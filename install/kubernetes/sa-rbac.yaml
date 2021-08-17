@@ -1,0 +1,57 @@
+# 训练使用的特殊账号，用来在集群中控制启动分布式
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubeflow-clusterrole
+rules:
+- apiGroups: ["*"]
+  resources: ["pods","pods/log","services","endpoints","configmaps","nodes","deployments","mpijobs","tfjobs","pytorchjobs","frameworks"]
+  verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubeflow-pipeline
+  namespace: pipeline
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubeflow-pipeline
+subjects:
+- kind: ServiceAccount
+  name: kubeflow-pipeline
+  namespace: pipeline
+roleRef:
+  kind: ClusterRole
+  name: kubeflow-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nni
+  namespace: katib
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: katib-nni-clusterrolebinding
+subjects:
+- kind: ServiceAccount
+  name: nni
+  namespace: katib
+roleRef:
+  kind: ClusterRole
+  name: kubeflow-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+
+
+
+

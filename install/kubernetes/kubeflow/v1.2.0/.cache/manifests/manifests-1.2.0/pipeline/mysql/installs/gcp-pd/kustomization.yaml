@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app: mysql
+  app.kubernetes.io/component: mysql
+  app.kubernetes.io/name: mysql
+resources:
+- ../../../upstream/env/platform-agnostic/mysql
+- ../../overlays/application/application.yaml
+- persistent-volume.yaml
+patchesStrategicMerge:
+- persistent-volume-claim.yaml
+images:
+- name: gcr.io/ml-pipeline/mysql
+  newTag: '5.6'
+  newName: gcr.io/ml-pipeline/mysql
+configMapGenerator:
+- name: pipeline-mysql-install-config
+  envs:
+  - params.env
+vars:
+- name: kfpMysqlPd
+  objref:
+    kind: ConfigMap
+    name: pipeline-mysql-install-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.mysqlPd
+- name: kfpMysqlPvName
+  objref:
+    kind: ConfigMap
+    name: pipeline-mysql-install-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.mysqlPvName
+configurations:
+- params.yaml
+

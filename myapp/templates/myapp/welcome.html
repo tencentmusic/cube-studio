@@ -1,0 +1,11 @@
+
+{% extends "myapp/basic.html" %}
+
+{% block navbar %}
+{% endblock %}
+
+{% block tail_js %}
+  {% with filename="welcome" %}
+    {% include "myapp/partials/_script_tag.html" %}
+  {% endwith %}
+{% endblock %}

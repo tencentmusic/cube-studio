@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+resources:
+- csi-driver.yaml
+- csi-controller.yaml
+- csi-controller-sa.yaml
+- csi-node-daemonset.yaml
+- csi-provisioner-cluster-role.yaml
+- csi-provisioner-cluster-role-binding.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+images:
+- name: amazon/aws-fsx-csi-driver
+  newName: amazon/aws-fsx-csi-driver
+  newTag: v0.3.0

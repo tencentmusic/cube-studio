@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: istio-system
+resources:
+- ../base/deployment.yaml
+- ../base/service.yaml
+- ../base/template.yaml
+- ../base/authzadaptor.yaml
+- ../base/handler.yaml
+- ../base/instance.yaml
+- ../base/rule.yaml
+- ../overlays/application
+commonLabels:
+  kustomize.component: aws-authzadaptor
+images:
+- name: seedjeffwan/istio-adapter
+  newName: seedjeffwan/istio-adapter
+  newTag: "0.1"
+configMapGenerator:
+- name: aws-authzadaptor-config
+  envs:
+  - ../base/params.env
+generatorOptions:
+  disableNameSuffixHash: true
+vars:
+- name: istio-namespace
+  objref:
+    kind: ConfigMap
+    name: aws-authzadaptor-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.istio-namespace
+- name: origin-header
+  objref:
+    kind: ConfigMap
+    name: aws-authzadaptor-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.origin-header
+- name: custom-header
+  objref:
+    kind: ConfigMap
+    name: aws-authzadaptor-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.custom-header
+configurations:
+- ../base/params.yaml

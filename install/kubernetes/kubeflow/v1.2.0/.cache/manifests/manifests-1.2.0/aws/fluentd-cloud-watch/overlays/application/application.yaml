@@ -1,0 +1,39 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: aws-fluentd-cloud-watch
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aws-fluentd-cloud-watch
+      app.kubernetes.io/instance: aws-fluentd-cloud-watch-v1.0.0
+      app.kubernetes.io/managed-by: kfctl
+      app.kubernetes.io/component: aws-fluentd-cloud-watch
+      app.kubernetes.io/part-of: kubeflow
+      app.kubernetes.io/version: v1.0.0
+  componentKinds:
+  - group: apps
+    kind: DaemonSet
+  - group: core
+    kind: ConfigMap
+  - group: core
+    kind: ServiceAccount
+  descriptor:
+    type: aws-fluentd-cloud-watch
+    version: v1.7.3-debian-cloudwatch-1.0
+    description: A Fluentd DaemonSet which collects logs from Kubenertes and ship to CloudWatch.
+    maintainers:
+    - name: Jiaxin Shan
+      email: shjiaxin@amazon.com
+    owners:
+    - name: Jiaxin Shan
+      email: shjiaxin@amazon.com
+    keywords:
+     - aws
+     - logs
+     - kubeflow
+    links:
+    - description: About
+      url: https://github.com/fluent/fluentd-kubernetes-daemonset
+  addOwnerRef: true
+

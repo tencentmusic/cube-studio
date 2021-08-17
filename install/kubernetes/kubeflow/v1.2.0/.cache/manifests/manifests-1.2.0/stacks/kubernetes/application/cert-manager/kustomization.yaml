@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+commonLabels:
+  app.kubernetes.io/component: cert-manager
+  app.kubernetes.io/name: cert-manager
+  kustomize.component: cert-manager
+kind: Kustomization
+namespace: cert-manager
+resources:
+- ../../../../cert-manager/cert-manager/base
+- ../../../../cert-manager/cert-manager/overlays/application/application.yaml
+- ../../../../cert-manager/cert-manager/overlays/self-signed/cluster-issuer.yaml
+configurations:
+- ../../../../cert-manager/cert-manager/overlays/application/params.yaml
+

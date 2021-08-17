@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-server
+  labels:
+    app: cache-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache-server
+  template:
+    metadata:
+      labels:
+        app: cache-server
+    spec:
+      containers:
+      - name: server
+        image: gcr.io/ml-pipeline/cache-server:dummy
+        env:
+          - name: DBCONFIG_DRIVER
+            value: mysql
+          - name: DBCONFIG_DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: pipeline-install-config
+                key: cacheDb
+          - name: DBCONFIG_HOST_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: pipeline-install-config
+                key: dbHost
+          - name: DBCONFIG_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: pipeline-install-config
+                key: dbPort
+          - name: DBCONFIG_USER
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: username
+          - name: DBCONFIG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: password
+          - name: NAMESPACE_TO_WATCH
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        args: ["--db_driver=$(DBCONFIG_DRIVER)",
+               "--db_host=$(DBCONFIG_HOST_NAME)",
+               "--db_port=$(DBCONFIG_PORT)",
+               "--db_name=$(DBCONFIG_DB_NAME)",
+               "--db_user=$(DBCONFIG_USER)",
+               "--db_password=$(DBCONFIG_PASSWORD)",
+               "--namespace_to_watch=$(NAMESPACE_TO_WATCH)",
+              ]
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8443
+          name: webhook-api
+        volumeMounts:
+        - name: webhook-tls-certs
+          mountPath: /etc/webhook/certs
+          readOnly: true
+      volumes:
+      - name: webhook-tls-certs
+        secret:
+          secretName: webhook-server-tls
+      serviceAccountName: kubeflow-pipelines-cache

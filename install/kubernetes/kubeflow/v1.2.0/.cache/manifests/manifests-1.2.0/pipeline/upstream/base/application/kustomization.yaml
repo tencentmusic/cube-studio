@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - application-controller-deployment.yaml
+  - application-controller-role.yaml
+  - application-controller-rolebinding.yaml
+  - application-controller-sa.yaml
+  - application-controller-service.yaml

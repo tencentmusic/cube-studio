@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: auth
+resources:
+- ../../../../dex-auth/dex-crds/overlays/istio
+configMapGenerator:
+- name: dex-parameters
+  behavior: merge
+  literals:
+  - issuer="http://dex.auth.svc.cluster.local:5556/dex"
+  - oidc_redirect_uris=["/login/oidc"]
+  - client_id="kubeflow-oidc-authservice"
+- envs:
+    - ./config/params.env
+  name: dex-config
+vars:
+- name: config_static_email
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.static_email
+- name: config_static_password_hash
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.static_password_hash
+patchesStrategicMerge:
+- configmap_patch.yaml
+generatorOptions:
+  disableNameSuffixHash: true 

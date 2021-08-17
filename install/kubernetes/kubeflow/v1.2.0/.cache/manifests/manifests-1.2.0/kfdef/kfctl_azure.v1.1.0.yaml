@@ -1,0 +1,58 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: kubeflowmanifests
+  namespace: kubeflow
+spec:
+  applications:
+  # It is expected to have Istio 1.6.x installed in istio-system namespace
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: namespaces/base
+    name: namespaces
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: application/v3
+    name: application
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/azure/application/cert-manager-crds
+    name: cert-manager-crds
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/azure/application/cert-manager-kube-system-resources
+    name: cert-manager-kube-system-resources
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/azure/application/istio
+    name: istio
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/azure/application/add-anonymous-user-filter-istio-1.6
+    name: add-anonymous-user-filter
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/azure/application/cert-manager
+    name: cert-manager
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: metacontroller/base
+    name: metacontroller
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/azure
+    name: kubeflow-apps
+  repos:
+  - name: manifests
+    uri: https://github.com/kubeflow/manifests/archive/v1.1-branch.tar.gz
+  version: v1.1-branch
+

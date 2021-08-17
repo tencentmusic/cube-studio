@@ -1,0 +1,114 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: activator
+    serving.knative.dev/release: v0.14.3
+  name: activator-service
+  namespace: knative-serving
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8012
+  - name: http2
+    port: 81
+    targetPort: 8013
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: http-metrics
+    port: 9090
+    targetPort: 9090
+  selector:
+    app: activator
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: controller
+    serving.knative.dev/release: v0.14.3
+  name: controller
+  namespace: knative-serving
+spec:
+  ports:
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: http-metrics
+    port: 9090
+    targetPort: 9090
+  selector:
+    app: controller
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    role: webhook
+    serving.knative.dev/release: v0.14.3
+  name: webhook
+  namespace: knative-serving
+spec:
+  ports:
+  - name: http-metrics
+    port: 9090
+    targetPort: 9090
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: https-webhook
+    port: 443
+    targetPort: 8443
+  selector:
+    role: webhook
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: autoscaler
+    serving.knative.dev/release: v0.14.3
+  name: autoscaler
+  namespace: knative-serving
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: http-metrics
+    port: 9090
+    targetPort: 9090
+  - name: https-custom-metrics
+    port: 443
+    targetPort: 8443
+  selector:
+    app: autoscaler
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    role: istio-webhook
+    serving.knative.dev/release: v0.14.3
+  name: istio-webhook
+  namespace: knative-serving
+spec:
+  ports:
+  - name: http-metrics
+    port: 9090
+    targetPort: 9090
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: https-webhook
+    port: 443
+    targetPort: 8443
+  selector:
+    app: istio-webhook

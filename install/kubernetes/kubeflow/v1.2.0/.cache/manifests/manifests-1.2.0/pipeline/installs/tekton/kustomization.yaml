@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../upstream/env/platform-agnostic/minio
+  - ../../upstream/env/platform-agnostic/mysql
+  - kfp-tekton
+
+# Identifier for application manager to apply ownerReference.
+# The ownerReference ensures the resources get garbage collected
+# when application is deleted.
+commonLabels:
+  app.kubernetes.io/name: kubeflow-pipelines
+  app.kubernetes.io/component: ml-pipeline
+
+# !!! If you want to customize the namespace,
+# please also update base/cache-deployer/cluster-scoped/cache-deployer-clusterrolebinding.yaml
+namespace: kubeflow
+
+images:
+  - name: mysql
+    newTag: "5.6"
+  - name: minio/minio
+    newTag: RELEASE.2018-02-09T22-40-05Z
+  - name: gcr.io/ml-pipeline/api-server
+    newName: docker.io/aipipeline/api-server
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/persistenceagent
+    newName: docker.io/aipipeline/persistenceagent
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/frontend
+    newName: docker.io/aipipeline/frontend
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/metadata-writer
+    newName: docker.io/aipipeline/metadata-writer
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/scheduledworkflow
+    newName: docker.io/aipipeline/scheduledworkflow
+    newTag: 0.4.0

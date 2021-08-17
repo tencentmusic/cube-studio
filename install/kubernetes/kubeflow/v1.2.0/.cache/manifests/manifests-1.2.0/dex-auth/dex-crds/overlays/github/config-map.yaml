@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dex
+data:
+  config.yaml: |
+    issuer: $(issuer)
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+    web:
+      http: 0.0.0.0:5556
+    logger:
+      level: "debug"
+      format: text
+    connectors:
+      - type: github
+        # Required field for connector id.
+        id: github
+        # Required field for connector name.
+        name: GitHub
+        config:
+          # Credentials can be string literals or pulled from the environment.
+          clientID: $(github_client_id)
+          clientSecret: $(github_client_secret)
+          redirectURI: http://dex.auth.svc.cluster.local:5556/dex/callback
+          # Optional organizations and teams, communicated through the "groups" scope.
+          #
+          # NOTE: This is an EXPERIMENTAL config option and will likely change.
+          #
+          orgs:
+          - name: $(github_org_name)
+          # Required ONLY for GitHub Enterprise. Leave it empty when using github.com.
+          # This is the Hostname of the GitHub Enterprise account listed on the
+          # management console. Ensure this domain is routable on your network.
+          hostName: $(github_hostname)
+          # Flag which indicates that all user groups and teams should be loaded.
+          loadAllGroups: false
+          # flag which will switch from using the internal GitHub id to the users handle (@mention) as the user id.
+          # It is possible for a user to change their own user name but it is very rare for them to do so
+          useLoginAsID: $(github_use_login_as_id)
+    staticClients:
+    - id: $(client_id)
+      redirectURIs: $(oidc_redirect_uris)
+      name: 'Dex Login Application'
+      secret: $(application_secret)

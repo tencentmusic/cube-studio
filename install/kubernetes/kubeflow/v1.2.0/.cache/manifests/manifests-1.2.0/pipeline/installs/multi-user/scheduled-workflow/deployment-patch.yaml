@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-pipeline-scheduledworkflow
+spec:
+  template:
+    spec:
+      containers:
+      - name: ml-pipeline-scheduledworkflow
+        env:
+        - name: NAMESPACE
+          value: '' # Empty namespace let viewer controller watch all namespaces
+          valueFrom: null # HACK: https://github.com/kubernetes-sigs/kustomize/issues/2606

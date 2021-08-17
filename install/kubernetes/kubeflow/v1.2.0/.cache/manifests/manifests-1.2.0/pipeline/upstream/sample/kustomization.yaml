@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  # Or github.com/kubeflow/pipelines/manifests/kustomize/env/gcp?ref=1.0.0
+  - ../env/gcp
+
+# Identifier for application manager to apply ownerReference.
+# The ownerReference ensures the resources get garbage collected
+# when application is deleted.
+commonLabels:
+  application-crd-id: kubeflow-pipelines
+
+# Used by Kustomize
+configMapGenerator:
+  - name: pipeline-install-config
+    envs: ["params.env"]
+    behavior: merge
+
+secretGenerator:
+  - name: mysql-secret
+    envs: ["params-db-secret.env"]
+    behavior: merge
+
+# !!! If you want to customize the namespace,
+# please also update sample/cluster-scoped-resources/kustomization.yaml's namespace field to the same value
+namespace: kubeflow
+
+#### Customization ###
+# 1. Change values in params.env file
+# 2. Change values in params-db-secret.env file for CloudSQL username and password
+# 3. kubectl apply -k ./
+####

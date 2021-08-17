@@ -1,0 +1,60 @@
+{% extends "appbuilder/base.html" %}
+
+{% block content %}
+<style>
+    .container {
+        overflow: hidden;
+        height: calc(100vh - 64px);
+        padding: 0;
+    }
+</style>
+<iframe id="_appFrame_" name="_appFrame_" src="{{ data.url }}" allowfullscreen allow="microphone;camera;midi;encrypted-media;" style="width: 100%; height: calc(100vh - 64px); border: none;">
+    子应用无法访问，请联系应用管理员 : (
+</iframe>
+{% if data['loading'] %}
+<div id="_di-loading_" class="di-loading e-ani">Hello</div>
+{% endif %}
+<script type="text/javascript">
+    // 全屏化服务
+    $(function($) {
+        const loading = Boolean('{{ data.loading }}' === 'True');
+        const target = '{{ data.target }}';
+        const delay = Number('{{ data.delay }}') || 0;
+        if (target) {
+            const iframe = document.getElementById('_appFrame_');
+            iframe.onload = function() {
+                setTimeout(() => {
+                    iframe.contentWindow.postMessage({
+                        type: 'fullview',
+                        target,
+                    }, '*');
+                }, delay)
+            }
+        }
+        if (loading) {
+            const loadingView = document.getElementById('_di-loading_');
+            setTimeout(() => {
+                loadingView.style.opacity = '0';
+                setTimeout(() => {
+                    loadingView.style.display = 'none';
+                }, 50);
+            }, delay + 1000);
+        }
+        // postMessage 事件
+        function appframeListener(event) {
+            if (event.data.type) {
+                switch (event.data.type) {
+                    case 'copy':
+                        var pathArr = location.pathname.split('/');
+                        pathArr[pathArr.length - 1] = event.data.message.pipelineId;
+                        location.pathname = `${pathArr.join('/')}`;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        window.addEventListener('message', appframeListener, false);
+    });
+</script>
+{% endblock %}

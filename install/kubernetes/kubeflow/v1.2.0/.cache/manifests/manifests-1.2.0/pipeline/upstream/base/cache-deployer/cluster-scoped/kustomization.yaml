@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - cache-deployer-clusterrole.yaml
+  - cache-deployer-clusterrolebinding.yaml
+  # HACK: although a service account(SA) is not a cluster-scoped resource.
+  # Presence of a SA referred by a clusterrolebinding allows kustomize to auto-add
+  # namespace for the clusterrolebinding's SA ref.
+  - cache-deployer-sa.yaml
+  

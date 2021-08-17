@@ -1,0 +1,109 @@
+import React, { useState, useEffect } from 'react';
+import { Icon, IconButton, PrimaryButton, DefaultButton, Stack } from '@fluentui/react';
+import MonacoEditor from 'react-monaco-editor';
+// import VisualizedData from './components/VisualizedData';
+import { useAppDispatch, useAppSelector } from '@src/models/hooks';
+import { selectShowEditor, updateShowEditor, selectValue, updateValue } from '@src/models/editor';
+import style from './style';
+
+const EditorAce: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const showModal = useAppSelector(selectShowEditor);
+  const value = useAppSelector(selectValue);
+  const [current, setCurrent] = useState('');
+  const [codeWidth, setCodeWidth] = useState<string | number>('50%');
+  const [dragging, setDragging] = useState(false);
+
+  const handleConfirm = () => {
+    dispatch(updateValue(current));
+    dispatch(updateShowEditor(false));
+  };
+  const handleCancel = () => {
+    dispatch(updateShowEditor(false));
+  };
+  const onMouseDown = () => {
+    setDragging(true);
+  };
+  const onMouseMove = (event: React.MouseEvent) => {
+    if (dragging && event.clientX > 370) {
+      setCodeWidth(event.clientX - 270);
+    }
+  };
+  const onMouseUpOrLeave = () => {
+    setDragging(false);
+  };
+
+  useEffect(() => {
+    setCurrent(value);
+  }, [showModal]);
+
+  return (
+    <div
+      className={style.modalStyles}
+      style={{
+        display: showModal ? 'flex' : 'none',
+      }}
+    >
+      <Stack className={style.contentStyles.container}>
+        <div className={style.contentStyles.header}>
+          <span>JSON Editor</span>
+          <IconButton iconProps={style.cancelIcon} onClick={handleCancel} />
+        </div>
+        <div
+          className={style.contentStyles.body}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUpOrLeave}
+          onMouseLeave={onMouseUpOrLeave}
+        >
+          <div
+            style={{
+              height: '100%',
+              width: codeWidth,
+            }}
+          >
+            <MonacoEditor
+              language="json"
+              theme="vs"
+              value={current}
+              onChange={value => {
+                setCurrent(value);
+              }}
+              options={{
+                automaticLayout: true,
+                formatOnPaste: true,
+                formatOnType: true,
+                renderLineHighlight: 'none',
+                autoClosingOvertype: 'always',
+                cursorStyle: 'block',
+                quickSuggestions: false,
+                scrollBeyondLastLine: false,
+                snippetSuggestions: 'none',
+                minimap: {
+                  enabled: false,
+                },
+              }}
+            />
+          </div>
+          <div className={style.resizeLine} onMouseDown={onMouseDown}>
+            <Icon iconName="BulletedListBulletMirrored" className={style.resizeLineIconStyles}></Icon>
+          </div>
+          <div
+            style={{
+              flex: 1,
+            }}
+          >
+            {/* <VisualizedData /> */}
+          </div>
+        </div>
+        <div className={style.contentStyles.footer}>
+          <PrimaryButton styles={{ root: { marginRight: 10 } }} onClick={handleConfirm}>
+            确认
+          </PrimaryButton>
+          <DefaultButton onClick={handleCancel}>取消</DefaultButton>
+        </div>
+      </Stack>
+    </div>
+  );
+};
+
+export default EditorAce;

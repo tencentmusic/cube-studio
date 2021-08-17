@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app: mysql
+  app.kubernetes.io/component: mysql
+  app.kubernetes.io/name: mysql
+resources:
+- ../generic
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- name: pipeline-mysql-parameters
+  envs:
+  - params.env
+vars:
+- name: mysqlPvcName
+  objref:
+    kind: ConfigMap
+    name: pipeline-mysql-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.mysqlPvcName
+images:
+- name: mysql
+  newTag: '5.6'
+  newName: mysql
+configurations:
+- params.yaml
+patchesStrategicMerge:
+- deployment-patch.yaml

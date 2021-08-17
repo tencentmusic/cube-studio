@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: proxy-agent-runner
+  name: proxy-agent-runner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: proxy-agent-runner
+subjects:
+- kind: ServiceAccount
+  name: proxy-agent-runner

@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+resources:
+  - ../../components/katib-crds
+  - ../../components/katib-controller
+  - ../../components/katib-db-manager
+patchesStrategicMerge:
+  - katib-db-manager-deployment.yaml
+secretGenerator:
+  - name: katib-mysql-secrets
+    envs:
+      - secrets.env
+commonLabels:
+  app.kubernetes.io/component: katib
+  app.kubernetes.io/name: katib-controller

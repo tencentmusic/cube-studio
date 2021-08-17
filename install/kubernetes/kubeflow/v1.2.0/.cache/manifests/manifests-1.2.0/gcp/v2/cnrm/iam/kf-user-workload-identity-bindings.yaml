@@ -1,0 +1,35 @@
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-workload-identity-user-ml-pipeline-ui # {"$kpt-set":"user-wi-ml-pipeline-ui"}
+spec:
+  member: serviceAccount:project-id.svc.id.goog[kubeflow/ml-pipeline-ui] # {"$kpt-set":"name-user-workload-identity-user-ml-pipeline-ui-member"}
+  role: roles/iam.workloadIdentityUser
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: name-user # {"$kpt-set":"user-sa-name"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-workload-identity-user-ml-pipeline-visualizationserver # {"$kpt-set":"user-wi-ml-pipeline-visualizationserver"}
+spec:
+  member: serviceAccount:project-id.svc.id.goog[kubeflow/ml-pipeline-visualizationserver] # {"$kpt-set":"name-user-workload-identity-user-ml-pipeline-visualizationserver-member"}
+  role: roles/iam.workloadIdentityUser
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: name-user # {"$kpt-set":"user-sa-name"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-workload-identity-user-pipeline-runner # {"$kpt-set":"user-wi-pipeline-runner"}
+spec:
+  member: serviceAccount:project-id.svc.id.goog[kubeflow/pipeline-runner] # {"$kpt-set":"name-user-workload-identity-user-pipeline-runner-member"}
+  role: roles/iam.workloadIdentityUser
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: name-user # {"$kpt-set":"user-sa-name"}

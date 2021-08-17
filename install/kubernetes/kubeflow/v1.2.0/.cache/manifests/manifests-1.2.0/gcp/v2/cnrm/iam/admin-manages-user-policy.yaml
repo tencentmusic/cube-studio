@@ -1,0 +1,13 @@
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-admin-manages-user # {"$kpt-set":"name-admin-manages-user"}
+spec:
+  member: serviceAccount:name-admin@project-id.iam.gserviceaccount.com # {"$kpt-set":"admin-service-account"}
+  # "roles/serviceAccountAdmin" grants kf-admin service account permission to
+  # manage workload identity binding policies for kf-user service account.
+  role: roles/iam.serviceAccountAdmin
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: name-user # {"$kpt-set":"user-sa-name"}

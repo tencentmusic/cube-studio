@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: frameworkcontroller
+  namespace: katib
+spec:
+  serviceName: frameworkcontroller
+  selector:
+    matchLabels:
+      app: frameworkcontroller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: frameworkcontroller
+    spec:
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+      serviceAccountName: frameworkcontroller
+      containers:
+      - name: frameworkcontroller
+        image: frameworkcontroller/frameworkcontroller
+        volumeMounts:
+        - name: tz-config
+          mountPath: /etc/localtime

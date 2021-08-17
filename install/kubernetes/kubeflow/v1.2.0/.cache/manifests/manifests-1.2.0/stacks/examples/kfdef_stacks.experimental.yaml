@@ -1,0 +1,60 @@
+# An experimental example file for using KFDef with the new specs
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  namespace: kubeflow
+spec:
+  applications:
+  # TODO: If you actually want to install ISTIO as part of KFDef setup you would
+  # need to add the appropriate package.
+  # Create Kubeflow specific ISTIO resources.
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: istio/istio/base
+    name: kubeflow-istio      
+  # Install controllers that other applications depend on
+  # e.g. metacontroller and application controller.
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: metacontroller/base
+    name: metacontroller
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: application/v3
+    name: application
+  # Certmanager gets installed in a different namespace so it needs to be a separate package
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: cert-manager/cert-manager-crds/base
+    name: cert-manager-crds
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: cert-manager/cert-manager-kube-system-resources/base
+    name: cert-manager-kube-system-resources
+  - kustomizeConfig:      
+      repoRef:
+        name: manifests
+        path: cert-manager/cert-manager/v3
+    name: cert-manager
+  # Install Kubeflow applications.
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/generic
+    name: kubeflow-apps
+  # Spartakus is a separate applications so that kfctl can remove it
+  # to disable usage reporting
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: common/spartakus/overlays/application
+    name: spartakus
+  repos:
+  - name: manifests
+    uri: https://github.com/kubeflow/manifests/archive/master.tar.gz    
+  version: master

@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  creationTimestamp: null
+  name: mirror-image
+spec:
+  inputs:
+    params:
+      - name: inputImage
+        type: string
+      - name: outputImage
+        type: string
+      - name: context
+        type: string
+  steps:
+    - image: gcr.io/kaniko-project/executor:v0.11.0
+      command:
+      - /kaniko/executor
+      - --dockerfile=Dockerfile
+      - --context=$(inputs.params.context)
+      - --destination=$(inputs.params.outputImage)
+      - --build-arg INPUT_IMAGE=$(inputs.params.inputImage)
+      name: build-push

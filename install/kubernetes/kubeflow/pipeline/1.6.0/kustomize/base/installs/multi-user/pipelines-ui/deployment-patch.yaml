@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-pipeline-ui
+spec:
+  template:
+    spec:
+      volumes:
+      - name: config-volume
+        configMap:
+          name: ml-pipeline-ui-configmap
+      containers:
+      - name: ml-pipeline-ui
+        env:
+        - name: VIEWER_TENSORBOARD_POD_TEMPLATE_SPEC_PATH
+          value: /etc/config/viewer-pod-template.json
+        - name: DEPLOYMENT
+          value: KUBEFLOW
+        - name: ARTIFACTS_SERVICE_PROXY_NAME
+          value: ml-pipeline-ui-artifact
+        - name: ARTIFACTS_SERVICE_PROXY_PORT
+          value: '80'
+        - name: ARTIFACTS_SERVICE_PROXY_ENABLED
+          value: 'true'
+        - name: ENABLE_AUTHZ
+          value: 'true'
+        - name: KUBEFLOW_USERID_HEADER
+          value: kubeflow-userid
+        - name: KUBEFLOW_USERID_PREFIX
+          value: ""
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true

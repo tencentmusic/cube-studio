@@ -1,0 +1,12 @@
+# This file demonstrates how a user would kustomize
+# "global" config like userid-header, userid-prefix etc..
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # kubelfow-config is the name of the global (as opposed to applicaiton specific 
+  # config map.
+  name: kubeflow-config
+data:
+  # Examples of overriding config.
+  project: alice-gcp
+  zone: us-east1-d

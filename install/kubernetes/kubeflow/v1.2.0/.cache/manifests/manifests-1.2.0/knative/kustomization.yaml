@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: knative-eventing
+resources:
+- knative-eventing-crds/base
+- knative-eventing-crds/overlays/application
+- knative-eventing-install/base/cluster-role.yaml
+- knative-eventing-install/base/cluster-role-binding.yaml
+- knative-eventing-install/base/secret.yaml
+- knative-eventing-install/base/config-map.yaml
+- knative-eventing-install/base/deployment.yaml
+- knative-eventing-install/base/service-account.yaml
+- knative-eventing-install/base/service.yaml
+- knative-eventing-install/base/webhook-configuration.yaml
+- knative-eventing-install/overlays/application
+commonLabels:
+  kustomize.component: knative
+  app.kubernetes.io/component: knative-eventing-install
+  app.kubernetes.io/name: knative-eventing-install
+images:
+- name: gcr.io/knative-releases/knative.dev/eventing/cmd/controller
+  newName: gcr.io/knative-releases/knative.dev/eventing/cmd/controller
+  newTag: c99f08229c464407e5ba11f942d29b969e0f7dd2e242973d50d480cc45eebf28
+- name: gcr.io/knative-releases/knative.dev/eventing/cmd/channel_broker
+  newName: gcr.io/knative-releases/knative.dev/eventing/cmd/channel_broker
+  newTag: 5065eaeb3904e8b0893255b11fdcdde54a6bac1d0d4ecc8c9ce4c4c32073d924
+- name: gcr.io/knative-releases/knative.dev/eventing/cmd/webhook
+  newName: gcr.io/knative-releases/knative.dev/eventing/cmd/webhook
+  newTag: a3046d0426b4617fe9186fb3d983e350de82d2e3f33dcc13441e591e24410901
+- name: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_controller
+  newName: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_controller
+  newTag: 9a084ba0ed6a12862adb3ca00de069f0ec1715fe8d4db6c9921fcca335c675bb
+- name: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_dispatcher
+  newName: gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_dispatcher
+  newTag: 8df896444091f1b34185f0fa3da5d41f32e84c43c48df07605c728e0fe49a9a8
+

@@ -1,0 +1,59 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+resources:
+  # Control pane
+  - ../../admission-webhook/webhook/v3
+#  - ../../common/centraldashboard/overlays/stacks   # 取消了对centraldashboard的依赖
+  - ../../kubeflow-roles/base
+#  - ../../jupyter/jupyter-web-app/base_v3        # 取消了对jupyter web的依赖
+#  - ../../jupyter/notebook-controller/base_v3    # 取消了对notebook的依赖
+  - ../../profiles/base_v3
+  # Training Operators
+  - ../../pytorch-job/pytorch-job-crds/overlays/application
+  - ../../pytorch-job/pytorch-operator/overlays/application
+  - ../../tf-training/tf-job-crds/overlays/application
+  - ../../tf-training/tf-job-operator/overlays/application
+  - ../../mxnet-job/mxnet-operator/overlays/application
+  - ../../mpi-job/mpi-operator/overlays/application
+  - ../../katib/installs/katib-external-db    # 里面是beat版本的最好不要用，但是因为其他地方引用了此组件的命名空间所以暂时部署
+#  - ../../xgboost-job/xgboost-operator/overlays/application   # 官方版本无法启动，使用独立版本
+  # Pipelines 使用单独升级的部署
+#  - ../../pipeline/minio/installs/generic
+#  - ../../pipeline/mysql/installs/generic
+#  - ../../pipeline/installs/multi-user
+#  - ../../argo/base_v3
+  # Serving components
+  - ../../seldon/seldon-core-operator/overlays/application
+  # Metadata 使用pipeline独立部署
+#  - ../../metadata/v3
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- envs:
+  - ./config/params.env
+  name: kubeflow-config
+vars:
+# We need to define vars at the top level otherwise we will get
+# conflicts.
+- fieldref:
+    fieldPath: data.clusterDomain
+  name: clusterDomain
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: kubeflow-config
+- fieldref:
+    fieldPath: metadata.namespace
+  name: namespace
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: kubeflow-config
+- fieldref:
+    fieldpath: metadata.namespace
+  name: katib-ui-namespace
+  objref:
+    kind: Service
+    name: katib-ui
+    apiVersion: v1

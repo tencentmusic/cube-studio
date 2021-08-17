@@ -1,0 +1,11 @@
+apiVersion: kpt.dev/v1alpha1
+kind: Kptfile
+metadata:
+  name: upstream
+upstream:
+  type: git
+  git:
+    commit: 3a96bd34ed562c5beabf7e4d84af1257694cffde
+    repo: https://github.com/kubeflow/kfserving
+    directory: /install/v0.4.1
+    ref: master

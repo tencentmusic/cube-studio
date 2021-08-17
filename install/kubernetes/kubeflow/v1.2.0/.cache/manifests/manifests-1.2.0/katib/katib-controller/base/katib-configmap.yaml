@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: katib-config
+data:
+  metrics-collector-sidecar: |-
+    {
+      "StdOut": {
+        "image": "docker.io/kubeflowkatib/file-metrics-collector:v1beta1-a96ff59"
+      },
+      "File": {
+        "image": "docker.io/kubeflowkatib/file-metrics-collector:v1beta1-a96ff59"
+      },
+      "TensorFlowEvent": {
+        "image": "docker.io/kubeflowkatib/tfevent-metrics-collector:v1beta1-a96ff59",
+        "resources": {
+          "limits": {
+            "memory": "1Gi"
+          }
+        }
+      }
+    }
+  suggestion: |-
+    {
+      "random": {
+        "image": "docker.io/kubeflowkatib/suggestion-hyperopt:v1beta1-a96ff59"
+      },
+      "grid": {
+        "image": "docker.io/kubeflowkatib/suggestion-chocolate:v1beta1-a96ff59"
+      },
+      "hyperband": {
+        "image": "docker.io/kubeflowkatib/suggestion-hyperband:v1beta1-a96ff59"
+      },
+      "bayesianoptimization": {
+        "image": "docker.io/kubeflowkatib/suggestion-skopt:v1beta1-a96ff59"
+      },
+      "tpe": {
+        "image": "docker.io/kubeflowkatib/suggestion-hyperopt:v1beta1-a96ff59"
+      },
+      "enas": {
+        "image": "docker.io/kubeflowkatib/suggestion-enas:v1beta1-a96ff59",
+        "imagePullPolicy": "Always",
+        "resources": {
+          "limits": {
+            "memory": "200Mi"
+          }
+        }
+      },
+      "cmaes": {
+        "image": "docker.io/kubeflowkatib/suggestion-goptuna:v1beta1-a96ff59"
+      },
+      "darts": {
+        "image": "docker.io/kubeflowkatib/suggestion-darts:v1beta1-a96ff59"
+      }
+    }
+  early-stopping: |-
+    {
+      "medianstop": {
+        "image": "docker.io/kubeflowkatib/earlystopping-medianstop:v1beta1-a96ff59",
+        "imagePullPolicy": "Always"
+      }
+    }

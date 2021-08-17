@@ -1,0 +1,38 @@
+# A patch to use private GKE clusters
+apiVersion: container.cnrm.cloud.google.com/v1beta1
+kind: ContainerCluster
+metadata:
+  clusterName: "project-id/location/name" # {"$kpt-set":"asm-cluster-name"}
+  name: name # {"$kpt-set":"name"}
+spec:
+  # https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#Cluster.PrivateClusterConfig
+  # This is the least secure config because it allows access to master from all public IPs.
+  # For alternative options see the above link.
+  privateClusterConfig:
+    enablePrivateNodes: true
+    # We set enablePrivateEndpoint to false because we want a publicly accessible endpoint.
+    enablePrivateEndpoint: false
+    # Keep this in sync with the range specified in the allow-egress to master firewall rule.
+    masterIpv4CidrBlock: 172.16.0.32/28
+  #
+  # TODO(https://github.com/kubeflow/gcp-blueprints/issues/32): Following options don't appear to be supported in CNRM; will private GKE work
+  # without them?
+  ipAllocationPolicy:
+    # Make the cluster VPC Native
+    useIpAliases: true
+    createSubnetwork: false
+    # TODO(jlewi): https://github.com/kubeflow/gcp-blueprints/issues/32 the following fields
+    # Automatic creation of the subnetwork and its secondary ranges doesn't seem to be possible 
+    # with CNRM. We have an explicit CNRM resource for the subnetwork which we reference
+    # in subnetworkRef. The names for the secondary resources listed here should map to those
+    # resources.
+    clusterSecondaryRangeName: pods
+    servicesSecondaryRangeName: services
+    # TODO(jlewi): https://github.com/kubeflow/gcp-blueprints/issues/32 the following fields
+    # don't seem to be included in CNRM 1.9.1
+    #createSubnetwork: true
+  # Create the clsuter in the private network we created.
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  subnetworkRef:
+    name: name # {"$kpt-set":"name"}

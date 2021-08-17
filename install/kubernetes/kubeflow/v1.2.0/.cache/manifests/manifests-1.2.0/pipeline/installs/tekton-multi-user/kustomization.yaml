@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+commonLabels:
+  app.kubernetes.io/name: kubeflow-pipelines
+  app.kubernetes.io/component: ml-pipeline
+resources:
+- ../multi-user
+- ../tekton/kfp-tekton/kfp-pipeline-config.yaml
+patchesStrategicMerge:
+- metadata-writer-clusterrole.yaml
+- ml-pipeline-apiserver-clusterrole.yaml
+- ml-pipeline-persistenceagent-clusterrole.yaml
+- ml-pipeline-ui-clusterrole.yaml
+- scheduled-workflow-clusterrole.yaml
+- ../tekton/kfp-tekton/ml-pipeline-deployment-patch.yaml
+- ../tekton/kfp-tekton/metadata-writer-deployment-patch.yaml
+configMapGenerator:
+- name: kubeflow-pipelines-profile-controller-code
+  behavior: replace
+  files:
+  - sync.py
+images:
+  - name: mysql
+    newTag: "5.6"
+  - name: minio/minio
+    newTag: RELEASE.2018-02-09T22-40-05Z
+  - name: gcr.io/ml-pipeline/api-server
+    newName: docker.io/aipipeline/api-server
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/persistenceagent
+    newName: docker.io/aipipeline/persistenceagent
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/frontend
+    newName: docker.io/aipipeline/frontend
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/metadata-writer
+    newName: docker.io/aipipeline/metadata-writer
+    newTag: 0.4.0
+  - name: gcr.io/ml-pipeline/scheduledworkflow
+    newName: docker.io/aipipeline/scheduledworkflow
+    newTag: 0.4.0

@@ -1,0 +1,21 @@
+# 添加代理8080端口的gateway，需要在istio-ingressgateway 的相关配置中打开8080端口
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: kubeflow-gateway-8080
+  namespace: kubeflow
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - '*'
+    port:
+      name: http3
+      number: 8080
+      protocol: HTTP
+---
+
+
+
+

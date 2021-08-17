@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudsqlproxy
+  labels:
+    app: cloudsqlproxy
+spec:
+  selector:
+    matchLabels:
+      app: cloudsqlproxy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cloudsqlproxy
+    spec:
+      serviceAccountName: kubeflow-pipelines-cloudsql-proxy
+      containers:
+        - image: gcr.io/cloudsql-docker/gce-proxy:1.14
+          name: cloudsqlproxy
+          env:            
+            - name: GCP_CLOUDSQL_INSTANCE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: pipeline-install-config
+                  key: gcsCloudSqlInstanceName
+          command: ["/cloud_sql_proxy",
+                    "-dir=/cloudsql",                    
+                    "-instances=$(GCP_CLOUDSQL_INSTANCE_NAME)=tcp:0.0.0.0:3306",
+                    "term_timeout=10s"]
+          # set term_timeout if require graceful handling of shutdown
+          # NOTE: proxy will stop accepting new connections; only wait on existing connections
+          lifecycle:
+            preStop:
+              exec:
+                # (optional) add a preStop hook so that termination is delayed
+                # this is required if your server still require new connections (e.g., connection pools)
+                command: ['sleep', '10']
+          ports:
+            - name: mysql
+              containerPort: 3306
+          volumeMounts:
+            - mountPath: /cloudsql
+              name: cloudsql
+      volumes:
+        - name: cloudsql
+          emptyDir:

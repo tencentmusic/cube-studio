@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-deployment
+  labels:
+    component: grpc-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: grpc-server
+  template:
+    metadata:
+      labels:
+        component: grpc-server
+    spec:
+      containers:
+        - name: container
+          envFrom:
+          - configMapRef:
+              name: metadata-db-parameters
+          - configMapRef:
+              name: grpc-configmap
+          args: ["--grpc_port=$(METADATA_GRPC_SERVICE_PORT)",
+                 "--mysql_config_host=$(MYSQL_HOST)",
+                 "--mysql_config_database=$(MYSQL_DATABASE)",
+                 "--mysql_config_port=$(MYSQL_PORT)",
+                 "--mysql_config_user=$(MYSQL_USERNAME)",
+                 "--mysql_config_password=$(MYSQL_PASSWORD)"
+          ]

@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: tekton-pipelines-controller
+    app.kubernetes.io/version: "v0.14.0"
+    pipeline.tekton.dev/release: "v0.14.0"
+    app: tekton-pipelines-controller
+    version: "v0.14.0"
+  name: tekton-pipelines-controller
+spec:
+  ports:
+  - name: http-metrics
+    port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app.kubernetes.io/component: tekton-pipelines-controller
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: tekton-pipelines-webhook
+    app.kubernetes.io/version: "v0.14.0"
+    pipeline.tekton.dev/release: "v0.14.0"
+    app: tekton-pipelines-webhook
+    version: "v0.14.0"
+  name: tekton-pipelines-webhook
+spec:
+  ports:
+  - name: http-metrics
+    port: 9090
+    targetPort: 9090
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: https-webhook
+    port: 443
+    targetPort: 8443
+  selector:
+    app.kubernetes.io/component: tekton-pipelines-webhook

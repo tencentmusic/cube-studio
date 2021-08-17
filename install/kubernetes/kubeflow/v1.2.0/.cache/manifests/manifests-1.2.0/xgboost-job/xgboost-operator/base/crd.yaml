@@ -1,0 +1,122 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: xgboostjobs.xgboostjob.kubeflow.org
+spec:
+  group: xgboostjob.kubeflow.org
+  names:
+    kind: XGBoostJob
+    singular: xgboostjob
+    plural: xgboostjobs
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            activeDeadlineSeconds:
+              description: Specifies the duration in seconds relative to the startTime
+                that the job may be active before the system tries to terminate it;
+                value must be positive integer.
+              format: int64
+              type: integer
+            backoffLimit:
+              description: Optional number of retries before marking this job failed.
+              format: int32
+              type: integer
+            cleanPodPolicy:
+              description: CleanPodPolicy defines the policy to kill pods after the
+                job completes. Default to Running.
+              type: string
+            schedulingPolicy:
+              description: SchedulingPolicy defines the policy related to scheduling,
+                e.g. gang-scheduling
+              properties:
+                minAvailable:
+                  format: int32
+                  type: integer
+              type: object
+            ttlSecondsAfterFinished:
+              description: TTLSecondsAfterFinished is the TTL to clean up jobs. It
+                may take extra ReconcilePeriod seconds for the cleanup, since reconcile
+                gets called periodically. Default to infinite.
+              format: int32
+              type: integer
+            xgbReplicaSpecs:
+              type: object
+          required:
+          - xgbReplicaSpecs
+          type: object
+        status:
+          properties:
+            completionTime:
+              description: Represents time when the job was completed. It is not guaranteed
+                to be set in happens-before order across separate operations. It is
+                represented in RFC3339 form and is in UTC.
+              format: date-time
+              type: string
+            conditions:
+              description: Conditions is an array of current observed job conditions.
+              items:
+                properties:
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  lastUpdateTime:
+                    description: The last time this condition was updated.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of job condition.
+                    type: string
+                required:
+                - type
+                - status
+                type: object
+              type: array
+            lastReconcileTime:
+              description: Represents last time when the job was reconciled. It is
+                not guaranteed to be set in happens-before order across separate operations.
+                It is represented in RFC3339 form and is in UTC.
+              format: date-time
+              type: string
+            replicaStatuses:
+              description: ReplicaStatuses is map of ReplicaType and ReplicaStatus,
+                specifies the status of each replica.
+              type: object
+            startTime:
+              description: Represents time when the job was acknowledged by the job
+                controller. It is not guaranteed to be set in happens-before order
+                across separate operations. It is represented in RFC3339 form and
+                is in UTC.
+              format: date-time
+              type: string
+          required:
+          - conditions
+          - replicaStatuses
+          type: object
+  version: v1alpha1

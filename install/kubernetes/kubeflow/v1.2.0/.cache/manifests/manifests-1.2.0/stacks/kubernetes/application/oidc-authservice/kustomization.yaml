@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: istio-system
+resources:
+- ../../../../istio/oidc-authservice/overlays/application
+configMapGenerator:
+- name: oidc-authservice-parameters
+  behavior: merge
+  literals:
+  - client_id=kubeflow-oidc-authservice
+  - oidc_provider=http://dex.auth.svc.cluster.local:5556/dex
+  - oidc_redirect_uri=/login/oidc
+  - oidc_auth_url=/dex/auth
+  - application_secret=pUBnBOY80SnXgjibTYM9ZWNzY2xreNGQok
+  - skip_auth_uri=/dex
+  - namespace=istio-system
+  - userid-header=kubeflow-userid
+  - userid-prefix=

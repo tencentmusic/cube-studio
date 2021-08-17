@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- cache-deployer-role.yaml
+- cache-deployer-rolebinding.yaml
+- cache-deployer-deployment.yaml
+images:
+- name: gcr.io/ml-pipeline/cache-deployer
+  newTag: 1.0.4

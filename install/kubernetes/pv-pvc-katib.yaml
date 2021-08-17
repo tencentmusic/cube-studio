@@ -1,0 +1,33 @@
+
+
+# 模型训练
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: katib-kubeflow-user-workspace
+  labels:
+    katib-pvname: katib-kubeflow-user-workspace
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/workspace
+  persistentVolumeReclaimPolicy: Retain
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-user-workspace
+  namespace: katib
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  selector:
+    matchLabels:
+      katib-pvname: katib-kubeflow-user-workspace

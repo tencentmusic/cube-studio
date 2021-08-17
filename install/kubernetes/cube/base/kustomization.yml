@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- service.yaml
+- deploy-watch.yaml
+- deploy-worker.yaml
+- sa-rbac.yaml
+- deploy.yaml
+- deploy-schedule.yaml
+

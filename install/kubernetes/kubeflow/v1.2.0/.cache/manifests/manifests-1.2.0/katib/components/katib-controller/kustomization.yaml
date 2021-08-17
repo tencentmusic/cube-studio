@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+resources:
+  - ../../katib-controller/base/katib-configmap.yaml
+  - ../../katib-controller/base/katib-controller-deployment.yaml
+  - ../../katib-controller/base/katib-controller-rbac.yaml
+  - ../../katib-controller/base/katib-controller-secret.yaml
+  - ../../katib-controller/base/katib-controller-service.yaml
+  - ../../katib-controller/base/katib-ui-deployment.yaml
+  - ../../katib-controller/base/katib-ui-rbac.yaml
+  - ../../katib-controller/base/katib-ui-service.yaml
+  - ../../katib-controller/base/trial-template-configmap.yaml
+  - ../../katib-controller/overlays/application/application.yaml
+  - ../../katib-controller/overlays/istio/katib-ui-virtual-service.yaml
+images:
+  - name: docker.io/kubeflowkatib/katib-controller
+    newTag: v1beta1-a96ff59
+    newName: docker.io/kubeflowkatib/katib-controller
+  - name: docker.io/kubeflowkatib/katib-ui
+    newTag: v1beta1-a96ff59
+    newName: docker.io/kubeflowkatib/katib-ui
+commonLabels:
+  app.kubernetes.io/component: katib
+  app.kubernetes.io/name: katib-controller
+configurations:
+  - ../../katib-controller/overlays/istio/params.yaml

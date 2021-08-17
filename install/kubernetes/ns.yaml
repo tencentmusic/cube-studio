@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infra
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pipeline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: katib
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: service
+
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jupyter
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubeflow
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-system

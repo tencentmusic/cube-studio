@@ -1,0 +1,104 @@
+apiVersion: kpt.dev/v1alpha1
+kind: Kptfile
+metadata:
+  name: .
+packageMetadata:
+  shortDescription: GCP blueprint configs.
+openAPI:
+  definitions:
+    io.k8s.cli.setters.location:
+      x-k8s-cli:
+        setter:
+          name: location
+          value: us-east1
+          isSet: true
+    io.k8s.cli.setters.name:
+      x-k8s-cli:
+        setter:
+          name: name
+          value: NAME
+          isSet: true
+    io.k8s.cli.setters.gcloud.core.project:
+      x-k8s-cli:
+        setter:
+          name: gcloud.core.project
+          value: PROJECT
+          isSet: true
+    io.k8s.cli.substitutions.cluster-name:
+      x-k8s-cli:
+        substitution:
+          name: cluster-name
+          pattern: ${gcloud.core.project}/${location}/${name}
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+          - marker: ${location}
+            ref: '#/definitions/io.k8s.cli.setters.location'
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.pool:
+      x-k8s-cli:
+        substitution:
+          name: pool
+          pattern: ${name}-pool
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.cnrm-sa:
+      x-k8s-cli:
+        substitution:
+          name: cnrm-sa
+          pattern: serviceAccount:cnrm-controller-manager@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.cnrm-wi:
+      x-k8s-cli:
+        substitution:
+          name: cnrm-wi
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[cnrm-system/cnrm-controller-manager]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.cnrm-systm-wi:
+      x-k8s-cli:
+        substitution:
+          name: cnrm-systm-wi
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[cnrm-system/cnrm-controller-manager]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.cnrm-system-sa:
+      x-k8s-cli:
+        substitution:
+          name: cnrm-system-sa
+          pattern: ${name}-cnrm-system
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.cnrm-system-wi:
+      x-k8s-cli:
+        substitution:
+          name: cnrm-system-wi
+          pattern: ${name}-cnrm-system-wi
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.cnrm-system:
+      x-k8s-cli:
+        substitution:
+          name: cnrm-system
+          pattern: ${name}-cnrm-system@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.wi-pool:
+      x-k8s-cli:
+        substitution:
+          name: wi-pool
+          pattern: ${gcloud.core.project}.svc.id.goog
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'

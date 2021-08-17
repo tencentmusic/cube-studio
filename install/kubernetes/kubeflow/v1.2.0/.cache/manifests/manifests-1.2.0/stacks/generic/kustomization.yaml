@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+resources:
+  # List the Kubeflow applications that should be included 
+  # TODO(https://github.com/kubeflow/manifests/issues/1073): 
+  # We need to switch the admission webhook to use cert-manager.
+  - ../../admission-webhook/webhook/v3
+  - ../../common/centraldashboard/overlays/stacks
+  - ../../kubeflow-roles/base
+  - ../../jupyter/jupyter-web-app/base_v3
+  - ../../jupyter/notebook-controller/base_v3
+  - ../../profiles/base_v3
+  - ../../pytorch-job/pytorch-job-crds/overlays/application
+  - ../../pytorch-job/pytorch-operator/overlays/application
+  - ../../tf-training/tf-job-crds/overlays/application
+  - ../../tf-training/tf-job-operator/overlays/application
+  - ../../argo/base_v3
+  - ../../pipeline/minio/installs/generic
+  - ../../pipeline/mysql/installs/generic
+  - ../../pipeline/installs/generic
+  - ../../metadata/v3
+  # This package will create a profile resource so it needs to be installed after the profiles CR
+  - ../../default-install/base
+  - ../../katib/installs/katib-standalone
+configMapGenerator:
+- envs:
+  - ./config/params.env
+  name: kubeflow-config
+vars:
+# We need to define vars at the top level otherwise we will get
+# conflicts. 
+- fieldref:
+    fieldPath: data.clusterDomain
+  name: clusterDomain
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: kubeflow-config
+- fieldref:
+    fieldPath: metadata.namespace
+  name: namespace
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: kubeflow-config
+- fieldref:
+    fieldpath: metadata.namespace
+  name: katib-ui-namespace
+  objref:
+    kind: Service
+    name: katib-ui
+    apiVersion: v1

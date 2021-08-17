@@ -1,0 +1,115 @@
+# NOTE: IMPORTANT
+# We need to separate out actual rules from aggregation rules due to
+# https://github.com/kubernetes/kubernetes/issues/65171
+# TL;DR: We can't have both aggregation and rules in a [Cluster]Role. When that
+# is the case, the rules get ignored.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.kubeflow.org/aggregate-to-kubeflow-edit: "true"
+  name: kubeflow-pipelines-edit
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kubeflow.org/aggregate-to-kubeflow-pipelines-edit: "true"
+rules: []
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.kubeflow.org/aggregate-to-kubeflow-pipelines-edit: "true"
+    rbac.authorization.kubeflow.org/aggregate-to-kubeflow-view: "true"
+  name: kubeflow-pipelines-view
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kubeflow.org/aggregate-to-kubeflow-pipelines-view: "true"
+rules: []
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.kubeflow.org/aggregate-to-kubeflow-pipelines-edit: "true"
+  name: aggregate-to-kubeflow-pipelines-edit
+rules:
+- apiGroups:
+  - pipelines.kubeflow.org
+  resources:
+  - pipelines
+  - pipelines/versions
+  verbs:
+  - create
+  - delete
+  - update
+- apiGroups:
+  - pipelines.kubeflow.org
+  resources:
+  - experiments
+  verbs:
+  - archive
+  - create
+  - delete
+  - unarchive
+- apiGroups:
+  - pipelines.kubeflow.org
+  resources:
+  - runs
+  verbs:
+  - archive
+  - create
+  - delete
+  - retry
+  - terminate
+  - unarchive
+- apiGroups:
+  - pipelines.kubeflow.org
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - disable
+  - enable
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.kubeflow.org/aggregate-to-kubeflow-pipelines-view: "true"
+  name: aggregate-to-kubeflow-pipelines-view
+rules:
+- apiGroups:
+  - pipelines.kubeflow.org
+  resources:
+  - pipelines
+  - pipelines/versions
+  - experiments
+  - runs
+  - jobs
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - viewers
+  verbs:
+  - create
+  - get
+  - delete
+- apiGroups:
+  - pipelines.kubeflow.org
+  resources:
+  - visualizations
+  verbs:
+  - create

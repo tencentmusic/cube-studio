@@ -1,0 +1,58 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mxjobs.kubeflow.org
+spec:
+  group: kubeflow.org
+  version: v1
+  scope: Namespaced
+  names:
+    kind: MXJob
+    singular: mxjob
+    plural: mxjobs
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            mxReplicaSpecs:
+              properties:
+                # The validation works when the configuration contains
+                # `Worker`, `Server`, `Scheduler`, 
+                # `TunerTracker`, `TunerServer`, `Tuner`,
+                # Otherwise it will not be validated.
+                Scheduler:
+                  properties:
+                    replicas:
+                      type: integer
+                      minimum: 1
+                      maximum: 1
+                Worker:
+                  properties:
+                    replicas:
+                      type: integer
+                      minimum: 1
+                Server:
+                  properties:
+                    replicas:
+                      type: integer
+                      minimum: 1
+                TunerTracker:
+                  properties:
+                    replicas:
+                      type: integer
+                      minimum: 1
+                      maximum: 1
+                TunerServer:
+                  properties:
+                    replicas:
+                      type: integer
+                      minimum: 1
+                Tuner:
+                  properties:
+                    replicas:
+                      type: integer
+                      minimum: 1
+                      maximum: 1

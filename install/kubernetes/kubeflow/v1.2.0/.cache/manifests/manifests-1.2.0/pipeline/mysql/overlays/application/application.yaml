@@ -1,0 +1,27 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: mysql
+spec:
+  addOwnerRef: true
+  componentKinds:
+  - group: core
+    kind: ConfigMap
+  - group: apps
+    kind: Deployment
+  descriptor:
+    description: ''
+    keywords:
+    - mysql
+    - kubeflow
+    links:
+    - description: About
+      url: ''
+    maintainers: []
+    owners: []
+    type: mysql
+    version: v1beta1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mysql
+      app.kubernetes.io/name: mysql

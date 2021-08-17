@@ -1,0 +1,32 @@
+# AnthosCLI requires a nodepool object to describe the nodepool.
+apiVersion: container.cnrm.cloud.google.com/v1beta1
+kind: ContainerNodePool
+metadata:
+  clusterName: "mgmt-project-id/mgmt-location/mgmt-name" # {"$kpt-set":"mgmt-cluster-name"}
+  name: NAME-pool # {"$kpt-set":"pool"}
+  annotations:
+    # Annotation required by anthoscli
+    gke.io/cluster: "bootstrap://"
+spec:
+  autoscaling:
+    minNodeCount: 1
+    maxNodeCount: 3
+  nodeConfig:
+    diskSizeGb: 100
+    diskType: pd-standard
+    machineType: n1-standard-4
+    preemptible: false
+    oauthScopes:
+    - https://www.googleapis.com/auth/devstorage.read_only
+    - https://www.googleapis.com/auth/logging.write
+    - https://www.googleapis.com/auth/monitoring
+    - https://www.googleapis.com/auth/trace.append
+    metadata:
+      disable-legacy-endpoints: "true"
+    workloadMetadataConfig:
+      mode: GKE_METADATA
+  management:
+    autoRepair: true
+    autoUpgrade: true
+  clusterRef:
+    name: name # {"$kpt-set":"name"}

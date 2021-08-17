@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+resources:
+- ../base/cluster-role.yaml
+- ../base/cluster-role-binding.yaml
+- ../base/configmap.yaml
+- ../base/daemonset.yaml
+- ../base/service-account.yaml
+commonLabels:
+  kustomize.component: fluentd-cloud-watch
+generatorOptions:
+  disableNameSuffixHash: true
+images:
+- name: fluent/fluentd-kubernetes-daemonset
+  newName: fluent/fluentd-kubernetes-daemonset
+  newTag: v1.7.3-debian-cloudwatch-1.0
+configMapGenerator:
+- name: fluentd-cloud-watch-parameters
+  envs: 
+  - params.env
+vars:
+- name: CLUSTER_NAME
+  objref:
+    kind: ConfigMap
+    name: fluentd-cloud-watch-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.clusterName
+- name: REGION
+  objref:
+    kind: ConfigMap
+    name: fluentd-cloud-watch-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.region

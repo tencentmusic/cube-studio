@@ -1,0 +1,20 @@
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeRouter
+metadata:
+  name: name # {"$kpt-set":"name"}
+spec:
+  description: Router to allow outbound internet access
+  region: REGION # {"$kpt-set":"gcloud.compute.region"}
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeRouterNAT
+metadata:
+  name: name # {"$kpt-set":"name"}
+spec:
+  region: REGION # {"$kpt-set":"gcloud.compute.region"}
+  routerRef:
+    name: name # {"$kpt-set":"name"}
+  natIpAllocateOption: AUTO_ONLY
+  sourceSubnetworkIpRangesToNat: ALL_SUBNETWORKS_ALL_IP_RANGES

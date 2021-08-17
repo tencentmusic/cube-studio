@@ -1,0 +1,57 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+bases:
+- application
+- argo
+- pipeline
+- metadata
+- cache
+- cache-deployer
+resources:
+- pipeline-application.yaml
+# Used by Kustomize
+configMapGenerator:
+- name: pipeline-install-config
+  envs: ["params.env"]
+secretGenerator:
+- name: mysql-secret
+  envs: ["params-db-secret.env"]
+vars:
+- name: kfp-namespace
+  objref:
+    kind: Deployment
+    apiVersion: apps/v1
+    name: ml-pipeline
+  fieldref:
+    fieldpath: metadata.namespace
+- name: kfp-app-name
+  objref:
+    kind: ConfigMap
+    name: pipeline-install-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.appName
+- name: kfp-app-version
+  objref:
+    kind: ConfigMap
+    name: pipeline-install-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.appVersion
+- name: kfp-artifact-bucket-name
+  objref:
+    kind: ConfigMap
+    name: pipeline-install-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.bucketName
+- name: kfp-container-runtime-executor
+  objref:
+    kind: ConfigMap
+    name: pipeline-install-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.containerRuntimeExecutor
+configurations:
+- params.yaml

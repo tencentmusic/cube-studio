@@ -1,0 +1,11 @@
+# TODO(https://github.com/kubeflow/manifests/issues/1052) clean up 
+# the manifests after the refactor is done. We should move
+# cluster-issuer into the kubeflow-issuer package.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- ../../base
+resources:
+- cluster-issuer.yaml
+commonLabels:
+  kustomize.component: cert-manager

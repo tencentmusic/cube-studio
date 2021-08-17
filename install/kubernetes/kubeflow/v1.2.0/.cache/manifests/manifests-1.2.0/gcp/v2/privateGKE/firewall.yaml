@@ -1,0 +1,255 @@
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-deny-egress # {"$kpt-set":"name-deny-egress"}
+spec:
+  description: "Deny all internet traffic by default"
+  deny:
+  - protocol: tcp
+    ports:
+    - "0-65535"
+  destinationRanges:
+  - 0.0.0.0/0
+  direction: EGRESS
+  priority: 1100
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-health-ingress # {"$kpt-set":"name-health-ingress"}
+spec:
+  description: "Allow health check ingress"
+  allow:
+  - protocol: tcp
+    ports:
+    - "80"
+    - "443"
+  # Prober address for health checks:
+  # https://cloud.google.com/load-balancing/docs/health-checks
+  sourceRanges:
+  - 130.211.0.0/22
+  - 35.191.0.0/16
+  direction: INGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-health-egress # {"$kpt-set":"name-health-egress"}
+spec:
+  description: "Allow health check egress"
+  allow:
+  - protocol: tcp
+    ports:
+    - "80"
+    - "443"
+  # Prober address for health checks:
+  # https://cloud.google.com/load-balancing/docs/health-checks
+  destinationRanges:
+  - 130.211.0.0/22
+  - 35.191.0.0/16
+  direction: EGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-apis-egress # {"$kpt-set":"name-apis-egress"}
+spec:
+  description: "Allow egress to google APIs"
+  allow:
+  - protocol: tcp
+    ports:
+    - "0-65535"
+  destinationRanges:
+  - 199.36.153.4/30
+  direction: EGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-master-egress # {"$kpt-set":"name-master-egress"}
+spec:
+  description: "Allow master node egress"
+  allow:
+  - protocol: tcp
+    ports:
+    - "443"
+    - "10250"
+  destinationRanges:
+  # Keep this in sync with the masterCidrBlock specified in cluster-private-patch.yaml
+  - 172.16.0.32/28
+  # TODO(jlewi): This was a bit of a hack to try to fix failing health checks during cluster
+  # provisioning. I was seeing packets get blocket.
+  #- 172.217.0.0/28
+
+  direction: EGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-int-egress # {"$kpt-set":"name-int-egress"}
+spec:
+  description: "Allow traffic to internal ips"
+  allow:
+  - protocol: tcp
+    ports:
+    - "0-65535"
+  destinationRanges:
+  - 10.0.0.0/8
+  # This rule is needed to ensure that any K8s services running within the cluster are accessible
+  - 192.168.0.0/16
+  direction: EGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+# Per https://istio.io/docs/setup/platform-setup/gke/
+# GKE will not automatically create a rule allowing traffic to the istio side car
+# webhook ports so we need to add that.
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-istio # {"$kpt-set":"name-istio"}
+spec:
+  description: "Allow traffic to ISTIO webhook"
+  allow:
+  - protocol: tcp
+    ports:
+    # In ASM 1.4 the port is 9443. Starting in ASM 1.5 the port is 15017
+    - "15017"
+    - "9443"
+  sourceRanges:
+  - 172.16.0.32/28
+  direction: INGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+# Per https://docs.cert-manager.io/en/release-0.11/getting-started/webhook.html#running-on-private-gke-clusters
+# We need an extra firewall rule to allow certmanager webhooks.
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-cm # {"$kpt-set":"name-cm"}
+spec:
+  description: "Allow traffic to cert manager webhook"
+  allow:
+  - protocol: tcp
+    ports:
+    - "443"
+    - "6443"
+  sourceRanges:
+  - 172.16.0.32/28
+  direction: INGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+# Allow traffic to DockerHub so we can pull docker images.
+#
+# IP addresses can be obtained by running
+# 1. nslookup index.dockerhub.io
+# 2. nslookup dockerhub.io
+# 3. nslookup registry-1.docker.io
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-dockerhub # {"$kpt-set":"name-dockerhub"}
+spec:
+  description: "Allow egress to dockerhub and quay.io"
+  allow:
+  - protocol: tcp
+    ports:
+    - "443"
+    - "80"
+  destinationRanges:
+  # Keep this in sync with the masterCidrBlock specified in cluster-private-patch.yaml
+  - "3.211.199.249"
+  - "18.232.227.119"
+  - "18.213.137.78"
+  - "23.22.155.84"
+  - "23.202.231.169"
+  - "23.217.138.110"
+  - "52.54.232.21"
+  - "52.72.232.213"
+  - "54.85.107.53"
+  - "54.236.131.166"
+  - "107.23.149.57"
+  - "217.70.184.38"
+  # production.cloudfare.docker.com
+  - "104.18.121.25"
+  - "104.18.122.25"
+  - "104.18.123.25"
+  - "104.18.124.25"
+  - "104.18.125.25"
+  # quay.io
+  - "3.218.162.19"
+  - "18.205.55.240"
+  - "52.202.225.67"
+  - "54.84.167.150"
+  - "13.227.47.39"
+  - "13.227.47.84"
+  - "13.227.47.105"
+  # cdn.quay.io
+  - "13.35.101.24"
+  - "13.35.101.91"
+  - "13.35.101.101"
+  - "13.35.101.104"
+  direction: EGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeFirewall
+metadata:
+  name: name-iap-jwks # {"$kpt-set":"name-iap-jwks"}
+spec:
+  description: "Allow traffic to www.gstatic.com to get IAP JWKs"
+  allow:
+  - protocol: tcp
+    ports:
+    - "443"
+  # JWKS should be served on www.gstatic.com and parallel domains
+  # g0.static.com
+  # g1.static.com
+  # g2.static.com
+  # g3.static.com
+  # The actual addresses appear to be the 172 addreses not the static
+  destinationRanges:
+  - "172.217.6.163"
+  - "172.217.6.131"
+  - "172.217.9.163"
+  - "172.217.1.131"
+  - "172.217.212.94"
+  - "172.217.204.94"
+  - "23.217.138.110"
+  - "23.202.231.169"
+  direction: EGRESS
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Enable logging to help debugging
+  enableLogging: false # {"$kpt-set":"log-firewalls"}

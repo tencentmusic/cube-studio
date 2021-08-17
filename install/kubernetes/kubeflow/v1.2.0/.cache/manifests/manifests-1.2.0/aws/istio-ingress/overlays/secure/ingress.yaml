@@ -1,0 +1,9 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: istio-ingress
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: $(certArn)
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/inbound-cidrs: $(inboundCidrs)
+    external-dns.alpha.kubernetes.io/hostname: $(hostname)

@@ -1,0 +1,20 @@
+# docker build -t ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-cpu-1.0.0 -f Dockerfile-ubuntu-cpu-1.0.0 .
+
+FROM ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-cpu-base
+
+# 安装插件
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+RUN pip install --upgrade jupyterlab-git && jupyter lab build && \
+     pip uninstall -y tensorboard && pip install tensorboard==2.2 && jupyter labextension install jupyterlab_tensorboard && jupyter serverextension enable jupyter_tensorboard --sys-prefix && \
+     jupyter labextension install @ryantam626/jupyterlab_sublime && \
+     jupyter labextension install jupyterlab-spreadsheet && \
+     jupyter labextension install @jupyterlab/toc  && \
+     jupyter labextension install @jupyterlab/fasta-extension && \
+     jupyter labextension install @jupyterlab/geojson-extension && \
+     jupyter labextension install @jupyterlab/katex-extension && \
+     jupyter labextension install @jupyterlab/mathjax3-extension && \
+     jupyter labextension install jupyterlab-drawio && \
+     jupyter labextension install jupyterlab-execute-time && \
+     pip install -U jupyter-lsp && jupyter labextension install @krassowski/jupyterlab-lsp && pip install python-language-server[all] && \
+     pip install nbresuse && jupyter labextension install jupyterlab-topbar-extension jupyterlab-system-monitor && jupyter lab build && \
+     rm -rf /tmp/* /var/tmp/* /root/.cache

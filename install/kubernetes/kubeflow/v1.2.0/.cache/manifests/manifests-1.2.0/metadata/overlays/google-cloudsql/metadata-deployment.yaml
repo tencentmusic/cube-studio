@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+  labels:
+    component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+      containers:
+      - name: cloudsql-proxy
+        envFrom:
+          - configMapRef:
+              name: metadata-db-parameters
+        image: gcr.io/cloudsql-docker/gce-proxy:1.16
+        command: ["/cloud_sql_proxy",
+                  "-instances=$(MYSQL_INSTANCE)=tcp:3306",
+                  # If running on a VPC, the Cloud SQL proxy can connect via Private IP. See:
+                  # https://cloud.google.com/sql/docs/mysql/private-ip for more info.
+                  # "-ip_address_types=PRIVATE",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        securityContext:
+          runAsUser: 2  # non-root user
+          allowPrivilegeEscalation: false
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+      - name: container
+        envFrom:
+          - configMapRef:
+              name: metadata-db-parameters
+          - secretRef:
+              name: metadata-db-secrets
+        command: ["./server/server",
+                  "--http_port=8080",
+                  "--mysql_service_host=$(MYSQL_HOST)",
+                  "--mysql_service_port=$(MYSQL_PORT)",
+                  "--mysql_service_user=$(MYSQL_USERNAME)",
+                  "--mysql_service_password=$(MYSQL_PASSWORD)",
+                  "--mlmd_db_name=$(MYSQL_DATABASE)"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-deployment
+  labels:
+    component: grpc-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: grpc-server
+  template:
+    metadata:
+      labels:
+        component: grpc-server
+    spec:
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+      containers:
+        - name: container
+          envFrom:
+          - configMapRef:
+              name: metadata-db-parameters
+          - secretRef:
+              name: metadata-db-secrets
+          - configMapRef:
+              name: metadata-grpc-configmap
+          args: ["--grpc_port=$(METADATA_GRPC_SERVICE_PORT)",
+                 "--mysql_config_host=$(MYSQL_HOST)",
+                 "--mysql_config_database=$(MYSQL_DATABASE)",
+                 "--mysql_config_port=$(MYSQL_PORT)",
+                 "--mysql_config_user=$(MYSQL_USERNAME)",
+                 "--mysql_config_password=$(MYSQL_PASSWORD)"
+          ]
+        - name: cloudsql-proxy
+          envFrom:
+          - configMapRef:
+              name: metadata-db-parameters
+          image: gcr.io/cloudsql-docker/gce-proxy:1.16
+          command: ["/cloud_sql_proxy",
+                    "-instances=$(MYSQL_INSTANCE)=tcp:3306",
+                    # If running on a VPC, the Cloud SQL proxy can connect via Private IP. See:
+                    # https://cloud.google.com/sql/docs/mysql/private-ip for more info.
+                    # "-ip_address_types=PRIVATE",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          securityContext:
+            runAsUser: 2  # non-root user
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+          

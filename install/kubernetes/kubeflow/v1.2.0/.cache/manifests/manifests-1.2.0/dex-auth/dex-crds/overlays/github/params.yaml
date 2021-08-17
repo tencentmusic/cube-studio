@@ -1,0 +1,5 @@
+varReference:
+- path: data/config.yaml
+  kind: ConfigMap
+- path: spec/http/route/destination/host
+  kind: VirtualService

@@ -1,0 +1,240 @@
+# encoding: utf-8
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeflow-watch
+  namespace: infra
+  labels:
+    app: kubeflow-watch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeflow-watch
+  template:
+    metadata:
+      name: kubeflow-watch
+      labels:
+        app: kubeflow-watch
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubeflow-dashboard
+                operator: In
+                values:
+                - "true"
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: kubeflow-dashboard-config
+          configMap:
+            name: kubeflow-dashboard-config
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
+              - key: config.py
+                path: config.py
+
+      serviceAccount: kubeflow-dashboard
+      containers:
+        - name: kubeflow-watch-workflow
+          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          imagePullPolicy: Always  # IfNotPresent
+          workingDir: /home/myapp/myapp/tools
+          command: ["python","watch_workflow.py"]
+          env:
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_HOST
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PORT
+          - name: REDIS_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PASSWORD
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: ENVIRONMENT
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: tz-config
+              mountPath: /etc/localtime
+          resources:
+            limits:
+              cpu: 4
+              memory: 4Gi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          livenessProbe:
+            failureThreshold: 1
+            exec:
+              command: ["bash","-c","hour=`date +%H`; if [ $hour -eq 03 ]; then exit 1; fi"]
+            initialDelaySeconds: 3600
+            periodSeconds: 3600
+            timeoutSeconds: 3600
+        - name: kubeflow-watch-experiments
+          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          imagePullPolicy: Always  # IfNotPresent
+          workingDir: /home/myapp/myapp/tools
+          command: ["python","watch_experiments.py"]
+          env:
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_HOST
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PORT
+          - name: REDIS_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PASSWORD
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: ENVIRONMENT
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: tz-config
+              mountPath: /etc/localtime
+          resources:
+            limits:
+              cpu: 4
+              memory: 4Gi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+
+        - name: kubeflow-watch-tfjobs
+          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          imagePullPolicy: Always  # IfNotPresent
+          workingDir: /home/myapp/myapp/tools
+          command: ["python","watch_tfjob.py"]
+          env:
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_HOST
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PORT
+          - name: REDIS_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PASSWORD
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: ENVIRONMENT
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: tz-config
+              mountPath: /etc/localtime
+          resources:
+            limits:
+              cpu: 4
+              memory: 4Gi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+        - name: kubeflow-watch-pytorchjobs
+          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          imagePullPolicy: Always  # IfNotPresent
+          workingDir: /home/myapp/myapp/tools
+          command: ["python","watch_pytorchjob.py"]
+          env:
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_HOST
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PORT
+          - name: REDIS_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PASSWORD
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: ENVIRONMENT
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: tz-config
+              mountPath: /etc/localtime
+          resources:
+            limits:
+              cpu: 4
+              memory: 4Gi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+

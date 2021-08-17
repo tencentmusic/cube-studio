@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+commonLabels:
+  app.kubernetes.io/name: kubeflow-pipelines
+  app.kubernetes.io/component: ml-pipeline
+resources:
+- ../../pipeline/cluster-scoped
+- ../../cache-deployer/cluster-scoped
+- ../generic
+- view-edit-cluster-roles.yaml
+- api-service
+- pipelines-ui
+- pipelines-profile-controller
+- scheduled-workflow
+- viewer-controller
+- persistence-agent
+- cache
+- metadata-writer
+- istio-authorization-config.yaml
+- virtual-service.yaml
+patchesStrategicMerge:
+- api-service/deployment-patch.yaml
+- pipelines-ui/deployment-patch.yaml
+- pipelines-ui/configmap-patch.yaml
+- scheduled-workflow/deployment-patch.yaml
+- viewer-controller/deployment-patch.yaml
+- persistence-agent/deployment-patch.yaml
+- metadata-writer/deployment-patch.yaml
+- cache/deployment-patch.yaml
+
+configurations:
+- params.yaml

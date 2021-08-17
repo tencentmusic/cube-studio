@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mpi-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mpi-operator
+  template:
+    metadata:
+      labels:
+        app: mpi-operator
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubeflow
+                    operator: In
+                    values:
+                      - "true"
+      containers:
+      - args:
+        - -alsologtostderr
+        - --lock-namespace
+        - $(lock-namespace)
+        - --kubectl-delivery-image
+        - $(kubectl-delivery-image)
+        image: mpioperator/mpi-operator:latest
+        imagePullPolicy: IfNotPresent
+        name: mpi-operator
+      serviceAccountName: mpi-operator

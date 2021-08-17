@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: istio-system
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- name: cluster-local-gateway-config
+  envs:
+  - ../base/params.env
+resources:
+- ../base/namespace.yaml
+- ../base/cluster-role-binding.yaml
+- ../base/cluster-role.yaml
+- ../base/deployment.yaml
+- ../base/horizontal-pod-autoscaler.yaml
+- ../base/pod-disruption-budget.yaml
+- ../base/service-account.yaml
+- ../base/service.yaml
+vars:
+- name: namespace
+  objref:
+    kind: ConfigMap
+    name: cluster-local-gateway-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.namespace
+commonLabels:
+  kustomize.component: cluster-local-gateway
+configurations:
+- ../base/params.yaml

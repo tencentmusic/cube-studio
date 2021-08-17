@@ -1,0 +1,20 @@
+{
+artifactRepository:
+{
+    s3: {
+        bucket: $(kfp-artifact-bucket-name),
+        keyPrefix: artifacts,
+        endpoint: s3.amazonaws.com,
+        insecure: true,
+        accessKeySecret: {
+            name: mlpipeline-minio-artifact,
+            key: accesskey
+        },
+        secretKeySecret: {
+            name: mlpipeline-minio-artifact,
+            key: secretkey
+        }
+    },
+    archiveLogs: true
+}
+}

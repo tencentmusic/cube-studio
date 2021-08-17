@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base/installs/multi-user
+  - ../../base/metadata/overlays/db
+  - ../../base/metadata/options/istio
+  - ../../third-party/argo/installs/cluster
+  - ../../third-party/mysql/base
+  - ../../third-party/mysql/options/istio
+  - ../../third-party/minio/base
+  - ../../third-party/minio/options/istio
+  - ../../third-party/metacontroller/base
+
+# Identifier for application manager to apply ownerReference.
+# The ownerReference ensures the resources get garbage collected
+# when application is deleted.
+commonLabels:
+  application-crd-id: kubeflow-pipelines
+
+# !!! If you want to customize the namespace,
+# please also update base/cache-deployer/cluster-scoped/cache-deployer-clusterrolebinding.yaml
+namespace: kubeflow

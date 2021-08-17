@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-pipeline-viewer-crd
+spec:
+  template:
+    spec:
+      containers:
+      - name: ml-pipeline-viewer-crd
+        env:
+        - name: NAMESPACE
+          value: '' # Empty namespace let viewer controller watch all namespaces
+          valueFrom: null

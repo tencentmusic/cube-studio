@@ -1,0 +1,103 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: kubeflow
+  namespace: kubeflow
+spec:
+  applications:
+# This needs to be first to set up permissions
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/openshift/openshift-scc
+    name: openshift-scc
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/istio-stack
+    name: istio-stack
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/istio
+    name: istio
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: application/v3
+    name: application
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: metacontroller/base
+    name: metacontroller
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/cert-manager-crds
+    name: cert-manager-crds
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/cert-manager-kube-system-resources
+    name: cert-manager-kube-system-resources
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/cert-manager
+    name: cert-manager
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/argo
+    name: argo
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/jupyter-web-app
+    name: jupyter-web-app
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/notebook-controller
+    name: notebook-controller
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/metadata
+    name: metadata
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/tf-job
+    name: tf-job
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/pytorch-job
+    name: pytorch-job
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/katib
+    name: katib
+  # commenting this out since it is included in kubeflow-apps
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/pipeline
+    name: pipeline
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift/application/seldon
+    name: seldon
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/openshift
+    name: kubeflow-apps
+  repos:
+  - name: manifests
+    uri: https://github.com/kubeflow/manifests/archive/v1.2-branch.tar.gz
+  version: v1.2-branch

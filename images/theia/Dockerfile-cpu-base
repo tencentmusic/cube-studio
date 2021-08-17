@@ -1,0 +1,25 @@
+# docker build -t ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-cpu-base -f Dockerfile-cpu-base .
+
+FROM theiaide/theia-python
+
+USER root
+# 安装中文，和基础的apt工具包
+RUN apt update && apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales
+
+RUN curl -LO https://dl.k8s.io/release/v1.16.0/bin/linux/amd64/kubectl && chmod +x kubectl && mv kubectl /usr/local/bin/
+
+RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
+    echo "alias la='ls -A'" >> /root/.bashrc && \
+    echo "alias vi='vim'" >> /root/.bashrc && \
+    /bin/bash -c "source /root/.bashrc"
+
+RUN apt install -y libsasl2-dev libpq-dev && rm -f /usr/bin/python && rm -f /usr/local/bin/pip && rm -f /usr/bin/pip && ln -s /usr/local/bin/python3 /usr/bin/python && ln -s /usr/bin/pip3 /usr/bin/pip
+
+# 安装python包
+RUN pip3 install --upgrade pip  && pip install gsutil pysnooper kubernetes simplejson sqlalchemy pandas numpy requests flask pymysql ray && \
+    rm -rf /tmp/* /var/tmp/* /root/.cache
+
+RUN echo "alias ll='ls -alF'" >> /root/.bashrc && echo "alias la='ls -A'" >> /root/.bashrc && echo "alias vi='vim'" >> /root/.bashrc &&  /bin/bash -c "source /root/.bashrc"
+
+
+

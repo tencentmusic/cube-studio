@@ -1,0 +1,27 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: knative-eventing-crds
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing-crds
+      app.kubernetes.io/component: knative-eventing-crds
+  componentKinds:
+  - group: core
+    kind: ConfigMap
+  - group: apps
+    kind: Deployment
+  descriptor:
+    type: knative-eventing-crds
+    version: v1beta1
+    description: ""
+    maintainers: []
+    owners: []
+    keywords:
+     - knative-eventing-crds
+     - kubeflow
+    links:
+    - description: About
+      url: ""
+  addOwnerRef: true

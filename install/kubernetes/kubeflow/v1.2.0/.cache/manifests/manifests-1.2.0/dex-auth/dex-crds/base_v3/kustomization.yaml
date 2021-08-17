@@ -1,0 +1,85 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: auth
+resources:
+- ../base/namespace.yaml
+- ../base/config-map.yaml
+- ../base/crds.yaml
+- ../base/deployment.yaml
+- ../base/service.yaml
+configMapGenerator:
+- name: dex-config
+  envs:
+  - ../base/params.env
+generatorOptions:
+  disableNameSuffixHash: true
+vars:
+- name: dex_domain
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.dex_domain
+- name: issuer
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.issuer
+- name: static_email
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.static_email
+- name: static_password_hash
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.static_password_hash
+- name: static_username
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.static_username
+- name: static_user_id
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.static_user_id
+- name: client_id
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.client_id
+- name: oidc_redirect_uris
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.oidc_redirect_uris
+- name: application_secret
+  objref:
+    kind: ConfigMap
+    name: dex-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.application_secret
+configurations:
+- ../base/params.yaml
+images:
+- name: quay.io/dexidp/dex
+  newName: quay.io/dexidp/dex
+  newTag: v2.22.0

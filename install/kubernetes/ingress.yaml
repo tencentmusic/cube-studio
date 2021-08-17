@@ -1,0 +1,135 @@
+# https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
+# 所有的注释都在上面的网址上
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: infra-kubeflow-dashboard
+  namespace: infra
+spec:
+  rules:
+    - host: kubeflow.local.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kubeflow-dashboard
+              servicePort: 80
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kubeflow-kubeflow-dashboard
+  namespace: kubeflow
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1g
+
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "true"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "*, X-CustomResponseHeader"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+
+    # nginx的location部分
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: *";
+      more_set_headers "Access-Control-Allow-Methods: *";
+      more_set_headers "Access-Control-Allow-Headers: *";
+      proxy_set_header Accept-Encoding "";
+      sub_filter '<head>' '<head><script src="https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/myapp_into.js"></script>';
+
+spec:
+  rules:
+    - host: kubeflow.local.com
+      http:
+        paths:
+          - path: /pipeline/
+            backend:
+              serviceName: ml-pipeline-ui
+              servicePort: 80
+          - path: /katib/
+            backend:
+              serviceName: katib-ui
+              servicePort: 80
+          - path: /minio/
+            backend:
+              serviceName: minio-service
+              servicePort: 9000
+    - host: ml-pipeline.kubeflow
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ml-pipeline
+              servicePort: 8888
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: istio-system-notebook
+  namespace: istio-system
+
+spec:
+  rules:
+    - host: kubeflow.local.com
+      http:
+        paths:
+          - path: /notebook/
+            backend:
+              serviceName: istio-ingressgateway
+              servicePort: 80
+          - path: /nni/
+            backend:
+              serviceName: istio-ingressgateway
+              servicePort: 80
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kube-system-kubeflow-dashboard
+  namespace: kube-system
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1g
+
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "true"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "*, X-CustomResponseHeader"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+
+    # nginx的location部分
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: *";
+      more_set_headers "Access-Control-Allow-Methods: *";
+      more_set_headers "Access-Control-Allow-Headers: *";
+      proxy_set_header Accept-Encoding "";
+      sub_filter '<head>' '<head><script src="https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/myapp_into.js"></script>';
+
+spec:
+  rules:
+    - host: kubeflow.local.com
+      http:
+        paths:
+          - path: /k8s/dashboard/cluster(/|$)(.*)
+            backend:
+              serviceName: kubernetes-dashboard-cluster
+              servicePort: 9090
+
+
+
+

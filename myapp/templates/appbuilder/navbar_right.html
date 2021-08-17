@@ -1,0 +1,60 @@
+
+
+{% set bug_report_url = appbuilder.app.config.get('BUG_REPORT_URL') %}
+{% set documentation_url = appbuilder.app.config.get('DOCUMENTATION_URL') %}
+{% set locale = session['locale'] %}
+{% if not locale %}
+    {% set locale = 'en' %}
+{% endif %}
+
+
+{% if documentation_url %}
+<li>
+  <a
+    tabindex="-1"
+    href="{{ documentation_url }}"
+    data-placement="bottom"
+    title="Documentation"
+    target="_blank"
+  >
+    <i class="fa fa-question-circle header-right-icon"></i>&nbsp;doc
+  </a>
+</li>
+{% endif %}
+{% if bug_report_url %}
+<li>
+  <a
+    tabindex="-1"
+    href="{{ bug_report_url }}"
+    data-placement="bottom"
+    title="Report a bug"
+    target="_blank"
+  >
+    <i class="fa fa-bug"></i>&nbsp;
+  </a>
+</li>
+{% endif %}
+
+
+{% if not current_user.is_anonymous %}
+    <li class="dropdown">
+      <a
+        class="dropdown-toggle"
+        data-toggle="dropdown"
+        title="{{g.user.get_full_name()}}"
+        href="javascript:void(0)"
+        style="display: none"
+      >
+        <i class="fa fa-user"></i>&nbsp;<b class="caret"></b>
+      </a>
+      <img src="https://dcloud.oa.com/Public/Avatar/{{ g.user.username }}.png" class="di-avatar" />
+      <ul class="dropdown-menu">
+          <li><a href="javascript:;">Hi, {{ g.user.username }}</a></li>
+          <li><a href="{{appbuilder.get_url_for_userinfo}}"><span class="fa fa-fw fa-user"></span>{{_("Profile")}}</a></li>
+          <li><a href="{{appbuilder.get_url_for_logout}}"><span class="fa fa-fw fa-sign-out"></span>{{_("Logout")}}</a></li>
+      </ul>
+    </li>
+{% else %}
+    <li><a href="{{appbuilder.get_url_for_login}}">
+    <i class="fa fa-fw fa-sign-in"></i>{{_("Login")}}</a></li>
+{% endif %}

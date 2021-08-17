@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app.kubernetes.io/component: minio
+  app.kubernetes.io/name: minio
+resources:
+- ../generic
+- persistent-volume-claim.yaml
+patchesStrategicMerge:
+- deployment-patch.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- name: pipeline-minio-parameters
+  envs:
+  - params.env
+vars:
+- name: minioPvcName
+  objref:
+    kind: ConfigMap
+    name: pipeline-minio-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.minioPvcName
+images:
+- name: minio/minio
+  newTag: RELEASE.2018-02-09T22-40-05Z
+  newName: minio/minio
+configurations:
+- params.yaml

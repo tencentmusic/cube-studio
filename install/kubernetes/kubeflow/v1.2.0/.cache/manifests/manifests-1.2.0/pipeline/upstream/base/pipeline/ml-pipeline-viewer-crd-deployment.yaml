@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ml-pipeline-viewer-crd
+  name: ml-pipeline-viewer-crd
+spec:
+  selector:
+    matchLabels:
+      app: ml-pipeline-viewer-crd
+  template:
+    metadata:
+      labels:
+        app: ml-pipeline-viewer-crd
+    spec:
+      containers:
+      - image: gcr.io/ml-pipeline/viewer-crd-controller:dummy
+        imagePullPolicy: IfNotPresent
+        name: ml-pipeline-viewer-crd
+        env:
+        - name: MAX_NUM_VIEWERS
+          value: "50"
+        - name: MINIO_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      serviceAccountName: ml-pipeline-viewer-crd-service-account

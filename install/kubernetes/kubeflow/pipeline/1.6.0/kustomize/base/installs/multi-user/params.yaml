@@ -1,0 +1,4 @@
+# Allow Kustomize var to replace following fields.
+varReference:
+- path: spec/http/route/destination/host
+  kind: VirtualService

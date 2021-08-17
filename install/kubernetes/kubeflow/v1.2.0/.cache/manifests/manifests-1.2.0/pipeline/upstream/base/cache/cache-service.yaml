@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache-server
+spec:
+  selector:
+    app: cache-server
+  ports:
+    - port: 443
+      targetPort: webhook-api

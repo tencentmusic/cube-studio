@@ -1,0 +1,156 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  namespace: kubeflow
+spec:
+  applications:
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: namespaces/base
+    name: namespaces
+  # Install istio in a different namespace: istio-system
+  # Remove this application if istio is already installed
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/istio-1-3-1-stack
+    name: istio-stack
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cluster-local-gateway-1-3-1
+    name: cluster-local-gateway
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: istio/istio/base
+    name: istio
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: application/v3
+    name: application
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/bootstrap
+    name: bootstrap
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cert-manager-crds
+    name: cert-manager-crds
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cert-manager-kube-system-resources
+    name: cert-manager-kube-system-resources
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cert-manager
+    name: cert-manager
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/oidc-authservice-appid
+    name: oidc-authservice
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: metacontroller/base
+    name: metacontroller
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: tektoncd/tektoncd-install/base
+    name: tektoncd-install
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: tektoncd/tektoncd-dashboard/base
+    name: tektoncd-dashboard
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/admission-webhook
+    name: admission-webhook
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/profile-control-plane
+    name: kubeflow-apps
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/metadata
+    name: metadata
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/katib
+    name: katib
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/kfp-tekton-multi-user
+    name: kfp-tekton-multi-user
+  # Switch the above kfp-tekton to
+  # the below applications if you want to
+  # run KFP with Argo
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/argo
+  #   name: argo
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/kfp-argo-multi-user
+  #   name: kfp-argo-multi-user
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/notebooks
+    name: notebooks
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/pytorch-job
+    name: pytorch-job
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/tf-job
+    name: tf-job
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: knative/installs/generic
+    name: knative
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: kfserving/installs/generic
+    name: kfserving
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/spartakus
+    name: spartakus
+  # Optional applications
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/seldon-core-operator
+  #   name: seldon-core-operator
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/spark-operator
+  #   name: spark-operator
+  repos:
+  - name: manifests
+    uri: https://github.com/kubeflow/manifests/archive/master.tar.gz
+  version: master

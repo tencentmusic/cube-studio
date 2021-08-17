@@ -1,0 +1,60 @@
+namePrefix: metadata-
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  kustomize.component: metadata
+configMapGenerator:
+- name: ui-parameters
+  envs:
+  - params.env
+- name: grpc-configmap
+  envs:
+  - grpc-params.env
+generatorOptions:
+  # TFX pipelines use metadata-grpc-configmap for finding grpc server host and
+  # port at runtime. Because they don't know the suffix, we have to disable it.
+  disableNameSuffixHash: true
+resources:
+- metadata-deployment.yaml
+- metadata-service.yaml
+- metadata-envoy-deployment.yaml
+- metadata-envoy-service.yaml
+namespace: kubeflow
+vars:
+# These vars are used internally for the kustomize package.
+# i.e to substitute values into fields kustomize isn't aware of.
+# The names should be unique enough that we don't get conflicts with other packages
+- name: metadata-namespace
+  objref:
+    kind: Service
+    name: envoy-service
+    apiVersion: v1
+  fieldref:
+    fieldpath: metadata.namespace
+- name: ui-clusterDomain
+  objref:
+    kind: ConfigMap
+    name: ui-parameters
+    version: v1
+  fieldref:
+    fieldpath: data.uiClusterDomain
+- name: metadata-envoy-service
+  objref:
+    kind: Service
+    name: envoy-service
+    apiVersion: v1
+  fieldref:
+    fieldpath: metadata.name
+images:
+- name: gcr.io/kubeflow-images-public/metadata
+  newName: gcr.io/kubeflow-images-public/metadata
+  newTag: v0.1.11
+- name: gcr.io/tfx-oss-public/ml_metadata_store_server
+  newName: gcr.io/tfx-oss-public/ml_metadata_store_server
+  newTag: v0.21.1
+- name: gcr.io/ml-pipeline/envoy
+  newName: gcr.io/ml-pipeline/envoy
+  newTag: metadata-grpc
+- name: mysql
+  newName: mysql
+  newTag: 8.0.3

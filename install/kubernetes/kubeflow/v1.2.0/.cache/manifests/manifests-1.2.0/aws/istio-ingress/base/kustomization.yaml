@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: istio-system
+resources:
+- ingress.yaml
+commonLabels:
+  kustomize.component: istio-ingress
+configMapGenerator:
+- name: istio-ingress-parameters
+  envs:
+  - params.env
+generatorOptions:
+  disableNameSuffixHash: true
+vars:
+- name: loadBalancerScheme
+  objref:
+    kind: ConfigMap
+    name: istio-ingress-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.loadBalancerScheme
+configurations:
+- params.yaml

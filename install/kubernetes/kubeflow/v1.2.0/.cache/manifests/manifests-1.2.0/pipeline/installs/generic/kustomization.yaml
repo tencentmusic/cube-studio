@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+commonLabels:
+  app.kubernetes.io/name: kubeflow-pipelines
+  app.kubernetes.io/component: ml-pipeline
+resources:
+- ../../upstream/base/pipeline/cluster-scoped
+- ../../upstream/base/pipeline
+- virtual-service.yaml
+- ../../cache/base_v3
+- application.yaml
+configMapGenerator:
+- name: pipeline-install-config
+  envs:
+  - ./params.env
+- name: pipeline-upstream-install-config
+  envs:
+  - ../../upstream/base/params.env
+secretGenerator:
+- name: mysql-secret
+  envs:
+  - ./params-db-secret.env
+vars:
+- name: kfp-ui-namespace
+  objref:
+    kind: Service
+    name: ml-pipeline-ui
+    apiVersion: v1
+  fieldref:
+    fieldpath: metadata.namespace
+- name: kfp-app-version
+  objref:
+    kind: ConfigMap
+    name: pipeline-upstream-install-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.appVersion
+configurations:
+- params.yaml

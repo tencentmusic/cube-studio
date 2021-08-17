@@ -1,0 +1,39 @@
+apiVersion: metacontroller.k8s.io/v1alpha1
+kind: CompositeController
+metadata:
+  name: kubeflow-pipelines-profile-controller
+spec:
+  generateSelector: true
+  resyncPeriodSeconds: 10
+  parentResource:
+    apiVersion: v1
+    resource: namespaces
+  childResources:
+  - apiVersion: v1
+    resource: secrets
+    updateStrategy:
+      method: OnDelete
+  - apiVersion: v1
+    resource: configmaps
+    updateStrategy:
+      method: OnDelete
+  - apiVersion: apps/v1
+    resource: deployments
+    updateStrategy:
+      method: InPlace
+  - apiVersion: v1
+    resource: services
+    updateStrategy:
+      method: InPlace
+  - apiVersion: networking.istio.io/v1alpha3
+    resource: destinationrules
+    updateStrategy:
+      method: InPlace
+  - apiVersion: security.istio.io/v1beta1
+    resource: authorizationpolicies
+    updateStrategy:
+      method: InPlace
+  hooks:
+    sync:
+      webhook:
+        url: http://kubeflow-pipelines-profile-controller/sync

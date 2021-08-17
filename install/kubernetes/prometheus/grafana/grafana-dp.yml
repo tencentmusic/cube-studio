@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: monitoring
+                operator: In
+                values:
+                - "true"
+      containers:
+      - name: grafana
+        image:  ai.tencentmusic.com/tme-public/prometheus:grafana-6.0.0
+        env:
+        - name: GRAFANA_PORT
+          value: "3000"
+        - name: GF_AUTH_BASIC_ENABLED
+          value: "false"
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "true"
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: grafana-credentials
+              key: user
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-credentials
+              key: password
+        - name: GF_PATHS_DATA
+          value: /grafana
+        ports:
+        - containerPort: 3000
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /grafana
+          name: grafana-storage
+          readOnly: false
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: grafana-config
+          mountPath: /etc/grafana/grafana.ini
+          readOnly: false
+          subPath: grafana.ini
+#        - name: grafana-defaults-config
+#          mountPath: /usr/share/grafana/conf/defaults.ini
+#          readOnly: false
+#          subPath: defaults.ini
+        - mountPath: /etc/grafana/provisioning/datasources
+          name: grafana-datasources
+          readOnly: false
+        - mountPath: /etc/grafana/provisioning/dashboards
+          name: grafana-dashboards
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/k8s-cluster-rsrc-use
+          name: grafana-dashboard-k8s-cluster-rsrc-use
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/k8s-node-rsrc-use
+          name: grafana-dashboard-k8s-node-rsrc-use
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-cluster
+          name: grafana-dashboard-k8s-resources-cluster
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-namespace
+          name: grafana-dashboard-k8s-resources-namespace
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-pod
+          name: grafana-dashboard-k8s-resources-pod
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/nodes
+          name: grafana-dashboard-nodes
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/pods
+          name: grafana-dashboard-pods
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/statefulset
+          name: grafana-dashboard-statefulset
+          readOnly: false
+#      securityContext:
+#        fsGroup: 472
+#        runAsNonRoot: true
+#        runAsUser: 65534
+      serviceAccountName: grafana
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: monitoring-grafana-pvc   
+#      - emptyDir: {}
+#        name: grafana-storage
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+      - name: grafana-datasources
+        secret:
+          secretName: grafana-datasources
+      - configMap:
+          name: grafana-dashboards
+        name: grafana-dashboards
+      - configMap:
+          name: grafana-dashboard-k8s-cluster-rsrc-use
+        name: grafana-dashboard-k8s-cluster-rsrc-use
+      - configMap:
+          name: grafana-dashboard-k8s-node-rsrc-use
+        name: grafana-dashboard-k8s-node-rsrc-use
+      - configMap:
+          name: grafana-dashboard-k8s-resources-cluster
+        name: grafana-dashboard-k8s-resources-cluster
+      - configMap:
+          name: grafana-dashboard-k8s-resources-namespace
+        name: grafana-dashboard-k8s-resources-namespace
+      - configMap:
+          name: grafana-dashboard-k8s-resources-pod
+        name: grafana-dashboard-k8s-resources-pod
+      - configMap:
+          name: grafana-dashboard-nodes
+        name: grafana-dashboard-nodes
+      - configMap:
+          name: grafana-dashboard-pods
+        name: grafana-dashboard-pods
+      - configMap:
+          name: grafana-dashboard-statefulset
+        name: grafana-dashboard-statefulset
+      - configMap:
+          name: grafana-config
+          items:
+            - key: grafana.ini
+              path: grafana.ini
+        name: grafana-config
+#      - configMap:
+#          name: grafana-defaults-config
+#          items:
+#            - key: defaults.ini
+#              path: defaults.ini
+#        name: grafana-defaults-config

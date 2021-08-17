@@ -1,0 +1,102 @@
+# This file configures the workflows to trigger in our Prow jobs.
+# see https://github.com/kubeflow/testing/blob/master/py/kubeflow/testing/run_e2e_workflow.py
+python_paths:
+  # Need to place kubeflow/testing in front of kubeflow/testing so that the package can
+  # be correctly located.
+  - kubeflow/testing/py
+  - kubeflow/kfctl/py
+workflows:
+  - app_dir: kubeflow/manifests/tests/workflows
+    component: workflows
+    name: unit
+    job_types:
+      - presubmit
+      - postsubmit
+      - periodic
+  - py_func: kubeflow.kfctl.testing.ci.kfctl_e2e_workflow.create_workflow
+    name: e2e
+    job_types:
+      - presubmit
+      - postsubmit
+      - periodic
+    include_dirs:
+      - admission-webhook/*
+      - application/*
+      - argo/*
+      - aws/*
+      - cert-manager/*
+      - common/
+      - default-install/*
+      - dex-auth/*
+      - experimental/*
+      - istio-1-3-1/*
+      - istio/*
+      - jupyter/*
+      - katib/*
+      - kfdef/kfctl_istio_dex*
+      - kfserving/*
+      - knative/*
+      - kubebench/*
+      - kubeflow-roles/*
+      - metacontroller/*
+      - metadata/*
+      - mpi-job/*
+      - mxnet-job/*
+      - namespaces/*
+      - pipeline/*
+      - profiles/*
+      - pytorch-job/*
+      - seldon/*
+      - spark/*
+      - stacks/*
+      - tektoncd/*
+      - tf-training/*
+      - xgboost-job/*
+    kwargs:
+      build_and_apply: false
+      config_path: https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_istio_dex.v1.2.0.yaml
+
+  ####################################### AWS Specific Tests
+  - py_func: kubeflow.kfctl.testing.ci.kfctl_e2e_workflow.create_workflow
+    name: aws-default
+    job_types:
+      - periodic
+    kwargs:
+      build_and_apply: false
+      config_path: https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_aws.v1.2.0.yaml
+      
+  - py_func: kubeflow.kfctl.testing.ci.kfctl_e2e_workflow.create_workflow
+    name: aws-1-15
+    job_types:
+      - periodic
+    kwargs:
+      build_and_apply: false
+      config_path: https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_aws.v1.2.0.yaml
+      eks_cluster_version: "1.15"
+    
+  - py_func: kubeflow.kfctl.testing.ci.kfctl_e2e_workflow.create_workflow
+    name: aws-1-16
+    job_types:
+      - periodic
+    kwargs:
+      build_and_apply: false
+      config_path: https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_aws.v1.2.0.yaml
+      eks_cluster_version: "1.16"  
+
+  - py_func: kubeflow.kfctl.testing.ci.kfctl_e2e_workflow.create_workflow
+    name: aws-1-17
+    job_types:
+      - periodic
+    kwargs:
+      build_and_apply: false
+      config_path: https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_aws.v1.2.0.yaml
+      eks_cluster_version: "1.17"
+  
+  - py_func: kubeflow.kfctl.testing.ci.kfctl_e2e_workflow.create_workflow
+    name: aws-1-18
+    job_types:
+      - periodic
+    kwargs:
+      build_and_apply: false
+      config_path: https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_aws.v1.2.0.yaml
+      eks_cluster_version: "1.18"

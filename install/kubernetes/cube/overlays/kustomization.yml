@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: infra
+
+configMapGenerator:
+- name: kubeflow-dashboard-config
+  files:
+  - config/config.py
+  - config/entrypoint.sh
+
+# kubectl delete configmap kubeflow-dashboard-config -n infra
+# kubectl create configmap kubeflow-dashboard-config --from-file=config -n infra
+
+- name: deploy-config
+  literals:
+  - STAGE=prod
+  - REDIS_HOST=redis-master.infra
+  - REDIS_PORT=6379
+  - REDIS_PASSWORD=admin
+  - MYSQL_SERVICE=mysql+pymysql://root:admin@mysql-service.infra:3306/kubeflow?charset=utf8
+  - HOST=kubeflow.local.com
+  - ENVIRONMENT=DEV
+  - GPU_TYPE=NVIDIA
+
+
+vars:
+- name: STAGE
+  objref:
+    kind: ConfigMap
+    name: deploy-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.STAGE
+
+bases:
+  - ../base
+
+images:
+- name: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+  newName: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+  newTag: 2020.10.01
+
+
+# kustomize build . | kubectl apply -f -
+
+
+
+

@@ -1,0 +1,36 @@
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-admin-workload-identity-user # {"$kpt-set":"name-admin-wi"}
+spec:
+  member: serviceAccount:project-id.svc.id.goog[kubeflow/profiles-controller-service-account] # {"$kpt-set":"admin-profiles-sa-wi"}
+  role: roles/iam.workloadIdentityUser
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: name-admin # {"$kpt-set":"admin-sa-name"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-admin-kubeflow-wi # {"$kpt-set":"name-admin-kubeflow-wi"}
+spec:
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: name-admin # {"$kpt-set":"admin-sa-name"}
+  member: serviceAccount:project-id.svc.id.goog[kubeflow/kf-admin] # {"$kpt-set":"iampolicy-member-kfadmin-kubeflow"}
+  role: roles/iam.workloadIdentityUser
+---
+# kf-admin binding in namespace istio-system
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-admin-istio-wi # {"$kpt-set":"name-admin-istio-wi"}
+spec:
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: name-admin # {"$kpt-set":"admin-sa-name"}
+  member: serviceAccount:project-id.svc.id.goog[istio-system/kf-admin] # {"$kpt-set":"iampolicy-member-kfadmin-istio-system"}
+  role: roles/iam.workloadIdentityUser

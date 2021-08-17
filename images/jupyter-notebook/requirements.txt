@@ -1,0 +1,7 @@
+pandas
+joblib
+numpy
+xgboost
+scikit-learn>=0.21.0,<0.22
+seldon-core
+tornado>=6.0.3

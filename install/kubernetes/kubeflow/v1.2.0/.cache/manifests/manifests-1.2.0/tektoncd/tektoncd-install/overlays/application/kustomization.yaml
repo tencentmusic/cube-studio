@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+bases:
+- ../../base
+commonLabels:
+  app.kubernetes.io/component: kubeflow
+  app.kubernetes.io/name: tektoncd-install
+configMapGenerator:
+- envs:
+  - params.env
+  name: tektoncd-install-parameters
+configurations:
+- params.yaml
+kind: Kustomization
+resources:
+- application.yaml
+vars:
+- fieldref:
+    fieldPath: data.generateName
+  name: generateName
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: tektoncd-install-parameters

@@ -1,0 +1,37 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tekton-pipelines-controller
+  labels:
+    app.kubernetes.io/component: tekton-pipelines-controller
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get"]
+  resourceNames: ["config-logging", "config-observability", "config-artifact-bucket",
+    "config-artifact-pvc", "feature-flags", "config-leader-election"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tekton-pipelines-webhook
+  labels:
+    app.kubernetes.io/component: tekton-pipelines-webhook
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get"]
+  resourceNames: ["config-logging", "config-observability", "config-leader-election"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "update"]
+  resourceNames: ["webhook-certs"]

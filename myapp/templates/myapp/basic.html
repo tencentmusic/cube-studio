@@ -1,0 +1,92 @@
+{% import 'appbuilder/general/lib.html' as lib %}
+<html>
+
+<head>
+  <title>
+    {% block title %}
+    {% if title %}
+    {{ title }}
+    {% elif appbuilder and appbuilder.app_name %}
+    {{ appbuilder.app_name }}
+    {% endif %}
+    {% endblock %}
+  </title>
+  {% block head_meta %}{% endblock %}
+  {% block head_css %}
+  <link rel="icon" type="image/png" href="/static/assets/images/favicon.ico">
+  <link rel="stylesheet" type="text/css" href="/static/appbuilder/css/flags/flags16.css" />
+  <link rel="stylesheet" type="text/css" href="/static/appbuilder/css/font-awesome.min.css">
+
+  {% for entry in get_unloaded_chunks(css_manifest('theme'), loaded_chunks) %}
+  <link rel="stylesheet" type="text/css" href="{{ entry }}" />
+  {% endfor %}
+
+  {% if entry %}
+  {% set entry_files = css_manifest(entry) %}
+  {% for entry in get_unloaded_chunks(entry_files, loaded_chunks) %}
+  <link rel="stylesheet" type="text/css" href="{{ entry }}" />
+  {% endfor %}
+  {% endif %}
+
+  {% endblock %}
+
+  {% with filename="theme" %}
+  {% include "myapp/partials/_script_tag.html" %}
+  {% endwith %}
+
+  <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+</head>
+
+<body {% if standalone_mode %}class="standalone" {% endif %}>
+  {# 顶层导航栏 #}
+  {% block navbar %}
+  {% if not standalone_mode %}
+  <header class="top" role="header">
+    {% include 'appbuilder/navbar.html' %}
+  </header>
+  {% endif %}
+  {% endblock %}
+  {# 当前页面的body #}
+  {% block body %}
+  <div id="app" data-bootstrap="{{ bootstrap_data }}">
+    <img src="/static/assets/images/loading.gif"
+      style="width: 50px; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%)">
+  </div>
+  {% endblock %}
+
+  <!-- Modal for misc messages / alerts 消息或报警弹框的设置 -->
+  <div class="misc-modal modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% block tail_js %}
+  {% if entry %}
+  {% with filename=entry %}
+  {% include "myapp/partials/_script_tag.html" %}
+  {% endwith %}
+  {% endif %}
+  {% endblock %}
+
+  <script src="/static/assets/js/mywater.js"></script>
+  <script type="text/javascript">
+    get_username()
+  </script>
+
+
+
+</body>
+
+</html>

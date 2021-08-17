@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kube-state-metrics
+  name: kube-state-metrics
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-state-metrics
+  template:
+    metadata:
+      labels:
+        app: kube-state-metrics
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: monitoring
+                operator: In
+                values:
+                - "true"
+      serviceAccountName: kube-state-metrics
+      containers:
+      - image: quay.io/coreos/kube-rbac-proxy:v0.3.1
+        name: kube-rbac-proxy-main
+        args:
+        - --secure-listen-address=:8443
+        - --upstream=http://127.0.0.1:8081/
+        ports:
+        - containerPort: 8443
+          name: https-main
+        resources:
+          limits:
+            cpu: 20m
+            memory: 40Mi
+          requests:
+            cpu: 10m
+            memory: 20Mi
+      - name: kube-rbac-proxy-self
+        image: quay.io/coreos/kube-rbac-proxy:v0.3.1
+        args:
+        - --secure-listen-address=:9443
+        - --upstream=http://127.0.0.1:8082/
+        ports:
+        - containerPort: 9443
+          name: https-self
+        resources:
+          limits:
+            cpu: 20m
+            memory: 40Mi
+          requests:
+            cpu: 10m
+            memory: 20Mi
+      - name: kube-state-metrics
+        image: quay.io/coreos/kube-state-metrics:v1.3.1
+        args:
+        - --host=127.0.0.1
+        - --port=8081
+        - --telemetry-host=127.0.0.1
+        - --telemetry-port=8082
+        resources:
+          limits:
+            cpu: 102m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+      - name: addon-resizer
+        image: quay.io/coreos/addon-resizer:1.0
+        command:
+        - /pod_nanny
+        - --container=kube-state-metrics
+        - --cpu=100m
+        - --extra-cpu=2m
+        - --memory=150Mi
+        - --extra-memory=30Mi
+        - --threshold=5
+        - --deployment=kube-state-metrics
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        resources:
+          limits:
+            cpu: 10m
+            memory: 30Mi
+          requests:
+            cpu: 10m
+            memory: 30Mi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534

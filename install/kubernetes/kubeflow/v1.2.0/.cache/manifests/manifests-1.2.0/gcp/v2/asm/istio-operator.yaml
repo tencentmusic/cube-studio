@@ -1,0 +1,38 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane
+metadata:
+  clusterName: "project-id/location/name" # {"$kpt-set":"asm-cluster-name"}
+spec:
+  profile: asm
+  hub: gcr.io/gke-release/asm
+  tag: 1.4.10-asm.15
+  values:
+    gateways:
+      istio-ingressgateway:
+        type: NodePort
+    global:
+      meshID: "proj-projectNumber" # {"$kpt-set":"asm-mesh-id"}
+      trustDomain: "project-id.svc.id.goog" # {"$kpt-set":"identity-ns"}
+      sds:
+        token:
+          aud: "project-id.svc.id.goog" # {"$kpt-set":"identity-ns"}
+      proxy:
+        env:
+          GCP_METADATA: "project-id|projectNumber|name|location" # {"$kpt-set":"asm-gcp-metadata"}
+    nodeagent:
+      env:
+        GKE_CLUSTER_URL: "https://container.googleapis.com/v1/projects/project-id/locations/location/clusters/name" # {"$kpt-set":"asm-cluster-url"}

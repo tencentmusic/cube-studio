@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ml-pipeline-persistenceagent
+  name: ml-pipeline-persistenceagent
+spec:
+  selector:
+    matchLabels:
+      app: ml-pipeline-persistenceagent
+  template:
+    metadata:
+      labels:
+        app: ml-pipeline-persistenceagent
+    spec:
+      containers:
+      - env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: TTL_SECONDS_AFTER_WORKFLOW_FINISH
+            value: "86400"
+        image: gcr.io/ml-pipeline/persistenceagent:dummy
+        imagePullPolicy: IfNotPresent
+        name: ml-pipeline-persistenceagent
+      serviceAccountName: ml-pipeline-persistenceagent

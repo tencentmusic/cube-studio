@@ -1,0 +1,15 @@
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeDisk
+metadata:
+  name: name-storage-metadata-store # {"$kpt-set":"name-storage-metadata-store"}
+spec:
+  location: location # {"$kpt-set":"location"}
+  size: 20
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeDisk
+metadata:
+  name: name-storage-artifact-store # {"$kpt-set":"name-storage-artifact-store"}
+spec:
+  location: location # {"$kpt-set":"location"}
+  size: 200

@@ -1,0 +1,285 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: clustertasks.tekton.dev
+  labels:
+    pipeline.tekton.dev/release: "v0.14.0"
+    version: "v0.14.0"
+spec:
+  group: tekton.dev
+  preserveUnknownFields: false
+  validation:
+    openAPIV3Schema:
+      type: object
+      x-kubernetes-preserve-unknown-fields: true
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1beta1
+    served: true
+    storage: true
+  names:
+    kind: ClusterTask
+    plural: clustertasks
+    categories:
+    - tekton
+    - tekton-pipelines
+  scope: Cluster
+  subresources:
+    status: {}
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      service:
+        name: tekton-pipelines-webhook
+        namespace: tekton-pipelines
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: conditions.tekton.dev
+  labels:
+    pipeline.tekton.dev/release: "v0.14.0"
+    version: "v0.14.0"
+spec:
+  group: tekton.dev
+  names:
+    kind: Condition
+    plural: conditions
+    categories:
+    - tekton
+    - tekton-pipelines
+  scope: Namespaced
+  subresources:
+    status: {}
+  version: v1alpha1
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: images.caching.internal.knative.dev
+  labels:
+    knative.dev/crd-install: "true"
+spec:
+  group: caching.internal.knative.dev
+  version: v1alpha1
+  names:
+    kind: Image
+    plural: images
+    singular: image
+    categories:
+    - knative-internal
+    - caching
+    shortNames:
+    - img
+  scope: Namespaced
+  subresources:
+    status: {}
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: pipelines.tekton.dev
+  labels:
+    pipeline.tekton.dev/release: "v0.14.0"
+    version: "v0.14.0"
+spec:
+  group: tekton.dev
+  preserveUnknownFields: false
+  validation:
+    openAPIV3Schema:
+      type: object
+      x-kubernetes-preserve-unknown-fields: true
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1beta1
+    served: true
+    storage: true
+  names:
+    kind: Pipeline
+    plural: pipelines
+    categories:
+    - tekton
+    - tekton-pipelines
+  scope: Namespaced
+  subresources:
+    status: {}
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      service:
+        name: tekton-pipelines-webhook
+        namespace: tekton-pipelines
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: pipelineruns.tekton.dev
+  labels:
+    pipeline.tekton.dev/release: "v0.14.0"
+    version: "v0.14.0"
+spec:
+  group: tekton.dev
+  preserveUnknownFields: false
+  validation:
+    openAPIV3Schema:
+      type: object
+      x-kubernetes-preserve-unknown-fields: true
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1beta1
+    served: true
+    storage: true
+  names:
+    kind: PipelineRun
+    plural: pipelineruns
+    categories:
+    - tekton
+    - tekton-pipelines
+    shortNames:
+    - pr
+    - prs
+  scope: Namespaced
+  additionalPrinterColumns:
+  - name: Succeeded
+    type: string
+    JSONPath: ".status.conditions[?(@.type==\"Succeeded\")].status"
+  - name: Reason
+    type: string
+    JSONPath: ".status.conditions[?(@.type==\"Succeeded\")].reason"
+  - name: StartTime
+    type: date
+    JSONPath: .status.startTime
+  - name: CompletionTime
+    type: date
+    JSONPath: .status.completionTime
+  subresources:
+    status: {}
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      service:
+        name: tekton-pipelines-webhook
+        namespace: tekton-pipelines
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: pipelineresources.tekton.dev
+  labels:
+    pipeline.tekton.dev/release: "v0.14.0"
+    version: "v0.14.0"
+spec:
+  group: tekton.dev
+  names:
+    kind: PipelineResource
+    plural: pipelineresources
+    categories:
+    - tekton
+    - tekton-pipelines
+  scope: Namespaced
+  subresources:
+    status: {}
+  version: v1alpha1
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: tasks.tekton.dev
+  labels:
+    pipeline.tekton.dev/release: "v0.14.0"
+    version: "v0.14.0"
+spec:
+  group: tekton.dev
+  preserveUnknownFields: false
+  validation:
+    openAPIV3Schema:
+      type: object
+      x-kubernetes-preserve-unknown-fields: true
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1beta1
+    served: true
+    storage: true
+  names:
+    kind: Task
+    plural: tasks
+    categories:
+    - tekton
+    - tekton-pipelines
+  scope: Namespaced
+  subresources:
+    status: {}
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      service:
+        name: tekton-pipelines-webhook
+        namespace: tekton-pipelines
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: taskruns.tekton.dev
+  labels:
+    pipeline.tekton.dev/release: "v0.14.0"
+    version: "v0.14.0"
+spec:
+  group: tekton.dev
+  preserveUnknownFields: false
+  validation:
+    openAPIV3Schema:
+      type: object
+      x-kubernetes-preserve-unknown-fields: true
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: false
+  - name: v1beta1
+    served: true
+    storage: true
+  names:
+    kind: TaskRun
+    plural: taskruns
+    categories:
+    - tekton
+    - tekton-pipelines
+    shortNames:
+    - tr
+    - trs
+  scope: Namespaced
+  additionalPrinterColumns:
+  - name: Succeeded
+    type: string
+    JSONPath: ".status.conditions[?(@.type==\"Succeeded\")].status"
+  - name: Reason
+    type: string
+    JSONPath: ".status.conditions[?(@.type==\"Succeeded\")].reason"
+  - name: StartTime
+    type: date
+    JSONPath: .status.startTime
+  - name: CompletionTime
+    type: date
+    JSONPath: .status.completionTime
+  subresources:
+    status: {}
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      service:
+        name: tekton-pipelines-webhook
+        namespace: tekton-pipelines

@@ -1,0 +1,852 @@
+apiVersion: kpt.dev/v1alpha1
+kind: Kptfile
+metadata:
+  name: .
+packageMetadata:
+  shortDescription: GCP blueprint configs.
+openAPI:
+  definitions:
+    io.k8s.cli.setters.gcloud.core.project:
+      x-k8s-cli:
+        setter:
+          name: gcloud.core.project
+          value: project-id
+    io.k8s.cli.setters.name:
+      x-k8s-cli:
+        setter:
+          name: name
+          value: name
+    io.k8s.cli.setters.gcloud.compute.zone:
+      x-k8s-cli:
+        setter:
+          name: gcloud.compute.zone
+          value: ZONE
+    io.k8s.cli.setters.gcloud.compute.region:
+      x-k8s-cli:
+        setter:
+          name: gcloud.compute.region
+          value: REGION
+    io.k8s.cli.setters.location:
+      x-k8s-cli:
+        setter:
+          name: location
+          value: location
+    io.k8s.cli.setters.log-firewalls:
+      x-k8s-cli:
+        setter:
+          name: log-firewalls
+          value: "false"
+    io.k8s.cli.substitutions.name-storage-metadata-store:
+      x-k8s-cli:
+        substitution:
+          name: name-storage-metadata-store
+          pattern: ${name}-storage-metadata-store
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-storage-artifact-store:
+      x-k8s-cli:
+        substitution:
+          name: name-storage-artifact-store
+          pattern: ${name}-storage-artifact-store
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-ip:
+      x-k8s-cli:
+        substitution:
+          name: name-ip
+          pattern: ${name}-ip
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-gcr:
+      x-k8s-cli:
+        substitution:
+          name: name-gcr
+          pattern: ${name}-gcr
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-gcr-cname:
+      x-k8s-cli:
+        substitution:
+          name: name-gcr-cname
+          pattern: ${name}-gcr-cname
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-gcr-a:
+      x-k8s-cli:
+        substitution:
+          name: name-gcr-a
+          pattern: ${name}-gcr-a
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-goog-apis:
+      x-k8s-cli:
+        substitution:
+          name: name-goog-apis
+          pattern: ${name}-goog-apis
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-goog-cname:
+      x-k8s-cli:
+        substitution:
+          name: name-goog-cname
+          pattern: ${name}-goog-cname
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-goog-a:
+      x-k8s-cli:
+        substitution:
+          name: name-goog-a
+          pattern: ${name}-goog-a
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-google-apis:
+      x-k8s-cli:
+        substitution:
+          name: name-google-apis
+          pattern: ${name}-google-apis
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-internet:
+      x-k8s-cli:
+        substitution:
+          name: name-internet
+          pattern: ${name}-internet
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-deny-egress:
+      x-k8s-cli:
+        substitution:
+          name: name-deny-egress
+          pattern: ${name}-deny-egress
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-health-ingress:
+      x-k8s-cli:
+        substitution:
+          name: name-health-ingress
+          pattern: ${name}-health-ingress
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-health-egress:
+      x-k8s-cli:
+        substitution:
+          name: name-health-egress
+          pattern: ${name}-health-egress
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-apis-egress:
+      x-k8s-cli:
+        substitution:
+          name: name-apis-egress
+          pattern: ${name}-apis-egress
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-master-egress:
+      x-k8s-cli:
+        substitution:
+          name: name-master-egress
+          pattern: ${name}-master-egress
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-int-egress:
+      x-k8s-cli:
+        substitution:
+          name: name-int-egress
+          pattern: ${name}-int-egress
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-istio:
+      x-k8s-cli:
+        substitution:
+          name: name-istio
+          pattern: ${name}-istio
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-cm:
+      x-k8s-cli:
+        substitution:
+          name: name-cm
+          pattern: ${name}-cm
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-dockerhub:
+      x-k8s-cli:
+        substitution:
+          name: name-dockerhub
+          pattern: ${name}-dockerhub
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-iap-jwks:
+      x-k8s-cli:
+        substitution:
+          name: name-iap-jwks
+          pattern: ${name}-iap-jwks
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-ml-pipeline-ui:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-ml-pipeline-ui
+          pattern: ${name}-user-workload-identity-user-ml-pipeline-ui
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-ml-pipeline-visualization:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-ml-pipeline-visualization
+          pattern: ${name}-user-workload-identity-user-ml-pipeline-visualization
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-ml-pipeline-visualizationserver:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-ml-pipeline-visualizationserver
+          pattern: ${name}-user-workload-identity-user-ml-pipeline-visualizationserver
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-pipeline-runner:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-pipeline-runner
+          pattern: ${name}-user-workload-identity-user-pipeline-runner
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-ml-pipeline-ui-member:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-ml-pipeline-ui-member
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[kubeflow/ml-pipeline-ui]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-ml-pipeline-visualization-member:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-ml-pipeline-visualization-member
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[kubeflow/ml-pipeline-visualization]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-ml-pipeline-visualizationserver-member:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-ml-pipeline-visualizationserver-member
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[kubeflow/ml-pipeline-visualizationserver]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.name-user-workload-identity-user-pipeline-runner-member:
+      x-k8s-cli:
+        substitution:
+          name: name-user-workload-identity-user-pipeline-runner-member
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[kubeflow/pipeline-runner]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.name-user-cloudbuild:
+      x-k8s-cli:
+        substitution:
+          name: name-user-cloudbuild
+          pattern: ${name}-user-cloudbuild
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-viewer:
+      x-k8s-cli:
+        substitution:
+          name: name-user-viewer
+          pattern: ${name}-user-viewer
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-source:
+      x-k8s-cli:
+        substitution:
+          name: name-user-source
+          pattern: ${name}-user-source
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-storage:
+      x-k8s-cli:
+        substitution:
+          name: name-user-storage
+          pattern: ${name}-user-storage
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-bigquery:
+      x-k8s-cli:
+        substitution:
+          name: name-user-bigquery
+          pattern: ${name}-user-bigquery
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-dataflow:
+      x-k8s-cli:
+        substitution:
+          name: name-user-dataflow
+          pattern: ${name}-user-dataflow
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-ml:
+      x-k8s-cli:
+        substitution:
+          name: name-user-ml
+          pattern: ${name}-user-ml
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-dataproc:
+      x-k8s-cli:
+        substitution:
+          name: name-user-dataproc
+          pattern: ${name}-user-dataproc
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-cloudsql:
+      x-k8s-cli:
+        substitution:
+          name: name-user-cloudsql
+          pattern: ${name}-user-cloudsql
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-logging:
+      x-k8s-cli:
+        substitution:
+          name: name-user-logging
+          pattern: ${name}-user-logging
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-metricwriter:
+      x-k8s-cli:
+        substitution:
+          name: name-user-metricwriter
+          pattern: ${name}-user-metricwriter
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-user-monitoringviewer:
+      x-k8s-cli:
+        substitution:
+          name: name-user-monitoringviewer
+          pattern: ${name}-user-monitoringviewer
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-vm-policy-logging:
+      x-k8s-cli:
+        substitution:
+          name: name-vm-policy-logging
+          pattern: ${name}-vm-logging
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-vm-policy-monitoring:
+      x-k8s-cli:
+        substitution:
+          name: name-vm-policy-monitoring
+          pattern: ${name}-vm-policy-monitoring
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-vm-policy-meshtelemetry:
+      x-k8s-cli:
+        substitution:
+          name: name-vm-policy-meshtelemetry
+          pattern: ${name}-vm-policy-meshtelemetry
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-vm-policy-cloudtrace:
+      x-k8s-cli:
+        substitution:
+          name: name-vm-policy-cloudtrace
+          pattern: ${name}-vm-policy-cloudtrace
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-vm-policy-monitoring-viewer:
+      x-k8s-cli:
+        substitution:
+          name: name-vm-policy-monitoring-viewer
+          pattern: ${name}-vm-policy-monitoring-viewer
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-vm-policy-storage:
+      x-k8s-cli:
+        substitution:
+          name: name-vm-policy-storage
+          pattern: ${name}-vm-policy-storage
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.cluster-name:
+      x-k8s-cli:
+        substitution:
+          name: cluster-name
+          pattern: ${gcloud.core.project}/${location}/${name}
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+          - marker: ${location}
+            ref: '#/definitions/io.k8s.cli.setters.location'
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.identity-ns:
+      x-k8s-cli:
+        substitution:
+          name: identity-ns
+          pattern: ${gcloud.core.project}.svc.id.goog
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.admin-sa-name:
+      x-k8s-cli:
+        substitution:
+          name: admin-sa-name
+          pattern: ${name}-admin
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.user-sa-name:
+      x-k8s-cli:
+        substitution:
+          name: user-sa-name
+          pattern: ${name}-user
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-admin-wi:
+      x-k8s-cli:
+        substitution:
+          name: name-admin-wi
+          pattern: ${name}-admin-workload-identity-user
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-profiles-sa-wi:
+      x-k8s-cli:
+        substitution:
+          name: admin-profiles-sa-wi
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[kubeflow/profiles-controller-service-account]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.user-wi-ml-pipeline-ui:
+      x-k8s-cli:
+        substitution:
+          name: user-wi-ml-pipeline-ui
+          pattern: ${name}-user-workload-identity-user-ml-pipeline-ui
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.user-wi-ml-pipeline-visualizationserver:
+      x-k8s-cli:
+        substitution:
+          name: user-wi-ml-pipeline-visualizationserver
+          pattern: ${name}-user-workload-identity-user-ml-pipeline-visualizationserver
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.user-wi-pipeline-runner:
+      x-k8s-cli:
+        substitution:
+          name: user-wi-pipeline-runner
+          pattern: ${name}-user-workload-identity-user-pipeline-runner
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.projects:
+      x-k8s-cli:
+        substitution:
+          name: projects
+          pattern: projects/${gcloud.core.project}
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.admin-service-account:
+      x-k8s-cli:
+        substitution:
+          name: admin-service-account
+          pattern: serviceAccount:${name}-admin@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.user-service-account:
+      x-k8s-cli:
+        substitution:
+          name: user-service-account
+          pattern: serviceAccount:${name}-user@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.vm-service-account:
+      x-k8s-cli:
+        substitution:
+          name: vm-service-account
+          pattern: serviceAccount:${name}-vm@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.vm-sa-ref:
+      x-k8s-cli:
+        substitution:
+          name: vm-sa-ref
+          pattern: ${name}-vm@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.admin-sa-ref:
+      x-k8s-cli:
+        substitution:
+          name: admin-sa-ref
+          pattern: ${name}-admin@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.user-sa-ref:
+      x-k8s-cli:
+        substitution:
+          name: user-sa-ref
+          pattern: ${name}-user@${gcloud.core.project}.iam.gserviceaccount.com
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.node-pool-cpu:
+      x-k8s-cli:
+        substitution:
+          name: node-pool-cpu
+          pattern: ${name}-cpu-pool-v1
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-admin-manages-user:
+      x-k8s-cli:
+        substitution:
+          name: name-admin-manages-user
+          pattern: ${name}-admin-manages-user
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-source-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-source-iam
+          pattern: ${name}-admin-source
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-servicemanagement-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-servicemanagement-iam
+          pattern: ${name}-admin-servicemanagement
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-network-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-network-iam
+          pattern: ${name}-admin-network
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-cloudbuild-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-cloudbuild-iam
+          pattern: ${name}-admin-cloudbuild
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-viewer-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-viewer-iam
+          pattern: ${name}-admin-viewer
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-storage-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-storage-iam
+          pattern: ${name}-admin-storage
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-bigquery-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-bigquery-iam
+          pattern: ${name}-admin-bigquery
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-dataflow-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-dataflow-iam
+          pattern: ${name}-admin-dataflow
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-ml-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-ml-iam
+          pattern: ${name}-admin-ml
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-dataproc-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-dataproc-iam
+          pattern: ${name}-admin-dataproc
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-cloudsql-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-cloudsql-iam
+          pattern: ${name}-admin-cloudsql
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-logging-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-logging-iam
+          pattern: ${name}-admin-logging
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-metricwriter-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-metricwriter-iam
+          pattern: ${name}-admin-metricwriter
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.admin-monitoringviewer-iam:
+      x-k8s-cli:
+        substitution:
+          name: admin-monitoringviewer-iam
+          pattern: ${name}-admin-monitoringviewer
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-vm:
+      x-k8s-cli:
+        substitution:
+          name: name-vm
+          pattern: ${name}-vm
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.setters.gcloud.project.projectNumber:
+      x-k8s-cli:
+        setter:
+          name: gcloud.project.projectNumber
+          value: projectNumber
+    io.k8s.cli.substitutions.asm-gcp-metadata:
+      x-k8s-cli:
+        substitution:
+          name: asm-gcp-metadata
+          pattern: ${gcloud.core.project}|${gcloud.project.projectNumber}|${name}|${location}
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+          - marker: ${gcloud.project.projectNumber}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.project.projectNumber'
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+          - marker: ${location}
+            ref: '#/definitions/io.k8s.cli.setters.location'
+    io.k8s.cli.substitutions.asm-cluster-url:
+      x-k8s-cli:
+        substitution:
+          name: asm-cluster-url
+          pattern: https://container.googleapis.com/v1/projects/${gcloud.core.project}/locations/${location}/clusters/${name}
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+          - marker: ${location}
+            ref: '#/definitions/io.k8s.cli.setters.location'
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.asm-mesh-id:
+      x-k8s-cli:
+        substitution:
+          name: asm-mesh-id
+          pattern: proj-${gcloud.project.projectNumber}
+          values:
+          - marker: ${gcloud.project.projectNumber}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.project.projectNumber'
+    io.k8s.cli.substitutions.asm-cluster-name:
+      x-k8s-cli:
+        substitution:
+          name: asm-cluster-name
+          pattern: ${gcloud.core.project}/${location}/${name}
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+          - marker: ${location}
+            ref: '#/definitions/io.k8s.cli.setters.location'
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.image-mirror-quay-io-jetstack:
+      x-k8s-cli:
+        substitution:
+          name: image-mirror-quay-io-jetstack
+          pattern: gcr.io/${gcloud.core.project}/mirror/quay.io/jetstack
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.image-mirror-kubeflow-images-public:
+      x-k8s-cli:
+        substitution:
+          name: image-mirror-kubeflow-images-public
+          pattern: gcr.io/${gcloud.core.project}/mirror/gcr.io/kubeflow-images-public
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.image-mirror-metacontroller:
+      x-k8s-cli:
+        substitution:
+          name: image-mirror-metacontroller
+          pattern: gcr.io/${gcloud.core.project}/mirror/metacontroller
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.name-admin-kubeflow-wi:
+      x-k8s-cli:
+        substitution:
+          name: name-admin-kubeflow-wi
+          pattern: ${name}-admin-kubeflow-wi
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.name-admin-istio-wi:
+      x-k8s-cli:
+        substitution:
+          name: name-admin-istio-wi
+          pattern: ${name}-admin-istio-wi
+          values:
+          - marker: ${name}
+            ref: '#/definitions/io.k8s.cli.setters.name'
+    io.k8s.cli.substitutions.iampolicy-member-kfadmin-kubeflow:
+      x-k8s-cli:
+        substitution:
+          name: iampolicy-member-kfadmin-kubeflow
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[kubeflow/kf-admin]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.iampolicy-member-kfadmin-istio:
+      x-k8s-cli:
+        substitution:
+          name: iampolicy-member-kfadmin-istio
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[istio/kf-admin]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.substitutions.iampolicy-member-kfadmin-istio-system:
+      x-k8s-cli:
+        substitution:
+          name: iampolicy-member-kfadmin-istio-system
+          pattern: serviceAccount:${gcloud.core.project}.svc.id.goog[istio-system/kf-admin]
+          values:
+          - marker: ${gcloud.core.project}
+            ref: '#/definitions/io.k8s.cli.setters.gcloud.core.project'
+    io.k8s.cli.setters.mgmt-location:
+      x-k8s-cli:
+        setter:
+          name: mgmt-location
+          value: us-central1-f
+    io.k8s.cli.setters.mgmt-name:
+      x-k8s-cli:
+        setter:
+          name: mgmt-name
+          value: mgmt-name
+    io.k8s.cli.setters.mgmt-project:
+      x-k8s-cli:
+        setter:
+          name: mgmt-project
+          value: mgmt-project-id
+    io.k8s.cli.substitutions.mgmt-cluster-name:
+      x-k8s-cli:
+        substitution:
+          name: mgmt-cluster-name
+          pattern: ${mgmt-project}/${mgmt-location}/${mgmt-name}
+          values:
+          - marker: ${mgmt-project}
+            ref: '#/definitions/io.k8s.cli.setters.mgmt-project'
+          - marker: ${mgmt-location}
+            ref: '#/definitions/io.k8s.cli.setters.mgmt-location'
+          - marker: ${mgmt-name}
+            ref: '#/definitions/io.k8s.cli.setters.mgmt-name'
+    io.k8s.cli.substitutions.mgmt-pool:
+      x-k8s-cli:
+        substitution:
+          name: mgmt-pool
+          pattern: ${mgmt-name}-pool
+          values:
+          - marker: ${mgmt-name}
+            ref: '#/definitions/io.k8s.cli.setters.mgmt-name'
+    io.k8s.cli.substitutions.mgmt-cnrm-sa:
+      x-k8s-cli:
+        substitution:
+          name: mgmt-cnrm-sa
+          pattern: serviceAccount:${mgmt-project}.svc.id.goog[cnrm-system/cnrm-controller-manager]
+          values:
+          - marker: ${mgmt-project}
+            ref: '#/definitions/io.k8s.cli.setters.mgmt-project'

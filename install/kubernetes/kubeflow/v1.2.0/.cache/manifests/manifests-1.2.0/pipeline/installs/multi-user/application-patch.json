@@ -1,0 +1,34 @@
+[
+    {
+        "op": "add",
+        "path": "/spec/componentKinds/0",
+        "value": {
+            "group": "metacontroller.k8s.io/v1alpha1",
+            "kind": "CompositeController"
+        }
+    },
+    {
+        "op": "add",
+        "path": "/spec/componentKinds/0",
+        "value": {
+            "group": "rbac.istio.io/v1alpha1",
+            "kind": "ServiceRole"
+        }
+    },
+    {
+        "op": "add",
+        "path": "/spec/componentKinds/0",
+        "value": {
+            "group": "rbac.istio.io/v1alpha1",
+            "kind": "ServiceRoleBinding"
+        }
+    },
+    {
+        "op": "add",
+        "path": "/spec/componentKinds/0",
+        "value": {
+            "group": "networking.istio.io/v1alpha3",
+            "kind": "DestinationRule"
+        }
+    }
+]

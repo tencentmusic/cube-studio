@@ -1,0 +1,19 @@
+# docker build -t tencentmuisc/notebook:vscode-ubuntu-node-base -f Dockerfile-node-base .
+
+ARG NODE_VERSION=12.18.3
+
+FROM node:${NODE_VERSION}
+ARG version=latest
+WORKDIR /home/theia
+ADD $version.package.json ./package.json
+ARG GITHUB_TOKEN
+RUN yarn --pure-lockfile && \
+    NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
+    yarn theia download:plugins && \
+    yarn --production && \
+    yarn autoclean --init && \
+    echo *.ts >> .yarnclean && \
+    echo *.ts.map >> .yarnclean && \
+    echo *.spec.* >> .yarnclean && \
+    yarn autoclean --force && \
+    yarn cache clean

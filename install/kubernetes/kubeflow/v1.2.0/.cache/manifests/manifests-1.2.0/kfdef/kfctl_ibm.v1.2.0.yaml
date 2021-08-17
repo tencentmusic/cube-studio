@@ -1,0 +1,158 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  namespace: kubeflow
+spec:
+  applications:
+  # Install istio in a different namespace: istio-system
+  # Remove this application if istio is already installed
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/istio-1-3-1-stack
+    name: istio-stack
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cluster-local-gateway-1-3-1
+    name: cluster-local-gateway
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/istio
+    name: istio
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/add-anonymous-user-filter
+    name: add-anonymous-user-filter
+  # application
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: application/v3
+    name: application
+  # bootstrap
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/bootstrap
+    name: bootstrap
+  # cert-manager
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cert-manager-crds
+    name: cert-manager-crds
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cert-manager-kube-system-resources
+    name: cert-manager-kube-system-resources
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/cert-manager
+    name: cert-manager
+  # Tekton
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: tektoncd/tektoncd-install/base
+    name: tektoncd-install
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: tektoncd/tektoncd-dashboard/base
+    name: tektoncd-dashboard
+  # Kubeflow components
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/admission-webhook
+    name: admission-webhook
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/profile-control-plane
+    name: kubeflow-apps
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/metadata
+    name: metadata
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/katib
+    name: katib
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/kfp-tekton
+    name: kfp-tekton
+  # Default on IBM Cloud is Kubeflow Pipelines with Tekton. Switch the above kfp-tekton to
+  # the below applications if you want to
+  # run Kubeflow Pipelines with Argo
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/argo
+  #   name: argo
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/kfp-argo
+  #   name: kfp-argo
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/notebooks
+    name: notebooks
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/pytorch-job
+    name: pytorch-job
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/tf-job
+    name: tf-job
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: metacontroller/base
+    name: metacontroller
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: knative/installs/generic
+    name: knative
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: kfserving/installs/generic
+    name: kfserving
+  # Spartakus is a separate applications so that kfctl can remove it
+  # to disable usage reporting
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: stacks/ibm/application/spartakus
+    name: spartakus
+  # Optional applications: Uncomment the following lines if you want to run Seldon or Spark on IBM Cloud.
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/seldon-core-operator
+  #   name: seldon-core-operator
+  # - kustomizeConfig:
+  #     repoRef:
+  #       name: manifests
+  #       path: stacks/ibm/application/spark-operator
+  #   name: spark-operator
+  repos:
+  - name: manifests
+    uri: https://github.com/kubeflow/manifests/archive/v1.2-branch.tar.gz
+  version: v1.2-branch

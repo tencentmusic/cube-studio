@@ -1,0 +1,44 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: aws-fsx-csi-driver
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aws-fsx-csi-driver
+      app.kubernetes.io/instance: aws-fsx-csi-driver-v1.0.0
+      app.kubernetes.io/managed-by: kfctl
+      app.kubernetes.io/component: aws-fsx-csi-driver
+      app.kubernetes.io/part-of: kubeflow
+      app.kubernetes.io/version: v1.0.0
+  componentKinds:
+  - group: apps
+    kind: Deployment
+  - group: apps
+    kind: DaemonSet
+  - group: storage
+    kind: CSIDriver
+  - group: core
+    kind: ServiceAccount
+  - group: rbac
+    kind: ClusterRoleBinding
+  - group: rbac
+    kind: ClusterRole
+  descriptor:
+    type: aws-efs-csi-driver
+    version: v0.3.0
+    description: The Amazon FSx for Lustre Container Storage Interface (CSI) driver provides a CSI interface that allows Amazon EKS clusters to manage the lifecycle of Amazon FSx for Lustre file systems.
+    maintainers:
+    - name: Jiaxin Shan
+      email: shjiaxin@amazon.com
+    owners:
+    - name: Jiaxin Shan
+      email: shjiaxin@amazon.com
+    keywords:
+     - aws
+     - kubeflow
+    links:
+    - description: About
+      url: https://github.com/kubernetes-sigs/aws-fsx-csi-driver
+  addOwnerRef: true
+

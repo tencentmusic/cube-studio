@@ -1,0 +1,41 @@
+apiVersion: dns.cnrm.cloud.google.com/v1beta1
+kind: DNSManagedZone
+metadata:
+  name: name-gcr # {"$kpt-set":"name-gcr"}
+spec:
+  description: "private zone for GCR.io"
+  dnsName: "gcr.io."
+  visibility: private
+  privateVisibilityConfig:
+    networks:
+    - networkRef:
+        name: name # {"$kpt-set":"name"}
+---
+apiVersion: dns.cnrm.cloud.google.com/v1beta1
+kind: DNSRecordSet
+metadata:
+  name: name-gcr-cname # {"$kpt-set":"name-gcr-cname"}
+spec:
+  name: "*.gcr.io."
+  type: "CNAME"
+  ttl: 300
+  managedZoneRef:
+    name: name-gcr # {"$kpt-set":"name-gcr"}
+  rrdatas:
+  - "gcr.io."
+---
+apiVersion: dns.cnrm.cloud.google.com/v1beta1
+kind: DNSRecordSet
+metadata:
+  name: name-gcr-a # {"$kpt-set":"name-gcr-a"}
+spec:
+  name: "gcr.io."
+  type: "A"
+  ttl: 300
+  managedZoneRef:
+    name: name-gcr # {"$kpt-set":"name-gcr"}
+  rrdatas:
+  - "199.36.153.4"
+  - "199.36.153.5"
+  - "199.36.153.6"
+  - "199.36.153.7"

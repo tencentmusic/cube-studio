@@ -1,0 +1,176 @@
+# 通过vs代理访问其他的服务，包括katib、pipline,argp,minio,grafana等
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: infra-kubeflow-dashboard
+  namespace: infra
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - '*'    # 管理平台的域名
+  http:
+  - route:
+    - destination:
+        host: kubeflow-dashboard.infra.svc.cluster.local
+        port:
+          number: 80
+---
+# 通过vs代理访问其他的服务，包括katib、pipline,argp,minio,grafana等
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: kubeflow-center
+  namespace: kubeflow
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - '*'    # 管理平台的域名
+  http:
+  - match:
+    - uri:
+        prefix: /minio/
+    rewrite:
+      uri: /minio/
+    route:
+    - destination:
+        host: minio-service.kubeflow.svc.cluster.local
+        port:
+          number: 9000
+    corsPolicy:
+      allowOrigin:
+      - '*'
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - '*'
+
+  - match:
+    - uri:
+        prefix: /katib/
+    rewrite:
+      uri: /katib/
+    route:
+    - destination:
+        host: katib-ui.kubeflow.svc.cluster.local
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigin:
+      - '*'
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - '*'
+  - match:
+    - uri:
+        prefix: /pipeline/
+    rewrite:
+      uri: /pipeline/
+    route:
+    - destination:
+        host: ml-pipeline-ui.kubeflow.svc.cluster.local
+        port:
+          number: 80
+      headers:
+        response:
+          add:
+            Access-Control-Allow-Origin: "*"
+            Access-Control-Allow-Methods: "*"
+            Access-Control-Allow-Headers: "*"
+            Access-Control-Allow-Credentials: "true"
+    corsPolicy:
+      allowOrigin:
+      - '*'
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - '*'
+  - match:
+    - uri:
+        prefix: /argo/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: argo-ui.kubeflow.svc.cluster.local
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigin:
+      - '*'
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - '*'
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: kube-system-k8s-dashboard-cluster
+  namespace: kube-system
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - uri:
+        prefix: /k8s/dashboard/cluster/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: kubernetes-dashboard-cluster.kube-system.svc.cluster.local
+        port:
+          number: 9090
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: kube-system-k8s-dashboard-user1
+  namespace: kube-system
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - uri:
+        prefix: /k8s/dashboard/pipeline/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: kubernetes-dashboard-user1.kube-system.svc.cluster.local
+        port:
+          number: 9090
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: monitoring-grafana
+  namespace: monitoring
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - uri:
+        prefix: /grafana/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: grafana.monitoring.svc.cluster.local
+        port:
+          number: 8080

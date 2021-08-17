@@ -1,0 +1,24 @@
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMServiceAccount
+metadata:
+  name: NAME-cnrm-system # {"$kpt-set":"cnrm-system-sa"}
+spec:
+  displayName: Service account for CNRM
+---
+# TODO(jlewi): anthoscli 0.2.4 doesn't support IAMPolicyMember except for projects.
+# As soon as it supports WI we should witch to that.
+# Using IAMPolicy on the cnrm-system service account should be ok
+# because this should be the only policy we set.
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicy
+metadata:
+  name: NAME-cnrm-system-wi # {"$kpt-set":"cnrm-system-wi"}
+spec:
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1alpha1
+    kind: IAMServiceAccount
+    name: NAME-cnrm-system # {"$kpt-set":"cnrm-system-sa"}
+  bindings:
+  - role: roles/iam.workloadIdentityUser
+    members:
+    - serviceAccount:PROJECT.svc.id.goog[cnrm-system/cnrm-controller-manager] # {"$kpt-set":"cnrm-wi"}

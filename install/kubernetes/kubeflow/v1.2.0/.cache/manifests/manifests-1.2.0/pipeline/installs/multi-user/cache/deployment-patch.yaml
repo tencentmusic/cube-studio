@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-server
+spec:
+  template:
+    spec:
+      containers:
+      - name: server
+        env:
+          - name: NAMESPACE_TO_WATCH
+            value: ''
+            valueFrom: null

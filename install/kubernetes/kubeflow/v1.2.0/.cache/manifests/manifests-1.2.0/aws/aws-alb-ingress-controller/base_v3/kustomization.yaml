@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+commonLabels:
+  app: aws-alb-ingress-controller
+  kustomize.component: aws-alb-ingress-controller
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- literals:
+  - cluster-name=test
+  name: aws-alb-ingress-controller-config
+images:
+- name: docker.io/amazon/aws-alb-ingress-controller
+  newName: docker.io/amazon/aws-alb-ingress-controller
+  newTag: v1.1.5
+resources:
+- ../base/cluster-role.yaml
+- ../base/cluster-role-binding.yaml
+- ../base/deployment.yaml
+- ../base/service-account.yaml
+- ../overlays/application/application.yaml
+patchesStrategicMerge:
+- deployment_patch.yaml

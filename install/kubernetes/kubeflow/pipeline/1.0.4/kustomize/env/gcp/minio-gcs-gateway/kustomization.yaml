@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- minio-gcs-gateway-deployment.yaml
+- minio-gcs-gateway-sa.yaml
+- minio-gcs-gateway-service.yaml
+
+secretGenerator:
+- name: mlpipeline-minio-artifact
+  env: minio-artifact-secret.env
+generatorOptions:
+  # mlpipeline-minio-artifact needs to be referred by exact name
+  disableNameSuffixHash: true

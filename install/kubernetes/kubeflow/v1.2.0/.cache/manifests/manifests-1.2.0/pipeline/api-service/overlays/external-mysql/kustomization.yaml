@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- ../../base
+patchesStrategicMerge:
+- config-map.yaml
+configMapGenerator:
+- name: pipeline-external-mysql-parameters
+  envs:
+  - params.env
+generatorOptions:
+  disableNameSuffixHash: true
+vars:
+- name: mysqlHost
+  objref:
+    kind: ConfigMap
+    name: pipeline-external-mysql-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.mysqlHost
+- name: mysqlUser
+  objref:
+    kind: ConfigMap
+    name: pipeline-external-mysql-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.mysqlUser
+- name: mysqlPassword
+  objref:
+    kind: ConfigMap
+    name: pipeline-external-mysql-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.mysqlPassword
+configurations:
+- params.yaml

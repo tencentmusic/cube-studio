@@ -1,0 +1,143 @@
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-cloudbuild # {"$kpt-set":"name-user-cloudbuild"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/cloudbuild.builds.editor
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-viewer # {"$kpt-set":"name-user-viewer"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/viewer
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-source # {"$kpt-set":"name-user-source"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/source.admin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-storage # {"$kpt-set":"name-user-storage"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/storage.admin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-bigquery # {"$kpt-set":"name-user-bigquery"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/bigquery.admin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-dataflow # {"$kpt-set":"name-user-dataflow"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/dataflow.admin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-ml # {"$kpt-set":"name-user-ml"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/ml.admin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-dataproc # {"$kpt-set":"name-user-dataproc"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/dataproc.editor
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-cloudsql # {"$kpt-set":"name-user-cloudsql"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/cloudsql.admin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-logging # {"$kpt-set":"name-user-logging"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/logging.logWriter
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-metricwriter # {"$kpt-set":"name-user-metricwriter"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/monitoring.metricWriter
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: name-user-monitoringviewer # {"$kpt-set":"name-user-monitoringviewer"}
+spec:
+  member: serviceAccount:name-user@project-id.iam.gserviceaccount.com # {"$kpt-set":"user-service-account"}
+  role: roles/monitoring.viewer
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/project-id # {"$kpt-set":"projects"}

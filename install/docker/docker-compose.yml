@@ -1,0 +1,84 @@
+version: '3'
+services:
+  redis:
+    image: bitnami/redis:4.0.14
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: admin
+    ports:
+      - "6379:6379"
+
+  myapp:
+    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01
+    restart: on-failure   # on-failure  unless-stopped
+    command: ['bash','-c','/entrypoint.sh']   # 生产模式
+    environment:
+      STAGE: 'dev'
+      REDIS_HOST: 'host.docker.internal'
+      REDIS_PORT: '6379'
+      REDIS_PASSWORD: admin
+      HOST: 127.0.0.1
+      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
+      ENVIRONMENT: DEV
+      GPU_TYPE: NVIDIA
+      KUBECONFIG: /home/myapp/kubeconfig/dev-config
+
+    ports:
+      - "80:80"
+    depends_on:
+      - redis
+    volumes:
+      - ../../myapp/:/home/myapp/myapp/
+      - ./file:/pvc
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./config.py:/home/myapp/myapp/config.py
+      - ./kubeconfig:/home/myapp/kubeconfig
+
+
+
+#  beat:
+#    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01
+#    restart: "no"
+#    command: ["bash","-c","celery beat --app=myapp.tasks.celery_app:celery_app --loglevel=info"]
+#    shm_size: '100gb'
+#    environment:
+#      REDIS_HOST: 'host.docker.internal'
+#      REDIS_PORT: '6379'
+#      REDIS_PASSWORD: admin
+#      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/myapp?charset=utf8'
+##      MYSQL_SERVICE: 'mysql+pymysql://root:admin@9.138.247.186:8081/myapp?charset=utf8'
+#      ENVIRONMENT: DEV
+#    depends_on:
+#      - redis
+#    volumes:
+#      - ../../myapp/:/home/myapp/myapp/
+#      - ./file:/pvc
+#      - ./entrypoint.sh:/entrypoint.sh
+#      - ./config.py:/home/myapp/myapp/config.py
+#      - ./kubeconfig:/home/myapp/kubeconfig
+##
+#
+##
+#
+#  worker:
+#    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01
+#    restart: unless-stopped
+#    command: ["bash","-c","celery worker --app=myapp.tasks.celery_app:celery_app --loglevel=info --pool=prefork -Ofair -c 4"]
+#    environment:
+#      REDIS_HOST: 'host.docker.internal'
+#      REDIS_PORT: '6379'
+#      REDIS_PASSWORD: admin
+#      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/myapp?charset=utf8'
+##      MYSQL_SERVICE: 'mysql+pymysql://root:admin@9.138.247.186:8081/myapp?charset=utf8'
+#      ENVIRONMENT: DEV
+#    depends_on:
+#      - redis
+#    volumes:
+#      - ../../myapp/:/home/myapp/myapp/
+#      - ./file:/pvc
+#      - ./entrypoint.sh:/entrypoint.sh
+#      - ./config.py:/home/myapp/myapp/config.py
+#      - ./kubeconfig:/home/myapp/kubeconfig
+#
+
+

@@ -1,0 +1,58 @@
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeNetwork
+metadata:
+  name: name # {"$kpt-set":"name"}
+spec:
+  routingMode: GLOBAL
+  autoCreateSubnetworks: false
+  deleteDefaultRoutesOnCreate: true
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeSubnetwork
+metadata:
+  name: name # {"$kpt-set":"name"}
+spec:
+  ipCidrRange: 10.10.10.0/24
+  region: REGION # {"$kpt-set":"gcloud.compute.region"}
+  description: kubeflow private subnet
+  privateIpGoogleAccess: true
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  logConfig:
+    aggregationInterval: INTERVAL_10_MIN
+    flowSampling: 0.5
+    metadata: INCLUDE_ALL_METADATA
+  secondaryIpRange:
+  - ipCidrRange: 10.10.11.0/24
+    rangeName: services
+  - ipCidrRange: 10.1.0.0/16
+    rangeName: pods
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeRoute
+metadata:
+  name: name-google-apis # {"$kpt-set":"name-google-apis"}
+spec:
+  destRange: 199.36.153.4/30
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  nextHopGateway: default-internet-gateway
+  priority: 1000
+---
+# We need a default internet route in order to allow outbound internet access using CloudNat
+# Without outbound internet access ISTIO will be unable to download the
+# jwks keys. In this case you can manually set the jwks keys in the ISTIO policy
+# but you would have to manually rotate them as they expire.
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeRoute
+metadata:
+  name: name-internet # {"$kpt-set":"name-internet"}
+spec:
+  description: "internet-route for IAP JWKS"
+  destRange: 0.0.0.0/0
+  networkRef:
+    name: name # {"$kpt-set":"name"}
+  # Important this must be higher priority then the Google APIs route
+  # because otherwise we will end up trying to route calls to google APIs over public internet and we will have problems.
+  priority: 1100
+  nextHopGateway: default-internet-gateway

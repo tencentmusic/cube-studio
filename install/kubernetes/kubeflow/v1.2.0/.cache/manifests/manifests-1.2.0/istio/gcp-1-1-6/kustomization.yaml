@@ -1,0 +1,8 @@
+# This packacge only installs ISTIO; not Kubeflwo specific resources (E.g gateways for Kubeflow)
+# Installs ISTIO 1-1-6
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: istio-system
+resources:
+- ../istio-crds/base
+- ../istio-install/base

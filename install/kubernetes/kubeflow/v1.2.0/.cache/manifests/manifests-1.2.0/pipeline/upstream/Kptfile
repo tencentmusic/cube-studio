@@ -1,0 +1,11 @@
+apiVersion: kpt.dev/v1alpha1
+kind: Kptfile
+metadata:
+    name: upstream
+upstream:
+    type: git
+    git:
+        commit: b604c6171244cc1cd80bfdc46248eaebf5f985d6
+        repo: https://github.com/kubeflow/pipelines
+        directory: /manifests/kustomize
+        ref: 1.0.4

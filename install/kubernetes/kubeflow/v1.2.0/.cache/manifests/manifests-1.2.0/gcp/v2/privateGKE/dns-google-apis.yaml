@@ -1,0 +1,41 @@
+apiVersion: dns.cnrm.cloud.google.com/v1beta1
+kind: DNSManagedZone
+metadata:
+  name: name-goog-apis # {"$kpt-set":"name-goog-apis"}
+spec:
+  description: "private zone for Google APIs"
+  dnsName: "googleapis.com."
+  visibility: private
+  privateVisibilityConfig:
+    networks:
+    - networkRef:
+        name: name # {"$kpt-set":"name"}
+---
+apiVersion: dns.cnrm.cloud.google.com/v1beta1
+kind: DNSRecordSet
+metadata:
+  name: name-goog-cname # {"$kpt-set":"name-goog-cname"}
+spec:
+  name: "*.googleapis.com."
+  type: "CNAME"
+  ttl: 300
+  managedZoneRef:
+    name: name-goog-apis # {"$kpt-set":"name-goog-apis"}
+  rrdatas:
+  - "restricted.googleapis.com."
+---
+apiVersion: dns.cnrm.cloud.google.com/v1beta1
+kind: DNSRecordSet
+metadata:
+  name: name-goog-a # {"$kpt-set":"name-goog-a"}
+spec:
+  name: "restricted.googleapis.com."
+  type: "A"
+  ttl: 300
+  managedZoneRef:
+    name: name-goog-apis # {"$kpt-set":"name-goog-apis"}
+  rrdatas:
+  - "199.36.153.4"
+  - "199.36.153.5"
+  - "199.36.153.6"
+  - "199.36.153.7"

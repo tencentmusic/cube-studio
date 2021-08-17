@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-pipeline-ui-configmap
+data:
+   # Temporary workarounds:
+   # 1. Using default-editor because default-viewer isn't bound to workload identity
+   viewer-pod-template.json:  |-
+    {
+        "spec": {
+            "serviceAccountName": "default-editor"
+        }
+    }

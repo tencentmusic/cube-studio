@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+__pycache__
+install/docker/file
+myapp/static/file
+myapp/test
+/myapp/static/appbuilder/vison/*
+/myapp/static/appbuilder/mnt
+/myapp/static/appbuilder/assets/

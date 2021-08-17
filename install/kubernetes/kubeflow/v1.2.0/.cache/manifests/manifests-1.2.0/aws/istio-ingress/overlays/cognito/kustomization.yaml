@@ -1,0 +1,40 @@
+bases:
+- ../../base
+patchesStrategicMerge:
+- ingress.yaml
+configMapGenerator:
+- name: istio-ingress-cognito-parameters
+  envs:
+  - params.env
+vars:
+- name: CognitoUserPoolArn
+  objref:
+    kind: ConfigMap
+    name: istio-ingress-cognito-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.CognitoUserPoolArn
+- name: CognitoAppClientId
+  objref:
+    kind: ConfigMap
+    name: istio-ingress-cognito-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.CognitoAppClientId
+- name: CognitoUserPoolDomain
+  objref:
+    kind: ConfigMap
+    name: istio-ingress-cognito-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.CognitoUserPoolDomain
+- name: certArn
+  objref:
+    kind: ConfigMap
+    name: istio-ingress-cognito-parameters
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.certArn
+namespace: istio-system
+configurations:
+- params.yaml

@@ -1,0 +1,20 @@
+# This is an example of a kustomize package a user
+# might create to kustomize it on GCP
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+generatorOptions:
+  disableNameSuffixHash: true
+resources:
+# Users start by inheriting the gcp stack and then customizing it
+- ../../gcp
+patchesStrategicMerge:
+# Patch in modifications to the global config
+- kubeflow-config.yaml
+configMapGenerator:    
+- name: jupyter-web-app-config
+  # TODO(jlewi): I think merge only applies to the keys but not the
+  # contents of the file; so the entire contents of the file are replaced.
+  behavior: merge
+  files:
+  - configs/spawner_ui_config.yaml

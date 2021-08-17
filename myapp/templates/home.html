@@ -1,0 +1,75 @@
+{% extends "appbuilder/base.html" %}
+
+{% block add_tail_js %}
+<script src="{{url_for('appbuilder.static',filename='js/marked.min.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="di-home">
+    {% for item in data %}
+    {% if item['type'] == 'title' %}
+    <!-- 标题栏 -->
+    <h3 class="title">{{ item['content'] }}</h3>
+    {% elif item['type'] == 'boxlist' %}
+    <!-- 盒子列表 -->
+    <ul class="boxlist">
+        {% if item['data'] == false %}
+        <li class="empty">
+            {% if item['msg'] %}
+            {{ item['msg'] }}
+            {% else %}
+            未查询到数据
+            {% endif %}
+        </li>
+        {% else %}
+        {% for litem in item['data'] %}
+        {% if litem['type'] == 'markdown' %}
+        <li data-open="{{ litem['open'] }}" data-url="{{ litem['url'] }}" class="box shadow markdown loading"
+            style="height: 10rem;background-size: 100% 100%;background-image: url({{ litem['cover'] }})">
+            {{ litem['content'] }}
+        </li>
+        {% elif litem['type'] == 'base' %}
+        <li data-open="{{ litem['open'] }}" data-url="{{ litem['url'] }}" class="box shadow"
+            style="background-image: url({{ litem['cover'] }})">
+            <h5 class="title">{{ litem['content'] }}</h5>
+        </li>
+        {% else %}
+        <li data-open="{{ litem['open'] }}" data-url="{{ litem['url'] }}" class="box shadow"
+            style="height: 10rem;background-size: 100% 100%;background-image: url({{ litem['cover'] }})">
+            {{ litem['content'] }}
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </ul>
+    {% endif %}
+    {% endfor %}
+</div>
+<script>
+    window.onload = function () {
+        document.querySelector('.di-home').addEventListener('click', function (e) {
+            const event = e || window.event;
+            const target = event.target || event.srcElement;
+            console.log(target.dataset.url);
+            if (target.nodeName === 'LI' && target.dataset.url) {
+                if (target.dataset.open)
+                {
+                    console.log(target.dataset.url);
+                    location.href = target.dataset.url;
+                }
+                else
+                {
+                  console.log(target.dataset.url);
+                  open(target.dataset.url);
+                }
+
+            }
+        });
+
+        document.querySelectorAll('.markdown').forEach(item => {
+            item.innerHTML = marked(item.textContent.trim())
+            item.classList.remove('loading');
+        });
+    }
+</script>
+{% endblock %}

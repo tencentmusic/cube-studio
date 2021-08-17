@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workflow-controller
+spec:
+  template:
+    spec:
+      containers:
+        - name: workflow-controller
+          image: gcr.io/ml-pipeline/workflow-controller:v2.12.9-license-compliance
+          args:
+            - --configmap
+            - workflow-controller-configmap
+            - --executor-image
+            - gcr.io/ml-pipeline/argoexec:v2.12.9-license-compliance
+          resources:
+            requests:
+              cpu: 100m
+              memory: 500Mi

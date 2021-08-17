@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+commonLabels:
+  app.kubernetes.io/name: sparkoperator
+  kustomize.component: spark-operator
+images:
+- name: gcr.io/spark-operator/spark-operator
+  newName: gcr.io/spark-operator/spark-operator
+  newTag: v1beta2-1.1.0-2.4.5
+kind: Kustomization
+namePrefix: spark-operator
+namespace: kubeflow
+resources:
+- spark-sa.yaml
+- cr-clusterrole.yaml
+- crb.yaml
+- deploy.yaml
+- operator-sa.yaml
+- role.yaml
+- rolebinding.yaml
+- sparkapplications.sparkoperator.k8s.io-crd.yaml
+- scheduledsparkapplications.sparkoperator.k8s.io-crd.yaml

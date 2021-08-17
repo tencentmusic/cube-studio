@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metadata-writer
+spec:
+  template:
+    spec:
+      containers:
+      - name: main
+        env:
+        - name: NAMESPACE_TO_WATCH
+          value: ''
+          valueFrom: null
