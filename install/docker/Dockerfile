@@ -1,6 +1,6 @@
 # docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01 -f install/docker/Dockerfile .
 
-FROM ai.tencentmusic.com/tme-public/myapp:base
+FROM ai.tencentmusic.com/tme-public/kubeflow-dashboard:base
 
 RUN apt-get update && apt-get install -y mysql-client zip
 

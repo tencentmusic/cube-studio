@@ -32,15 +32,15 @@ CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLAT
 
 ```
 构建基础镜像（包含基础环境）
-docker build -t ai.tencentmusic.com/tme-public/myapp:base -f install/docker/Dockerfile-base .
+docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ai.tencentmusic.com/tme-public/myapp:2021.10.01.1 -f install/docker/Dockerfile .
+docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01 -f install/docker/Dockerfile .
 ```
 
 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ai.tencentmusic.com/tme-public/myapp:2021.10.01.1
+docker pull ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -54,17 +54,22 @@ LOGIN_URL地址：登录重定向地址
 MYSQL_SERVICE：mysql的地址
 
 
-1) build fore
+1) init database
+```
+STAGE: 'init'
+docker-compose -f docker-compose.yml  up
+```
+2) build fore
 ```
 STAGE: 'build'
 docker-compose -f docker-compose.yml  up
 ```
-2) debug backend
+3) debug backend
 ```
 STAGE: 'dev'
 docker-compose -f docker-compose.yml  up
 ```
-3) Production
+4) Production
 ```
 STAGE: 'prod'
 docker-compose -f docker-compose.yml  up
