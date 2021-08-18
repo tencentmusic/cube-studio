@@ -264,6 +264,9 @@ class K8s():
             if 'status' in crd_object and 'finishedAt' in crd_object['status'] and crd_object['status']['finishedAt']:
                 finish_time = crd_object['status']['finishedAt'].replace('T', ' ').replace('Z', '')
                 finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+            elif 'status' in crd_object and 'completionTime' in crd_object['status'] and crd_object['status']['completionTime']:
+                finish_time = crd_object['status']['completionTime'].replace('T', ' ').replace('Z', '')
+                finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
 
             back_object={
                 "name":crd_object['metadata']['name'],
