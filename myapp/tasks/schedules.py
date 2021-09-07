@@ -42,7 +42,9 @@ from myapp.models.model_notebook import Notebook
 from myapp.security import (
     MyUser
 )
-
+from myapp.views.view_pipeline import run_pipeline,dag_to_pipeline
+from sqlalchemy.exc import InvalidRequestError,OperationalError
+from sqlalchemy import or_
 
 class Pusherror(Exception):
     pass
@@ -78,6 +80,7 @@ def delete_old_crd(object_info):
 
         with session_scope(nullpool=True) as dbsession:
             for crd_object in crd_objects:
+                print(crd_object['status'],crd_object['create_time'],crd_object['finish_time'])
 
                 # # 如果当前还在运行，上层workflow已停止，直接删除
                 # if crd_object['status']=='Running':
@@ -86,6 +89,7 @@ def delete_old_crd(object_info):
                     try:
                         # 如果workflow被删除了，则下面的也一并被删除
                         workflows = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).all()
+                        print(workflows)
                         for workflow in workflows:
                             if workflow.status=='Deleted':
                                 crd_names = k8s_client.delete_crd(group=object_info['group'],
@@ -93,10 +97,12 @@ def delete_old_crd(object_info):
                                                                   plural=object_info['plural'],
                                                                   namespace=crd_object['namespace'],
                                                                   name=crd_object['name'])
-                                db_crds = dbsession.query(model_map[object_info['plural']]).filter(model_map[object_info['plural']].name.in_(crd_names)).all()
-                                for db_crd in db_crds:
-                                    db_crd.status = 'Deleted'
-                                dbsession.commit()
+                                time.sleep(10)
+                                if model_map[object_info['plural']] in model_map:
+                                    db_crds = dbsession.query(model_map[object_info['plural']]).filter(model_map[object_info['plural']].name.in_(crd_names)).all()
+                                    for db_crd in db_crds:
+                                        db_crd.status = 'Deleted'
+                                    dbsession.commit()
                     except Exception as e:
                         print(e)
 
@@ -117,7 +123,7 @@ def delete_old_crd(object_info):
                                     push_message([username]+conf.get('ADMIN_USER','').split(','),'%s %s 创建时间 %s， 已经运行时间过久，注意修正'%(object_info['plural'],crd_object['name'],crd_object['create_time']))
                     else:
                         # 如果运行结束已经1天，就直接删除
-                        if crd_object['finish_time'] and crd_object['finish_time'] < (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'):
+                        if crd_object['finish_time'] and crd_object['finish_time'] < (datetime.datetime.now() - datetime.timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S'):
                             print('delete %s.%s namespace=%s, name=%s success' % (object_info['group'], object_info['plural'], crd_object['namespace'], crd_object['name']))
                             crd_names = k8s_client.delete_crd(group=object_info['group'], version=object_info['version'],
                                                               plural=object_info['plural'], namespace=crd_object['namespace'],
@@ -363,7 +369,7 @@ def alert_notebook_renew(task):
 
 
 # 推送微信消息
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def deliver_message(pipeline,message=''):
     receivers = pipeline.created_by.username.split(',')
     receivers = [receiver.strip() for receiver in receivers if receiver.strip()]
@@ -387,9 +393,10 @@ def deliver_message(pipeline,message=''):
         message = "pipeline: %s(%s) \nnamespace: %s\ncrontab: %s\ntime: %s\nfail start run:\n%s" % (pipeline.name,pipeline.describe, pipeline.namespace,pipeline.cron_time,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),message)
 
     push_message(receivers,message)
+    push_message(conf.get('ADMIN_USER').split(','),message)
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def save_history(dbsession,pipeline,message=''):
     schedule_history = RunHistory(
         created_on=datetime.datetime.now(),
@@ -405,7 +412,7 @@ def save_history(dbsession,pipeline,message=''):
 
 
 # 获取预计发送时间。控制发送频率不要太频繁
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def next_schedules(cron_time, start_at, stop_at, resolution=0):
     crons = croniter.croniter(cron_time, start_at - datetime.timedelta(seconds=1))
     previous = start_at - datetime.timedelta(days=1)
@@ -426,11 +433,18 @@ def next_schedules(cron_time, start_at, stop_at, resolution=0):
         previous = eta
 
 
-# 定时执行workflow调度任务
-@celery_app.task(name="task.make_run_task", bind=True)
-def make_run_task(task):
-    print('============= begin make run')
+# 用户每次配置定时，都会记录定时配置时间。作为start_time参考
+# start_time表示最近一次的定时调度配置生效，所有处理和检测的历史，都是在start_time 之后
+# 平台 worker 产生任务的进程 损坏情况恢复后  任务的时间变量模板
+# 只关注created之前的任务
+# 用户可以多次修改定时调度与否或者定时调度周期
+# 同一个pipeline手动定时两不冲突
 
+# 产生定时任务各个时间点的任务配置
+@celery_app.task(name="task.make_timerun_config", bind=True)
+def make_timerun_config(task):
+    print('============= begin make timerun config')
+    # 先产生所有要产生的任务。可能也会产生直接的任务。
     with session_scope(nullpool=True) as dbsession:
         try:
             resolution = conf.get("PIPELINE_TASK_CRON_RESOLUTION", 0) * 60  # 设置最小发送时间间隔，15分钟
@@ -440,68 +454,126 @@ def make_run_task(task):
 
             pipelines = dbsession.query(Pipeline).filter(Pipeline.schedule_type=='crontab').all()  # 获取model记录
             for pipeline in pipelines:  # 循环发起每一个调度
-                args = (pipeline.id,)  #
-                print('begin make run task %s'%pipeline.name)
-                print('时间基本信息: start %s, stop %s,resolution %ss,crontab %s,now %s'%(start_at,stop_at,resolution,pipeline.cron_time,datetime.datetime.now()))
 
+                print('begin make timerun config %s'%pipeline.name)
                 # 计算start_at和stop_at之间，每一个任务的调度时间，并保障最小周期不超过设定的resolution。
                 for eta in next_schedules(pipeline.cron_time, start_at, stop_at, resolution=resolution):  #
-                    # 异步应用任务，不然会阻塞后面的任务.如果时间点是当前时间以前，会直接立刻发送
-                    print('下一个执行时间点',eta,'当前时间点',datetime.datetime.now())
-                    run_workflow.apply_async(args=args, eta=eta)
+                    print('执行时间点', eta)
+                    execution_date = eta.strftime('%Y-%m-%d %H:%M:%S')
+                    if execution_date>pipeline.cronjob_start_time:
+                        # 要检查是否重复添加记录了
+                        exist_timeruns=dbsession.query(RunHistory).filter(RunHistory.pipeline_id==pipeline.id).filter(RunHistory.execution_date==execution_date).first()
+                        if not exist_timeruns:
+                            pipeline_file = dag_to_pipeline(pipeline=pipeline, dbsession=dbsession,execution_date=execution_date)  # 合成workflow
+                            # print('make pipeline file %s' % pipeline_file)
+                            if pipeline_file:
+                                schedule_history = RunHistory(
+                                    created_on=datetime.datetime.now(),
+                                    pipeline_id=pipeline.id,
+                                    pipeline_argo_id='',
+                                    pipeline_file=pipeline_file,
+                                    version_id='',
+                                    run_id='',
+                                    message='',
+                                    status='comed',
+                                    execution_date=execution_date
+                                )
+                                dbsession.add(schedule_history)
+                                dbsession.commit()
+                            else:
+                                push_message(conf.get('ADMIN_USER').split(','),'pipeline %s make config fail'%pipeline.name)
+
         except Exception as e:
             print(e)
 
 
 
 
-from myapp.views.view_pipeline import run_pipeline,dag_to_pipeline
-from sqlalchemy.exc import InvalidRequestError,OperationalError
 
-# 定时执行workflow调度任务
-@celery_app.task(name="task.run_workflow", bind=True)
-def run_workflow(task,pipeline_id):
-    run_run_workflow_fun(pipeline_id)
-
-@pysnooper.snoop()
-def run_run_workflow_fun(pipeline_id):
-    print('-------------------------')
+# 定时执行workflow调度任务   每5分钟
+@celery_app.task(name="task.upload_timerun", bind=True)
+def upload_timerun(task):
+    print('============= begin upload timerun ')
 
     with session_scope(nullpool=True) as dbsession:
-
         try:
-            pipeline = dbsession.query(Pipeline).get(pipeline_id)  # 获取model记录
-            if not pipeline:
-                print('pipeline not exit')
-                return
-            print('begin run workflow %s %s' % (pipeline.name, datetime.datetime.now()))
+            pipelines = dbsession.query(Pipeline).filter(Pipeline.schedule_type=='crontab').all()  # 获取model记录
+            for pipeline in pipelines:  # 循环发起每一个调度
+                start_time=pipeline.cronjob_start_time
+                # 获取当前pipeline  还没有处理的任务，其他的不关系
+                timeruns = dbsession.query(RunHistory)\
+                    .filter(RunHistory.pipeline_id==pipeline.id)\
+                    .filter(RunHistory.execution_date>start_time)\
+                    .filter(RunHistory.status == 'comed') \
+                    .order_by(RunHistory.execution_date.desc()).all()
 
-            pipeline.pipeline_file = dag_to_pipeline(pipeline,dbsession)  # 合成workflow
-            print('make pipeline file %s'%pipeline.pipeline_file)
-            # return
-            print('begin upload and run pipeline %s' % pipeline.name)
-            pipeline.version_id =''
-            pipeline.run_id = ''
-            pipeline_argo_id,version_id,run_id = run_pipeline(pipeline)
-            print('success upload and run pipeline %s,pipeline_argo_id %s, version_id %s,run_id %s ' % (pipeline.name,pipeline_argo_id,version_id,run_id))
-            pipeline.pipeline_id = pipeline_argo_id
-            pipeline.version_id = version_id
-            pipeline.run_id = run_id
-            dbsession.commit()  # 更新
-            deliver_message(pipeline)   # 没有操作事务
-            save_history(dbsession,pipeline)   # 操作事务
+                if timeruns:
+                    # 如果依赖过去运行历史的运行状态，只检测最早的一个timerun是否可以运行
+                    if pipeline.depends_on_past:
+                        timerun=timeruns[-1]   # 最早的一个应该调度的
+                        # 获取前一个定时调度的timerun
+                        pass_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id==pipeline.id).filter(RunHistory.execution_date>start_time).filter(RunHistory.execution_date<timerun.execution_date).order_by(RunHistory.execution_date.desc()).first()
+                        if not pass_run:
+                            upload_workflow(timerun, pipeline, dbsession)
+                        elif pass_run.status=='created':
+                            # 这里要注意处理一下 watch组件坏了，或者argo controller组件坏了的情况。以及误操作在workflow界面把记录删除了的情况
+                            workflow = dbsession.query(Workflow).filter(Workflow.labels.contains(pass_run.run_id)).first()
+                            if workflow:
+                                if workflow.status == 'Deleted' or workflow.status == 'Succeeded':
+                                    print('pass workflow success finish')
+                                    upload_workflow(timerun,pipeline,dbsession)
 
-        except Pusherror as e1:
-            save_history(dbsession,pipeline, str(e1))
+                    else:
+                        # 检测正在运行的workflow与限制是否符合
+                        running_workflows = pipeline.get_workflow()
+                        running_workflows = [running_workflow for running_workflow in running_workflows if running_workflow['status'] == 'Running' or running_workflow['status'] == 'Created' or running_workflow['status'] == 'Pending']
+                        if len(running_workflows) < pipeline.max_active_runs:
+                            more_run_num = pipeline.max_active_runs-len(running_workflows)
+                            for i in range(more_run_num):
+                                if len(timeruns)>i:
+                                    upload_workflow(timeruns[-i-1], pipeline, dbsession)
+
         except Exception as e:
-            print('kubeflow crontab run pipeline error:',e)
-            try:
-                deliver_message(pipeline,'kubeflow crontab run pipeline error:'+str(e))
-                save_history(dbsession,pipeline, str(e))
-            except Pusherror as e1:
-                save_history(dbsession,pipeline, str(e1))
-            except Exception as e2:
-                print(e2)
+            print(e)
+
+
+
+
+# 依据timerun配置发起调度
+# @pysnooper.snoop()
+def upload_workflow(timerun,pipeline,dbsession):
+
+    try:
+        print('begin upload workflow %s %s' % (pipeline.name, datetime.datetime.now()))
+        print('read pipeline file %s' % timerun.pipeline_file)
+        # return
+        print('begin upload and run pipeline %s' % pipeline.name)
+
+        pipeline_argo_id,version_id,run_id = run_pipeline(
+            pipeline_file=timerun.pipeline_file,
+            pipeline_name=pipeline.name,
+            kfp_host=pipeline.project.cluster.get('KFP_HOST'),
+            pipeline_argo_id=timerun.pipeline_argo_id,
+            pipeline_argo_version_id=timerun.version_id
+        )
+        print('success upload and run pipeline %s,pipeline_argo_id %s, version_id %s,run_id %s ' % (pipeline.name,pipeline_argo_id,version_id,run_id))
+        timerun.pipeline_argo_id = pipeline_argo_id
+        timerun.version_id = version_id
+        timerun.run_id = run_id
+        timerun.status='created'
+
+        dbsession.commit()  # 更新
+        deliver_message(pipeline)   # 没有操作事务
+
+    except Exception as e:
+        print('kubeflow cronjob run pipeline error:',e)
+        try:
+            deliver_message(pipeline,'kubeflow cronjob run pipeline error:'+str(e))
+        except Exception as e2:
+            print(e2)
+
+
+
 
 
 def delDir(dir, iteration=False):
@@ -565,7 +637,6 @@ def get_run_time(workflow):
 # 检查pipeline的运行时长
 @pysnooper.snoop()
 def check_pipeline_time():
-    from sqlalchemy import or_
 
     with session_scope(nullpool=True) as dbsession:
         try:
@@ -608,7 +679,6 @@ def check_pipeline_time():
 # 检查pipeline的运行资源
 @pysnooper.snoop()
 def check_pipeline_resource():
-    # from sqlalchemy import or_
 
     with session_scope(nullpool=True) as dbsession:
         try:
@@ -674,7 +744,7 @@ def check_pipeline_resource():
                     print(message)
                     if message:
                         # push_message(conf.get('ADMIN_USER','').split(','),message)
-                        push_admin(message)
+                        push_message(conf.get('ADMIN_USER').split(','),message)
                         push_message([work['user']],message)
 
         except Exception as e:
@@ -760,8 +830,8 @@ def watch_gpu(task):
 
 
 # if __name__ == '__main__':
-#     watch_gpu(task=None)
-#
+#     delete_tfjob(task=None)
+
 
 
 
