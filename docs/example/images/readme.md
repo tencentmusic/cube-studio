@@ -10,13 +10,6 @@
 	ln -s /usr/bin/pip3 /usr/bin/pip
 	pip install pip --upgrade
 	
-# 容器内使用git clone
-
-	git clone [http://userName:password@](http://userName:password@/)链接
-	示例
-	git clone http://pengluan:xxxx@git.code.oa.com/tme-data-infra/dev.git
-
-
 # ubuntu 容器基础工具的封装
 
 	RUN apt update
@@ -72,64 +65,3 @@
 		
 	cuda10.1-cuda10.0-cuda9.0-cudnn7.6
 		- ai.tencentmusic.com/tme-public/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base
-
-### tlinux
-	- mirrors.tencent.com/star_library/tlinux-64bit-v2.2.20170418:latest
-
-### python2.7
-##### cuda
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda9.0-cudnn7.6:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.4:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.6:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.1-cudnn7.6:latest
-##### ttensorflow
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.1-cudnn7.6-nccl2.5.6-ttf1.15.2.1:latest
-##### tensorflow
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda9.0-cudnn7.6-tf1.12:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.4-tf1.13:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.4-tf1.14:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.6-tf1.15:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.6-tf2.0:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.1-cudnn7.6-tf2.1:latest
-##### pytorch1.4
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.1-cudnn7.6-pytorch1.4-torchvision0.5:latest
-##### horovod
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda9.0-cudnn7.6-tf1.12-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.4-tf1.13-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.4-tf1.14-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.0-cudnn7.6-tf2.0-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.1-cudnn7.6-tf2.1-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python2.7-cuda10.1-cudnn7.6-pytorch1.4-torchvision0.5-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-
-### python3.6
-##### cuda
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda9.0-cudnn7.6:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.4:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.6:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6:latest
-##### cuda10.1-cuda10.0-cuda9.0-cudnn7.6
-	- csighub.tencentyun.com/tme-kubeflow/gpu:python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base
- 
-##### ttensorflow
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6-nccl2.5.6-ttf1.15.2.1:latest
-#### tensorflow
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda9.0-cudnn7.6-tf1.12:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.4-tf1.13:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.4-tf1.14:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.6-tf1.15:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.6-tf2.0:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6-tf2.1:latest
-##### pytorch
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6-pytorch1.4-torchvision0.5:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6-pytorch1.5-torchvision0.6:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6-pytorch1.6-torchvision0.7:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.2-cudnn8.0-pytorch1.6-torchvision0.7:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.2-cudnn8.0-pytorch1.5-torchvision0.6:latest
-##### horovod
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda9.0-cudnn7.6-tf1.12-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.4-tf1.13-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.4-tf1.14-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.0-cudnn7.6-tf2.0-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6-tf2.1-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-	- mirrors.tencent.com/star_library/g-tlinux2.2-python3.6-cuda10.1-cudnn7.6-pytorch1.4-torchvision0.5-openmpi4.0.3-nccl2.5.6-ofed4.6-horovod:latest
-
