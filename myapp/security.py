@@ -250,6 +250,7 @@ class MyUserRemoteUserModelView(UserModelView):
 
 
 
+
 from myapp.project import MyCustomRemoteUserView
 from myapp.project import Myauthdbview
 # myapp自带的角色和角色权限，自定义了各种权限
@@ -338,6 +339,8 @@ class MyappSecurityManager(SecurityManager):
         self.appbuilder.add_view_no_menu(self.resetmypasswordview())
         self.appbuilder.add_view_no_menu(self.userinfoeditview())
 
+
+
         if self.auth_type == AUTH_DB:
             self.user_view = self.userdbmodelview
             self.auth_view = self.authdbview()
@@ -372,7 +375,6 @@ class MyappSecurityManager(SecurityManager):
             category_icon="fa-cogs",
             category_label=_("Security"),
         )
-
         role_view = self.appbuilder.add_view(
             self.rolemodelview,
             "List Roles",
@@ -820,7 +822,7 @@ class MyappSecurityManager(SecurityManager):
     def get_create_pipeline_ids(self,session):
         from myapp.models.model_job import Pipeline
         if g.user:
-            pipeline_ids = session.query(Pipeline).filter(Pipeline.created_by_fk == User.get_user_id()).all()
+            pipeline_ids = session.query(Pipeline.id).filter(Pipeline.created_by_fk == User.get_user_id()).all()
             pipeline_ids = [pipeline_id[0] for pipeline_id in pipeline_ids]
             return pipeline_ids
         else:

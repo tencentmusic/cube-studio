@@ -16,12 +16,15 @@ import pysnooper
 class Prometheus():
 
     def __init__(self,host=''):
+        #  '/api/v1/query_range'    查看范围数据
+        #  '/api/v1/query'    瞬时数据查询
         self.host = host
+        self.query_path='http://%s/api/v1/query'%self.host
+        self.query_range_path = 'http://%s/api/v1/query_range' % self.host
 
 
-    # @pysnooper.snoop()
-    def get_metric(self,pod_name, namespace):
-        print(self.host)
+        # @pysnooper.snoop()
+    def get_resource_metric(self,pod_name, namespace):
         max_cpu = 0
         max_mem = 0
 
@@ -38,7 +41,7 @@ class Prometheus():
         print(params)
 
         try:
-            res = requests.get(url=self.host,params=params)
+            res = requests.get(url=self.query_range_path,params=params)
             metrics = json.loads(res.content.decode('utf8', 'ignore'))
             if metrics['status']=='success':
                 metrics=metrics['data']['result']
@@ -65,7 +68,7 @@ class Prometheus():
         print(params)
         try:
 
-            res = requests.get(url=self.host,params=params)
+            res = requests.get(url=self.query_range_path,params=params)
             metrics = json.loads(res.content.decode('utf8', 'ignore'))
             if metrics['status']=='success':
                 metrics=metrics['data']['result']
@@ -82,9 +85,47 @@ class Prometheus():
 
 
 
+
+    @pysnooper.snoop()
+    def get_machine_metric(self):
+
+        # 这个pod  30分钟内的最大值
+        metrics={
+            "pod_num":"sum(kubelet_running_pod_count)by (node)",
+            "request_mem":""
+        }
+        back = {}
+        for metric_name in metrics:
+            # print(mem_expr)
+            params={
+                'query': metrics[metric_name],
+                'timeout':"30s"
+            }
+            print(params)
+            back[metric_name]={}
+
+            try:
+                res = requests.get(url=self.query_path,params=params)
+                metrics = json.loads(res.content.decode('utf8', 'ignore'))
+                if metrics['status']=='success':
+                    metrics=metrics['data']['result']
+                    if metrics:
+                        for metric in metrics:
+                            node = metric['metric']['node']
+                            if ':' in node:
+                                node = node[:node.index(':')]
+                            value = metric['value'][1]
+                            back[metric_name][node]=int(value)
+
+
+            except Exception as e:
+                print(e)
+
+        return back
+
 # if __name__ == "__main__":
-#     prometheus = Prometheus('http://9.138.244.68:8080/api/v1/query_range')
-#     prometheus.get_metric('cupid-deepfm-v1-x7g9h-515457540','pipeline')
+#     prometheus = Prometheus('10.101.142.128:8081')
+#     prometheus.get_machine_metric()
 
 
 

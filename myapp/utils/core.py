@@ -55,7 +55,6 @@ from myapp.utils.dates import datetime_to_epoch, EPOCH
 import re
 import random
 
-
 logging.getLogger("MARKDOWN").setLevel(logging.INFO)
 
 PY3K = sys.version_info >= (3, 0)
@@ -1481,7 +1480,7 @@ def check_resource_cpu(resource_cpu,src_resource_cpu=None):
 
 import yaml
 # @pysnooper.snoop(watch_explode=())
-def merge_tfjob_experiment_template(worker_num,node_selector,volume_mount,image,image_secrets,workingDir,image_pull_policy,resource_memory,resource_cpu,command):
+def merge_tfjob_experiment_template(worker_num,node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,command):
     nodeSelector=None
     if node_selector and '=' in node_selector:
         nodeSelector = {}
@@ -1522,8 +1521,18 @@ def merge_tfjob_experiment_template(worker_num,node_selector,volume_mount,image,
                         "mountPath":mount
                     })
 
-
-
+    if hostAliases:
+        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
+        hostAliases = [
+            {
+                "ip": host.split(' ')[0],
+                "hostnames":[
+                    host.split(' ')[1]
+                ]
+            } for host in hostAliases
+        ]
+    else:
+        hostAliases=[]
 
     raw_json={
       "apiVersion": "kubeflow.org/v1",
@@ -1539,14 +1548,7 @@ def merge_tfjob_experiment_template(worker_num,node_selector,volume_mount,image,
                   "restartPolicy": "OnFailure",
                   "template": {
                       "spec": {
-                          "hostAliases": [
-                              {
-                                  "ip": "10.56.12.205",
-                                  "hostnames": [
-                                      "api.weixin.oa.com"
-                                  ]
-                              }
-                          ],
+                          "hostAliases": hostAliases,
                           "imagePullSecrets": image_secrets,
                           "nodeSelector": nodeSelector,
                           "volumes": volumes if volumes else None,
@@ -1613,7 +1615,7 @@ def merge_tfjob_experiment_template(worker_num,node_selector,volume_mount,image,
 
 import yaml
 # @pysnooper.snoop(watch_explode=())
-def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets,workingDir,image_pull_policy,resource_memory,resource_cpu,command):
+def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,command):
     nodeSelector=None
     if node_selector and '=' in node_selector:
         nodeSelector = {}
@@ -1653,6 +1655,18 @@ def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets
                         "mountPath":mount
                     })
 
+    if hostAliases:
+        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
+        hostAliases = [
+            {
+                "ip": host.split(' ')[0],
+                "hostnames":[
+                    host.split(' ')[1]
+                ]
+            } for host in hostAliases
+        ]
+    else:
+        hostAliases=[]
 
 
 
@@ -1666,14 +1680,7 @@ def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets
       "spec": {
           "template": {
               "spec": {
-                  "hostAliases": [
-                      {
-                          "ip": "10.56.12.205",
-                          "hostnames": [
-                              "api.weixin.oa.com"
-                          ]
-                      }
-                  ],
+                  "hostAliases": hostAliases,
                   "imagePullSecrets": image_secrets,
                   "restartPolicy": "Never",
                   "nodeSelector": nodeSelector,
@@ -1738,7 +1745,7 @@ def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets
 
 import yaml
 # @pysnooper.snoop(watch_explode=())
-def merge_pytorchjob_experiment_template(worker_num,node_selector,volume_mount,image,image_secrets,workingDir,image_pull_policy,resource_memory,resource_cpu,master_command,worker_command):
+def merge_pytorchjob_experiment_template(worker_num,node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,master_command,worker_command):
     nodeSelector=None
     if node_selector and '=' in node_selector:
         nodeSelector = {}
@@ -1783,6 +1790,18 @@ def merge_pytorchjob_experiment_template(worker_num,node_selector,volume_mount,i
                         "mountPath":mount
                     })
 
+    if hostAliases:
+        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
+        hostAliases = [
+            {
+                "ip": host.split(' ')[0],
+                "hostnames":[
+                    host.split(' ')[1]
+                ]
+            } for host in hostAliases
+        ]
+    else:
+        hostAliases=[]
 
 
 
@@ -1800,14 +1819,7 @@ def merge_pytorchjob_experiment_template(worker_num,node_selector,volume_mount,i
                   "restartPolicy": "OnFailure",
                   "template": {
                       "spec": {
-                          "hostAliases": [
-                              {
-                                  "ip": "10.56.12.205",
-                                  "hostnames": [
-                                      "api.weixin.oa.com"
-                                  ]
-                              }
-                          ],
+                          "hostAliases": hostAliases,
                           "imagePullSecrets": image_secrets,
                           "nodeSelector": nodeSelector,
                           "volumes": volumes if volumes else None,
@@ -1829,14 +1841,7 @@ def merge_pytorchjob_experiment_template(worker_num,node_selector,volume_mount,i
                   "restartPolicy": "OnFailure",
                   "template": {
                       "spec": {
-                          "hostAliases": [
-                              {
-                                  "ip": "10.56.12.205",
-                                  "hostnames": [
-                                      "api.weixin.oa.com"
-                                  ]
-                              }
-                          ],
+                          "hostAliases": hostAliases,
                           "imagePullSecrets": image_secrets,
                           "nodeSelector": nodeSelector,
                           "volumes": volumes if volumes else None,
@@ -1923,6 +1928,8 @@ def get_gpu(resource_gpu):
         print(e)
 
     return 0, 0
+
+
 
 # 按expand字段中index字段进行排序
 def sort_expand_index(items,dbsession):

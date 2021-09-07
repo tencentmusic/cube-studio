@@ -1,15 +1,14 @@
 # 生产部署
 
 基础环境依赖
+docker >= 19.03
+kubernetes >=1.18
+ssd ceph > 10T  挂载到每台机器的 /data/k8s/
+单机 磁盘>=1T   单机磁盘容量要求不大，仅做镜像容器的的存储
+控制端机器 cpu>=32 mem>=64G * 2
+任务端机器，根据需要自行配置
 
-- docker >= 19.03  
-- kubernetes >=1.18  
-- ssd ceph > 10T  挂载到每台机器的 /data/k8s/  
-- 单机 磁盘>=1T   单机磁盘容量要求不大，仅做镜像容器的的存储  
-- 控制端机器 cpu>=32 mem>=64G * 2  
-- 任务端机器，根据需要自行配置  
-
-本平台依赖k8s/kubeflow/prometheus/efk相关组件，请优先参数install/kubenetes/readme.md 部署依赖组件。
+本平台依赖k8s/kubeflow/prometheus/efk相关组件，请优先参考install/kubenetes/readme.md 部署依赖组件。
 
 
 # 本地调试
@@ -35,12 +34,12 @@ CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLAT
 docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01 -f install/docker/Dockerfile .
+docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.09.01 -f install/docker/Dockerfile .
 ```
 
 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01
+docker pull ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.09.01
 ```
 
 ## deploy myapp (docker-compose)
