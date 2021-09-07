@@ -1,0 +1,12 @@
+*.pyc
+app.db
+./tmp
+./build/*
+.idea
+env
+venv
+*.sublime*
+appbuilder1
+install/docker/kubeconfig
+
+

@@ -26,7 +26,7 @@ from myapp.exceptions import MyappException
 from wtforms import BooleanField, IntegerField, SelectField, StringField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MyCommaSeparatedListField,MySelectMultipleField
-from myapp.views.view_team import Project_Filter
+from myapp.views.view_team import Project_Filter,Project_Join_Filter
 from myapp.utils.py import py_k8s
 from flask_wtf.file import FileField
 import shlex
@@ -114,7 +114,7 @@ class NNI_ModelView_Base():
 
 
     add_form_query_rel_fields = {
-        "project": [["name", Project_Filter, 'org']]
+        "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
     edit_form_extra_fields={}
@@ -487,30 +487,6 @@ class NNI_ModelView_Base():
         volume_mount = "kubeflow-user-workspace(pvc):/mnt,/usr/share/zoneinfo/Asia/Shanghai(hostpath):/etc/localtime"
         labels={"nni": nni.name, "username": nni.created_by.username,'run-id':run_id}
 
-        # k8s_client.create_deployment(namespace=namespace,
-        #                       name=nni.name,
-        #                       replicas=1,
-        #                       labels=labels,
-        #                       command=command,
-        #                       args=None,
-        #                       volume_mount=volume_mount,
-        #                       working_dir='/mnt/%s'%nni.created_by.username,
-        #                       node_selector='cpu=true,train=true',
-        #                       resource_memory='2G',
-        #                       resource_cpu='2',
-        #                       resource_gpu='0',
-        #                       image_pull_policy='Always',
-        #                       image_pull_secrets=image_secrets,
-        #                       image=conf.get('NNI_IMAGES',json.loads(nni.job_json).get('job_worker_image')) ,
-        #                       hostAliases=None,
-        #                       env=None,
-        #                       privileged=False,
-        #                       accounts='nni',
-        #                       username=nni.created_by.username,
-        #                       ports=[8888]
-        #                       )
-
-
         k8s_client.create_debug_pod(
             namespace=namespace,
             name=nni.name,
@@ -519,14 +495,14 @@ class NNI_ModelView_Base():
             args=None,
             volume_mount=volume_mount,
             working_dir='/mnt/%s'%nni.created_by.username,
-            node_selector='cpu=true,train=true',
+            node_selector=nni.get_node_selector(),
             resource_memory='2G',
             resource_cpu='2',
             resource_gpu='0',
             image_pull_policy='Always',
             image_pull_secrets=image_secrets,
             image=conf.get('NNI_IMAGES',json.loads(nni.job_json).get('job_worker_image')) ,
-            hostAliases=None, # '10.101.140.98 cls-g9v4gmm0.ccs.tencent-cloud.com',
+            hostAliases=conf.get('HOSTALIASES',''),
             env=None,
             privileged=False,
             accounts='nni',
@@ -537,7 +513,7 @@ class NNI_ModelView_Base():
                            name=nni.name,
                            username=nni.created_by.username,
                            ports=[8888],
-                           selector={"app": nni.name, "user": nni.created_by.username}
+                           selector=labels
                            )
 
 
@@ -714,8 +690,10 @@ frameworkcontrollerConfig:
         flash('nni服务部署完成',category='success')
 
         # 执行启动命令
-        command = ['bash','-c','mkdir -p /nni/nni_node/static/nni/%s && cp -r /nni/nni_node/static/* /nni/nni_node/static/nni/%s/ ; nnictl create --config /mnt/%s/nni/%s/controll_template.yaml -p 8888 --foreground --url_prefix nni/%s'%(nni.name,nni.name,nni.created_by.username,nni.name,nni.name)]
+        # command = ['bash','-c','mkdir -p /nni/nni_node/static/nni/%s && cp -r /nni/nni_node/static/* /nni/nni_node/static/nni/%s/ ; nnictl create --config /mnt/%s/nni/%s/controll_template.yaml -p 8888 --foreground --url_prefix nni/%s'%(nni.name,nni.name,nni.created_by.username,nni.name,nni.name)]
         # command = ['bash', '-c','nnictl create --config /mnt/%s/nni/%s/controll_template.yaml -p 8888 --foreground' % (nni.created_by.username, nni.name)]
+        command = ['bash','-c','nnictl create --config /mnt/%s/nni/%s/controll_template.yaml -p 8888 --foreground --url_prefix nni/%s'%(nni.created_by.username,nni.name,nni.name)]
+
         print(command)
         self.deploy_nni_service(nni,command)
 
@@ -741,10 +719,11 @@ frameworkcontrollerConfig:
         if item.job_type=='TFJob':
             item.trial_spec=core.merge_tfjob_experiment_template(
                 worker_num=item.tf_worker_num,
-                node_selector=item.node_selector,
+                node_selector=item.get_node_selector(),
                 volume_mount=item.volume_mount,
                 image=item.tf_worker_image,
                 image_secrets = image_secrets,
+                hostAliases=conf.get('HOSTALIASES', ''),
                 workingDir=item.working_dir,
                 image_pull_policy=item.image_pull_policy,
                 resource_memory=item.resource_memory,
@@ -758,10 +737,11 @@ frameworkcontrollerConfig:
             }
         if item.job_type == 'Job':
             item.trial_spec=core.merge_job_experiment_template(
-                node_selector=item.node_selector,
+                node_selector=item.get_node_selector(),
                 volume_mount=item.volume_mount,
                 image=item.job_worker_image,
                 image_secrets=image_secrets,
+                hostAliases=conf.get('HOSTALIASES', ''),
                 workingDir=item.working_dir,
                 image_pull_policy=item.image_pull_policy,
                 resource_memory=item.resource_memory,
@@ -776,10 +756,11 @@ frameworkcontrollerConfig:
         if item.job_type == 'PyTorchJob':
             item.trial_spec=core.merge_pytorchjob_experiment_template(
                 worker_num=item.pytorch_worker_num,
-                node_selector=item.node_selector,
+                node_selector=item.get_node_selector(),
                 volume_mount=item.volume_mount,
                 image=item.pytorch_worker_image,
                 image_secrets=image_secrets,
+                hostAliases=conf.get('HOSTALIASES', ''),
                 workingDir=item.working_dir,
                 image_pull_policy=item.image_pull_policy,
                 resource_memory=item.resource_memory,

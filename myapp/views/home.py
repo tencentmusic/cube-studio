@@ -13,6 +13,8 @@ from flask import (
     Response,
     url_for,
 )
+from myapp.utils.py.py_k8s import K8s
+import datetime,json
 from flask import Flask, jsonify
 import pysnooper
 from apispec import yaml_utils
@@ -24,6 +26,11 @@ from myapp.views.base import BaseMyappView
 
 from flask_appbuilder import ModelView,AppBuilder,expose,BaseView,has_access
 from myapp import app, appbuilder
+
+resource_used = {
+    "check_time": None,
+    "data": {}
+}
 
 class Myapp(BaseMyappView):
     route_base='/myapp'
@@ -68,13 +75,13 @@ class Myapp(BaseMyappView):
             flash('当前pod状态：%s'%pod['status'],category='warning')
         data = {
             "url": pod_url,
-            "target": 'div.kd-logs-container',
-            "delay": 1000,
+            "target": 'div.kd-scroll-container',     #  kd-logs-container  :nth-of-type(0)
+            "delay": 2000,
             "loading":True,
             "currentHeight": 128
         }
         # 返回模板
-        if cluster_name == 'local':
+        if cluster_name == conf.get('ENVIRONMENT'):
             return self.render_template('link.html', data=data)
         else:
             return self.render_template('external_link.html', data=data)
@@ -82,10 +89,46 @@ class Myapp(BaseMyappView):
 
     @expose('/feature/check')
     def featureCheck(self):
+
         url = request.values.get("url", type=str, default=None)
         if '/myapp/home' in url:
-            pass
-            username=g.user.username
+
+            if not resource_used['check_time'] or resource_used['check_time']<(datetime.datetime.now()-datetime.timedelta(minutes=10)):
+                clusters = conf.get('CLUSTERS', {})
+                for cluster_name in clusters:
+                    cluster = clusters[cluster_name]
+                    k8s_client = K8s(cluster['KUBECONFIG'])
+
+                    all_node = k8s_client.get_node()
+                    all_node_json = {}
+                    for node in all_node:   # list 转dict
+                        ip = node['hostip']
+                        if 'cpu' in node['labels'] or 'gpu' in node['labels']:
+                            all_node_json[ip]=node
+                            all_node_json[ip]['used_memory'] = []
+                            all_node_json[ip]['used_cpu'] = []
+                            all_node_json[ip]['used_gpu'] = []
+
+                    # print(all_node_json)
+                    for namespace in ['jupyter', 'pipeline', 'katib', 'service']:
+                        all_pods = k8s_client.get_pods(namespace=namespace)
+                        for pod in all_pods:
+                            if pod['status'] == 'Running':
+                                # print(namespace,pod)
+                                all_node_json[pod['host_ip']]['used_memory'].append(pod['memory'])
+                                all_node_json[pod['host_ip']]['used_cpu'].append(pod['cpu'])
+                                all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
+                                # print(all_node_json[pod['host_ip']])
+
+                    for node in all_node_json:
+                        all_node_json[node]['used_memory'] = int(sum(all_node_json[node]['used_memory']))
+                        all_node_json[node]['used_cpu'] = int(sum(all_node_json[node]['used_cpu']))
+                        all_node_json[node]['used_gpu'] = int(sum(all_node_json[node]['used_gpu']))
+
+                    resource_used['data'][cluster_name]=all_node_json
+                resource_used['check_time']=datetime.datetime.now()
+
+            all_node_json = resource_used['data']
 
             # 数据格式说明 dict:
             # 'delay': Integer 延时隐藏 单位: 毫秒 0为不隐藏
@@ -95,18 +138,33 @@ class Myapp(BaseMyappView):
             # 'title': String 标题
             # 'content': String 内容html内容
             # /static/appbuilder/mnt/make_pipeline.mp4
-            # data = {
-            #     'content': '<video poster="/static/assets/images/ad/video-cover2.png" width="100%" height="auto" controls >\
-            #                     <source src="https://xx.xx.xx/make_job_template.mp4" type="video/mp4">\
-            #                 </video>',
-            #     'delay': 5000,
-            #     'hit': True,
-            #     'target': url,
-            #     'title': '开发定制一个任务模板',
-            #     'type': 'html',
-            # }
-            # # 返回模板
-            # return jsonify(data)
+            message = ''
+            td_html='<td style="border: 1px solid black;padding: 10px">%s</th>'
+            for cluster_name in all_node_json:
+                nodes = all_node_json[cluster_name]
+                for ip in nodes:
+                    message+="<tr>%s %s %s %s %s %s %s<tr>"%(
+                        td_html%cluster_name,
+                        td_html % nodes[ip]['labels'].get('org','public'),
+                        td_html%ip,
+                        td_html%('gpu/'+nodes[ip]['labels'].get('gpu-type','') if 'gpu' in nodes[ip]['labels'] else 'cpu'),
+                        td_html%("cpu:%s/%s"%(nodes[ip]['used_cpu'],nodes[ip]['cpu'])),
+                        td_html%("mem:%s/%s"%(nodes[ip]['used_memory'],nodes[ip]['memory'])),
+                        td_html%("gpu:%s/%s"%(nodes[ip]['used_gpu'],nodes[ip]['gpu']))
+                )
+
+            message=Markup(f'<table>%s</table>'%message)
+            # print(message)
+            data = {
+                'content': message,
+                'delay': 30000,
+                'hit': True,
+                'target': url,
+                'title': '当前负载',
+                'type': 'html',
+            }
+            # 返回模板
+            return jsonify(data)
         return jsonify({})
 
 

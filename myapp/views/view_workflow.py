@@ -77,7 +77,7 @@ class Crd_ModelView_Base():
 
     list_columns = ['name','namespace_url','create_time','status','username','stop']
     show_columns = ['name','namespace','create_time','status','annotations_html','labels_html','spec_html','status_more_html','info_json_html']
-    order_columns = ['create_time']
+    order_columns = ['id']
 
     # base_permissions = ['list','delete','show']
     # label_columns = {
@@ -149,6 +149,7 @@ class Crd_ModelView_Base():
                         #     db_crd.status = 'Deleted'
                         # db.session.commit()
                         item.status='Deleted'
+                        item.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         db.session.commit()
 
                 except Exception as e:
@@ -226,6 +227,7 @@ class Workflow_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
                 run_id=json.loads(workflow.labels).get("run-id",'')
             )
             workflow.status='Deleted'
+            workflow.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             db.session.commit()
         except Exception as e:
             print(e)
@@ -245,10 +247,10 @@ class Workflow_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
 
     label_title = '运行实例'
     datamodel = SQLAInterface(Workflow)
-    list_columns = ['name','pipeline_url', 'namespace_url', 'create_time', 'status', 'username', 'log','stop']
+    list_columns = ['name','project','pipeline_url', 'namespace_url', 'create_time','change_time', 'final_status','status', 'username', 'log','stop']
     crd_name = 'workflow'
 
-appbuilder.add_view(Workflow_ModelView,"运行实例",href='/workflow_modelview/list/?_flt_2_name=',icon = 'fa-tasks',category = '训练')
+appbuilder.add_view(Workflow_ModelView,"运行实例",href='/workflow_modelview/list/?_flt_2_name=&_flt_2_labels=',icon = 'fa-tasks',category = '训练')
 
 
 # 添加api

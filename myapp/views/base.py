@@ -92,6 +92,14 @@ def json_error_response(msg=None, status=500, stacktrace=None, payload=None, lin
         mimetype="application/json",
     )
 
+def json_response(message,status,result):
+    return jsonify(
+        {
+            "message":message,
+            "status":status,
+            "result":result
+        }
+    )
 
 def json_success(json_msg, status=200):
     return Response(json_msg, status=status, mimetype="application/json")
@@ -224,8 +232,12 @@ class MyappModelView(ModelView):
     conv = GeneralModelConverter(datamodel)
 
 
+
     # 配置增删改查页面标题
     def _init_titles(self):
+
+        self.help_url = conf.get('HELP_URL', {}).get(self.datamodel.obj.__tablename__, '') if self.datamodel else ''
+
         """
             Init Titles if not defined
         """
@@ -411,7 +423,7 @@ class MyappModelView(ModelView):
               raise MyappException('just creator can edit/delete ')
 
 
-    # @pysnooper.snoop(watch_explode=('aa','bb'))
+    # @pysnooper.snoop(watch_explode=('item'))
     def _edit(self, pk):
         """
             Edit function logic, override to implement different logic

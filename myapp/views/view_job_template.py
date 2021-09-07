@@ -195,7 +195,7 @@ class Job_Template_ModelView_Base():
             #     raise MyappException('images entrypoint not exist')
             all_host = {}
             all_rows = re.split('\r|\n',item.hostAliases)
-            all_rows = [all_row for all_row in all_rows if all_row]
+            all_rows = [all_row.strip() for all_row in all_rows if all_row.strip()]
             for row in all_rows:
                 hosts = row.split(' ')
                 hosts = [host for host in hosts if host]
@@ -253,7 +253,6 @@ class Job_Template_ModelView_Base():
 
 
     @expose("/run", methods=["POST"])
-    @pysnooper.snoop()
     def run(self):
         request_data = request.json
         job_template_id=request_data.get('job_template_id','')
@@ -337,7 +336,8 @@ class Job_Template_ModelView_Base():
                                            runner=g.user.username,
                                            uuid=uuid,
                                            pipeline_id='0',
-                                           pipeline_name='venus-task'
+                                           pipeline_name='venus-task',
+                                           cluster_name=conf.get('ENVIRONMENT')
                                            )
                 return des_str
 
@@ -345,7 +345,7 @@ class Job_Template_ModelView_Base():
             for global_env_key in global_envs:
                 env += global_env_key + '=' + global_envs[global_env_key] + "\n"
 
-
+            hostAliases=job_template.hostAliases+"\n"+conf.get('HOSTALIASES','')
             k8s.create_debug_pod(namespace,
                                  name=pod_name,
                                  labels={'run-rtx': g.user.username},
@@ -360,7 +360,7 @@ class Job_Template_ModelView_Base():
                                  image_pull_policy='Always',
                                  image_pull_secrets=[job_template.images.repository.hubsecret],
                                  image=job_template.images.name,
-                                 hostAliases=job_template.hostAliases,
+                                 hostAliases=hostAliases,
                                  env=env,
                                  privileged=job_template.privileged,
                                  accounts=job_template.accounts,
@@ -392,7 +392,6 @@ class Job_Template_ModelView_Base():
 
 
     @expose("/listen", methods=["POST"])
-    @pysnooper.snoop()
     def listen(self):
         request_data = request.json
         run_id = request_data.get('run_id', '').replace('_','-')

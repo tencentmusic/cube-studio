@@ -134,7 +134,6 @@ if conf.get("WTF_CSRF_ENABLED"):
 pessimistic_connection_handling(db.engine)
 
 cache = setup_cache(app, conf.get("CACHE_CONFIG"))
-tables_cache = setup_cache(app, conf.get("TABLE_NAMES_CACHE_CONFIG"))
 
 migrate = Migrate(app, db, directory=APP_DIR + "/migrations")
 

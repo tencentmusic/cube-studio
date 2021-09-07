@@ -3,8 +3,8 @@ from . import home
 from . import route
 from . import view_team
 from . import view_notebook
-# from . import view_job
 from . import view_images
+from . import view_docker
 from . import view_job_template
 from . import view_task
 from . import view_pipeline

@@ -205,39 +205,6 @@ class BaseTemplateProcessor:
         return template.render(kwargs)
 
 
-class PrestoTemplateProcessor(BaseTemplateProcessor):
-    """Presto Jinja context
-
-    The methods described here are namespaced under ``presto`` in the
-    jinja context as in ``SELECT '{{ presto.some_macro_call() }}'``
-    """
-
-    engine = "presto"
-
-    @staticmethod
-    def _schema_table(
-        table_name: str, schema: Optional[str]
-    ) -> Tuple[str, Optional[str]]:
-        if "." in table_name:
-            schema, table_name = table_name.split(".")
-        return table_name, schema
-
-    def latest_partition(self, table_name: str):
-        table_name, schema = self._schema_table(table_name, self.schema)
-        return self.database.db_engine_spec.latest_partition(
-            table_name, schema, self.database
-        )[1]
-
-    def latest_sub_partition(self, table_name, **kwargs):
-        table_name, schema = self._schema_table(table_name, self.schema)
-        return self.database.db_engine_spec.latest_sub_partition(
-            table_name=table_name, schema=schema, database=self.database, **kwargs
-        )
-
-
-class HiveTemplateProcessor(PrestoTemplateProcessor):
-    engine = "hive"
-
 
 template_processors = {}
 keys = tuple(globals().keys())

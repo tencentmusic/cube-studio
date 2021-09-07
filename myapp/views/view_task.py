@@ -273,7 +273,7 @@ class Task_ModelView_Base():
         if args_json_column:
             # 将一层嵌套的参数形式，改为多层嵌套的json形似
             des_merge_args = nest_once(args_json_column)
-            item.args=json.dumps(des_merge_args['args'])
+            item.args=json.dumps(des_merge_args.get('args',{}))
         # 如果是原始完成的args
         elif not item.args:
             item.args='{}'
@@ -286,6 +286,10 @@ class Task_ModelView_Base():
         item.name=item.name.replace('_','-')[0:54].lower()
         if item.job_template is None:
             raise MyappException("Job Template 为必选")
+
+        if not item.volume_mount:
+            item.volume_mount='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
+
         if item.job_template.volume_mount and item.job_template.volume_mount not in item.volume_mount:
             if item.volume_mount:
                 item.volume_mount += ","+item.job_template.volume_mount
@@ -423,99 +427,121 @@ class Task_ModelView_Base():
         return self.post_delete_redirect()
 
 
+    def run_pod(self,task,k8s_client,run_id,namespace,pod_name,image,working_dir,command,args):
+
+        # 模板中环境变量
+        task_env = task.job_template.env + "\n"
+
+        # 系统环境变量
+        task_env += 'KFJ_TASK_ID=' + str(task.id) + "\n"
+        task_env += 'KFJ_TASK_NAME=' + str(task.name) + "\n"
+        task_env += 'KFJ_TASK_NODE_SELECTOR=' + str(task.get_node_selector()) + "\n"
+        task_env += 'KFJ_TASK_VOLUME_MOUNT=' + str(task.volume_mount) + "\n"
+        task_env += 'KFJ_TASK_IMAGES=' + str(task.job_template.images) + "\n"
+        task_env += 'KFJ_TASK_RESOURCE_CPU=' + str(task.resource_cpu) + "\n"
+        task_env += 'KFJ_TASK_RESOURCE_MEMORY=' + str(task.resource_memory) + "\n"
+        task_env += 'KFJ_TASK_RESOURCE_GPU=' + str(task.resource_gpu.replace('+', '')) + "\n"
+        task_env += 'KFJ_PIPELINE_ID=' + str(task.pipeline_id) + "\n"
+        task_env += 'KFJ_RUN_ID=' + run_id + "\n"
+        task_env += 'KFJ_CREATOR=' + str(task.pipeline.created_by.username) + "\n"
+        task_env += 'KFJ_RUNNER=' + str(g.user.username) + "\n"
+        task_env += 'KFJ_PIPELINE_NAME=' + str(task.pipeline.name) + "\n"
+        task_env += 'KFJ_NAMESPACE=pipeline' + "\n"
+        task_env += 'GPU_TYPE=%s' % os.environ.get("GPU_TYPE", "NVIDIA") + "\n"
+
+        def template_str(src_str):
+            rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(src_str)
+            des_str = rtemplate.render(creator=task.pipeline.created_by.username,
+                                       datetime=datetime,
+                                       runner=g.user.username if g and g.user and g.user.username else task.pipeline.created_by.username,
+                                       uuid=uuid,
+                                       pipeline_id=task.pipeline.id,
+                                       pipeline_name=task.pipeline.name,
+                                       cluster_name=task.pipeline.project.cluster['NAME']
+                                       )
+            return des_str
+        # 全局环境变量
+        pipeline_global_env = template_str(task.pipeline.global_env.strip()) if task.pipeline.global_env else ''  # 优先渲染，不然里面如果有date就可能存在不一致的问题
+        pipeline_global_env = [env.strip() for env in pipeline_global_env.split('\n') if '=' in env.strip()]
+        for env in pipeline_global_env:
+            key, value = env[:env.index('=')], env[env.index('=') + 1:]
+            if key not in task_env:
+                task_env += key + '=' + value + "\n"
+
+        platform_global_envs = json.loads(
+            template_str(json.dumps(conf.get('GLOBAL_ENV', {}), indent=4, ensure_ascii=False)))
+        for global_env_key in platform_global_envs:
+            if global_env_key not in task_env:
+                task_env += global_env_key + '=' + platform_global_envs[global_env_key] + "\n"
+
+        volume_mount = task.volume_mount
+
+        resource_cpu = task.job_template.get_env('TASK_RESOURCE_CPU') if task.job_template.get_env('TASK_RESOURCE_CPU') else task.resource_cpu
+        resource_gpu = task.job_template.get_env('TASK_RESOURCE_GPU') if task.job_template.get_env('TASK_RESOURCE_GPU') else task.resource_gpu
+        resource_memory = task.job_template.get_env('TASK_RESOURCE_MEMORY') if task.job_template.get_env('TASK_RESOURCE_MEMORY') else task.resource_memory
+        hostAliases=conf.get('HOSTALIASES')
+        if task.job_template.hostAliases:
+            hostAliases+="\n"+task.job_template.hostAliases
+        k8s_client.create_debug_pod(namespace,
+                             name=pod_name,
+                             labels={"pipeline": task.pipeline.name, 'task': task.name, 'run-rtx': g.user.username,'run-id': run_id},
+                             command=command,
+                             args=args,
+                             volume_mount=volume_mount,
+                             working_dir=working_dir,
+                             node_selector=task.get_node_selector(), resource_memory=resource_memory,
+                             resource_cpu=resource_cpu, resource_gpu=resource_gpu,
+                             image_pull_policy=task.pipeline.image_pull_policy,
+                             image_pull_secrets=[task.job_template.images.repository.hubsecret],
+                             image=image,
+                             hostAliases=hostAliases,
+                             env=task_env, privileged=task.job_template.privileged,
+                             accounts=task.job_template.accounts, username=task.pipeline.created_by.username)
+
+
     # @event_logger.log_this
     @expose("/debug/<task_id>", methods=["GET", "POST"])
-    # @pysnooper.snoop()
     def debug(self,task_id):
         task = db.session.query(Task).filter_by(id=task_id).first()
+        if not g.user.is_admin() and task.job_template.created_by.username!=g.user.username:
+            flash('仅管理员或当前任务模板创建者，可启动debug模式', 'warning')
+            return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
+
+
         from myapp.utils.py.py_k8s import K8s
-        k8s = K8s(task.pipeline.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(task.pipeline.project.cluster['KUBECONFIG'])
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name="debug-"+task.pipeline.name.replace('_','-')+"-"+task.name.replace('_','-')
         pod_name=pod_name[:60]
-        pod = k8s.get_pods(namespace=namespace,pod_name=pod_name)
+        pod = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
         # print(pod)
         if pod:
             pod = pod[0]
         # 有历史非运行态，直接删除
         # if pod and (pod['status']!='Running' and pod['status']!='Pending'):
         if pod and pod['status'] == 'Succeeded':
-            k8s.delete_pods(namespace=namespace,pod_name=pod_name)
+            k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
             time.sleep(2)
             pod=None
         # 没有历史或者没有运行态，直接创建
         if not pod or pod['status']!='Running':
             run_id = "debug-" + str(uuid.uuid4().hex)
             command=['sh','-c','sleep 7200 && hour=`date +%H` && while [ $hour -ge 06 ];do sleep 3600;hour=`date +%H`;done']
-            # command = ['sh', '-c','sleep 7200']
-            task_env=task.job_template.env+"\n"
-            task_env += 'KFJ_TASK_ID='+str(task.id)+"\n"
-            task_env += 'KFJ_TASK_NAME=' + str(task.name) + "\n"
-            task_env += 'KFJ_TASK_NODE_SELECTOR=' + str(task.node_selector) + "\n"
-            task_env += 'KFJ_TASK_VOLUME_MOUNT=' + str(task.volume_mount) + "\n"
-            task_env += 'KFJ_TASK_IMAGES=' + str(task.job_template.images) + "\n"
-            task_env += 'KFJ_TASK_RESOURCE_CPU=' + str(task.resource_cpu) + "\n"
-            task_env += 'KFJ_TASK_RESOURCE_MEMORY=' + str(task.resource_memory) + "\n"
-            task_env += 'KFJ_TASK_RESOURCE_GPU=' + str(task.resource_gpu.replace('+','')) + "\n"
-            task_env += 'KFJ_PIPELINE_ID=' + str(task.pipeline_id) + "\n"
-            task_env += 'KFJ_RUN_ID=' + run_id + "\n"
-            task_env += 'KFJ_CREATOR=' + str(task.pipeline.created_by.username) + "\n"
-            task_env += 'KFJ_RUNNER=' + str(g.user.username) + "\n"
-            task_env += 'KFJ_PIPELINE_NAME=' + str(task.pipeline.name) + "\n"
-            task_env += 'KFJ_NAMESPACE=pipeline' + "\n"
-            task_env += 'GPU_TYPE=%s'%os.environ.get("GPU_TYPE", "NVIDIA") +"\n"
-
-
-            def template_str(src_str):
-                rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(src_str)
-                des_str = rtemplate.render(creator=task.pipeline.created_by.username,
-                                           datetime=datetime,
-                                           runner=g.user.username if g and g.user and g.user.username else task.pipeline.created_by.username,
-                                           uuid=uuid,
-                                           pipeline_id=task.pipeline.id,
-                                           pipeline_name =task.pipeline.name
-                                           )
-                return des_str
-
-            pipeline_global_env = template_str(task.pipeline.global_env.strip()) if task.pipeline.global_env else ''  # 优先渲染，不然里面如果有date就可能存在不一致的问题
-            pipeline_global_env = [env.strip() for env in pipeline_global_env.split('\n') if '=' in env.strip()]
-            for env in pipeline_global_env:
-                key, value = env[:env.index('=')], env[env.index('=') + 1:]
-                if key not in task_env:
-                    task_env += key + '=' + value + "\n"
-
-
-            platform_global_envs = json.loads(template_str(json.dumps(conf.get('GLOBAL_ENV', {}), indent=4, ensure_ascii=False)))
-            for global_env_key in platform_global_envs:
-                if global_env_key not in task_env:
-                    task_env += global_env_key +'=' + platform_global_envs[global_env_key] + "\n"
-
-            volume_mount = task.volume_mount
-
-
-            resource_cpu = task.job_template.get_env('TASK_RESOURCE_CPU') if task.job_template.get_env('TASK_RESOURCE_CPU') else task.resource_cpu
-            resource_gpu = task.job_template.get_env('TASK_RESOURCE_GPU') if task.job_template.get_env('TASK_RESOURCE_GPU') else task.resource_gpu
-            resource_memory = task.job_template.get_env('TASK_RESOURCE_MEMORY') if task.job_template.get_env('TASK_RESOURCE_MEMORY') else task.resource_memory
-
-            k8s.create_debug_pod(namespace,
-                                 name=pod_name,
-                                 labels={"pipeline":task.pipeline.name,'task':task.name,'run-rtx':g.user.username,'run-id':run_id},
-                                 command=command,
-                                 args=None,
-                                 volume_mount=volume_mount,
-                                 working_dir=task.working_dir if task.working_dir else task.job_template.workdir,
-                                 node_selector=task.node_selector,resource_memory= resource_memory,
-                                 resource_cpu=resource_cpu,resource_gpu=resource_gpu,
-                                 image_pull_policy=task.pipeline.image_pull_policy,
-                                 image_pull_secrets=[task.job_template.images.repository.hubsecret],
-                                 image= json.loads(task.args)['images'] if task.job_template.name==conf.get('CUSTOMIZE_JOB') else task.job_template.images.name,
-                                 hostAliases=task.job_template.hostAliases,
-                                 env=task_env,privileged=task.job_template.privileged,
-                                 accounts=task.job_template.accounts,username=task.pipeline.created_by.username)
+            self.run_pod(
+                task=task,
+                k8s_client=k8s_client,
+                run_id=run_id,
+                namespace=namespace,
+                pod_name=pod_name,
+                image=json.loads(task.args)['images'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else task.job_template.images.name,
+                working_dir='/mnt',
+                command=command,
+                args=None
+            )
 
         try_num=5
         while(try_num>0):
-            pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
+            pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
             # print(pod)
             if pod:
                 pod = pod[0]
@@ -543,12 +569,12 @@ class Task_ModelView_Base():
         print(pod_url)
         data = {
             "url": pod_url,
-            "target":'div.kd-scroll-container.ng-star-inserted',
-            "delay": 1000,
+            "target":'div.kd-scroll-container', #  'div.kd-scroll-container.ng-star-inserted',
+            "delay": 2000,
             "loading": True
         }
         # 返回模板
-        if cluster_name=='local':
+        if cluster_name==conf.get('ENVIRONMENT'):
             return self.render_template('link.html', data=data)
         else:
             return self.render_template('external_link.html', data=data)
@@ -559,11 +585,11 @@ class Task_ModelView_Base():
     def run_task(self,task_id):
         task = db.session.query(Task).filter_by(id=task_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s = K8s(task.pipeline.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(task.pipeline.project.cluster['KUBECONFIG'])
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name[:60]
-        pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
+        pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
             pod = pod[0]
@@ -571,13 +597,13 @@ class Task_ModelView_Base():
         if pod:
             run_id = pod['labels'].get("run-id", '')
             if run_id:
-                k8s.delete_workflow(all_crd_info=conf.get('CRD_INFO', {}), namespace=namespace, run_id=run_id)
+                k8s_client.delete_workflow(all_crd_info=conf.get('CRD_INFO', {}), namespace=namespace, run_id=run_id)
 
-            k8s.delete_pods(namespace=namespace, pod_name=pod_name)
+            k8s_client.delete_pods(namespace=namespace, pod_name=pod_name)
             delete_time = datetime.datetime.now()
             while pod:
                 time.sleep(2)
-                pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
+                pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
                 check_date = datetime.datetime.now()
                 if (check_date-delete_time).seconds>60:
                     flash("超时，请稍后重试",category='warning')
@@ -614,95 +640,28 @@ class Task_ModelView_Base():
                     ops_args.append('%s' % str(task_attr_name))
                     ops_args.append('%s' % str(task_args[task_attr_name]))  # 这里应该对不同类型的参数名称做不同的参数处理，比如bool型，只有参数，没有值
 
-            # job_template_args = json.loads(task.job_template.args) if task.job_template.args else {}
-            # for arg_name in task_args:
-            #     arg_type=''
-            #     for group in job_template_args:
-            #         for template_arg in job_template_args[group]:
-            #             if template_arg==arg_name:
-            #                 arg_type=job_template_args[group][template_arg].get('type','')
-            #                 break
-            #     arg_value = task_args[arg_name]
-            #     if arg_value:
-            #         args.append(arg_name)
-            #         if arg_type=='json':
-            #             args.append(json.dumps(arg_value,ensure_ascii=False))
-            #         else:
-            #             args.append(str(arg_value))
 
-
-            def template_str(src_str):
-                rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(src_str)
-                des_str = rtemplate.render(creator=task.pipeline.created_by.username,
-                                           datetime=datetime,
-                                           runner=g.user.username if g and g.user and g.user.username else task.pipeline.created_by.username,
-                                           uuid=uuid,
-                                           pipeline_id=task.pipeline.id,
-                                           pipeline_name=task.pipeline.name
-                                           )
-                return des_str
-
-            #
-            # global_args = template_str(task.pipeline.global_args.strip()) if task.pipeline.global_args else ''  # 优先渲染，不然里面如果有date就可能存在不一致的问题
-            # if global_args.strip():
-            #     global_args_arr = global_args.strip().split(' ')
-            #     global_args_arr = [arr for arr in global_args_arr if arr]
-            #     ops_args.extend(global_args_arr)
 
             # print(ops_args)
             run_id = "run-"+str(task.pipeline.id)+"-"+str(task.id)
-            # command = ['sh', '-c','sleep 7200']
-            task_env = task.job_template.env + "\n"
-            task_env += 'KFJ_TASK_ID=' + str(task.id) + "\n"
-            task_env += 'KFJ_TASK_NAME=' + str(task.name) + "\n"
-            task_env += 'KFJ_TASK_NODE_SELECTOR=' + str(task.node_selector) + "\n"
-            task_env += 'KFJ_TASK_VOLUME_MOUNT=' + str(task.volume_mount) + "\n"
-            task_env += 'KFJ_TASK_IMAGES=' + str(task.job_template.images) + "\n"
-            task_env += 'KFJ_TASK_RESOURCE_CPU=' + str(task.resource_cpu) + "\n"
-            task_env += 'KFJ_TASK_RESOURCE_MEMORY=' + str(task.resource_memory) + "\n"
-            task_env += 'KFJ_TASK_RESOURCE_GPU=' + str(task.resource_gpu.replace('+','')) + "\n"
-            task_env += 'KFJ_PIPELINE_ID=' + str(task.pipeline_id) + "\n"
-            task_env += 'KFJ_RUN_ID=' + run_id + "\n"
-            task_env += 'KFJ_CREATOR=' + str(task.pipeline.created_by.username) + "\n"
-            task_env += 'KFJ_RUNNER=' + str(g.user.username) + "\n"
-            task_env += 'KFJ_PIPELINE_NAME=' + str(task.pipeline.name) + "\n"
-            task_env += 'KFJ_NAMESPACE=pipeline' + "\n"
 
-
-            pipeline_global_env = template_str(task.pipeline.global_env.strip()) if task.pipeline.global_env else ''  # 优先渲染，不然里面如果有date就可能存在不一致的问题
-            pipeline_global_env = [env.strip() for env in pipeline_global_env.split('\n') if '=' in env.strip()]
-            for env in pipeline_global_env:
-                key, value = env[:env.index('=')], env[env.index('=') + 1:]
-                if key not in task_env:
-                    task_env += key + '=' + value + "\n"
-
-            global_envs = json.loads(template_str(json.dumps(conf.get('GLOBAL_ENV', {}), indent=4, ensure_ascii=False)))
-            for global_env_key in global_envs:
-                if global_env_key not in task_env:
-                    task_env += global_env_key + '=' + global_envs[global_env_key] + "\n"
+            self.run_pod(
+                task=task,
+                k8s_client=k8s_client,
+                run_id=run_id,
+                namespace=namespace,
+                pod_name=pod_name,
+                image=json.loads(task.args)['images'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else task.job_template.images.name,
+                working_dir=json.loads(task.args)['workdir'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else task.job_template.workdir,
+                command=json.loads(task.args)['command'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else command,
+                args=None if task.job_template.name == conf.get('CUSTOMIZE_JOB') else ops_args)
 
 
 
-            volume_mount = task.volume_mount
-            k8s.create_debug_pod(namespace,
-                                 name=pod_name,
-                                 labels={"pipeline": task.pipeline.name, 'task': task.name, 'run-rtx': g.user.username,'run-id':run_id},
-                                 command=command,
-                                 args=None if task.job_template.name == conf.get('CUSTOMIZE_JOB') else ops_args,
-                                 volume_mount=volume_mount,
-                                 working_dir=task.working_dir if task.working_dir else task.job_template.workdir,
-                                 node_selector=task.node_selector, resource_memory=task.resource_memory,
-                                 resource_cpu=task.resource_cpu, resource_gpu=task.resource_gpu if "+" not in task.resource_gpu else '0',
-                                 image_pull_policy=task.pipeline.image_pull_policy,
-                                 image_pull_secrets=[task.job_template.images.repository.hubsecret],
-                                 image=json.loads(task.args)['images'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else task.job_template.images.name,
-                                 hostAliases=task.job_template.hostAliases,
-                                 env=task_env, privileged=task.job_template.privileged,
-                                 accounts=task.job_template.accounts, username=task.pipeline.created_by.username)
 
         try_num = 5
         while (try_num > 0):
-            pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
+            pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
             # print(pod)
             if pod:
                 break
@@ -734,8 +693,11 @@ class Task_ModelView_Base():
         # 有历史，直接删除
         if pod:
             k8s_client.delete_pods(namespace=namespace,pod_name=pod['name'])
-            k8s_client.delete_workflow(all_crd_info = conf.get("CRD_INFO", {}), namespace=namespace,run_id=pod['labels'].get('run-id',''))
-            time.sleep(2)
+            run_id = pod['labels'].get('run-id', '')
+            if run_id:
+                k8s_client.delete_workflow(all_crd_info = conf.get("CRD_INFO", {}), namespace=namespace,run_id=run_id)
+                k8s_client.delete_pods(namespace=namespace, labels={"run-id": run_id})
+                time.sleep(2)
 
 
         # 删除debug容器
@@ -748,9 +710,11 @@ class Task_ModelView_Base():
         # 有历史，直接删除
         if pod:
             k8s_client.delete_pods(namespace=namespace, pod_name=pod['name'])
-            k8s_client.delete_workflow(all_crd_info = conf.get("CRD_INFO", {}), namespace=namespace,run_id=pod['labels'].get('run-id',''))
-            time.sleep(2)
-
+            run_id = pod['labels'].get('run-id','')
+            if run_id:
+                k8s_client.delete_workflow(all_crd_info = conf.get("CRD_INFO", {}), namespace=namespace,run_id=run_id)
+                k8s_client.delete_pods(namespace=namespace, labels={"run-id":run_id})
+                time.sleep(2)
         flash("删除完成",category='success')
         # self.update_redirect()
         return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))

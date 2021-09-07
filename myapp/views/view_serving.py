@@ -28,6 +28,7 @@ from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLi
 from myapp.utils.py import py_k8s
 import os, zipfile
 import shutil
+from myapp.views.view_team import filter_join_org_project
 from flask import (
     current_app,
     abort,
@@ -98,24 +99,12 @@ class Service_ModelView(MyappModelView):
     order_columns = ['id']
 
     base_filters = [["id", Pipeline_Filter, lambda: []]]  # 设置权限过滤器
-    # 获取查询自己所在的项目组的project
-    def filter_project():
-        query = db.session.query(Project)
-        user_roles = [role.name.lower() for role in list(get_user_roles())]
-        if "admin" in user_roles:
-            return query.filter(Project.type=='org').order_by(Project.id.desc())
-
-        # 查询自己拥有的项目
-        my_user_id = g.user.get_id() if g.user else 0
-        owner_ids_query = db.session.query(Project_User.project_id).filter(Project_User.user_id == my_user_id)
-
-        return query.filter(Project.id.in_(owner_ids_query)).filter(Project.type=='org').order_by(Project.id.desc())
 
 
     edit_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
-            query_factory=filter_project,
+            query_factory=filter_join_org_project,
             allow_blank=True,
             widget=Select2Widget()
         ),
@@ -197,14 +186,14 @@ class Service_ModelView(MyappModelView):
                               args=None,
                               volume_mount=volume_mount,
                               working_dir=service.working_dir,
-                              node_selector=service.node_selector,
+                              node_selector=service.get_node_selector(),
                               resource_memory=service.resource_memory,
                               resource_cpu=service.resource_cpu,
                               resource_gpu=service.resource_gpu if service.resource_gpu else '',
                               image_pull_policy='Always',
                               image_pull_secrets=image_secrets,
                               image=service.images,
-                              hostAliases=None,
+                              hostAliases=conf.get('HOSTALIASES',''),
                               env=service.env,
                               privileged=False,
                               accounts=None,

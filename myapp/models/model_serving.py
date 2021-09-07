@@ -15,6 +15,8 @@ from sqlalchemy import (
     Text,
     Enum,
 )
+from myapp.utils import core
+import re
 from myapp.utils.py.py_k8s import K8s
 from myapp.models.helpers import AuditMixinNullable, ImportMixin
 from flask import escape, g, Markup, request
@@ -86,6 +88,10 @@ class Service(Model,AuditMixinNullable,MyappModelBase):
                 url = "http://"+self.host
 
         return Markup(f'<a target=_blank href="{url}">{url}</a>')
+
+    def get_node_selector(self):
+        return self.get_default_node_selector(self.project.node_selector,self.resource_gpu,'service')
+
 
 
     @property
@@ -185,11 +191,13 @@ class KfService(Model,AuditMixinNullable,MyappModelBase):
             k8s = K8s(self.project.cluster['KUBECONFIG'])
             namespace = conf.get('KFSERVING_NAMESPACE')
             crd_info = conf.get('CRD_INFO')['inferenceservice']
-            crd_yaml = k8s.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=self.name)
-            status_more = json.loads(crd_yaml['status_more'])
+            crd = k8s.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=self.name)
+            if crd:
+                status_more = json.loads(crd['status_more'])
             # print(status_more)
-            url = crd_yaml['status']+":"+str(status_more.get('traffic',0))+"%"
-            return Markup(f'%s'%url)
+                url = crd['status']+":"+str(status_more.get('traffic',0))+"%"
+                return Markup(f'%s'%url)
+
         except Exception as e:
             print(e)
         return 'unknown'

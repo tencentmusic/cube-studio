@@ -21,7 +21,6 @@ from sqlalchemy.orm import relationship, sessionmaker, subqueryload
 from myapp import (
     app,
     appbuilder,
-    cache,
     conf,
     db
 )

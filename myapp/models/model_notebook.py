@@ -65,7 +65,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if "(pvc)" not in self.volume_mount:
             url = url + "#/mnt"
         else:
-            url = url + "#/mnt/%s"%self.created_by.username
+            if self.created_by:
+                url = url + "#/mnt/%s"%self.created_by.username
         host = "http://"+self.cluster['JUPYTER_DOMAIN']
         return Markup(f'<a target=_blank href="{host}{url}">{self.name}</a>')
 
@@ -77,16 +78,15 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     @property
     def status(self):
         try:
-            k8s_dash_url=''
-            if g.user.is_admin():
-                k8s_dash_url = self.cluster.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
-
-            k8s_client = py_k8s.K8s(self.cluster['KUBECONFIG'])   # notebook只在当前集群
+            k8s_client = py_k8s.K8s(self.cluster['KUBECONFIG'])
             namespace = conf.get('NOTEBOOK_NAMESPACE')
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
             status = pods[0]['status']
-            url = Markup(f'<a target=_blank href="{k8s_dash_url}">{status}</a>')
-            return url
+            if g.user.is_admin():
+                k8s_dash_url = self.cluster.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
+                url = Markup(f'<a target=_blank href="{k8s_dash_url}">{status}</a>')
+                return url
+            return status
 
         except Exception as e:
             # print(e)
@@ -97,7 +97,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if self.project:
             return self.project.cluster
         else:
-            return conf.get('CLUSTERS')['local']
+            return conf.get('CLUSTERS')[conf.get('ENVIRONMENT')]
 
     # 清空激活
     @property
@@ -109,6 +109,9 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         end = end.strftime('%Y-%m-%d')
         return Markup(f'<a href="/notebook_modelview/renew/{self.id}">截至 {end}</a>')
 
+
+    def get_node_selector(self):
+        return self.get_default_node_selector(self.project.node_selector,self.resource_gpu,'notebook')
 
 
     # 清空激活

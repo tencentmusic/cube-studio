@@ -111,6 +111,30 @@ class Project_Filter(MyappFilter):
         return query.filter(self.model.type==value).order_by(self.model.id.desc())
 
 
+
+# 开发者能看到所有模板，用户只能看到release的模板
+class Project_Join_Filter(MyappFilter):
+    # @pysnooper.snoop()
+    def apply(self, query, value):
+        if g.user.is_admin():
+            return query.filter(self.model.type == value).order_by(self.model.id.desc())
+        join_projects_id = security_manager.get_join_projects_id(db.session)
+        return query.filter(self.model.id.in_(join_projects_id)).filter(self.model.type==value).order_by(self.model.id.desc())
+
+# 获取查询自己所在的项目组的project
+def filter_join_org_project():
+    query = db.session.query(Project)
+    user_roles = [role.name.lower() for role in list(get_user_roles())]
+    if "admin" in user_roles:
+        return query.filter(Project.type=='org').order_by(Project.id.desc())
+
+    # 查询自己拥有的项目
+    my_user_id = g.user.get_id() if g.user else 0
+    owner_ids_query = db.session.query(Project_User.project_id).filter(Project_User.user_id == my_user_id)
+
+    return query.filter(Project.id.in_(owner_ids_query)).filter(Project.type=='org').order_by(Project.id.desc())
+
+
 class Project_ModelView_Base():
     label_title='项目组'
     datamodel = SQLAInterface(Project)
@@ -186,6 +210,14 @@ class Project_ModelView_job_template(Project_ModelView_Base,MyappModelView):
     datamodel = SQLAInterface(Project)
 
 
+# 添加api
+class Project_ModelView_job_template_Api(Project_ModelView_Base,MyappModelRestApi):
+    route_base = '/project_modelview/job_template/api'
+    datamodel = SQLAInterface(Project)
+    project_type = 'job-template'
+    base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+
+appbuilder.add_api(Project_ModelView_job_template_Api)
 
 
 class Project_ModelView_org(Project_ModelView_Base,MyappModelView):
@@ -193,12 +225,31 @@ class Project_ModelView_org(Project_ModelView_Base,MyappModelView):
     base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
     datamodel = SQLAInterface(Project)
 
+# 添加api
+class Project_ModelView_org_Api(Project_ModelView_Base,MyappModelRestApi):
+    route_base = '/project_modelview/org/api'
+    datamodel = SQLAInterface(Project)
+    project_type = 'org'
+    base_filters = [["id", Project_Join_Filter, project_type]]  # 设置权限过滤器
+
+appbuilder.add_api(Project_ModelView_org_Api)
+
 
 
 class Project_ModelView_train_model(Project_ModelView_Base,MyappModelView):
     project_type = 'model'
     base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
     datamodel = SQLAInterface(Project)
+
+
+# 添加api
+class Project_ModelView_train_model_Api(Project_ModelView_Base,MyappModelRestApi):
+    route_base = '/project_modelview/model/api'
+    datamodel = SQLAInterface(Project)
+    project_type = 'model'
+    base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+
+appbuilder.add_api(Project_ModelView_train_model_Api)
 
 
 # 添加视图和菜单

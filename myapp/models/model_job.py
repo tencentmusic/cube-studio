@@ -32,7 +32,10 @@ from myapp.models.base import MyappModelBase
 import datetime
 metadata = Model.metadata
 conf = app.config
-
+from myapp.utils import core
+import re
+from myapp.utils.py import py_k8s
+import pysnooper
 
 # 定义model
 class Repository(Model,AuditMixinNullable,MyappModelBase):
@@ -137,6 +140,7 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     def expand_html(self):
         return Markup('<pre><code>' + self.expand + '</code></pre>')
 
+
     @renders('name')
     def name_title(self):
         return Markup(f'<a data-toggle="tooltip" rel="tooltip" title data-original-title="{self.describe}">{self.name}</a>')
@@ -156,6 +160,7 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
                     return env[env.index('=')+1:].strip()
         else:
             return None
+
 
     def clone(self):
         return Job_Template(
@@ -191,11 +196,13 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     run_id = Column(String(100))
     node_selector = Column(String(100), default='cpu=true,train=true')  # 挂载
     image_pull_policy = Column(Enum('Always','IfNotPresent'),nullable=False,default='Always')
-    parallelism = Column(Integer, nullable=False,default=1)
+    parallelism = Column(Integer, nullable=False,default=1)  # 同一个pipeline，最大并行的task数目
     alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated')   # 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated
     alert_user = Column(String(300), default='')
     expand = Column(Text(65536),default='[]')
-
+    depends_on_past = Column(Boolean, default=False)
+    max_active_runs = Column(Integer, nullable=False,default=3)   # 最大同时运行的pipeline实例
+    parameter = Column(Text(65536), default='{}')
 
     def __repr__(self):
         return self.name
@@ -215,6 +222,13 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         pipeline_run_url = "/pipeline_modelview/run_pipeline/" +str(self.id)
         return Markup(f'<a target=_blank href="{pipeline_run_url}">run</a>')
 
+
+    @property
+    def cronjob_start_time(self):
+        cronjob_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if self.parameter:
+            return json.loads(self.parameter).get('cronjob_start_time',cronjob_start_time)
+        return cronjob_start_time
 
 
     @property
@@ -244,6 +258,11 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def expand_html(self):
         return Markup('<pre><code>' + self.expand + '</code></pre>')
 
+    @renders('parameter')
+    def parameter_html(self):
+        return Markup('<pre><code>' + self.parameter + '</code></pre>')
+
+
     @renders('pipeline_file')
     def pipeline_file_html(self):
         pipeline_file = self.pipeline_file or ''
@@ -257,6 +276,27 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def get_tasks(self,dbsession=db.session):
         return dbsession.query(Task).filter_by(pipeline_id=self.id).all()
 
+    # 获取当期运行时workfflow的数量
+    def get_workflow(self):
+
+        back_crds = []
+        try:
+            k8s_client = py_k8s.K8s(self.project.cluster['KUBECONFIG'])
+            crd_info = conf.get("CRD_INFO", {}).get('workflow', {})
+            if crd_info:
+                crds = k8s_client.get_crd(group=crd_info['group'], version=crd_info['version'],
+                                          plural=crd_info['plural'], namespace=self.namespace,
+                                          label_selector="pipeline-id=%s"%str(self.id))
+                for crd in crds:
+                    if crd.get('labels', '{}'):
+                        labels = json.loads(crd['labels'])
+                        if labels.get('pipeline-id', '') == str(self.id):
+                            back_crds.append(crd)
+            return back_crds
+        except Exception as e:
+            print(e)
+        return back_crds
+
 
     @property
     def run_instance(self):
@@ -267,9 +307,9 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         # print(url)
         return Markup(f"<a href='{url}'>{self.schedule_type}</a>")  # k8s有长度限制
 
-
+    # 这个dag可能不对，所以要根据真实task纠正一下
     def fix_dag_json(self,dbsession=db.session):
-        dag = json.loads(self.dag_json)  # 这个dag可能不对，所以要根据真实task纠正一下
+        dag = json.loads(self.dag_json)
         # 如果添加了task，但是没有保存pipeline，就自动创建dag
         if not dag:
             tasks = self.get_tasks(dbsession)
@@ -389,7 +429,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         return expand_tasks
 
 
-
+    # @pysnooper.snoop()
     def clone(self):
         return Pipeline(
             name=self.name.replace('_','-'),
@@ -398,15 +438,16 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             describe=self.describe,
             namespace=self.namespace,
             global_env=self.global_env,
-            schedule_type=self.schedule_type,
+            schedule_type='once',
             cron_time=self.cron_time,
-            pipeline_file=self.pipeline_file,
+            pipeline_file='',
             pipeline_argo_id=self.pipeline_argo_id,
             node_selector=self.node_selector,
             image_pull_policy=self.image_pull_policy,
             parallelism=self.parallelism,
-            alert_status=self.alert_status,
-            expand=self.expand
+            alert_status='',
+            expand=self.expand,
+            parameter=self.parameter
         )
 
 
@@ -460,6 +501,10 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     @property
     def log(self):
         return Markup(f'<a target=_blank href="/task_modelview/log/{self.id}">log</a>')
+
+    def get_node_selector(self):
+        return self.get_default_node_selector(self.pipeline.project.node_selector,self.resource_gpu,'train')
+
 
     @renders('args')
     def args_html(self):
@@ -522,14 +567,15 @@ class RunHistory(Model,MyappModelBase):
     run_id = Column(String(100))
     message = Column(Text, default='')
     created_on = Column(DateTime, default=datetime.datetime.now, nullable=False)
+    execution_date=Column(String(100), nullable=False)
+    status = Column(String(100),default='comed')   # commed表示已经到了该调度的时间，created表示已经发起了调度。注意操作前校验去重
 
 
     @property
-    def name(self):
-        pipeline_url = "/pipeline_modelview/edit/%s"%self.pipeline_id
-
-        # pipeline_url = conf.get('PIPELINE_URL')+'pipelines/details/%s'%self.pipeline_id
-        return Markup(f'<a target=_blank href="{pipeline_url}">{self.pipeline.name}</a>')
+    def status_url(self):
+        if self.status=='comed':
+            return self.status
+        return Markup(f'<a target=_blank href="/workflow_modelview/list/?_flt_2_labels={self.run_id}">{self.status}</a>')
 
     @property
     def creator(self):
@@ -537,28 +583,32 @@ class RunHistory(Model,MyappModelBase):
 
     @property
     def pipeline_url(self):
-        pipeline_url = conf.get('PIPELINE_URL') + "pipelines/details/%s"%self.pipeline_argo_id
-
-        if self.version_id:
-            pipeline_url += '/version/'+self.version_id
-
         # pipeline_url = conf.get('PIPELINE_URL')+'pipelines/details/%s'%self.pipeline_id
-        return Markup(f'<a target=_blank href="{pipeline_url}">{self.pipeline.describe}</a>')
+        return Markup(f'<a target=_blank href="/pipeline_modelview/web/{self.pipeline.id}">{self.pipeline.describe}</a>')
+
+
+    @property
+    def history(self):
+        url = r'/workflow_modelview/list/?_flt_2_labels="pipeline-id"%3A+"' + '%s"' % self.pipeline_id
+        return Markup(f"<a href='{url}'>运行记录</a>")
 
     @property
     def log(self):
         if self.run_id:
-            pipeline_url = conf.get('PIPELINE_URL')+ "runs/details/" +str(self.run_id)
+            pipeline_url = self.pipeline.project.cluster.get('PIPELINE_URL')+ "runs/details/" +str(self.run_id)
             return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
         else:
             return Markup(f'日志')
 
+import sqlalchemy as sa
 class Crd:
     # __tablename__ = "crd"
     id = Column(Integer, primary_key=True)
     name = Column(String(100),default='')
     namespace = Column(String(100), default='')
     create_time=Column(String(100), default='')
+    change_time = Column(String(100), default='')
+
     status = Column(String(100), default='')
     annotations = Column(Text, default='')
     labels = Column(Text, default='')
@@ -578,6 +628,15 @@ class Crd:
     def labels_html(self):
         return Markup('<pre><code>' + self.labels + '</code></pre>')
 
+    @property
+    def final_status(self):
+        status='未知'
+        try:
+            if self.status_more:
+                status = json.loads(self.status_more).get('phase','未知')
+        except Exception as e:
+            print(e)
+        return status
 
     @renders('spec')
     def spec_html(self):
@@ -617,7 +676,8 @@ class Workflow(Model,Crd,MyappModelBase):
                 if pipeline_id:
                     pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
                     if pipeline:
-                        return Markup(f'{pipeline.describe}')
+                        # return Markup(f'{pipeline.describe}')
+                        return Markup(f'<a href="/pipeline_modelview/web/{pipeline.id}">{pipeline.describe}</a>')
 
                 pipeline_name = self.name[:-6]
                 pipeline = db.session.query(Pipeline).filter_by(name=pipeline_name).first()
@@ -648,6 +708,13 @@ class Workflow(Model,Crd,MyappModelBase):
         return None
 
 
+    @property
+    def project(self):
+        pipeline = self.pipeline
+        if pipeline:
+            return pipeline.project.name
+        else:
+            return "未知"
 
     @property
     def log(self):

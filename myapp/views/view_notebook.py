@@ -26,7 +26,7 @@ from myapp.exceptions import MyappException
 from wtforms import BooleanField, IntegerField, SelectField, StringField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MyCommaSeparatedListField,MySelectMultipleField
-
+from myapp.security import MyUser
 from myapp.utils.py import py_k8s
 from flask_wtf.file import FileField
 import shlex
@@ -68,7 +68,7 @@ from .base import (
 )
 from flask_appbuilder import CompactCRUDMixin, expose
 import pysnooper,datetime,time,json
-# from myapp.views.view_team import Project_Filter
+from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
 from kubernetes.client import V1ObjectMeta
 
 conf = app.config
@@ -81,16 +81,6 @@ class Notebook_Filter(MyappFilter):
             return query
 
         return query.filter(self.model.created_by_fk==g.user.id)
-
-
-# 开发者能看到所有模板，用户只能看到release的模板
-class Project_Filter(MyappFilter):
-    # @pysnooper.snoop()
-    def apply(self, query, value):
-        if g.user.is_admin():
-            return query
-        join_projects_id = security_manager.get_join_projects_id(db.session)
-        return query.filter(self.model.id.in_(join_projects_id)).filter(self.model.type==value).order_by(self.model.id.desc())
 
 
 
@@ -107,10 +97,10 @@ class Notebook_ModelView_Base():
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Notebook_Filter, lambda: []]]  # 设置权限过滤器
     order_columns = ['id']
-    add_columns = ['project','name','describe','images','working_dir','volume_mount','node_selector','resource_memory','resource_cpu']
-    list_columns = ['project','name_url','volume_mount','resource','status','renew','reset']
+    add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu']
+    list_columns = ['project','ide_type','name_url','resource','status','renew','reset']
     add_form_query_rel_fields = {
-        "project": [["name", Project_Filter, 'org']]
+        "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
     # @pysnooper.snoop()
@@ -131,6 +121,19 @@ class Notebook_ModelView_Base():
             validators=[DataRequired()]
         )
 
+        # "project": QuerySelectField(
+        #     _(datamodel.obj.lab('project')),
+        #     query_factory=filter_join_org_project,
+        #     allow_blank=True,
+        #     widget=Select2Widget()
+        # ),
+
+        self.add_form_extra_fields['project'] = QuerySelectField(
+            _(self.datamodel.obj.lab('project')),
+            description=_(r'部署项目组'),
+            query_factory=filter_join_org_project,
+            widget=MySelect2Widget(extra_classes="readonly" if notebook else None, new_web=False),
+        )
         self.add_form_extra_fields['images'] = SelectField(
             _(self.datamodel.obj.lab('images')),
             description=_(r'notebook基础环境镜像，如果显示不准确，请删除新建notebook'),
@@ -176,6 +179,9 @@ class Notebook_ModelView_Base():
             description='cpu的资源使用限制(单位：核)，示例：2', widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
+
+
+
         gpu_type = conf.get("GPU_TYPE", "NVIDIA")  # TENCENT
         if gpu_type=='NVIDIA':
             self.add_form_extra_fields['resource_gpu'] = StringField(
@@ -192,7 +198,7 @@ class Notebook_ModelView_Base():
                 description='gpu的资源使用限制(core,memory)，示例:10,2（10%的单卡核数和2G的显存,最大100,13），其中core为小于100的整数或100的整数倍，表示占用的单卡的百分比例，memory为整数，表示n(G)的显存', widget=BS3TextFieldWidget(),
                 validators=[DataRequired()]
             )
-        columns = ['name','describe','images','node_selector','resource_memory','resource_cpu','resource_gpu']
+        columns = ['name','describe','images','resource_memory','resource_cpu','resource_gpu']
 
         if g.user.is_admin():
             columns.append('volume_mount')
@@ -204,10 +210,12 @@ class Notebook_ModelView_Base():
     # @pysnooper.snoop()
     def pre_add(self, item):
         item.name = item.name.replace("_", "-")[0:54].lower()
-        if core.get_gpu(item.resource_gpu)[0]:
-            item.node_selector = item.node_selector.replace('cpu=true','gpu=true')
-        else:
-            item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
+
+        # 不需要用户自己填写node selector
+        # if core.get_gpu(item.resource_gpu)[0]:
+        #     item.node_selector = item.node_selector.replace('cpu=true','gpu=true')
+        # else:
+        #     item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
 
         item.resource_memory=core.check_resource_memory(item.resource_memory,self.src_item_json.get('resource_memory',None))
         item.resource_cpu = core.check_resource_cpu(item.resource_cpu,self.src_item_json.get('resource_cpu',None))
@@ -217,8 +225,14 @@ class Notebook_ModelView_Base():
         else:
             item.ide_type = 'jupyter'
 
-
+    # @pysnooper.snoop(watch_explode=('item'))
     def pre_update(self, item):
+
+        # if item.changed_by_fk:
+        #     item.changed_by=db.session.query(MyUser).filter_by(id=item.changed_by_fk).first()
+        # if item.created_by_fk:
+        #     item.created_by=db.session.query(MyUser).filter_by(id=item.created_by_fk).first()
+
         self.pre_add(item)
 
 
@@ -226,12 +240,20 @@ class Notebook_ModelView_Base():
         flash('自动reset 一分钟后生效','warning')
         self.reset_notebook(item)
 
+    @pysnooper.snoop(watch_explode=('item'))
     def post_update(self, item):
-        flash('自动reset 一分钟后生效','warning')
-        item.changed_on = datetime.datetime.now()
-        db.session.commit()
-        self.reset_notebook(item)
+        flash('reset以后配置方可生效', 'warning')
 
+        # item.changed_on = datetime.datetime.now()
+        # db.session.commit()
+        # self.reset_notebook(item)
+
+        # flash('自动reset 一分钟后生效', 'warning')
+        if self.src_item_json:
+            item.changed_by_fk = int(self.src_item_json.get('changed_by_fk'))
+        if self.src_item_json:
+            item.created_by_fk = int(self.src_item_json.get('created_by_fk'))
+        db.session.commit()
 
     def post_list(self,items):
         flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行',category='warning')
@@ -263,17 +285,17 @@ class Notebook_ModelView_Base():
     pre_add_get=set_column
 
 
-
+    # @pysnooper.snoop(watch_explode=('notebook'))
     def reset_notebook(self, notebook):
         self.reset_theia(notebook)
 
 
     # 部署pod，service，VirtualService
-    # @pysnooper.snoop()
+    # @pysnooper.snoop(watch_explode=('notebook',))
     def reset_theia(self, notebook):
         from myapp.utils.py.py_k8s import K8s
 
-        k8s = K8s(notebook.cluster['KUBECONFIG'])      # notebook只在当前集群
+        k8s = K8s(notebook.cluster['KUBECONFIG'])
         namespace = conf.get('NOTEBOOK_NAMESPACE')
         port=3000
 
@@ -299,7 +321,7 @@ class Notebook_ModelView_Base():
 
 
         image_secrets = conf.get('HUBSECRET', [])
-        user_hubsecrets = db.session.query(Repository.hubsecret).filter(Repository.created_by_fk == g.user.id).all()
+        user_hubsecrets = db.session.query(Repository.hubsecret).filter(Repository.created_by_fk == notebook.created_by.id).all()
         if user_hubsecrets:
             for hubsecret in user_hubsecrets:
                 if hubsecret[0] not in image_secrets:
@@ -314,14 +336,14 @@ class Notebook_ModelView_Base():
             args=None,
             volume_mount=volume_mount,
             working_dir=workingDir,
-            node_selector=notebook.node_selector,
+            node_selector=notebook.get_node_selector(),
             resource_memory=notebook.resource_memory,
             resource_cpu=notebook.resource_cpu,
             resource_gpu=notebook.resource_gpu,
             image_pull_policy=notebook.image_pull_policy,
             image_pull_secrets=image_secrets,
             image=notebook.images,
-            hostAliases=None,
+            hostAliases=conf.get('HOSTALIASES',''),
             env={
              "NO_AUTH": "true"
             },
@@ -337,11 +359,11 @@ class Notebook_ModelView_Base():
 
         crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
         crd_name = "notebook-jupyter-%s"%notebook.name.replace('_', '-') #  notebook.name.replace('_', '-')
-        crd_list = k8s.get_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, return_dict=None)
-        for vs_obj in crd_list:
-            if vs_obj['name'] == crd_name:
-                k8s.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
-                time.sleep(1)
+        vs_obj = k8s.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
+        if vs_obj:
+            k8s.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
+            time.sleep(1)
+
         crd_json = {
             "apiVersion": "networking.istio.io/v1alpha3",
             "kind": "VirtualService",
@@ -414,7 +436,7 @@ class Notebook_ModelView_Base():
             abort(404)
         for item in items:
             try:
-                k8s_client = py_k8s.K8s(item.cluster['KUBECONFIG'])    # notebook只在当前集群
+                k8s_client = py_k8s.K8s(item.cluster['KUBECONFIG'])
                 k8s_client.delete_pods(namespace=item.namespace,pod_name=item.name)
                 k8s_client.delete_service(namespace=item.namespace,name=item.name)
                 crd_info = conf.get("CRD_INFO", {}).get('virtualservice', {})
@@ -438,7 +460,6 @@ class Notebook_ModelView_Base():
         if '_flt_0_created_by' in args and args['_flt_0_created_by']=='':
             print(request.url)
             print(request.path)
-            flash('去除过滤条件->查看所有pipeline','success')
             return redirect(request.url.replace('_flt_0_created_by=','_flt_0_created_by=%s'%g.user.id))
 
         widgets = self._list()

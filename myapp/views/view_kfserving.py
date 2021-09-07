@@ -98,7 +98,7 @@ class KfService_ModelView(MyappModelView):
         namespace = conf.get('KFSERVING_NAMESPACE')
         crd_info = conf.get('CRD_INFO')['inferenceservice']
         crd_list = k8s.get_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
-                                    namespace=namespace, return_dict=None)
+                                    namespace=namespace)
         for crd_obj in crd_list:
             if crd_obj['name'] == mykfservice.name:
                 k8s.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],

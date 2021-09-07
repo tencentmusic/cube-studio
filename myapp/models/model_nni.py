@@ -15,6 +15,8 @@ from sqlalchemy import (
     Text,
     Enum,
 )
+from myapp.utils import core
+import re
 from myapp.models.base import MyappModelBase
 from myapp.models.helpers import AuditMixinNullable, ImportMixin
 from flask import escape, g, Markup, request
@@ -109,6 +111,12 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
     @property
     def log(self):
         return Markup(f'<a target=_blank href="/nni_modelview/log/{self.id}">log</a>')
+
+
+    def get_node_selector(self):
+        return self.get_default_node_selector(self.project.node_selector,self.resource_gpu,'train')
+
+
 
     def clone(self):
         return NNI(

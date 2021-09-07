@@ -15,6 +15,8 @@ from sqlalchemy import (
     Text,
     Enum,
 )
+from myapp.utils import core
+import re
 from myapp.models.base import MyappModelBase
 from myapp.models.helpers import AuditMixinNullable, ImportMixin
 from flask import escape, g, Markup, request
@@ -102,6 +104,9 @@ class Hyperparameter_Tuning(Model,AuditMixinNullable,MyappModelBase):
     @renders('experiment')
     def experiment_html(self):
         return Markup('<pre><code>' + self.experiment + '</code></pre>')
+
+    def get_node_selector(self):
+        return self.get_default_node_selector(self.project.node_selector,self.resource_gpu,'train')
 
 
     def clone(self):

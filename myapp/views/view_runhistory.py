@@ -5,8 +5,10 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 
 from myapp import app, appbuilder,db,event_logger
-
-
+from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget,BS3TextAreaFieldWidget
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from sqlalchemy import and_, or_, select
 
 from .baseApi import (
@@ -61,11 +63,18 @@ class RunHistory_ModelView_Base():
     base_order = ('id', 'desc')
     order_columns = ['id']
 
-    list_columns = ['name', 'pipeline_url','creator','created_on','log']
-    # add_columns = ['project','name','describe','namespace','schedule_type','cron_time','node_selector','image_pull_policy','parallelism','dag_json','global_args']
-    # show_columns = ['project','name','describe','namespace','schedule_type','cron_time','node_selector','image_pull_policy','parallelism','global_args','dag_json_html','pipeline_file_html']
-    # edit_columns = add_columns
+    list_columns = ['pipeline_url','creator','created_on','execution_date','status_url','log','history']
+    edit_columns = ['status']
     base_filters = [["id", RunHistory_Filter, lambda: []]]  # 设置权限过滤器
+    add_form_extra_fields = {
+        "status": SelectField(
+            _(datamodel.obj.lab('status')),
+            description="状态comed为已识别未提交，created为已提交",
+            widget=Select2Widget(),
+            choices=[['comed', 'comed'], ['created', 'created']]
+        ),
+    }
+    edit_form_extra_fields = add_form_extra_fields
 
 
 class RunHistory_ModelView(RunHistory_ModelView_Base,MyappModelView,DeleteMixin):

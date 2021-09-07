@@ -29,7 +29,7 @@ from sqlalchemy import String,Column,Integer,ForeignKey,UniqueConstraint
 from myapp.security import MyUser
 metadata = Model.metadata
 conf = app.config
-
+import pysnooper
 
 
 
@@ -57,11 +57,20 @@ class Project(Model,AuditMixinNullable,MyappModelBase):
         else:
             return []
 
+    @property
+    def node_selector(self):
+        try:
+            expand = json.loads(self.expand) if self.expand else {}
+            node_selector = expand.get('node_selector', '')
+            return node_selector
+        except Exception as e:
+            print(e)
+            return ''
 
     @property
     def cluster(self):
         all_clusters = conf.get('CLUSTERS')
-        default=all_clusters.get('local',{})
+        default=all_clusters.get(conf.get('ENVIRONMENT'),{})
         try:
             expand = json.loads(self.expand) if self.expand else {}
             project_cluster = expand.get('cluster','')

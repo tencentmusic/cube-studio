@@ -102,6 +102,7 @@ class Repository_ModelView_Base():
     pre_add_get = set_column
 
     # 直接创建hubsecret
+    # @pysnooper.snoop()
     def apply_hubsecret(self,hubsecret):
         from myapp.utils.py.py_k8s import K8s
         all_cluster=conf.get('CLUSTERS',{})
@@ -139,6 +140,8 @@ class Repository_ModelView_Api(Repository_ModelView_Base,MyappModelRestApi):
 appbuilder.add_api(Repository_ModelView_Api)
 
 
+
+
 # 只能查看到自己归属的项目组的镜像
 class Images_Filter(MyappFilter):
     # @pysnooper.snoop(watch_explode=('result'))
@@ -146,10 +149,6 @@ class Images_Filter(MyappFilter):
         user_roles = [role.name.lower() for role in list(self.get_user_roles())]
         if "admin" in user_roles:
             return query
-        from flask_sqlalchemy import BaseQuery
-        # join_projects_id = security_manager.get_join_projects_id(db.session)
-        # logging.info(join_projects_id)
-        # result = query.filter(self.model.project_id.in_(join_projects_id)).order_by(self.model.changed_on.desc())
 
         result = query.order_by(self.model.id.desc())
         return result
@@ -162,17 +161,13 @@ class Images_ModelView_Base():
     datamodel = SQLAInterface(Images)
     check_redirect_list_url = '/images_modelview/list/?_flt_2_name='
     help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
-    list_columns = ['project','images_url','creator','modified']
+    list_columns = ['images_url','creator','modified']
 
     base_order = ('id', 'desc')
     order_columns = ['id']
-    add_columns = ['project', 'repository', 'name', 'describe', 'dockerfile', 'gitpath']
+    add_columns = ['repository', 'name', 'describe', 'dockerfile', 'gitpath']
     edit_columns = add_columns
-    add_form_query_rel_fields = {
-        "project": [["name", Project_Filter, 'job-template']]
-    }
 
-    edit_form_query_rel_fields = add_form_query_rel_fields
     add_form_extra_fields = {
         "dockerfile": StringField(
             _(datamodel.obj.lab('dockerfile')),
@@ -190,7 +185,6 @@ class Images_ModelView_Base():
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         )
     }
-    # show_columns = ['project','repository','created_by','changed_by','created_on','changed_on','name','describe','entrypoint','dockerfile','gitpath']
 
     edit_form_extra_fields = add_form_extra_fields
     base_filters = [["id", Images_Filter, lambda: []]]  # 设置权限过滤器
@@ -200,17 +194,18 @@ class Images_ModelView_Base():
 class Images_ModelView(Images_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Images)
 
-appbuilder.add_view(Images_ModelView,"镜像",href="/images_modelview/list/?_flt_2_name=",icon = 'fa-file-image-o',category = '训练',category_icon = 'fa-envelope')
+appbuilder.add_view(Images_ModelView,"模板镜像",href="/images_modelview/list/?_flt_2_name=",icon = 'fa-file-image-o',category = '训练',category_icon = 'fa-envelope')
 
 
 # 添加api
 class Images_ModelView_Api(Images_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Images)
     route_base = '/images_modelview/api'
-    list_columns = ['project','images_url', 'repository', 'name', 'describe', 'dockerfile', 'gitpath','modified','creator']
+    list_columns = ['images_url', 'repository', 'name', 'describe', 'dockerfile', 'gitpath','modified','creator']
 
 appbuilder.add_api(Images_ModelView_Api)
 
 
-appbuilder.add_separator("训练")   # 在指定菜单栏下面的每个子菜单中间添加一个分割线的显示。
 
+
+appbuilder.add_separator("训练")   # 在指定菜单栏下面的每个子菜单中间添加一个分割线的显示。

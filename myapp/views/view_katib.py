@@ -604,10 +604,11 @@ class Hyperparameter_Tuning_ModelView_Base():
         if item.job_type=='TFJob':
             item.trial_spec=core.merge_tfjob_experiment_template(
                 worker_num=item.tf_worker_num,
-                node_selector=item.node_selector,
+                node_selector=item.get_node_selector(),
                 volume_mount=item.volume_mount,
                 image=item.tf_worker_image,
                 image_secrets = image_secrets,
+                hostAliases=conf.get('HOSTALIASES',''),
                 workingDir=item.working_dir,
                 image_pull_policy=item.image_pull_policy,
                 resource_memory=item.resource_memory,
@@ -621,10 +622,11 @@ class Hyperparameter_Tuning_ModelView_Base():
             }
         if item.job_type == 'Job':
             item.trial_spec=core.merge_job_experiment_template(
-                node_selector=item.node_selector,
+                node_selector=item.get_node_selector(),
                 volume_mount=item.volume_mount,
                 image=item.job_worker_image,
                 image_secrets=image_secrets,
+                hostAliases=conf.get('HOSTALIASES',''),
                 workingDir=item.working_dir,
                 image_pull_policy=item.image_pull_policy,
                 resource_memory=item.resource_memory,
@@ -639,10 +641,11 @@ class Hyperparameter_Tuning_ModelView_Base():
         if item.job_type == 'PyTorchJob':
             item.trial_spec=core.merge_pytorchjob_experiment_template(
                 worker_num=item.pytorch_worker_num,
-                node_selector=item.node_selector,
+                node_selector=item.get_node_selector(),
                 volume_mount=item.volume_mount,
                 image=item.pytorch_worker_image,
                 image_secrets=image_secrets,
+                hostAliases=conf.get('HOSTALIASES', ''),
                 workingDir=item.working_dir,
                 image_pull_policy=item.image_pull_policy,
                 resource_memory=item.resource_memory,

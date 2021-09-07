@@ -382,15 +382,21 @@ class MyappModelRestApi(ModelRestApi):
 
 
     @expose("/", methods=["GET"])
-    # @pysnooper.snoop(watch_explode=('_args'))
     def api_list(self, **kwargs):
         _response = dict()
         if self.pre_json_load:
-            json = self.pre_json_load(request.json)
+            req_json = self.pre_json_load(request.json)
         else:
-            json = request.json
-        _args = json or {}
+            try:
+                req_json = request.json or {}
+            except Exception as e:
+                print(e)
+                req_json={}
+        _args = req_json or {}
         _args.update(request.args)
+        # 应对那些get无法传递body的请求，也可以把body放在url里面
+        if 'form_data' in request.args:
+            _args.update(json.loads(request.args.get('form_data')))
         # handle select columns
         select_cols = _args.get(API_SELECT_COLUMNS_RIS_KEY, [])
         _pruned_select_cols = [col for col in select_cols if col in self.list_columns]

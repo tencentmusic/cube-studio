@@ -3,7 +3,6 @@
 from myapp import (
     app,
     appbuilder,
-    cache,
     conf,
     db,
     event_logger,
