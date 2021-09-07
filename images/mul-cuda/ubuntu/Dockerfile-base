@@ -1,0 +1,49 @@
+
+# docker build -t ai.tencentmusic.com/tme-public/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base .
+
+# 手动安装了各种cuda
+# https://developer.nvidia.com/cuda-toolkit-archive    安装不上
+FROM nvidia/cuda:10.1-cudnn7-runtime-ubuntu18.04
+
+RUN apt update -y
+
+# 安装运维工具
+RUN apt install -y --force-yes --no-install-recommends software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip
+
+# 安装中文
+RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
+ENV LANG zh_CN.UTF-8
+ENV LC_ALL zh_CN.UTF-8
+ENV LANGUAGE zh_CN.UTF-8
+
+# 便捷操作
+RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
+    echo "alias la='ls -A'" >> /root/.bashrc && \
+    echo "alias vi='vim'" >> /root/.bashrc && \
+    /bin/bash -c "source /root/.bashrc"
+
+# 安装python
+RUN add-apt-repository ppa:deadsnakes/ppa && apt install -y --force-yes --no-install-recommends apt install python2.7 python3.6 python3-pip libsasl2-dev libpq-dev \
+    && ln -s /usr/bin/python2.7 /usr/bin/python \
+    && ln -s /usr/bin/pip3 /usr/bin/pip
+
+
+RUN mkdir -p /usr/local/services/ && mkdir -p /data/L5Backup/ && chmod -R 777 /data/L5Backup/
+WORKDIR /usr/local/services/
+RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/l5_protocol_32os-1.0.tar.gz && tar -zxvf l5_protocol_32os-1.0.tar.gz && rm l5_protocol_32os-1.0.tar.gz
+#RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/dns_l5_agent-1.0.tar.gz && tar -zxvf dns_l5_agent-1.0.tar.gz && rm dns_l5_agent-1.0.tar.gz
+RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/tdwdfs_client-1.0.tar.gz && tar -zxvf tdwdfs_client-1.0.tar.gz && rm tdwdfs_client-1.0.tar.gz
+#RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/dc_agent-1.0.tar.gz && tar -zxvf dc_agent-1.0.tar.gz && rm dc_agent-1.0.tar.gz
+
+WORKDIR /
+
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
+ENV PATH=$PATH:/usr/local/cuda/bin
+ENV CUDA_HOME=$CUDA_HOME:/usr/local/cuda
+
+
+
+
+
+
