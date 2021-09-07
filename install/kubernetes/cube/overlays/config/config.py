@@ -82,7 +82,7 @@ ENABLE_PROXY_FIX = False
 APP_NAME = "Kubeflow"
 
 # Uncomment to setup an App icon
-APP_ICON = "/static/assets/images/myapp-logo@2x.png"
+APP_ICON = "/static/assets/images/myapp-logo.png"
 APP_ICON_WIDTH = 126
 
 # Uncomment to specify where clicking the logo would take the user
@@ -527,19 +527,19 @@ class CeleryConfig(object):
             'schedule': crontab(minute='1'),
         },
         'task_task2': {
-            'task': 'task.make_run_task',
+            'task': 'task.make_timerun_config',
             # 'schedule': 10.0,     #10s中执行一次
             'schedule': crontab(minute='1'),
         },
         'task_task3': {
+            'task': 'task.upload_timerun',
+            # 'schedule': 10.0,     #10s中执行一次
+            'schedule': crontab(minute='*/5'),
+        },
+        'task_task4': {
             'task': 'task.delete_old_data',
             # 'schedule': 100.0,     #10s中执行一次
             'schedule': crontab(minute='1', hour='1'),
-        },
-        'task_task4': {
-            'task': 'task.check_pipeline_run',
-            # 'schedule': 100.0,     #10s中执行一次
-            'schedule': crontab(minute='1', hour='23'),
         },
         'task_task5': {
             'task': 'task.delete_notebook',
@@ -666,7 +666,7 @@ GLOBAL_ENV={
     "GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
     "KFJ_GPU_MEM_MIN":"13G",
     "KFJ_GPU_MEM_MAX":"13G",
-    "KFJ_ENVIRONMENT":os.environ.get("ENVIRONMENT", "DEV").lower(),
+    "KFJ_ENVIRONMENT":"{{cluster_name}}",
 }
 GPU_TYPE = os.environ.get("GPU_TYPE", "NVIDIA")
 
@@ -685,7 +685,9 @@ HELP_URL={
     "notebook":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001776883",
     "service":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001838471",
     "kfserving":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001951821",
-    "model":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001867625"
+    "model":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001867625",
+    "run":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693002080729",
+    "docker":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693002082587"
 }
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
@@ -699,7 +701,7 @@ NOTEBOOK_NAMESPACE = 'jupyter'
 SERVICE_NAMESPACE = 'service'
 KFSERVING_NAMESPACE = 'kfserving'
 
-ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV')
+
 KATIB_JOB_DEFAULT_IMAGE='ai.tencentmusic.com/tme-public/katib'
 KATIB_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
 KATIB_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
@@ -733,10 +735,10 @@ WORKSPACE_HOST_PATH = '/data/k8s/kubeflow/pipeline/workspace'
 # 每个用户的归档目录，可以用来存储训练模型
 ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 # prometheus地址
-PROMETHEUS = 'http://prometheus-k8s.monitoring:9090/api/v1/query_range'
+PROMETHEUS = 'prometheus-k8s.monitoring:9090'
 KFP_HOST = "ml-pipeline.kubeflow:8888"
 
-NNI_IMAGES='ai.tencentmusic.com/tme-public/nni:20211002'
+NNI_IMAGES='ai.tencentmusic.com/tme-public/nni:20211003'
 
 
 
@@ -751,6 +753,12 @@ KATIB_URL = 'http://%s/katib/#' % HOST
 # 这两部分功能需要泛化域名。没有泛化域名此部分功能受限
 KFSERVING_DOMAIN = 'kfserving.%s' % ISTIO_INGRESS_DOMAIN
 SERVICE_DOMAIN = 'service.%s' % ISTIO_INGRESS_DOMAIN
+
+# 多行分割内网特定host
+HOSTALIASES='''
+127.0.0.1 localhost
+'''
+
 
 
 
@@ -780,18 +788,19 @@ ALL_LINKS=[
 # 多集群应用
 CLUSTERS={
     # 至少要有一个这个
-    "local":{
-        "NAME":"local",
-        "KUBECONFIG":'/home/myapp/kubeconfig/dev-config',
-        "K8S_DASHBOARD_CLUSTER":K8S_DASHBOARD_CLUSTER,
-        "KFP_HOST":KFP_HOST,
-        "PIPELINE_URL":PIPELINE_URL,
-        "JUPYTER_DOMAIN":JUPYTER_DOMAIN
+    "dev":{
+        "NAME":"dev",
+        "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
+        "K8S_DASHBOARD_CLUSTER":'http://kubeflow.local.com/k8s/dashboard/cluster/',
+        "KFP_HOST": 'xx.xx.xx.xx:8888',
+        "PIPELINE_URL": 'http://kubeflow.local.com/pipeline/#/',
+        "JUPYTER_DOMAIN":"kubeflow.local.com",
+        "NNI_DOMAIN":'kubeflow.local.com'
     }
 }
 
-
-
+# 当前控制器所在的集群
+ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV').lower()
 
 
 

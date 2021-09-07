@@ -91,11 +91,17 @@ CREATE DATABASE IF NOT EXISTS cachedb DEFAULT CHARACTER SET utf8 DEFAULT COLLATE
   
 # 部署 管理平台  
 
-如果涉及到多集群部署，修改kubeconfig中的文件，文件名为$cluster-config
+如果涉及到多集群部署，修改kubeconfig中的文件，文件名为$cluster-config，并在每个集群中部署configmap
 
 ```bash
 kubectl delete configmap kubernetes-config -n infra
 kubectl create configmap kubernetes-config --from-file=kubeconfig -n infra
+
+kubectl delete configmap kubernetes-config -n pipeline
+kubectl create configmap kubernetes-config --from-file=kubeconfig -n pipeline
+
+kubectl delete configmap kubernetes-config -n katib
+kubectl create configmap kubernetes-config --from-file=kubeconfig -n katib
 ```
 
   
@@ -149,5 +155,14 @@ kubectl apply -f virtual.yaml
 - 训练任务会选择train=true的机器  
 - notebook会选择notebook=true的机器  
 - 服务化会选择service=true的机器  
-- 不同组织架构的人会选择对应org=xx的机器，用户的org在用户编辑中可以设置。默认不设置，则没有这个规则的机器选择限制  
+- 不同项目的任务会选择对应org=xx的机器。默认为org=public 
   
+
+# kube-scheduler调度策略
+可以参考 https://docs.qq.com/doc/DWFVqcFd0S29WUGxD
+
+
+# 版本升级
+数据库升级，数据库记录要批量添加默认值到原有记录上，不然容易添加失败
+
+
