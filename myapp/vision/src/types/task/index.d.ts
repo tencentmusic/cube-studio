@@ -7,6 +7,7 @@ export interface ITaskAdd {
   pipeline: number;
   resource_cpu: string;
   resource_memory: string;
+  [propname: string]: any;
 }
 
 // task 可编辑参数类型

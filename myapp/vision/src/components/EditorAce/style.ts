@@ -33,6 +33,7 @@ const contentStyles = mergeStyleSets({
     display: 'flex',
   },
   footer: {
+    position: 'relative',
     display: 'flex',
     padding: '24px 0',
     justifyContent: 'flex-end',

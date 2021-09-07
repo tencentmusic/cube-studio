@@ -60,8 +60,11 @@
                 case 'copy':
                     var pathArr = location.pathname.split('/');
                     pathArr[pathArr.length - 1] = event.data.message.pipelineId;
-                    location.pathname = `${pathArr.join('/')}`;
+                    window.location.pathname = `${pathArr.join('/')}`;
                     break;
+                case 'link':
+                  window.location.pathname = '/pipeline_modelview/web/' + event.data.message.pipelineId
+                  break;
                 default:
                     break;
             }

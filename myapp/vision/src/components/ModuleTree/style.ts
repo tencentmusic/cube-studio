@@ -32,6 +32,7 @@ const treeContainer = mergeStyles({
   display: 'flex',
   flexDirection: 'column',
   borderRight: '1px solid rgb(234, 234, 234)',
+  backgroundColor: '#fff',
 });
 const searchBoxStyle = mergeStyles({
   margin: '12px 16px',

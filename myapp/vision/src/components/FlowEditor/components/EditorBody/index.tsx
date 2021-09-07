@@ -12,6 +12,7 @@ import ReactFlow, {
   Connection,
   Edge,
   isEdge,
+  isNode,
 } from 'react-flow-renderer';
 import api from '@src/api';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
@@ -69,9 +70,17 @@ const EditorBody: React.FC = () => {
           pipeline: +pipelineId,
           name: taskName,
           label: `新建 ${modelInfo.name} task`,
+          volume_mount: 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+          image_pull_policy: 'Always',
+          working_dir: '',
+          command: '',
+          overwrite_entrypoint: 0,
           node_selector: 'cpu=true,train=true',
           resource_memory: '2G',
           resource_cpu: '2',
+          resource_gpu: '0',
+          timeout: 0,
+          retry: 0,
         })
         .then((res: any) => {
           if (res?.result?.id) {
@@ -122,7 +131,7 @@ const EditorBody: React.FC = () => {
   // 删除
   const onElementsRemove = (elementsToRemove: Elements) => {
     elementsToRemove.forEach(ele => {
-      if (ele?.id) {
+      if (ele?.id && isNode(ele)) {
         api
           .task_modelview_del(+ele.id)
           .then(() => {
@@ -182,9 +191,9 @@ const EditorBody: React.FC = () => {
           onSelectionChange={onSelectionChange}
         >
           {/* pipeline setting 配置板 */}
-          <Setting />
-          <MiniMap nodeStrokeColor="#8a8886" nodeColor="#c8c8c8" />
-          <Controls />
+          <Setting></Setting>
+          <MiniMap nodeStrokeColor="#8a8886" nodeColor="#c8c8c8"></MiniMap>
+          <Controls></Controls>
           {/* pipeline task 配置板 */}
           <LayerHost id="hostId_model" className="layer-host" />
         </ReactFlow>

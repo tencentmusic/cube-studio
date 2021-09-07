@@ -2,7 +2,7 @@ import { mergeStyles } from '@fluentui/react';
 const settingContainer = mergeStyles({
   display: 'flex',
   flexDirection: 'column',
-  width: 340,
+  width: 350,
   position: 'absolute',
   top: 0,
   right: 0,
@@ -10,8 +10,7 @@ const settingContainer = mergeStyles({
   height: 'auto',
   backgroundColor: '#fff',
   borderLeft: '1px solid rgb(234, 234, 234)',
-  boxShadow:
-    'rgb(0 0 0 / 18%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 22%) 0px 0.3px 0.9px 0px',
+  boxShadow: 'rgb(0 0 0 / 18%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 22%) 0px 0.3px 0.9px 0px',
   zIndex: 999,
 });
 const settingHeader = mergeStyles({

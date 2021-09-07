@@ -1,20 +1,20 @@
-import React, { useEffect } from 'react';
-import { Stack, CommandBar, ICommandBarItemProps, Icon, Spinner, SpinnerSize } from '@fluentui/react';
-import { removeElements, isNode } from 'react-flow-renderer';
-import { useAppSelector, useAppDispatch } from '../../../../models/hooks';
-import { updateErrMsg } from '../../../../models/app';
-import { selectElements, updateElements, selectSelected } from '../../../../models/element';
+import { CommandBar, ICommandBarItemProps, Icon, Spinner, SpinnerSize, Stack } from '@fluentui/react';
+import api from '@src/api';
+import { updateErrMsg } from '@src/models/app';
+import { selectElements, selectSelected, updateElements } from '@src/models/element';
+import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import {
-  selectSaved,
   savePipeline,
+  selectEditing,
   selectInfo,
   selectPipelineId,
-  selectEditing,
+  selectSaved,
   updateEditing,
-} from '../../../../models/pipeline';
-import { saveTaskList, selectTaskList } from '../../../../models/task';
-import { toggle } from '../../../../models/template';
-import api from '../../../../api';
+} from '@src/models/pipeline';
+import { saveTaskList, selectTaskList } from '@src/models/task';
+import { toggle } from '@src/models/template';
+import React, { useEffect } from 'react';
+import { isNode, removeElements } from 'react-flow-renderer';
 import style from './style';
 
 const { Item } = Stack;
@@ -54,7 +54,7 @@ const EditorTool: React.FC = () => {
       text: '保存',
       onClick: async e => {
         e?.preventDefault();
-        await dispatch(await saveTaskList());
+        dispatch(await saveTaskList());
         dispatch(savePipeline());
       },
     },
@@ -102,6 +102,21 @@ const EditorTool: React.FC = () => {
       onClick: () => {
         if (pipeline?.name) {
           window.open(`${window.location.origin}/pipeline_modelview/web/pod/${pipelineId}`);
+        }
+      },
+    },
+    {
+      buttonStyles: style.commonButton,
+      iconOnly: true,
+      key: 'timer',
+      iconProps: {
+        iconName: 'TimeEntry',
+        styles: style.commonIcon,
+      },
+      text: '定时调度',
+      onClick: () => {
+        if (pipeline?.name) {
+          window.open(`${window.location.origin}/runhistory_modelview/list/?_flt_0_pipeline=${pipelineId}`);
         }
       },
     },
@@ -158,17 +173,13 @@ const EditorTool: React.FC = () => {
         }}
       >
         {saved ? (
-          isEditing ? (
-            <>
-              <Icon iconName="AlertSolid" styles={{ root: { color: '#e95f39', marginRight: 5 } }} />
-              未保存
-            </>
-          ) : (
-            <>
-              <Icon iconName="SkypeCircleCheck" styles={{ root: { color: '#8cb93c', marginRight: 5 } }} />
-              已保存
-            </>
-          )
+          <>
+            <Icon
+              iconName={isEditing ? 'AlertSolid' : 'SkypeCircleCheck'}
+              styles={{ root: { color: isEditing ? '#e95f39' : '#8cb93c', marginRight: 5 } }}
+            />
+            {isEditing ? '未保存' : '已保存'}
+          </>
         ) : (
           <>
             <Spinner

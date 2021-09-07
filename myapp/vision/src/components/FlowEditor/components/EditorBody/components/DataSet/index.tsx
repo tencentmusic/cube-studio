@@ -7,14 +7,8 @@ import style from './style';
 const DataSet: React.FC<NodeProps> = props => {
   return (
     <>
-      <Handle
-        type="target"
-        position={Position.Top}
-        className={style.handleStyle}
-      />
-      <div
-        className={props.selected ? style.nodeOnSelect : style.nodeContainer}
-      >
+      <Handle type="target" position={Position.Top} className={style.handleStyle} />
+      <div className={props.selected ? style.nodeOnSelect : style.nodeContainer}>
         <div className={style.nodeBar}></div>
         <div className={style.nodeContent}>
           <div className={style.nodeConentTitleBar}>
@@ -25,11 +19,7 @@ const DataSet: React.FC<NodeProps> = props => {
           </div>
         </div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className={style.handleStyle}
-      />
+      <Handle type="source" position={Position.Bottom} className={style.handleStyle} />
       {/* 配置板 */}
       <Layer hostId="hostId_model" className="data-set-layer">
         <Model model={props}></Model>

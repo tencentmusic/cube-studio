@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Icon, IconButton, PrimaryButton, DefaultButton, Stack } from '@fluentui/react';
+import { Icon, IconButton, PrimaryButton, DefaultButton, Stack, MessageBar, MessageBarType } from '@fluentui/react';
 import MonacoEditor from 'react-monaco-editor';
-// import VisualizedData from './components/VisualizedData';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { selectShowEditor, updateShowEditor, selectValue, updateValue } from '@src/models/editor';
+import { isJsonString } from '@src/utils/index';
 import style from './style';
 
 const EditorAce: React.FC = () => {
@@ -11,14 +11,20 @@ const EditorAce: React.FC = () => {
   const showModal = useAppSelector(selectShowEditor);
   const value = useAppSelector(selectValue);
   const [current, setCurrent] = useState('');
-  const [codeWidth, setCodeWidth] = useState<string | number>('50%');
+  const [codeWidth, setCodeWidth] = useState<string | number>('100%');
   const [dragging, setDragging] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const handleConfirm = () => {
+    if (!isJsonString(current)) {
+      setIsError(true);
+      return;
+    }
     dispatch(updateValue(current));
     dispatch(updateShowEditor(false));
   };
   const handleCancel = () => {
+    setIsError(false);
     dispatch(updateShowEditor(false));
   };
   const onMouseDown = () => {
@@ -66,9 +72,11 @@ const EditorAce: React.FC = () => {
               theme="vs"
               value={current}
               onChange={value => {
+                setIsError(false);
                 setCurrent(value);
               }}
               options={{
+                renderValidationDecorations: 'on',
                 automaticLayout: true,
                 formatOnPaste: true,
                 formatOnType: true,
@@ -96,6 +104,21 @@ const EditorAce: React.FC = () => {
           </div>
         </div>
         <div className={style.contentStyles.footer}>
+          {isError ? (
+            <MessageBar
+              messageBarType={MessageBarType.error}
+              styles={{
+                root: {
+                  position: 'absolute',
+                  width: '50%',
+                  left: 0,
+                },
+              }}
+              isMultiline={false}
+            >
+              JSON 格式错误
+            </MessageBar>
+          ) : null}
           <PrimaryButton styles={{ root: { marginRight: 10 } }} onClick={handleConfirm}>
             确认
           </PrimaryButton>

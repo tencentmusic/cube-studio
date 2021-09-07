@@ -1,20 +1,10 @@
 import React from 'react';
-import {
-  Stack,
-  TooltipHost,
-  IconButton,
-  PrimaryButton,
-  DefaultButton,
-} from '@fluentui/react';
+import { Stack, TooltipHost, IconButton, PrimaryButton, DefaultButton } from '@fluentui/react';
 import moment from 'moment';
 import ErrorTips from '../ErrorTips';
 import { useAppSelector, useAppDispatch } from '../../../../models/hooks';
 import { updateErrMsg } from '../../../../models/app';
-import {
-  selectPipelineId,
-  selectInfo,
-  savePipeline,
-} from '../../../../models/pipeline';
+import { selectPipelineId, selectInfo, savePipeline } from '../../../../models/pipeline';
 import { saveTaskList } from '../../../../models/task';
 import { toggle } from '../../../../models/setting';
 import api from '../../../../api';
@@ -55,20 +45,13 @@ const EditorHead: React.FC = () => {
     if (pipelineId) {
       await dispatch(await saveTaskList());
       dispatch(savePipeline());
-      window.open(
-        `${window.location.origin}/pipeline_modelview/run_pipeline/${pipelineId}`,
-      );
+      window.open(`${window.location.origin}/pipeline_modelview/run_pipeline/${pipelineId}`);
     }
   };
 
   return (
     <Item className="editor-head">
-      <Stack
-        horizontal
-        horizontalAlign="space-between"
-        verticalAlign="center"
-        styles={style.headStyle}
-      >
+      <Stack horizontal horizontalAlign="space-between" verticalAlign="center" styles={style.headStyle}>
         <Item grow={1}>
           <Stack horizontal>
             <Item>
@@ -139,9 +122,7 @@ const EditorHead: React.FC = () => {
                     })
                     .catch(err => {
                       if (err.response) {
-                        dispatch(
-                          updateErrMsg({ msg: err.response.data.message }),
-                        );
+                        dispatch(updateErrMsg({ msg: err.response.data.message }));
                       }
                     });
                 }}

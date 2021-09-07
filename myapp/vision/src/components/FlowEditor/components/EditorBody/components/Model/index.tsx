@@ -1,5 +1,13 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { CommandBar, ICommandBarItemProps, TextField, Dropdown, IDropdownOption, ActionButton } from '@fluentui/react';
+import {
+  CommandBar,
+  ICommandBarItemProps,
+  TextField,
+  Dropdown,
+  IDropdownOption,
+  ActionButton,
+  Label,
+} from '@fluentui/react';
 import api from '@src/api';
 import { updateErrMsg } from '@src/models/app';
 import { updateShowEditor, updateKeyValue, selectShowEditor, selectKey, selectValue } from '@src/models/editor';
@@ -99,7 +107,6 @@ const Model: React.FC<ModelProps> = props => {
   // 从接口获取数据展示 task 配置面板
   useEffect(() => {
     if (props.model.selected) {
-      console.log(+props.model.id);
       dispatch(updateTaskId(+props.model.id));
       if (Object.keys(task).length === 0) {
         api
@@ -232,7 +239,7 @@ const Model: React.FC<ModelProps> = props => {
             }}
             value={task?.label || ''}
           />
-          <div className={style.splitLine}></div>
+          {/* <div className={style.splitLine}></div>
           <TextField
             label="挂载目录"
             description="外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录"
@@ -269,7 +276,7 @@ const Model: React.FC<ModelProps> = props => {
               handleOnChange('node_selector', value ? value : '');
             }}
             value={task?.node_selector || ''}
-          />
+          /> */}
           <div className={style.splitLine}></div>
           <TextField
             label="内存申请"
@@ -339,7 +346,7 @@ const Model: React.FC<ModelProps> = props => {
                   {options.length > 0 ? (
                     <>
                       <Dropdown
-                        label={`${cur} ${key}`}
+                        label={`${key}`}
                         onChange={(event: FormEvent, option?: IDropdownOption) => {
                           handleOnChange(key, `${option?.text}` || '', args.type);
                         }}
@@ -355,7 +362,7 @@ const Model: React.FC<ModelProps> = props => {
                       onRenderLabel={() => {
                         return (
                           <div className={style.textLabelStyle}>
-                            {`${cur} ${key}`}
+                            {`${key}`}
                             {args.type === 'json' ? (
                               <ActionButton
                                 iconProps={{ iconName: 'FullWidthEdit' }}
@@ -393,12 +400,19 @@ const Model: React.FC<ModelProps> = props => {
                       disabled={args.editable !== 1 || args.type === 'json'}
                     />
                   )}
-                  <div className={style.splitLine}></div>
                 </React.Fragment>
               );
             });
 
-            acc.push(mapCurrent.flat() as never);
+            acc.push(
+              (
+                <React.Fragment key={cur}>
+                  <Label>参数 {cur}</Label>
+                  {mapCurrent.flat()}
+                  <div className={style.splitLine}></div>
+                </React.Fragment>
+              ) as never,
+            );
             return acc;
           }, [])}
         </div>

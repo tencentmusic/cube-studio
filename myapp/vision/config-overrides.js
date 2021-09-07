@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const path = require('path');
 const paths = require('react-scripts/config/paths');
 
@@ -8,6 +9,7 @@ paths.appBuild = path.join(path.dirname(paths.appBuild), '../static/appbuilder/v
 
 module.exports = {
   webpack: config => {
+    config.devtool = false;
     // alias
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -20,6 +22,12 @@ module.exports = {
         languages: ['json'],
       }),
     );
+
+    if (process.env.NODE_ENV !== 'production') {
+      config.plugins.push(
+        new BundleAnalyzerPlugin()
+      )
+    }
 
     return config;
   },

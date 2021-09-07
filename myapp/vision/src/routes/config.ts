@@ -12,6 +12,11 @@ const config: Array<IRoute> = [
     path: '/',
     component: lazy(() => import('../pages/Index')),
   },
+  {
+    name: 'home',
+    path: '/home',
+    component: lazy(() => import('../pages/Home')),
+  },
 ];
 
 export default config;

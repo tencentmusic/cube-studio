@@ -2,8 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppThunk } from '../store';
 import { updateErrMsg } from '../app';
 import { selectElements } from '../element';
-import api from '../../api';
-import getParamter from '../../utils/getParamter';
+import api from '@src/api';
+import getParamter from '@src/utils/getParamter';
 
 export interface PipelineState {
   pipelineId: number | string;
@@ -11,6 +11,7 @@ export interface PipelineState {
   saved: boolean;
   changed: any;
   editing: boolean;
+  pipelineList: any[];
 }
 
 const initialState: PipelineState = {
@@ -19,6 +20,7 @@ const initialState: PipelineState = {
   saved: true,
   changed: {},
   editing: false,
+  pipelineList: [],
 };
 
 const pipelineSlice = createSlice({
@@ -40,18 +42,39 @@ const pipelineSlice = createSlice({
     updateEditing: (state, action: PayloadAction<boolean>) => {
       state.editing = action.payload;
     },
+    updatePipelineList: (state, action: PayloadAction<any[]>) => {
+      state.pipelineList = action.payload;
+    },
   },
 });
 
-export const { updatePipelineId, updateInfo, updateSaved, updateChanged, updateEditing } = pipelineSlice.actions;
+export const { updatePipelineId, updateInfo, updateSaved, updateChanged, updateEditing, updatePipelineList } =
+  pipelineSlice.actions;
 
 export const selectPipelineId = (state: RootState): PipelineState['pipelineId'] => state.pipeline.pipelineId;
 export const selectInfo = (state: RootState): PipelineState['info'] => state.pipeline.info;
 export const selectSaved = (state: RootState): PipelineState['saved'] => state.pipeline.saved;
 export const selectChanged = (state: RootState): PipelineState['changed'] => state.pipeline.changed;
 export const selectEditing = (state: RootState): PipelineState['editing'] => state.pipeline.editing;
+export const selectPipelineList = (state: RootState): PipelineState['pipelineList'] => state.pipeline.pipelineList;
 
-// 获取流水线
+export const getPipelineList = (): AppThunk => dispatch => {
+  api.pipeline_modelview_list().then(res => {
+    if (res?.status === 0) {
+      const list = res.result.map((item: any) => {
+        return {
+          id: item.id,
+          name: item.name,
+          describe: item.describe,
+          changed_on: item.changed_on,
+        };
+      });
+      dispatch(updatePipelineList(list));
+    }
+  });
+};
+
+// 获取当前流水线信息
 export const getPipeline = (): AppThunk => (dispatch, getState) => {
   const state = getState();
   const pipelineId = selectPipelineId(state);

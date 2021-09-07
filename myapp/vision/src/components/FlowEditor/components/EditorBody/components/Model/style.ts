@@ -10,8 +10,7 @@ const modelContainer = mergeStyles({
   height: 'auto',
   backgroundColor: '#fff',
   borderLeft: '1px solid rgb(234, 234, 234)',
-  boxShadow:
-    'rgb(0 0 0 / 18%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 22%) 0px 0.3px 0.9px 0px',
+  boxShadow: 'rgb(0 0 0 / 18%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 22%) 0px 0.3px 0.9px 0px',
   zIndex: 998,
 });
 const modelHeader = mergeStyles({

@@ -9,13 +9,18 @@ const job_template_modelview = (): Promise<any> => {
 
 // 获取项目组
 const project_modelview = (): Promise<any> => {
-  return ajax.get('/project_modelview/api/');
+  return ajax.get('/project_modelview/org/api/');
 };
 
 // 新增流水线
 
 const pipeline_modelview_add = (data: IPipelineAdd): Promise<any> => {
   return ajax.post({ url: '/pipeline_modelview/api/', data });
+};
+
+// 获取流水线列表
+const pipeline_modelview_list = (): Promise<any> => {
+  return ajax.get('/pipeline_modelview/my/list/');
 };
 
 // 获取流水线信息
@@ -93,6 +98,7 @@ const api = {
   job_template_modelview,
   project_modelview,
   pipeline_modelview_add,
+  pipeline_modelview_list,
   pipeline_modelview_detail,
   pipeline_modelview_edit,
   pipeline_modelview_run,

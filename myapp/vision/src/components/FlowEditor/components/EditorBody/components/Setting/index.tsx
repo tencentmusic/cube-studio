@@ -4,7 +4,7 @@ import { isEdge } from 'react-flow-renderer';
 import api from '@src/api';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { selectElements } from '@src/models/element';
-import { selectInfo, updateChanged, updateEditing } from '@src/models/pipeline';
+import { selectInfo, updateChanged, updateEditing, selectChanged } from '@src/models/pipeline';
 import { selectShow, toggle } from '@src/models/setting';
 import style from './style';
 
@@ -12,9 +12,9 @@ const Setting: React.FC = () => {
   const dispatch = useAppDispatch();
   const pipelineInfo = useAppSelector(selectInfo);
   const settingShow = useAppSelector(selectShow);
+  const pipelineChanged = useAppSelector(selectChanged);
   const elements = useAppSelector(selectElements);
   const [current, setCurrent] = useState<any>({});
-  const [pipelineChanged, setPipelineChanged] = useState({});
   const [dropItem, setDropItem] = useState([]);
   const [selectedItem, setSelectedItem] = useState<IDropdownOption>();
 
@@ -29,7 +29,7 @@ const Setting: React.FC = () => {
     }
     if (pipelineInfo) {
       setCurrent({ ...current, ...obj });
-      setPipelineChanged({ ...pipelineChanged, ...obj });
+      dispatch(updateChanged({ ...pipelineChanged, ...obj }));
     }
   };
 
@@ -47,7 +47,6 @@ const Setting: React.FC = () => {
 
   // 将 setting 编辑变化的数据同步至 redux
   useEffect(() => {
-    dispatch(updateChanged(pipelineChanged));
     if (Object.keys(pipelineChanged).length > 1) {
       dispatch(updateEditing(true));
     }
@@ -92,10 +91,12 @@ const Setting: React.FC = () => {
       ...current,
       ...{ dag_json: JSON.stringify(dag_json, undefined, 4) },
     });
-    setPipelineChanged({
-      ...pipelineChanged,
-      ...{ dag_json: JSON.stringify(dag_json) },
-    });
+    dispatch(
+      updateChanged({
+        ...pipelineChanged,
+        ...{ dag_json: JSON.stringify(dag_json) },
+      }),
+    );
   }, [elements]);
 
   return (
@@ -106,7 +107,7 @@ const Setting: React.FC = () => {
       className={style.settingContainer}
     >
       <div className={style.settingHeader}>
-        <div className={style.headerTitle}>Setting</div>
+        <div className={style.headerTitle}>流水线设置</div>
         <IconButton
           iconProps={{
             iconName: 'ChromeClose',
@@ -193,13 +194,35 @@ const Setting: React.FC = () => {
           <Dropdown
             label="镜像拉取策略"
             options={[
-              { key: 'always', text: 'Always' },
-              { key: 'ifNotPresent', text: 'IfNotPresent' },
+              { key: 'Always', text: 'Always' },
+              { key: 'IfNotPresent', text: 'IfNotPresent' },
             ]}
-            defaultSelectedKey="always"
+            selectedKey={current.image_pull_policy}
             onChange={(event: FormEvent, option?: IDropdownOption) => {
               handleOnChange('image_pull_policy', `${option?.text}` || '');
             }}
+          />
+          <div className={style.splitLine}></div>
+          <Dropdown
+            label="过往依赖"
+            options={[
+              { key: 'true', text: '是', data: true },
+              { key: 'false', text: '否', data: false },
+            ]}
+            selectedKey={`${current.depends_on_past}`}
+            onChange={(event: FormEvent, option?: IDropdownOption) => {
+              handleOnChange('depends_on_past', option?.data || true);
+            }}
+          />
+          <div className={style.splitLine}></div>
+          <TextField
+            label="最大激活运行数"
+            description="当前pipeline可同时运行的任务流实例数目"
+            onChange={(event: FormEvent, value?: string) => {
+              handleOnChange('max_active_runs', value ? +value : '');
+            }}
+            value={current?.max_active_runs || ''}
+            required
           />
           <div className={style.splitLine}></div>
           <TextField
