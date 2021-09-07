@@ -11,9 +11,9 @@ bases:
 - ../base/pipeline/cluster-scoped
 #- ../base/cache-deployer/cluster-scoped
 #vars:
-## NOTE: var name must be unique globally to allow composition of multiple kustomize
-## packages. Therefore, we added prefix `kfp-cluster-scoped-` to distinguish it from
-## others.
+# NOTE: var name must be unique globally to allow composition of multiple kustomize
+# packages. Therefore, we added prefix `kfp-cluster-scoped-` to distinguish it from
+# others.
 #- name: kfp-cluster-scoped-namespace
 #  objref:
 #    # cache deployer sa's metadata.namespace will be first transformed by namespace field in kustomization.yaml
@@ -25,4 +25,3 @@ bases:
 #    fieldpath: metadata.namespace
 configurations:
 - params.yaml
-

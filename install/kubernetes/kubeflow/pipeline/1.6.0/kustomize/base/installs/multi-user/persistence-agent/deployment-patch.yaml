@@ -9,5 +9,5 @@ spec:
       - name: ml-pipeline-persistenceagent
         env:
         - name: NAMESPACE
-          value: 'pipeline'
+          value: ''
           valueFrom: null

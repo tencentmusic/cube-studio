@@ -10,5 +10,7 @@ spec:
     protocol: TCP
     port: 80
     targetPort: 3000
+    nodePort: 30004
+  type: NodePort
   selector:
     app: ml-pipeline-ui

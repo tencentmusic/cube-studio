@@ -23,7 +23,9 @@ spec:
               name: pipeline-install-config
               key: autoUpdatePipelineDefaultVersion
         - name: POD_NAMESPACE
-          value: pipeline
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         - name: OBJECTSTORECONFIG_SECURE
           value: "false"
         - name: OBJECTSTORECONFIG_BUCKETNAME

@@ -19,21 +19,31 @@ kubeflow每一部分相应的可以独立升级
 ```
 
 
-1.6.0 版本替换为自己的mysql数据库（未测试）
-```
-注释pipeline/1.6.0/kustomize/cluster-scoped-resources/kustomization.yaml中的 cache部署 ,namespace的部署
-注释pipeline/1.6.0/kustomize/base/installs/generic/kustomization.yaml中的cache部署
-注释pipeline/1.6.0/kustomize/env/platform-agnostic/kustomization.yaml 中的 mysql部署
-修改pipeline/1.6.0/kustomize/base/installs/generic/mysql-secret.yaml 中的mysql账号密码
-修改pipeline/1.6.0/kustomize/base/installs/generic/pipeline-install-config.yaml 中mysql的地址信息
+1.6.0 版本更改
 
+	为所有的Deployment打上节点亲和度补丁
+	修改流水线执行的命名空间
+	修改mysql服务host和密码为自己部署的
+	minio不要用subPath,rancher部署的集群不支持
+	minio-pvc 加一个selector
+	修改 metadata-writer 的 NAMESPACE_TO_WATCH 环境变量
+	修改 ml-pipeline 的 POD_NAMESPACE 环境变量
+	修改 ml-pipeline-persistenceagent 的 NAMESPACE 环境变量
+	所有镜像拉取策略改为IfNotPresent
+	修改某些跨命名空间的serviceaccount权限
+	不部署cache模块和mysql模块
 
 部署1.6.0版本
-cd pipeline/1.6.0/kustomize
-kubectl apply -k cluster-scoped-resources/
-kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
-kubectl apply -k env/platform-agnostic/
-```
+
+	cd pipeline/1.0.6/kustomize  
+	kustomize build cluster-scoped-resources/ | kubectl apply -f -
+	kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s  
+	kustomize build env/platform-agnostic/  | kubectl apply -f -
+	kubectl wait applications/pipeline -n kubeflow --for condition=Ready --timeout=1800s  
+	# 注意：1.6.0版本初始化时如果检测到mysql里有mlpipeline库，不会在里面建表。所以部署前保证mlpipeline库已经建好表
+	#或者没有mlpipeline库
+	# 注意：需要kustomize版本大于v3.0.0，安装可下载releases：https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv4.3.0
+	#如果kubectl版本大于等于v1.22.1，也可以直接用kubectl apply -k 安装。
 
 1.0.4版本替换为自己的mysql
 ```

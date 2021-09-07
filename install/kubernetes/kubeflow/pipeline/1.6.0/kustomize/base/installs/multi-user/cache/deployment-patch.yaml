@@ -9,5 +9,5 @@ spec:
       - name: server
         env:
           - name: NAMESPACE_TO_WATCH
-            value: 'pipeline'
+            value: ''
             valueFrom: null

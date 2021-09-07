@@ -56,7 +56,9 @@ spec:
                 name: mysql-secret
                 key: password
           - name: NAMESPACE_TO_WATCH
-            value: pipeline
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
         args: ["--db_driver=$(DBCONFIG_DRIVER)",
                "--db_host=$(DBCONFIG_HOST_NAME)",
                "--db_port=$(DBCONFIG_PORT)",

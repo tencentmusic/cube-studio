@@ -17,3 +17,132 @@ commonLabels:
 # !!! If you want to customize the namespace,
 # please also update base/cache-deployer/cluster-scoped/cache-deployer-clusterrolebinding.yaml
 namespace: kubeflow
+
+patches:
+# 为所有的Deployment打上节点亲和度补丁
+- path: affinity_patch.yaml
+  target:
+    kind: Deployment
+# 修改流水线执行的命名空间
+- patch: |
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: "--managed-namespace"
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: "pipeline"
+  target:
+    kind: Deployment
+    name: workflow-controller
+# 修改mysql密码
+- patch: |
+    - op: replace
+      path: /stringData/password
+      value: "admin"
+  target:
+    kind: Secret
+    name: mysql-secret
+# 修改mysql服务host
+- patch: |
+    - op: replace
+      path: /data/dbHost
+      value: "mysql-service.infra"
+  target:
+    kind: ConfigMap
+    name: pipeline-install-config
+# minio不要用subPath,rancher部署的集群不支持
+- patch: |
+    - op: remove
+      path: /spec/template/spec/containers/0/volumeMounts/0/subPath
+  target:
+    kind: Deployment
+    name: minio
+# minio-pvc 加一个selector
+- path: minio_pvc_selector_patch.yaml
+  target:
+    kind: PersistentVolumeClaim
+    name: minio-pvc
+# 修改 metadata-writer 的 NAMESPACE_TO_WATCH 环境变量
+- patch: |
+    - op: replace
+      path: /spec/template/spec/containers/0/env/0/value
+      value: "pipeline"
+    - op: remove
+      path: /spec/template/spec/containers/0/env/0/valueFrom
+  target:
+    kind: Deployment
+    name: metadata-writer
+# 修改 ml-pipeline 的 POD_NAMESPACE 环境变量
+- patch: |
+    - op: replace
+      path: /spec/template/spec/containers/0/env/1/value
+      value: "pipeline"
+    - op: remove
+      path: /spec/template/spec/containers/0/env/1/valueFrom
+  target:
+    kind: Deployment
+    name: ml-pipeline
+# 修改 ml-pipeline-persistenceagent 的 NAMESPACE 环境变量
+- patch: |
+    - op: replace
+      path: /spec/template/spec/containers/0/env/0/value
+      value: "pipeline"
+    - op: remove
+      path: /spec/template/spec/containers/0/env/0/valueFrom
+  target:
+    kind: Deployment
+    name: ml-pipeline-persistenceagent
+# 所有镜像拉取策略改为IfNotPresent
+- patch: |
+    - op: replace
+      path: /spec/template/spec/containers/0/imagePullPolicy
+      value: "IfNotPresent"
+  target:
+    kind: Deployment
+# 部分serviceaccount权限增大
+- patch: |
+    - op: replace
+      path: /kind
+      value: "ClusterRoleBinding"
+    - op: replace
+      path: /roleRef/kind
+      value: "ClusterRole"
+    - op: add
+      path: /subjects/0/namespace
+      value: "kubeflow"
+  target:
+    kind: RoleBinding
+    name: ml-pipeline-persistenceagent-binding|argo-binding|kubeflow-pipelines-metadata-writer-binding|ml-pipeline|ml-pipeline-scheduledworkflow-binding|ml-pipeline-ui|ml-pipeline-viewer-crd-service-account-binding
+- patch: |
+    - op: replace
+      path: /kind
+      value: "ClusterRoleBinding"
+    - op: replace
+      path: /roleRef/kind
+      value: "ClusterRole"
+    - op: add
+      path: /subjects/0/namespace
+      value: "pipeline"
+  target:
+    kind: RoleBinding
+    name: pipeline-runner-binding
+- patch: |
+    - op: replace
+      path: /kind
+      value: "ClusterRole"
+    - op: replace
+      path: /metadata/namespace
+      value: ""
+  target:
+    kind: Role
+    name: ml-pipeline-persistenceagent-role|argo-role|kubeflow-pipelines-metadata-writer-role|ml-pipeline|ml-pipeline-scheduledworkflow-role|ml-pipeline-ui|ml-pipeline-viewer-crd-service-account-role|pipeline-runner
+
+# 删除mysql、cache、cache-deployer的部署
+#- patch: |
+#    - op: remove
+#      path: /
+#  target:
+#    name: cache.*
+
+#patchesStrategicMerge:
+#- remove_patch.yaml
