@@ -22,7 +22,7 @@ from myapp.project import push_admin,push_message
 import pymysql
 conf=app.config
 
-cluster=os.getenv('CLUSTER','').lower()
+cluster=os.getenv('ENVIRONMENT','').lower()
 if not cluster:
     print('no cluster %s'%cluster)
     exit(1)

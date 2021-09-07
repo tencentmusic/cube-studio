@@ -30,7 +30,7 @@ from myapp.utils.py.py_prometheus import Prometheus
 
 prometheus = Prometheus(conf.get('PROMETHEUS',''))
 
-cluster=os.getenv('CLUSTER','').lower()
+cluster=os.getenv('ENVIRONMENT','').lower()
 if not cluster:
     print('no cluster %s'%cluster)
     exit(1)
@@ -188,7 +188,7 @@ def save_monitoring(pytorchjob,dbsession):
             task_id = json.loads(pytorchjob.labels).get('task-id','')
             if task_id:
                 task = dbsession.query(Task).filter_by(id=int(task_id)).first()
-                metrics = prometheus.get_metric(pytorchjob.name, namespace='pipeline')
+                metrics = prometheus.get_resource_metric(pytorchjob.name, namespace='pipeline')
                 monitoring = json.loads(task.monitoring) if task and task.monitoring else {}
 
                 pytorchjob_monitoring = monitoring.get('pytorchjob', [])

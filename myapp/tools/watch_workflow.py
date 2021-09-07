@@ -27,7 +27,7 @@ from myapp.utils.celery import session_scope
 conf=app.config
 prometheus = Prometheus(conf.get('PROMETHEUS',''))
 
-cluster=os.getenv('CLUSTER','').lower()
+cluster=os.getenv('ENVIRONMENT','').lower()
 if not cluster:
     print('no cluster %s'%cluster)
     exit(1)
@@ -119,6 +119,7 @@ def check_has_push(crd,dbsession):
 
         workflow.create_time = crd['create_time']
         workflow.status = crd['status']
+        workflow.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         workflow.annotations = json.dumps(crd['annotations'],indent=4,ensure_ascii=False)
         workflow.labels = json.dumps(crd['labels'],indent=4,ensure_ascii=False)
         workflow.spec = json.dumps(crd['spec'],indent=4,ensure_ascii=False),
@@ -204,7 +205,7 @@ def push_task_time(workflow,dbsession):
     if pipeline_id and pods:
         pipeline = dbsession.query(Pipeline).filter_by(id=pipeline_id).first()
         if pipeline:
-            message='\n%s，各task耗时，酌情优化:\n'%pipeline.describe
+            message='\n%s %s，各task耗时，酌情优化:\n'%(pipeline.describe,pipeline.created_by.username)
             task_pod_time={}
             for pod_name in pods:
                 # print(pods[pod_name])
@@ -272,7 +273,7 @@ def save_monitoring(workflow,dbsession):
                     task_name = task_name[:task_name.index('(')] if '(' in task_name else task_name
 
                     task = dbsession.query(Task).filter(Task.pipeline_id == int(pipeline_id)).filter(Task.name == task_name).first()
-                    metrics = prometheus.get_metric(pod_name, namespace='pipeline')
+                    metrics = prometheus.get_resource_metric(pod_name, namespace='pipeline')
                     monitoring = json.loads(task.monitoring) if task and task.monitoring else {}
                     task_monitoring = monitoring.get('task',[])
                     if metrics:
