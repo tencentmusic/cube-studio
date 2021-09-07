@@ -1,4 +1,4 @@
-# docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2020.10.01 -f install/docker/Dockerfile .
+# docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.09.01 -f install/docker/Dockerfile .
 
 FROM ai.tencentmusic.com/tme-public/kubeflow-dashboard:base
 
@@ -15,7 +15,7 @@ RUN mkdir /kubeflow && wget -P /kubeflow/ https://docker-76009.sz.gfp.tencent-cl
 #RUN pip install kubernetes==10.0.0
 # kfserving需要kubernetes 12.0版本
 RUN pip install kubernetes==12.0.1
-
+COPY install/docker/docker-add-file/rest.py /usr/local/lib/python3.6/dist-packages/kubernetes/client/rest.py
 COPY install/docker/docker-add-file/__init__.py /usr/local/lib/python3.6/dist-packages/marshmallow_enum/__init__.py
 
 COPY myapp /home/myapp/myapp
