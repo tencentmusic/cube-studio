@@ -136,6 +136,15 @@ patches:
   target:
     kind: Role
     name: ml-pipeline-persistenceagent-role|argo-role|kubeflow-pipelines-metadata-writer-role|ml-pipeline|ml-pipeline-scheduledworkflow-role|ml-pipeline-ui|ml-pipeline-viewer-crd-service-account-role|pipeline-runner
+# resource去掉,容易造成日志过多的时候挂掉
+#- patch: |
+#    - op: replace
+#      path: /data/executor
+#      value:
+#        imagePullPolicy: IfNotPresent
+#  target:
+#    kind: ConfigMap
+#    name: workflow-controller-configmap
 
 # 删除mysql、cache、cache-deployer的部署
 #- patch: |

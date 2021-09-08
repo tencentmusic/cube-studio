@@ -30,10 +30,10 @@ data:
         key: secretkey
   executor: |
     imagePullPolicy: IfNotPresent
-    resources:
-      requests:
-        cpu: 0.01
-        memory: 32Mi
-      limits:
-        cpu: 0.5
-        memory: 512Mi
+#    resources:
+#      requests:
+#        cpu: 0.01
+#        memory: 32Mi
+#      limits:
+#        cpu: 0.5
+#        memory: 512Mi

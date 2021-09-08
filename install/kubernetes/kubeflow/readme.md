@@ -35,7 +35,7 @@ kubeflow每一部分相应的可以独立升级
 
 部署1.6.0版本
 
-	cd pipeline/1.0.6/kustomize  
+	cd pipeline/1.6.0/kustomize  
 	kustomize build cluster-scoped-resources/ | kubectl apply -f -
 	kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s  
 	kustomize build env/platform-agnostic/  | kubectl apply -f -
