@@ -291,7 +291,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
             ops = kfp.dsl.ContainerOp(
                 name=task.name,
                 image=json.loads(task.args).get('images'),
-                command=json.loads(task.args).get('command'),
+                command=['bash','-c',json.loads(task.args).get('command')],
                 container_kwargs=container_kwargs,
                 file_outputs = json.loads(task.outputs) if task.outputs and json.loads(task.outputs) else None
             )

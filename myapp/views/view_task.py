@@ -653,7 +653,7 @@ class Task_ModelView_Base():
                 pod_name=pod_name,
                 image=json.loads(task.args)['images'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else task.job_template.images.name,
                 working_dir=json.loads(task.args)['workdir'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else task.job_template.workdir,
-                command=json.loads(task.args)['command'] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else command,
+                command=['bash','-c',json.loads(task.args)['command']] if task.job_template.name == conf.get('CUSTOMIZE_JOB') else command,
                 args=None if task.job_template.name == conf.get('CUSTOMIZE_JOB') else ops_args)
 
 
