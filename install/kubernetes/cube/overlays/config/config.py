@@ -736,7 +736,7 @@ WORKSPACE_HOST_PATH = '/data/k8s/kubeflow/pipeline/workspace'
 ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 # prometheus地址
 PROMETHEUS = 'prometheus-k8s.monitoring:9090'
-KFP_HOST = "ml-pipeline.kubeflow:8888"
+KFP_HOST = "http://ml-pipeline.kubeflow:8888"
 
 NNI_IMAGES='ai.tencentmusic.com/tme-public/nni:20211003'
 
@@ -792,7 +792,7 @@ CLUSTERS={
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
         "K8S_DASHBOARD_CLUSTER":'http://kubeflow.local.com/k8s/dashboard/cluster/',
-        "KFP_HOST": 'xx.xx.xx.xx:8888',
+        "KFP_HOST": 'http://xx.xx.xx.xx:8888',
         "PIPELINE_URL": 'http://kubeflow.local.com/pipeline/#/',
         "JUPYTER_DOMAIN":"kubeflow.local.com",
         "NNI_DOMAIN":'kubeflow.local.com'

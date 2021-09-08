@@ -988,7 +988,7 @@ class Pipeline_ModelView_Base():
                 workflow = db.session.query(Workflow).filter_by(name=crd['name']).first()
                 if not workflow:
                     username = ''
-                    labels = json.loads(workflow['labels'])
+                    labels = json.loads(crd['labels'])
                     if 'run-rtx' in labels:
                         username = labels['run-rtx']
                     elif 'upload-rtx' in labels:
