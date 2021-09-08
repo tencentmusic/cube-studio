@@ -40,6 +40,7 @@ kubeflow每一部分相应的可以独立升级
 	kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s  
 	kustomize build env/platform-agnostic/  | kubectl apply -f -
 	kubectl wait applications/pipeline -n kubeflow --for condition=Ready --timeout=1800s  
+	# 注意：部署前需要在env/platform-agnostic/kustomize.yaml第41、49、51行分别填写mysql的账号、密码、host。如果是用教程默认部署的mysql，则不用修改。
 	# 注意：1.6.0版本初始化时如果检测到mysql里有mlpipeline库，不会在里面建表。所以部署前保证mlpipeline库已经建好表
 	#或者没有mlpipeline库
 	# 注意：需要kustomize版本大于v3.0.0，安装可下载releases：https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv4.3.0

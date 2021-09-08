@@ -34,6 +34,14 @@ patches:
   target:
     kind: Deployment
     name: workflow-controller
+# 修改mysql账号
+- patch: |
+    - op: replace
+      path: /stringData/username
+      value: "root"
+  target:
+    kind: Secret
+    name: mysql-secret
 # 修改mysql密码
 - patch: |
     - op: replace
