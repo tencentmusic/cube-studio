@@ -31,15 +31,21 @@ images = ['gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
           'gcr.io/kubeflow-images-public/profile-controller:vmaster-ga49f658f',
           'gcr.io/kubeflow-images-public/ingress-setup:latest']
 
-new_pipline = ['argoproj/workflow-controller:v2.3.0', 'gcr.io/ml-pipeline/metadata-envoy:1.0.4',
-               'gcr.io/ml-pipeline/api-server:1.0.4', 'gcr.io/ml-pipeline/argoexec:v2.7.5-license-compliance',
-               'gcr.io/ml-pipeline/minio:RELEASE.2019-08-14T20-37-41Z-license-compliance',
-               'gcr.io/ml-pipeline/persistenceagent:1.0.4', 'gcr.io/tfx-oss-public/ml_metadata_store_server:0.22.1',
-               'gcr.io/ml-pipeline/frontend:1.0.4', 'gcr.io/ml-pipeline/metadata-writer:1.0.4',
-               'gcr.io/ml-pipeline/scheduledworkflow:1.0.4', 'gcr.io/ml-pipeline/viewer-crd-controller:1.0.4',
-               'gcr.io/ml-pipeline/visualization-server:1.0.4',
-               'gcr.io/ml-pipeline/application-crd-controller:1.0-beta-non-cluster-role',
-               'gcr.io/ml-pipeline/workflow-controller:v2.7.5-license-compliance', 'gcr.io/ml-pipeline/mysql:5.6']
+new_pipline = [
+    'gcr.io/ml-pipeline/api-server:1.6.0',
+    'gcr.io/ml-pipeline/viewer-crd-controller:1.6.0',
+    'gcr.io/ml-pipeline/minio:RELEASE.2019-08-14T20-37-41Z-license-compliance',
+    'gcr.io/ml-pipeline/workflow-controller:v2.12.9-license-compliance',
+    'gcr.io/ml-pipeline/frontend:1.6.0',
+    'gcr.io/ml-pipeline/scheduledworkflow:1.6.0',
+    'gcr.io/ml-pipeline/persistenceagent:1.6.0',
+    'gcr.io/ml-pipeline/visualization-server:1.6.0',
+    'gcr.io/ml-pipeline/metadata-envoy:1.6.0',
+    'gcr.io/ml-pipeline/metadata-writer:1.6.0',
+    'gcr.io/tfx-oss-public/ml_metadata_store_server:0.30.0',
+    "gcr.io/ml-pipeline/argoexec:v2.7.5-license-compliance"
+]
+
 
 new_katib = ['docker.io/kubeflowkatib/katib-ui:v1beta1-a96ff59',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-db-manager', 'mysql:5.7',
@@ -106,7 +112,7 @@ kube_batch = ['kubesigs/kube-batch:v0.5']
 
 
 images = new_katib + images + new_pipline + new_gpu + new_prometheus + new_serving + knative_sha256 + knative + volcano
-# images = kube_batch
+images = new_pipline
 images = list(set(images))
 
 # 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网ai.tencentmusic.com的仓库
