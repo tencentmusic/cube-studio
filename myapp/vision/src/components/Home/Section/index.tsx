@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Icon, Stack, Modal } from '@fluentui/react';
 import api from '@src/api';
-import { updateErrMsg } from '@src/models/app';
-import { useAppDispatch } from '@src/models/hooks';
-import moment from 'moment';
+import { updateErrMsg, selectUserName } from '@src/models/app';
+import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import Player from 'xgplayer';
 import style from './style';
 
@@ -19,12 +18,13 @@ const Section: React.FC<ISectionProps> = props => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [curVideo, setCurVideo] = useState<string>('');
   const [curPlayer, setCurPlayer] = useState<Player | undefined>(undefined);
+  const userName = useAppSelector(selectUserName);
 
   const handleNewPipeline = () => {
     api
       .pipeline_modelview_add({
-        describe: '新建流水线',
-        name: `pipeline-created-on-${moment().format('MM-DD-HHmmSSSS')}`,
+        describe: `new-pipeline-${Date.now()}`,
+        name: `${userName}-pipeline-${Date.now()}`,
         node_selector: 'cpu=true,train=true',
         schedule_type: 'once',
         image_pull_policy: 'Always',
@@ -58,7 +58,19 @@ const Section: React.FC<ISectionProps> = props => {
   const handleClick = (item: any) => {
     switch (item.type) {
       case 'link':
-        window.location.href = item.url;
+        if (window.self === window.top) {
+          window.location.href = `${window.location.origin}${location.pathname}?pipeline_id=${item?.id}`;
+        } else {
+          window.parent.postMessage(
+            {
+              type: 'link',
+              message: {
+                pipelineId: item?.id,
+              },
+            },
+            `${window.location.origin}`,
+          );
+        }
         break;
       case 'outside':
         window.open(item.url, '_blank');
@@ -129,6 +141,7 @@ const Section: React.FC<ISectionProps> = props => {
         ) : null}
         {/* sample card item */}
         {props.data.map((item: any, key: number) => {
+          if (!item.img) return null;
           return (
             <div
               className={style.sampleCardStyle}

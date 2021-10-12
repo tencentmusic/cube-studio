@@ -7,15 +7,22 @@ const job_template_modelview = (): Promise<any> => {
   return ajax.get('/job_template_modelview/api/');
 };
 
-// 获取项目组
+const project_all = (): Promise<any> => {
+  return ajax.get('/project_modelview/api/');
+};
+// 获取 org 项目组
 const project_modelview = (): Promise<any> => {
   return ajax.get('/project_modelview/org/api/');
 };
 
 // 新增流水线
-
 const pipeline_modelview_add = (data: IPipelineAdd): Promise<any> => {
   return ajax.post({ url: '/pipeline_modelview/api/', data });
+};
+
+// 获取流水线列表
+const pipeline_modelview_demo = (): Promise<any> => {
+  return ajax.get('/pipeline_modelview/demo/list/');
 };
 
 // 获取流水线列表
@@ -23,9 +30,18 @@ const pipeline_modelview_list = (): Promise<any> => {
   return ajax.get('/pipeline_modelview/my/list/');
 };
 
+const pipeline_modelview_all = (filters: string): Promise<any> => {
+  return ajax.get(`/pipeline_modelview/api/?form_data=${filters}`);
+};
+
 // 获取流水线信息
 const pipeline_modelview_detail = (pipelineId: number | string): Promise<any> => {
   return ajax.get(`/pipeline_modelview/api/${pipelineId}`);
+};
+
+// 删除指定流水线
+const pipeline_modelview_delete = (pipelineId: number | string): Promise<any> => {
+  return ajax.delete(`/pipeline_modelview/api/${pipelineId}`);
 };
 
 // 流水线编辑提交
@@ -96,10 +112,14 @@ const task_modelview_edit = (pipelineId: string | number, taskId: string | numbe
 
 const api = {
   job_template_modelview,
+  project_all,
   project_modelview,
   pipeline_modelview_add,
+  pipeline_modelview_demo,
   pipeline_modelview_list,
+  pipeline_modelview_all,
   pipeline_modelview_detail,
+  pipeline_modelview_delete,
   pipeline_modelview_edit,
   pipeline_modelview_run,
   pipeline_modelview_copy,

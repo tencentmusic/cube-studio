@@ -149,6 +149,21 @@ const EditorTool: React.FC = () => {
         dispatch(updateElements(removeElements(selectedElements, elements)));
       },
     },
+    {
+      buttonStyles: style.commonButton,
+      iconOnly: true,
+      key: 'monitor',
+      iconProps: {
+        iconName: 'NetworkTower',
+        styles: style.commonIcon,
+      },
+      text: '监控',
+      onClick: () => {
+        if (pipeline?.id) {
+          window.open(`${window.location.origin}/pipeline_modelview/web/monitoring/${pipelineId}`);
+        }
+      },
+    },
   ];
 
   // task 发生编辑行为时状态变更

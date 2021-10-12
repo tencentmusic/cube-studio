@@ -6,11 +6,12 @@ const sectionStyles = mergeStyles({
   borderBottom: '1px solid #dadada',
   selectors: {
     '.subtitle': {
-      marginBottom: 8,
+      marginBottom: 20,
       height: 24,
-      lineHeight: '22px',
-      fontSize: 16,
-      fontWeight: 600,
+      lineHeight: '1.1',
+      fontSize: 20,
+      fontWeight: 'bold',
+      fontFamily: '"Raleway","Helvetica Neue",Helvetica,Arial,sans-serif;',
     },
     '.expand-button': {
       color: '#005cd2',
@@ -76,7 +77,6 @@ const sampleImgStyles = mergeStyles({
 });
 
 const cardTitleStyles = mergeStyles({
-  lineHeight: '20px',
   marginTop: 16,
   textAlign: 'center',
   cursor: 'pointer',

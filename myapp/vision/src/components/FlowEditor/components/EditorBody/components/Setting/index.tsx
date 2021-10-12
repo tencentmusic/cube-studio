@@ -142,6 +142,7 @@ const Setting: React.FC = () => {
               handleOnChange('name', value ? value : '');
             }}
             value={current?.name || ''}
+            disabled
           />
           <div className={style.splitLine}></div>
           <TextField
@@ -211,7 +212,7 @@ const Setting: React.FC = () => {
             ]}
             selectedKey={`${current.depends_on_past}`}
             onChange={(event: FormEvent, option?: IDropdownOption) => {
-              handleOnChange('depends_on_past', option?.data || true);
+              handleOnChange('depends_on_past', option?.data);
             }}
           />
           <div className={style.splitLine}></div>

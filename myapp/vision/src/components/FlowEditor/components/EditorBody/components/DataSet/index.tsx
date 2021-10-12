@@ -14,7 +14,7 @@ const DataSet: React.FC<NodeProps> = props => {
           <div className={style.nodeConentTitleBar}>
             <div className={style.nodeIconWrapper}>
               <Icon iconName="Database" className={style.nodeIcon}></Icon>
-              <div className={style.nodeTitle}>{props?.data?.name}</div>
+              <div className={style.nodeTitle}>{props?.data?.label}</div>
             </div>
           </div>
         </div>
