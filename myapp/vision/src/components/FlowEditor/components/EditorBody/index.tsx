@@ -61,15 +61,15 @@ const EditorBody: React.FC = () => {
     if (pipelineId) {
       dispatch(updateLoading(true));
       //  http://kubeflow.music.woa.com/job_template_modelview/api/_info
-      const taskName = `${modelInfo.name
-        .replace(/\.|[\u4e00-\u9fa5]/g, '')
-        .replace(/_|\s/g, '-')}-${Date.now()}`.substring(0, 49);
+      const taskName = `${
+        modelInfo.name.replace(/\.|[\u4e00-\u9fa5]/g, '').replace(/_|\s/g, '-') || 'task'
+      }-${Date.now()}`.substring(0, 49);
       api
         .task_modelview_add(pipelineId, {
           job_template: modelInfo.id,
           pipeline: +pipelineId,
           name: taskName,
-          label: `新建 ${modelInfo.name} task`,
+          label: `新建 ${modelInfo.name} 任务`,
           volume_mount: 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
           image_pull_policy: 'Always',
           working_dir: '',
@@ -90,6 +90,7 @@ const EditorBody: React.FC = () => {
               position,
               data: {
                 name: taskName,
+                label: `新建 ${modelInfo.name} 任务`,
               },
             };
             dispatch(updateEditing(true));
@@ -165,6 +166,9 @@ const EditorBody: React.FC = () => {
     const elements = expand.map((ele: Node | Edge) => {
       if (isEdge(ele) && !ele?.arrowHeadType) {
         return Object.assign(ele, { arrowHeadType: 'arrow' });
+      }
+      if (isNode(ele) && !ele.data.label) {
+        ele.data.label = ele.data.name;
       }
       return ele;
     });

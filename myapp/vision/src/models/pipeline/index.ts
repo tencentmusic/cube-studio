@@ -12,6 +12,7 @@ export interface PipelineState {
   changed: any;
   editing: boolean;
   pipelineList: any[];
+  all: any[] | undefined;
 }
 
 const initialState: PipelineState = {
@@ -21,6 +22,7 @@ const initialState: PipelineState = {
   changed: {},
   editing: false,
   pipelineList: [],
+  all: undefined,
 };
 
 const pipelineSlice = createSlice({
@@ -45,11 +47,21 @@ const pipelineSlice = createSlice({
     updatePipelineList: (state, action: PayloadAction<any[]>) => {
       state.pipelineList = action.payload;
     },
+    updateAll: (state, action: PayloadAction<any[] | undefined>) => {
+      state.all = action.payload;
+    },
   },
 });
 
-export const { updatePipelineId, updateInfo, updateSaved, updateChanged, updateEditing, updatePipelineList } =
-  pipelineSlice.actions;
+export const {
+  updatePipelineId,
+  updateInfo,
+  updateSaved,
+  updateChanged,
+  updateEditing,
+  updatePipelineList,
+  updateAll,
+} = pipelineSlice.actions;
 
 export const selectPipelineId = (state: RootState): PipelineState['pipelineId'] => state.pipeline.pipelineId;
 export const selectInfo = (state: RootState): PipelineState['info'] => state.pipeline.info;
@@ -57,22 +69,57 @@ export const selectSaved = (state: RootState): PipelineState['saved'] => state.p
 export const selectChanged = (state: RootState): PipelineState['changed'] => state.pipeline.changed;
 export const selectEditing = (state: RootState): PipelineState['editing'] => state.pipeline.editing;
 export const selectPipelineList = (state: RootState): PipelineState['pipelineList'] => state.pipeline.pipelineList;
+export const selectAll = (state: RootState): PipelineState['all'] => state.pipeline.all;
 
 export const getPipelineList = (): AppThunk => dispatch => {
   api.pipeline_modelview_list().then(res => {
     if (res?.status === 0) {
-      const list = res.result.map((item: any) => {
+      const list: any[] = res.result.map((item: any) => {
         return {
           id: item.id,
           name: item.name,
           describe: item.describe,
           changed_on: item.changed_on,
+          project_id: item.project_id,
         };
       });
-      dispatch(updatePipelineList(list));
+      dispatch(
+        updatePipelineList(list.sort((a, b) => new Date(b.changed_on).getTime() - new Date(a.changed_on).getTime())),
+      );
     }
   });
 };
+
+export const getAllList =
+  (data: unknown): AppThunk =>
+  dispatch => {
+    dispatch(updateAll(undefined));
+    api
+      .pipeline_modelview_all(JSON.stringify(data))
+      .then(res => {
+        if (res?.status === 0) {
+          const list: any[] = res.result.map((item: any) => {
+            return {
+              id: item.id,
+              name: item.name,
+              describe: item.describe,
+              changed_on: item.changed_on,
+              project_id: item.project.id,
+            };
+          });
+          dispatch(updateAll(list.sort((a, b) => new Date(b.changed_on).getTime() - new Date(a.changed_on).getTime())));
+        }
+      })
+      .catch(err => {
+        if (err.response) {
+          dispatch(
+            updateErrMsg({
+              msg: err?.response?.data?.message || '获取列表失败',
+            }),
+          );
+        }
+      });
+  };
 
 // 获取当前流水线信息
 export const getPipeline = (): AppThunk => (dispatch, getState) => {

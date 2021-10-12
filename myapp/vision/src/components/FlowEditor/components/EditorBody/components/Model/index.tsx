@@ -151,10 +151,10 @@ const Model: React.FC<ModelProps> = props => {
         }),
       );
     }
-    if (taskChanged?.name) {
+    if (taskChanged?.label) {
       const res = elements.map(ele => {
         if (ele.id === props.model.id) {
-          const data = { ...ele.data, ...{ name: taskChanged.name } };
+          const data = { ...ele.data, ...{ label: taskChanged.label } };
           return { ...ele, ...{ data } };
         }
         return ele;
@@ -223,24 +223,24 @@ const Model: React.FC<ModelProps> = props => {
           <div className={style.splitLine}></div>
           <TextField
             label="名称"
-            description="英文名(字母、数字、- 组成)，最长50个字符"
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('name', value ? value : '');
             }}
             value={task?.name || ''}
+            disabled
           />
           <div className={style.splitLine}></div>
           <TextField
             label="标签"
-            description="中文名"
+            description="节点标签"
             required
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('label', value ? value : '');
             }}
             value={task?.label || ''}
           />
-          {/* <div className={style.splitLine}></div>
-          <TextField
+          <div className={style.splitLine}></div>
+          {/* <TextField
             label="挂载目录"
             description="外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录"
             onChange={(event: FormEvent, value?: string) => {
@@ -276,8 +276,8 @@ const Model: React.FC<ModelProps> = props => {
               handleOnChange('node_selector', value ? value : '');
             }}
             value={task?.node_selector || ''}
-          /> */}
-          <div className={style.splitLine}></div>
+          />
+          <div className={style.splitLine}></div> */}
           <TextField
             label="内存申请"
             description="内存的资源使用限制，示例1G，10G， 最大10G，如需更多联系管理员"

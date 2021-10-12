@@ -23,11 +23,11 @@ module.exports = {
       }),
     );
 
-    if (process.env.NODE_ENV !== 'production') {
-      config.plugins.push(
-        new BundleAnalyzerPlugin()
-      )
-    }
+    // if (process.env.NODE_ENV !== 'production') {
+    //   config.plugins.push(
+    //     new BundleAnalyzerPlugin()
+    //   )
+    // }
 
     return config;
   },

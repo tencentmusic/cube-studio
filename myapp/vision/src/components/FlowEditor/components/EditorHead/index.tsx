@@ -1,13 +1,12 @@
 import React from 'react';
 import { Stack, TooltipHost, IconButton, PrimaryButton, DefaultButton } from '@fluentui/react';
-import moment from 'moment';
 import ErrorTips from '../ErrorTips';
-import { useAppSelector, useAppDispatch } from '../../../../models/hooks';
-import { updateErrMsg } from '../../../../models/app';
-import { selectPipelineId, selectInfo, savePipeline } from '../../../../models/pipeline';
-import { saveTaskList } from '../../../../models/task';
-import { toggle } from '../../../../models/setting';
-import api from '../../../../api';
+import { useAppSelector, useAppDispatch } from '@src/models/hooks';
+import { updateErrMsg, selectUserName } from '@src/models/app';
+import { selectPipelineId, selectInfo, savePipeline } from '@src/models/pipeline';
+import { saveTaskList } from '@src/models/task';
+import { toggle } from '@src/models/setting';
+import api from '@src/api';
 import style from './style';
 const { Item } = Stack;
 
@@ -15,13 +14,14 @@ const EditorHead: React.FC = () => {
   const dispatch = useAppDispatch();
   const pipelineId = useAppSelector(selectPipelineId);
   const info = useAppSelector(selectInfo);
+  const userName = useAppSelector(selectUserName);
 
   // 新建流水线
   const handleNewPipeline = () => {
     api
       .pipeline_modelview_add({
-        describe: '新建流水线',
-        name: `pipeline-created-on-${moment().format('MM-DD-HHmmSSSS')}`,
+        describe: `新建流水线-${Date.now()}`,
+        name: `${userName}-pipeline-${Date.now()}`,
         node_selector: 'cpu=true,train=true',
         schedule_type: 'once',
         image_pull_policy: 'Always',
@@ -56,7 +56,7 @@ const EditorHead: React.FC = () => {
           <Stack horizontal>
             <Item>
               {info.name ? (
-                <div className={style.headNameStyle}>{info.name}</div>
+                <div className={style.headNameStyle}>{info.describe}</div>
               ) : (
                 <PrimaryButton
                   styles={{
