@@ -89,7 +89,7 @@ class Docker_ModelView_Base():
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Docker_Filter, lambda: []]]  # 设置权限过滤器
     order_columns = ['id']
-    add_columns=['describe','base_image','target_image','consecutive_build']
+    add_columns=['describe','base_image','target_image','need_gpu','consecutive_build','expand']
     edit_columns=add_columns
     list_columns=['id','describe','consecutive_build','base_image','target_image','debug','save']
     add_form_extra_fields=[]
@@ -120,6 +120,8 @@ class Docker_ModelView_Base():
             description=Markup(f'基础镜像和构建方法可参考：<a href="%s">点击打开</a>'%(conf.get('HELP_URL').get('docker',''))),
             widget=BS3TextFieldWidget()
         )
+        # # if g.user.is_admin():
+        # self.edit_columns=['describe','base_image','target_image','need_gpu','consecutive_build']
         self.edit_form_extra_fields = self.add_form_extra_fields
 
 
@@ -130,9 +132,17 @@ class Docker_ModelView_Base():
         if image_org not in item.target_image or item.target_image==image_org:
             flash('目标镜像名称不符合规范','warning')
 
+        if item.expand:
+            item.expand = json.dumps(json.loads(item.expand),indent=4,ensure_ascii=False)
+
     def pre_update(self,item):
         self.pre_add(item)
-
+        # 如果修改了基础镜像，就把debug中的任务删除掉
+        if self.src_item_json:
+            if item.base_image!=self.src_item_json.get('base_image',''):
+                self.delete_pod(item.id)
+                item.last_image=''
+                flash('发现基础镜像更换，已帮你删除之前启动的debug容器','success')
 
     # @event_logger.log_this
     @expose("/debug/<docker_id>", methods=["GET", "POST"])
@@ -155,24 +165,25 @@ class Docker_ModelView_Base():
 
 
         # 没有历史或者没有运行态，直接创建
-        if not pod or pod['status']!='Running':
+        if not pod or (pod['status']!='Running' and pod['status']!='Pending'):
 
             command=['sh','-c','sleep 7200 && hour=`date +%H` && while [ $hour -ge 06 ];do sleep 3600;hour=`date +%H`;done']
             hostAliases = conf.get('HOSTALIASES')
+            default_volume_mount = 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
             k8s_client.create_debug_pod(namespace,
                                         name=pod_name,
                                         command=command,
                                         labels={},
                                         args=None,
-                                        volume_mount='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+                                        volume_mount=json.loads(docker.expand).get('volume_mount',default_volume_mount) if docker.expand else default_volume_mount,
                                         working_dir='/mnt/%s'%docker.created_by.username,
-                                        node_selector='cpu=true,train=true,org=public',
-                                        resource_memory='8G',
-                                        resource_cpu='4',
-                                        resource_gpu='0',
+                                        node_selector='%s=true,train=true,org=public'%('gpu' if docker.need_gpu else 'cpu'),
+                                        resource_memory=json.loads(docker.expand).get('resource_memory','8G') if docker.expand else '8G',
+                                        resource_cpu=json.loads(docker.expand).get('resource_cpu','4') if docker.expand else '4',
+                                        resource_gpu=json.loads(docker.expand if docker.expand else '{}').get('resource_gpu','1') if docker.need_gpu else '0',
                                         image_pull_policy='Always',
                                         image_pull_secrets=conf.get('HUBSECRET',[]),
-                                        image=docker.base_image,
+                                        image= docker.last_image if docker.last_image and docker.consecutive_build else docker.base_image,
                                         hostAliases=hostAliases,
                                         env=None,
                                         privileged=None,
@@ -196,6 +207,20 @@ class Docker_ModelView_Base():
 
         flash('镜像调试只安装环境，请不要运行业务代码。当晚前请注意保存镜像','warning')
         return redirect("/docker_modelview/web/debug/%s/%s/%s"%(conf.get('ENVIRONMENT'),namespace,pod_name))
+
+
+    # @event_logger.log_this
+    @expose("/delete_pod/<docker_id>", methods=["GET", "POST"])
+    @pysnooper.snoop()
+    def delete_pod(self,docker_id):
+        docker = db.session.query(Docker).filter_by(id=docker_id).first()
+        from myapp.utils.py.py_k8s import K8s
+        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG'))
+        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
+        k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
+        flash('清理结束，可重新进行调试','success')
+        return redirect("/docker_modelview/list/")
 
 
     @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>", methods=["GET", "POST"])
@@ -235,7 +260,6 @@ class Docker_ModelView_Base():
         node_name=''
         container_id=''
         if pod:
-            status = pod.status
             node_name=pod.spec.node_name
             containers = [container for container in pod.status.container_statuses if container.name==pod_name]
             if containers:
@@ -259,7 +283,7 @@ class Docker_ModelView_Base():
             args=None,
             volume_mount='/var/run/docker.sock(hostpath):/var/run/docker.sock',
             working_dir='/mnt/%s' % docker.created_by.username,
-            node_selector='cpu=true,train=true,org=public',
+            node_selector=None,
             resource_memory='4G',
             resource_cpu='4',
             resource_gpu='0',
@@ -273,6 +297,12 @@ class Docker_ModelView_Base():
             username=docker.created_by.username,
             node_name=node_name
         )
+        from myapp.tasks.async_task import check_docker_commit
+        # 发起异步任务检查commit pod是否完成，如果完成，修正last_image
+        kwargs={
+            "docker_id":docker.id
+        }
+        check_docker_commit.apply_async(kwargs=kwargs)
 
         return redirect("/myapp/web/log/%s/%s/%s" % (conf.get('ENVIRONMENT'),namespace, pod_name))
 
