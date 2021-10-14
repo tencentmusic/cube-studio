@@ -28,65 +28,6 @@ import json
 
 
 
-
-
-
-# 首页显示内容
-
-# 数据格式说明 dict:
-# 'id': 唯一标识,
-# 'type': 类型 一级支持 title | boxlist | list 二级支持 text | markdown,
-# 'open': 是否当前页打开 1 从当前窗口打开 默认打开新的标签页,
-# 'url': 点击时打开的链接 仅支持 http(s)://开头,
-# 'cover': 封面图链接 支持base64图片编码,
-# 'content': 内容 支持markdown(需设置类型为markdown),
-# 'data': 嵌套下级内容数组
-
-HOME_CONFIG = [
-    {
-        'id': 2,
-        'type': 'title',
-        'content': '平台主功能',
-        'data': [],
-    }, {
-        'id': 102,
-        'type': 'boxlist',
-        'content': 'Pipelines',
-        'data': [{
-            'id': 1021,
-            'type': 'base',
-            'open': 1,
-            'url': '/pipeline_modelview/list/',
-            'cover': '/static/assets/images/home/dag.jpg',
-            'content': '机器学习pipeline流水线',
-        }, {
-            'id': 1022,
-            'type': 'base',
-            'open': 1,
-            'url': '/notebook_modelview/add',
-            'cover': '/static/assets/images/home/vscode.png',
-            'content': '在线ide编辑器',
-        },
-            {
-                'id': 1023,
-                'type': 'base',
-                'open': 1,
-                'url': '/nni_modelview/add',
-                'cover': '/static/assets/images/home/private.png',
-                'content': '超参搜索',
-            }, {
-                'id': 1024,
-                'type': 'base',
-                'open': 1,
-                'url': '/service_modelview/list/',
-                'cover': '/static/assets/images/home/service.png',
-                'content': '模型服务化',
-            }],
-    }
-]
-
-
-
 # 推送给管理员消息的函数
 def push_admin(message):
     pass

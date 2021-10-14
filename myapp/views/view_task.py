@@ -211,6 +211,19 @@ class Task_ModelView_Base():
             del form._fields['job_describe']  # 不处理这个字段
 
 
+
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        user_roles = [role.name.lower() for role in list(get_user_roles())]
+        if "admin" in user_roles:
+            return True
+        if g.user and g.user.username and item.pipeline and  hasattr(item.pipeline,'created_by'):
+            if g.user.username==item.pipeline.created_by.username:
+                return True
+        flash('just creator can edit/delete ', 'warning')
+        return False
+
+
     # 验证args参数
     # @pysnooper.snoop(watch_explode=('item'))
     def task_args_check(self,item):
@@ -370,6 +383,7 @@ class Task_ModelView_Base():
 
     # 因为删除就找不到pipeline了
     def pre_delete(self, item):
+        self.check_redirect_list_url = '/pipeline_modelview/edit/' + str(item.pipeline.id)
         self.pipeline = item.pipeline
 
 
@@ -408,23 +422,24 @@ class Task_ModelView_Base():
         "list": MyLineSeparatedListField
     }
 
-    @event_logger.log_this
-    @expose("/delete/<pk>")
-    @has_access
-    def delete(self, pk):
-        pk = self._deserialize_pk_if_composite(pk)
-        self.src_item_object = self.datamodel.get(pk, self._base_filters)
-        if self.check_redirect_list_url:
-            self.check_redirect_list_url = '/pipeline_modelview/edit/' + str(self.src_item_object.pipeline.id)
-            try:
-                self.check_edit_permission(self.src_item_object)
-            except Exception as e:
-                print(e)
-                flash(str(e), 'warning')
-                return redirect(self.check_redirect_list_url)
 
-        self._delete(pk)
-        return self.post_delete_redirect()
+    # @event_logger.log_this
+    # @expose("/delete/<pk>")
+    # @has_access
+    # def delete(self, pk):
+    #     pk = self._deserialize_pk_if_composite(pk)
+    #     self.src_item_object = self.datamodel.get(pk, self._base_filters)
+    #     if self.check_redirect_list_url:
+    #         self.check_redirect_list_url = '/pipeline_modelview/edit/' + str(self.src_item_object.pipeline.id)
+    #         try:
+    #             self.check_edit_permission(self.src_item_object)
+    #         except Exception as e:
+    #             print(e)
+    #             flash(str(e), 'warning')
+    #             return redirect(self.check_redirect_list_url)
+    #
+    #     self._delete(pk)
+    #     return self.post_delete_redirect()
 
 
     def run_pod(self,task,k8s_client,run_id,namespace,pod_name,image,working_dir,command,args):
@@ -503,9 +518,10 @@ class Task_ModelView_Base():
     @expose("/debug/<task_id>", methods=["GET", "POST"])
     def debug(self,task_id):
         task = db.session.query(Task).filter_by(id=task_id).first()
-        if not g.user.is_admin() and task.job_template.created_by.username!=g.user.username:
-            flash('仅管理员或当前任务模板创建者，可启动debug模式', 'warning')
-            return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
+        if task.job_template.name != conf.get('CUSTOMIZE_JOB'):
+            if not g.user.is_admin() and task.job_template.created_by.username!=g.user.username:
+                flash('仅管理员或当前任务模板创建者，可启动debug模式', 'warning')
+                return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
 
         from myapp.utils.py.py_k8s import K8s

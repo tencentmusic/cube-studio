@@ -32,7 +32,7 @@ from myapp.views.view_task import Task_ModelView
 from sqlalchemy import and_, or_, select
 from myapp.exceptions import MyappException
 from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-
+from myapp.project import push_message,push_admin
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget,BS3TextAreaFieldWidget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
 from myapp.utils.py import py_k8s
@@ -253,7 +253,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
             else:
                 task_command += " && ".join(commands)
 
-        job_template_entrypoint = task.job_template.entrypoint.strip().replace("  ",'') if task.job_template.entrypoint else ''
+        job_template_entrypoint = task.job_template.entrypoint.strip() if task.job_template.entrypoint else ''
 
 
         command=None
@@ -261,7 +261,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
             command = job_template_entrypoint
 
         if task_command:
-            command = task_command.replace("  ",'')
+            command = task_command
 
 
         # entrypoint = task.job_template.images.entrypoint
@@ -302,11 +302,14 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
             # if task_command:
             #     task_command = task_command.split(' ')
             #     task_command = [command for command in task_command if command]
+
+            command = command.split(' ') if command else []
+            command = [com for com in command if com]
             ops = kfp.dsl.ContainerOp(
                 name=task.name,
                 image=task.job_template.images.name,
                 arguments=ops_args,
-                command=command.split(' ') if command else None,
+                command=command if command else None,
                 container_kwargs=container_kwargs,
                 file_outputs=json.loads(task.outputs) if task.outputs and json.loads(task.outputs) else None
             )
@@ -413,7 +416,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
             pod_anti_affinity=k8s_client.V1PodAntiAffinity(
                 preferred_during_scheduling_ignored_during_execution=[
                     k8s_client.V1WeightedPodAffinityTerm(
-                        weight=5,
+                        weight=20,
                         pod_affinity_term=k8s_client.V1PodAffinityTerm(
                             label_selector=k8s_client.V1LabelSelector(
                                 match_labels={
@@ -491,27 +494,25 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
         # 配置拉取秘钥。本来在contain里面，workflow在外面
         task_temp = all_tasks[task_name]
         if task_temp.job_template.images.repository.hubsecret:
-            hubsecret =  task_temp.job_template.images.repository.hubsecret
+            hubsecret = task_temp.job_template.images.repository.hubsecret
             if hubsecret not in hubsecret_list:
                 hubsecret_list.append(hubsecret)
                 pipeline_conf.image_pull_secrets.append(k8s_client.V1LocalObjectReference(name=hubsecret))
 
 
-    # 配置host
-    hostAliases = conf.get('HOSTALIASES', '')
-    if task_temp.job_template.hostAliases:
-        hostAliases+="\n"+ task_temp.job_template.hostAliases
-    if hostAliases:
-        hostAliases_list = re.split('\r|\n', hostAliases)
-        hostAliases_list = [host.strip() for host in hostAliases_list if host.strip()]
-        for row in hostAliases_list:
-            hosts = row.strip().split(' ')
-            hosts = [host for host in hosts if host]
-            # print(hosts)
-            # print('------------')
-
-            if len(hosts) > 1:
-                pipeline_conf.set_host_aliases(ip=hosts[0],hostnames=hosts[1:])
+        # # 配置host 在kfp中并不生效
+        # hostAliases = conf.get('HOSTALIASES', '')
+        # if task_temp.job_template.hostAliases:
+        #     hostAliases+="\n"+ task_temp.job_template.hostAliases
+        # if hostAliases:
+        #     hostAliases_list = re.split('\r|\n', hostAliases)
+        #     hostAliases_list = [host.strip() for host in hostAliases_list if host.strip()]
+        #     for row in hostAliases_list:
+        #         hosts = row.strip().split(' ')
+        #         hosts = [host for host in hosts if host]
+        #
+        #         if len(hosts) > 1:
+        #             pipeline_conf.set_host_aliases(ip=hosts[0],hostnames=hosts[1:])
 
 
     # 配置默认拉取策略
@@ -531,8 +532,6 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
     pipeline_conf.labels['save-time'] = datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
     pipeline_conf.labels['pipeline-id'] = str(pipeline.id)
     pipeline_conf.labels['run-id'] = global_envs.get('KFJ_RUN_ID','')   # 以此来绑定运行时id，不能用kfp的run—id。那个是传到kfp以后才产生的。
-
-
 
     kfp.compiler.Compiler().compile(my_pipeline, pipeline.name+'.yaml',pipeline_conf=pipeline_conf)
     file = open(pipeline.name+'.yaml',mode='rb')
@@ -581,14 +580,13 @@ def upload_pipeline(pipeline_file,pipeline_name,kfp_host,pipeline_argo_id):
 
 
 
-@pysnooper.snoop(watch_explode=())
+# @pysnooper.snoop(watch_explode=())
 def run_pipeline(pipeline_file,pipeline_name,kfp_host,pipeline_argo_id,pipeline_argo_version_id):
     # logging.info(pipeline)
     # return
     # 如果没值就先upload
     if not pipeline_argo_id or not pipeline_argo_version_id:
         pipeline_argo_id,pipeline_argo_version_id = upload_pipeline(pipeline_file,pipeline_name,kfp_host,pipeline_argo_id)   # 必须上传新版本
-
 
     client = kfp.Client(kfp_host)
     # 先创建一个实验，在在这个实验中运行指定pipeline
@@ -626,7 +624,7 @@ class Pipeline_ModelView_Base():
     order_columns = ['id']
 
     list_columns = ['id','project','pipeline_url','creator','modified']
-    add_columns = ['project','name','describe','namespace','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','alert_status','alert_user']
+    add_columns = ['project','name','describe','namespace','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','alert_status','alert_user','parameter']
     show_columns = ['project','name','describe','namespace','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','dag_json_html','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand_html','parameter_html']
     edit_columns = add_columns
 
@@ -684,6 +682,13 @@ class Pipeline_ModelView_Base():
             default=1,
             validators=[DataRequired()]
         ),
+        "expired_limit": IntegerField(
+            _(datamodel.obj.lab('expired_limit')),
+            description="定时调度过期记录保留个数",
+            widget=BS3TextFieldWidget(),
+            default=1,
+            validators=[DataRequired()]
+        ),
         "parallelism": IntegerField(
             _(datamodel.obj.lab('parallelism')),
             description="一个任务流实例中可同时运行的task数目",
@@ -727,6 +732,19 @@ class Pipeline_ModelView_Base():
 
 
     related_views = [Task_ModelView, ]
+
+
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        user_roles = [role.name.lower() for role in list(get_user_roles())]
+        if "admin" in user_roles:
+            return True
+        if g.user and g.user.username and hasattr(item,'created_by'):
+            if g.user.username==item.created_by.username:
+                return True
+        flash('just creator can edit/delete ', 'warning')
+        return False
+
 
     # 验证args参数
     # @pysnooper.snoop(watch_explode=('item'))
@@ -814,6 +832,7 @@ class Pipeline_ModelView_Base():
         item.parameter = json.dumps({"cronjob_start_time":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}, indent=4, ensure_ascii=False)
 
 
+
     # @pysnooper.snoop()
     def pre_update(self, item):
 
@@ -827,15 +846,29 @@ class Pipeline_ModelView_Base():
         self.merge_upstream(item)
         self.pipeline_args_check(item)
         item.change_datetime = datetime.datetime.now()
+        if item.parameter:
+            item.parameter = json.dumps(json.loads(item.parameter),indent=4,ensure_ascii=False)
+        else:
+            item.parameter = '{}'
 
         if (item.schedule_type=='crontab' and self.src_item_json.get("schedule_type")=='once') or (item.cron_time!=self.src_item_json.get("cron_time",'')):
             parameter = json.loads(item.parameter if item.parameter else '{}')
             parameter.update({"cronjob_start_time":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
             item.parameter = json.dumps(parameter,indent=4,ensure_ascii=False)
 
+        # 限制提醒
+        if item.schedule_type=='crontab':
+            if not item.project.node_selector:
+                flash('无法保障公共集群的稳定性，定时任务请选择专门的日更集群项目组','warning')
+            else:
+                org = item.project.node_selector.replace('org=','')
+                if not org or org=='public':
+                    flash('无法保障公共集群的稳定性，定时任务请选择专门的日更集群项目组','warning')
+
+
     def pre_update_get(self,item):
         item.dag_json = item.fix_dag_json()
-        item.expand = json.dumps(item.fix_expand(),indent=4,ensure_ascii=False)
+        # item.expand = json.dumps(item.fix_expand(),indent=4,ensure_ascii=False)
         db.session.commit()
 
     # 删除前先把下面的task删除了
@@ -857,6 +890,20 @@ class Pipeline_ModelView_Base():
                 for pipeline in pipelines:
                     back.append(pipeline.to_json())
                 return json_response(message='success',status=0,result=back)
+        except Exception as e:
+            print(e)
+            return json_response(message=str(e),status=-1,result={})
+
+
+    @expose("/demo/list/")
+    @pysnooper.snoop()
+    def demo(self):
+        try:
+            pipelines = db.session.query(Pipeline).filter(Pipeline.parameter.contains('"demo": "true"')).all()
+            back=[]
+            for pipeline in pipelines:
+                back.append(pipeline.to_json())
+            return json_response(message='success',status=0,result=back)
         except Exception as e:
             print(e)
             return json_response(message=str(e),status=-1,result={})
@@ -937,6 +984,7 @@ class Pipeline_ModelView_Base():
                         namespace=crd['namespace'],
                         run_id = run_id
                     )
+                    push_message(conf.get('ADMIN_USER', '').split(','),'手动运行新的pipeline %s，进而删除旧的pipeline run-id: %s' % (pipeline.describe,run_id,))
                     if db_crd:
                         db_crd.status='Deleted'
                         db_crd.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1052,7 +1100,7 @@ class Pipeline_ModelView_Base():
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
 
         pipeline.dag_json = pipeline.fix_dag_json()
-        pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)
+        # pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)
 
         # db_tasks = pipeline.get_tasks(db.session)
         # if db_tasks:
@@ -1097,6 +1145,26 @@ class Pipeline_ModelView_Base():
 
 
     # # @event_logger.log_this
+    @expose("/web/monitoring/<pipeline_id>", methods=["GET"])
+    def web_monitoring(self,pipeline_id):
+        pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
+        if pipeline.run_id:
+            data = {
+                "url": pipeline.project.cluster.get('GRAFANA_TASK','') + pipeline.name,
+                # "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
+                "delay":1000,
+                "loading": True
+            }
+            # 返回模板
+            if pipeline.project.cluster['NAME']==conf.get('ENVIRONMENT'):
+                return self.render_template('link.html', data=data)
+            else:
+                return self.render_template('external_link.html', data=data)
+        else:
+            flash('no running instance','warning')
+            return redirect('/pipeline_modelview/web/%s'%pipeline.id)
+
+    # # @event_logger.log_this
     @expose("/web/pod/<pipeline_id>", methods=["GET"])
     def web_pod(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
@@ -1113,7 +1181,7 @@ class Pipeline_ModelView_Base():
             return self.render_template('external_link.html', data=data)
 
 
-    @pysnooper.snoop(watch_explode=('expand'))
+    # @pysnooper.snoop(watch_explode=('expand'))
     def copy_db(self,pipeline):
         new_pipeline = pipeline.clone()
         expand = json.loads(pipeline.expand) if pipeline.expand else {}

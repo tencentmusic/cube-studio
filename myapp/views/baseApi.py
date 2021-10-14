@@ -202,6 +202,17 @@ def merge_response_func(func, key):
 
     return wrap
 
+
+def json_response(message,status,result):
+    return jsonify(
+        {
+            "message":message,
+            "status":status,
+            "result":result
+        }
+    )
+
+
 import pysnooper
 # @pysnooper.snoop(depth=5)
 # 暴露url+视图函数。视图函数会被覆盖，暴露url也会被覆盖
@@ -212,6 +223,7 @@ class MyappModelRestApi(ModelRestApi):
     page_size = 100
     src_item_object = None    # 原始model对象
     src_item_json={}    # 原始model对象的json
+    check_edit_permission = None
     datamodel=None
     post_list=None
     pre_json_load=None
@@ -524,6 +536,18 @@ class MyappModelRestApi(ModelRestApi):
         item = self.datamodel.get(pk, self._base_filters)
         self.src_item_json = item.to_json()
 
+        # if self.check_redirect_list_url:
+        try:
+            if self.check_edit_permission:
+                has_permission = self.check_edit_permission(item)
+                if not has_permission:
+                    return json_response(message='no permission to edit',status=1,result={})
+
+        except Exception as e:
+            print(e)
+            return json_response(message='check edit permission'+str(e),status=1,result={})
+
+
         if not request.is_json:
             return self.response_error(400, message="Request is not JSON")
         if not item:
@@ -541,6 +565,8 @@ class MyappModelRestApi(ModelRestApi):
         if isinstance(item.data, dict):
             return self.response_error(422,message=item.errors)
         self.pre_update(item.data)
+
+
         try:
             self.datamodel.edit(item.data, raise_exception=True)
             self.post_update(item.data)

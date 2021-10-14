@@ -121,33 +121,21 @@ class K8s():
 
     # 指定命名空间，指定服务名，指定pod名称，指定状态，删除重启pod。status为运行状态,True  或者False
     def delete_pods(self,namespace=None,service_name=None,pod_name=None,status=None,labels=None):
-        allresponse = []
-        if namespace and pod_name:
-            api_response = self.v1.delete_namespaced_pod(name = pod_name, namespace=namespace,grace_period_seconds=0)
-            allresponse.append(api_response)
-            return allresponse
+        if not namespace:
+            return []
+        all_pods=self.get_pods(namespace=namespace,pod_name=pod_name,service_name=service_name,labels=labels)
+        if status:
+            all_pods = [pod for pod in all_pods if pod['status']==status]
         try:
-            if labels:
-                all_pod = self.get_pods(namespace=namespace,labels=labels)
-                for pod in all_pod:
-                    api_response = self.v1.delete_namespaced_pod(pod['name'], namespace,grace_period_seconds=0)
-                    allresponse.append(api_response)
-            if status:
-                all_pod = self.get_pods(namespace=namespace,service_name=service_name,pod_name=pod_name)
-                if all_pod:
-                    for pod in all_pod:
-                        if status==None:   # 如果没有指定运行状态，则直接删除
-                            api_response = self.v1.delete_namespaced_pod(pod['name'],namespace,grace_period_seconds=0)
-                            allresponse.append(api_response)
-                        elif pod['status']==status:
-                            # body = kubernetes.client.V1DeleteOptions(grace_period_seconds=0,orphan_dependents=False)  # 不正常的要设置强制删除
-                            api_response = self.v1.delete_namespaced_pod(pod['name'], namespace,grace_period_seconds=0)
-                            allresponse.append(api_response)
-                        print('delete pod %s' % all_pod)
-            return allresponse
+            for pod in all_pods:
+                self.v1.delete_namespaced_pod(pod['name'], namespace,grace_period_seconds=0)
+                print('delete pod %s' % pod['name'])
         except Exception as e:
             print(e)
-            return []
+        return all_pods
+
+
+
 
     # 获取指定label的nodeip列表
     # @pysnooper.snoop()
@@ -215,7 +203,7 @@ class K8s():
 
     # 根据各种crd自定义的status结构，判断最终评定的status
     # @pysnooper.snoop()
-    def get_crd_status(self,crd_object,plural):
+    def get_crd_status(self,crd_object,group,plural):
         status = ''
         # workflows 使用最后一个node的状态为真是状态
         if plural == 'workflows':
@@ -233,6 +221,10 @@ class K8s():
                 for condition in crd_object['status']['conditions']:
                     if condition['type']=='Ready' and condition['status']=='True':
                         status='ready'
+        elif plural == 'jobs' and group=='batch.volcano.sh':
+            status = 'unready'
+            if 'status' in crd_object and 'state' in crd_object['status'] and 'phase' in  crd_object['status']['state']:
+                return crd_object['status']['state']['phase']
         else:
             if 'status' in crd_object and 'phase' in crd_object['status']:
                 status = crd_object['status']['phase']
@@ -264,7 +256,7 @@ class K8s():
                 return {}
 
             # print(crd_object['status']['conditions'][-1]['type'])
-            status = self.get_crd_status(crd_object,plural)
+            status = self.get_crd_status(crd_object,group,plural)
 
             creat_time = crd_object['metadata']['creationTimestamp'].replace('T', ' ').replace('Z', '')
             creat_time = (datetime.datetime.strptime(creat_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
@@ -301,7 +293,7 @@ class K8s():
         back_objects=[]
         for crd_object in crd_objects:
             # print(crd_object['status']['conditions'][-1]['type'])
-            status = self.get_crd_status(crd_object,plural)
+            status = self.get_crd_status(crd_object,group,plural)
 
             creat_time = crd_object['metadata']['creationTimestamp'].replace('T', ' ').replace('Z', '')
             creat_time = (datetime.datetime.strptime(creat_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
@@ -312,6 +304,13 @@ class K8s():
             elif 'status' in crd_object and 'completionTime' in crd_object['status'] and crd_object['status']['completionTime']:
                 finish_time = crd_object['status']['completionTime'].replace('T', ' ').replace('Z', '')
                 finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+
+            # vcjob的结束时间
+            elif 'status' in crd_object and 'state' in crd_object['status'] and 'lastTransitionTime' in crd_object['status']['state']:
+                if crd_object['status']['state'].get('phase','')=='Completed':
+                    finish_time = crd_object['status']['state']['lastTransitionTime'].replace('T', ' ').replace('Z', '')
+                    finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+
 
             back_object={
                 "name":crd_object['metadata']['name'],
@@ -427,7 +426,6 @@ class K8s():
             except Exception as e:
                 print(e)
 
-
             # 删除pytorchjob
             try:
                 crd_info = all_crd_info['pytorchjob']
@@ -448,14 +446,17 @@ class K8s():
             except Exception as e:
                 print(e)
 
-            # 删除framework
+            # 删除vcjob
             try:
-                crd_info = all_crd_info['framework']
-                crd_names = self.delete_crd(group=crd_info['group'], version=crd_info['version'],
-                                                  plural=crd_info['plural'], namespace=namespace,
-                                                  labels={"run-id": str(run_id)})
+                crd_info = all_crd_info['vcjob']
+                crd_names = self.delete_crd(
+                    group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
+                    namespace=namespace, labels={'run-id': run_id}
+                )
             except Exception as e:
                 print(e)
+
+
 
 
             # 删除deployment
@@ -481,16 +482,6 @@ class K8s():
                 if daemonsets:
                     for daemonset in daemonsets:
                         self.AppsV1Api.delete_namespaced_daemon_set(namespace=namespace,name=daemonset.metadata.name,grace_period_seconds=0)
-
-            except Exception as e:
-                print(e)
-
-            # 删除sts
-            try:
-                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace,label_selector="run-id=%s" % str(run_id)).items
-                if stss:
-                    for sts in stss:
-                        self.AppsV1Api.delete_namespaced_stateful_set(namespace=namespace,name=sts.metadata.name,grace_period_seconds=0)
 
             except Exception as e:
                 print(e)
@@ -650,7 +641,7 @@ class K8s():
         return k8s_volumes,k8s_volume_mounts
 
 
-    # @pysnooper.snoop(watch_explode=('envs'))
+    # @pysnooper.snoop(watch_explode=())
     def make_container(self,name,command,args,volume_mount,working_dir,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image,env,privileged=False,username='',ports=None):
 
         if not '~' in resource_memory:
@@ -706,8 +697,8 @@ class K8s():
             "memory": requests_memory
         }
         resources_limits = {
-            "cpu": requests_cpu,
-            "memory": requests_memory
+            "cpu": limits_cpu,
+            "memory": limits_memory
         }
 
         if gpu_type == 'NVIDIA':
@@ -1033,12 +1024,17 @@ class K8s():
 
     # 创建pod
     # @pysnooper.snoop()
-    def create_service(self,namespace,name,username,ports,selector=None):
+    def create_service(self,namespace,name,username,ports,selector=None,service_type='ClusterIP',externalIPs=None):
         svc_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username})
-        ports = [client.V1ServicePort(name='http%s'%index, port=int(port), protocol='TCP', target_port=int(port)) for index,port in enumerate(ports)]
-        svc_spec = client.V1ServiceSpec(ports=ports, selector={"app": name, 'user': username}, type='ClusterIP')
+        service_ports=[]
+        for index,port in enumerate(ports):
+            if type(port)==list and len(port)>1:
+                service_ports.append(client.V1ServicePort(name='http%s'%index, port=int(port[0]), protocol='TCP', target_port=int(port[1])))
+            else:
+                service_ports.append(client.V1ServicePort(name='http%s' % index, port=int(port), protocol='TCP', target_port=int(port)))
+        svc_spec = client.V1ServiceSpec(ports=service_ports, selector={"app": name, 'user': username}, type=service_type,external_i_ps=externalIPs)
         if selector:
-            svc_spec = client.V1ServiceSpec(ports=ports, selector=selector, type='ClusterIP')
+            svc_spec = client.V1ServiceSpec(ports=service_ports, selector=selector, type=service_type,external_i_ps=externalIPs)
         service = client.V1Service(api_version='v1', kind='Service', metadata=svc_metadata, spec=svc_spec)
         # print(service.to_dict())
         try:

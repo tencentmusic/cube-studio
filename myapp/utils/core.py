@@ -1395,8 +1395,8 @@ def check_resource_memory(resource_memory,src_resource_memory=None):
         if resource_int<=src_resource_int:
             return resource
 
-        if resource_int>50000:
-            return '50G'
+        if resource_int>250000:
+            return '250G'
         else:
             return resource
 
@@ -1442,9 +1442,9 @@ def check_resource_cpu(resource_cpu,src_resource_cpu=None):
         if resource_int<=src_resource_int:
             return resource
 
-        if resource_int>20:
-            return '20'
-            # raise MyappException('resource cpu max 20')
+        if resource_int>50:
+            return '50'
+            # raise MyappException('resource cpu max 50')
         return resource
 
     resource = resource_cpu.upper().replace('-', '~').replace('_', '~').strip()

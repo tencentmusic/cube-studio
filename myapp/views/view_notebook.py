@@ -253,6 +253,7 @@ class Notebook_ModelView_Base():
             item.changed_by_fk = int(self.src_item_json.get('changed_by_fk'))
         if self.src_item_json:
             item.created_by_fk = int(self.src_item_json.get('created_by_fk'))
+
         db.session.commit()
 
     def post_list(self,items):
@@ -287,6 +288,8 @@ class Notebook_ModelView_Base():
 
     # @pysnooper.snoop(watch_explode=('notebook'))
     def reset_notebook(self, notebook):
+        notebook.changed_on=datetime.datetime.now()
+        db.session.commit()
         self.reset_theia(notebook)
 
 
@@ -310,7 +313,7 @@ class Notebook_ModelView_Base():
                                     "--no-browser --allow-root --port=%s "
                                     "--NotebookApp.token='' --NotebookApp.password='' "
                                     "--NotebookApp.allow_origin='*' "
-                                    "--NotebookApp.base_url=%s" % ('/mnt/%s' % notebook.created_by.username if "(pvc)" in notebook.volume_mount else "/mnt/",port,rewrite_url)]
+                                    "--NotebookApp.base_url=%s" % (notebook.mount,port,rewrite_url)]
             volume_mount +=',2G(memory):/dev/shm'
 
         elif notebook.ide_type=='theia':
@@ -337,8 +340,8 @@ class Notebook_ModelView_Base():
             volume_mount=volume_mount,
             working_dir=workingDir,
             node_selector=notebook.get_node_selector(),
-            resource_memory=notebook.resource_memory,
-            resource_cpu=notebook.resource_cpu,
+            resource_memory="0G~"+notebook.resource_memory,
+            resource_cpu="0~"+notebook.resource_cpu,
             resource_gpu=notebook.resource_gpu,
             image_pull_policy=notebook.image_pull_policy,
             image_pull_secrets=image_secrets,
@@ -414,6 +417,7 @@ class Notebook_ModelView_Base():
     @expose('/reset/<notebook_id>',methods=['GET','POST'])
     def reset(self,notebook_id):
         notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
+
         try:
             notebook_crd = self.reset_notebook(notebook)
             flash('已重置，Running状态后可进入。注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。','warning')

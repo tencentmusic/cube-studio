@@ -67,6 +67,109 @@ FRONTEND_CONF_KEYS = (
 
 
 
+from flask_appbuilder.const import (
+    FLAMSG_ERR_SEC_ACCESS_DENIED,
+    LOGMSG_ERR_SEC_ACCESS_DENIED,
+    PERMISSION_PREFIX
+)
+from flask_appbuilder._compat import as_unicode
+
+log = logging.getLogger(__name__)
+
+def has_access(f):
+    """
+        Use this decorator to enable granular security permissions to your methods.
+        Permissions will be associated to a role, and roles are associated to users.
+
+        By default the permission's name is the methods name.
+    """
+    if hasattr(f, '_permission_name'):
+        permission_str = f._permission_name
+    else:
+        permission_str = f.__name__
+
+    def wraps(self, *args, **kwargs):
+
+        permission_str = "{}{}".format(PERMISSION_PREFIX, f._permission_name)
+        if self.method_permission_name:
+            _permission_name = self.method_permission_name.get(f.__name__)
+            if _permission_name:
+                permission_str = "{}{}".format(PERMISSION_PREFIX, _permission_name)
+        if (permission_str in self.base_permissions and
+                self.appbuilder.sm.has_access(
+                    permission_str,
+                    self.class_permission_name
+                )):
+            return f(self, *args, **kwargs)
+        else:
+            log.warning(
+                LOGMSG_ERR_SEC_ACCESS_DENIED.format(
+                    permission_str,
+                    self.__class__.__name__
+                )
+            )
+            flash(as_unicode(FLAMSG_ERR_SEC_ACCESS_DENIED), "danger")
+        return redirect(
+            url_for(
+                self.appbuilder.sm.auth_view.__class__.__name__ + ".login",
+                next=request.url
+            )
+        )
+
+    f._permission_name = permission_str
+    return functools.update_wrapper(wraps, f)
+
+
+def has_access_api(f):
+    """
+        Use this decorator to enable granular security permissions to your API methods.
+        Permissions will be associated to a role, and roles are associated to users.
+
+        By default the permission's name is the methods name.
+
+        this will return a message and HTTP 401 is case of unauthorized access.
+    """
+    if hasattr(f, '_permission_name'):
+        permission_str = f._permission_name
+    else:
+        permission_str = f.__name__
+
+    def wraps(self, *args, **kwargs):
+        permission_str = "{}{}".format(PERMISSION_PREFIX, f._permission_name)
+        if self.method_permission_name:
+            _permission_name = self.method_permission_name.get(f.__name__)
+            if _permission_name:
+                permission_str = "{}{}".format(PERMISSION_PREFIX, _permission_name)
+        if (permission_str in self.base_permissions and
+                self.appbuilder.sm.has_access(
+                    permission_str,
+                    self.class_permission_name
+                )):
+            return f(self, *args, **kwargs)
+        else:
+            log.warning(
+                LOGMSG_ERR_SEC_ACCESS_DENIED.format(
+                    permission_str,
+                    self.__class__.__name__
+                )
+            )
+            response = make_response(
+                jsonify(
+                    {
+                        'message': str(FLAMSG_ERR_SEC_ACCESS_DENIED),
+                        'severity': 'danger'
+                    }
+                ),
+                401
+            )
+            response.headers['Content-Type'] = "application/json"
+            return response
+
+    f._permission_name = permission_str
+    return functools.update_wrapper(wraps, f)
+
+
+
 def get_error_msg():
     if conf.get("SHOW_STACKTRACE"):
         error_msg = traceback.format_exc()
@@ -226,7 +329,7 @@ class MyappModelView(ModelView):
     post_list = None
     pre_show = None
     post_show = None
-
+    check_edit_permission=None
     label_title = ''
 
     conv = GeneralModelConverter(datamodel)
@@ -413,14 +516,6 @@ class MyappModelView(ModelView):
                 self.add_template, title=self.add_title, widgets=widget
             )
 
-    # 检测是否具有编辑权限，只有creator和admin可以编辑
-    def check_edit_permission(self, item):
-        user_roles = [role.name.lower() for role in list(get_user_roles())]
-        if "admin" in user_roles:
-            return
-        if g.user and g.user.username and hasattr(item,'created_by'):
-            if g.user.username!=item.created_by.username:
-              raise MyappException('just creator can edit/delete ')
 
 
     # @pysnooper.snoop(watch_explode=('item'))
@@ -512,13 +607,22 @@ class MyappModelView(ModelView):
 
         if self.src_item_object:
             self.src_item_json = self.src_item_object.to_json()
-        if self.check_redirect_list_url:
-            try:
-                self.check_edit_permission(self.src_item_object)
-            except Exception as e:
-                print(e)
-                flash(str(e), 'warning')
-                return redirect(self.check_redirect_list_url)
+
+        # if self.check_redirect_list_url:
+        try:
+            if self.check_edit_permission:
+                has_permission = self.check_edit_permission(self.src_item_object)
+                if not has_permission:
+                    self.update_redirect()
+                    url = self.get_redirect()
+                    return redirect(url)
+
+        except Exception as e:
+            print(e)
+            flash(str(e), 'warning')
+            self.update_redirect()
+            return redirect(self.get_redirect())
+            # return redirect(self.check_redirect_list_url)
 
         widgets = self._edit(pk)
 
@@ -543,7 +647,10 @@ class MyappModelView(ModelView):
             self.src_item_json = self.src_item_object.to_json()
         if self.check_redirect_list_url:
             try:
-                self.check_edit_permission(self.src_item_object)
+                if self.check_edit_permission:
+                    if not self.check_edit_permission(self.src_item_object):
+                        flash(str('no permission delete'), 'warning')
+                        return redirect(self.check_redirect_list_url)
             except Exception as e:
                 print(e)
                 flash(str(e), 'warning')

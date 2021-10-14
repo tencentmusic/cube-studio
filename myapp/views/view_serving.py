@@ -11,6 +11,7 @@ from flask_appbuilder.actions import action
 from myapp import app, appbuilder,db,event_logger
 import logging
 import re
+import copy
 import uuid
 import requests
 from myapp.exceptions import MyappException
@@ -168,7 +169,7 @@ class Service_ModelView(MyappModelView):
         namespace = conf.get('SERVICE_NAMESPACE')
 
 
-        # 设定notebook的机器选择器
+        # 设定service的机器选择器
         if core.get_gpu(service.resource_gpu)[0]:
             service.node_selector = service.node_selector.replace('cpu=true','gpu=true')
             db.session.commit()
@@ -201,12 +202,15 @@ class Service_ModelView(MyappModelView):
                               ports=[int(port) for port in service.ports.split(',')]
                               )
 
-        k8s.create_service(namespace=namespace,
-                           name=service.name,
-                           username=service.created_by.username,
-                           ports=[int(port) for port in service.ports.split(',')]
-                           )
 
+        ports = [int(port) for port in service.ports.split(',')]
+
+        k8s.create_service(
+            namespace=namespace,
+            name=service.name,
+            username=service.created_by.username,
+            ports=ports
+        )
         # 如果域名配置的gateway，就用这个
         host = service.name+"."+conf.get('SERVICE_DOMAIN')
         if service.host:
@@ -216,6 +220,21 @@ class Service_ModelView(MyappModelView):
                            host = host,
                            ports=service.ports.split(',')
                            )
+
+        # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
+        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',None)
+        if SERVICE_EXTERNAL_IP:
+            service_ports = [[30000+10*service.id+index,port] for index,port in enumerate(ports)]
+
+            k8s.create_service(
+                namespace=namespace,
+                name=(service.name+"-external")[:60],
+                username=service.created_by.username,
+                ports=service_ports,
+                selector={"app": service.name, 'user': service.created_by.username},
+                externalIPs=conf.get('SERVICE_EXTERNAL_IP',None)
+            )
+
 
         # # 创建虚拟服务做代理
         # crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
@@ -273,6 +292,7 @@ class Service_ModelView(MyappModelView):
 
         flash('服务部署完成',category='warning')
         return redirect('/service_modelview/list/')
+
 
 
     @expose('/link/<service_id>')

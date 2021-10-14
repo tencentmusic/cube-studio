@@ -212,7 +212,7 @@ def push_task_time(workflow,dbsession):
                 task_name = pods[pod_name]['displayName']
                 finishedAt = datetime.datetime.strptime(pods[pod_name]['finishedAt'].replace('T',' ').replace('Z',''),'%Y-%m-%d %H:%M:%S')
                 startAt = datetime.datetime.strptime(pods[pod_name]['startedAt'].replace('T', ' ').replace('Z', ''),'%Y-%m-%d %H:%M:%S')
-                run_time= round((finishedAt-startAt).seconds/60/60,2)
+                run_time= round((finishedAt-startAt).days*24+(finishedAt-startAt).seconds/60/60,2)
                 db_task_name = task_name[:task_name.index('(')] if '(' in task_name else task_name
                 task = dbsession.query(Task).filter(Task.pipeline_id == int(pipeline_id)).filter(Task.name == db_task_name).first()
                 if startAt in task_pod_time and task_pod_time[startAt]:
@@ -244,7 +244,7 @@ def push_task_time(workflow,dbsession):
                 workflow.info_json = json.dumps(info_json, indent=4, ensure_ascii=False)
                 dbsession.commit()
 
-                push_admin(message)
+                push_message(conf.get('ADMIN_USER').split(','),message)
 
                 alert_user = pipeline.alert_user.split(',') if pipeline.alert_user else []
                 alert_user = [user.strip() for user in alert_user if user.strip()]
@@ -375,7 +375,7 @@ def deal_event(event,workflow_info,namespace):
                     deliver_message(workflow,dbsession)
                 except Exception as e1:
                     print('push fail:', e1)
-                    push_admin(str(e1))
+                    push_message(conf.get('ADMIN_USER').split(','),'push fail'+str(e1))
             save_history(workflow,dbsession)
             save_monitoring(workflow, dbsession)
 

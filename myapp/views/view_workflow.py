@@ -7,7 +7,7 @@ from flask_babel import gettext as __
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 from myapp.models.model_team import Project,Project_User
 from flask_appbuilder.actions import action
-
+from myapp.project import push_message,push_admin
 from myapp import app, appbuilder,db,event_logger
 
 from sqlalchemy import and_, or_, select
@@ -151,6 +151,8 @@ class Crd_ModelView_Base():
                         item.status='Deleted'
                         item.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         db.session.commit()
+                        push_message(conf.get('ADMIN_USER', '').split(','), '手动触发stop %s %s' % (crd_info['plural'],item.name))
+
 
                 except Exception as e:
                     flash(str(e), "danger")
@@ -247,7 +249,7 @@ class Workflow_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
 
     label_title = '运行实例'
     datamodel = SQLAInterface(Workflow)
-    list_columns = ['name','project','pipeline_url', 'namespace_url', 'create_time','change_time', 'final_status','status', 'username', 'log','stop']
+    list_columns = ['name','project','pipeline_url', 'namespace_url','execution_date', 'create_time','change_time', 'final_status','status', 'username', 'log','stop']
     crd_name = 'workflow'
 
 appbuilder.add_view(Workflow_ModelView,"运行实例",href='/workflow_modelview/list/?_flt_2_name=&_flt_2_labels=',icon = 'fa-tasks',category = '训练')

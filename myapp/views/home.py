@@ -51,10 +51,8 @@ class Myapp(BaseMyappView):
 
     @expose('/home')
     def home(self):
-        from myapp.project import HOME_CONFIG
-        data = HOME_CONFIG
         # 返回模板
-        return self.render_template('home.html', data=data)
+        return self.render_template('home.html')
 
 
     @expose("/web/log/<cluster_name>/<namespace>/<pod_name>", methods=["GET",])
