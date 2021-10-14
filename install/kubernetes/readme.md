@@ -9,7 +9,7 @@
 
  ！！！重要：分布式文件系统需要挂载到每台机器的/data/k8s/下面，当然也可以挂载其他目录下，以软链的形式链接到/data/k8s/下 
 
-需要每天机器都有对应的目录/data/k8s为分布式存储目录
+需要每台机器都有对应的目录/data/k8s为分布式存储目录
 ```bash  
 mkdir -p /data/k8s/kubeflow/minio  
 mkdir -p /data/k8s/kubeflow/global  
