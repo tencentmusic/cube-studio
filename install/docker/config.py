@@ -515,6 +515,14 @@ class CeleryConfig(object):
             # 'time_limit': 1,
             'soft_time_limit': 600,   # 只在 prefork pool 里支持
             'ignore_result': True,
+        },
+        'task.check_docker_commit': {
+            'rate_limit': '1/s',
+            'ignore_result': True,
+        },
+        'task.upload_workflow': {
+            'rate_limit': '10/s',
+            'ignore_result': True,
         }
     }
 
@@ -529,13 +537,13 @@ class CeleryConfig(object):
         'task_task2': {
             'task': 'task.make_timerun_config',
             # 'schedule': 10.0,     #10s中执行一次
-            'schedule': crontab(minute='1'),
-        },
-        'task_task3': {
-            'task': 'task.upload_timerun',
-            # 'schedule': 10.0,     #10s中执行一次
             'schedule': crontab(minute='*/5'),
         },
+        # 'task_task3': {
+        #     'task': 'task.upload_timerun',
+        #     # 'schedule': 10.0,     #10s中执行一次
+        #     'schedule': crontab(minute='*/5'),
+        # },
         'task_task4': {
             'task': 'task.delete_old_data',
             # 'schedule': 100.0,     #10s中执行一次
@@ -544,17 +552,31 @@ class CeleryConfig(object):
         'task_task5': {
             'task': 'task.delete_notebook',
             # 'schedule': 10.0,
-            'schedule': crontab(minute='1', hour='1'),
+            'schedule': crontab(minute='1', hour='4'),
         },
         # 'task_task6': {
         #     'task': 'task.push_workspace_size',
         #     # 'schedule': 10.0,
         #     'schedule': crontab(minute='10', hour='10'),
         # },
-        'task_task8': {
-            'task': 'task.alert_notebook_renew',
+        'task_task6':{
+            'task':"task.check_pipeline_run",
+            'schedule': crontab(minute='10', hour='11'),
+        },
+        'task_task7': {
+            'task': 'task.list_train_model',
             # 'schedule': 10.0,
-            'schedule': crontab(minute='30', hour='10'),
+            'schedule': crontab(minute='20', hour='10'),
+        },
+        'task_task8': {
+            'task': 'task.delete_debug_docker',
+            # 'schedule': 10.0,
+            'schedule': crontab(minute='30', hour='6'),
+        },
+        'task_task9': {
+            'task': 'task.watch_gpu',
+            # 'schedule': 10.0,
+            'schedule': crontab(minute='10',hour='8-23/2'),
         }
     }
 
@@ -647,6 +669,13 @@ CRD_INFO={
         "plural": "frameworks",
         'kind': 'Framework',
         "timeout": 60 * 60 * 24 * 2
+    },
+    "vcjob": {
+        "group": "batch.volcano.sh",
+        "version": "v1alpha1",
+        'kind': 'Job',
+        "plural": "jobs",
+        "timeout": 60 * 60 * 24 * 2
     }
 }
 
@@ -707,6 +736,8 @@ KATIB_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
 KATIB_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
+# 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
+REPOSITORY_ORG='ai.tencentmusic/tme-public/'
 # notebook每个pod使用的用户账号
 JUPYTER_ACCOUNTS='jupyter-user'
 HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,KATIB_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE,KFSERVING_NAMESPACE]
@@ -759,13 +790,12 @@ HOSTALIASES='''
 127.0.0.1 localhost
 '''
 
-
+SERVICE_EXTERNAL_IP=[]
 
 
 NNI_DOMAIN = HOST  # 如果没有域名就用*   有域名就配置成 HOST
 JUPYTER_DOMAIN = HOST  # 如果没有域名就用*   有域名就配置成 HOST
 
-GRAFANA_TASK = 'http://%s/grafana/d/task/ge-rong-qi-fu-zai-jian-kong?orgId=1&var-instance=All&var-namespace=All&var-pod=' % HOST  # grafana配置的访问task运行数据的网址
 
 ALL_LINKS=[
     {
@@ -781,21 +811,22 @@ ALL_LINKS=[
     {
         "label":"Grafana",
         "name":"grafana",
-        "url": 'http://%s/grafana/'%HOST  # 访问grafana的域名地址
+        "url": 'http://xx.xx.xx.xx:8080/'  # 访问grafana的域名地址
     }
 ]
 
-# 多集群应用
+# 所有训练集群的信息
 CLUSTERS={
-    # 至少要有一个这个
+    # 和project expand里面的名称一致
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
         "K8S_DASHBOARD_CLUSTER":'http://kubeflow.local.com/k8s/dashboard/cluster/',
-        "KFP_HOST": 'http://xx.xx.xx.xx:8888',
+        "KFP_HOST": 'http://ml-pipeline.kubeflow:8888',
         "PIPELINE_URL": 'http://kubeflow.local.com/pipeline/#/',
         "JUPYTER_DOMAIN":"kubeflow.local.com",
-        "NNI_DOMAIN":'kubeflow.local.com'
+        "NNI_DOMAIN":'kubeflow.local.com',
+        "GRAFANA_TASK": 'http://xx.xx.xx.xx:8080/xx/normal_pod_info?orgId=1&var-pod='  # grafana配置的访问task运行数据的网址
     }
 }
 
