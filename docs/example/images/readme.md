@@ -2,6 +2,15 @@
 
 ![](../pic/tapd_20424693_1630748567_87.png)
 
+扩展字段高级配置(例如)：
+```
+{
+  "volume_mount":"kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+  "resource_memory":"8G",
+  "resource_cpu": "4"
+}
+```
+
 # 修改默认python版本
 
 	rm /usr/bin/python
@@ -48,11 +57,12 @@
 
 
 
+
 # 常用基础镜像
 
 ### ubuntu
-	cuda10.1-cudnn7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7
+    cuda10.1-cudnn7
+    - ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7
 		
 	python3.6
 		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6
@@ -62,6 +72,46 @@
 		
 	python3.8
 		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.8
+		
+		
+	cuda10.0-cudnn7
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7
+		
+	python3.6
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.6
+		
+	python3.7
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.7
+		
+	python3.8
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.8
+		
+		
+	cuda9.1-cudnn7
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7
+		
+	python3.6
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.6
+		
+	python3.7
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.7
+		
+	python3.8
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.8
+		
+	
+	cuda9.0-cudnn7
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7
+		
+	python3.6
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7-python3.6
+		
+	python3.7
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7-python3.7
+		
+	python3.8
+		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7-python3.8
+		
 		
 	cuda10.1-cuda10.0-cuda9.0-cudnn7.6
 		- ai.tencentmusic.com/tme-public/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base

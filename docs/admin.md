@@ -113,6 +113,16 @@ TASK_RESOURCE_GPU=0       使用该模板的task 忽略用户的资源配置，g
  - 在pieline正常运行10次以后，定时任务会取其中真实使用的资源最大值，再预留一定的空间，动态的修改用户配置的资源项，防止资源配置不合理而浪费算力
 
 
+# 训练->demo任务流
+
+首页会显示所有的demo pipeline。即 pipeline 扩展字段expand（dict）中包含
+```
+{
+    "demo": "true",
+    "img": "https://xx.xx.xx.xx/xx.png"
+}
+```
+
 # 训练->定时调度记录
 
 手动运行和定时运行同一个pipeline相互之间不干扰。
