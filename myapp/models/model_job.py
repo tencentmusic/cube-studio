@@ -153,7 +153,7 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     # import pysnooper
     # @pysnooper.snoop()
     def get_env(self,name):
-        if name in self.env:
+        if self.env and name in self.env:
             envs = self.env.split('\n')
             for env in envs:
                 if name in env:
@@ -202,6 +202,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     expand = Column(Text(65536),default='[]')
     depends_on_past = Column(Boolean, default=False)
     max_active_runs = Column(Integer, nullable=False,default=3)   # 最大同时运行的pipeline实例
+    expired_limit = Column(Integer, nullable=False, default=1)  # 过期保留个数
     parameter = Column(Text(65536), default='{}')
 
     def __repr__(self):
@@ -276,7 +277,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def get_tasks(self,dbsession=db.session):
         return dbsession.query(Task).filter_by(pipeline_id=self.id).all()
 
-    # 获取当期运行时workfflow的数量
+    # 获取当期运行时workflow的数量
     def get_workflow(self):
 
         back_crds = []
@@ -518,7 +519,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def monitoring_html(self):
         try:
             monitoring = json.loads(self.monitoring)
-            monitoring['link']=conf.get('GRAFANA_TASK','')+monitoring.get('pod_name','')
+            monitoring['link']=self.pipeline.project.cluster.get('GRAFANA_TASK','')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
         except Exception as e:
             return Markup('<pre><code> 暂无 </code></pre>')
@@ -666,6 +667,43 @@ class Crd:
 # 定义model
 class Workflow(Model,Crd,MyappModelBase):
     __tablename__ = 'workflow'
+
+    @renders('namespace')
+    def namespace_url(self):
+        if self.pipeline:
+            url = conf.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (self.namespace, self.pipeline.name.replace('_', '-'))
+            return Markup(f'<a target=_blank href="{url}">{self.namespace}</a>')
+        else:
+            url = conf.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (self.namespace, self.name.replace('_', '-'))
+            return Markup(f'<a target=_blank href="{url}">{self.namespace}</a>')
+
+    @property
+    def run_history(self):
+        label = json.loads(self.labels) if self.labels else {}
+        runid = label.get('run-id','')
+        if runid:
+            return db.session.query(RunHistory).filter(RunHistory.pipeline_file.contains(runid)).first()
+            # return db.session.query(RunHistory).filter_by(run_id=runid).first()
+        else:
+            return None
+
+    @property
+    def schedule_type(self):
+        run_history = self.run_history
+        if run_history:
+            return 'crontab'
+        else:
+            return 'once'
+
+
+    @property
+    def execution_date(self):
+        run_history = self.run_history
+        if run_history:
+            return run_history.execution_date
+        else:
+            return 'once'
+
 
     @property
     def pipeline_url(self):

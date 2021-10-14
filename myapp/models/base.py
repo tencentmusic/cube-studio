@@ -80,6 +80,8 @@ class MyappModelBase():
         "save":"保存",
         "history":"历史",
         "consecutive_build":"连续构建",
+        "need_gpu":"需要gpu",
+        "last_image":"最新镜像",
 
         "log": "日志",
         "pod": "容器",
@@ -167,6 +169,8 @@ class MyappModelBase():
         "max_active_runs": "最大激活运行数",
         "des_image":"目标镜像",
         "target_image":"目标镜像",
+
+        "polaris_url": "北极星地址",
 
         "creator": "创建者",
         "created_by": "创建者",

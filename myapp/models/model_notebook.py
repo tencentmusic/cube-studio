@@ -62,13 +62,30 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         else:
             url = "/notebook/"+self.namespace + "/" + self.name+"/lab?"
 
-        if "(pvc)" not in self.volume_mount:
-            url = url + "#/mnt"
-        else:
-            if self.created_by:
-                url = url + "#/mnt/%s"%self.created_by.username
+        url=url + "#"+self.mount
+        # if "(pvc)" not in self.volume_mount:
+        #     url = url + "#/mnt"
+        # else:
+        #     if self.created_by:
+        #         url = url + "#/mnt/%s"%self.created_by.username
         host = "http://"+self.cluster['JUPYTER_DOMAIN']
         return Markup(f'<a target=_blank href="{host}{url}">{self.name}</a>')
+
+    @property
+    def mount(self):
+        if "(hostpath)" in self.volume_mount:
+            mount = self.volume_mount[self.volume_mount.index('(hostpath)'):]
+            mount=mount.replace('(hostpath):','')
+            if ',' in mount:
+                mount = mount[:mount.index(',')]
+                return mount
+            else:
+                return mount
+        else:
+            if self.created_by:
+                return "/mnt/%s"% self.created_by.username
+            else:
+                return "/mnt/"
 
 
     @property

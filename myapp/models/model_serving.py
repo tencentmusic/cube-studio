@@ -59,6 +59,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase):
     resource_gpu= Column(String(100), default='0')
     deploy_time = Column(String(100), nullable=False,default=datetime.datetime.now)
     host = Column(String(200), default='')  # 挂载
+    expand = Column(Text(65536), default='')
 
     @property
     def deploy(self):
