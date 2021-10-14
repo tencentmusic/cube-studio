@@ -23,6 +23,10 @@ data:
       max_connections = 1000
       innodb_buffer_pool_size=2G
       explicit_defaults_for_timestamp = 1
+      character_set_server=utf8
+      init_connect='SET NAMES utf8'
+      default-character-set=utf8
       # skip-grant-tables
 
-
+  [client]
+    default-character-set=utf8

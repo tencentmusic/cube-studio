@@ -6,6 +6,11 @@ kind: Ingress
 metadata:
   name: infra-kubeflow-dashboard
   namespace: infra
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1g
 spec:
   rules:
     - host: kubeflow.local.com

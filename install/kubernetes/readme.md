@@ -88,7 +88,11 @@ CREATE DATABASE IF NOT EXISTS cachedb DEFAULT CHARACTER SET utf8 DEFAULT COLLATE
 # 部署frameworkercontroller组件  
 参考frameworkercontroller/readme.md  
   
-  
+# 部署volcano组件  
+```bash
+kubectl apply -f volcano/volcano-development.yaml
+```
+
 # 部署 管理平台  
 
 如果涉及到多集群部署，修改kubeconfig中的文件，文件名为$cluster-config，并在每个集群中部署configmap

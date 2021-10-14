@@ -43,7 +43,8 @@ new_pipline = [
     'gcr.io/ml-pipeline/metadata-envoy:1.6.0',
     'gcr.io/ml-pipeline/metadata-writer:1.6.0',
     'gcr.io/tfx-oss-public/ml_metadata_store_server:0.30.0',
-    "gcr.io/ml-pipeline/argoexec:v2.7.5-license-compliance"
+    "gcr.io/ml-pipeline/argoexec:v2.7.5-license-compliance",
+    "gcr.io/ml-pipeline/argoexec:v2.12.9-license-compliance"
 ]
 
 
