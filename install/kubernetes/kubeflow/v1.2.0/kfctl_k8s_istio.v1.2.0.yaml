@@ -3,7 +3,7 @@ kind: KfDef
 metadata:
   annotations:
     kfctl.kubeflow.io/force-delete: "false"
-  clusterName: dev
+  clusterName: cls-s01hbvh9
   creationTimestamp: null
   name: v1.2.0
   namespace: kubeflow

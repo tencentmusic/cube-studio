@@ -24,6 +24,18 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
+    app: pipeline-runner
+  name: pipeline-runner
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
     app: kubeflow-pipelines-metadata-writer-role
   name: kubeflow-pipelines-metadata-writer-role
 rules:
