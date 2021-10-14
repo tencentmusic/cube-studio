@@ -35,7 +35,7 @@ cat /etc/docker/daemon.json
     }  
 }  
 ```  
-# 如果是内网部署，需要先把镜像传递到私有仓库，在从私有仓库拉取到每台机器上  
+# 如果是内网部署，需要先把镜像传递到私有仓库，再从私有仓库拉取到每台机器上  
   
 ```bash  
 sh pull_image_kubeflow.sh  
