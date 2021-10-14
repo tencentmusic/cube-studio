@@ -11,6 +11,7 @@ import json
 from myapp import app, appbuilder, db, security_manager
 from myapp.models.model_notebook import Notebook
 from myapp.models.model_team import Project,Project_User
+from myapp.models.model_job import Repository,Images,Job_Template,Pipeline,Task
 conf = app.config
 
 def create_app(script_info=None):
@@ -24,7 +25,10 @@ import pysnooper
 
 # https://dormousehole.readthedocs.io/en/latest/cli.html
 @app.cli.command('init')
+@pysnooper.snoop()
 def init():
+
+    # 初始化创建项目组
     try:
         """Inits the Myapp application"""
         appbuilder.add_permissions(update_perms=True)   # update_perms为true才会检测新权限
@@ -71,6 +75,117 @@ def init():
         add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 9})
     except Exception as e:
         print(e)
+
+
+
+
+    # 初始化创建仓库镜像模板任务流
+    try:
+
+        repository = db.session.query(Repository).filter_by(name='hubsecret').first()
+        if repository is None:
+            try:
+                repository = Repository()
+                repository.name = 'hubsecret'
+                repository.server='registry.docker-cn.com'
+                repository.user = 'kubeflow'
+                repository.password = 'kubeflow'
+                repository.hubsecret = 'hubsecret'
+                repository.created_by_fk=1
+                repository.changed_by_fk=1
+                db.session.add(repository)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+
+
+        images = db.session.query(Images).filter_by(name='ubuntu:18.04').first()
+        project = db.session.query(Project).filter_by(name='基础命令').filter_by(type='job-template').first()
+        if images is None and project:
+            try:
+                images = Images()
+                images.name = 'ubuntu:18.04'
+                images.describe='开源ubuntu:18.04基础镜像'
+                images.created_by_fk=1
+                images.changed_by_fk=1
+                images.project_id=project.id
+                images.repository_id=repository.id
+                db.session.add(images)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+
+
+        job_template = db.session.query(Job_Template).filter_by(name=conf.get('CUSTOMIZE_JOB','自定义镜像')).first()
+        project = db.session.query(Project).filter_by(name='基础命令').filter_by(type='job-template').first()
+        if job_template is None and project:
+            try:
+                job_template = Job_Template()
+                job_template.name = conf.get('CUSTOMIZE_JOB','自定义镜像') if conf.get('CUSTOMIZE_JOB','自定义镜像') else '自定义镜像'
+                job_template.describe='使用用户自定义镜像作为运行镜像'
+                job_template.created_by_fk=1
+                job_template.changed_by_fk=1
+                job_template.project_id=project.id
+                job_template.images_id=images.id
+                job_template.version='Release'
+                job_template.args=json.dumps(
+                    {
+                        "shell": {
+                            "images": {
+                                "type": "str",
+                                "item_type": "str",
+                                "label": "要调试的镜像",
+                                "require": 1,
+                                "choice": [],
+                                "range": "",
+                                "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                                "placeholder": "",
+                                "describe": "要调试的镜像，<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/docs/example/images'>基础镜像参考<a>",
+                                "editable": 1,
+                                "condition": "",
+                                "sub_args": {}
+                            },
+                            "workdir": {
+                                "type": "str",
+                                "item_type": "str",
+                                "label": "启动目录",
+                                "require": 1,
+                                "choice": [],
+                                "range": "",
+                                "default": "/mnt/xx",
+                                "placeholder": "",
+                                "describe": "启动目录",
+                                "editable": 1,
+                                "condition": "",
+                                "sub_args": {}
+                            },
+                            "command": {
+                                "type": "str",
+                                "item_type": "str",
+                                "label": "启动命令",
+                                "require": 1,
+                                "choice": [],
+                                "range": "",
+                                "default": "sh start.sh",
+                                "placeholder": "",
+                                "describe": "启动命令",
+                                "editable": 1,
+                                "condition": "",
+                                "sub_args": {}
+                            }
+                        }
+                    },
+                    indent=4,ensure_ascii=False)
+                db.session.add(job_template)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+
+
+
+    except Exception as e:
+        print(e)
+
 
 @app.cli.command('init_db')
 def init_db():
