@@ -24,7 +24,7 @@ kubectl apply -f sa-rbac.yaml
 # 修改k8s apiserver启动参数
 修改k8s api server启动参数才能正常安装istio
 
-rancher部署的k8s修改
+rancher部署的k8s修改(选中集群-升级-编辑yaml)
 ```
 services:
     ...
