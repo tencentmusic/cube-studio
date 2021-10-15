@@ -16,6 +16,13 @@ mkdir -p /data/k8s/kubeflow/global
 mkdir -p /data/k8s/kubeflow/pipeline/workspace  
 mkdir -p /data/k8s/kubeflow/pipeline/archives  
 ```  
+平台pvc会使用这些分布式存储目录下的subpath，所以如果你是rancher部署k8s集群，需要在kubelet容器中挂载主机的/data/k8s/目录到kubelet容器的/data/k8s/目录。
+rancher修改kubelet容器挂载目录(选中集群-升级-编辑yaml)
+```
+    kubelet:
+      extra_binds:
+        - '/data/k8s:/data/k8s'
+```
   
 # gpu环境的准备  
 1、找运维同学在机器上安装gpu驱动  
