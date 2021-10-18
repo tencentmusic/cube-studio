@@ -1,13 +1,13 @@
 # 生产部署
 
 基础环境依赖
-docker >= 19.03  
-kubernetes >=1.18  
-kubectl >=1.18  
-ssd ceph > 10T  挂载到每台机器的 /data/k8s/  
-单机 磁盘>=1T   单机磁盘容量要求不大，仅做镜像容器的的存储  
-控制端机器 cpu>=32 mem>=64G * 2  
-任务端机器，根据需要自行配置  
+ - docker >= 19.03  
+ - kubernetes >=1.18  
+ - kubectl >=1.18  
+ - ssd ceph > 10T  挂载到每台机器的 /data/k8s/  
+ - 单机 磁盘>=1T   单机磁盘容量要求不大，仅做镜像容器的的存储  
+ - 控制端机器 cpu>=32 mem>=64G * 2  
+ - 任务端机器，根据需要自行配置  
 
 本平台依赖k8s/kubeflow/prometheus/efk相关组件，请优先参考install/kubenetes/readme.md 部署依赖组件。
 
