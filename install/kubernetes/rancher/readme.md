@@ -8,21 +8,23 @@
 
 # 将基础组件推送到内网仓库，并来idc机器拉取
 
-内网无法连接外网，需要我们提前拉好镜像。关于镜像的版本与rancher版本、k8s版本有关。
+内网无法连接外网，需要我们提前拉好镜像。如果你的机器可以连接外网，可以忽略这一部分的操作。
 
-比如我这里使用的是rancher v2.3.2，k8s使用的是v1.16.7。rancher v2.3.2，k8s v1.16.7依赖的镜像。在官网https://github.com/rancher/rancher/releases/tag/v2.3.2  中 找到 依赖的镜像txt文件
+关于镜像的版本与rancher版本、k8s版本有关。可以选择一个能够部署k8s 1.18的rancher版本：https://github.com/rancher/rancher/releases
 
-https://github.com/rancher/rancher/releases/download/v2.3.2/rancher-images.txt
+比如我这里使用的是rancher v2.6.1，这个版本依赖的镜像，在官网https://github.com/rancher/rancher/releases/tag/v2.6.1  中找到依赖的镜像txt文件
 
-将依赖镜像在开发网拉取下来，然后重新tag成docker.oa.com域名下的镜像，推送到docker.oa.com上，后面需要在idc每个机器上拉取下来，再tag成原始镜像名。例如
+https://github.com/rancher/rancher/releases/download/v2.6.1/rancher-images.txt
+
+将依赖镜像在开发网拉取下来，然后重新tag成内网仓库镜像，例如docker.oa.com域名下的镜像，推送到docker.oa.com上，后面需要在idc每个机器上拉取下来，再tag成原始镜像名。例如
 
 ## 可以连接外网的机器上
-docker pull rancher/rancher-agent:v2.3.2
-docker tag rancher/rancher-agent:v2.3.2 docker.oa.com:8080/public/rancher/rancher-agent:v2.3.2
+docker pull rancher/rancher-agent:v2.6.1
+docker tag rancher/rancher-agent:v2.6.1 docker.oa.com:8080/public/rancher/rancher-agent:v2.6.1
 
 ## 内网idc机器
-docker pull docker.oa.com/public/rancher/rancher-agent:v2.3.2 
-docker tag docker.oa.com/public/rancher/rancher-agent:v2.3.2 rancher/rancher-agent:v2.3.2 
+docker pull docker.oa.com/public/rancher/rancher-agent:v2.6.1
+docker tag docker.oa.com/public/rancher/rancher-agent:v2.6.1 rancher/rancher-agent:v2.6.1
 由于依赖镜像比较多，可以写一个脚本，批量的拉取和tag。
 
 # 初始化节点
@@ -37,14 +39,13 @@ init_node.sh 是为了初始化机器，可以把自己的要做的初始化任�
 reset_docker.sh 是为了在机器从rancher集群踢出以后，把rancher环境清理感觉，回归自由机器。
 
 
-
 # 部署rancher server
 
 # 部署k8s集群
 
 单节点部署rancher server
 ```bash
-sudo docker run -d --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:v2.3.2
+sudo docker run -d --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:v2.6.1
 ```
 
 进去rancher server的https://xx.xx.xx.xx/ 的web界面，选择添加集群，选择自定义集群。填写集群名称
@@ -57,6 +58,7 @@ sudo docker run -d --restart=unless-stopped -p 443:443 --privileged --name=myran
 
 有几个需要修改的是k8s使用的网段，由于默认使用的是10.xx，如果和公司网段重复，可以修改为其他网关，例如
 172.16.0.0/16和172.17.0.0/16 两个网段
+
 ```bash
 services:
     etcd:
@@ -198,17 +200,17 @@ kubectl delete node node12
 
 先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl
 ```bash
-docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:v2.3.2
-docker run --volumes-from rancher-data-new -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-2.3.2-20210101.tar.gz /var/lib/rancher
+docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:v2.6.1
+docker run --volumes-from rancher-data-new -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-20210101.tar.gz /var/lib/rancher
 ```
 
 把tar.gz 文件复制到新的rancher server机器上
 ```
-tar -zxvf rancher-data-backup-2.3.2-20210101.tar.gz && mv var/lib/rancher /var/lib/
+tar -zxvf rancher-data-backup-20210101.tar.gz && mv var/lib/rancher /var/lib/
 ```
 新机器上启动新的rancher server
 ```
-sudo docker run -d --restart=unless-stopped -v /var/lib/rancher:/var/lib/rancher -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:v2.3.2
+sudo docker run -d --restart=unless-stopped -v /var/lib/rancher:/var/lib/rancher -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:v2.6.1
 
 1、新rancher server的web界面上修改rancher server的url
 2、打开地址 https://新rancher的ip/v3/clusters/源集群id/clusterregistrationtokens
