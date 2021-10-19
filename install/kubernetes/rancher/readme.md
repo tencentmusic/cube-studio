@@ -12,19 +12,19 @@
 
 关于镜像的版本与rancher版本、k8s版本有关。可以选择一个能够部署k8s 1.18的rancher版本：https://github.com/rancher/rancher/releases
 
-比如我这里使用的是rancher v2.6.1，这个版本依赖的镜像，在官网https://github.com/rancher/rancher/releases/tag/v2.6.1  中找到依赖的镜像txt文件
+比如我这里使用的是rancher_version=v2.5.2，这个版本依赖的镜像，在官网https://github.com/rancher/rancher/releases/tag/$rancher_version  中找到依赖的镜像txt文件
 
-https://github.com/rancher/rancher/releases/download/v2.6.1/rancher-images.txt
+https://github.com/rancher/rancher/releases/download/$rancher_version/rancher-images.txt
 
 将依赖镜像在开发网拉取下来，然后重新tag成内网仓库镜像，例如docker.oa.com域名下的镜像，推送到docker.oa.com上，后面需要在idc每个机器上拉取下来，再tag成原始镜像名。例如
 
 ## 可以连接外网的机器上
-docker pull rancher/rancher-agent:v2.6.1
-docker tag rancher/rancher-agent:v2.6.1 docker.oa.com:8080/public/rancher/rancher-agent:v2.6.1
+docker pull rancher/rancher-agent:$rancher_version
+docker tag rancher/rancher-agent:$rancher_version docker.oa.com:8080/public/rancher/rancher-agent:$rancher_version
 
 ## 内网idc机器
-docker pull docker.oa.com/public/rancher/rancher-agent:v2.6.1
-docker tag docker.oa.com/public/rancher/rancher-agent:v2.6.1 rancher/rancher-agent:v2.6.1
+docker pull docker.oa.com/public/rancher/rancher-agent:$rancher_version
+docker tag docker.oa.com/public/rancher/rancher-agent:$rancher_version rancher/rancher-agent:$rancher_version
 由于依赖镜像比较多，可以写一个脚本，批量的拉取和tag。
 
 # 初始化节点
@@ -45,7 +45,7 @@ reset_docker.sh 是为了在机器从rancher集群踢出以后，把rancher环�
 
 单节点部署rancher server
 ```bash
-sudo docker run -d --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:v2.6.1
+sudo docker run -d --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$rancher_version
 ```
 
 进去rancher server的https://xx.xx.xx.xx/ 的web界面，选择添加集群，选择自定义集群。填写集群名称
@@ -200,7 +200,7 @@ kubectl delete node node12
 
 先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl
 ```bash
-docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:v2.6.1
+docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:$rancher_version
 docker run --volumes-from rancher-data-new -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-20210101.tar.gz /var/lib/rancher
 ```
 
@@ -210,7 +210,7 @@ tar -zxvf rancher-data-backup-20210101.tar.gz && mv var/lib/rancher /var/lib/
 ```
 新机器上启动新的rancher server
 ```
-sudo docker run -d --restart=unless-stopped -v /var/lib/rancher:/var/lib/rancher -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:v2.6.1
+sudo docker run -d --restart=unless-stopped -v /var/lib/rancher:/var/lib/rancher -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$rancher_version
 
 1、新rancher server的web界面上修改rancher server的url
 2、打开地址 https://新rancher的ip/v3/clusters/源集群id/clusterregistrationtokens
