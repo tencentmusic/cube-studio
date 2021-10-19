@@ -28,5 +28,5 @@ data:
       default-character-set=utf8
       # skip-grant-tables
 
-  [client]
-    default-character-set=utf8
+    [client]
+      default-character-set=utf8
