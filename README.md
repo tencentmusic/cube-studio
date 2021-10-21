@@ -1,3 +1,10 @@
+# TME Cube Studio
+TME Cube Studio是由TME研发的一站式容器化的数据处理、模型训练、模型评估、模型在线预测的全流程开发和部署服务，支持TensorFlow、PyTorch多种框架，GPU多机多卡分布式训练，自定义训练Pipeline构建等功能, 提升算法迭代效率和模型共享度. 
+
+# 部署产品形态
+![image](https://user-images.githubusercontent.com/1631662/138237773-a7e1f7a6-5d12-4f29-a8cb-006396a95bbb.png)
+用户可以使用 https://github.com/tencentmusic/cube-job-template 中预先开发的组件, 或者通过自己制作镜像在平台上进行调用.
+
 # 生产部署
 
 基础环境依赖
