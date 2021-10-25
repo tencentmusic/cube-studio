@@ -5,6 +5,17 @@ TME Cube Studio是由TME研发的集成数据处理、分布式计算、机器�
 ![image](https://user-images.githubusercontent.com/1631662/138237773-a7e1f7a6-5d12-4f29-a8cb-006396a95bbb.png)
 用户可以使用 https://github.com/tencentmusic/cube-job-template 中预先开发的组件, 或者自己制作镜像在平台上进行调用.
 
+
+# 功能简述
+
+<object data="docs/user.pdf" type="application/pdf" width="700px" height="700px">
+    <embed src="http://yoursite.com/the.pdf">
+        <p> 下载 <a href="./docs/user.pdf"> PDF</a>.</p>
+    </embed>
+</object>
+
+
+
 # 生产部署
 
 基础环境依赖
@@ -108,3 +119,6 @@ cd myapp/vision && yarn && yarn build
 ```
 
 输出路径：`/myapp/static/appbuilder`
+
+
+
