@@ -154,7 +154,7 @@ kubectl create -f pv-pvc-service.yaml
 kubectl apply -f gateway.yaml  
 # 创建新的账号需要  
 kubectl apply -f sa-rbac.yaml          
-# 修改并创建virtual。需要将其中的域名kubeflow.local.com批量修改为平台的域名
+# 修改并创建virtual。需要将其中的管理平台的域名批量修改为平台的域名
 kubectl apply -f virtual.yaml  
 ```  
   

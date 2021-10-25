@@ -118,7 +118,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"
+  - "*"        # 管理平台的域名
   http:
   - match:
     - uri:
@@ -162,7 +162,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"
+  - "*"        # 管理平台的域名
   http:
   - match:
     - uri:
