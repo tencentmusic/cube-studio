@@ -38,6 +38,9 @@ spec:
                 path: entrypoint.sh
               - key: config.py
                 path: config.py
+        - name: kubernetes-config
+          configMap:
+            name: kubernetes-config
 
       serviceAccount: kubeflow-dashboard
       containers:
@@ -81,6 +84,8 @@ spec:
               subPath: config.py
             - name: tz-config
               mountPath: /etc/localtime
+            - name: kubernetes-config
+              mountPath: /home/myapp/kubeconfig
           resources:
             limits:
               cpu: 4
