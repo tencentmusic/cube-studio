@@ -140,6 +140,8 @@ spec:
               subPath: config.py
             - name: tz-config
               mountPath: /etc/localtime
+            - name: kubernetes-config
+              mountPath: /home/myapp/kubeconfig
           resources:
             limits:
               cpu: 4
@@ -188,6 +190,8 @@ spec:
               subPath: config.py
             - name: tz-config
               mountPath: /etc/localtime
+            - name: kubernetes-config
+              mountPath: /home/myapp/kubeconfig
           resources:
             limits:
               cpu: 4
@@ -235,6 +239,8 @@ spec:
               subPath: config.py
             - name: tz-config
               mountPath: /etc/localtime
+            - name: kubernetes-config
+              mountPath: /home/myapp/kubeconfig
           resources:
             limits:
               cpu: 4
