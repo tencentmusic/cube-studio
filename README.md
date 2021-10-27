@@ -115,6 +115,7 @@ npm: 6.14.8+
 yarn: npm install yarn -g
 ```
 ```sh
+# 初始化安装可能会遇到依赖包的版本选择，直接回车默认即可
 cd myapp/vision && yarn && yarn build
 ```
 
