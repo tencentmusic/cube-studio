@@ -22,7 +22,8 @@ elif [ "$STAGE" = "build" ]; then
 
 elif [ "$STAGE" = "dev" ]; then
   export FLASK_APP=myapp:app
-  FLASK_ENV=development  flask run -p 80 --with-threads  --host=0.0.0.0
+#  FLASK_ENV=development  flask run -p 80 --with-threads  --host=0.0.0.0
+  python myapp/run.py
 
 elif [ "$STAGE" = "prod" ]; then
   export FLASK_APP=myapp:app

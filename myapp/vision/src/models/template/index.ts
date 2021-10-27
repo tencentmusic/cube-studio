@@ -20,7 +20,7 @@ export interface CurrentInfo {
 
 const initialState: TemplateState = {
   show: true,
-  callout: false,
+  callout: true,
   current: null,
   info: {
     createdBy: '',
