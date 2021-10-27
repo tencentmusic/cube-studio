@@ -705,18 +705,18 @@ NOTEBOOK_GPU_TYPE='NVIDIA'
 
 # 各类model list界面的帮助文档
 HELP_URL={
-    "pipeline":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001687933",
-    "job_template":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001688629",
-    "task":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001687933",
-    "hp":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001771487",
-    "nni":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001951823",
-    "images":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001702653",
-    "notebook":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001776883",
-    "service":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001838471",
-    "kfserving":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001951821",
-    "model":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693001867625",
-    "run":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693002080729",
-    "docker":"http://tapd.oa.com/kubeflow/markdown_wikis/show/#1220424693002082587"
+    "pipeline":"http://xx.xx/xx",
+    "job_template":"http://xx.xx/xx",
+    "task":"http://xx.xx/xx",
+    "hp":"http://xx.xx/xx",
+    "nni":"http://xx.xx/xx",
+    "images":"http://xx.xx/xx",
+    "notebook":"http://xx.xx/xx",
+    "service":"http://xx.xx/xx",
+    "kfserving":"http://xx.xx/xx",
+    "model":"http://xx.xx/xx",
+    "run":"http://xx.xx/xx",
+    "docker":"http://xx.xx/xx"
 }
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称

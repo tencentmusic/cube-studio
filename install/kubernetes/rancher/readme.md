@@ -180,11 +180,6 @@ affinity:
 
 下载安装不同系统办公电脑对应的kubectl，然后复制config到~/.kube/config文件。就可以通过命令访问k8s集群了。
 
-# kubernetes-dashboard
-如果你喜欢用k8s-dashboard，可以自己安装dashboard。参考git。
-
-https://git.code.oa.com/tme-data-infra/kubernetes/tree/master/dashboard
-
 这样我们就完成k8s的部署。
 
 # 节点清理

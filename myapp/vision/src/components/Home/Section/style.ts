@@ -67,7 +67,6 @@ const sampleImgStyles = mergeStyles({
   height: '100%',
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
-  // backgroundImage: 'url(http://kubeflow.tke.woa.com/static/assets/images/home/dag.jpg)',
   selectors: {
     img: {
       width: '100%',

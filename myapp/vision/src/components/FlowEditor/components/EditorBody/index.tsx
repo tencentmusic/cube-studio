@@ -60,7 +60,6 @@ const EditorBody: React.FC = () => {
 
     if (pipelineId) {
       dispatch(updateLoading(true));
-      //  http://kubeflow.music.woa.com/job_template_modelview/api/_info
       const taskName = `${
         modelInfo.name.replace(/\.|[\u4e00-\u9fa5]/g, '').replace(/_|\s/g, '-') || 'task'
       }-${Date.now()}`.substring(0, 49);
