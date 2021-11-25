@@ -33,12 +33,12 @@ def init():
         """Inits the Myapp application"""
         appbuilder.add_permissions(update_perms=True)   # update_perms为true才会检测新权限
         security_manager.sync_role_definitions()
-        def add_project(type,name,describe,expand={}):
-            project = db.session.query(Project).filter_by(name=name).first()
+        def add_project(project_type,name,describe,expand={}):
+            project = db.session.query(Project).filter_by(name=name).filter_by(type=project_type).first()
             if project is None:
                 try:
                     project = Project()
-                    project.type=type
+                    project.type=project_type
                     project.name = name
                     project.describe=describe
                     project.expand=json.dumps(expand,ensure_ascii=False,indent=4)

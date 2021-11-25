@@ -186,7 +186,6 @@ IMG_UPLOAD_URL = "/static/file/uploads/"
 
 CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24  # cache默认超时是24小时，一天才过期
 CACHE_CONFIG = {"CACHE_TYPE": "null"}    # 不使用缓存
-TABLE_NAMES_CACHE_CONFIG = {"CACHE_TYPE": "null"}   # 不使用缓存
 
 # CORS Options
 ENABLE_CORS = True
@@ -294,7 +293,6 @@ CONFIG_PATH_ENV_VAR = "MYAPP_CONFIG_PATH"
 FLASK_APP_MUTATOR = None
 
 # Set this to false if you don't want users to be able to request/grant
-# datasource access requests from/to other users.
 ENABLE_ACCESS_REQUEST = True
 
 # smtp server configuration
@@ -372,7 +370,7 @@ ENABLE_SCHEDULED_EMAIL_REPORTS = True
 SCHEDULED_EMAIL_DEBUG_MODE = True
 
 # 任务的最小执行间隔min
-PIPELINE_TASK_CRON_RESOLUTION = 15
+PIPELINE_TASK_CRON_RESOLUTION = 10
 
 # Email report configuration
 # From address in emails
@@ -571,12 +569,17 @@ class CeleryConfig(object):
         'task_task8': {
             'task': 'task.delete_debug_docker',
             # 'schedule': 10.0,
-            'schedule': crontab(minute='30', hour='6'),
+            'schedule': crontab(minute='30', hour='22'),
         },
         'task_task9': {
             'task': 'task.watch_gpu',
             # 'schedule': 10.0,
             'schedule': crontab(minute='10',hour='8-23/2'),
+        },
+        'task_task10': {
+            'task': 'task.adjust_node_resource',
+            # 'schedule': 10.0,
+            'schedule': crontab(minute='*/10'),
         }
     }
 
@@ -771,15 +774,12 @@ KFP_HOST = "http://ml-pipeline.kubeflow:8888"
 
 NNI_IMAGES='ai.tencentmusic.com/tme-public/nni:20211003'
 
-
-
 ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用
-LOGIN_URL = 'http://%s/login'%HOST
-K8S_DASHBOARD_CLUSTER = 'http://%s/k8s/dashboard/cluster/' % HOST  #
-K8S_DASHBOARD_PIPELINE = 'http://%s/k8s/dashboard/pipeline/' % HOST
+K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
+K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
 
-PIPELINE_URL = 'http://%s/pipeline/#/' % HOST
-KATIB_URL = 'http://%s/katib/#' % HOST
+PIPELINE_URL = '/pipeline/#/'
+KATIB_URL = '/katib/#'
 
 # 这两部分功能需要泛化域名。没有泛化域名此部分功能受限
 KFSERVING_DOMAIN = 'kfserving.%s' % ISTIO_INGRESS_DOMAIN
@@ -801,17 +801,17 @@ ALL_LINKS=[
     {
         "label":"Minio",
         "name":"minio",
-        "url":"http://%s/minio/public/"%HOST
+        "url":"/minio/public/"
     },
     {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
-        "url": K8S_DASHBOARD_CLUSTER +"#/pod?namespace=infra"
+        "url": "/k8s/dashboard/cluster/#/pod?namespace=infra"
     },
     {
         "label":"Grafana",
         "name":"grafana",
-        "url": 'http://xx.xx.xx.xx:8080/'  # 访问grafana的域名地址
+        "url": '/grafana/'  # 访问grafana的域名地址
     }
 ]
 
@@ -821,13 +821,13 @@ CLUSTERS={
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        "K8S_DASHBOARD_CLUSTER":'http://kubeflow.local.com/k8s/dashboard/cluster/',
+        "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
         "KFP_HOST": 'http://ml-pipeline.kubeflow:8888',
-        "PIPELINE_URL": 'http://kubeflow.local.com/pipeline/#/',
-        "JUPYTER_DOMAIN":"kubeflow.local.com",
-        "NNI_DOMAIN":'kubeflow.local.com',
-        "GRAFANA_TASK": 'http://xx.xx.xx.xx:8080/xx/normal_pod_info?orgId=1&var-pod='  # grafana配置的访问task运行数据的网址
-    }
+        "PIPELINE_URL": '/pipeline/#/',
+        "GRAFANA_TASK": '/grafana/d/pod-info/pod-info?orgId=1&var-pod=',  # grafana配置的访问task运行数据的网址
+         "GRAFANA_SERVICE":"/grafana/d/istio-service/istio-service?orgId=1&var-namespace=service&var-service="    # grafana配置的访问service数据的网址
+
+}
 }
 
 # 当前控制器所在的集群

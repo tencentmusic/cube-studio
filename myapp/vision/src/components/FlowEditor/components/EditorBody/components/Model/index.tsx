@@ -240,47 +240,9 @@ const Model: React.FC<ModelProps> = props => {
             value={task?.label || ''}
           />
           <div className={style.splitLine}></div>
-          {/* <TextField
-            label="挂载目录"
-            description="外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录"
-            onChange={(event: FormEvent, value?: string) => {
-              handleOnChange('volume_mount', value ? value : '');
-            }}
-            value={task?.volume_mount || ''}
-          />
-          <div className={style.splitLine}></div>
-          <TextField
-            label="启动目录"
-            description="工作目录，容器启动的初始所在目录，不填默认使用Dockerfile内定义的工作目录"
-            onChange={(event: FormEvent, value?: string) => {
-              handleOnChange('working_dir', value ? value : '');
-            }}
-            value={task?.working_dir || ''}
-          />
-          <div className={style.splitLine}></div>
-          <TextField
-            label="启动命令"
-            description="启动命令"
-            onChange={(event: FormEvent, value?: string) => {
-              handleOnChange('command', value ? value : '');
-            }}
-            multiline={true}
-            autoAdjustHeight={true}
-            value={task?.command || ''}
-          />
-          <div className={style.splitLine}></div>
-          <TextField
-            label="调度机器"
-            description="运行当前task所在的机器"
-            onChange={(event: FormEvent, value?: string) => {
-              handleOnChange('node_selector', value ? value : '');
-            }}
-            value={task?.node_selector || ''}
-          />
-          <div className={style.splitLine}></div> */}
           <TextField
             label="内存申请"
-            description="内存的资源使用限制，示例1G，10G， 最大10G，如需更多联系管理员"
+            description="内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管理员"
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_memory', value ? value : '');
             }}
@@ -290,7 +252,7 @@ const Model: React.FC<ModelProps> = props => {
           <div className={style.splitLine}></div>
           <TextField
             label="CPU申请"
-            description="CPU的资源使用限制(单位核)，示例 0.4，10，最大10核，如需更多联系管理员"
+            description="CPU的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管理员"
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_cpu', value ? value : '');
             }}

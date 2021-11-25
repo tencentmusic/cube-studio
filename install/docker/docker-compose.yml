@@ -9,7 +9,7 @@ services:
       - "6379:6379"
 
   myapp:
-    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.10.01
+    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.11.01
     restart: on-failure   # on-failure  unless-stopped
     command: ['bash','-c','/entrypoint.sh']   # 生产模式
     environment:
@@ -18,7 +18,7 @@ services:
       REDIS_PORT: '6379'
       REDIS_PASSWORD: admin
       HOST: 127.0.0.1
-      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
+      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow1?charset=utf8'
       ENVIRONMENT: DEV
       GPU_TYPE: NVIDIA
 
@@ -36,7 +36,7 @@ services:
 
 
 #  beat:
-#    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.10.01
+#    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.11.01
 #    restart: "no"
 #    command: ["bash","-c","celery beat --app=myapp.tasks.celery_app:celery_app --loglevel=info"]
 #    shm_size: '100gb'
@@ -59,7 +59,7 @@ services:
 ##
 #
 #  worker:
-#    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.10.01
+#    image: ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.11.01
 #    restart: unless-stopped
 #    command: ["bash","-c","celery worker --app=myapp.tasks.celery_app:celery_app --loglevel=info --pool=prefork -Ofair -c 4"]
 #    environment:

@@ -38,7 +38,7 @@ bases:
 images:
 - name: ai.tencentmusic.com/tme-public/kubeflow-dashboard
   newName: ai.tencentmusic.com/tme-public/kubeflow-dashboard
-  newTag: 2021.10.01
+  newTag: 2021.11.01
 
 
 # kustomize build . | kubectl apply -f -

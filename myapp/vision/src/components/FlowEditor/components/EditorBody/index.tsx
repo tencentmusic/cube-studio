@@ -58,6 +58,22 @@ const EditorBody: React.FC = () => {
       y: event.clientY - reactFlowBounds.top,
     });
 
+    const { args } = modelInfo;
+    const defaultArgs = {};
+
+    Object.keys(args).reduce((acc, cur) => {
+      const curArgs = {};
+
+      Object.keys(args[cur]).reduce((curAcc, argsKey) => {
+        const defaultValue = args[cur][argsKey].default;
+        Object.assign(curAcc, { [argsKey]: defaultValue });
+        return curAcc;
+      }, curArgs);
+      Object.assign(acc, curArgs);
+
+      return acc;
+    }, defaultArgs);
+
     if (pipelineId) {
       dispatch(updateLoading(true));
       const taskName = `${
@@ -80,6 +96,7 @@ const EditorBody: React.FC = () => {
           resource_gpu: '0',
           timeout: 0,
           retry: 0,
+          args: JSON.stringify(defaultArgs),
         })
         .then((res: any) => {
           if (res?.result?.id) {

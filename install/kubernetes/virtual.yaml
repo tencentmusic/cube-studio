@@ -8,7 +8,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - '*'    # 管理平台的域名
+  - "*"    # 管理平台的域名
   http:
   - route:
     - destination:
@@ -26,7 +26,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - '*'    # 管理平台的域名
+  - "*"    # 管理平台的域名
   http:
   - match:
     - uri:
@@ -40,12 +40,12 @@ spec:
           number: 9000
     corsPolicy:
       allowOrigin:
-      - '*'
+      - "*"
       allowMethods:
       - POST
       - GET
       allowHeaders:
-      - '*'
+      - "*"
 
   - match:
     - uri:
@@ -59,12 +59,12 @@ spec:
           number: 80
     corsPolicy:
       allowOrigin:
-      - '*'
+      - "*"
       allowMethods:
       - POST
       - GET
       allowHeaders:
-      - '*'
+      - "*"
   - match:
     - uri:
         prefix: /pipeline/
@@ -84,12 +84,12 @@ spec:
             Access-Control-Allow-Credentials: "true"
     corsPolicy:
       allowOrigin:
-      - '*'
+      - "*"
       allowMethods:
       - POST
       - GET
       allowHeaders:
-      - '*'
+      - "*"
   - match:
     - uri:
         prefix: /argo/
@@ -102,12 +102,12 @@ spec:
           number: 80
     corsPolicy:
       allowOrigin:
-      - '*'
+      - "*"
       allowMethods:
       - POST
       - GET
       allowHeaders:
-      - '*'
+      - "*"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -118,7 +118,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"        # 管理平台的域名
+  - "*"
   http:
   - match:
     - uri:
@@ -162,7 +162,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"        # 管理平台的域名
+  - "*"
   http:
   - match:
     - uri:

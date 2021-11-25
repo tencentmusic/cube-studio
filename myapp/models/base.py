@@ -82,6 +82,7 @@ class MyappModelBase():
         "consecutive_build":"连续构建",
         "need_gpu":"需要gpu",
         "last_image":"最新镜像",
+        "expired_limit":"有效实例数目",
 
         "log": "日志",
         "pod": "容器",
@@ -152,6 +153,7 @@ class MyappModelBase():
         "run_instance":"运行实例",
         "monitoring": "监控",
         "monitoring_html":"监控",
+        "monitoring_url":"监控",
         "link": "链接",
         "clear": "清理",
         "expand":"扩展",
@@ -169,6 +171,9 @@ class MyappModelBase():
         "max_active_runs": "最大激活运行数",
         "des_image":"目标镜像",
         "target_image":"目标镜像",
+        "image_history":"镜像历史",
+        "elapsed_time":"耗时",
+        "task_status":"任务状态",
 
         "polaris_url": "北极星地址",
 
