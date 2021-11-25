@@ -51,6 +51,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     resource_memory = Column(String(100), default='2G')
     resource_cpu = Column(String(100), default='2')
     resource_gpu = Column(String(100), default='0')
+    expand = Column(Text(65536), default='')
 
     def __repr__(self):
         return self.name
@@ -61,14 +62,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             url = "/notebook/"+self.namespace + "/" + self.name+"/"
         else:
             url = "/notebook/"+self.namespace + "/" + self.name+"/lab?"
-
-        url=url + "#"+self.mount
-        # if "(pvc)" not in self.volume_mount:
-        #     url = url + "#/mnt"
-        # else:
-        #     if self.created_by:
-        #         url = url + "#/mnt/%s"%self.created_by.username
-        host = "http://"+self.cluster['JUPYTER_DOMAIN']
+        url= url + "#"+self.mount
+        host = "http://"+request.host  # 使用当前域名打开
         return Markup(f'<a target=_blank href="{host}{url}">{self.name}</a>')
 
     @property

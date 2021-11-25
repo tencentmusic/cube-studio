@@ -36,12 +36,16 @@ import pysnooper
 class Project(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'project'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique = True, nullable=False)
+    name = Column(String(50), nullable=False)
     describe = Column(Text)
     type = Column(String(50))   # 项目类型。组织架构项目组，功能项目组
     expand = Column(Text(65536), default='{}')
 
     export_children = ["user"]
+
+    __table_args__ = (
+        UniqueConstraint('name','type'),
+    )
 
     def __repr__(self):
         return self.name
@@ -63,6 +67,18 @@ class Project(Model,AuditMixinNullable,MyappModelBase):
             expand = json.loads(self.expand) if self.expand else {}
             node_selector = expand.get('node_selector', '')
             return node_selector
+        except Exception as e:
+            print(e)
+            return ''
+
+    @property
+    def volume_mount(self):
+        try:
+            expand = json.loads(self.expand) if self.expand else {}
+            volume_mount = expand.get('volume_mount', '')
+            if not volume_mount:
+                volume_mount='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
+            return volume_mount
         except Exception as e:
             print(e)
             return ''

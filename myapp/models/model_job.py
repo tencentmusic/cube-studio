@@ -202,7 +202,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     expand = Column(Text(65536),default='[]')
     depends_on_past = Column(Boolean, default=False)
     max_active_runs = Column(Integer, nullable=False,default=3)   # 最大同时运行的pipeline实例
-    expired_limit = Column(Integer, nullable=False, default=1)  # 过期保留个数
+    expired_limit = Column(Integer, nullable=False, default=1)  # 过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能
     parameter = Column(Text(65536), default='{}')
 
     def __repr__(self):
@@ -210,13 +210,8 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def pipeline_url(self):
-        pipeline_url = conf.get('PIPELINE_URL') + "pipelines/details/%s"%self.pipeline_argo_id
-
-        if self.version_id:
-            pipeline_url += '/version/'+self.version_id
         pipeline_url="/pipeline_modelview/web/" +str(self.id)
         return Markup(f'<a href="{pipeline_url}">{self.describe}</a>')
-        # return Markup(f'<a target=_blank href="{pipeline_url}">{self.describe}</a>')
 
     @property
     def run_pipeline(self):
@@ -235,7 +230,6 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     @property
     def log(self):
         if self.run_id:
-            # pipeline_url = conf.get('PIPELINE_URL')+ "runs/details/" +str(self.run_id)
             pipeline_url = "/pipeline_modelview/web/log/%s"%self.id
             return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
         else:
@@ -310,6 +304,8 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     # 这个dag可能不对，所以要根据真实task纠正一下
     def fix_dag_json(self,dbsession=db.session):
+        if not self.dag_json:
+            return "{}"
         dag = json.loads(self.dag_json)
         # 如果添加了task，但是没有保存pipeline，就自动创建dag
         if not dag:
@@ -584,7 +580,6 @@ class RunHistory(Model,MyappModelBase):
 
     @property
     def pipeline_url(self):
-        # pipeline_url = conf.get('PIPELINE_URL')+'pipelines/details/%s'%self.pipeline_id
         return Markup(f'<a target=_blank href="/pipeline_modelview/web/{self.pipeline.id}">{self.pipeline.describe}</a>')
 
 
@@ -706,11 +701,51 @@ class Workflow(Model,Crd,MyappModelBase):
 
 
     @property
+    def task_status(self):
+        status_mode = json.loads(self.status_more)
+        task_status={}
+        nodes=status_mode.get('nodes',{})
+        tasks = self.pipeline.get_tasks()
+        for pod_name in nodes:
+            pod = nodes[pod_name]
+            if pod['type']=='Pod':
+                if pod['phase']=='Succeeded':     # 那些重试和失败的都忽略掉
+                    templateName=pod['templateName']
+                    for task in tasks:
+                        if task.name==templateName:
+                            finish_time = datetime.datetime.strptime(pod['finishedAt'], '%Y-%m-%d %H:%M:%S')
+                            start_time = datetime.datetime.strptime(pod['startedAt'], '%Y-%m-%d %H:%M:%S')
+                            elapsed = (finish_time - start_time).days * 24 + (finish_time - start_time).seconds / 60 / 60
+                            task_status[task.label]= str(round(elapsed,2))+"h"
+
+        message=""
+        for key in task_status:
+            message += key+": "+task_status[key]+"\n"
+        return Markup('<pre><code>' + message + '</code></pre>')
+
+
+
+    @property
+    def elapsed_time(self):
+        status_mode = json.loads(self.status_more)
+        finish_time=status_mode.get('finishedAt',self.change_time)
+        if not finish_time: finish_time=self.change_time
+        start_time = status_mode.get('startedAt', '')
+        if finish_time and start_time:
+            finish_time = datetime.datetime.strptime(finish_time,'%Y-%m-%d %H:%M:%S')
+            start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+            elapsed = (finish_time-start_time).days*24+(finish_time-start_time).seconds/60/60
+            return str(round(elapsed,2))+"h"
+        else:
+            return '未知'
+
+
+    @property
     def pipeline_url(self):
         if self.labels:
             try:
-                lables = json.loads(self.labels)
-                pipeline_id = lables.get("pipeline-id",'')
+                labels = json.loads(self.labels)
+                pipeline_id = labels.get("pipeline-id",'')
                 if pipeline_id:
                     pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
                     if pipeline:
@@ -730,8 +765,8 @@ class Workflow(Model,Crd,MyappModelBase):
     def pipeline(self):
         if self.labels:
             try:
-                lables = json.loads(self.labels)
-                pipeline_id = lables.get("pipeline-id",'')
+                labels = json.loads(self.labels)
+                pipeline_id = labels.get("pipeline-id",'')
                 if pipeline_id:
                     pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
                     if pipeline:
@@ -758,8 +793,8 @@ class Workflow(Model,Crd,MyappModelBase):
     def log(self):
         if self.labels:
             try:
-                lables = json.loads(self.labels)
-                run_id = lables.get("pipeline/runid",'')
+                labels = json.loads(self.labels)
+                run_id = labels.get("pipeline/runid",'')
                 if run_id:
                     pipeline_url = conf.get('PIPELINE_URL')+ "runs/details/" +str(run_id)
                     return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
@@ -777,8 +812,8 @@ class Tfjob(Model,Crd,MyappModelBase):
     def pipeline(self):
         if self.labels:
             try:
-                lables = json.loads(self.labels)
-                pipeline_id = lables.get("pipeline-id",'')
+                labels = json.loads(self.labels)
+                pipeline_id = labels.get("pipeline-id",'')
                 if pipeline_id:
                     pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
                     return Markup(f'<a href="/pipeline_modelview/list/?_flt_2_name={pipeline.name}">{pipeline.describe}</a>')
@@ -790,8 +825,8 @@ class Tfjob(Model,Crd,MyappModelBase):
     def run_instance(self):
         if self.labels:
             try:
-                lables = json.loads(self.labels)
-                run_id = lables.get("run-id",'')
+                labels = json.loads(self.labels)
+                run_id = labels.get("run-id",'')
                 if run_id:
                     return Markup(f'<a href="/workflow_modelview/list/?_flt_2_labels={run_id}">运行实例</a>')
             except Exception as e:

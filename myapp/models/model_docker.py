@@ -35,7 +35,10 @@ conf = app.config
 class Docker(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'docker'
     id = Column(Integer, primary_key=True)
-
+    project_id = Column(Integer, ForeignKey('project.id'), nullable=False)  # 定义外键
+    project = relationship(
+        "Project", foreign_keys=[project_id]
+    )
     describe = Column(String(200),  nullable=True)
     base_image = Column(String(200),  nullable=True)
     target_image=Column(String(200), nullable=True,default='')
@@ -57,4 +60,6 @@ class Docker(Model,AuditMixinNullable,MyappModelBase):
     def debug(self):
         return Markup(f'<a href="/docker_modelview/debug/{self.id}">调试</a> | <a href="/docker_modelview/delete_pod/{self.id}">清理</a>')
 
-
+    @property
+    def image_history(self):
+        return Markup(f'基础镜像:{self.base_image}<br>当前镜像:{self.last_image if self.last_image else self.base_image}<br>目标镜像:{self.target_image}')

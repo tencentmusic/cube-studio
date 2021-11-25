@@ -70,6 +70,14 @@ class Service(Model,AuditMixinNullable,MyappModelBase):
         return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
 
     @property
+    def monitoring_url(self):
+        # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
+        url=self.project.cluster.get('GRAFANA_SERVICE','')+self.name
+        return Markup(f'<a href="{url}">监控</a>')
+        # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
+
+
+    @property
     def name_url(self):
         # user_roles = [role.name.lower() for role in list(g.user.roles)]
         # if "admin" in user_roles:
