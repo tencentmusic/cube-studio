@@ -215,6 +215,16 @@ class Job_Template_ModelView_Base():
         job_args = json.loads(item.args)
         item.demo = json.dumps(core.validate_task_args(task_args, job_args),indent=4, ensure_ascii=False)
 
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        user_roles = [role.name.lower() for role in list(get_user_roles())]
+        if "admin" in user_roles:
+            return True
+        if g.user and g.user.username and hasattr(item,'created_by'):
+            if g.user.username==item.created_by.username:
+                return True
+        flash('just creator can edit/delete ', 'warning')
+        return False
 
 
     def pre_update(self, item):
