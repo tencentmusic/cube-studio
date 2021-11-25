@@ -13,16 +13,10 @@ from myapp import app, db
 logger = logging.getLogger(__name__)
 
 # Null pool is used for the celery workers due process forking side effects.
-# For more info see: https://github.com/apache/superset/issues/10530
 @contextmanager
 def session_scope(nullpool: bool) -> Iterator[Session]:
     """Provide a transactional scope around a series of operations."""
     database_uri = app.config["SQLALCHEMY_DATABASE_URI"]
-    if "sqlite" in database_uri:
-        logger.warning(
-            "SQLite Database support for metadata databases will be removed \
-            in a future version of Superset."
-        )
     if nullpool:
         engine = create_engine(database_uri, poolclass=NullPool)
         session_class = sessionmaker()

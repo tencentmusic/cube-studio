@@ -66,20 +66,14 @@ log = logging.getLogger(__name__)
 
 
 def get_error_msg():
-    """
-        (inspired on Superset code)
-    :return: (str)
-    """
+
     if current_app.config.get("FAB_API_SHOW_STACKTRACE"):
         return traceback.format_exc()
     return "Fatal error"
 
 
 def safe(f):
-    """
-    A decorator that catches uncaught exceptions and
-    return the response in JSON format (inspired on Superset code)
-    """
+
     def wraps(self, *args, **kwargs):
         try:
             return f(self, *args, **kwargs)
@@ -495,11 +489,11 @@ class MyappModelRestApi(ModelRestApi):
             return self.response_error(400,message="Request is not JSON")
         try:
             if self.pre_json_load:
-                json = self.pre_json_load(request.json)
+                json_data = self.pre_json_load(request.json)
             else:
-                json = request.json
+                json_data = request.json
 
-            item = self.add_model_schema.load(json)
+            item = self.add_model_schema.load(json_data)
             # item = self.add_model_schema.load(data)
         except ValidationError as err:
             return self.response_error(422,message=err.messages)
@@ -554,10 +548,10 @@ class MyappModelRestApi(ModelRestApi):
             return self.response_error(404,message='Not found')
         try:
             if self.pre_json_load:
-                json = self.pre_json_load(request.json)
+                json_data = self.pre_json_load(request.json)
             else:
-                json = request.json
-            data = self._merge_update_item(item, json)
+                json_data = request.json
+            data = self._merge_update_item(item, json_data)
             item = self.edit_model_schema.load(data, instance=item)
         except ValidationError as err:
             return self.response_error(422,message=err.messages)

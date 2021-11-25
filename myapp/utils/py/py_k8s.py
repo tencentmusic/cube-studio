@@ -156,6 +156,7 @@ class K8s():
                 back_node['memory'] = int(node.status.allocatable.get('memory', '0').replace('Ki', '')) // 1024//1024
                 back_node['gpu'] = int(node.status.allocatable.get('nvidia.com/gpu', '0'))
                 back_node['labels']=node.metadata.labels
+                back_node['name']=node.metadata.name
                 for address in adresses:
                     if address.type=='InternalIP':
                         back_node['hostip']=address.address
@@ -170,7 +171,7 @@ class K8s():
             return []
 
     # 获取指定label的nodeip列表
-    def label_node(self,ips, label):
+    def label_node(self,ips, labels):
         try:
             all_node_ip = []
             all_node = self.v1.list_node().items
@@ -189,9 +190,7 @@ class K8s():
                 if InternalIP in ips:
                     body = {
                         "metadata": {
-                            "labels": {
-                                label: "true"
-                            }
+                            "labels": labels
                         }
                     }
                     api_response = self.v1.patch_node(Hostname, body)
@@ -307,7 +306,7 @@ class K8s():
 
             # vcjob的结束时间
             elif 'status' in crd_object and 'state' in crd_object['status'] and 'lastTransitionTime' in crd_object['status']['state']:
-                if crd_object['status']['state'].get('phase','')=='Completed':
+                if crd_object['status']['state'].get('phase','')=='Completed' or crd_object['status']['state'].get('phase','')=='Aborted' or crd_object['status']['state'].get('phase','')=='Failed' or crd_object['status']['state'].get('phase','')=='Terminated':
                     finish_time = crd_object['status']['state']['lastTransitionTime'].replace('T', ' ').replace('Z', '')
                     finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -1196,6 +1195,50 @@ class K8s():
             }
             crd = self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                                  namespace=namespace, body=crd_json)
+
+
+
+    def create_hpa(self,namespace,name,min_replicas,max_replicas,mem_threshold=0.5,cpu_threshold=0.5):
+
+        try:
+            client.AutoscalingV2beta2Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace)
+        except Exception as e:
+            print(e)
+
+        try:
+            my_metrics = []
+            my_metrics.append(client.V2beta2MetricSpec(type='Resource',
+                                                       resource=client.V2beta2ResourceMetricSource(name='memory',
+                                                                                                   target=client.V2beta2MetricTarget(
+                                                                                                       average_utilization=int(mem_threshold*100),
+                                                                                                       type='Utilization'))))
+            my_metrics.append(client.V2beta2MetricSpec(type='Resource',
+                                                       resource=client.V2beta2ResourceMetricSource(name='cpu',
+                                                                                                   target=client.V2beta2MetricTarget(
+                                                                                                       average_utilization=int(cpu_threshold*100),
+                                                                                                       type='Utilization'))))
+            my_conditions = []
+            my_conditions.append(client.V2beta2HorizontalPodAutoscalerCondition(status="True", type='AbleToScale'))
+
+            status = client.V2beta2HorizontalPodAutoscalerStatus(conditions=my_conditions, current_replicas=max_replicas,
+                                                                 desired_replicas=max_replicas)
+
+            body = client.V2beta2HorizontalPodAutoscaler(
+                api_version='autoscaling/v2beta2',
+                kind='HorizontalPodAutoscaler',
+                metadata=client.V1ObjectMeta(name=name),
+                spec=client.V2beta2HorizontalPodAutoscalerSpec(
+                    max_replicas=max_replicas,
+                    min_replicas=min_replicas,
+                    metrics=my_metrics,
+                    scale_target_ref=client.V2beta2CrossVersionObjectReference(kind='Deployment', name=name,
+                                                                               api_version='apps/v1'),
+                ),
+                status=status)
+            v2 = client.AutoscalingV2beta2Api()
+            ret = v2.create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=body, pretty=True)
+        except Exception as e:
+            print(e)
 
 
 

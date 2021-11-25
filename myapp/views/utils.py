@@ -49,8 +49,6 @@ def get_permissions(user):
         for perm in role.permissions:
             if perm.permission and perm.view_menu:
                 perms.add((perm.permission.name, perm.view_menu.name))
-                if perm.permission.name in ("datasource_access", "database_access"):
-                    permissions[perm.permission.name].add(perm.view_menu.name)
         roles[role.name] = [
             [perm.permission.name, perm.view_menu.name]
             for perm in role.permissions

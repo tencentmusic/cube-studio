@@ -138,6 +138,7 @@ class Myapp(BaseMyappView):
             # /static/appbuilder/mnt/make_pipeline.mp4
             message = ''
             td_html='<td style="border: 1px solid black;padding: 10px">%s</th>'
+            message += "<tr>%s %s %s %s %s %s %s<tr>" %(td_html%"集群",td_html%"资源组", td_html%"机器", td_html%"机型", td_html%"cpu占用率", td_html%"内存占用率", td_html%"gpu占用率")
             for cluster_name in all_node_json:
                 nodes = all_node_json[cluster_name]
                 for ip in nodes:
@@ -155,7 +156,7 @@ class Myapp(BaseMyappView):
             # print(message)
             data = {
                 'content': message,
-                'delay': 30000,
+                'delay': 300000,
                 'hit': True,
                 'target': url,
                 'title': '当前负载',

@@ -77,8 +77,9 @@ def deliver_message(workflow,dbsession):
         if finish_time:
             finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=0)).strftime(
                 '%Y-%m-%d %H:%M:%S')
-        help_url='%s#/search?namespace=pipeline&q=%s'%(conf.get('K8S_DASHBOARD_PIPELINE'),workflow.name)
+        help_url='http://%s/pipeline_modelview/web/pod/%s'%(conf.get('HOST'),pipeline_id)
         message = "workflow: %s \npipeline: %s(%s) \nnamespace: %s\nstatus: % s \nstart_time: %s\nfinish_time: %s\n" % (workflow.name,info_json.get('pipeline_name',''),info_json.get('describe',''),workflow.namespace,workflow.status,start_time,finish_time)
+        message+='\n'
         link={
             "pod详情":help_url
         }
@@ -231,9 +232,15 @@ def push_task_time(workflow,dbsession):
                     ]
 
             task_pod_time_sorted = sorted(task_pod_time.items(),key=lambda item:item[0])
+            max_task_run_time = 0
             for task_pods in task_pod_time_sorted:
                 for task_pod in task_pods[1]:
                     message+=task_pod['task']+":"+task_pod['run_time']+"(h)\n"
+                    try:
+                        if float(task_pod['run_time'])>max_task_run_time:
+                            max_task_run_time = float(task_pod['run_time'])
+                    except Exception as e:
+                        print(e)
 
             # 记录是否已经推送，不然反复推送不好
             info_json = json.loads(workflow.info_json)
@@ -243,15 +250,20 @@ def push_task_time(workflow,dbsession):
                 info_json['push_task_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 workflow.info_json = json.dumps(info_json, indent=4, ensure_ascii=False)
                 dbsession.commit()
-
-                push_message(conf.get('ADMIN_USER').split(','),message)
+                message+="\n"
+                link = {
+                    "点击查看资源的使用": "http://%s/pipeline_modelview/web/monitoring/%s"%(conf.get('HOST'),pipeline_id)
+                }
+                # 有单任务运行时长超过4个小时才通知
+                if max_task_run_time>4:
+                    push_message(conf.get('ADMIN_USER').split(','),message,link)
 
                 alert_user = pipeline.alert_user.split(',') if pipeline.alert_user else []
                 alert_user = [user.strip() for user in alert_user if user.strip()]
                 receivers = alert_user + [workflow.username]
                 receivers = list(set(receivers))
 
-                push_message(receivers,message)
+                push_message(receivers,message,link)
 
 
 
@@ -302,9 +314,9 @@ def save_monitoring(workflow,dbsession):
                     if task:
                         task.monitoring = json.dumps(monitoring_new,ensure_ascii=False,indent=4)
                         dbsession.commit()
-                        # print(pods)
 
             push_task_time(workflow, dbsession)
+
             push_resource_rec(workflow, dbsession)
 
     except Exception as e:

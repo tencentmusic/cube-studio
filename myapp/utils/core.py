@@ -1395,8 +1395,8 @@ def check_resource_memory(resource_memory,src_resource_memory=None):
         if resource_int<=src_resource_int:
             return resource
 
-        if resource_int>250000:
-            return '250G'
+        if resource_int>100000:
+            return '100G'
         else:
             return resource
 

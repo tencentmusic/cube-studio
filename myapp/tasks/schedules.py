@@ -99,7 +99,7 @@ def delete_old_crd(object_info):
                                                                   name=crd_object['name'])
                                 # push_message(conf.get('ADMIN_USER', '').split(','), '%s %s 因上层workflow %s 已删除，现删除' % (object_info['plural'], crd_object['name'], run_id))
                                 time.sleep(10)
-                                if model_map[object_info['plural']] in model_map:
+                                if object_info['plural'] in model_map:
                                     db_crds = dbsession.query(model_map[object_info['plural']]).filter(model_map[object_info['plural']].name.in_(crd_names)).all()
                                     for db_crd in db_crds:
                                         db_crd.status = 'Deleted'
@@ -113,13 +113,15 @@ def delete_old_crd(object_info):
                         if crd_object['create_time'] < (datetime.datetime.now() - datetime.timedelta(seconds=timeout)).strftime('%Y-%m-%d %H:%M:%S'):
                             if object_info['plural']=='workflows':
                                 username=''
+
                                 label=json.loads(crd_object['labels'])
+                                pipeline_id = label.get('pipeline-id','')
                                 if 'run-rtx' in label:
                                     username = label['run-rtx']
                                 elif 'upload-rtx' in label:
                                     username = label['upload-rtx']
                                 if username:
-                                    push_message([username]+conf.get('ADMIN_USER','').split(','),'%s %s 创建时间 %s， 已经运行时间过久，注意修正'%(object_info['plural'],crd_object['name'],crd_object['create_time']))
+                                    push_message([username]+conf.get('ADMIN_USER','').split(','),'%s %s %s %s 创建时间 %s， 已经运行时间过久，注意修正'%(username,object_info['plural'],crd_object['name'],pipeline_id,crd_object['create_time']))
                     else:
                         # 如果运行结束已经1天，就直接删除
                         if crd_object['finish_time'] and crd_object['finish_time'] < (datetime.datetime.now() - datetime.timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S'):
@@ -179,13 +181,21 @@ def delete_tfjob(task):
 
     time.sleep(10)
 
-    # 删除framework
-    framework_info = conf.get("CRD_INFO", {}).get('framework', {})
-    print(framework_info)
-    if framework_info:
-        delete_old_crd(framework_info)
+    vcjob_info = conf.get("CRD_INFO", {}).get('vcjob', {})
+    print(vcjob_info)
+    if vcjob_info:
+        delete_old_crd(vcjob_info)
 
     time.sleep(10)
+
+
+    # # 删除framework
+    # framework_info = conf.get("CRD_INFO", {}).get('framework', {})
+    # print(framework_info)
+    # if framework_info:
+    #     delete_old_crd(framework_info)
+    #
+    # time.sleep(10)
 
 
     # 删除deployment
@@ -208,14 +218,15 @@ def delete_tfjob(task):
                         print(e)
 
             # print(deploy)
-            try:
-                create_time = deploy.metadata.creation_timestamp.strftime('%Y-%m-%d')
-                delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-                if create_time < delete_time:
-                    print('kill %s'%deploy.metadata.name)
-                    k8s_client.delete_deployment(namespace='pipeline', name=deploy.name)
-            except Exception as e:
-                print(e)
+
+            # try:
+            #     create_time = deploy.metadata.creation_timestamp.strftime('%Y-%m-%d')
+            #     delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+            #     if create_time < delete_time:
+            #         print('kill %s'%deploy.metadata.name)
+            #         k8s_client.delete_deployment(namespace='pipeline', name=deploy.name)
+            # except Exception as e:
+            #     print(e)
 
 
 
@@ -243,14 +254,14 @@ def delete_tfjob(task):
                         except Exception as e:
                             print(e)
 
-                try:
-                    create_time = daemon_set.metadata.creation_timestamp.strftime('%Y-%m-%d')
-                    delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-                    if create_time < delete_time:
-                        print('kill %s'%daemon_set.metadata.name)
-                        k8s_client.AppsV1Api.delete_namespaced_daemon_set(namespace='pipeline', name=daemon_set.name)
-                except Exception as e:
-                    print(e)
+                # try:
+                #     create_time = daemon_set.metadata.creation_timestamp.strftime('%Y-%m-%d')
+                #     delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+                #     if create_time < delete_time:
+                #         print('kill %s'%daemon_set.metadata.name)
+                #         k8s_client.AppsV1Api.delete_namespaced_daemon_set(namespace='pipeline', name=daemon_set.name)
+                # except Exception as e:
+                #     print(e)
         except Exception as e:
             print(e)
 
@@ -275,41 +286,20 @@ def delete_tfjob(task):
                                     k8s_client.AppsV1Api.delete_namespaced_stateful_set(namespace='pipeline', name=sts.name)
                         except Exception as e:
                             print(e)
-                try:
-                    create_time = sts.metadata.creation_timestamp.strftime('%Y-%m-%d')
-                    delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-                    if create_time < delete_time:
-                        print('kill %s'%sts.metadata.name)
-                        k8s_client.AppsV1Api.delete_namespaced_stateful_set(namespace='pipeline', name=sts.name)
-                except Exception as e:
-                    print(e)
+                # try:
+                #     create_time = sts.metadata.creation_timestamp.strftime('%Y-%m-%d')
+                #     delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+                #     if create_time < delete_time:
+                #         print('kill %s'%sts.metadata.name)
+                #         k8s_client.AppsV1Api.delete_namespaced_stateful_set(namespace='pipeline', name=sts.name)
+                # except Exception as e:
+                #     print(e)
         except Exception as e:
             print(e)
 
     time.sleep(60)
 
-    # 删除pod
-    clusters = conf.get('CLUSTERS', {})
-    for cluster_name in clusters:
-        cluster = clusters[cluster_name]
-        try:
-            k8s_client = K8s(cluster['KUBECONFIG'])
 
-            pods = k8s_client.v1.list_namespaced_pod(namespace='pipeline').items
-            for pod in pods:
-                # print(pod)
-                try:
-                    create_time = pod.metadata.creation_timestamp.strftime('%Y-%m-%d')
-                    delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-                    if create_time < delete_time:
-                        print('kill %s'%pod.metadata.name)
-                        k8s_client.v1.delete_namespaced_pod(namespace='pipeline', name=pod.metadata.name)
-                except Exception as e:
-                    print(e)
-        except Exception as e:
-            print(e)
-
-    push_message(conf.get('ADMIN_USER','').split(','),'清理历史pod完成')
 
 
 @celery_app.task(name="task.delete_notebook", bind=True)
@@ -331,9 +321,11 @@ def delete_notebook(task):
                     vscode_pods = k8s_client.get_pods(namespace=namespace,pod_name=notebook.name)
                     if vscode_pods:
                         vscode_pod=vscode_pods[0]
+                        # print(vscode_pod)
                         k8s_client.delete_pods(namespace=namespace, pod_name=vscode_pod['name'])
-                        user = vscode_pod['lables'].get('user', '')
+                        user = vscode_pod['labels'].get('user', '')
                         if user:
+                            pass
                             push_message([user], '您的notebook %s已清理释放资源，如果需要可reset后重新使用。' % vscode_pod['name'])
                 else:
                     message = '您的notebook %s即将过期，如要继续使用，请尽快续期，每次有效期3天\n' % notebook.name
@@ -348,11 +340,19 @@ def delete_debug_docker(task):
     clusters = conf.get('CLUSTERS',{})
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        notebook_namespace = conf.get('NOTEBOOK_NAMESPACE')
+        pipeline_namespace = conf.get('PIPELINE_NAMESPACE')
         k8s_client = K8s(cluster['KUBECONFIG'])
-        k8s_client.delete_pods(namespace=namespace,status='Succeeded')
+        k8s_client.delete_pods(namespace=notebook_namespace,status='Succeeded')
+        pipeline_pods = k8s_client.get_pods(pipeline_namespace)
+        for pod in pipeline_pods:
+            if pod['name'][0:6]=='debug-' or pod['name'][0:4]=='run-':
+                run_id = pod['labels'].get('run-id', '')
+                if run_id:
+                    k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace=pipeline_namespace,run_id=run_id)
+                    k8s_client.delete_pods(namespace=pipeline_namespace, labels={"run-id": run_id})
 
-        push_message(conf.get('ADMIN_USER', '').split(','), 'notebook清理和续期通知完成')
+        push_message(conf.get('ADMIN_USER', '').split(','), 'notebook清理完成')
 
 
 # 推送微信消息
@@ -380,7 +380,7 @@ def deliver_message(pipeline,message=''):
         message = "pipeline: %s(%s) \nnamespace: %s\ncrontab: %s\ntime: %s\nfail start run:\n%s" % (pipeline.name,pipeline.describe, pipeline.namespace,pipeline.cron_time,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),message)
 
     push_message(receivers,message)
-    push_message(conf.get('ADMIN_USER').split(','),message)
+    # push_message(conf.get('ADMIN_USER').split(','),message)
 
 
 # @pysnooper.snoop()
@@ -533,7 +533,6 @@ def upload_timerun(pipeline_id,stop_time):
                     # 获取前一个定时调度的timerun
                     pass_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id==pipeline.id).filter(RunHistory.execution_date>start_time).filter(RunHistory.execution_date<timerun.execution_date).order_by(RunHistory.execution_date.desc()).first()
                     if not pass_run:
-                        push_message(['pengluan'], 'no pass_run %s %s ' % (str(kwargs), datetime.datetime.now()))
                         upload_workflow.apply_async(kwargs=kwargs,expires=120,retry=False)
                     elif pass_run.status=='created':
                         # 这里要注意处理一下 watch组件坏了，或者argo controller组件坏了的情况。以及误操作在workflow界面把记录删除了的情况
@@ -541,7 +540,6 @@ def upload_timerun(pipeline_id,stop_time):
                         if workflow:
                             if workflow.status == 'Deleted' or workflow.status == 'Succeeded':
                                 print('pass workflow success finish')
-                                push_message(['pengluan'],'Succeeded workflow %s %s ' % (str(kwargs), datetime.datetime.now()))
                                 upload_workflow.apply_async(kwargs=kwargs,expires=120,retry=False)
 
                         else:
@@ -565,9 +563,42 @@ def upload_timerun(pipeline_id,stop_time):
                                     label = json.loads(crd['labels'])
                                     if crd['status']=='Succeeded' and label.get('pipeline/runid','')==pass_run.run_id:
                                         print('pass workflow success finish')
-                                        push_message(['pengluan'],'no workflow %s %s ' % (str(kwargs), datetime.datetime.now()))
                                         upload_workflow.apply_async(kwargs=kwargs,expires=120,retry=False)
+                # 按时间倒序，只保留最新的n个实例，之前的要删掉
+                elif pipeline.expired_limit:
+                    # 获取最新的n个
+                    timeruns = dbsession.query(RunHistory) \
+                        .filter(RunHistory.pipeline_id == pipeline.id) \
+                        .filter(RunHistory.execution_date > start_time) \
+                        .filter(RunHistory.execution_date <= stop_time) \
+                        .order_by(RunHistory.execution_date.desc()).limit(pipeline.expired_limit)
 
+                    latest_run_ids = [timerun.run_id for timerun in timeruns]  # 可以运行的timerun
+
+                    # 如果有旧的在运行，就先删掉
+                    exist_workflows = pipeline.get_workflow()
+                    for exist_workflow in exist_workflows:
+                        argo_run_id = json.loads(exist_workflow['labels']).get('pipeline/runid','')
+                        run_id = json.loads(exist_workflow['labels']).get('run-id', '')
+                        if argo_run_id and run_id:
+                            pass_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id == pipeline.id).filter(RunHistory.execution_date > start_time).filter(RunHistory.run_id == argo_run_id).first()
+                            # 如果是定时任务发起的实例，并且已经过期，就直接删除
+                            if pass_run and argo_run_id not in latest_run_ids:
+                                k8s_client = K8s(pipeline.project.cluster['KUBECONFIG'])
+                                k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace='pipeline',run_id=run_id)
+
+                    # 如果有新的还没运行的，就运行
+                    for timerun in timeruns:
+                        if timerun.status=='comed':
+                            kwargs = {
+                                "timerun_id": timerun.id,
+                                "pipeline_id": pipeline_id
+                            }
+                            upload_workflow.apply_async(kwargs=kwargs, expires=120, retry=False)
+
+
+
+                # 按时间顺序并发运行
                 else:
                     # 检测正在运行的workflow与激活并发限制是否符合
                     running_workflows = pipeline.get_workflow()
@@ -586,7 +617,6 @@ def upload_timerun(pipeline_id,stop_time):
                                 # if timerun.execution_date > datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'):
                                 #     upload_workflow.apply_async(kwargs=kwargs,eta=datetime.datetime.strptime(timerun.execution_date,'%Y-%m-%d %H:%M:%S'))
                                 # else:
-                                push_message(['pengluan'],'more workflow %s %s '%(str(kwargs),datetime.datetime.now()))
                                 upload_workflow.apply_async(kwargs=kwargs,expires=120,retry=False)
 
         except Exception as e:
@@ -882,7 +912,7 @@ def watch_gpu(task):
         cluster = clusters[cluster_name]
         k8s_client = K8s(cluster['KUBECONFIG'])
 
-        all_gpu_pods=k8s_client.get_uesd_gpu(['pipeline','katib','jupyter','service'])
+        all_gpu_pods=k8s_client.get_uesd_gpu(namespaces=['pipeline','katib','jupyter','service'])
 
         print(all_gpu_pods)
         message = ''
@@ -896,7 +926,170 @@ def watch_gpu(task):
         # push_admin("%s集群共已使用%s张卡"%(cluster_name,int(used_gpu)))
 
 
+@celery_app.task(name="task.adjust_node_resource", bind=True)
+@pysnooper.snoop()
+def adjust_node_resource(task):
+    clusters = conf.get('CLUSTERS', {})
+    for cluster_name in clusters:
+        cluster = clusters[cluster_name]
+        k8s_client = K8s(cluster['KUBECONFIG'])
+        all_node = k8s_client.get_node()
+        all_node_json = {}
 
+        # 获取每台机器的资源申请量
+        for node in all_node:  # list 转dict
+            ip = node['hostip']
+            if node['labels'].get('cpu','false')=='true' or node['labels'].get('gpu','false')=='true':
+                all_node_json[ip] = node
+                all_node_json[ip]['used_memory'] = []
+                all_node_json[ip]['used_cpu'] = []
+                all_node_json[ip]['used_gpu'] = []
+
+        # print(all_node_json)
+        for namespace in ['jupyter', 'pipeline', 'katib', 'service']:
+            all_pods = k8s_client.get_pods(namespace=namespace)
+            for pod in all_pods:
+                if pod['status'] == 'Running':
+                    # print(namespace,pod)
+                    all_node_json[pod['host_ip']]['used_memory'].append(pod['memory'])
+                    all_node_json[pod['host_ip']]['used_cpu'].append(pod['cpu'])
+                    all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
+                    # print(all_node_json[pod['host_ip']])
+
+        for ip in all_node_json:
+            all_node_json[ip]['used_memory'] = int(sum(all_node_json[ip]['used_memory']))
+            all_node_json[ip]['used_cpu'] = int(sum(all_node_json[ip]['used_cpu']))
+            all_node_json[ip]['used_gpu'] = int(sum(all_node_json[ip]['used_gpu']))
+
+
+        # 获取每个资源组的资源申请量，cpu机器和gpu单独看。
+        all_org_resource={}
+        for ip in all_node_json:
+            org=all_node_json[ip]['labels'].get('org','public')
+            if org not in all_org_resource:
+                all_org_resource[org]={
+                    "cpu_node_num":0,
+                    "gpu_node_num":0,
+                    "cpu_req_total":0,
+                    "gpu_req_total": 0,
+                    "cpu_allocatable_total":0,
+                    "gpu_allocatable_total":0
+                }
+            if all_node_json[ip]['labels'].get('cpu','false')=='true':
+                all_org_resource[org]['cpu_node_num']+=1
+                all_org_resource[org]['cpu_req_total'] += all_node_json[ip]['used_cpu']
+                all_org_resource[org]['cpu_allocatable_total'] += all_node_json[ip]['cpu']
+
+            if all_node_json[ip]['labels'].get('gpu','false')=='true':
+                all_org_resource[org]['gpu_node_num']+=1
+                all_org_resource[org]['gpu_req_total'] += all_node_json[ip]['used_gpu']
+                all_org_resource[org]['gpu_allocatable_total'] += all_node_json[ip]['gpu']
+
+        # 计算申请率最大最小集群
+        max_cpu_org=max_gpu_org=min_cpu_org=min_gpu_org='public'
+        max_cpu_per = max_gpu_per = 0
+        min_cpu_per = min_gpu_per = 1
+        for org in all_org_resource:
+            org_resource=all_org_resource[org]
+            if org_resource['cpu_node_num']>3:   # 至少4台机器，才参与调度融合
+                if org_resource['cpu_req_total']/org_resource['cpu_allocatable_total']>max_cpu_per:
+                    max_cpu_per=org_resource['cpu_req_total']/org_resource['cpu_allocatable_total']
+                    max_cpu_org=org
+                if org_resource['cpu_req_total']/org_resource['cpu_allocatable_total']<min_cpu_per:
+                    min_cpu_per=org_resource['cpu_req_total']/org_resource['cpu_allocatable_total']
+                    min_cpu_org=org
+
+            if org_resource['gpu_node_num']>3:   # 至少4台机器，才参与调度融合
+                if org_resource['gpu_req_total']/org_resource['gpu_allocatable_total']>max_gpu_per:
+                    max_gpu_per=org_resource['gpu_req_total']/org_resource['gpu_allocatable_total']
+                    max_gpu_org=org
+                if org_resource['gpu_req_total']/org_resource['gpu_allocatable_total']<min_gpu_per:
+                    min_gpu_per=org_resource['gpu_req_total']/org_resource['gpu_allocatable_total']
+                    min_gpu_org=org
+
+
+        print(all_org_resource)
+        # 如果差别最大的两个不同的资源组，cpu申请率差距在20%，则将申请率最小的资源组中的申请率最小的机器转为到另一个资源组
+        print(max_cpu_org,min_cpu_org,max_gpu_org,min_gpu_org)
+        if max_cpu_org!=min_cpu_org and max_cpu_per>min_cpu_per+0.2:
+            org_node_cpu_per={}
+            for ip in all_node_json:
+                if all_node_json[ip]['labels'].get('org','')==min_cpu_org and all_node_json[ip]['labels'].get('cpu','false')=='true':
+                    org_node_cpu_per[ip]=all_node_json[ip]['used_cpu']/all_node_json[ip]['cpu']
+            org_node_cpu_per = sorted(org_node_cpu_per.items(), key=lambda x: x[1], reverse=False)   # 从小到大排序
+            print(org_node_cpu_per)
+            adjust_node = [node[0] for node in org_node_cpu_per[:1]]   # 每次调整一台机器
+            push_message(conf.get('ADMIN_USER').split(','),'集群 %s 调整项目组 %s 下 cpu机器 %s 到项目组%s'%(cluster_name,min_cpu_org,','.join(adjust_node),max_cpu_org))
+            k8s_client.label_node(adjust_node,labels={"org":max_cpu_org})
+
+
+        # 将差距最大的两个gpu资源组，进行调配
+        if max_gpu_org!=min_gpu_org and max_gpu_per>min_gpu_per+0.2:
+            org_node_gpu_per={}
+            for ip in all_node_json:
+                if all_node_json[ip]['labels'].get('org','')==min_gpu_org and all_node_json[ip]['labels'].get('gpu','false')=='true':
+                    org_node_gpu_per[ip]=all_node_json[ip]['used_gpu']/all_node_json[ip]['gpu']
+            org_node_gpu_per = sorted(org_node_gpu_per.items(), key=lambda x: x[1], reverse=False)   # 从小到大排序
+            print(org_node_gpu_per)
+            adjust_node = [node[0] for node in org_node_gpu_per[:1]]  # 每次调整一台机器
+            push_message(conf.get('ADMIN_USER').split(','), '集群 %s 调整项目组 %s 下 gpu机器 %s 到项目组%s' % (cluster_name, min_gpu_org, ','.join(adjust_node), max_gpu_org))
+            k8s_client.label_node(adjust_node,labels={"org":max_gpu_org})
+
+
+
+
+# 每5分钟做一次均衡，空闲资源每个集群按申请率划分
+#
+# @celery_app.task(name="task.equalizer", bind=True)
+# def equalizer(task):
+#     clusters = conf.get('CLUSTERS', {})
+#     for cluster_name in clusters:
+#         # 获取下面不同项目组的资源
+#
+#         # 获取集群下面的所有机器，如果存在资源占用为空的就直接收回
+#         cluster = clusters[cluster_name]
+#         k8s_client = K8s(cluster['KUBECONFIG'])
+#         k8s_client.get_node(label={'org'})
+#
+#         all_gpu_pods=k8s_client.get_uesd_gpu(namespaces=['pipeline','katib','jupyter','service'])
+#
+#         print(all_gpu_pods)
+#         message = ''
+#         used_gpu = 0
+#         for pod in all_gpu_pods:
+#             used_gpu+=pod['gpu']
+#             message+=pod['namespace']+","+pod['user']+","+pod['name']+","+str(pod['gpu'])+"\n"
+#         print(message)
+#         message+="%s集群共已使用%s张卡"%(cluster_name,int(used_gpu))
+#         push_message(conf.get('ADMIN_USER','').split(','),message)
+#         # push_admin("%s集群共已使用%s张卡"%(cluster_name,int(used_gpu)))
+#
+
+
+
+
+# def aa():
+#     # 删除jupyter
+#     print('begin delete notebook')
+#     object_info = conf.get("CRD_INFO", {}).get('notebook', {})
+#     print(object_info)
+#     timeout = int(object_info.get('timeout', 60 * 60 * 24 * 3))
+#     with session_scope(nullpool=True) as dbsession:
+#         # 删除vscode的pod
+#         try:
+#             alert_time = datetime.datetime.now() - datetime.timedelta(seconds=timeout) + datetime.timedelta(days=1)
+#             notebooks = dbsession.query(Notebook).filter(Notebook.changed_on <= alert_time).all()   # 需要删除或者需要通知续期的notebook
+#             for notebook in notebooks:
+#                 if notebook.changed_on < (datetime.datetime.now() - datetime.timedelta(seconds=timeout) + datetime.timedelta(days=1)):
+#                     message = '您的notebook %s即将过期，如要继续使用，请尽快续期，每次有效期3天\n' % notebook.name
+#                     print(notebook.created_by.username,message)
+#                     push_message([notebook.created_by.username], message)
+#
+#         except Exception as e:
+#             print(e)
+
+
+#
 # if __name__ == '__main__':
 #     delete_tfjob(task=None)
 
