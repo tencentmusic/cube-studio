@@ -30,14 +30,14 @@ kubectl create -f ./kube-state-metrics/kube-state-metrics-sa.yml
 kubectl create -f ./kube-state-metrics/kube-state-metrics-rbac.yml
 kubectl create -f ./kube-state-metrics/kube-state-metrics-svc.yml
 kubectl create -f ./kube-state-metrics/kube-state-metrics-dp.yml
-kubectl create -f ./grafana/grafana-sa.yml
+
 ```
 
  # 自定义配置文件，定义显示方式
 ```
 # 按照自己的分布式存储创建pv
 kubectl create -f ./grafana/pv-pvc-hostpath.yml
-
+kubectl create -f ./grafana/grafana-sa.yml
 kubectl create -f ./grafana/grafana-source.yml
 kubectl create -f ./grafana/grafana-datasources.yml
 kubectl create -f ./grafana/grafana-admin-secret.yml
