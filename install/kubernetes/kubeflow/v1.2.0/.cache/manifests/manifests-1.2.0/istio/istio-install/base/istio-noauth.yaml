@@ -434,7 +434,7 @@ data:
           "refId": "H"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{container_name=~\"galley\", pod_name=~\"istio-galley-.*\"})",
+          "expr": "sum(container_memory_working_set_bytes{container_name=~\"galley\", pod_name=~\"istio-galley-.*\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Total (kis)",

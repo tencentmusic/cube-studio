@@ -14,8 +14,8 @@ spec:
         sum(rate(container_cpu_usage_seconds_total{job="kubelet", image!=""}[5m])) by (namespace)
       record: namespace:container_cpu_usage_seconds_total:sum_rate
     - expr: |
-        sum(container_memory_usage_bytes{job="kubelet", image!=""}) by (namespace)
-      record: namespace:container_memory_usage_bytes:sum
+        sum(container_memory_working_set_bytes{job="kubelet", image!=""}) by (namespace)
+      record: namespace:container_memory_working_set_bytes:sum
     - expr: |
         sum by (namespace, label_name) (
            sum(rate(container_cpu_usage_seconds_total{job="kubelet", image!=""}[5m])) by (namespace, pod_name)
@@ -25,11 +25,11 @@ spec:
       record: namespace_name:container_cpu_usage_seconds_total:sum_rate
     - expr: |
         sum by (namespace, label_name) (
-          sum(container_memory_usage_bytes{job="kubelet",image!=""}) by (pod_name, namespace)
+          sum(container_memory_working_set_bytes{job="kubelet",image!=""}) by (pod_name, namespace)
         * on (namespace, pod_name) group_left(label_name)
           label_replace(kube_pod_labels{job="kube-state-metrics"}, "pod_name", "$1", "pod", "(.*)")
         )
-      record: namespace_name:container_memory_usage_bytes:sum
+      record: namespace_name:container_memory_working_set_bytes:sum
     - expr: |
         sum by (namespace, label_name) (
           sum(kube_pod_container_resource_requests_memory_bytes{job="kube-state-metrics"}) by (namespace, pod)

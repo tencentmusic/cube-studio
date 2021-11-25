@@ -346,9 +346,9 @@ data:
     groups:
     - name: kubernetes.rules
       rules:
-      - expr: sum(container_memory_usage_bytes{container_name!="POD",pod_name!=""}) BY
+      - expr: sum(container_memory_working_set_bytes{container_name!="POD",pod_name!=""}) BY
           (pod_name)
-        record: pod_name:container_memory_usage_bytes:sum
+        record: pod_name:container_memory_working_set_bytes:sum
       - expr: sum(container_spec_cpu_shares{container_name!="POD",pod_name!=""}) BY (pod_name)
         record: pod_name:container_spec_cpu_shares:sum
       - expr: sum(rate(container_cpu_usage_seconds_total{container_name!="POD",pod_name!=""}[5m]))
@@ -356,14 +356,14 @@ data:
         record: pod_name:container_cpu_usage:sum
       - expr: sum(container_fs_usage_bytes{container_name!="POD",pod_name!=""}) BY (pod_name)
         record: pod_name:container_fs_usage_bytes:sum
-      - expr: sum(container_memory_usage_bytes{container_name!=""}) BY (namespace)
-        record: namespace:container_memory_usage_bytes:sum
+      - expr: sum(container_memory_working_set_bytes{container_name!=""}) BY (namespace)
+        record: namespace:container_memory_working_set_bytes:sum
       - expr: sum(container_spec_cpu_shares{container_name!=""}) BY (namespace)
         record: namespace:container_spec_cpu_shares:sum
       - expr: sum(rate(container_cpu_usage_seconds_total{container_name!="POD"}[5m]))
           BY (namespace)
         record: namespace:container_cpu_usage:sum
-      - expr: sum(container_memory_usage_bytes{container_name!="POD",pod_name!=""}) BY
+      - expr: sum(container_memory_working_set_bytes{container_name!="POD",pod_name!=""}) BY
           (cluster) / sum(machine_memory_bytes) BY (cluster)
         record: cluster:memory_usage:ratio
       - expr: sum(container_spec_cpu_shares{container_name!="POD",pod_name!=""}) / 1000
@@ -628,7 +628,7 @@ data:
           description: Pod:{{$labels.pod_name}},container:{{$labels.container}} memory
             useage exceeded 95% for 5 minutes, and the current value for useage is {{$value}}%.
           summary: ContainerMemoryRunningFull
-        expr: label_replace(container_memory_usage_bytes, "container", "$1", "container_name",  "(.*)")
+        expr: label_replace(container_memory_working_set_bytes, "container", "$1", "container_name",  "(.*)")
           / on(container, pod_name) label_replace(kube_pod_container_resource_limits_memory_bytes,
           "pod_name", "$1", "pod",  "(.*)") * 100 > 95
         for: 5m
