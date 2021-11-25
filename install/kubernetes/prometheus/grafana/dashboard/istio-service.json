@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1634028047331,
+  "iteration": 1634283475928,
   "links": [],
   "panels": [
     {
@@ -51,7 +51,7 @@
       "paceLength": 10,
       "percentage": false,
       "pointradius": 2,
-      "points": true,
+      "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "stack": false,
@@ -69,10 +69,10 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "服务监控",
+      "title": "全部服务监控",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 1,
         "value_type": "individual"
       },
       "type": "graph",
@@ -121,13 +121,15 @@
       },
       "id": 2,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
         "current": false,
-        "max": false,
+        "max": true,
         "min": false,
+        "rightSide": true,
         "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -136,7 +138,7 @@
       "paceLength": 10,
       "percentage": false,
       "pointradius": 2,
-      "points": true,
+      "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "stack": false,
@@ -145,6 +147,7 @@
         {
           "expr": "sum by (destination_service_name) (istio_requests_total{destination_service_namespace=\"$namespace\",destination_service_name=~\"($service)\"})",
           "format": "time_series",
+          "hide": false,
           "intervalFactor": 1,
           "legendFormat": "{{destination_service_name}}",
           "refId": "B"
@@ -154,10 +157,10 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "服务监控",
+      "title": "服务请求量",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 1,
         "value_type": "individual"
       },
       "type": "graph",
@@ -190,8 +193,97 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus-istio",
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 4,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (destination_service_name) (istio_request_bytes_sum{destination_service_namespace=\"$namespace\",destination_service_name=~\"($service)\"})",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{destination_service_name}}",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "服务吞吐",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
+  "refresh": false,
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -200,8 +292,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "service",
           "value": "service"
         },
@@ -227,21 +318,19 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "selected": false,
+          "text": "swallow-mysql",
+          "value": "swallow-mysql"
         },
         "datasource": "Prometheus-istio",
-        "definition": "label_values(galley_istio_networking_virtualservices{namespace=\"$namespace\"}, name)",
+        "definition": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_service_name)",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": true,
         "name": "service",
         "options": [],
-        "query": "label_values(galley_istio_networking_virtualservices{namespace=\"$namespace\"}, name)",
+        "query": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_service_name)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -255,7 +344,7 @@
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now/d",
     "to": "now"
   },
   "timepicker": {
@@ -284,7 +373,7 @@
     ]
   },
   "timezone": "",
-  "title": "isito service",
-  "uid": "f6Ui29D7z",
-  "version": 22
+  "title": "istio service",
+  "uid": "istio-service",
+  "version": 40
 }

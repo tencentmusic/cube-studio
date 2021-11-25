@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 24,
-  "iteration": 1634025029724,
+  "iteration": 1635924485936,
   "links": [],
   "panels": [
     {
@@ -149,7 +149,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by(pod) (container_memory_usage_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",node=\"$node\"})",
+          "expr": "sum by(pod) (container_memory_working_set_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",node=\"$node\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{pod}}",
@@ -1015,7 +1015,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "nodes",
-  "uid": "1",
-  "version": 14
+  "title": "node",
+  "uid": "node",
+  "version": 16
 }
