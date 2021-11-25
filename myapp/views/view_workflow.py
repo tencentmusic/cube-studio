@@ -92,7 +92,7 @@ class Crd_ModelView_Base():
     #     "username": _("关联用户"),
     #     "log": _("日志"),
     # }
-    crd_name =''
+    crd_name = ''
     base_order = ('create_time', 'desc')
     base_filters = [["id", CRD_Filter, lambda: []]]  # 设置权限过滤器
 
@@ -235,8 +235,6 @@ class Workflow_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
             print(e)
 
 
-
-
     @expose("/stop/<crd_id>")
     def stop(self, crd_id):
         workflow = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
@@ -249,7 +247,8 @@ class Workflow_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
 
     label_title = '运行实例'
     datamodel = SQLAInterface(Workflow)
-    list_columns = ['name','project','pipeline_url', 'namespace_url','execution_date', 'create_time','change_time', 'final_status','status', 'username', 'log','stop']
+    list_columns = ['project','pipeline_url', 'create_time','change_time','elapsed_time', 'final_status','status', 'username', 'log','stop']
+    show_columns = ['name', 'namespace', 'create_time', 'status','task_status', 'annotations_html', 'labels_html', 'spec_html','status_more_html', 'info_json_html']
     crd_name = 'workflow'
 
 appbuilder.add_view(Workflow_ModelView,"运行实例",href='/workflow_modelview/list/?_flt_2_name=&_flt_2_labels=',icon = 'fa-tasks',category = '训练')

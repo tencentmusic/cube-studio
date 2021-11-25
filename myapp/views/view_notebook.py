@@ -156,7 +156,7 @@ class Notebook_ModelView_Base():
         )
         self.add_form_extra_fields['volume_mount'] = StringField(
             _(self.datamodel.obj.lab('volume_mount')),
-            default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+            default=notebook.project.volume_mount if notebook else '',
             description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$pvc_name2(pvc):/$container_path2',
             widget=BS3TextFieldWidget()
         )
@@ -200,9 +200,12 @@ class Notebook_ModelView_Base():
             )
         columns = ['name','describe','images','resource_memory','resource_cpu','resource_gpu']
 
+
+        self.add_columns = ['project']+columns   # 添加的时候没有挂载配置，使用项目中的挂载配置
+
+        # 修改的时候管理员可以在上面添加一些特殊的挂载配置，适应一些特殊情况
         if g.user.is_admin():
             columns.append('volume_mount')
-        self.add_columns = ['project']+columns
         self.edit_columns = ['project']+columns
         self.edit_form_extra_fields=self.add_form_extra_fields
 
@@ -224,6 +227,9 @@ class Notebook_ModelView_Base():
             item.ide_type = 'theia'
         else:
             item.ide_type = 'jupyter'
+
+        if not item.volume_mount:
+            item.volume_mount = item.project.volume_mount
 
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_update(self, item):
@@ -379,7 +385,7 @@ class Notebook_ModelView_Base():
                     "kubeflow/kubeflow-gateway"
                 ],
                 "hosts": [
-                   "*" if core.checkip(notebook.cluster.get('JUPYTER_DOMAIN')) else notebook.cluster.get('JUPYTER_DOMAIN')
+                   "*" if core.checkip(request.host) else request.host
                 ],
                 "http": [
                     {

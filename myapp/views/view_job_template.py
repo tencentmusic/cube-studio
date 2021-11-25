@@ -282,6 +282,7 @@ class Job_Template_ModelView_Base():
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "venus-" + run_id.replace('_', '-')
         pod_name = pod_name[:60]
+        pod_name = pod_name[:-1] if pod_name[-1]=='-' else pod_name
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -405,6 +406,7 @@ class Job_Template_ModelView_Base():
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "venus-" + run_id.replace('_', '-')
         pod_name = pod_name[:60]
+        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:

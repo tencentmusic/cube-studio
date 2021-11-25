@@ -236,11 +236,11 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
 
 
         # # 创建label，这样能让每个pod都找到运行人。
-        # container_lables={
+        # container_labels={
         #     'upload-rtx': g.user.username if g and g.user and g.user.username else pipeline.created_by.username,
         #     'run-rtx': g.user.username if g and g.user and g.user.username else pipeline.created_by.username
         # }
-        # container_kwargs['labels']=container_lables
+        # container_kwargs['labels']=container_labels
 
 
         task_command = ''
@@ -416,7 +416,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
             pod_anti_affinity=k8s_client.V1PodAntiAffinity(
                 preferred_during_scheduling_ignored_during_execution=[
                     k8s_client.V1WeightedPodAffinityTerm(
-                        weight=20,
+                        weight=80,
                         pod_affinity_term=k8s_client.V1PodAffinityTerm(
                             label_selector=k8s_client.V1LabelSelector(
                                 match_labels={
@@ -624,8 +624,8 @@ class Pipeline_ModelView_Base():
     order_columns = ['id']
 
     list_columns = ['id','project','pipeline_url','creator','modified']
-    add_columns = ['project','name','describe','namespace','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','alert_status','alert_user','parameter']
-    show_columns = ['project','name','describe','namespace','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','dag_json_html','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand_html','parameter_html']
+    add_columns = ['project','name','describe','namespace','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','alert_status','alert_user','parameter']
+    show_columns = ['project','name','describe','namespace','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','dag_json_html','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand_html','parameter_html']
     edit_columns = add_columns
 
 
@@ -684,7 +684,7 @@ class Pipeline_ModelView_Base():
         ),
         "expired_limit": IntegerField(
             _(datamodel.obj.lab('expired_limit')),
-            description="定时调度过期记录保留个数",
+            description="定时调度最新实例限制数目，0表示不限制",
             widget=BS3TextFieldWidget(),
             default=1,
             validators=[DataRequired()]
@@ -878,6 +878,12 @@ class Pipeline_ModelView_Base():
         for task in tasks:
             db.session.delete(task)
         db.session.commit()
+        if "(废弃)" not in pipeline.describe:
+            pipeline.describe+="(废弃)"
+        pipeline.schedule_type='once'
+        pipeline.expand=""
+        pipeline.dag_json="{}"
+        db.session.commit()
 
 
     @expose("/my/list/")
@@ -896,7 +902,6 @@ class Pipeline_ModelView_Base():
 
 
     @expose("/demo/list/")
-    @pysnooper.snoop()
     def demo(self):
         try:
             pipelines = db.session.query(Pipeline).filter(Pipeline.parameter.contains('"demo": "true"')).all()
@@ -984,7 +989,7 @@ class Pipeline_ModelView_Base():
                         namespace=crd['namespace'],
                         run_id = run_id
                     )
-                    push_message(conf.get('ADMIN_USER', '').split(','),'手动运行新的pipeline %s，进而删除旧的pipeline run-id: %s' % (pipeline.describe,run_id,))
+                    # push_message(conf.get('ADMIN_USER', '').split(','),'%s手动运行新的pipeline %s，进而删除旧的pipeline run-id: %s' % (pipeline.created_by.username,pipeline.describe,run_id,))
                     if db_crd:
                         db_crd.status='Deleted'
                         db_crd.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1149,17 +1154,19 @@ class Pipeline_ModelView_Base():
     def web_monitoring(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
         if pipeline.run_id:
-            data = {
-                "url": pipeline.project.cluster.get('GRAFANA_TASK','') + pipeline.name,
-                # "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
-                "delay":1000,
-                "loading": True
-            }
-            # 返回模板
-            if pipeline.project.cluster['NAME']==conf.get('ENVIRONMENT'):
-                return self.render_template('link.html', data=data)
-            else:
-                return self.render_template('external_link.html', data=data)
+            url = pipeline.project.cluster.get('GRAFANA_TASK','') + pipeline.name
+            return redirect(url)
+            # data = {
+            #     "url": pipeline.project.cluster.get('GRAFANA_TASK','') + pipeline.name,
+            #     # "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
+            #     "delay":1000,
+            #     "loading": True
+            # }
+            # # 返回模板
+            # if pipeline.project.cluster['NAME']==conf.get('ENVIRONMENT'):
+            #     return self.render_template('link.html', data=data)
+            # else:
+            #     return self.render_template('external_link.html', data=data)
         else:
             flash('no running instance','warning')
             return redirect('/pipeline_modelview/web/%s'%pipeline.id)

@@ -17,7 +17,7 @@ from myapp.views.view_team import Project_Filter
 from myapp import app, appbuilder,db,event_logger
 
 from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-
+from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
 
@@ -89,12 +89,15 @@ class Docker_ModelView_Base():
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Docker_Filter, lambda: []]]  # 设置权限过滤器
     order_columns = ['id']
-    add_columns=['describe','base_image','target_image','need_gpu','consecutive_build','expand']
+    add_columns=['project','describe','base_image','target_image','need_gpu','consecutive_build','expand']
     edit_columns=add_columns
-    list_columns=['id','describe','consecutive_build','base_image','target_image','debug','save']
+    list_columns=['id','project','describe','consecutive_build','image_history','debug','save']
     add_form_extra_fields=[]
     edit_form_extra_fields=add_form_extra_fields
-
+    add_form_query_rel_fields = {
+        "project": [["name", Project_Join_Filter, 'org']]
+    }
+    edit_form_query_rel_fields=add_form_query_rel_fields
     @pysnooper.snoop()
     def pre_add_get(self,docker=None):
 
@@ -169,7 +172,8 @@ class Docker_ModelView_Base():
 
             command=['sh','-c','sleep 7200 && hour=`date +%H` && while [ $hour -ge 06 ];do sleep 3600;hour=`date +%H`;done']
             hostAliases = conf.get('HOSTALIASES')
-            default_volume_mount = 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
+
+            default_volume_mount = docker.project.volume_mount
             k8s_client.create_debug_pod(namespace,
                                         name=pod_name,
                                         command=command,

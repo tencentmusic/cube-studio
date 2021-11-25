@@ -159,14 +159,14 @@ class Task_ModelView_Base():
         'resource_memory': StringField(
             label = _(datamodel.obj.lab('resource_memory')),
             default=Task.resource_memory.default.arg,
-            description='内存的资源使用限制，示例1G，10G， 最大10G，如需更多联系管理员',
+            description='内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管理员',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
         'resource_cpu': StringField(
             label = _(datamodel.obj.lab('resource_cpu')),
             default=Task.resource_cpu.default.arg,
-            description='cpu的资源使用限制(单位核)，示例 0.4，10，最大10核，如需更多联系管理员',
+            description='cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管理员',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
@@ -300,8 +300,7 @@ class Task_ModelView_Base():
         if item.job_template is None:
             raise MyappException("Job Template 为必选")
 
-        if not item.volume_mount:
-            item.volume_mount='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
+        item.volume_mount=item.pipeline.project.volume_mount   # 默认使用项目的配置
 
         if item.job_template.volume_mount and item.job_template.volume_mount not in item.volume_mount:
             if item.volume_mount:
@@ -423,29 +422,11 @@ class Task_ModelView_Base():
     }
 
 
-    # @event_logger.log_this
-    # @expose("/delete/<pk>")
-    # @has_access
-    # def delete(self, pk):
-    #     pk = self._deserialize_pk_if_composite(pk)
-    #     self.src_item_object = self.datamodel.get(pk, self._base_filters)
-    #     if self.check_redirect_list_url:
-    #         self.check_redirect_list_url = '/pipeline_modelview/edit/' + str(self.src_item_object.pipeline.id)
-    #         try:
-    #             self.check_edit_permission(self.src_item_object)
-    #         except Exception as e:
-    #             print(e)
-    #             flash(str(e), 'warning')
-    #             return redirect(self.check_redirect_list_url)
-    #
-    #     self._delete(pk)
-    #     return self.post_delete_redirect()
-
 
     def run_pod(self,task,k8s_client,run_id,namespace,pod_name,image,working_dir,command,args):
 
         # 模板中环境变量
-        task_env = task.job_template.env + "\n"
+        task_env = task.job_template.env + "\n" if task.job_template.env else ''
 
         # 系统环境变量
         task_env += 'KFJ_TASK_ID=' + str(task.id) + "\n"
@@ -529,6 +510,7 @@ class Task_ModelView_Base():
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name="debug-"+task.pipeline.name.replace('_','-')+"-"+task.name.replace('_','-')
         pod_name=pod_name[:60]
+        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
         pod = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
         # print(pod)
         if pod:
@@ -605,6 +587,7 @@ class Task_ModelView_Base():
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name[:60]
+        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -702,6 +685,7 @@ class Task_ModelView_Base():
         # 删除运行时容器
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name[:60]
+        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -719,6 +703,7 @@ class Task_ModelView_Base():
         # 删除debug容器
         pod_name = "debug-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name[:60]
+        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -744,6 +729,7 @@ class Task_ModelView_Base():
         namespace = conf.get('PIPELINE_NAMESPACE')
         running_pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = running_pod_name[:60]
+        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         if pod:
             pod = pod[0]
