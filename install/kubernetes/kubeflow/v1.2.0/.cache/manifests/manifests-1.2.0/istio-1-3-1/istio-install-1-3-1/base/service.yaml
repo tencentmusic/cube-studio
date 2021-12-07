@@ -48,7 +48,6 @@ metadata:
     app: istio-ingressgateway
     istio: ingressgateway
 spec:
-  type: LoadBalancer
   selector:
     app: istio-ingressgateway
     istio: ingressgateway

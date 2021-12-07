@@ -46,23 +46,6 @@ kubeflow每一部分相应的可以独立升级
 	# 注意：需要kustomize版本大于v3.0.0，安装可下载releases：https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv4.3.0
 	#如果kubectl版本大于等于v1.22.1，也可以直接用kubectl apply -k 安装。
 
-1.0.4版本替换为自己的mysql
-```
-注释pipeline/1.0.4/kustomize/cluster-scoped-resources/kustomization.yaml中的 cache部署,namespace的部署
-注视pipeline/1.0.4/kustomize/base/kustomization.yaml中的 cache部署
-注释pipeline/1.0.4/kustomize/env/platform-agnostic/kustomization.yaml 中的 mysql部署
-修改pipeline/1.0.4/kustomize/base/params-db-secret.env 中的mysql账号密码
-修改pipeline/1.0.4/kustomize/base/params.env 中mysql的地址信息
-
-部署1.0.4版本
-cd pipeline/1.0.4/kustomize
-kubectl apply -k cluster-scoped-resources/
-kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
-kubectl apply -k env/platform-agnostic/
-kubectl wait applications/pipeline -n kubeflow --for condition=Ready --timeout=1800s
-
-```
-
 ##  部署minio-pv
 按照自己集群的分布式存储方式创建pv
 ```bash

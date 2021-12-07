@@ -39,7 +39,7 @@ data:
       },
       "enas": {
         "image": "docker.io/kubeflowkatib/suggestion-enas:v1beta1-a96ff59",
-        "imagePullPolicy": "Always",
+        "imagePullPolicy": "IfNotPresent",
         "resources": {
           "limits": {
             "memory": "200Mi"
@@ -57,6 +57,6 @@ data:
     {
       "medianstop": {
         "image": "docker.io/kubeflowkatib/earlystopping-medianstop:v1beta1-a96ff59",
-        "imagePullPolicy": "Always"
+        "imagePullPolicy": "IfNotPresent"
       }
     }

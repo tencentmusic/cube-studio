@@ -25,6 +25,12 @@ data:
       explicit_defaults_for_timestamp = 1
       character_set_server=utf8
       init_connect='SET NAMES utf8'
-      character-set-server=utf8
-      # skip-grant-tables
+      skip-grant-tables
+
+  init.sql: |-
+    CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+    CREATE DATABASE IF NOT EXISTS mlpipeline DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+    CREATE DATABASE IF NOT EXISTS katib DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+    CREATE DATABASE IF NOT EXISTS metadb DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+    CREATE DATABASE IF NOT EXISTS cachedb DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 

@@ -1,0 +1,61 @@
+# encoding: utf-8
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kubeflow-dashboard-init
+  labels:
+    app: kubeflow-dashboard-init
+spec:
+  parallelism: 1
+  completions: 1
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: Never
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubeflow-dashboard
+                operator: In
+                values:
+                - "true"
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: kubeflow-dashboard-config
+          configMap:
+            name: kubeflow-dashboard-config
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
+              - key: config.py
+                path: config.py
+
+      serviceAccount: kubeflow-dashboard
+      containers:
+        - name: kubeflow-dashboard
+          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          imagePullPolicy: Always  # IfNotPresent
+          command: ["bash","/entrypoint.sh"]
+          env:
+          - name: STAGE
+            value: init
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: tz-config
+              mountPath: /etc/localtime
+
+

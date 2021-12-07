@@ -120,7 +120,7 @@ spec:
       containers:
         - name: kubernetes-dashboard-cluster
           image: kubernetesui/dashboard:v2.2.0  
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9090
               protocol: TCP

@@ -67,7 +67,7 @@ spec:
                "--db_password=$(DBCONFIG_PASSWORD)",
                "--namespace_to_watch=$(NAMESPACE_TO_WATCH)",
               ]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8443
           name: webhook-api

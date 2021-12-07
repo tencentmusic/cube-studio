@@ -1,5 +1,5 @@
 # 所需要的所有镜像
-images = ['gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
+kubeflow = ['gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
           'gcr.io/ml-pipeline/metadata-writer:1.0.4', 'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1',
           'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:8.0.3',
           'docker.io/kubeflowkatib/katib-db-manager:v1beta1-a96ff59',
@@ -30,6 +30,8 @@ images = ['gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
           'kubeflow/mxnet-operator:v1.0.0-20200625',
           'gcr.io/kubeflow-images-public/profile-controller:vmaster-ga49f658f',
           'gcr.io/kubeflow-images-public/ingress-setup:latest']
+
+kubernetes_dashboard=['kubernetesui/dashboard:v2.2.0','kubernetesui/metrics-scraper:v1.0.6']
 
 new_pipline = [
     'gcr.io/ml-pipeline/api-server:1.6.0',
@@ -111,8 +113,7 @@ volcano = ['volcanosh/vc-controller-manager:latest', 'volcanosh/vc-scheduler:lat
 
 kube_batch = ['kubesigs/kube-batch:v0.5']
 
-
-images = new_katib + images + new_pipline + new_gpu + new_prometheus + new_serving + knative_sha256 + knative + volcano
+images = new_katib + kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + knative_sha256 + knative + volcano
 # images = new_pipline
 images = list(set(images))
 
@@ -122,7 +123,7 @@ HOST = 'ai.tencentmusic.com/tme-public/'
 for image in images:
     # print(image)
     image = image.replace('<none>', '')
-    image_name = HOST + image.replace('/', '-').replace('@sha256', '')
+    image_name = HOST + image.replace(HOST,'').replace('/', '-').replace('@sha256', '')
 
     # 可联网机器上拉取公有镜像并推送到私有仓库
     # print('docker pull %s' % image)
