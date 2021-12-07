@@ -65,7 +65,7 @@ kubectl apply -f dashboard/v2.2.0-user.yaml
 # 部署kube-batch  
 kube-batch用来实现gang调度  
 ```bash  
-kubectl apply -f kube-batch/deploy.yaml  
+kubectl create -f kube-batch/deploy.yaml  
 ```  
   
 # 部署元数据组件mysql  
