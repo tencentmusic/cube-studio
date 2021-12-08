@@ -26,7 +26,7 @@ expand字段
 		"cluster": "dev"
 	}
 
-### 机器划分项目组
+### 资源划分项目组
 机器通过label进行管理，所有的调度机器由平台控制，不由用户直接控制。
 
 - 对于cpu的train/notebook/service会选择cpu=true的机器  
@@ -42,7 +42,11 @@ expand字段
 	{
 		"node_selector": "org=public"
 	}
-
+管理该项目自动挂载什么pvc，可通过项目组的expand字段控制项目组的调度机器
+	{
+		"volume_mount": "kubeflow-user-workspace(pvc):/mnt"
+	}
+	
 # 在线开发->notebook
 
 定时任务中配置了notebook的定时清理和提醒用户续期，没有及时续期的notebook会被删除。容器消失后环境丢失
