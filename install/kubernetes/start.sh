@@ -1,8 +1,9 @@
 mkdir ~/.kube/
 cp config ~/.kube/config
 cp config kubeconfig/dev-kubeconfig
-ip=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1`
-kubectl label node $ip train=true cpu=true notebook=true service=true org=public istio=true knative=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true
+#ip=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1`
+node=`kubectl get node |grep worker | awk '{print $1}' | head -n 1`
+kubectl label node $node train=true cpu=true notebook=true service=true org=public istio=true knative=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true
 # 拉取镜像
 sh pull_image_kubeflow.sh
 curl -LO https://dl.k8s.io/release/v1.18.0/bin/linux/amd64/kubectl
