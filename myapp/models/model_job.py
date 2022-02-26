@@ -15,6 +15,7 @@ from sqlalchemy import (
     Text,
     Enum,
 )
+import numpy
 import random
 import copy
 import logging
@@ -271,6 +272,19 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def get_tasks(self,dbsession=db.session):
         return dbsession.query(Task).filter_by(pipeline_id=self.id).all()
 
+    # @pysnooper.snoop()
+    def delete_old_task(self, dbsession=db.session):
+        try:
+            expand_tasks = json.loads(self.expand) if self.expand else []
+            tasks = dbsession.query(Task).filter_by(pipeline_id=self.id).all()
+            tasks_id = [int(expand_task['id']) for expand_task in expand_tasks if expand_task.get('id', '').isdecimal()]
+            for task in tasks:
+                if task.id not in tasks_id:
+                    db.session.delete(task)
+                    db.session.commit()
+        except Exception as e:
+            print(e)
+
     # 获取当期运行时workflow的数量
     def get_workflow(self):
 
@@ -359,6 +373,32 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             dag_json = json.dumps(dag, indent=4, ensure_ascii=False)
 
             return dag_json
+
+    # 自动聚焦到视图中央
+    # @pysnooper.snoop()
+    def fix_position(self):
+        expand_tasks = json.loads(self.expand) if self.expand else []
+        if not expand_tasks:
+            expand_tasks = []
+        x=[]
+        y=[]
+        for item in expand_tasks:
+            if "position" in item:
+                if item['position'].get('x',0):
+                    x.append(int(item['position'].get('x',0)))
+                    y.append(int(item['position'].get('y', 0)))
+        x_dist=400- numpy.mean(x) if x else 0
+        y_dist = 300 -numpy.mean(y) if y else 0
+        for item in expand_tasks:
+            if "position" in item:
+                if item['position'].get('x', 0):
+                    item['position']['x'] = int(item['position']['x'])+x_dist
+                    item['position']['y'] = int(item['position']['y']) + y_dist
+
+        return expand_tasks
+
+
+
 
     # 生成前端锁需要的扩展字段
     def fix_expand(self,dbsession=db.session):
@@ -500,7 +540,11 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         return Markup(f'<a target=_blank href="/task_modelview/log/{self.id}">log</a>')
 
     def get_node_selector(self):
-        return self.get_default_node_selector(self.pipeline.project.node_selector,self.resource_gpu,'train')
+        project_node_selector = self.get_default_node_selector(self.pipeline.project.node_selector,self.resource_gpu,'train')
+        gpu_type = core.get_gpu(self.resource_gpu)[1]
+        if gpu_type:
+            project_node_selector+=',gpu-type='+gpu_type
+        return project_node_selector
 
 
     @renders('args')
@@ -515,7 +559,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def monitoring_html(self):
         try:
             monitoring = json.loads(self.monitoring)
-            monitoring['link']=self.pipeline.project.cluster.get('GRAFANA_TASK','')+monitoring.get('pod_name','')
+            monitoring['link']=self.pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
         except Exception as e:
             return Markup('<pre><code> 暂无 </code></pre>')
@@ -731,13 +775,21 @@ class Workflow(Model,Crd,MyappModelBase):
         finish_time=status_mode.get('finishedAt',self.change_time)
         if not finish_time: finish_time=self.change_time
         start_time = status_mode.get('startedAt', '')
-        if finish_time and start_time:
-            finish_time = datetime.datetime.strptime(finish_time,'%Y-%m-%d %H:%M:%S')
-            start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
-            elapsed = (finish_time-start_time).days*24+(finish_time-start_time).seconds/60/60
-            return str(round(elapsed,2))+"h"
-        else:
-            return '未知'
+        try:
+            if finish_time and start_time:
+                if 'T' in finish_time:
+                    finish_time = datetime.datetime.strptime(finish_time,'%Y-%m-%dT%H:%M:%S')
+                else:
+                    finish_time = datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S')
+                if 'T' in start_time:
+                    start_time = datetime.datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+                else:
+                    start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+                elapsed = (finish_time-start_time).days*24+(finish_time-start_time).seconds/60/60
+                return str(round(elapsed,2))+"h"
+        except Exception as e:
+            print(e)
+        return '未知'
 
 
     @property

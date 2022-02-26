@@ -5,7 +5,6 @@ import asyncio
 from kubernetes import client as k8s_client
 from kubernetes import config as k8s_config
 from kubernetes import watch
-import kubernetes
 from os import path
 import json
 import requests
@@ -44,7 +43,7 @@ else:
         exit(1)
 
 # 推送微信消息
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def deliver_message(tfjob):
     if not tfjob:
         return
@@ -75,7 +74,7 @@ def deliver_message(tfjob):
             push_message(receivers,message)
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_has_push(crd,dbsession):
     # 可能是workflow启动的或者是hp启动的
     workflow_name = crd['labels'].get('workflow-name','')
@@ -182,7 +181,7 @@ def check_has_push(crd,dbsession):
 
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def save_monitoring(tfjob,dbsession):
     try:
         if tfjob.status=='Succeeded':
@@ -228,7 +227,7 @@ def save_monitoring(tfjob,dbsession):
 
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def save_history(tfjob,dbsession):
     info_json = json.loads(tfjob.info_json)
     if info_json['has_push']:
@@ -240,7 +239,7 @@ def save_history(tfjob,dbsession):
     dbsession.commit()
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_crd_exist(group,version,namespace,plural,name):
     client = k8s_client.CustomObjectsApi()
     exist_crd = client.get_namespaced_custom_object(group,version,namespace,plural,name)

@@ -487,6 +487,42 @@ class MyappModelView(ModelView):
         )
 
 
+    # @pysnooper.snoop(watch_explode=('item'))
+    def _add(self):
+        """
+            Add function logic, override to implement different logic
+            returns add widget or None
+        """
+        is_valid_form = True
+        get_filter_args(self._filters)
+        exclude_cols = self._filters.get_relation_cols()
+        form = self.add_form.refresh()
+
+        if request.method == "POST":
+            self._fill_form_exclude_cols(exclude_cols, form)
+            if form.validate():
+                self.process_form(form, True)
+                item = self.datamodel.obj()
+
+                try:
+                    form.populate_obj(item)
+                    self.pre_add(item)
+                except Exception as e:
+                    flash(str(e), "danger")
+                else:
+                    print(item.to_json())
+                    if self.datamodel.add(item):
+                        self.post_add(item)
+                    flash(*self.datamodel.message)
+                finally:
+                    return None
+            else:
+                is_valid_form = False
+        if is_valid_form:
+            self.update_redirect()
+        return self._get_add_widget(form=form, exclude_cols=exclude_cols)
+
+
     @event_logger.log_this
     @expose("/add", methods=["GET", "POST"])
     @has_access
@@ -510,6 +546,8 @@ class MyappModelView(ModelView):
 
         widget = self._add()
         if not widget:
+            if self.check_redirect_list_url:
+                return redirect(self.check_redirect_list_url)
             return self.post_add_redirect()
         else:
             return self.render_template(

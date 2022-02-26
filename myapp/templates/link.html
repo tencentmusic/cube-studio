@@ -2,76 +2,87 @@
 
 {% block content %}
 <style>
-  .container {
-    overflow: hidden;
-    height: calc(100vh - 64px);
-    padding: 0;
-  }
+    .container {
+        overflow: hidden;
+        height: calc(100vh - 64px);
+        padding: 0;
+    }
 </style>
-<iframe id="_appFrame_" name="_appFrame_" src="{{ data.url }}" allowfullscreen allow="microphone;camera;midi;encrypted-media;"
-    style="width: 100%; height: calc(100vh - {{ data.currentHeight or 64 }}px ); border: none;">
-  子应用无法访问，请联系应用管理员 : (
+<iframe id="_appFrame_" name="_appFrame_" src="{{ data.url }}" allowfullscreen allow="microphone;camera;midi;encrypted-media;" style="width: 100%; height: calc(100vh - 64px); border: none;">
+    子应用无法访问，请联系应用管理员 : (
 </iframe>
 {% if data['loading'] %}
-<div id="_di-loading_" class="di-loading e-ani"></div>
+<div id="_di-loading_" class="di-loading e-ani">Hello</div>
 {% endif %}
 <script type="text/javascript">
-  // 全屏化服务
-  $(function ($) {
-    const loading = Boolean('{{ data.loading }}' === 'True');
-    const target = '{{ data.target }}';
-    const delay = Number('{{ data.delay }}') || 0;
-    if( target ) {
-      const iframe = document.getElementById('_appFrame_');
-      iframe.onload = function () {
-        $(frames['_appFrame_'].document).find(target).css({
-          position: 'fixed',
-          top: '0px',
-          left: '0px',
-          width: '100%',
-          height: '100%',
-          zIndex: '999',
-          background: 'white'
-        });
-
-        setTimeout(() => {
-          iframe.contentWindow.postMessage({
-            type: 'fullview',
-            target,
-          }, '*');
-        }, delay)
-      }
-    }
-
-    if( loading ) {
-      const loadingView = document.getElementById('_di-loading_');
-      setTimeout( () => {
-        loadingView.style.opacity = '0';
-        setTimeout(() => {
-          loadingView.style.display = 'none';
-        }, 250 );
-      }, delay + 500 );
-    }
-
-    // postMessage 事件
-    function appframeListener(event) {
-        if (event.data.type) {
-            switch (event.data.type) {
-                case 'copy':
-                    var pathArr = location.pathname.split('/');
-                    pathArr[pathArr.length - 1] = event.data.message.pipelineId;
-                    window.location.pathname = `${pathArr.join('/')}`;
-                    break;
-                case 'link':
-                  window.location.pathname = '/pipeline_modelview/web/' + event.data.message.pipelineId
-                  break;
-                default:
-                    break;
+    // 全屏化服务
+    $(function($) {
+        const loading = Boolean('{{ data.loading }}' === 'True');
+        const target = '{{ data.target }}';
+        const delay = Number('{{ data.delay }}') || 0;
+        if (target) {
+            const iframe = document.getElementById('_appFrame_');
+            iframe.onload = function() {
+                setTimeout(() => {
+                    iframe.contentWindow.postMessage({
+                        type: 'fullview',
+                        target,
+                    }, '*');
+                }, delay)
             }
         }
-    }
-    window.addEventListener('message', appframeListener, false);
+        if (loading) {
+            const loadingView = document.getElementById('_di-loading_');
+            setTimeout(() => {
+                loadingView.style.opacity = '0';
+                setTimeout(() => {
+                    loadingView.style.display = 'none';
+                }, 50);
+            }, delay + 500);
+        }
 
-  });
+        const hackTimer = setInterval(()=>{
+            const iframe = document.getElementById('_appFrame_');
+            const tarDom = iframe.contentDocument.querySelector('{{data.target}}')
+            if(!!tarDom){
+                tarDom.style.cssText += `position: fixed;
+                    top: 0px;
+                    left: 0px;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 999;
+                    background: white;`
+                clearInterval(hackTimer)
+            }
+        },delay);
+
+        // postMessage 事件
+        function appframeListener(event) {
+            console.log(event);
+            if (event.data.type) {
+                console.log(event.data.type);
+                switch (event.data.type) {
+                    case 'copy':
+                        var pathArr = location.pathname.split('/');
+                        pathArr[pathArr.length - 1] = event.data.message.pipelineId;
+                        location.pathname = `${pathArr.join('/')}`;
+                        break;
+                    case 'noFindElement':
+                        setTimeout(()=>{
+                            const iframe = document.getElementById('_appFrame_');
+                            setTimeout(() => {
+                                iframe.contentWindow.postMessage({
+                                    type: 'fullview',
+                                    target,
+                                }, '*');
+                            }, delay)
+                        },500);
+                    default:
+                        break;
+                }
+            }
+        }
+        window.addEventListener('message', appframeListener, false);
+    });
 </script>
 {% endblock %}

@@ -72,7 +72,7 @@ conf = app.config
 
 
 
-class Pipeline_Filter(MyappFilter):
+class Service_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
         if g.user.is_admin():
@@ -81,47 +81,39 @@ class Pipeline_Filter(MyappFilter):
         join_projects_id = security_manager.get_join_projects_id(db.session)
         # public_project_id =
         # logging.info(join_projects_id)
-        return query.filter(
-            or_(
-                self.model.project_id.in_(join_projects_id),
-                # self.model.project.name.in_(['public'])
-            )
-        )
+        return query.filter(self.model.project_id.in_(join_projects_id))
 
 
 class Service_ModelView(MyappModelView):
     datamodel = SQLAInterface(Service)
     help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
-    show_columns = ['name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host_url','link']
-    add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host']
-    list_columns = ['project','name_url','host_url','deploy','clear','monitoring_url','creator','modified']
-    edit_columns = add_columns
+    show_columns = ['name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url','link']
+    add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
+    list_columns = ['project','name_url','host_url','polaris_url','deploy','monitoring_url','creator','modified','clear']
+    edit_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','volume_mount','host',]
     base_order = ('id','desc')
     order_columns = ['id']
+    label_title = '云原生服务'
+    base_filters = [["id", Service_Filter, lambda: []]]  # 设置权限过滤器
 
-    base_filters = [["id", Pipeline_Filter, lambda: []]]  # 设置权限过滤器
 
-
-    edit_form_extra_fields={
+    add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
             query_factory=filter_join_org_project,
             allow_blank=True,
             widget=Select2Widget()
         ),
-        "name":StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=BS3TextFieldWidget(), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
+        "name":StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
         "label":StringField(_(datamodel.obj.lab('label')), description='中文名', widget=BS3TextFieldWidget(),validators=[DataRequired()]),
         "images": StringField(_(datamodel.obj.lab('images')), description='镜像全称', widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "volume_mount":StringField(_(datamodel.obj.lab('volume_mount')),description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录',widget=BS3TextFieldWidget(),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'),
+        "volume_mount":StringField(_(datamodel.obj.lab('volume_mount')),description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录',widget=BS3TextFieldWidget(),default=''),
         "working_dir": StringField(_(datamodel.obj.lab('working_dir')),description='工作目录，容器启动的初始所在目录，不填默认使用Dockerfile内定义的工作目录',widget=BS3TextFieldWidget()),
         "command":StringField(_(datamodel.obj.lab('command')), description='启动命令，支持多行命令',widget=MyBS3TextAreaFieldWidget(rows=3)),
         "node_selector":StringField(_(datamodel.obj.lab('node_selector')), description='运行当前服务所在的机器',widget=BS3TextFieldWidget(),default='cpu=true,serving=true'),
         "resource_memory":StringField(_(datamodel.obj.lab('resource_memory')),default=Service.resource_memory.default.arg,description='内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管路员',widget=BS3TextFieldWidget(),validators=[DataRequired()]),
         "resource_cpu":StringField(_(datamodel.obj.lab('resource_cpu')), default=Service.resource_cpu.default.arg,description='cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管路员',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "min_replicas": StringField(_(datamodel.obj.lab('min_replicas')), default=Service.min_replicas.default.arg,description='最小副本数，用来配置高可用，流量变动自动伸缩',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "max_replicas": StringField(_(datamodel.obj.lab('max_replicas')), default=Service.max_replicas.default.arg,
-                                    description='最大副本数，用来配置高可用，流量变动自动伸缩', widget=BS3TextFieldWidget(),
-                                    validators=[DataRequired()]),
+        "replicas": StringField(_(datamodel.obj.lab('replicas')), default=Service.replicas.default.arg,description='pod副本数，用来配置高可用',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "ports": StringField(_(datamodel.obj.lab('ports')), default=Service.ports.default.arg,description='进程端口号，逗号分隔',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "env": StringField(_(datamodel.obj.lab('env')), default=Service.env.default.arg, description='使用模板的task自动添加的环境变量，支持模板变量。书写格式:每行一个环境变量env_key=env_value',widget=MyBS3TextAreaFieldWidget()),
         "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,
@@ -131,35 +123,48 @@ class Service_ModelView(MyappModelView):
 
     gpu_type = conf.get('GPU_TYPE')
     if gpu_type == 'TENCENT':
-        edit_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')),
+        add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')),
                                                                   default='0,0',
                                                                   description='gpu的资源使用限制(core,memory)，示例:10,2（10%的单卡核数和2*256M的显存），其中core为小于100的整数或100的整数倍，表示占用的单卡的百分比例，memory为整数，表示n*256M的显存',
                                                                   widget=BS3TextFieldWidget())
     if gpu_type == 'NVIDIA':
-        edit_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default=0,
+        add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default=0,
                                                                   description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
                                                                   widget=BS3TextFieldWidget())
 
-    add_form_extra_fields = edit_form_extra_fields
+    edit_form_extra_fields = add_form_extra_fields
+    # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
 
 
     def pre_add(self, item):
         if not item.volume_mount:
             item.volume_mount=item.project.volume_mount
 
+    def delete_old_service(self,service_name,cluster):
+        service_external_name = (service_name + "-external").lower()[:60].strip('-')
+        from myapp.utils.py.py_k8s import K8s
+        k8s = K8s(cluster['KUBECONFIG'])
+        namespace = conf.get('SERVICE_NAMESPACE')
+        k8s.delete_deployment(namespace=namespace, name=service_name)
+        k8s.delete_service(namespace=namespace, name=service_name)
+        k8s.delete_service(namespace=namespace, name=service_external_name)
+        k8s.delete_istio_ingress(namespace=namespace, name=service_name)
+
+
+    def pre_update(self, item):
+        # 修改了名称的话，要把之前的删掉
+        if self.src_item_json.get('name','')!=item.name:
+            self.delete_old_service(self.src_item_json.get('name',''),item.project.cluster)
+            flash('检测到修改名称，旧服务已清理完成', category='warning')
+
+    def pre_delete(self, item):
+        self.delete_old_service(item.name,item.project.cluster)
+        flash('服务已清理完成', category='warning')
 
     @expose('/clear/<service_id>', methods=['POST', "GET"])
     def clear(self, service_id):
         service = db.session.query(Service).filter_by(id=service_id).first()
-        service_external_name = (service.name + "-external")[:60]
-        service_external_name = service_external_name[:-1] if service_external_name[-1] == '-' else service_external_name
-        from myapp.utils.py.py_k8s import K8s
-        k8s = K8s(service.project.cluster['KUBECONFIG'])
-        namespace = conf.get('SERVICE_NAMESPACE')
-        k8s.delete_deployment(namespace=namespace,name=service.name)
-        k8s.delete_service(namespace=namespace,name=service.name)
-        k8s.delete_service(namespace=namespace, name=service_external_name)
-        k8s.delete_istio_ingress(namespace=namespace,name=service.name)
+        self.delete_old_service(service.name,service.project.cluster)
         flash('服务清理完成', category='warning')
         return redirect('/service_modelview/list/')
 
@@ -181,9 +186,9 @@ class Service_ModelView(MyappModelView):
 
         k8s_client.create_deployment(namespace=namespace,
                               name=service.name,
-                              replicas=service.max_replicas,
+                              replicas=service.replicas,
                               labels={"app":service.name,"username":service.created_by.username},
-                              command=['sh','-c',service.command] if service.command else None,
+                              command=['bash','-c',service.command] if service.command else None,
                               args=None,
                               volume_mount=volume_mount,
                               working_dir=service.working_dir,
@@ -217,6 +222,8 @@ class Service_ModelView(MyappModelView):
             host=service.host.replace('http://','').replace('https://','').strip()
             if "/" in host:
                 host = host[:host.index("/")]
+            if ":" in host:
+                host = host[:host.index(":")]
         k8s_client.create_istio_ingress(namespace=namespace,
                            name=service.name,
                            host = host,
@@ -227,8 +234,7 @@ class Service_ModelView(MyappModelView):
         SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',None)
         if SERVICE_EXTERNAL_IP:
             service_ports = [[30000+10*service.id+index,port] for index,port in enumerate(ports)]
-            service_external_name = (service.name + "-external")[:60]
-            service_external_name = service_external_name[:-1] if service_external_name[-1] == '-' else service_external_name
+            service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
                 namespace=namespace,
                 name=service_external_name,
@@ -292,15 +298,7 @@ class Service_ModelView(MyappModelView):
         # # print(crd_json)
         # crd = k8s.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
         # # return crd
-        if int(service.max_replicas)>int(service.min_replicas):
-            k8s_client.create_hpa(
-                namespace=namespace,
-                name=service.name,
-                min_replicas=int(service.min_replicas),
-                max_replicas=int(service.max_replicas),
-                mem_threshold=0.5,
-                cpu_threshold=0.5
-            )
+
 
 
         flash('服务部署完成',category='warning')
@@ -325,7 +323,6 @@ class Service_ModelView(MyappModelView):
         return self.render_template('link.html', data=data)
 
 
-
-appbuilder.add_view(Service_ModelView,"内部服务",icon = 'fa-tasks',category = '服务化')
+appbuilder.add_view(Service_ModelView,"内部服务",icon = 'fa-internet-explorer',category = '服务化')
 
 

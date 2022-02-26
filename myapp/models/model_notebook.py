@@ -59,11 +59,16 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     @property
     def name_url(self):
         if self.ide_type=='theia':
-            url = "/notebook/"+self.namespace + "/" + self.name+"/"
+            url = "/notebook/"+self.namespace + "/" + self.name+"/" + "#"+self.mount
         else:
-            url = "/notebook/"+self.namespace + "/" + self.name+"/lab?"
-        url= url + "#"+self.mount
-        host = "http://"+request.host  # 使用当前域名打开
+            url = "/notebook/"+self.namespace + "/" + self.name+"/lab/tree"+self.mount
+
+        # url= url + "#"+self.mount
+        JUPYTER_DOMAIN = self.project.cluster.get('JUPYTER_DOMAIN',request.host)
+        if JUPYTER_DOMAIN:
+            host = "http://"+JUPYTER_DOMAIN
+        else:
+            host = "http://"+request.host # 使用当前域名打开
         return Markup(f'<a target=_blank href="{host}{url}">{self.name}</a>')
 
     @property

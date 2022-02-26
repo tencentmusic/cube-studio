@@ -40,7 +40,6 @@ from flask import (
 from myapp import security_manager
 import kfp    # 使用自定义的就要把pip安装的删除了
 from werkzeug.datastructures import FileStorage
-from kubernetes import client as k8s_client
 from .base import (
     api,
     BaseMyappView,
@@ -129,7 +128,7 @@ class Repository_ModelView(Repository_ModelView_Base,MyappModelView,DeleteMixin)
     datamodel = SQLAInterface(Repository)
 
 # 添加视图和菜单
-appbuilder.add_view(Repository_ModelView,"仓库",icon = 'fa-shopping-basket',category = '训练',category_icon = 'fa-tasks')
+appbuilder.add_view(Repository_ModelView,"仓库",icon = 'fa-shopping-basket',category = '训练',category_icon = 'fa-sitemap')
 
 # 添加api
 class Repository_ModelView_Api(Repository_ModelView_Base,MyappModelRestApi):
@@ -194,7 +193,7 @@ class Images_ModelView_Base():
 class Images_ModelView(Images_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Images)
 
-appbuilder.add_view(Images_ModelView,"模板镜像",href="/images_modelview/list/?_flt_2_name=",icon = 'fa-file-image-o',category = '训练',category_icon = 'fa-envelope')
+appbuilder.add_view(Images_ModelView,"模板镜像",href="/images_modelview/list/?_flt_2_name=",icon = 'fa-file-image-o',category = '训练')
 
 
 # 添加api

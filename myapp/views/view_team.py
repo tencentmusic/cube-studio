@@ -101,7 +101,7 @@ appbuilder.add_api(Project_User_ModelView_Api)
 
 
 
-# 开发者能看到所有模板，用户只能看到release的模板
+# 获取某类project分组
 class Project_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, value):
@@ -112,7 +112,7 @@ class Project_Filter(MyappFilter):
 
 
 
-# 开发者能看到所有模板，用户只能看到release的模板
+# 获取自己参加的某类project分组
 class Project_Join_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, value):
@@ -121,11 +121,14 @@ class Project_Join_Filter(MyappFilter):
         join_projects_id = security_manager.get_join_projects_id(db.session)
         return query.filter(self.model.id.in_(join_projects_id)).filter(self.model.type==value).order_by(self.model.id.desc())
 
+
+
 # 获取查询自己所在的项目组的project
 def filter_join_org_project():
     query = db.session.query(Project)
-    user_roles = [role.name.lower() for role in list(get_user_roles())]
-    if "admin" in user_roles:
+    # user_roles = [role.name.lower() for role in list(get_user_roles())]
+    # if "admin" in user_roles:
+    if g.user.is_admin():
         return query.filter(Project.type=='org').order_by(Project.id.desc())
 
     # 查询自己拥有的项目

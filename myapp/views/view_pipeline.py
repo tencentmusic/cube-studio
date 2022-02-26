@@ -12,6 +12,7 @@ from sqlalchemy.exc import InvalidRequestError
 # 将model添加成视图，并控制在前端的显示
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 from myapp.models.model_team import Project,Project_User
+from myapp.views.view_team import Project_Join_Filter
 from flask_appbuilder.actions import action
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
 from flask_appbuilder.models.sqla.filters import FilterEqualFunction, FilterStartsWith,FilterEqual,FilterNotEqual
@@ -334,7 +335,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
                     pvc_name = volume.replace('(pvc)','').replace(' ','')
                     temps = re.split('_|\.|/', pvc_name)
                     temps = [temp for temp in temps if temp]
-                    volumn_name = '-'.join(temps)
+                    volumn_name = ('-'.join(temps))[:60].lower().strip('-')
                     ops=ops.add_volume(k8s_client.V1Volume(name=volumn_name,
                                                            persistent_volume_claim=k8s_client.V1PersistentVolumeClaimVolumeSource(claim_name=pvc_name)))\
                         .add_volume_mount(k8s_client.V1VolumeMount(mount_path=os.path.join(mount,task.pipeline.created_by.username), name=volumn_name,sub_path=task.pipeline.created_by.username))
@@ -342,7 +343,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
                     hostpath_name = volume.replace('(hostpath)', '').replace(' ', '')
                     temps = re.split('_|\.|/', hostpath_name)
                     temps = [temp for temp in temps if temp]
-                    volumn_name = '-'.join(temps)
+                    volumn_name = ('-'.join(temps))[:60].lower().strip('-')
 
                     ops = ops.add_volume(k8s_client.V1Volume(name=volumn_name,
                                                              host_path=k8s_client.V1HostPathVolumeSource(path=hostpath_name))) \
@@ -351,7 +352,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
                     configmap_name = volume.replace('(configmap)', '').replace(' ', '')
                     temps = re.split('_|\.|/', configmap_name)
                     temps = [temp for temp in temps if temp]
-                    volumn_name = '-'.join(temps)
+                    volumn_name = ('-'.join(temps))[:60].lower().strip('-')
 
                     ops = ops.add_volume(k8s_client.V1Volume(name=volumn_name,
                                                              config_map=k8s_client.V1ConfigMapVolumeSource(name=configmap_name))) \
@@ -359,7 +360,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
 
                 if "(memory)" in volume:
                     memory_size = volume.replace('(memory)', '').replace(' ', '').lower().replace('g','')
-                    volumn_name = 'memory-%s'%memory_size
+                    volumn_name = ('memory-%s'%memory_size)[:60].lower().strip('-')
                     ops = ops.add_volume(k8s_client.V1Volume(name=volumn_name,empty_dir=k8s_client.V1EmptyDirVolumeSource(medium='Memory',size_limit='%sGi'%memory_size)))\
                         .add_volume_mount(k8s_client.V1VolumeMount(mount_path=mount, name=volumn_name))
 
@@ -464,17 +465,8 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
                 ops.set_cpu_limit(resource_cpu.split("~")[1])
 
         if resource_gpu:
-            gpu_type = conf.get('GPU_TYPE','NVIDIA')
-            if gpu_type=='NVIDIA':
-                if resource_gpu and core.get_gpu(resource_gpu)[0]>0:
-                    ops.set_gpu_limit(core.get_gpu(resource_gpu)[0])
-            if gpu_type=='TENCENT':
-                gpu_core,gpu_mem = core.get_gpu(resource_gpu)
-                if gpu_core and gpu_mem:
-                    ops.add_resource_request('tencent.com/vcuda-core',str(gpu_core))
-                    ops.add_resource_request('tencent.com/vcuda-memory', str(4*gpu_mem))
-                    ops.add_resource_limit('tencent.com/vcuda-core',str(gpu_core))
-                    ops.add_resource_limit("tencent.com/vcuda-memory", str(4*gpu_mem))
+            if resource_gpu and core.get_gpu(resource_gpu)[0]>0:
+                ops.set_gpu_limit(core.get_gpu(resource_gpu)[0])
 
 
         all_ops[task_name]=ops
@@ -824,7 +816,7 @@ class Pipeline_ModelView_Base():
 
     # @pysnooper.snoop()
     def pre_add(self, item):
-        item.name = item.name.replace('_', '-')[0:54].lower()
+        item.name = item.name.replace('_', '-')[0:54].lower().strip('-')
         # item.alert_status = ','.join(item.alert_status)
         self.pipeline_args_check(item)
         item.create_datetime=datetime.datetime.now()
@@ -1029,6 +1021,9 @@ class Pipeline_ModelView_Base():
     def run_pipeline(self,pipeline_id):
         print(pipeline_id)
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
+
+        pipeline.delete_old_task()
+
         time.sleep(1)
         # if pipeline.changed_on+datetime.timedelta(seconds=5)>datetime.datetime.now():
         #     flash("发起运行实例，太过频繁，5s后重试",category='warning')
@@ -1106,6 +1101,7 @@ class Pipeline_ModelView_Base():
 
         pipeline.dag_json = pipeline.fix_dag_json()
         # pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)
+        pipeline.expand = json.dumps(pipeline.fix_position(), indent=4, ensure_ascii=False)
 
         # db_tasks = pipeline.get_tasks(db.session)
         # if db_tasks:
@@ -1136,7 +1132,7 @@ class Pipeline_ModelView_Base():
             data = {
                 "url": pipeline.project.cluster.get('PIPELINE_URL') + "runs/details/" + pipeline.run_id,
                 "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
-                "delay":1000,
+                "delay":500,
                 "loading": True
             }
             # 返回模板
@@ -1154,10 +1150,10 @@ class Pipeline_ModelView_Base():
     def web_monitoring(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
         if pipeline.run_id:
-            url = pipeline.project.cluster.get('GRAFANA_TASK','') + pipeline.name
+            url = pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
             return redirect(url)
             # data = {
-            #     "url": pipeline.project.cluster.get('GRAFANA_TASK','') + pipeline.name,
+            #     "url": pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH') + pipeline.name,
             #     # "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
             #     "delay":1000,
             #     "loading": True
@@ -1178,7 +1174,7 @@ class Pipeline_ModelView_Base():
         data = {
             "url": pipeline.project.cluster.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (conf.get('PIPELINE_NAMESPACE'), pipeline.name.replace('_', '-')),
             "target":"div.kd-chrome-container.kd-bg-background",
-            "delay":1000,
+            "delay":500,
             "loading": True
         }
         # 返回模板
@@ -1265,7 +1261,6 @@ class Pipeline_ModelView(Pipeline_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Pipeline)
     # base_order = ("changed_on", "desc")
     # order_columns = ['changed_on']
-
 
 appbuilder.add_view(Pipeline_ModelView,"任务流",href="/pipeline_modelview/list/?_flt_0_created_by=",icon = 'fa-sitemap',category = '训练')
 

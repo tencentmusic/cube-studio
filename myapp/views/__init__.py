@@ -13,6 +13,8 @@ from . import view_workflow
 # from . import view_katib
 from . import view_nni
 from . import view_serving
+from . import view_inferenceserving
+from . import view_service_pipeline
 # from . import view_kfserving
 from . import view_link
 from .log import views 

@@ -51,7 +51,6 @@ conf = app.config
 
 
 @celery_app.task(name="task.check_docker_commit", bind=True)  # , soft_time_limit=15
-@pysnooper.snoop()
 def check_docker_commit(task,docker_id):  # 在页面中测试时会自定接收者和id
     with session_scope(nullpool=True) as dbsession:
         try:

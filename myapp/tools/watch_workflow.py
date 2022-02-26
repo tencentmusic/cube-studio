@@ -5,7 +5,6 @@ import asyncio
 from kubernetes import client as k8s_client
 from kubernetes import config as k8s_config
 from kubernetes import watch
-import kubernetes
 from os import path
 import json
 import requests
@@ -41,7 +40,7 @@ else:
         exit(1)
 
 # 推送微信消息
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def deliver_message(workflow,dbsession):
     if not workflow:
         return
@@ -88,7 +87,7 @@ def deliver_message(workflow,dbsession):
 
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_has_push(crd,dbsession):
     pipeline_id = crd['labels'].get('pipeline-id', '')
     pipeline = dbsession.query(Pipeline).filter_by(id=int(pipeline_id)).first()
@@ -148,7 +147,7 @@ def check_has_push(crd,dbsession):
         return False,workflow
 
 # 推送修改通知
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def push_resource_rec(workflow,dbsession):
     pipeline_id = json.loads(workflow.labels).get('pipeline-id', '')
     pipeline = dbsession.query(Pipeline).filter_by(id=int(pipeline_id)).first()
@@ -192,7 +191,7 @@ def push_resource_rec(workflow,dbsession):
 
 
 # 推送训练耗时通知
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def push_task_time(workflow,dbsession):
     if not workflow:
         return
@@ -267,7 +266,7 @@ def push_task_time(workflow,dbsession):
 
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def save_monitoring(workflow,dbsession):
     try:
         if workflow.status=='Succeeded':
@@ -324,7 +323,7 @@ def save_monitoring(workflow,dbsession):
 
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def save_history(workflow,dbsession):
     info_json = json.loads(workflow.info_json)
     if info_json['has_push']:
@@ -335,7 +334,7 @@ def save_history(workflow,dbsession):
     workflow.info_json = json.dumps(info_json, indent=4, ensure_ascii=False)
     dbsession.commit()
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_crd_exist(group,version,namespace,plural,name):
     client = k8s_client.CustomObjectsApi()
     exist_crd = client.get_namespaced_custom_object(group,version,namespace,plural,name)
@@ -345,7 +344,7 @@ def check_crd_exist(group,version,namespace,plural,name):
 
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def deal_event(event,workflow_info,namespace):
     with session_scope(nullpool=True) as dbsession:
         try:

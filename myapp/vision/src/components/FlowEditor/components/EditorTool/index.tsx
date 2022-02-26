@@ -30,8 +30,8 @@ const EditorTool: React.FC = () => {
   const selectedElements = useAppSelector(selectSelected);
   const commandItem: ICommandBarItemProps[] = [
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'expand',
       iconProps: {
         iconName: 'Library',
@@ -44,8 +44,8 @@ const EditorTool: React.FC = () => {
       },
     },
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'save',
       iconProps: {
         iconName: 'save',
@@ -59,14 +59,14 @@ const EditorTool: React.FC = () => {
       },
     },
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'example',
       iconProps: {
         iconName: 'FastForward',
         styles: style.commonIcon,
       },
-      text: '运行实例',
+      text: '调度实例',
       onClick: () => {
         if (pipelineId) {
           window.open(
@@ -76,8 +76,8 @@ const EditorTool: React.FC = () => {
       },
     },
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'log',
       iconProps: {
         iconName: 'ComplianceAudit',
@@ -91,8 +91,8 @@ const EditorTool: React.FC = () => {
       },
     },
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'docker',
       iconProps: {
         iconName: 'WebAppBuilderFragment',
@@ -106,14 +106,14 @@ const EditorTool: React.FC = () => {
       },
     },
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'timer',
       iconProps: {
         iconName: 'TimeEntry',
         styles: style.commonIcon,
       },
-      text: '定时调度',
+      text: '定时记录',
       onClick: () => {
         if (pipeline?.name) {
           window.open(`${window.location.origin}/runhistory_modelview/list/?_flt_0_pipeline=${pipelineId}`);
@@ -121,8 +121,8 @@ const EditorTool: React.FC = () => {
       },
     },
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'delete',
       iconProps: {
         iconName: 'Delete',
@@ -150,8 +150,8 @@ const EditorTool: React.FC = () => {
       },
     },
     {
-      buttonStyles: style.commonButton,
-      iconOnly: true,
+      // buttonStyles: style.commonButton,
+      // iconOnly: true,
       key: 'monitor',
       iconProps: {
         iconName: 'NetworkTower',
@@ -196,18 +196,18 @@ const EditorTool: React.FC = () => {
             {isEditing ? '未保存' : '已保存'}
           </>
         ) : (
-          <>
-            <Spinner
-              styles={{
-                root: {
-                  marginRight: 5,
-                },
-              }}
-              size={SpinnerSize.small}
-            ></Spinner>
+            <>
+              <Spinner
+                styles={{
+                  root: {
+                    marginRight: 5,
+                  },
+                }}
+                size={SpinnerSize.small}
+              ></Spinner>
             保存中
           </>
-        )}
+          )}
       </Stack>
     </Item>
   );

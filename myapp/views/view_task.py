@@ -39,11 +39,6 @@ from myapp.utils.py import py_k8s
 from flask_wtf.file import FileField
 import shlex
 import re,copy
-from kubernetes.client.models import (
-    V1Container, V1EnvVar, V1EnvFromSource, V1SecurityContext, V1Probe,
-    V1ResourceRequirements, V1VolumeDevice, V1VolumeMount, V1ContainerPort,
-    V1Lifecycle, V1Volume,V1SecurityContext
-)
 from .baseApi import (
     MyappModelRestApi
 )
@@ -64,7 +59,6 @@ from flask import (
 from myapp import security_manager
 import kfp    # 使用自定义的就要把pip安装的删除了
 from werkzeug.datastructures import FileStorage
-from kubernetes import client as k8s_client
 from .base import (
     api,
     BaseMyappView,
@@ -190,15 +184,8 @@ class Task_ModelView_Base():
 
     }
 
-    gpu_type = conf.get('GPU_TYPE')
-    if gpu_type == 'TENCENT':
-        add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')),
-                                                                  default='0,0',
-                                                                  description='gpu的资源使用限制(core,memory)，示例:10,2（10%的单卡核数和2*256M的显存），其中core为小于100的整数或100的整数倍，表示占用的单卡的百分比例，memory为整数，表示n*256M的显存',
-                                                                  widget=BS3TextFieldWidget())
-    if gpu_type == 'NVIDIA':
-        add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default=0,
-                                                                  description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
+    add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default=0,
+                                                                  description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
                                                                   widget=BS3TextFieldWidget())
 
     edit_form_extra_fields = add_form_extra_fields
@@ -509,8 +496,7 @@ class Task_ModelView_Base():
         k8s_client = K8s(task.pipeline.project.cluster['KUBECONFIG'])
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name="debug-"+task.pipeline.name.replace('_','-')+"-"+task.name.replace('_','-')
-        pod_name=pod_name[:60]
-        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
+        pod_name=pod_name.lower()[:60].strip('-')
         pod = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
         # print(pod)
         if pod:
@@ -553,29 +539,8 @@ class Task_ModelView_Base():
             return redirect('/pipeline_modelview/web/%s'%str(task.pipeline.id))
 
 
-        return redirect("/task_modelview/web/debug/%s/%s/%s"%(task.pipeline.project.cluster['NAME'],namespace,pod_name))
+        return redirect("/myapp/web/debug/%s/%s/%s/%s"%(task.pipeline.project.cluster['NAME'],namespace,pod_name,pod_name))
 
-
-    @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>", methods=["GET", "POST"])
-    # @pysnooper.snoop()
-    def web_debug(self,cluster_name,namespace,pod_name):
-        cluster=conf.get('CLUSTERS',{})
-        if cluster_name in cluster:
-            pod_url = cluster[cluster_name].get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,pod_name, namespace)
-        else:
-            pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, pod_name, namespace)
-        print(pod_url)
-        data = {
-            "url": pod_url,
-            "target":'div.kd-scroll-container', #  'div.kd-scroll-container.ng-star-inserted',
-            "delay": 2000,
-            "loading": True
-        }
-        # 返回模板
-        if cluster_name==conf.get('ENVIRONMENT'):
-            return self.render_template('link.html', data=data)
-        else:
-            return self.render_template('external_link.html', data=data)
 
 
     @expose("/run/<task_id>", methods=["GET", "POST"])
@@ -586,8 +551,7 @@ class Task_ModelView_Base():
         k8s_client = K8s(task.pipeline.project.cluster['KUBECONFIG'])
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
-        pod_name = pod_name[:60]
-        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
+        pod_name = pod_name.lower()[:60].strip('-')
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -684,8 +648,7 @@ class Task_ModelView_Base():
 
         # 删除运行时容器
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
-        pod_name = pod_name[:60]
-        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
+        pod_name = pod_name.lower()[:60].strip('-')
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -702,8 +665,7 @@ class Task_ModelView_Base():
 
         # 删除debug容器
         pod_name = "debug-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
-        pod_name = pod_name[:60]
-        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
+        pod_name = pod_name.lower()[:60].strip('-')
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -728,8 +690,7 @@ class Task_ModelView_Base():
         k8s = K8s(task.pipeline.project.cluster['KUBECONFIG'])
         namespace = conf.get('PIPELINE_NAMESPACE')
         running_pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
-        pod_name = running_pod_name[:60]
-        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
+        pod_name = running_pod_name.lower()[:60].strip('-')
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         if pod:
             pod = pod[0]

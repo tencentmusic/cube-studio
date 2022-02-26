@@ -366,6 +366,8 @@ class KfService_ModelView(MyappModelView):
     #     url = url_for(f"{self.endpoint}.list")
     #     return redirect(url)
 
-
 appbuilder.add_view(KfService_ModelView,"kfserving",icon = 'fa-tasks',category = '服务化')
+
+
+
 

@@ -41,7 +41,6 @@ from flask import (
 from myapp import security_manager
 import kfp    # 使用自定义的就要把pip安装的删除了
 from werkzeug.datastructures import FileStorage
-from kubernetes import client as k8s_client
 from .base import (
     api,
     BaseMyappView,
@@ -98,7 +97,7 @@ class Docker_ModelView_Base():
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields=add_form_query_rel_fields
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def pre_add_get(self,docker=None):
 
         self.add_form_extra_fields['describe'] = StringField(
@@ -111,7 +110,7 @@ class Docker_ModelView_Base():
 
         self.add_form_extra_fields['target_image']=StringField(
             _(self.datamodel.obj.lab('target_image')),
-            default=conf.get('REPOSITORY_ORG')+g.user.username+":",
+            default=conf.get('REPOSITORY_ORG')+g.user.username+":xx",
             description="目标镜像名，必须为%s%s:xxx"%(conf.get('REPOSITORY_ORG'),g.user.username),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(),Regexp("^%s%s:"%(conf.get('REPOSITORY_ORG'),g.user.username))]
@@ -149,7 +148,7 @@ class Docker_ModelView_Base():
 
     # @event_logger.log_this
     @expose("/debug/<docker_id>", methods=["GET", "POST"])
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def debug(self,docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
@@ -215,7 +214,7 @@ class Docker_ModelView_Base():
 
     # @event_logger.log_this
     @expose("/delete_pod/<docker_id>", methods=["GET", "POST"])
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def delete_pod(self,docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
@@ -253,7 +252,7 @@ class Docker_ModelView_Base():
 
     # @event_logger.log_this
     @expose("/save/<docker_id>", methods=["GET", "POST"])
-    @pysnooper.snoop(watch_explode='status')
+    # @pysnooper.snoop(watch_explode='status')
     def save(self,docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s

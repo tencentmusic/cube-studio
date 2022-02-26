@@ -5,7 +5,6 @@ import asyncio
 from kubernetes import client as k8s_client
 from kubernetes import config as k8s_config
 from kubernetes import watch
-import kubernetes
 from os import path
 import json
 import requests

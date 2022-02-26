@@ -76,6 +76,8 @@ const Ajax = {
           resolve(response.data);
         })
         .catch(err => {
+          console.log(err, "---777777777777");
+
           this._errHandle(err);
           reject(err);
         });

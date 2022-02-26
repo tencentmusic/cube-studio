@@ -105,6 +105,11 @@ const ModuleTree: React.FC = () => {
               role="search"
               className={style.searchBoxStyle}
               onChange={debounce((event, newValue) => {
+                if (!newValue) {
+                  setShowSearch(false);
+                  return;
+                }
+                console.log(newValue);
                 const temp = new Map();
 
                 nodeMap.forEach((value, key) => {
@@ -112,7 +117,7 @@ const ModuleTree: React.FC = () => {
 
                   if (children.length > 0) {
                     children.forEach((element: any) => {
-                      if (element.name.indexOf(newValue) > -1 || element.describe.indexOf(newValue) > -1) {
+                      if (element?.name?.indexOf(newValue) > -1 || element?.describe?.indexOf(newValue) > -1) {
                         if (temp.has(key)) {
                           temp.set(key, temp.get(key).concat(element));
                         } else {
@@ -124,7 +129,7 @@ const ModuleTree: React.FC = () => {
                 });
                 setSearchResult(temp);
                 setShowSearch(true);
-              }, 1000)}
+              }, 300)}
               onBlur={() => {
                 setTimeout(() => {
                   setShowSearch(false);
@@ -140,6 +145,17 @@ const ModuleTree: React.FC = () => {
               target={`.ms-SearchBox`}
             >
               <Stack className={style.searchListStyle}>
+                {Array.from(searchResult.keys()).length === 0 ? (
+                  <div
+                    style={{
+                      textAlign: 'center',
+                    }}
+                  >
+                    暂无匹配
+                  </div>
+                ) : (
+                  ''
+                )}
                 {Array.from(searchResult.keys()).map((key: any) => {
                   const currentRes = searchResult.get(key);
 

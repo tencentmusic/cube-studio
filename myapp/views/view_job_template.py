@@ -291,8 +291,7 @@ class Job_Template_ModelView_Base():
         k8s = K8s()
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "venus-" + run_id.replace('_', '-')
-        pod_name = pod_name[:60]
-        pod_name = pod_name[:-1] if pod_name[-1]=='-' else pod_name
+        pod_name = pod_name.lower()[:60].strip('-')
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:
@@ -402,6 +401,8 @@ class Job_Template_ModelView_Base():
         return response
 
 
+
+
     @expose("/listen", methods=["POST"])
     def listen(self):
         request_data = request.json
@@ -415,8 +416,7 @@ class Job_Template_ModelView_Base():
         k8s = K8s()
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "venus-" + run_id.replace('_', '-')
-        pod_name = pod_name[:60]
-        pod_name = pod_name[:-1] if pod_name[-1] == '-' else pod_name
+        pod_name = pod_name.lower()[:60].strip('-')
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         # print(pod)
         if pod:

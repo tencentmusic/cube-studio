@@ -62,7 +62,7 @@ model_map = {
 }
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def delete_old_crd(object_info):
     timeout = int(object_info.get('timeout', 60 * 60 * 24 * 3))
     clusters = conf.get('CLUSTERS',{})
@@ -352,7 +352,7 @@ def delete_debug_docker(task):
                     k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace=pipeline_namespace,run_id=run_id)
                     k8s_client.delete_pods(namespace=pipeline_namespace, labels={"run-id": run_id})
 
-        push_message(conf.get('ADMIN_USER', '').split(','), 'notebook清理完成')
+        push_message(conf.get('ADMIN_USER', '').split(','), 'debug pod 清理完毕')
 
 
 # 推送微信消息
@@ -429,7 +429,6 @@ def next_schedules(cron_time, start_at, stop_at, resolution=0):
 
 # 产生定时任务各个时间点的任务配置
 @celery_app.task(name="task.make_timerun_config", bind=True)
-@pysnooper.snoop()
 def make_timerun_config(task):
     print('============= begin make timerun config')
     # 先产生所有要产生的任务。可能也会产生直接的任务。
@@ -453,11 +452,11 @@ def make_timerun_config(task):
 
                 stop_at = datetime.datetime.now() + datetime.timedelta(seconds=300)   # 下一个调度时间点，强制5分钟调度一次。这之前的 任务，该调度的都发起或者延迟发起
 
-                print('begin make timerun config %s'%pipeline.name)
+                # print('begin make timerun config %s'%pipeline.name)
                 # 计算start_at和stop_at之间，每一个任务的调度时间，并保障最小周期不超过设定的resolution。
                 try:
                     for eta in next_schedules(pipeline.cron_time, start_at, stop_at, resolution=resolution):  #
-                        print('执行时间点', eta)
+                        # print('执行时间点', eta)
                         execution_date = eta.strftime('%Y-%m-%d %H:%M:%S')
                         if execution_date>pipeline.cronjob_start_time:
                             # 要检查是否重复添加记录了
@@ -503,9 +502,9 @@ def make_timerun_config(task):
 
 
 # 计算那些任务可以准备上传了
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def upload_timerun(pipeline_id,stop_time):
-    print('============= begin upload timerun')
+    # print('============= begin upload timerun')
 
     with session_scope(nullpool=True) as dbsession:
         try:
@@ -586,6 +585,9 @@ def upload_timerun(pipeline_id,stop_time):
                             if pass_run and argo_run_id not in latest_run_ids:
                                 k8s_client = K8s(pipeline.project.cluster['KUBECONFIG'])
                                 k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace='pipeline',run_id=run_id)
+                                workflow = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).first()
+                                workflow.status='Deleted'
+                                dbsession.commit()
 
                     # 如果有新的还没运行的，就运行
                     for timerun in timeruns:
@@ -627,7 +629,6 @@ def upload_timerun(pipeline_id,stop_time):
 
 # 真正去做上传动作。
 @celery_app.task(name="task.upload_workflow", bind=True)
-@pysnooper.snoop()
 def upload_workflow(task,timerun_id,pipeline_id):
     with session_scope(nullpool=True) as dbsession:
         try:
@@ -714,7 +715,7 @@ def delete_old_data(task):
 
 
 # 获取训练时长
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def get_run_time(workflow):
     start_time = json.loads(workflow.status_more).get('startedAt','')
     finish_time = json.loads(workflow.status_more).get('finishedAt', '')
@@ -733,7 +734,7 @@ def get_run_time(workflow):
     return round((finish_time-start_time).days*24+(finish_time-start_time).seconds/60/60,2)
 
 # 检查pipeline的运行时长
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_pipeline_time():
 
     with session_scope(nullpool=True) as dbsession:
@@ -774,7 +775,7 @@ def check_pipeline_time():
 
 
 # 检查pipeline的运行资源
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_pipeline_resource():
 
     with session_scope(nullpool=True) as dbsession:
@@ -925,7 +926,14 @@ def watch_gpu(task):
         push_message(conf.get('ADMIN_USER','').split(','),message)
         # push_admin("%s集群共已使用%s张卡"%(cluster_name,int(used_gpu)))
 
+# @celery_app.task(name="task.share_public", bind=True)
+# @pysnooper.snoop()
+# def share_public(task):
+#     pass
 
+
+
+# 各项目组之间相互均衡的方案，一台机器上可能并不能被一个项目组占完，所以可能会跑多个项目组的任务
 @celery_app.task(name="task.adjust_node_resource", bind=True)
 @pysnooper.snoop()
 def adjust_node_resource(task):
@@ -935,26 +943,44 @@ def adjust_node_resource(task):
         k8s_client = K8s(cluster['KUBECONFIG'])
         all_node = k8s_client.get_node()
         all_node_json = {}
-
-        # 获取每台机器的资源申请量
+        pending_pods={}
+        # 获取每台机器的资源容纳量
         for node in all_node:  # list 转dict
             ip = node['hostip']
-            if node['labels'].get('cpu','false')=='true' or node['labels'].get('gpu','false')=='true':
-                all_node_json[ip] = node
-                all_node_json[ip]['used_memory'] = []
-                all_node_json[ip]['used_cpu'] = []
-                all_node_json[ip]['used_gpu'] = []
+            if node['labels'].get('share','true')=='true' and node['labels'].get('train','false')=='true':  # 前提要求机器允许被其他项目组共享
+                if node['labels'].get('cpu','false')=='true' or node['labels'].get('gpu','false')=='true':
+                    all_node_json[ip] = node
+                    all_node_json[ip]['used_memory'] = []
+                    all_node_json[ip]['used_cpu'] = []
+                    all_node_json[ip]['used_gpu'] = []
 
         # print(all_node_json)
         for namespace in ['jupyter', 'pipeline', 'katib', 'service']:
             all_pods = k8s_client.get_pods(namespace=namespace)
             for pod in all_pods:
+                if pod['host_ip'] not in all_node_json:
+                    continue
                 if pod['status'] == 'Running':
                     # print(namespace,pod)
                     all_node_json[pod['host_ip']]['used_memory'].append(pod['memory'])
                     all_node_json[pod['host_ip']]['used_cpu'].append(pod['cpu'])
                     all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
                     # print(all_node_json[pod['host_ip']])
+                # 有挂起等待超过5分钟的情况，立刻划资源过去，并推送通知，因为挂起不一定是因为资源。
+                if pod['status']=='Pending' and (datetime.datetime.now()-pod['start_time']).seconds>300:
+                    # 如果因为资源不足就通过资源调度解决
+                    containers = pod['status_more'].get('conditions', [])
+                    messages = ','.join([container['message'] if container['message'] else '' for container in containers])
+
+                    if 'insufficient' in messages.lower():
+                        pending_pods[pod['name']]={
+                            "namespace":namespace,
+                            "cluster":cluster_name,
+                            "node_selector":pod['node_selector']
+                        }
+                        push_message(conf.get('ADMIN_USER','').split(','),'cluster %s, namespace %s pod %s 因资源问题 pending'%(cluster_name,namespace,pod['name']))
+                    else:
+                        push_message(conf.get('ADMIN_USER', '').split(','),'cluster %s, namespace %s pod %s 因其他问题 pending' % (cluster_name,namespace, pod['name']))
 
         for ip in all_node_json:
             all_node_json[ip]['used_memory'] = int(sum(all_node_json[ip]['used_memory']))
@@ -991,7 +1017,7 @@ def adjust_node_resource(task):
         min_cpu_per = min_gpu_per = 1
         for org in all_org_resource:
             org_resource=all_org_resource[org]
-            if org_resource['cpu_node_num']>3:   # 至少4台机器，才参与调度融合
+            if org_resource['cpu_node_num']>2:   # 至少3台机器，才参与调度融合
                 if org_resource['cpu_req_total']/org_resource['cpu_allocatable_total']>max_cpu_per:
                     max_cpu_per=org_resource['cpu_req_total']/org_resource['cpu_allocatable_total']
                     max_cpu_org=org
@@ -999,7 +1025,7 @@ def adjust_node_resource(task):
                     min_cpu_per=org_resource['cpu_req_total']/org_resource['cpu_allocatable_total']
                     min_cpu_org=org
 
-            if org_resource['gpu_node_num']>3:   # 至少4台机器，才参与调度融合
+            if org_resource['gpu_node_num']>2:   # 至少3台机器，才参与调度融合
                 if org_resource['gpu_req_total']/org_resource['gpu_allocatable_total']>max_gpu_per:
                     max_gpu_per=org_resource['gpu_req_total']/org_resource['gpu_allocatable_total']
                     max_gpu_org=org
@@ -1007,92 +1033,67 @@ def adjust_node_resource(task):
                     min_gpu_per=org_resource['gpu_req_total']/org_resource['gpu_allocatable_total']
                     min_gpu_org=org
 
+        # 获取项目组下面，每台机器的cpu申请量
+        def get_cpu_per_node(org):
+            org_node_cpu_per = {}
+            for ip in all_node_json:
+                if all_node_json[ip]['labels'].get('org', '') == org and all_node_json[ip]['labels'].get('cpu','false') == 'true':
+                    org_node_cpu_per[ip] = all_node_json[ip]['used_cpu'] / all_node_json[ip]['cpu']
 
+            org_node_cpu_per = sorted(org_node_cpu_per.items(), key=lambda x: x[1], reverse=False)  # 从小到大排序
+            return org_node_cpu_per
+
+        # 获取项目组下面，每台机器的gpu申请量
+        def get_gpu_per_node(org):
+            org_node_gpu_per={}
+            for ip in all_node_json:
+                if all_node_json[ip]['labels'].get('org','')==org and all_node_json[ip]['labels'].get('gpu','false')=='true':
+                    org_node_gpu_per[ip]=all_node_json[ip]['used_gpu']/all_node_json[ip]['gpu']
+            org_node_gpu_per = sorted(org_node_gpu_per.items(), key=lambda x: x[1], reverse=False)   # 从小到大排序
+            return org_node_gpu_per
+
+
+        # 如果存在资源问题pending，直接调整
+        if pending_pods:
+            for pod_name in pending_pods:
+                des_org = pending_pods[pod_name]['node_selector'].get('org','public')
+                # 如果缺少cpu
+                if pending_pods[pod_name]['node_selector'].get('cpu','false')=='true' and des_org!=min_cpu_org:
+                    # 直接将申请量最小的集群中申请量最小的cpu机器迁移过去
+                    org_node_cpu_per = get_cpu_per_node(min_cpu_org)
+                    print(org_node_cpu_per)
+                    adjust_node = [node[0] for node in org_node_cpu_per[:1]]  # 每次调整一台机器
+                    push_message(conf.get('ADMIN_USER').split(','), '集群 %s 调整项目组 %s 下 cpu机器 %s 到项目组%s' % (cluster_name, min_cpu_org, ','.join(adjust_node), des_org))
+                    k8s_client.label_node(adjust_node, labels={"org": des_org})
+                    return
+
+                if pending_pods[pod_name]['node_selector'].get('gpu','false')=='true' and des_org!=min_gpu_org:
+                    org_node_gpu_per = get_gpu_per_node(min_gpu_org)
+                    print(org_node_gpu_per)
+                    adjust_node = [node[0] for node in org_node_gpu_per[:1]]  # 每次调整一台机器
+                    push_message(conf.get('ADMIN_USER').split(','), '集群 %s 调整项目组 %s 下 gpu机器 %s 到项目组%s' % (cluster_name, min_gpu_org, ','.join(adjust_node), des_org))
+                    k8s_client.label_node(adjust_node, labels={"org": des_org})
+                    return
+
+        # 不存在资源挂起的情况，保持最大最小集群申请量差异在20%以下
         print(all_org_resource)
         # 如果差别最大的两个不同的资源组，cpu申请率差距在20%，则将申请率最小的资源组中的申请率最小的机器转为到另一个资源组
         print(max_cpu_org,min_cpu_org,max_gpu_org,min_gpu_org)
         if max_cpu_org!=min_cpu_org and max_cpu_per>min_cpu_per+0.2:
-            org_node_cpu_per={}
-            for ip in all_node_json:
-                if all_node_json[ip]['labels'].get('org','')==min_cpu_org and all_node_json[ip]['labels'].get('cpu','false')=='true':
-                    org_node_cpu_per[ip]=all_node_json[ip]['used_cpu']/all_node_json[ip]['cpu']
-            org_node_cpu_per = sorted(org_node_cpu_per.items(), key=lambda x: x[1], reverse=False)   # 从小到大排序
+            org_node_cpu_per = get_cpu_per_node(min_cpu_org)
             print(org_node_cpu_per)
             adjust_node = [node[0] for node in org_node_cpu_per[:1]]   # 每次调整一台机器
             push_message(conf.get('ADMIN_USER').split(','),'集群 %s 调整项目组 %s 下 cpu机器 %s 到项目组%s'%(cluster_name,min_cpu_org,','.join(adjust_node),max_cpu_org))
             k8s_client.label_node(adjust_node,labels={"org":max_cpu_org})
+            return
 
 
         # 将差距最大的两个gpu资源组，进行调配
         if max_gpu_org!=min_gpu_org and max_gpu_per>min_gpu_per+0.2:
-            org_node_gpu_per={}
-            for ip in all_node_json:
-                if all_node_json[ip]['labels'].get('org','')==min_gpu_org and all_node_json[ip]['labels'].get('gpu','false')=='true':
-                    org_node_gpu_per[ip]=all_node_json[ip]['used_gpu']/all_node_json[ip]['gpu']
-            org_node_gpu_per = sorted(org_node_gpu_per.items(), key=lambda x: x[1], reverse=False)   # 从小到大排序
+            org_node_gpu_per = get_gpu_per_node(min_gpu_org)
             print(org_node_gpu_per)
             adjust_node = [node[0] for node in org_node_gpu_per[:1]]  # 每次调整一台机器
             push_message(conf.get('ADMIN_USER').split(','), '集群 %s 调整项目组 %s 下 gpu机器 %s 到项目组%s' % (cluster_name, min_gpu_org, ','.join(adjust_node), max_gpu_org))
             k8s_client.label_node(adjust_node,labels={"org":max_gpu_org})
-
-
-
-
-# 每5分钟做一次均衡，空闲资源每个集群按申请率划分
-#
-# @celery_app.task(name="task.equalizer", bind=True)
-# def equalizer(task):
-#     clusters = conf.get('CLUSTERS', {})
-#     for cluster_name in clusters:
-#         # 获取下面不同项目组的资源
-#
-#         # 获取集群下面的所有机器，如果存在资源占用为空的就直接收回
-#         cluster = clusters[cluster_name]
-#         k8s_client = K8s(cluster['KUBECONFIG'])
-#         k8s_client.get_node(label={'org'})
-#
-#         all_gpu_pods=k8s_client.get_uesd_gpu(namespaces=['pipeline','katib','jupyter','service'])
-#
-#         print(all_gpu_pods)
-#         message = ''
-#         used_gpu = 0
-#         for pod in all_gpu_pods:
-#             used_gpu+=pod['gpu']
-#             message+=pod['namespace']+","+pod['user']+","+pod['name']+","+str(pod['gpu'])+"\n"
-#         print(message)
-#         message+="%s集群共已使用%s张卡"%(cluster_name,int(used_gpu))
-#         push_message(conf.get('ADMIN_USER','').split(','),message)
-#         # push_admin("%s集群共已使用%s张卡"%(cluster_name,int(used_gpu)))
-#
-
-
-
-
-# def aa():
-#     # 删除jupyter
-#     print('begin delete notebook')
-#     object_info = conf.get("CRD_INFO", {}).get('notebook', {})
-#     print(object_info)
-#     timeout = int(object_info.get('timeout', 60 * 60 * 24 * 3))
-#     with session_scope(nullpool=True) as dbsession:
-#         # 删除vscode的pod
-#         try:
-#             alert_time = datetime.datetime.now() - datetime.timedelta(seconds=timeout) + datetime.timedelta(days=1)
-#             notebooks = dbsession.query(Notebook).filter(Notebook.changed_on <= alert_time).all()   # 需要删除或者需要通知续期的notebook
-#             for notebook in notebooks:
-#                 if notebook.changed_on < (datetime.datetime.now() - datetime.timedelta(seconds=timeout) + datetime.timedelta(days=1)):
-#                     message = '您的notebook %s即将过期，如要继续使用，请尽快续期，每次有效期3天\n' % notebook.name
-#                     print(notebook.created_by.username,message)
-#                     push_message([notebook.created_by.username], message)
-#
-#         except Exception as e:
-#             print(e)
-
-
-#
-# if __name__ == '__main__':
-#     delete_tfjob(task=None)
-
-
-
+            return
 

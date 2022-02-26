@@ -4,10 +4,18 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@fluentui/react": "^8.5.1",
     "@reduxjs/toolkit": "^1.5.1",
+    "@typescript-eslint/parser": "^5.10.0",
+    "antd": "4.17.4",
     "axios": "^0.21.1",
+    "babel-plugin-import": "^1.13.3",
     "cookie": "^0.4.1",
+    "customize-cra": "^1.0.0",
+    "eslint-plugin-react": "^7.28.0",
+    "less": "^4.1.2",
+    "less-loader": "^10.2.0",
     "moment": "^2.29.1",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
@@ -20,6 +28,7 @@
   "scripts": {
     "dev": "react-app-rewired start",
     "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "prettier": "prettier --write '**/*.{tsx,ts,less}'"
   },
   "browserslist": {
@@ -42,11 +51,12 @@
     "@types/react-router-dom": "^5.1.7",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
+    "eslint": "^7.32.0",
     "monaco-editor-webpack-plugin": "^4.1.1",
     "prettier": "^2.2.1",
-    "react-app-rewired": "^2.1.8",
-    "react-scripts": "4.0.3",
-    "typescript": "^4.1.2",
+    "react-app-rewired": "^2.1.9",
+    "react-scripts": "^5.0.0",
+    "typescript": "^4.5.4",
     "web-vitals": "^1.0.1",
     "webpack-bundle-analyzer": "^4.4.2"
   },

@@ -1383,7 +1383,7 @@ def check_resource_memory(resource_memory,src_resource_memory=None):
         src_resource_int=0
         if src_resource and 'G' in src_resource:
             src_resource_int = int(float(src_resource.replace('G',''))*1000)
-        if src_resource and 'M' in  src_resource:
+        if src_resource and 'M' in src_resource:
             src_resource_int = int(src_resource.replace('M', ''))
 
         resource_int=0
@@ -1913,21 +1913,25 @@ def checkip(ip):
 
 # @pysnooper.snoop()
 def get_gpu(resource_gpu):
+    gpu_num=0
+    gpu_type = None
     try:
         if resource_gpu:
-            gpu_type = os.environ.get("GPU_TYPE", "NVIDIA")  # TENCENT
-            if gpu_type == 'NVIDIA':
-                num = int(resource_gpu.split(',')[0])
-                num = 2 if num > 2 else num
-                return num, num
-            if gpu_type == 'TENCENT':
-                core = int(resource_gpu.split(',')[0])
-                memory = int(resource_gpu.split(',')[1]) if ',' in resource_gpu else 0
-                return core, memory
+            if '(' in resource_gpu:
+                gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
+                gpu_type = gpu_type[0] if gpu_type else None
+            if '（' in resource_gpu:
+                gpu_type = re.findall(r"（(.+?)）", resource_gpu)
+                gpu_type = gpu_type[0] if gpu_type else None
+
+            resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
+            resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
+            gpu_num = int(resource_gpu)
+
     except Exception as e:
         print(e)
-
-    return 0, 0
+    gpu_type = gpu_type.upper() if gpu_type else None
+    return gpu_num, gpu_type
 
 
 

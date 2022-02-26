@@ -265,62 +265,66 @@ class Workflow_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
 appbuilder.add_api(Workflow_ModelView_Api)
 
 
-appbuilder.add_separator("训练")   # 在指定菜单栏下面的每个子菜单中间添加一个分割线的显示。
 
 
-# list正在运行的tfjob
-class Tfjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
-    label_title = 'tf分布式任务'
-    datamodel = SQLAInterface(Tfjob)
-    crd_name = 'tfjob'
-    list_columns = ['name','pipeline_url','run_instance','namespace_url','create_time','status','username','stop']
 
 
-appbuilder.add_view(Tfjob_ModelView,"TFjob",href="/tfjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
-# 添加api
-class Tfjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
-    label_title = 'tf分布式任务'
-    datamodel = SQLAInterface(Tfjob)
-    route_base = '/tfjob_modelview/api'
-    crd_name = 'tfjob'
-
-appbuilder.add_api(Tfjob_ModelView_Api)
-
-
-# list正在运行的xgb
-class Xgbjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
-    label_title = 'xgb分布式任务'
-    datamodel = SQLAInterface(Xgbjob)
-    crd_name = 'xgbjob'
-
-appbuilder.add_view(Xgbjob_ModelView,"XGBjob",href="/xgbjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
-
-
-# 添加api
-class Xgbjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
-    label_title = 'xgb分布式任务'
-    datamodel = SQLAInterface(Xgbjob)
-    route_base = '/xgbjob_modelview/api'
-    crd_name = 'xgbjob'
-
-appbuilder.add_api(Xgbjob_ModelView_Api)
-
-
-# list正在运行的pytorch
-class Pytorchjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
-    label_title = 'pytorch分布式任务'
-    datamodel = SQLAInterface(Pytorchjob)
-    crd_name = 'pytorchjob'
-
-appbuilder.add_view(Pytorchjob_ModelView,"Pytorchjob",href="/pytorchjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
-
-
-# 添加api
-class Pytorchjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
-    label_title = 'pytorch分布式任务'
-    datamodel = SQLAInterface(Pytorchjob)
-    route_base = '/pytorchjob_modelview/api'
-    crd_name = 'pytorchjob'
-
-appbuilder.add_api(Pytorchjob_ModelView_Api)
+# appbuilder.add_separator("训练")   # 在指定菜单栏下面的每个子菜单中间添加一个分割线的显示。
+#
+#
+# # list正在运行的tfjob
+# class Tfjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
+#     label_title = 'tf分布式任务'
+#     datamodel = SQLAInterface(Tfjob)
+#     crd_name = 'tfjob'
+#     list_columns = ['name','pipeline_url','run_instance','namespace_url','create_time','status','username','stop']
+#
+#
+# appbuilder.add_view(Tfjob_ModelView,"TFjob",href="/tfjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
+# # 添加api
+# class Tfjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
+#     label_title = 'tf分布式任务'
+#     datamodel = SQLAInterface(Tfjob)
+#     route_base = '/tfjob_modelview/api'
+#     crd_name = 'tfjob'
+#
+# appbuilder.add_api(Tfjob_ModelView_Api)
+#
+#
+# # list正在运行的xgb
+# class Xgbjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
+#     label_title = 'xgb分布式任务'
+#     datamodel = SQLAInterface(Xgbjob)
+#     crd_name = 'xgbjob'
+#
+# appbuilder.add_view(Xgbjob_ModelView,"XGBjob",href="/xgbjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
+#
+#
+# # 添加api
+# class Xgbjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
+#     label_title = 'xgb分布式任务'
+#     datamodel = SQLAInterface(Xgbjob)
+#     route_base = '/xgbjob_modelview/api'
+#     crd_name = 'xgbjob'
+#
+# appbuilder.add_api(Xgbjob_ModelView_Api)
+#
+#
+# # list正在运行的pytorch
+# class Pytorchjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
+#     label_title = 'pytorch分布式任务'
+#     datamodel = SQLAInterface(Pytorchjob)
+#     crd_name = 'pytorchjob'
+#
+# appbuilder.add_view(Pytorchjob_ModelView,"Pytorchjob",href="/pytorchjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
+#
+#
+# # 添加api
+# class Pytorchjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
+#     label_title = 'pytorch分布式任务'
+#     datamodel = SQLAInterface(Pytorchjob)
+#     route_base = '/pytorchjob_modelview/api'
+#     crd_name = 'pytorchjob'
+#
+# appbuilder.add_api(Pytorchjob_ModelView_Api)
 

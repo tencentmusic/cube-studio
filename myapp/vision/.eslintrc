@@ -6,18 +6,14 @@
     "node": true,
     "es6": true
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:@typescript-eslint/recommended"],
   "globals": {
     "describe": true,
     "beforeEach": true,
     "it": true,
     "expect": true
   },
-  "plugins": ["react"],
+  "plugins": ["react","@typescript-eslint"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
@@ -31,6 +27,7 @@
     "no-alert": "error",
     "no-eval": "error",
     "spaced-comment": ["error", "always"],
+    // "linebreak-style": ["error", "windows"],
     "linebreak-style": ["error", "unix"],
     "react/prop-types": 0,
     "no-console": 0,

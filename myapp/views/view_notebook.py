@@ -50,7 +50,6 @@ from .baseApi import (
 )
 from myapp import security_manager
 from werkzeug.datastructures import FileStorage
-from kubernetes import client as k8s_client
 from .base import (
     api,
     BaseMyappView,
@@ -69,7 +68,6 @@ from .base import (
 from flask_appbuilder import CompactCRUDMixin, expose
 import pysnooper,datetime,time,json
 from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
-from kubernetes.client import V1ObjectMeta
 
 conf = app.config
 
@@ -97,7 +95,7 @@ class Notebook_ModelView_Base():
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Notebook_Filter, lambda: []]]  # 设置权限过滤器
     order_columns = ['id']
-    add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu']
+    add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
     list_columns = ['project','ide_type','name_url','resource','status','renew','reset']
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -180,26 +178,16 @@ class Notebook_ModelView_Base():
             validators=[DataRequired()]
         )
 
+        self.add_form_extra_fields['resource_gpu'] = StringField(
+            _(self.datamodel.obj.lab('resource_gpu')),
+            default='0',
+            description='gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
+            widget=BS3TextFieldWidget(),
+            # choices=conf.get('GPU_CHOICES', [[]]),
+            validators=[DataRequired()]
+        )
 
-
-        gpu_type = conf.get("GPU_TYPE", "NVIDIA")  # TENCENT
-        if gpu_type=='NVIDIA':
-            self.add_form_extra_fields['resource_gpu'] = StringField(
-                _(self.datamodel.obj.lab('resource_gpu')),
-                default='0',
-                description='gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
-                widget=BS3TextFieldWidget(),
-                validators=[DataRequired()]
-            )
-        if gpu_type=='TENCENT':
-            self.add_form_extra_fields['resource_gpu'] = StringField(
-                _(self.datamodel.obj.lab('resource_gpu')),
-                default='0,0',
-                description='gpu的资源使用限制(core,memory)，示例:10,2（10%的单卡核数和2G的显存,最大100,13），其中core为小于100的整数或100的整数倍，表示占用的单卡的百分比例，memory为整数，表示n(G)的显存', widget=BS3TextFieldWidget(),
-                validators=[DataRequired()]
-            )
         columns = ['name','describe','images','resource_memory','resource_cpu','resource_gpu']
-
 
         self.add_columns = ['project']+columns   # 添加的时候没有挂载配置，使用项目中的挂载配置
 
@@ -228,7 +216,7 @@ class Notebook_ModelView_Base():
         else:
             item.ide_type = 'jupyter'
 
-        if not item.volume_mount:
+        if not item.id:
             item.volume_mount = item.project.volume_mount
 
     # @pysnooper.snoop(watch_explode=('item'))
@@ -246,7 +234,7 @@ class Notebook_ModelView_Base():
         flash('自动reset 一分钟后生效','warning')
         self.reset_notebook(item)
 
-    @pysnooper.snoop(watch_explode=('item'))
+    # @pysnooper.snoop(watch_explode=('item'))
     def post_update(self, item):
         flash('reset以后配置方可生效', 'warning')
 
@@ -311,19 +299,29 @@ class Notebook_ModelView_Base():
         command=None
         workingDir=None
         volume_mount = notebook.volume_mount
+        if '/dev/shm' not in volume_mount:
+            volume_mount += ',10G(memory):/dev/shm'
         rewrite_url = '/'
+        pre_command = '(nohup sh /init.sh > /notebook_init.log 2>&1 &) ; (nohup sh /mnt/%s/init.sh > /init.log 2>&1 &) ; '%notebook.created_by.username
         if notebook.ide_type=='jupyter':
             rewrite_url = '/notebook/jupyter/%s/' % notebook.name
             workingDir = '/mnt/%s' % notebook.created_by.username
-            command = ["sh", "-c", "jupyter lab --notebook-dir=%s --ip=0.0.0.0 "
+            # command = ["sh", "-c", "%s jupyter lab --notebook-dir=%s --ip=0.0.0.0 "
+            #                         "--no-browser --allow-root --port=%s "
+            #                         "--NotebookApp.token='' --NotebookApp.password='' "
+            #                         "--NotebookApp.allow_origin='*' "
+            #                         "--NotebookApp.base_url=%s" % (pre_command,notebook.mount,port,rewrite_url)]
+
+            command = ["sh", "-c", "%s jupyter lab --notebook-dir=/ --ip=0.0.0.0 "
                                     "--no-browser --allow-root --port=%s "
                                     "--NotebookApp.token='' --NotebookApp.password='' "
                                     "--NotebookApp.allow_origin='*' "
-                                    "--NotebookApp.base_url=%s" % (notebook.mount,port,rewrite_url)]
-            volume_mount +=',2G(memory):/dev/shm'
+                                    "--NotebookApp.base_url=%s" % (pre_command,port,rewrite_url)]
+
 
         elif notebook.ide_type=='theia':
-            command = ["node","/home/theia/src-gen/backend/main.js",  "/home/project","--hostname=0.0.0.0","--port=%s"%port]
+            command = ["bash",'-c','%s node /home/theia/src-gen/backend/main.js /home/project --hostname=0.0.0.0 --port=%s'%(pre_command,port)]
+            # command = ["node","/home/theia/src-gen/backend/main.js",  "/home/project","--hostname=0.0.0.0","--port=%s"%port]
             workingDir = '/home/theia'
         print(command)
         print(workingDir)
@@ -373,6 +371,11 @@ class Notebook_ModelView_Base():
             k8s.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
             time.sleep(1)
 
+
+        host = notebook.project.cluster.get('JUPYTER_DOMAIN',request.host)
+        if not host:
+            host=request.host
+
         crd_json = {
             "apiVersion": "networking.istio.io/v1alpha3",
             "kind": "VirtualService",
@@ -385,7 +388,7 @@ class Notebook_ModelView_Base():
                     "kubeflow/kubeflow-gateway"
                 ],
                 "hosts": [
-                   "*" if core.checkip(request.host) else request.host
+                   "*" if core.checkip(host) else host
                 ],
                 "http": [
                     {
@@ -422,14 +425,17 @@ class Notebook_ModelView_Base():
     # @event_logger.log_this
     @expose('/reset/<notebook_id>',methods=['GET','POST'])
     def reset(self,notebook_id):
-        notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
 
+        notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
         try:
             notebook_crd = self.reset_notebook(notebook)
             flash('已重置，Running状态后可进入。注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。','warning')
         except Exception as e:
             flash('重置失败，稍后重试。%s'%str(e), 'warning')
-        return redirect(self.check_redirect_list_url)
+
+        self.update_redirect()
+        return redirect(self.get_redirect())
+        # return redirect(self.check_redirect_list_url)
 
     # @event_logger.log_this
     @expose('/renew/<notebook_id>',methods=['GET','POST'])
@@ -437,7 +443,8 @@ class Notebook_ModelView_Base():
         notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
         notebook.changed_on=datetime.datetime.now()
         db.session.commit()
-        return redirect(self.check_redirect_list_url)
+        self.update_redirect()
+        return redirect(self.get_redirect())
 
     # 基础批量删除
     # @pysnooper.snoop()
@@ -501,7 +508,7 @@ class Notebook_ModelView_Base():
 class Notebook_ModelView(Notebook_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Notebook)
 # 添加视图和菜单
-appbuilder.add_view(Notebook_ModelView,"notebook",href="/notebook_modelview/list/?_flt_0_created_by=",icon = 'fa-shopping-basket',category = '在线开发',category_icon = 'fa-glass')
+appbuilder.add_view(Notebook_ModelView,"notebook",href="/notebook_modelview/list/?_flt_0_created_by=",icon = 'fa-file-code-o',category = '在线开发',category_icon = 'fa-code')
 
 
 # 添加api

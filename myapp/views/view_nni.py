@@ -51,7 +51,6 @@ from .baseApi import (
 from myapp import security_manager
 
 from werkzeug.datastructures import FileStorage
-from kubernetes import client as k8s_client
 from .base import (
     api,
     BaseMyappView,
@@ -283,7 +282,6 @@ class NNI_ModelView_Base():
         validators=[DataRequired()]
     )
 
-
     @pysnooper.snoop()
     def set_column(self, nni=None):
         # 对编辑进行处理
@@ -311,7 +309,6 @@ class NNI_ModelView_Base():
                 choices=job_type_choices,
                 validators=[DataRequired()]
             )
-
 
         self.edit_form_extra_fields['tf_worker_num'] = IntegerField(
             _(self.datamodel.obj.lab('tf_worker_num')),
@@ -517,6 +514,9 @@ class NNI_ModelView_Base():
 
 
 
+        host = nni.project.cluster.get('NNI_DOMAIN',request.host)
+        if not host:
+            host=request.host
 
         vs_json = {
             "apiVersion": "networking.istio.io/v1alpha3",
@@ -530,7 +530,7 @@ class NNI_ModelView_Base():
                     "kubeflow/kubeflow-gateway"
                 ],
                 "hosts": [
-                    "*" if core.checkip(request.host) else request.host
+                    "*" if core.checkip(host) else host
                 ],
                 "http": [
                     {
@@ -845,9 +845,10 @@ class NNI_ModelView(NNI_ModelView_Base,MyappModelView):
     conv = GeneralModelConverter(datamodel)
 
 
+appbuilder.add_separator("训练")   # 在指定菜单栏下面的每个子菜单中间添加一个分割线的显示。
 # 添加视图和菜单
-appbuilder.add_view(NNI_ModelView,"nni超参搜索",icon = 'fa-shopping-basket',category = '超参搜索',category_icon = 'fa-glass')
-
+# appbuilder.add_view(NNI_ModelView,"nni超参搜索",icon = 'fa-shopping-basket',category = '超参搜索',category_icon = 'fa-share-alt')
+appbuilder.add_view(NNI_ModelView,"nni超参搜索",icon = 'fa-shopping-basket',category = '训练')
 
 # 添加api
 class NNI_ModelView_Api(NNI_ModelView_Base,MyappModelRestApi):

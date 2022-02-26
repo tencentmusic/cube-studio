@@ -75,6 +75,7 @@ const EditorAce: React.FC = () => {
                 setIsError(false);
                 setCurrent(value);
               }}
+              height={500}
               options={{
                 renderValidationDecorations: 'on',
                 automaticLayout: true,
