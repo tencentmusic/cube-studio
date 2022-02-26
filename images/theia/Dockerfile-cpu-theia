@@ -1,5 +1,7 @@
 ARG NODE_VERSION=12.18.3
 
+# docker build -t ai.tencentmusic.com/tme-public/theia-python -f Dockerfile-cpu-theia .
+
 FROM node:${NODE_VERSION}
 ARG version=latest
 WORKDIR /home/theia

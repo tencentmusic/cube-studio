@@ -1,12 +1,6 @@
 # TME Cube Studio
 TME Cube Studio是由TME研发的集成数据处理、分布式计算、机器学习模型训练等多项功能的容器化算法平台, 帮助算法使用者提升算法迭代效率和共享度. Cube Studio包含多种组件, 支持TensorFlow、PyTorch等多种框架的分布式训练，自定义Pipeline构建等功能. 
 
-# 部署平台与组件
-如何在数据中心部署平台请参考平台部署流程, 平台完成部署之后如下:
-![image](https://user-images.githubusercontent.com/1631662/144393089-31511cb7-abac-43b3-b492-081d5b7e8d7b.png)
-
-之后用户可以自主部署组件, 可以部署使用https://github.com/tencentmusic/cube-job-template 中预先开发的组件, 或者自己制作镜像在平台上进行调用.
-
 # 开源共建
 有意向进行开源共建的同学请微信添加767065521并备注"Cube Studio开源共建"进入微信群.
 
@@ -31,6 +25,8 @@ TME Cube Studio是由TME研发的集成数据处理、分布式计算、机器�
 
 本平台依赖k8s/kubeflow/prometheus/efk相关组件，请优先参考install/kubenetes/readme.md 部署依赖组件。
 
+平台完成部署之后如下:
+![image](./docs/example/pic/pipeline.png)
 
 # 本地调试
 
