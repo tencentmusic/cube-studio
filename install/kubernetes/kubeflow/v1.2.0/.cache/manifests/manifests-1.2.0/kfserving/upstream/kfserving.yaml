@@ -4434,9 +4434,9 @@ spec:
           name: webhook-server
           protocol: TCP
         resources:
-          limits:
-            cpu: 100m
-            memory: 300Mi
+#          limits:
+#            cpu: 100m
+#            memory: 300Mi
           requests:
             cpu: 100m
             memory: 200Mi

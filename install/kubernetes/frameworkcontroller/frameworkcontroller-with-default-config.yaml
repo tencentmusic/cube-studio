@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: frameworkcontroller
-  namespace: katib
+  namespace: kubeflow
 spec:
   serviceName: frameworkcontroller
   selector:
@@ -14,6 +14,15 @@ spec:
       labels:
         app: frameworkcontroller
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubeflow
+                    operator: In
+                    values:
+                      - 'true'
       volumes:
       - name: tz-config
         hostPath:
@@ -22,6 +31,9 @@ spec:
       containers:
       - name: frameworkcontroller
         image: frameworkcontroller/frameworkcontroller
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: tz-config
           mountPath: /etc/localtime
+
+

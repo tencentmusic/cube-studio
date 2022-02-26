@@ -261,6 +261,15 @@ spec:
       labels:
         app: kube-batch
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubeflow
+                    operator: In
+                    values:
+                      - 'true'
       serviceAccountName: kube-batch
       containers:
       - name: kube-batch

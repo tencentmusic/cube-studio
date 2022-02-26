@@ -38,7 +38,7 @@ spec:
         - --web.console.libraries=/etc/prometheus/console-libraries
         - --config.file=/etc/prometheus/config_out/prometheus.env.yaml
         - --storage.tsdb.path=/prometheus
-        - --storage.tsdb.retention=24h
+        - --storage.tsdb.retention=7d
         - --web.enable-lifecycle
         - --storage.tsdb.no-lockfile
         - --web.route-prefix=/
@@ -97,10 +97,10 @@ spec:
         image: quay.io/coreos/prometheus-config-reloader:v0.22.0
         imagePullPolicy: IfNotPresent
         name: prometheus-config-reloader
-        resources:
-          limits:
-            cpu: 100m
-            memory: 500Mi
+#        resources:
+#          limits:
+#            cpu: 100m
+#            memory: 500Mi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -114,10 +114,10 @@ spec:
         image: quay.io/coreos/configmap-reload:v0.0.1
         imagePullPolicy: IfNotPresent
         name: rules-configmap-reloader
-        resources:
-          limits:
-            cpu: 50m
-            memory: 100Mi
+#        resources:
+#          limits:
+#            cpu: 50m
+#            memory: 100Mi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:

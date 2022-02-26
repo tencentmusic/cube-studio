@@ -819,6 +819,4 @@ metadata:
     controller: true
     kind: Prometheus
     name: kube-prometheus
-    uid: a9f3ecd8-e0aa-11e8-88eb-3665111f30ef
   resourceVersion: "2469"
-  selfLink: /api/v1/namespaces/monitoring/configmaps/prometheus-kube-prometheus-rulefiles

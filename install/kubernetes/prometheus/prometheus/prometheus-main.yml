@@ -1,4 +1,3 @@
-# 部署后记得修改数据的保留时长，启动参数"--storage.tsdb.retention=15d",
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
@@ -12,13 +11,12 @@ spec:
     - name: alertmanager-main
       namespace: monitoring
       port: web
-  baseImage: quay.io/prometheus/prometheus
+  image: quay.io/prometheus/prometheus:v2.27.1
   replicas: 1
+  retention: 7d
   resources:
     requests:
       memory: 400Mi
-    limits:
-      memory: 2000Mi
   ruleSelector:
     matchLabels:
       prometheus: k8s
@@ -28,5 +26,8 @@ spec:
     matchExpressions:
     - key: k8s-app
       operator: Exists
-  version: v2.3.1
+#  version: v2.3.1
 
+  additionalScrapeConfigs:
+    name: prometheus-config
+    key: prometheus-additional.yaml

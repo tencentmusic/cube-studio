@@ -16,15 +16,15 @@ resources:
   - ../../tf-training/tf-job-operator/overlays/application
   - ../../mxnet-job/mxnet-operator/overlays/application
   - ../../mpi-job/mpi-operator/overlays/application
-  - ../../katib/installs/katib-external-db    # 里面是beat版本的最好不要用，但是因为其他地方引用了此组件的命名空间所以暂时部署
+#  - ../../katib/installs/katib-external-db    # 里面是beat版本的最好不要用，但是因为其他地方引用了此组件的命名空间所以暂时部署
 #  - ../../xgboost-job/xgboost-operator/overlays/application   # 官方版本无法启动，使用独立版本
   # Pipelines 使用单独升级的部署
 #  - ../../pipeline/minio/installs/generic
 #  - ../../pipeline/mysql/installs/generic
 #  - ../../pipeline/installs/multi-user
 #  - ../../argo/base_v3
-  # Serving components
-  - ../../seldon/seldon-core-operator/overlays/application
+  # Serving components  服务化也独立部署
+#  - ../../seldon/seldon-core-operator/overlays/application
   # Metadata 使用pipeline独立部署
 #  - ../../metadata/v3
 generatorOptions:

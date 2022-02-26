@@ -22,7 +22,6 @@ spec:
               servicePort: 80
 
 ---
-
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -54,10 +53,6 @@ spec:
     - host: kubeflow.local.com
       http:
         paths:
-          - path: /pipeline/
-            backend:
-              serviceName: ml-pipeline-ui
-              servicePort: 80
           - path: /katib/
             backend:
               serviceName: katib-ui
@@ -66,47 +61,22 @@ spec:
             backend:
               serviceName: minio-service
               servicePort: 9000
-    - host: ml-pipeline.kubeflow
-      http:
-        paths:
-          - path: /
+          - path: /pipeline/
             backend:
-              serviceName: ml-pipeline
-              servicePort: 8888
+              serviceName: ml-pipeline-ui
+              servicePort: 80
 
 ---
-
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: istio-system-notebook
-  namespace: istio-system
-
-spec:
-  rules:
-    - host: kubeflow.local.com
-      http:
-        paths:
-          - path: /notebook/
-            backend:
-              serviceName: istio-ingressgateway
-              servicePort: 80
-          - path: /nni/
-            backend:
-              serviceName: istio-ingressgateway
-              servicePort: 80
----
-
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: kube-system-kubeflow-dashboard
   namespace: kube-system
   annotations:
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3000"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3000"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3000"
-    nginx.ingress.kubernetes.io/proxy-body-size: 1g
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
 
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
     nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -114,27 +84,68 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-headers: "true"
     nginx.ingress.kubernetes.io/cors-expose-headers: "*, X-CustomResponseHeader"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx server
+#    nginx.ingress.kubernetes.io/server-snippet: |
 
-
-    # nginx的location部分
+    # nginx location
     nginx.ingress.kubernetes.io/configuration-snippet: |
       more_set_headers "Access-Control-Allow-Origin: *";
       more_set_headers "Access-Control-Allow-Methods: *";
       more_set_headers "Access-Control-Allow-Headers: *";
       proxy_set_header Accept-Encoding "";
-      sub_filter '<head>' '<head><script src="https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/myapp_into.js"></script>';
+      sub_filter '<head>' '<head><script src="http://kubeflow.local.com/static/appbuilder/js/myapp_into.js"></script>';
 
 spec:
   rules:
-    - host: kubeflow.local.com
+    - host: k8s.local.com      # 这里需要修改为自己的k8s dashboard的域名
       http:
         paths:
-          - path: /k8s/dashboard/cluster(/|$)(.*)
+          - path: /
             backend:
               serviceName: kubernetes-dashboard-cluster
               servicePort: 9090
 
+
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: monitoring-grafana
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "true"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "*, X-CustomResponseHeader"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    # nginx server
+#    nginx.ingress.kubernetes.io/server-snippet: |
+
+
+    # nginx location
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: *";
+      more_set_headers "Access-Control-Allow-Methods: *";
+      more_set_headers "Access-Control-Allow-Headers: *";
+      proxy_set_header Accept-Encoding "";
+      sub_filter '<head>' '<head><script src="http://kubeflow.local.com/static/appbuilder/js/myapp_into.js"></script>';
+
+spec:
+  rules:
+    - host: grafana.local.com       # 这里需要修改为自己的k8s dashboard的域名
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grafana
+              servicePort: 3000
 
 
 

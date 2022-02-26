@@ -1,37 +1,40 @@
 # 所需要的所有镜像
-kubeflow = ['gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
-          'gcr.io/ml-pipeline/metadata-writer:1.0.4', 'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1',
-          'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:8.0.3',
-          'docker.io/kubeflowkatib/katib-db-manager:v1beta1-a96ff59',
-          'docker.io/kubeflowkatib/katib-controller:v1beta1-a96ff59', 'argoproj/argoui:v2.3.0',
-          'gcr.io/istio-release/proxy_init:release-1.3-latest-daily',
-          'gcr.io/istio-release/kubectl:release-1.3-latest-daily', 'gcr.io/google_containers/spartakus-amd64:v1.1.0',
-          'gcr.io/istio-release/proxyv2:release-1.3-latest-daily', 'mpioperator/mpi-operator:latest',
-          'gcr.io/kubeflow-images-public/admission-webhook:vmaster-ge5452b6f',
-          'gcr.io/kubeflow-images-public/tf_operator:vmaster-gda226016', 'istio/proxyv2:1.3.1',
-          'gcr.io/istio-release/galley:release-1.3-latest-daily', 'quay.io/jetstack/cert-manager-cainjector:v0.11.0',
-          'gcr.io/istio-release/citadel:release-1.3-latest-daily',
-          'gcr.io/kubeflow-images-public/jupyter-web-app:vmaster-g845af298', 'python:3.7',
-          'gcr.io/istio-release/mixer:release-1.3-latest-daily', 'gcr.io/istio-release/pilot:release-1.3-latest-daily',
-          'gcr.io/spark-operator/spark-operator:v1beta2-1.1.0-2.4.5', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0',
-          'gcr.io/tfx-oss-public/ml_metadata_store_server:0.22.1',
-          'gcr.io/tfx-oss-public/ml_metadata_store_server:0.25.1',
-          'gcr.io/istio-release/sidecar_injector:release-1.3-latest-daily',
-          'quay.io/jetstack/cert-manager-webhook:v0.11.0',
-          'gcr.io/kubeflow-images-public/kubernetes-sigs/application:1.0-beta',
-          'gcr.io/kubeflow-images-public/centraldashboard:vmaster-g8097cfeb',
-          'gcr.io/kubeflow-images-public/xgboost-operator:v0.1.0', 'quay.io/jetstack/cert-manager-controller:v0.11.0',
-          'mysql:8', 'seldonio/seldon-core-operator:1.4.0', 'gcr.io/kfserving/kfserving-controller:v0.4.1',
-          'gcr.io/istio-release/node-agent-k8s:release-1.3-latest-daily',
-          'gcr.io/kubeflow-images-public/notebook-controller:vmaster-g6eb007d0',
-          'gcr.io/kubeflow-images-public/pytorch-operator:vmaster-g518f9c76',
-          'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1', 'metacontroller/metacontroller:v0.3.0',
-          'prom/prometheus:v2.8.0', 'gcr.io/kubeflow-images-public/kfam:vmaster-g9f3bfd00',
-          'kubeflow/mxnet-operator:v1.0.0-20200625',
-          'gcr.io/kubeflow-images-public/profile-controller:vmaster-ga49f658f',
-          'gcr.io/kubeflow-images-public/ingress-setup:latest']
+kubeflow = [
+    'gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
+    'gcr.io/ml-pipeline/metadata-writer:1.0.4', 'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1',
+    'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:8.0.3',
+    'docker.io/kubeflowkatib/katib-db-manager:v1beta1-a96ff59',
+    'docker.io/kubeflowkatib/katib-controller:v1beta1-a96ff59', 'argoproj/argoui:v2.3.0',
+    'gcr.io/istio-release/proxy_init:release-1.3-latest-daily',
+    'gcr.io/istio-release/kubectl:release-1.3-latest-daily', 'gcr.io/google_containers/spartakus-amd64:v1.1.0',
+    'gcr.io/istio-release/proxyv2:release-1.3-latest-daily', 'mpioperator/mpi-operator:latest',
+    'gcr.io/kubeflow-images-public/admission-webhook:vmaster-ge5452b6f',
+    'gcr.io/kubeflow-images-public/tf_operator:vmaster-gda226016', 'istio/proxyv2:1.3.1',
+    'gcr.io/istio-release/galley:release-1.3-latest-daily', 'quay.io/jetstack/cert-manager-cainjector:v0.11.0',
+    'gcr.io/istio-release/citadel:release-1.3-latest-daily',
+    'gcr.io/kubeflow-images-public/jupyter-web-app:vmaster-g845af298', 'python:3.7',
+    'gcr.io/istio-release/mixer:release-1.3-latest-daily', 'gcr.io/istio-release/pilot:release-1.3-latest-daily',
+    'gcr.io/spark-operator/spark-operator:v1beta2-1.1.0-2.4.5', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0',
+    'gcr.io/tfx-oss-public/ml_metadata_store_server:0.22.1',
+    'gcr.io/tfx-oss-public/ml_metadata_store_server:0.25.1',
+    'gcr.io/istio-release/sidecar_injector:release-1.3-latest-daily',
+    'quay.io/jetstack/cert-manager-webhook:v0.11.0',
+    'gcr.io/kubeflow-images-public/kubernetes-sigs/application:1.0-beta',
+    'gcr.io/kubeflow-images-public/centraldashboard:vmaster-g8097cfeb',
+    'gcr.io/kubeflow-images-public/xgboost-operator:v0.1.0', 'quay.io/jetstack/cert-manager-controller:v0.11.0',
+    'mysql:8', 'seldonio/seldon-core-operator:1.4.0', 'gcr.io/kfserving/kfserving-controller:v0.4.1',
+    'gcr.io/istio-release/node-agent-k8s:release-1.3-latest-daily',
+    'gcr.io/kubeflow-images-public/notebook-controller:vmaster-g6eb007d0',
+    'gcr.io/kubeflow-images-public/pytorch-operator:vmaster-g518f9c76',
+    'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1', 'metacontroller/metacontroller:v0.3.0',
+    'prom/prometheus:v2.8.0', 'gcr.io/kubeflow-images-public/kfam:vmaster-g9f3bfd00',
+    'kubeflow/mxnet-operator:v1.0.0-20200625',
+    'gcr.io/kubeflow-images-public/profile-controller:vmaster-ga49f658f',
+    'gcr.io/kubeflow-images-public/ingress-setup:latest',
+    'alpine:3.10'
+]
 
-kubernetes_dashboard=['kubernetesui/dashboard:v2.2.0','kubernetesui/metrics-scraper:v1.0.6']
+kubernetes_dashboard=['kubernetesui/dashboard:v2.2.0','kubernetesui/metrics-scraper:v1.0.6','quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0']
 
 new_pipline = [
     'gcr.io/ml-pipeline/api-server:1.6.0',
@@ -67,11 +70,13 @@ new_prometheus = [
     'quay.io/prometheus/alertmanager:v0.15.0',
     'quay.io/prometheus-operator/prometheus-config-reloader:v0.46.0',
     'quay.io/prometheus/prometheus:v2.3.1',
+    "quay.io/prometheus/prometheus:v2.27.1",
     'quay.io/coreos/kube-state-metrics:v1.3.1',
     'quay.io/prometheus/node-exporter:v0.15.2',
     'quay.io/coreos/kube-rbac-proxy:v0.3.1',
     'quay.io/coreos/addon-resizer:1.0',
-    'ai.tencentmusic.com/tme-public/prometheus:grafana-6.0.0'
+    'ai.tencentmusic.com/tme-public/prometheus:grafana-6.0.0',
+    "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1"
 ]
 new_serving = ['gcr.io/kfserving/alibi-explainer:0.2.2', 'gcr.io/kfserving/logger:0.2.2', 'tensorflow/serving:1.14.0',
                'tensorflow/serving:1.14.0-gpu', 'tensorflow/serving:1.11.0', 'tensorflow/serving:1.11.0-gpu',
@@ -85,6 +90,8 @@ new_serving = ['gcr.io/kfserving/alibi-explainer:0.2.2', 'gcr.io/kfserving/logge
                'gcr.io/kfserving/pytorchserver:0.2.2', 'nvcr.io/nvidia/tensorrtserver:19.05-py3',
                'gcr.io/kfserving/storage-initializer:0.2.2',
                'gcr.io/knative-releases/knative.dev/serving/cmd/queue:792f6945c7bc73a49a470a5b955c39c8bd174705743abf5fb71aa0f4c04128eb']
+
+new_kfserving=['kserve/kserve-controller:v0.7.0']
 
 knative_sha256 = [
     'gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:ffa3d72ee6c2eeb2357999248191a643405288061b7080381f22875cb703e929',
@@ -108,10 +115,12 @@ knative = ['ai.tencentmusic.com/tme-public/knative:serving-activator',
            'ai.tencentmusic.com/tme-public/knative:net-istio-webhook',
            'ai.tencentmusic.com/tme-public/knative:net-istio-controller']
 
-volcano = ['volcanosh/vc-controller-manager:latest', 'volcanosh/vc-scheduler:latest',
-           'volcanosh/vc-webhook-manager:latest']
+volcano = ['volcanosh/vc-controller-manager:v1.4.0', 'volcanosh/vc-scheduler:v1.4.0',
+           'volcanosh/vc-webhook-manager:v1.4.0']
 
 kube_batch = ['kubesigs/kube-batch:v0.5']
+nni = ['frameworkcontrolle/frameworkcontrolle']
+
 
 images = new_katib + kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + knative_sha256 + knative + volcano
 # images = new_pipline

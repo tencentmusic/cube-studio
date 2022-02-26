@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frameworkcontroller-config
-  namespace: default
+  namespace: kubeflow
 data:
   frameworkcontroller.yaml: |
     kubeClientQps: 200

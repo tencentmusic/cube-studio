@@ -19,11 +19,9 @@ commonLabels:
 namespace: kubeflow
 
 patches:
-# 为所有的Deployment打上节点亲和度补丁
 - path: affinity_patch.yaml
   target:
     kind: Deployment
-# 修改流水线执行的命名空间
 - patch: |
     - op: add
       path: /spec/template/spec/containers/0/args/-
@@ -34,7 +32,6 @@ patches:
   target:
     kind: Deployment
     name: workflow-controller
-# 修改mysql账号
 - patch: |
     - op: replace
       path: /stringData/username
@@ -42,7 +39,6 @@ patches:
   target:
     kind: Secret
     name: mysql-secret
-# 修改mysql密码
 - patch: |
     - op: replace
       path: /stringData/password
@@ -50,7 +46,6 @@ patches:
   target:
     kind: Secret
     name: mysql-secret
-# 修改mysql服务host
 - patch: |
     - op: replace
       path: /data/dbHost
@@ -58,19 +53,19 @@ patches:
   target:
     kind: ConfigMap
     name: pipeline-install-config
-# minio不要用subPath,rancher部署的集群不支持
+
 - patch: |
     - op: remove
       path: /spec/template/spec/containers/0/volumeMounts/0/subPath
   target:
     kind: Deployment
     name: minio
-# minio-pvc 加一个selector
+
 - path: minio_pvc_selector_patch.yaml
   target:
     kind: PersistentVolumeClaim
     name: minio-pvc
-# 修改 metadata-writer 的 NAMESPACE_TO_WATCH 环境变量
+
 - patch: |
     - op: replace
       path: /spec/template/spec/containers/0/env/0/value
@@ -80,7 +75,7 @@ patches:
   target:
     kind: Deployment
     name: metadata-writer
-# 修改 ml-pipeline 的 POD_NAMESPACE 环境变量
+
 - patch: |
     - op: replace
       path: /spec/template/spec/containers/0/env/1/value
@@ -90,7 +85,7 @@ patches:
   target:
     kind: Deployment
     name: ml-pipeline
-# 修改 ml-pipeline-persistenceagent 的 NAMESPACE 环境变量
+
 - patch: |
     - op: replace
       path: /spec/template/spec/containers/0/env/0/value
@@ -100,14 +95,14 @@ patches:
   target:
     kind: Deployment
     name: ml-pipeline-persistenceagent
-# 所有镜像拉取策略改为IfNotPresent
+
 - patch: |
     - op: replace
       path: /spec/template/spec/containers/0/imagePullPolicy
       value: "IfNotPresent"
   target:
     kind: Deployment
-# 部分serviceaccount权限增大
+
 - patch: |
     - op: replace
       path: /kind
@@ -144,7 +139,7 @@ patches:
   target:
     kind: Role
     name: ml-pipeline-persistenceagent-role|argo-role|kubeflow-pipelines-metadata-writer-role|ml-pipeline|ml-pipeline-scheduledworkflow-role|ml-pipeline-ui|ml-pipeline-viewer-crd-service-account-role|pipeline-runner
-# resource去掉,容易造成日志过多的时候挂掉
+
 #- patch: |
 #    - op: replace
 #      path: /data/executor

@@ -87,8 +87,8 @@ spec:
             - containerPort: 9102
               name: http
           resources:
-            limits:
-              memory: 100Mi
+#            limits:
+#              memory: 100Mi
             requests:
               memory: 40Mi
       serviceAccountName: event-exporter

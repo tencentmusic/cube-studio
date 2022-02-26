@@ -1,0 +1,71 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubeflow-prometheus-adapter
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: prometheus-adapter
+    app.kubernetes.io/name: prometheus-adapter
+    app.kubernetes.io/instance: kubeflow
+    app.kubernetes.io/version: "v0.9.1"
+data:
+  config.yaml: |
+    # node，namespace，PersistentVolume， pod，object等自定义指标
+    # rules 配置 custom.metrics.k8s.io
+    # externalRules 配置 external.metrics.k8s.io
+    rules:
+    # cpu利用率
+    # 通过seriesQuery挑选需要处理的metrics集合，可以通过seriesFilters精确过滤metrics
+    - seriesQuery: '{__name__="container_cpu_usage_seconds_total",namespace="service",container!="POD"}'
+      seriesFilters: []
+      # pod 自定义指标 就是hpa查询查询指定命名空间指定pod的指标。所以需要通过resources配置 指标标签和命名空间和pod名称的映射关系
+      resources:
+        overrides:
+          namespace:      # 指标的标签
+            resource: namespace     # k8s的资源名
+          pod:      # 指标的标签
+            resource: pod       # k8s的资源名
+          # kubernetes_name:
+          #  group: apps
+          #  resource: deployment
+      # 用来给指标重命名的
+      name:
+        matches: "^(.*)_seconds_total"
+        as: "${1}"
+      # 获取指标的值。Series：表示指标名称，LabelMatchers：附加的标签，就是 pod 名称
+      metricsQuery: (sum(rate(<<.Series>>{<<.LabelMatchers>>,job="kubelet", image!="",container_name!="POD"}[1m])) by (<<.GroupBy>>))
+    # kubectl get --raw="/apis/custom.metrics.k8s.io/v1beta1" | jq
+    # kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/{namespace-name}/{object-type}/{object-name}/{metric-name...}"
+    # 最后形成的查询地址 kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/service/pods/*/container_cpu_usage"
+    # sum(rate(container_cpu_usage_seconds_total{namespace="service",container!="POD"}[1m])) by(pod)
+
+
+
+    # gpu 利用率
+    - seriesQuery: '{__name__="DCGM_FI_DEV_GPU_UTIL",exported_pod!="",exported_namespace="service"}'
+      seriesFilters: []
+      # pod 自定义指标 就是hpa查询查询指定命名空间指定pod的指标。所以需要通过resources配置 指标标签和命名空间和pod名称的映射关系
+      resources:
+        overrides:
+          exported_namespace:      # 指标的标签
+            resource: namespace     # k8s的资源名
+          exported_pod:      # 指标的标签
+            resource: pod       # k8s的资源名
+          # kubernetes_name:
+          #  group: apps
+          #  resource: deployment
+      # 用来给指标重命名的
+      name:
+        matches: "^(.*)"
+        as: "container_gpu_usage"
+      # 获取指标的值。Series：表示指标名称，LabelMatchers：附加的标签，就是 pod 名称
+      metricsQuery: (sum(avg_over_time(<<.Series>>{<<.LabelMatchers>>}[5m])) by (<<.GroupBy>>))/100
+    # kubectl get --raw="/apis/custom.metrics.k8s.io/v1beta1" | jq
+    # kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/{namespace-name}/{object-type}/{object-name}/{metric-name...}"
+    # 最后形成的查询地址 kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/service/pods/*/container_gpu_usage" | jq
+    # sum(avg_over_time(DCGM_FI_DEV_GPU_UTIL{exported_pod!="",exported_namespace="service"}[5m]))by(exported_pod)
+
+
+

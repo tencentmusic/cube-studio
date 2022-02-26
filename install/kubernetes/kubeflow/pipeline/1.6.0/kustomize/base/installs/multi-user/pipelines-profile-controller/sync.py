@@ -216,10 +216,10 @@ class Controller(BaseHTTPRequestHandler):
                                         "cpu": "10m",
                                         "memory": "70Mi"
                                     },
-                                    "limits": {
-                                        "cpu": "100m",
-                                        "memory": "500Mi"
-                                    },
+                                    # "limits": {
+                                    #     "cpu": "100m",
+                                    #     "memory": "500Mi"
+                                    # },
                                 }
                             }],
                             "serviceAccountName":

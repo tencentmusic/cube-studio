@@ -22,6 +22,7 @@ sh start.sh
 - notebook会选择notebook=true的机器  
 - 服务化会选择service=true的机器  
 - 不同项目的任务会选择对应org=xx的机器。默认为org=public 
+- 可以通过gpu-type=xx表示gpu的型号
   
 控制器机器管理：
 - mysql=true 部署mysql服务的机器
