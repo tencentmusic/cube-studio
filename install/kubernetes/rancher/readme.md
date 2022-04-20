@@ -122,7 +122,7 @@ $ docker stop $RANCHER_CONTAINER_NAME
 $ docker create --volumes-from $RANCHER_CONTAINER_NAME --name rancher-data rancher/rancher:$RANCHER_CONTAINER_TAG
 # 先备份一遍
 $ docker run --volumes-from rancher-data -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup.tar.gz /var/lib/rancher
-$ docker run --name myrancher-new -d --volumes-from rancher-data --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher:$RANCHER_CONTAINER_TAG
+$ docker run --name myrancher-new -d --volumes-from rancher-data --restart=unless-stopped -p 443:443 rancher/rancher:$RANCHER_CONTAINER_TAG
 ```
 
 然后就可以把原有容器删除掉了。这个新启动的容器，在docker service重启后是可以继续正常工作的。
