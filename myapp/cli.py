@@ -941,6 +941,7 @@ def init():
 
 
 @app.cli.command('init_db')
+@pysnooper.snoop()
 def init_db():
     SQLALCHEMY_DATABASE_URI = conf.get('SQLALCHEMY_DATABASE_URI','')
     import sqlalchemy.engine.url as url

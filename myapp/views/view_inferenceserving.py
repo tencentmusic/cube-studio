@@ -101,7 +101,7 @@ class InferenceService_ModelView(MyappModelView):
     base_filters = [["id",InferenceService_Filter, lambda: []]]  # 设置权限过滤器
     custom_service = 'serving'
     # service_type_choices= ['',custom_service,'tfserving','torch-server','onnxruntime','triton-server','kfserving-tf','kfserving-torch','kfserving-onnx','kfserving-sklearn','kfserving-xgboost','kfserving-lightgbm','kfserving-paddle']
-    service_type_choices= ['',custom_service,'tfserving','torch-server','onnxruntime','triton-server','trpc-python']
+    service_type_choices= ['',custom_service,'tfserving','torch-server','onnxruntime','triton-server']
     # label_columns = {
     #     "host": _("域名：测试环境test.xx，调试环境 debug.xx"),
     # }

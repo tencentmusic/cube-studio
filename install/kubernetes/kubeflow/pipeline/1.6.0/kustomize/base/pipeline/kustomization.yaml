@@ -12,10 +12,10 @@ resources:
   - ml-pipeline-persistenceagent-role.yaml
   - ml-pipeline-persistenceagent-rolebinding.yaml
   - ml-pipeline-persistenceagent-sa.yaml
-  - ml-pipeline-scheduledworkflow-deployment.yaml
-  - ml-pipeline-scheduledworkflow-role.yaml
-  - ml-pipeline-scheduledworkflow-rolebinding.yaml
-  - ml-pipeline-scheduledworkflow-sa.yaml
+#  - ml-pipeline-scheduledworkflow-deployment.yaml
+#  - ml-pipeline-scheduledworkflow-role.yaml
+#  - ml-pipeline-scheduledworkflow-rolebinding.yaml
+#  - ml-pipeline-scheduledworkflow-sa.yaml
   - ml-pipeline-ui-deployment.yaml
   - ml-pipeline-ui-configmap.yaml
   - ml-pipeline-ui-role.yaml

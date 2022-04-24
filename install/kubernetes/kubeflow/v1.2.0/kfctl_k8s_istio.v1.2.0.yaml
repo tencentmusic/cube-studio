@@ -49,50 +49,13 @@ spec:
         name: manifests
         path: stacks/kubernetes/application/cert-manager
     name: cert-manager
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: stacks/kubernetes/application/add-anonymous-user-filter
-    name: add-anonymous-user-filter
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: metacontroller/base
-    name: metacontroller
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: admission-webhook/bootstrap/overlays/application
-    name: bootstrap
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: stacks/kubernetes/application/spark-operator
-    name: spark-operator
+
   - kustomizeConfig:
       repoRef:
         name: manifests
         path: stacks/kubernetes
     name: kubeflow-apps
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: knative/installs/generic
-    name: knative
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: kfserving/installs/generic
-    name: kfserving
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: stacks/kubernetes/application/spartakus
-    name: spartakus
-  repos:
-  - name: manifests
-    uri: https://github.com/kubeflow/manifests/archive/v1.2.0.tar.gz
-  version: v1.2-branch
+
 status:
   reposCache:
   - localPath: '".cache/manifests/manifests-1.2.0"'

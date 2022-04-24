@@ -1,4 +1,4 @@
-# docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2022.02.01 -f install/docker/Dockerfile .
+# docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2022.04.01 -f install/docker/Dockerfile .
 
 FROM ai.tencentmusic.com/tme-public/kubeflow-dashboard:base
 

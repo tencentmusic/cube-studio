@@ -1,5 +1,0 @@
-varReference:
-- path: spec/template/spec/volumes/secret/secretName
-  kind: Deployment
-- path: data/config.yaml
-  kind: ConfigMap

@@ -1,4 +1,0 @@
-resources:
-- enable-services.yaml
-- cluster.yaml
-- nodepool.yaml

@@ -1,5 +1,0 @@
-varReference:
-- path: spec/template/spec/containers/image
-  kind: StatefulSet
-- path: data/frameworks
-  kind: ConfigMap

@@ -1,14 +1,14 @@
-mkdir ~/.kube/
+mkdir -p ~/.kube/ kubeconfig /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives
 cp config ~/.kube/config
 cp config kubeconfig/dev-kubeconfig
 
 node=`kubectl get node |grep worker | awk '{print $1}' | head -n 1`
-kubectl label node $node train=true cpu=true notebook=true service=true org=public istio=true knative=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true
+kubectl label node $node train=true cpu=true notebook=true service=true org=public istio=true knative=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true --overwrite
 # 拉取镜像
 sh pull_image_kubeflow.sh
-curl -LO https://dl.k8s.io/release/v1.18.0/bin/linux/amd64/kubectl
-chmod +x kubectl
-mv kubectl /usr/bin/
+curl -LO https://dl.k8s.io/release/v1.18.0/bin/linux/amd64/kubectl && chmod +x kubectl  && mv kubectl /usr/bin/
+wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.1/kustomize_v4.5.1_linux_amd64.tar.gz && tar -zxvf kustomize_v4.5.1_linux_amd64.tar.gz && chmod +x kustomize && mv kustomize /usr/bin/
+
 # 创建命名空间
 sh create_ns_secret.sh
 # 部署dashboard
@@ -24,12 +24,13 @@ kubectl create -f redis/pv-hostpath.yaml
 kubectl create -f redis/configmap.yaml
 kubectl create -f redis/service.yaml
 # 如果自己需要使用pv来保存redis队列数据，可以修改master.yaml
-kubectl create -f master.yaml
+kubectl create -f redis/master.yaml
 # 部署kube-batch
 kubectl create -f kube-batch/deploy.yaml
 
 # 部署prometheus
 cd prometheus
+mkdir -p /data/k8s/monitoring/grafana/
 chmod -R 777 /data/k8s/monitoring/grafana/
 kubectl apply -f ./operator/bundle.yaml
 kubectl apply -f ./alertmanater/alertmanager-main-sa.yml
@@ -70,12 +71,13 @@ kubectl apply -f ./servicemonitor/node-exporter-sm.yml
 kubectl apply -f ./servicemonitor/prometheus-operator-sm.yml
 kubectl apply -f ./servicemonitor/prometheus-sm.yml
 kubectl apply -f ./servicemonitor/pushgateway-sm.yml
-kubectl apply -f ./gpu/dcgm-exporter.yml
-kubectl apply -f ./gpu/dcgm-exporter-sm.yml
 kubectl apply -f ./prometheus_adapter/metric_rule.yaml
 kubectl apply -f ./prometheus_adapter/prometheus_adapter.yaml
 cd ../
 
+# 部署gpu的监控
+kubectl apply -f gpu/dcgm-exporter.yaml
+kubectl apply -f gpu/dcgm-exporter-sm.yaml
 
 # 部署frameworkcontroller
 
@@ -104,7 +106,7 @@ kubectl create clusterrolebinding frameworkbarrier-kubeflow --clusterrole=framew
 kubectl apply -f volcano/volcano-development.yaml
 
 
-# 部署kubeflow
+# 部署kubeflow(训练框架+istio)
 kubectl apply -f kubeflow/v1.2.0/sa-rbac.yaml
 wget https://github.com/kubeflow/kfctl/releases/download/v1.2.0/kfctl_v1.2.0-0-gbc038f9_linux.tar.gz && tar -zxvf kfctl_v1.2.0-0-gbc038f9_linux.tar.gz
 chmod +x kfctl
@@ -120,13 +122,13 @@ kubectl apply -f kubeflow/pipeline/minio-artifact-secret.yaml
 kubectl apply -f kubeflow/pipeline/pipeline-runner-rolebinding.yaml
 
 cd kubeflow/pipeline/1.6.0/kustomize/
-kubectl apply -k cluster-scoped-resources/
+kustomize build cluster-scoped-resources/ | kubectl apply -f -
 kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
-kubectl apply -k env/platform-agnostic/
+kustomize build env/platform-agnostic/  | kubectl apply -f -
 cd ../../../../
 
 # 部署xgb
-kubectl kustomize  kubeflow/xgboost-operator/manifests/base | kubectl apply -f -
+#kubectl kustomize  kubeflow/xgboost-operator/manifests/base | kubectl apply -f -
 
 
 # 部署管理平台

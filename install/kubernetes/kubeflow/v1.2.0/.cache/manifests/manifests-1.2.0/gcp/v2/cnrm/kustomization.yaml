@@ -1,8 +1,0 @@
-# This kustomize package defines CNRM resources to create the GCP resources needed
-# to deploy Kubeflow.
-resources:
-- cluster
-- ingress
-- iam
-- pipelines
-- gcp-services.yaml

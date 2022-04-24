@@ -1,2 +1,0 @@
-clientId=
-clientSecret=

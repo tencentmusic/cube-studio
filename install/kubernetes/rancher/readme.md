@@ -45,12 +45,13 @@ reset_docker.sh 是为了在机器从rancher集群踢出以后，把rancher环�
 
 单节点部署rancher server
 ```bash
-sudo docker run -d --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$rancher_version
+export RANCHER_CONTAINER_TAG=v2.5.2
+sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
 ```
 
-进去rancher server的https://xx.xx.xx.xx/ 的web界面，选择添加集群，选择自定义集群。填写集群名称
+进去rancher server的https://xx.xx.xx.xx/ 的web界面，选择添加集群->选择自定义集群->填写集群名称
 
-选择kubernetes版本（注意：这个的版本第一次打开时可能刷新不出来，需要等待1~2分钟再刷新才能显示出来）
+选择kubernetes版本，目前最高支持到1.18（注意：这个的版本第一次打开时可能刷新不出来，需要等待1~2分钟再刷新才能显示出来）
 
 之后选择编辑yaml文件。
 
@@ -59,8 +60,10 @@ sudo docker run -d --restart=unless-stopped -p 443:443 --privileged --name=myran
 有几个需要修改的是k8s使用的网段，由于默认使用的是10.xx，如果和公司网段重复，可以修改为其他网关，例如
 172.16.0.0/16和172.17.0.0/16 两个网段
 
+services部分示例
+
 ```bash
-services:
+  services:
     etcd:
       backup_config:
         enabled: true
@@ -78,19 +81,27 @@ services:
     kube-api:
       always_pull_images: false
       pod_security_policy: false
+      # 服务node port范围
       service_node_port_range: 10-32767
+      # 服务的ip范围
       service_cluster_ip_range: 172.16.0.0/16
+      # 证书 部署isito需要
       extra_args:     
         service-account-issuer: kubernetes.default.svc
         service-account-signing-key-file: /etc/kubernetes/ssl/kube-service-account-token-key.pem
     kube-controller:
+      # 集群pod的ip范围
       cluster_cidr: 172.17.0.0/16
+      # 集群服务的 ip 范围
       service_cluster_ip_range: 172.16.0.0/16
     kubelet:
+      # dns服务的ip
       cluster_dns_server: 172.16.0.10
+      # 主机镜像回收触发门开
       extra_args:
         image-gc-high-threshold: 90
         image-gc-low-threshold: 85
+      # kubelet挂载主机目录，这样才能使用subpath
       extra_binds:
         - '/data:/data'
     kubeproxy: {}
@@ -111,18 +122,22 @@ services:
 
 
 # rancher server 高可用
+  
  rancher server 有高可用部署方案，可以参考官网https://rancher.com/docs/rancher/v2.x/en/installation/how-ha-works/
 
 ## 单节点的配置高可用
 
-
-官方提供的几种高可用方案，要么需要ssh互联，需要需要跳板机账号密码都无法在idc环境实现。并且使用单容器模式部署的时候，docker service或者机器重启，rancher server都会报异常。一直报wait k3s start。下面提供一种方案能使单容器模式下，机器重启rancher server仍可用。
+官方提供的几种高可用方案，要么需要ssh互联，需要需要跳板机账号密码都无法在idc环境实现。
+并且使用单容器模式部署的时候，docker service或者机器重启，rancher server都会报异常。一直报wait k3s start。下面提供一种方案能使单容器模式下，机器重启rancher server仍可用。
 ```bash
-$ docker stop $RANCHER_CONTAINER_NAME
-$ docker create --volumes-from $RANCHER_CONTAINER_NAME --name rancher-data rancher/rancher:$RANCHER_CONTAINER_TAG
+export RANCHER_CONTAINER_NAME=myrancher
+export RANCHER_CONTAINER_TAG=v2.5.2
+
+docker stop $RANCHER_CONTAINER_NAME
+docker create --volumes-from $RANCHER_CONTAINER_NAME --name rancher-data rancher/rancher:$RANCHER_CONTAINER_TAG
 # 先备份一遍
-$ docker run --volumes-from rancher-data -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup.tar.gz /var/lib/rancher
-$ docker run --name myrancher-new -d --volumes-from rancher-data --restart=unless-stopped -p 443:443 rancher/rancher:$RANCHER_CONTAINER_TAG
+docker run --volumes-from rancher-data --privileged -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup.tar.gz /var/lib/rancher
+docker run --name myrancher-new -d --privileged --volumes-from rancher-data --restart=unless-stopped -p 443:443 rancher/rancher:$RANCHER_CONTAINER_TAG
 ```
 
 然后就可以把原有容器删除掉了。这个新启动的容器，在docker service重启后是可以继续正常工作的。
@@ -201,7 +216,7 @@ kubectl delete node node12
 先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl
 ```bash
 docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:$rancher_version
-docker run --volumes-from rancher-data-new -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-20210101.tar.gz /var/lib/rancher
+docker run --volumes-from rancher-data-new  -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-20210101.tar.gz /var/lib/rancher
 ```
 
 把tar.gz 文件复制到新的rancher server机器上

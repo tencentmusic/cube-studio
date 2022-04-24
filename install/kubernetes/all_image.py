@@ -54,7 +54,7 @@ new_pipline = [
 
 
 new_katib = ['docker.io/kubeflowkatib/katib-ui:v1beta1-a96ff59',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-db-manager', 'mysql:5.7',
+             'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-db-manager', 'mysql:5.7','mysql:8.0.26',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/file-metrics-collector',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-ui',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-controller', 'docker.io/kubeflowkatib/mxnet-mnist',

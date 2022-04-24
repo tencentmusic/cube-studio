@@ -37,7 +37,7 @@ spec:
         - name: "DCGM_EXPORTER_KUBERNETES"
           value: "true"
         name: "dcgm-exporter"
-        hostNetwork: true
+#        hostNetwork: true
         ports:
         - name: "metrics"
           containerPort: 9400
