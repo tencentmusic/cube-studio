@@ -6,17 +6,13 @@ TME Cube Studio是由TME研发的集成数据处理、分布式计算、机器�
 
 # 功能简述
 
-<object data="docs/user.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="http://yoursite.com/the.pdf">
-        <p> 下载 <a href="./docs/user.pdf"> PDF</a>.</p>
-    </embed>
-</object>
+[![](./docs/example/pic/infra.jpg)](https://blog.csdn.net/luanpeng825485697/article/details/123619334)
 
 # 平台部署流程
 
 基础环境依赖
  - docker >= 19.03  
- - kubernetes >=1.18  
+ - kubernetes = 1.18  
  - kubectl >=1.18  
  - ssd ceph > 10T  挂载到每台机器的 /data/k8s/  
  - 单机 磁盘>=1T   单机磁盘容量要求不大，仅做镜像容器的的存储  
