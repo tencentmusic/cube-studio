@@ -1,5 +1,12 @@
-# TME Cube Studio
-TME Cube Studio是由TME研发的集成数据处理、分布式计算、机器学习模型训练等多项功能的容器化算法平台, 帮助算法使用者提升算法迭代效率和共享度. Cube Studio包含多种组件, 支持TensorFlow、PyTorch等多种框架的分布式训练，自定义Pipeline构建等功能. 
+# Cube Studio
+
+cube是tme开源的一站式云原生机器学习平台，目前主要包含
+ - 1、特征平台，支持在/离线特征；数据源管理，支持结构数据和媒体标注数据管理；
+ - 2、在线的vscode/jupyter代码开发；在线镜像调试，支持免dockerfile，增量构建；
+ - 3、任务流编排，在线拖拉拽；开放的模板市场，支持tf/pytorch/mxnet/spark/ray/horovod/kaldi/volcano等分布式计算/训练任务；task的单节点debug，分布式任务的批量优先级调度，聚合日志；任务运行资源监控，报警；定时调度，支持补录，忽略，重试，依赖，并发限制，定时任务算力的智能修正；
+ - 4、nni，katib，ray的超参搜索；
+ - 5、tf/pytorch/onnx模型的推理服务，serverless流量管控，triton gpu推理加速，依据gpu利用率/qps等指标的hpa能力，虚拟化gpu，虚拟显存等服务化能力。
+ - 6、多集群多项目组资源统筹，联邦调度；
 
 # 开源共建
 
