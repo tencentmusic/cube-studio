@@ -24,7 +24,8 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 ### 申请加入项目组
 
 路径：项目组->项目分组，oa联系creator将自己加入到项目组中
-![](./pic/tapd_20424693_1630649794_35.png)
+
+![image](https://user-images.githubusercontent.com/20157705/167538387-0119b48a-cd7e-48ca-b89a-efd7c2cae657.png)
 
 备注：
 
@@ -55,16 +56,19 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 # 在线notebook开发
 
 ### notebook支持类型
+
 1. Jupyter （cpu/gpu）
 2. vscode（cpu/gpu）
 
 ### 支持功能
+
 1. 代码开发/调试，上传/下载，命令行，git工蜂/github，内网/外网，tensorboard，自主安装插件
 
 ### 添加notebook
+
 路径：在线开发->notebook->添加
 
-![](./pic/tapd_20424693_1630648630_29.png)
+![image](https://user-images.githubusercontent.com/20157705/167538439-d921aeb9-635f-4d0a-8a59-726d21b04e5e.png)
 
 备注：
 1. Running状态下，方可进入
@@ -75,34 +79,56 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 
 ### jupyter示例：
 
-![](./pic/tapd_20424693_1611142088_15.png)
+![image](https://user-images.githubusercontent.com/20157705/167538488-cba41bf6-ba66-4150-b17e-f31f5cc5013d.png)
 
 ### vscode示例：
 
-![](./pic/tapd_20424693_1615455976_85.png)
+![image](https://user-images.githubusercontent.com/20157705/167538518-d9c05758-b808-481a-be4e-dc42477f98c5.png)
 
 ### 切换归档目录示例：
 
-![](./pic/tapd_20424693_1619156218_75.png)
+![image](https://user-images.githubusercontent.com/20157705/167538586-7ce638da-72a9-4c4a-904d-7d76d4356c82.png)
 
 ### tensorboard示例：
 
 进入到对应的日志目录，再打开tensorboard按钮
 
-![](./pic/tapd_20424693_1630381219_76.png)
+![image](https://user-images.githubusercontent.com/20157705/167538606-e6ba0559-3238-41cb-aa37-d2c61632085d.png)
 
 
 # 在线构建镜像
 
-![](./pic/tapd_20424693_1630748567_87.png)
+![image](https://user-images.githubusercontent.com/20157705/167538625-39c19c33-a63d-44fa-a16a-2aaa7b480190.png)
 
 ### 常用基础镜像
 
-### ubuntu
+#### ubuntu
+
+cuda10.2-cudnn7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.2-cudnn7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.2-cudnn7-python3.7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.2-cudnn7-python3.8
+
+cuda10.1-cudnn7
 - ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7
 - ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6
 - ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.7
 - ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.8
+
+cuda10.0-cudnn7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.6
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.8
+
+cuda9.1-cudnn7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.6
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.7
+- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.8
+
+
+cuda10.1-cuda10.0-cuda9.0-cudnn7.6
 - ai.tencentmusic.com/tme-public/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base
 
 
@@ -112,13 +138,13 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 
 路径：训练->任务流->新建
 
-![](./pic/tapd_20424693_1630650436_41.png)
+![image](https://user-images.githubusercontent.com/20157705/167538656-34631373-a055-4659-acbe-33594397efbe.png)
 
 主要配置： 参考每个配置参数的描述
 
 ### 编排pipeline
 
-![](./pic/tapd_20424693_1630651816_13.png)
+![image](https://user-images.githubusercontent.com/20157705/167538672-db0f4e3f-d59f-48d5-a712-6655df5f6b4b.png)
 
  - task公共参数：参考每个配置的描述  
  - task的模板参数：参考每个模板的链接教程文档
@@ -129,43 +155,43 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 
 使用task的run按钮和log按钮可单独调试一个task
 
-![](./pic/tapd_20424693_1630652726_69.png)
+![image](https://user-images.githubusercontent.com/20157705/167538698-d08078c0-c399-457a-9f2b-32cb002b4b06.png)
 
 ##### pipeline运行调试：
 
 pipeline的运行按钮发起调度
 
-![](./pic/tapd_20424693_1630652948_17.png)
+![image](https://user-images.githubusercontent.com/20157705/167538718-e07e1144-2cfb-4fec-8dad-1522e957592b.png)
 
 ##### pipeline日志效果：
 
-![](./pic/tapd_20424693_1606994509_86.png)
+![image](https://user-images.githubusercontent.com/20157705/167538739-1c079d43-8922-4254-ad5e-edff5d670e2a.png)
 
 ### pod查看示意图
 
-![](./pic/tapd_20424693_1630652786_45.png)
+![image](https://user-images.githubusercontent.com/20157705/167538762-4c65bf8a-0599-4fbd-8fc0-43ce89146a80.png)
 
 pod效果：
 
-![](./pic/tapd_20424693_1630652346_97.png)
+![image](https://user-images.githubusercontent.com/20157705/167538775-77a71603-7e73-4e2a-8913-cef753a51c3a.png)
 
 ### 实例记录
 
-![](./pic/tapd_20424693_1630652888_5.png)
+![image](https://user-images.githubusercontent.com/20157705/167538787-52ee881b-b151-49cd-a904-76516525a043.png)
 
 调度实例记录。停止可以清除调度容器
 
-![](./pic/tapd_20424693_1630652863_77.png)
+![image](https://user-images.githubusercontent.com/20157705/167538802-3c292d93-fdbd-4145-b58c-6518969b0ac4.png)
 
 ### 定时调度
 
 配置定时：pipeline编辑界面
 
-![](./pic/tapd_20424693_1630653430_19.png)
+![image](https://user-images.githubusercontent.com/20157705/167538811-3644c420-5b00-4c13-af75-c672aef899b2.png)
 
 查看路径：训练-定时调度记录
 
-![](./pic/tapd_20424693_1630567772_14.png)
+![image](https://user-images.githubusercontent.com/20157705/167538824-60bf1d3d-1739-4820-b083-fcc72314ec6d.png)
 
 字段说明：执行时间为这个pipeline本次调度该发起的时间点  
 状态：comed，为调度配置已经产生。created为调度已经发起。
