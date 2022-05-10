@@ -28,8 +28,7 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 ### 多集群管控
 
-cube支持多集群调度，可以由一个web平台管控多个训练或推理集群。在不同项目组下配置当前项目组使用的集群名，然后在用户训练或部署推理时，指定对应项目组即可。
-
+cube支持多集群调度，可同时管控多个训练或推理集群。在单个集群内，不仅做到一个项目组内在线开发、训练、推理的隔离，还可以做到一个k8s集群下多个项目组算力的隔离。另外在不同项目组下的算力间具有动态均衡的能力，能够在多项目间共享公共算力池和私有化算力池，做到成本最低化。
 ![image](./docs/example/pic/mul_k8s.png)
 
 ### 分布式存储
@@ -40,7 +39,7 @@ cube会自动为用户挂载用户个人目录，同一个用户在平台任何�
 
 ### 在线开发
 
-支持在线jupyterlab/theia(vscode)等功能，多用户，多实例，支持cpu/gpu版本。另外支持在线构建docker镜像，免除算法同学docker学习成本
+cube支持在线jupyterlab/theia(vscode)等功能，多用户，多实例，支持cpu/gpu版本。另外支持在线构建docker镜像，免除算法同学docker学习成本
 
 ![image](./docs/example/pic/debug.png)
 
@@ -64,7 +63,7 @@ cube会自动为用户挂载用户个人目录，同一个用户在平台任何�
 
 ### 分布式框架
 
-已k8s为核心，支持tf分布式训练、pytorch分布式训练、spark分布式数据处理、ray分布式超参搜索、mpi分布式训练、horovod分布式训练、nni分布式超参搜索、mxnet分布式训练、volcano分布式数据处理、kaldi分布式语音训练等，
+以k8s为核心，支持tf分布式训练、pytorch分布式训练、spark分布式数据处理、ray分布式超参搜索、mpi分布式训练、horovod分布式训练、nni分布式超参搜索、mxnet分布式训练、volcano分布式数据处理、kaldi分布式语音训练等，
 以及在此衍生出来的分布式的数据下载，hdfs拉取，cos上传下载，视频采帧，音频抽取，分布式的训练，例如推荐场景的din算法，ComiRec算法，MMoE算法，DeepFM算法，youtube dnn算法，ple模型，ESMM模型，双塔模型，音视频的wenet，containAI等算法的分布式训练。
 
 ![image](./docs/example/pic/distributed.png)
