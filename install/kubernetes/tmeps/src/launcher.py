@@ -142,7 +142,7 @@ if __name__ == '__main__':
 	role = tf_config["task"]["type"]
 	if role != "saver":
 		try:
-			train_and_evaluate(checkpoint_path, model_fn, input_fn2, ps_num)
+			train_and_evaluate(checkpoint_path, model_fn, input_fn4, ps_num)
 		except Exception as e:
 			traceback.print_exc()
 	else:
