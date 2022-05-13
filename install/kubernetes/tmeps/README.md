@@ -6,7 +6,7 @@ patch: 对tf serving镜像和recommenders-addons镜像的各种补丁
 deploy: 部署到k8s的yaml文件  
 src: tf模型、数据类  
 
-### 如何部署使用
+### 如何部署训练
 
 1. 打包镜像。
     
@@ -23,7 +23,10 @@ src: tf模型、数据类
 3. 部署训练集群。在deploy/kustomization.yaml调整redis host、集群规模等。
 
     kubectl apply -k deploy/kustomization.yaml
-    
+
+### 如何部署推理服务
+
+
 ### 如何更改tf和tf serving的版本
 
 1. 切换子项目的tag或者branch  
