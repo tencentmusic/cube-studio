@@ -2,22 +2,22 @@
 
 ### 代码结构
 
-.  
-├── build.sh       # build镜像  
-├── deploy         # 部署到k8s的yaml文件  
-├── docs  
-├── patch          # 对serving代码和recommenders-addons代码的各种补丁  
-├── README.md  
-├── recommenders-addons  # 原生tfra0.3.1代码  
-├── serving        # 原生tf-serving2.5.2代码  
-└── src            # tf模型、数据类  
-    ├── client.py    # 推理服务client  
-    ├── common.py  
-    ├── input_fn_builder.py   # 定义input_fn，描述输入  
-    ├── launcher.py           # 定义Estimator  
-    ├── model_fn_builder.py   # 定义model_fn，描述计算图  
-    ├── redis_backend.conf    # redis后台配置  
-    └── serving_models.conf   # serving 配置  
+	.  
+	├── build.sh       # build镜像  
+	├── deploy         # 部署到k8s的yaml文件  
+	├── docs  
+	├── patch          # 对serving代码和recommenders-addons代码的各种补丁  
+	├── README.md  
+	├── recommenders-addons  # 原生tfra0.3.1代码  
+	├── serving        # 原生tf-serving2.5.2代码  
+	└── src            # tf模型、数据类  
+    	├── client.py    # 推理服务client  
+    	├── common.py  
+    	├── input_fn_builder.py   # 定义input_fn，描述输入  
+    	├── launcher.py           # 定义Estimator  
+    	├── model_fn_builder.py   # 定义model_fn，描述计算图  
+    	├── redis_backend.conf    # redis后台配置  
+    	└── serving_models.conf   # serving 配置  
 
 ### 如何部署训练
 
