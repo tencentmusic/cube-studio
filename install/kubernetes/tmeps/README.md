@@ -11,19 +11,16 @@ src: tf模型、数据类
 ### 如何部署训练
 
 1. 打包镜像。
-    
     ./build.sh    
     
 2. 部署redis。已经有redis就不用部署了。  
-
     kubectl apply -f deploy/redis.yaml
     
-3. 调整模型和数据
+3. 调整模型和数据  
     模型：model_fn_builder.py
     数据输入：input_fn_builder.py（支持实时消费的方式，详见demo的实现）
 
 3. 部署训练集群。在deploy/kustomization.yaml调整redis host、集群规模等。
-
     kubectl apply -k deploy/kustomization.yaml
 
 ### 如何部署推理服务
