@@ -1,12 +1,11 @@
 #!/bin/bash
 
-#set -ex
+set -ex
 
 rm -rf /home/myapp/myapp/static/assets
 ln -s /home/myapp/myapp/assets /home/myapp/myapp/static/
 rm -rf /home/myapp/myapp/static/appbuilder/mnt
 ln -s /data/k8s/kubeflow/global/static /home/myapp/myapp/static/appbuilder/mnt
-
 
 if [ "$STAGE" = "init" ]; then
   export FLASK_APP=myapp:app
@@ -28,6 +27,7 @@ elif [ "$STAGE" = "dev" ]; then
 
 elif [ "$STAGE" = "prod" ]; then
   export FLASK_APP=myapp:app
+  python myapp/check_tables.py
   gunicorn --bind  0.0.0.0:80 --workers 20 --timeout 300 --limit-request-line 0 --limit-request-field_size 0 --log-level=info myapp:app
 else
     myapp --help

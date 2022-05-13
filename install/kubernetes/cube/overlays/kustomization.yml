@@ -18,7 +18,6 @@ configMapGenerator:
   - REDIS_PORT=6379
   - REDIS_PASSWORD=admin
   - MYSQL_SERVICE=mysql+pymysql://root:admin@mysql-service.infra:3306/kubeflow?charset=utf8
-  - HOST=kubeflow.local.com
   - ENVIRONMENT=DEV
   - GPU_TYPE=NVIDIA
 

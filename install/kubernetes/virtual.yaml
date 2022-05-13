@@ -8,7 +8,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "kubeflow.local.com"    # 管理平台的域名
+  - "*"    # 管理平台的域名   kubeflow.local.com
   http:
   - route:
     - destination:
@@ -26,7 +26,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "kubeflow.local.com"    # 管理平台的域名
+  - "*"    # 管理平台的域名  kubeflow.local.com
   http:
   - match:
     - uri:
@@ -118,7 +118,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "kubeflow.local.com"
+  - "*"   # 配置自己管理的域名kubeflow.local.com
   http:
   - match:
     - uri:
@@ -140,7 +140,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "kubeflow.local.com"
+  - "*"   # 配置自己管理的域名 kubeflow.local.com
   http:
   - match:
     - uri:
@@ -162,7 +162,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "kubeflow.local.com"
+  - "*"  # 配置自己管理的域名 kubeflow.local.com
   http:
   - match:
     - uri:

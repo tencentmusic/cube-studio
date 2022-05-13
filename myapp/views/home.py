@@ -21,7 +21,7 @@ from apispec import yaml_utils
 from flask import Blueprint, current_app, jsonify, make_response, request
 from flask_babel import lazy_gettext as _
 from myapp import conf, db, get_feature_flags, security_manager,event_logger
-import yaml,os
+import yaml
 from myapp.views.base import BaseMyappView
 
 from flask_appbuilder import ModelView,AppBuilder,expose,BaseView,has_access
@@ -104,6 +104,29 @@ class Myapp(BaseMyappView):
         else:
             return self.render_template('external_link.html', data=data)
 
+
+    @expose('/schedule/node/<ip>')
+    def schedule_node(self,ip):
+        all_node_json = resource_used['data']
+        for cluster_name in all_node_json:
+            nodes = all_node_json[cluster_name]
+            if ip in nodes:
+                clusters = conf.get('CLUSTERS', {})
+                cluster = clusters[cluster_name]
+                k8s_client = K8s(cluster['KUBECONFIG'])
+                # 获取最新的节点信息
+                nodes = k8s_client.get_node(ip=ip)
+                if nodes:
+                    node = nodes[0]
+                    enable_train = node['labels'].get('train','true')
+                    k8s_client.label_node([ip],{"train":"false" if enable_train=='true' else "true"})
+                    break
+
+        return redirect('/myapp/home')
+
+
+    # from myapp import tracer
+
     @expose('/feature/check')
     # @trace(tracer,depth=1,trace_content='line')
     def featureCheck(self):
@@ -113,45 +136,42 @@ class Myapp(BaseMyappView):
                 clusters = conf.get('CLUSTERS', {})
                 for cluster_name in clusters:
                     cluster = clusters[cluster_name]
+                    k8s_client = K8s(cluster['KUBECONFIG'])
+
+                    all_node = k8s_client.get_node()
                     all_node_json = {}
-                    kubeconfig_path = cluster.get('KUBECONFIG','')
-                    if kubeconfig_path:
-                        k8s_client = K8s(kubeconfig_path)
+                    for node in all_node:   # list 转dict
+                        ip = node['hostip']
+                        if 'cpu' in node['labels'] or 'gpu' in node['labels']:
+                            all_node_json[ip]=node
+                            all_node_json[ip]['used_memory'] = []
+                            all_node_json[ip]['used_cpu'] = []
+                            all_node_json[ip]['used_gpu'] = []
+                            all_node_json[ip]['user'] = []
 
-                        all_node = k8s_client.get_node()
+                    # print(all_node_json)
+                    for namespace in ['jupyter', 'pipeline', 'katib', 'service']:
+                        all_pods = k8s_client.get_pods(namespace=namespace)
+                        for pod in all_pods:
+                            if pod['status'] == 'Running' and pod['host_ip'] in all_node_json:
+                                # print(namespace,pod)
+                                all_node_json[pod['host_ip']]['used_memory'].append(pod['memory'])
+                                all_node_json[pod['host_ip']]['used_cpu'].append(pod['cpu'])
+                                all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
 
-                        for node in all_node:   # list 转dict
-                            ip = node['hostip']
-                            if 'cpu' in node['labels'] or 'gpu' in node['labels']:
-                                all_node_json[ip]=node
-                                all_node_json[ip]['used_memory'] = []
-                                all_node_json[ip]['used_cpu'] = []
-                                all_node_json[ip]['used_gpu'] = []
-                                all_node_json[ip]['user'] = []
+                                # user = pod['labels'].get('user','')
+                                # if not user:
+                                #     user = pod['labels'].get('run-rtx','')
+                                # if not user:
+                                #     user = pod['labels'].get('rtx-user','')
+                                # if user:
+                                #     all_node_json[pod['host_ip']]['user'].append(user)
+                                # print(all_node_json[pod['host_ip']])
 
-                        # print(all_node_json)
-                        for namespace in ['jupyter', 'pipeline', 'katib', 'service']:
-                            all_pods = k8s_client.get_pods(namespace=namespace)
-                            for pod in all_pods:
-                                if pod['status'] == 'Running' and pod['host_ip'] in all_node_json:
-                                    # print(namespace,pod)
-                                    all_node_json[pod['host_ip']]['used_memory'].append(pod['memory'])
-                                    all_node_json[pod['host_ip']]['used_cpu'].append(pod['cpu'])
-                                    all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
-
-                                    # user = pod['labels'].get('user','')
-                                    # if not user:
-                                    #     user = pod['labels'].get('run-rtx','')
-                                    # if not user:
-                                    #     user = pod['labels'].get('rtx-user','')
-                                    # if user:
-                                    #     all_node_json[pod['host_ip']]['user'].append(user)
-                                    # print(all_node_json[pod['host_ip']])
-
-                        for node in all_node_json:
-                            all_node_json[node]['used_memory'] = int(sum(all_node_json[node]['used_memory']))
-                            all_node_json[node]['used_cpu'] = int(sum(all_node_json[node]['used_cpu']))
-                            all_node_json[node]['used_gpu'] = int(sum(all_node_json[node]['used_gpu']))
+                    for node in all_node_json:
+                        all_node_json[node]['used_memory'] = int(sum(all_node_json[node]['used_memory']))
+                        all_node_json[node]['used_cpu'] = int(sum(all_node_json[node]['used_cpu']))
+                        all_node_json[node]['used_gpu'] = int(sum(all_node_json[node]['used_gpu']))
 
                     resource_used['data'][cluster_name]=all_node_json
                 resource_used['check_time']=datetime.datetime.now()

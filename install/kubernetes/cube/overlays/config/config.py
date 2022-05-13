@@ -321,7 +321,6 @@ TROUBLESHOOTING_LINK = ""
 WTF_CSRF_TIME_LIMIT = 60 * 60 * 24 * 7
 
 # This link should lead to a page with instructions on how to gain access to a
-# Datasource. It will be placed at the bottom of permissions errors.
 PERMISSION_INSTRUCTIONS_LINK = ""
 
 # Integrate external Blueprints to the app by passing them to your
@@ -495,6 +494,7 @@ class CeleryConfig(object):
     # CELERYD_TASK_TIME_LIMIT = 60
     # 任务发送完成是否需要确认，对性能会稍有影响
     CELERY_ACKS_LATE = True
+    CELERY_SEND_TASK_SENT_EVENT = True
     # celery worker的并发数，默认是服务器的内核数目, 也是命令行 - c参数指定的数目
     # CELERYD_CONCURRENCY = 4
     CELERY_TIMEZONE = 'Asia/Shanghai'
@@ -589,12 +589,13 @@ ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
 
 FAB_API_MAX_PAGE_SIZE=100    # 最大翻页数目，不设置的话就会是20
 CACHE_DEFAULT_TIMEOUT = 10*60  # 缓存默认过期时间，10分钟才过期
-CACHE_CONFIG = {
-    'CACHE_TYPE': 'redis', # 使用 Redis
-    'CACHE_REDIS_HOST': REDIS_HOST, # 配置域名
-    'CACHE_REDIS_PORT': int(REDIS_PORT), # 配置端口号
-    'CACHE_REDIS_URL':'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
-}
+
+# CACHE_CONFIG = {
+#     'CACHE_TYPE': 'redis', # 使用 Redis
+#     'CACHE_REDIS_HOST': REDIS_HOST, # 配置域名
+#     'CACHE_REDIS_PORT': int(REDIS_PORT), # 配置端口号
+#     'CACHE_REDIS_URL':'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
+# }
 
 CELERY_CONFIG = CeleryConfig
 
@@ -653,8 +654,8 @@ CRD_INFO={
         "timeout": 60 * 60 * 24 * 2
     },
     "inferenceservice": {
-        "group": "serving.kubeflow.org",
-        "version": "v1alpha2",
+        "group": "serving.kserve.io",
+        "version": "v1beta1",
         "plural": "inferenceservices",
         'kind':'InferenceService',
         "timeout": 60 * 60 * 24 * 1
@@ -681,8 +682,6 @@ CRD_INFO={
         "timeout": 60 * 60 * 24 * 2
     }
 }
-
-HOST = os.getenv('HOST','localhost')  # 控制平台的入口，ip或者域名
 
 # 每个task都会携带的任务环境变量，{{}}模板变量会在插入前进行渲染
 GLOBAL_ENV={
@@ -717,6 +716,7 @@ HELP_URL={
     "notebook":"http://xx.xx/xx",
     "service":"http://xx.xx/xx",
     "kfserving":"http://xx.xx/xx",
+    "inferenceservice":"http://xx.xx/xx",
     "model":"http://xx.xx/xx",
     "run":"http://xx.xx/xx",
     "docker":"http://xx.xx/xx"
@@ -728,11 +728,14 @@ CUSTOMIZE_JOB='自定义镜像'
 PIPELINE_TASK_BCC_ADDRESS = 'admin'
 ADMIN_USER='admin'
 PIPELINE_NAMESPACE = 'pipeline'
+SERVICE_PIPELINE_NAMESPACE='service'
 KATIB_NAMESPACE = 'katib'
 NOTEBOOK_NAMESPACE = 'jupyter'
 SERVICE_NAMESPACE = 'service'
+PRE_SERVICE_NAMESPACE = 'pre-service'
 KFSERVING_NAMESPACE = 'kfserving'
-
+SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
+SERVICE_PIPELINE_JAEGER='tracing.service'
 
 KATIB_JOB_DEFAULT_IMAGE='ai.tencentmusic.com/tme-public/katib'
 KATIB_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
@@ -749,8 +752,9 @@ HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,KATIB_NAMESPACE,NOTEBOOK_NAMESPACE,SERVI
 NOTEBOOK_IMAGES=[
     ['ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-cpu-base', 'vscode（cpu）'],
     ['ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-gpu-base', 'vscode（gpu）'],
-    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-cpu-1.0.0','jupyter（cpu）'],
-    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-gpu-1.0.0','jupyter（gpu）']
+    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-cpu-base', 'jupyter（cpu）'],
+    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-gpu-base','jupyter（gpu）'],
+    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-cpu-1.0.0', 'jupyter（tensorboard）'],
 ]
 
 # 定时检查大小的目录列表。需要再celery中启动检查任务
@@ -793,10 +797,6 @@ HOSTALIASES='''
 SERVICE_EXTERNAL_IP=[]
 
 
-NNI_DOMAIN = HOST  # 如果没有域名就用*   有域名就配置成 HOST
-JUPYTER_DOMAIN = HOST  # 如果没有域名就用*   有域名就配置成 HOST
-
-
 ALL_LINKS=[
     {
         "label":"Minio",
@@ -815,6 +815,56 @@ ALL_LINKS=[
     }
 ]
 
+TFSERVING_IMAGES=['ai.tencentmusic.com/tme-public/serving:1.11.0','ai.tencentmusic.com/tme-public/serving:1.11.0-gpu','ai.tencentmusic.com/tme-public/serving:1.12.0','ai.tencentmusic.com/tme-public/serving:1.12.0-gpu','ai.tencentmusic.com/tme-public/serving:1.13.0','ai.tencentmusic.com/tme-public/serving:1.13.0-gpu','ai.tencentmusic.com/tme-public/serving:1.14.0','ai.tencentmusic.com/tme-public/serving:1.14.0-gpu','ai.tencentmusic.com/tme-public/serving:2.0.0','ai.tencentmusic.com/tme-public/serving:2.0.0-gpu','ai.tencentmusic.com/tme-public/serving:2.1.4','ai.tencentmusic.com/tme-public/serving:2.1.4-gpu','ai.tencentmusic.com/tme-public/serving:2.2.3','ai.tencentmusic.com/tme-public/serving:2.2.3-gpu','ai.tencentmusic.com/tme-public/serving:2.3.4','ai.tencentmusic.com/tme-public/serving:2.3.4-gpu','ai.tencentmusic.com/tme-public/serving:2.4.3','ai.tencentmusic.com/tme-public/serving:2.4.3-gpu','ai.tencentmusic.com/tme-public/serving:2.5.2','ai.tencentmusic.com/tme-public/serving:2.5.2-gpu','ai.tencentmusic.com/tme-public/serving:2.6.0','ai.tencentmusic.com/tme-public/serving:2.6.0-gpu']
+TRITONSERVER_IMAGES=['ai.tencentmusic.com/tme-public/tritonserver:21.12-py3','ai.tencentmusic.com/tme-public/tritonserver:21.09-py3']
+TORCHSERVER_IMAGES=['ai.tencentmusic.com/tme-public/torchserve:0.5.0-cpu','ai.tencentmusic.com/tme-public/torchserve:0.5.0-gpu','ai.tencentmusic.com/tme-public/torchserve:0.4.2-cpu','ai.tencentmusic.com/tme-public/torchserve:0.4.2-gpu']
+INFERNENCE_IMAGES={
+    "tfserving":TFSERVING_IMAGES,
+    'torch-server':TORCHSERVER_IMAGES,
+    'onnxruntime':['ai.tencentmusic.com/tme-public/onnxruntime:v1.0.0','ai.tencentmusic.com/tme-public/onnxruntime:server-latest'],
+    'triton-server':TRITONSERVER_IMAGES,
+    'kfserving-tf': TFSERVING_IMAGES,
+    "kfserving-torch":TORCHSERVER_IMAGES,
+    "kfserving-triton": TRITONSERVER_IMAGES,
+    'kfserving-sklearn': ['ai.tencentmusic.com/tme-public/sklearnserver:v0.7.0'],
+    'kfserving-xgboost': ['ai.tencentmusic.com/tme-public/sklearnserver:v0.7.0'],
+    'kfserving-lightgbm':['ai.tencentmusic.com/tme-public/lgbserver:v0.7.0'],
+    'kfserving-paddle':['ai.tencentmusic.com/tme-public/paddleserver:v0.7.0']
+}
+
+INFERNENCE_COMMAND={
+    "tfserving":"/usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
+    "torch-server":"torchserve --start --model-store /models/$model_name/ --models $model_name=$model_name.mar --foreground --log-config /config/log4j2.xml",
+    "onnxruntime":"onnxruntime_server --model_path /models/",
+    "triton-server":'tritonserver --model-repository=/models/ --strict-model-config=true --log-verbose=1'
+}
+INFERNENCE_ENV={
+    "tfserving":['TF_CPP_VMODULE=http_server=1','TZ=Asia/Shanghai'],
+}
+INFERNENCE_PORTS={
+    "tfserving":'8501',
+    "torch-server":"8080,8081",
+    "onnxruntime":"8001",
+    "triton-server":"8000,8002"
+}
+INFERNENCE_METRICS={
+    "tfserving":'8501:/metrics',
+    "torch-server":"8082:/metrics",
+    "triton-server":"8002:/metrics"
+}
+INFERNENCE_HEALTH={
+    "tfserving":'8501:/v1/models/$model_name/versions/$model_version/metadata',
+    "torch-server":"8080:/ping",
+    "triton-server":"8000:/v2/health/ready"
+}
+GRAFANA_TASK_PATH='/grafana/d/pod-info/pod-info?var-pod='
+GRAFANA_SERVICE_PATH="/grafana/d/istio-service/istio-service?var-namespace=service&var-service="
+GRAFANA_CLUSTER_PATH="/grafana/d/all-node/all-node?var-org="
+GRAFANA_NODE_PATH="/grafana/d/node/node?var-node="
+GPU_CHOICE_ARR = ["0","1(T4)","2(T4)","1(V100)","2(V100)","1(A100)","2(A100)","1(vgpu)"]
+GPU_CHOICES = [[choice,choice] for choice in GPU_CHOICE_ARR]
+# 当前控制器所在的集群
+ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV').lower()
 # 所有训练集群的信息
 CLUSTERS={
     # 和project expand里面的名称一致
@@ -824,14 +874,11 @@ CLUSTERS={
         "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
         "KFP_HOST": 'http://ml-pipeline.kubeflow:8888',
         "PIPELINE_URL": '/pipeline/#/',
-        "GRAFANA_TASK": '/grafana/d/pod-info/pod-info?orgId=1&var-pod=',  # grafana配置的访问task运行数据的网址
-         "GRAFANA_SERVICE":"/grafana/d/istio-service/istio-service?orgId=1&var-namespace=service&var-service="    # grafana配置的访问service数据的网址
-
+        # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
+        # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
+    }
 }
-}
 
-# 当前控制器所在的集群
-ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV').lower()
 
 
 

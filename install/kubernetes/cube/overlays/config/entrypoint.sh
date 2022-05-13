@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -ex
+set -ex
 
 rm -rf /home/myapp/myapp/static/assets
 ln -s /home/myapp/myapp/assets /home/myapp/myapp/static/
@@ -23,10 +23,12 @@ elif [ "$STAGE" = "build" ]; then
 
 elif [ "$STAGE" = "dev" ]; then
   export FLASK_APP=myapp:app
-  FLASK_ENV=development  flask run -p 80 --with-threads  --host=0.0.0.0
+#  FLASK_ENV=development  flask run -p 80 --with-threads  --host=0.0.0.0
+  python myapp/run.py
 
 elif [ "$STAGE" = "prod" ]; then
   export FLASK_APP=myapp:app
+  python myapp/check_tables.py
   gunicorn --bind  0.0.0.0:80 --workers 20 --timeout 300 --limit-request-line 0 --limit-request-field_size 0 --log-level=info myapp:app
 else
     myapp --help

@@ -683,8 +683,6 @@ CRD_INFO={
     }
 }
 
-HOST = os.getenv('HOST','localhost')  # 控制平台的入口，ip或者域名
-
 # 每个task都会携带的任务环境变量，{{}}模板变量会在插入前进行渲染
 GLOBAL_ENV={
     "KFJ_PIPELINE_ID":"{{pipeline_id}}",
@@ -799,10 +797,6 @@ HOSTALIASES='''
 SERVICE_EXTERNAL_IP=[]
 
 
-NNI_DOMAIN = HOST  # 如果没有域名就用*   有域名就配置成 HOST
-JUPYTER_DOMAIN = HOST  # 如果没有域名就用*   有域名就配置成 HOST
-
-
 ALL_LINKS=[
     {
         "label":"Minio",
@@ -871,18 +865,17 @@ GPU_CHOICE_ARR = ["0","1(T4)","2(T4)","1(V100)","2(V100)","1(A100)","2(A100)","1
 GPU_CHOICES = [[choice,choice] for choice in GPU_CHOICE_ARR]
 # 当前控制器所在的集群
 ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV').lower()
-# ENVIRONMENT='tke'
 # 所有训练集群的信息
 CLUSTERS={
     # 和project expand里面的名称一致
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        "K8S_DASHBOARD_CLUSTER":'http://kubeflow.local.com/k8s/dashboard/cluster/',
+        "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
         "KFP_HOST": 'http://ml-pipeline.kubeflow:8888',
-        "PIPELINE_URL": 'http://kubeflow.local.com/pipeline/#/',
-        "JUPYTER_DOMAIN":"kubeflow.local.com",
-        "NNI_DOMAIN":'kubeflow.local.com'
+        "PIPELINE_URL": '/pipeline/#/',
+        # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
+        # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
     }
 }
 

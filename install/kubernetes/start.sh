@@ -161,8 +161,7 @@ ip=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1`
 kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec":{"externalIPs":["'"${ip}"'"]}}'
 
 # 本地电脑手动host
-echo "在自己的电脑执行以下命令："
-echo "sudo echo ${ip} kubeflow.local.com >> /etc/hosts"
+echo "打开网址：http://xx.xx.xx.xx"
 
 
 
