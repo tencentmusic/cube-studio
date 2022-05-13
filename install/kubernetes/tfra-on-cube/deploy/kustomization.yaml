@@ -1,0 +1,75 @@
+resources:
+- ps.yaml
+- worker.yaml
+- chief.yaml
+- evaluator.yaml
+- server.yaml
+- saver.yaml
+
+namespace: tfra-dev
+
+namePrefix: test-model-
+commonLabels:
+  trainning-model: test-model
+
+replicas:
+- name: ps
+  count: 1
+- name: worker
+  count: 4
+- name: chief
+  count: 1
+- name: evaluator
+  count: 1
+- name: server
+  count: 1
+- name: saver
+  count: 1
+
+patches:
+  - patch: |-
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          name: "model_tfra_redis_config_path"
+          value: "/mnt/uthermai/tfra-redis-ps-trainer/src/redis_backend.conf"
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          name: "checkpoint_path"
+          value: "/mnt/uthermai/tmp/checkpoint"
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          name: "model_path"
+          value: "/mnt/uthermai/tmp/saved_model"
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          name: "data_path"
+          value: "/mnt/uthermai/tmp"
+    target:
+      version: v1
+      kind: StatefulSet
+
+  - patch: |-
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          name: "ps_cluster_config"
+          value: '{"cluster": {"evaluator": ["test-model-evaluator-0.test-model-evaluator-svc.tfra-dev.svc.cluster.local:2223"], "worker": ["test-model-worker-0.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-1.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-2.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-3.test-model-worker-svc.tfra-dev.svc.cluster.local:2223"], "ps": ["test-model-ps-0.test-model-ps-svc.tfra-dev.svc.cluster.local:2223"], "chief": ["test-model-chief-0.test-model-chief-svc.tfra-dev.svc.cluster.local:2223"]}}'
+    target:
+      version: v1
+      kind: StatefulSet
+      name: ps|worker|chief|evaluator
+
+  - patch: |-
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          name: "ps_cluster_config"
+          value: '{"cluster": {"evaluator": ["test-model-evaluator-0.test-model-evaluator-svc.tfra-dev.svc.cluster.local:2223"], "worker": ["test-model-worker-0.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-1.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-2.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-3.test-model-worker-svc.tfra-dev.svc.cluster.local:2223"], "ps": ["test-model-ps-0.test-model-ps-svc.tfra-dev.svc.cluster.local:2223"], "chief": ["test-model-chief-0.test-model-chief-svc.tfra-dev.svc.cluster.local:2223"], "saver":["test-model-saver-0.test-model-saver-svc.tfra-dev.svc.cluster.local:2223"]}}'
+    target:
+      version: v1
+      kind: StatefulSet
+      name: saver

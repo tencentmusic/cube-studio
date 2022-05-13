@@ -1,0 +1,6 @@
+[submodule "install/kubernetes/tfra-on-cube/serving"]
+	path = install/kubernetes/tfra-on-cube/serving
+	url = https://github.com/tensorflow/serving.git
+[submodule "install/kubernetes/tfra-on-cube/recommenders-addons"]
+	path = install/kubernetes/tfra-on-cube/recommenders-addons
+	url = https://github.com/tensorflow/recommenders-addons.git

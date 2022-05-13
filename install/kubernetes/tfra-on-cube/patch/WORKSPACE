@@ -1,0 +1,15 @@
+# recommenders-addons
+
+#load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
+#git_repository(
+#    name = "recommenders-addons",
+#    remote = "https://github.com/tensorflow/recommenders-addons.git",
+#    tag = "v0.3.1"
+#)
+
+local_repository(
+    name = "recommenders-addons",
+    path = "../recommenders-addons",
+)
+
+# recommenders-addons 的依赖也要引入

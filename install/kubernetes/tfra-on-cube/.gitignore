@@ -1,0 +1,7 @@
+__pycache__
+*.pyc
+
+SaveModel/
+bazel*/
+
+test/

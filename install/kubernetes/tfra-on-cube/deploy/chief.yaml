@@ -1,0 +1,60 @@
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: chief
+  namespace: tfra-dev
+spec:
+  serviceName: chief-svc
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      k8s-app: chief
+  template:
+    metadata:
+      name: chief
+      labels:
+        k8s-app: chief
+    spec:
+      nodeSelector:
+        train : "true"
+        cpu: "true"
+      containers:
+      - name: app
+        image: mirrors.tencent.com/uthermai/tfra-redis-ps-trainer:tfra-0.3.1_cpu
+        imagePullPolicy: Always
+        env:
+        - name: "whoami"
+          value: "chief"
+        resources:
+          limits:
+            cpu: 8000m
+            memory: 16000Mi
+          requests:
+            cpu: 8000m
+            memory: 16000Mi
+        volumeMounts:
+        - name: uthermai-data
+          mountPath:  /mnt/uthermai
+      volumes:
+      - name: empty-dir
+        emptyDir: {}
+      - name: uthermai-data
+        hostPath:
+          path: /data/k8s/kubeflow/pipeline/workspace/uthermai
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chief-svc
+  namespace: tfra-dev
+  labels:
+    k8s-app: chief
+spec:
+  ports:
+    - port: 2223
+  clusterIP: "None"
+  selector:
+    k8s-app: chief

@@ -1,0 +1,23 @@
+# tfra
+build --action_env TF_HEADER_DIR="/patch/lib_tf-2.5.1/include"
+build --action_env TF_SHARED_LIBRARY_DIR="/patch/lib_tf-2.5.1"
+build --action_env TF_VERSION_INTEGER="2051"
+build --action_env TF_SHARED_LIBRARY_NAME="libtensorflow_framework.so.2"
+build --action_env TF_CXX11_ABI_FLAG="0"
+build --action_env FOR_TF_SERVING="1"
+build --spawn_strategy=standalone
+build --strategy=Genrule=standalone
+build -c opt
+#build -c dbg
+#build --copt=-mavx
+build --action_env TF_NEED_CUDA="0"
+#build --action_env CUDA_TOOLKIT_PATH="/usr/local/cuda"
+#build --action_env CUDNN_INSTALL_PATH="/usr/lib/x86_64-linux-gnu"
+#build --action_env TF_CUDA_VERSION="11.2"
+#build --action_env TF_CUDNN_VERSION="8"
+#test --config=cuda
+#build --config=cuda
+#build:cuda --define=using_cuda=true --define=using_cuda_nvcc=true
+#build:cuda --crosstool_top=@local_config_cuda//crosstool:toolchain
+
+build --linkopt=-Wl,--hash-style=sysv

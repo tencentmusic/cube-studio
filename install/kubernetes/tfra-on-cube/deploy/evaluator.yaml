@@ -1,0 +1,60 @@
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: evaluator
+  namespace: tfra-dev
+spec:
+  serviceName: evaluator-svc
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      k8s-app: evaluator
+  template:
+    metadata:
+      name: evaluator
+      labels:
+        k8s-app: evaluator
+    spec:
+      nodeSelector:
+        train : "true"
+        cpu: "true"
+      containers:
+      - name: app
+        image: mirrors.tencent.com/uthermai/tfra-redis-ps-trainer:tfra-0.3.1_cpu
+        imagePullPolicy: Always
+        env:
+        - name: "whoami"
+          value: "evaluator"
+        resources:
+          limits:
+            cpu: 4000m
+            memory: 8000Mi
+          requests:
+            cpu: 4000m
+            memory: 8000Mi
+        volumeMounts:
+        - name: uthermai-data
+          mountPath:  /mnt/uthermai
+      volumes:
+      - name: empty-dir
+        emptyDir: {}
+      - name: uthermai-data
+        hostPath:
+          path: /data/k8s/kubeflow/pipeline/workspace/uthermai
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evaluator-svc
+  namespace: tfra-dev
+  labels:
+    k8s-app: evaluator
+spec:
+  ports:
+    - port: 2223
+  clusterIP: "None"
+  selector:
+    k8s-app: evaluator
