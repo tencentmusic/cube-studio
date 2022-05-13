@@ -97,7 +97,7 @@ tmeps支持tf框架实时训练，秒级上线，能应对embedding稀疏大模�
 
 平台完成部署之后如下:
 
-![image](https://user-images.githubusercontent.com/20157705/167534850-e7f40f1e-058d-4370-be01-8bbcaf80c3e0.png)
+<img width="100%" alt="167874734-5b1629e0-c3bb-41b0-871d-ffa43d914066" src="https://user-images.githubusercontent.com/20157705/168214806-b8aceb3d-e1b4-48f0-a079-903ef8751f40.png">
 
 
 
