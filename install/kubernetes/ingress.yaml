@@ -45,8 +45,8 @@ metadata:
       more_set_headers "Access-Control-Allow-Origin: *";
       more_set_headers "Access-Control-Allow-Methods: *";
       more_set_headers "Access-Control-Allow-Headers: *";
-      proxy_set_header Accept-Encoding "";
       sub_filter '<head>' '<head><script src="https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/myapp_into.js"></script>';
+      sub_filter_once off;
 
 spec:
   rules:
@@ -92,8 +92,8 @@ metadata:
       more_set_headers "Access-Control-Allow-Origin: *";
       more_set_headers "Access-Control-Allow-Methods: *";
       more_set_headers "Access-Control-Allow-Headers: *";
-      proxy_set_header Accept-Encoding "";
       sub_filter '<head>' '<head><script src="https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/myapp_into.js"></script>';
+      sub_filter_once off;
 
 spec:
   rules:
@@ -134,8 +134,8 @@ metadata:
       more_set_headers "Access-Control-Allow-Origin: *";
       more_set_headers "Access-Control-Allow-Methods: *";
       more_set_headers "Access-Control-Allow-Headers: *";
-      proxy_set_header Accept-Encoding "";
       sub_filter '<head>' '<head><script src="https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/myapp_into.js"></script>';
+      sub_filter_once off;
 
 spec:
   rules:
