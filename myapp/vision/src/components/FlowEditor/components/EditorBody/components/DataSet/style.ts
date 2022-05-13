@@ -2,9 +2,8 @@ import { mergeStyles } from '@fluentui/react';
 
 const baseContainerStyle = {
   height: 54,
-  width: 272,
-  padding: 8,
-  borderRadius: 4,
+  minWidth: 272,
+  borderRadius: 100,
   borderStyle: 'solid',
   display: 'flex',
   flexDirection: 'row',
@@ -12,10 +11,11 @@ const baseContainerStyle = {
   fontSize: 12,
   cursor: 'move',
   boxSizing: 'border-box',
+  transition: 'all 0.3s'
 };
 const nodeContainer = mergeStyles({
   ...baseContainerStyle,
-  ...{ borderWidth: 1, borderColor: '#8a8886' },
+  ...{ borderWidth: 1, borderColor: '#b1b1b7' },
 });
 const nodeOnSelect = mergeStyles({
   ...baseContainerStyle,
@@ -41,45 +41,68 @@ const nodeConentTitleBar = mergeStyles({
 });
 const nodeIconWrapper = mergeStyles({
   fontSize: 16,
+  width: 64,
   display: 'flex',
-  flexDirection: 'row',
-  flexWrap: 'nowrap',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgb(0, 120, 212)',
+  borderTopLeftRadius: 100,
+  borderBottomLeftRadius: 100,
+  margin: '-1px 0 -1px -1px'
 });
 const nodeIcon = mergeStyles({
   userSelect: 'none',
-  marginRight: 8,
   boxSizing: 'border-box',
-  width: '100%',
+  color: '#fff',
+  fontSize: 20,
+  marginLeft: 8
 });
 const nodeTitle = mergeStyles({
   whiteSpace: 'nowrap',
   textOverflow: 'ellipsis',
   overflow: 'hidden',
-  width: 200,
-  marginBottom: 10,
+  paddingLeft: 8,
+  paddingBottom: 2,
+  marginBottom: 2,
   fontWeight: 600,
-  fontSize: 12,
-  flexShrink: 0,
-  flexGrow: 1,
+  fontSize: 14,
+  borderBottom: '1px dashed #c1c1c1',
   userSelect: 'none',
 });
 const handleStyle = mergeStyles({
-  width: '9px !important',
-  height: '9px !important',
-  bottom: '-5px !important',
-  borderColor: '#8a8886 !important',
+  width: '12px !important',
+  height: '12px !important',
+  bottom: '-7px !important',
+  // top: '-7px !important',
+  borderColor: '#b1b1b7 !important',
   backgroundColor: '#fff !important',
+  transition: 'all 0.3s',
   '&:hover': {
     borderWidth: '2px !important',
-    borderColor: '#0078d4 !important',
-    cursor: 'default !important',
+    borderColor: 'var(--hover-color) !important',
+    cursor: 'pointer !important',
   },
 });
 const hidden = mergeStyles({
   visibility: 'hidden',
 });
 
+const nodeContentWrapper = mergeStyles({
+  height: '100%',
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  flexDirection: 'column',
+});
+
+const nodeTips = mergeStyles({
+  color: 'rgb(177, 177, 183)',
+  paddingLeft: 8,
+});
+
 export default {
+  nodeTips,
+  nodeContentWrapper,
   nodeContainer,
   nodeOnSelect,
   nodeBar,

@@ -333,8 +333,13 @@ class MyappModelView(ModelView):
     label_title = ''
 
     conv = GeneralModelConverter(datamodel)
-
-
+    pre_list=None
+    user_permissions = {
+        "can_add": True,
+        "can_edit": True,
+        "can_delete": True,
+        "can_show": True
+    }
 
     # 配置增删改查页面标题
     def _init_titles(self):
@@ -367,6 +372,14 @@ class MyappModelView(ModelView):
                 self.show_title = self.label_title+" 详情"
         self.title = self.list_title
 
+    # 每个用户对当前记录的权限，base_permissions 是对所有记录的权限
+    def check_item_permissions(self,item):
+        self.user_permissions = {
+            "add": True,
+            "edit": True,
+            "delete": True,
+            "show": True
+        }
 
     # 配置字段的中文描述
     # @pysnooper.snoop()
@@ -931,8 +944,8 @@ class CsvResponse(Response):
     """
     Override Response to take into account csv encoding from config.py
     """
-
-    charset = conf.get("CSV_EXPORT").get("encoding", "utf-8")
+    if conf and conf.get("CSV_EXPORT"):
+        charset = conf.get("CSV_EXPORT").get("encoding", "utf-8")
 
 # 检查是否有权限
 def check_ownership(obj, raise_if_false=True):

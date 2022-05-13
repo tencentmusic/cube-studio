@@ -92,8 +92,8 @@ const Home: React.FC = () => {
           onClick={() => {
             goPipeline(item);
           }}
+          dangerouslySetInnerHTML={{ __html: item.name }}
         >
-          {item.name}
         </span>
       ),
     },
@@ -167,7 +167,6 @@ const Home: React.FC = () => {
           };
           return cur;
         });
-
         setPipelineList(pipelineDemo);
       }
     });
@@ -175,11 +174,12 @@ const Home: React.FC = () => {
       if (res.status === 0) {
         setHasProject(true);
         const list: any = [];
-        res.result.forEach((ele: any) => {
+        res.result.data.forEach((ele: any) => {
           if (ele.id) {
             list[ele.id] = ele;
           }
         });
+        console.log('list', list);
         setProjectList(list);
         dispatch(getPipelineList());
       }

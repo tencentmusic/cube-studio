@@ -98,7 +98,7 @@ export const getAllList =
       .pipeline_modelview_all(JSON.stringify(data))
       .then(res => {
         if (res?.status === 0) {
-          const list: any[] = res.result.map((item: any) => {
+          const list: any[] = res.result.data.map((item: any) => {
             return {
               id: item.id,
               name: item.name,

@@ -55,7 +55,7 @@ const Setting: React.FC = () => {
   // 项目组选项
   useEffect(() => {
     api.project_modelview().then((res: any) => {
-      const orgProject = res?.result.reduce((acc: any, cur: any) => {
+      const orgProject = res?.result.data.reduce((acc: any, cur: any) => {
         if (cur.type === 'org') {
           const item = {
             key: cur.id,

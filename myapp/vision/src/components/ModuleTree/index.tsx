@@ -13,6 +13,31 @@ import style from './style';
 
 const { Item } = Stack;
 
+const ColorList: Array<{
+  color: string,
+  bg: string
+}> = [
+    {
+      color: 'rgba(0,120,212,1)',
+      bg: 'rgba(0,120,212,0.02)',
+    }, {
+      color: 'rgba(0,170,200,1)',
+      bg: 'rgba(0,170,200,0.02)',
+    }, {
+      color: 'rgba(0,200,153,1)',
+      bg: 'rgba(0,200,153,0.02)',
+    }, {
+      color: 'rgba(0,6,200,1)',
+      bg: 'rgba(0,6,200,0.02)',
+    }, {
+      color: 'rgba(212,65,0,1)',
+      bg: 'rgba(212,65,0,0.02)',
+    }, {
+      color: 'rgba(212,176,0,1)',
+      bg: 'rgba(212,176,0,0.02)',
+    },
+  ]
+
 const ModuleTree: React.FC = () => {
   const dispatch = useAppDispatch();
   const show = useAppSelector(selectShow);
@@ -40,6 +65,7 @@ const ModuleTree: React.FC = () => {
         createdBy: ele.created_by.username,
         lastChanged: ele.changed_on,
         expand: JSON.parse(ele.expand),
+        color: ColorList[ele.project.id % ColorList.length]
       };
       if (!dataSet.has(ele.project.id)) {
         dataSet.set(ele.project.id, {
@@ -64,12 +90,12 @@ const ModuleTree: React.FC = () => {
       .job_template_modelview()
       .then((res: any) => {
         if (res?.status === 0 && res?.message === 'success') {
-          handleTemplateData(res?.result);
+          handleTemplateData(res?.result.data);
 
           const currentTime = Date.now();
           storage.set('job_template', {
             update: currentTime,
-            value: res?.result,
+            value: res?.result.data,
             expire: 1000 * 60 * 60 * 24, // 24小时更新一次
           });
         }
@@ -154,8 +180,8 @@ const ModuleTree: React.FC = () => {
                     暂无匹配
                   </div>
                 ) : (
-                  ''
-                )}
+                    ''
+                  )}
                 {Array.from(searchResult.keys()).map((key: any) => {
                   const currentRes = searchResult.get(key);
 
@@ -206,53 +232,53 @@ const ModuleTree: React.FC = () => {
                   <Spinner size={SpinnerSize.large} label="Loading" />
                 </Stack>
               ) : (
-                <ul className={style.moduleListStyle}>
-                  {Array.from(nodeMap.keys()).map((key: any) => {
-                    const curNode = nodeMap.get(key);
-                    return (
-                      <li key={key} className={style.moduleListItem}>
-                        <div
-                          role="button"
-                          onClick={() => {
-                            if (expandNodes.has(key)) {
-                              expandNodes.delete(key);
-                            } else {
-                              expandNodes.add(key);
-                            }
-                            setExpandNodes(new Set(expandNodes));
-                          }}
-                        >
-                          <div className={style.itemFolderNode}>
-                            <Icon
-                              iconName={expandNodes.has(key) ? 'FlickUp' : 'FlickLeft'}
-                              styles={{
-                                root: {
-                                  alignItems: expandNodes.has(key) ? 'baseline' : 'center',
-                                },
-                              }}
-                              className={style.listIconStyle}
-                            />
-                            {curNode.title}
+                  <ul className={style.moduleListStyle}>
+                    {Array.from(nodeMap.keys()).map((key: any) => {
+                      const curNode = nodeMap.get(key);
+                      return (
+                        <li key={key} className={style.moduleListItem}>
+                          <div
+                            role="button"
+                            onClick={() => {
+                              if (expandNodes.has(key)) {
+                                expandNodes.delete(key);
+                              } else {
+                                expandNodes.add(key);
+                              }
+                              setExpandNodes(new Set(expandNodes));
+                            }}
+                          >
+                            <div className={style.itemFolderNode}>
+                              <Icon
+                                iconName={expandNodes.has(key) ? 'FlickUp' : 'FlickLeft'}
+                                styles={{
+                                  root: {
+                                    alignItems: expandNodes.has(key) ? 'baseline' : 'center',
+                                  },
+                                }}
+                                className={style.listIconStyle}
+                              />
+                              {curNode.title}
+                            </div>
                           </div>
-                        </div>
-                        {expandNodes.has(key) ? (
-                          <ul role="group" style={{ paddingLeft: '0px' }}>
-                            {curNode.children?.map((cur: any) => {
-                              return (
-                                <li className={style.moduleListItem} key={cur.id}>
-                                  <div role="button">
-                                    <ModuleItem model={cur}></ModuleItem>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+                          {expandNodes.has(key) ? (
+                            <ul role="group" style={{ paddingLeft: '0px' }}>
+                              {curNode.children?.map((cur: any) => {
+                                return (
+                                  <li className={style.moduleListItem} key={cur.id}>
+                                    <div role="button">
+                                      <ModuleItem model={cur}></ModuleItem>
+                                    </div>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
             </div>
           </div>
         </div>

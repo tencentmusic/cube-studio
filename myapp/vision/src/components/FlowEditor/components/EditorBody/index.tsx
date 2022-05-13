@@ -76,9 +76,8 @@ const EditorBody: React.FC = () => {
 
     if (pipelineId) {
       dispatch(updateLoading(true));
-      const taskName = `${
-        modelInfo.name.replace(/\.|[\u4e00-\u9fa5]/g, '').replace(/_|\s/g, '-') || 'task'
-      }-${Date.now()}`.substring(0, 49);
+      const taskName = `${modelInfo.name.replace(/\.|[\u4e00-\u9fa5]/g, '').replace(/_|\s/g, '-') || 'task'
+        }-${Date.now()}`.substring(0, 49);
       api
         .task_modelview_add(pipelineId, {
           job_template: modelInfo.id,
@@ -105,6 +104,7 @@ const EditorBody: React.FC = () => {
               type: 'dataSet',
               position,
               data: {
+                info: modelInfo,
                 name: taskName,
                 label: `新建 ${modelInfo.name} 任务`,
               },

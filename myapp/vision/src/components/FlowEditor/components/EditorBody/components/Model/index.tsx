@@ -262,7 +262,7 @@ const Model: React.FC<ModelProps> = props => {
           <div className={style.splitLine}></div>
           <TextField
             label="GPU申请"
-            description="GPU的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡"
+            description="gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU"
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_gpu', value ? value : '');
             }}
