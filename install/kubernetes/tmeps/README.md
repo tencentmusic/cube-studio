@@ -1,4 +1,4 @@
-![image](https://github.com/tencentmusic/cube-studio/blob/tfra-dev/install/kubernetes/tmeps/docs/tmpps%E6%9E%B6%E6%9E%84%E5%9B%BE.png =100x200)
+![image](https://github.com/tencentmusic/cube-studio/blob/tfra-dev/install/kubernetes/tmeps/docs/tmpps%E6%9E%B6%E6%9E%84%E5%9B%BE.png)
 
 ### 代码结构
 
