@@ -27,12 +27,12 @@
 2. 部署redis。（已经有redis就不用部署了）  
     kubectl apply -f deploy/redis.yaml
     
-3. 调整模型和数据  （有需要的话）
-    模型：model_fn_builder.py
-    数据输入：input_fn_builder.py（支持流输入，参考demo的input_fn函数）
+3. 调整模型和数据  （有需要的话）  
+    模型：model_fn_builder.py  
+    数据输入：input_fn_builder.py（支持流输入，参考demo的input_fn函数）  
 
-3. 部署训练集群。在deploy/kustomization.yaml调整redis host、集群规模等。
-    kubectl apply -k deploy/kustomization.yaml
+3. 部署训练集群。在deploy/kustomization.yaml调整redis host、集群规模等。  
+    kubectl apply -k deploy/kustomization.yaml  
 
 ### 如何请求推理服务
 跟请求原生tf-serving一样，参考src/client.py
