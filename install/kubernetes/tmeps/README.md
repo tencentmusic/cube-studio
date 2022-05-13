@@ -1,3 +1,5 @@
+![Image text](https://github.com/tencentmusic/cube-studio/blob/tfra-dev/install/kubernetes/tmeps/docs/tmpps%E6%9E%B6%E6%9E%84%E5%9B%BE.png =100x200)
+
 ### 代码结构
 
 serving: tf serving2.5.2 原生代码  
