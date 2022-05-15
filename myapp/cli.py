@@ -546,7 +546,7 @@ def init():
                         "range": "",
                         "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
                         "placeholder": "",
-                        "describe": "worker镜像，直接运行你代码的环境镜像 <a href='https://docs.qq.com/doc/DU0ptZEpiSmtMY1JT'>基础镜像</a>",
+                        "describe": "worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
                         "editable": 1,
                         "condition": "",
                         "sub_args": {}
@@ -928,6 +928,176 @@ def init():
                         "default": "",
                         "placeholder": "",
                         "describe": "上游输出文件",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    }
+                }
+            }
+        )
+
+
+
+        # 注册 kaldi 模型离线推理分布式
+        create_template(
+            repository_id=repository.id,
+            project_name='多媒体类模板',
+            image_name='ai.tencentmusic.com/tme-public/kaldi_distributed_on_volcano:v2',
+            image_describe='kaldi音频分布式',
+            job_template_name='kaldi-distributed-on-volcanojob',
+            job_template_describe='kaldi音频分布式训练',
+            job_template_command='',
+            job_template_volume='4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube',
+            job_template_account='kubeflow-pipeline',
+            job_template_env='''
+            NO_RESOURCE_CHECK=true
+            TASK_RESOURCE_CPU=4
+            TASK_RESOURCE_MEMORY=4G
+            TASK_RESOURCE_GPU=0
+            ''',
+            job_template_expand={
+                "index": 4,
+                "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/kaldi_distributed_on_volcanojob"
+            },
+
+            job_template_args={
+                "shell": {
+                    "--working_dir": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "启动目录",
+                        "describe": "启动目录",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--user_cmd": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "./run.sh",
+                        "placeholder": "启动命令",
+                        "describe": "启动命令",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--num_worker": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "2",
+                        "placeholder": "worker数量",
+                        "describe": "worker数量",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--image": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "ai.tencentmusic.com/tme-public/kaldi_distributed_worker:v1",
+                        "placeholder": "",
+                        "describe": "worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    }
+                }
+            }
+        )
+
+        # 分布式离线推理
+        create_template(
+            repository_id=repository.id,
+            project_name='多媒体类模板',
+            image_name='ai.tencentmusic.com/tme-public/volcano:offline-predict-20220101',
+            image_describe='分布式离线推理',
+            job_template_name='model-offline-predict',
+            job_template_describe='分布式离线推理',
+            job_template_command='',
+            job_template_volume='kubernetes-config(configmap):/root/.kube',
+            job_template_account='kubeflow-pipeline',
+            job_template_env='''
+                NO_RESOURCE_CHECK=true
+                TASK_RESOURCE_CPU=4
+                TASK_RESOURCE_MEMORY=4G
+                TASK_RESOURCE_GPU=0
+                ''',
+            job_template_expand={
+                "index": 8,
+                "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_offline_predict"
+            },
+
+            job_template_args={
+                "shell": {
+                    "--working_dir": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "启动目录",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "/mnt/xx",
+                        "placeholder": "",
+                        "describe": "启动目录",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--command": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "环境安装和任务启动命令",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "/mnt/xx/../start.sh",
+                        "placeholder": "",
+                        "describe": "环境安装和任务启动命令",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--num_worker": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "占用机器个数",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "3",
+                        "placeholder": "",
+                        "describe": "占用机器个数",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--image": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                        "placeholder": "",
+                        "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
                         "editable": 1,
                         "condition": "",
                         "sub_args": {}
