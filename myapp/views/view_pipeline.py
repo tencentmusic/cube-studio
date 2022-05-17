@@ -207,6 +207,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
         container_envs = []
         if task.job_template.env:
             envs = re.split('\r|\n',task.job_template.env)
+            envs=[env.strip() for env in envs if env.strip()]
             for env in envs:
                 env_key,env_value = env.split('=')[0],env.split('=')[1]
                 container_envs.append(V1EnvVar(env_key,env_value))

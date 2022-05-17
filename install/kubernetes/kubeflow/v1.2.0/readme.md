@@ -18,8 +18,8 @@ kubectl apply -f sa-rbac.yaml
  - imagePullPolicy: Always 更改为 IfNotPresent
 
 修改自定义配置
- - 修改v1.2.0/.cache/manifests/manifests-1.2.0/katib/installs/katib-external-db/secrets.env 中配置的katib连接的数据库
- - 修改v1.2.0/.cache/manifests/manifests-1.2.0/metadata/overlays/external-mysql/params.env  中配置的metadata连接的数据库
+ - 修改v1.2.0/manifests/manifests-1.2.0/katib/installs/katib-external-db/secrets.env 中配置的katib连接的数据库
+ - 修改v1.2.0/manifests/manifests-1.2.0/metadata/overlays/external-mysql/params.env  中配置的metadata连接的数据库
 
 # 修改k8s apiserver启动参数
 修改k8s api server启动参数才能正常安装istio

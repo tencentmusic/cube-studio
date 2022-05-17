@@ -405,7 +405,7 @@ spec:
         severity: critical
     - alert: KubeStatefulSetGenerationMismatch
       annotations:
-        message: StatefulSet {{ $labels.namespace }}/{{ labels.statefulset }} generation
+        message: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} generation
           mismatch
         runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubestatefulsetgenerationmismatch
       expr: |

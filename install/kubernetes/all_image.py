@@ -69,6 +69,8 @@ new_gpu = ['nvidia/k8s-device-plugin:v0.7.1', 'nvidia/dcgm-exporter:2.0.13-2.1.2
 new_prometheus = [
     'quay.io/prometheus/alertmanager:v0.15.0',
     'quay.io/prometheus-operator/prometheus-config-reloader:v0.46.0',
+    'quay.io/prometheus-operator/prometheus-config-reloader:v0.48.0',
+    'quay.io/prometheus-operator/prometheus-config-reloader:v0.56.1',
     'quay.io/prometheus/prometheus:v2.3.1',
     "quay.io/prometheus/prometheus:v2.27.1",
     'quay.io/coreos/kube-state-metrics:v1.3.1',
@@ -76,7 +78,9 @@ new_prometheus = [
     'quay.io/coreos/kube-rbac-proxy:v0.3.1',
     'quay.io/coreos/addon-resizer:1.0',
     'ai.tencentmusic.com/tme-public/prometheus:grafana-6.0.0',
-    "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1"
+    'quay.io/prometheus-operator/prometheus-operator:v0.56.1',
+    "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",
+    'grafana/grafana:7.5.2'
 ]
 new_serving = ['gcr.io/kfserving/alibi-explainer:0.2.2', 'gcr.io/kfserving/logger:0.2.2', 'tensorflow/serving:1.14.0',
                'tensorflow/serving:1.14.0-gpu', 'tensorflow/serving:1.11.0', 'tensorflow/serving:1.11.0-gpu',

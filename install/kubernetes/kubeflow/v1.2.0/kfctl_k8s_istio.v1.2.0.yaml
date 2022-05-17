@@ -58,5 +58,5 @@ spec:
 
 status:
   reposCache:
-  - localPath: '".cache/manifests/manifests-1.2.0"'
+  - localPath: '"manifests/manifests-1.2.0"'
     name: manifests

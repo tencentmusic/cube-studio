@@ -52,6 +52,7 @@ kubectl apply -f ./grafana/grafana-datasources.yml
 kubectl apply -f ./grafana/grafana-admin-secret.yml
 kubectl apply -f ./grafana/grafana-svc.yml
 kubectl create configmap grafana-config --from-file=./grafana/grafana.ini --namespace=monitoring
+kubectl create configmap all-grafana-dashboards --from-file=./grafana/dashboard --namespace=monitoring
 kubectl apply -f ./grafana/grafana-dp.yml
 kubectl apply -f ./service-discovery/kube-controller-manager-svc.yml
 kubectl apply -f ./service-discovery/kube-scheduler-svc.yml
@@ -76,9 +77,9 @@ kubectl apply -f ./prometheus_adapter/prometheus_adapter.yaml
 cd ../
 
 # 部署gpu的监控
-#kubectl apply -f gpu/nvidia-device-plugin.yml
-#kubectl apply -f gpu/dcgm-exporter.yaml
-#kubectl apply -f gpu/dcgm-exporter-sm.yaml
+kubectl apply -f gpu/nvidia-device-plugin.yml
+kubectl apply -f gpu/dcgm-exporter.yaml
+kubectl apply -f gpu/dcgm-exporter-sm.yaml
 
 # 部署frameworkcontroller
 
@@ -150,6 +151,8 @@ kubectl create -f pv-pvc-service.yaml
 
 kubectl apply -k cube/overlays
 
+kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s
+kubectl wait crd/gateways.networking.istio.io --for condition=established --timeout=60s
 
 kubectl apply -f gateway.yaml
 kubectl apply -f sa-rbac.yaml

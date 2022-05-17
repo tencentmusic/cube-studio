@@ -67,29 +67,8 @@ spec:
         - mountPath: /etc/grafana/provisioning/dashboards
           name: grafana-dashboards
           readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/k8s-cluster-rsrc-use
-          name: grafana-dashboard-k8s-cluster-rsrc-use
-          readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/k8s-node-rsrc-use
-          name: grafana-dashboard-k8s-node-rsrc-use
-          readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-cluster
-          name: grafana-dashboard-k8s-resources-cluster
-          readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-namespace
-          name: grafana-dashboard-k8s-resources-namespace
-          readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-pod
-          name: grafana-dashboard-k8s-resources-pod
-          readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/nodes
-          name: grafana-dashboard-nodes
-          readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/pods
-          name: grafana-dashboard-pods
-          readOnly: false
-        - mountPath: /grafana-dashboard-definitions/0/statefulset
-          name: grafana-dashboard-statefulset
+        - mountPath: /grafana-dashboard-definitions/0/
+          name: all-grafana-dashboards
           readOnly: false
 #      securityContext:
 #        fsGroup: 472
@@ -112,38 +91,11 @@ spec:
           name: grafana-dashboards
         name: grafana-dashboards
       - configMap:
-          name: grafana-dashboard-k8s-cluster-rsrc-use
-        name: grafana-dashboard-k8s-cluster-rsrc-use
-      - configMap:
-          name: grafana-dashboard-k8s-node-rsrc-use
-        name: grafana-dashboard-k8s-node-rsrc-use
-      - configMap:
-          name: grafana-dashboard-k8s-resources-cluster
-        name: grafana-dashboard-k8s-resources-cluster
-      - configMap:
-          name: grafana-dashboard-k8s-resources-namespace
-        name: grafana-dashboard-k8s-resources-namespace
-      - configMap:
-          name: grafana-dashboard-k8s-resources-pod
-        name: grafana-dashboard-k8s-resources-pod
-      - configMap:
-          name: grafana-dashboard-nodes
-        name: grafana-dashboard-nodes
-      - configMap:
-          name: grafana-dashboard-pods
-        name: grafana-dashboard-pods
-      - configMap:
-          name: grafana-dashboard-statefulset
-        name: grafana-dashboard-statefulset
+          name: all-grafana-dashboards
+        name: all-grafana-dashboards
       - configMap:
           name: grafana-config
           items:
             - key: grafana.ini
               path: grafana.ini
         name: grafana-config
-#      - configMap:
-#          name: grafana-defaults-config
-#          items:
-#            - key: defaults.ini
-#              path: defaults.ini
-#        name: grafana-defaults-config
