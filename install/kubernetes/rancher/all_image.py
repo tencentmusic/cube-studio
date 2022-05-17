@@ -232,7 +232,7 @@ images =[
 ]
 images = list(set(images))
 # 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网ai.tencentmusic.com的仓库
-HOST = 'ai.musictencent.com/tme-public/'
+HOST = 'ai.tencentmusic.com/tme-public/'
 
 for image in images:
     # print(image)
