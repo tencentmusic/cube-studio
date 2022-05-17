@@ -11,7 +11,7 @@ cube-studio/install/kubernetes/config
 cd cube-studio/install/kubernetes/
 sh start.sh
 ```
-[单机部署参考视频](https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/install_standalone.mp4)
+[单机部署参考视频](https://www.bilibili.com/video/BV18r4y147oj/)
  
 # 通过label进行机器管理  
 开发训练服务机器管理：
