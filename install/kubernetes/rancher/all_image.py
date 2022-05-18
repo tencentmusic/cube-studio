@@ -237,7 +237,7 @@ HOST = 'ai.tencentmusic.com/tme-public/'
 for image in images:
     # print(image)
     image = image.replace('<none>', '')
-    image_name = HOST + image.replace('/', '-').replace('@sha256', '')
+    image_name = HOST + image.replace(HOST,'').replace('/', '-').replace('@sha256', '')
 
     # 可联网机器上拉取公有镜像并推送到私有仓库
     # print('docker pull %s' % image)
