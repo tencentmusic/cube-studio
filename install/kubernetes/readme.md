@@ -6,10 +6,10 @@
 # 单机测试
 
 在单机上将k8s的kubeconfig文件保存为
-cube-studio/install/kubernetes/config
+cube-studio/install/kubernetes/config，下面的命令换成自己的机器ip
 ```
 cd cube-studio/install/kubernetes/
-sh start.sh
+sh start.sh xx.xx.xx.xx
 ```
 [单机部署参考视频](https://www.bilibili.com/video/BV18r4y147oj/)
  
