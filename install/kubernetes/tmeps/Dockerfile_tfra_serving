@@ -131,8 +131,8 @@ RUN mkdir /usr/lib/x86_64-linux-gnu/include/ && \
   ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so.${TF_CUDNN_VERSION} /usr/local/cuda/lib64/libcudnn.so.${TF_CUDNN_VERSION}
 
 # cmake
-RUN curl -L https://cmake.org/files/v3.15/cmake-3.15.7-Linux-x86_64.sh -o make-3.15.7-Linux-x86_64.sh
-#COPY tools/make-3.15.7-Linux-x86_64.sh ./
+#RUN curl -L https://cmake.org/files/v3.15/cmake-3.15.7-Linux-x86_64.sh -o make-3.15.7-Linux-x86_64.sh
+COPY make-3.15.7-Linux-x86_64.sh ./
 RUN chmod 777 make-3.15.7-Linux-x86_64.sh && \
 	./make-3.15.7-Linux-x86_64.sh --skip-license --prefix=/usr
 
@@ -150,11 +150,12 @@ ENV TMP="/tmp"
 # 补丁
 COPY serving/ /tensorflow-serving/
 COPY recommenders-addons/ /recommenders-addons/
-COPY patch/ /patch/
-RUN cat /patch/tfra_bazelrc >> /tensorflow-serving/.bazelrc && \
-    cat /patch/WORKSPACE >> /tensorflow-serving/WORKSPACE && \
-	cat /recommenders-addons/WORKSPACE | grep -v workspace | sed 's@load("//@load("\@recommenders-addons//@g' | sed 's@build_file = "//@build_file = "\@recommenders-addons//@g' >> /tensorflow-serving/WORKSPACE && \
-    sh /patch/patch.sh /tensorflow-serving/tensorflow_serving/model_servers/BUILD
+COPY append_tfra_ops_on_tf_serving_source.sh /
+RUN sh /append_tfra_ops_on_tf_serving_source.sh && cat /tensorflow-serving/WORKSPACE
+ARG TF_VERSION="2.5.1"
+RUN pip3 install --upgrade pip && pip3 install tensorflow-gpu==${TF_VERSION}
+
+#RUN mkdir /tf_lib && curl -L https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-${TF_VERSION}.tar.gz | tar xz --directory /tf_lib
 
 WORKDIR /tensorflow-serving
 # Build, and install TensorFlow Serving
@@ -229,4 +230,6 @@ WORKDIR /app
 COPY --from=compile_build /usr/local/bin/tensorflow_model_server /usr/local/bin/
 RUN chmod 777 /usr/local/bin/tensorflow_model_server
 CMD ["sleep","99d"]
+
+
 

@@ -1,21 +1,22 @@
 FROM ubuntu:18.04 as org
 
 # 换内网源
-RUN echo "deb http://mirrors.tencent.com/ubuntu/ bionic main restricted universe multiverse\n \
-deb http://mirrors.tencent.com/ubuntu/ bionic-security main restricted universe multiverse\n \
-deb http://mirrors.tencent.com/ubuntu/ bionic-updates main restricted universe multiverse\n \
-deb-src http://mirrors.tencent.com/ubuntu/ bionic main restricted universe multiverse\n \
-deb-src http://mirrors.tencent.com/ubuntu/ bionic-security main restricted universe multiverse\n \
-deb-src http://mirrors.tencent.com/ubuntu/ bionic-updates main restricted universe multiverse" > /etc/apt/sources.list
+#RUN echo "deb http://mirrors.tencent.com/ubuntu/ bionic main restricted universe multiverse\n \
+#deb http://mirrors.tencent.com/ubuntu/ bionic-security main restricted universe multiverse\n \
+#deb http://mirrors.tencent.com/ubuntu/ bionic-updates main restricted universe multiverse\n \
+#deb-src http://mirrors.tencent.com/ubuntu/ bionic main restricted universe multiverse\n \
+#deb-src http://mirrors.tencent.com/ubuntu/ bionic-security main restricted universe multiverse\n \
+#deb-src http://mirrors.tencent.com/ubuntu/ bionic-updates main restricted universe multiverse" > /etc/apt/sources.list
 
 # 安装运维工具
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -y vim apt-transport-https gnupg2 ca-certificates-java rsync jq wget git dnsutils iputils-ping net-tools curl locales zip unzip tzdata zlib1g-dev
 
 # 安装python
-RUN apt install -y python3.6-dev python3-pip \
-    && ln -sf /usr/bin/python3 /usr/bin/python \
-    && ln -sf /usr/bin/pip3 /usr/bin/pip
+RUN apt install -y python3.8-dev python3-pip libsasl2-dev libpq-dev \
+    && rm -f /usr/bin/python3 && ln -s /usr/bin/python3.8 /usr/bin/python3 \
+    && rm -f /usr/bin/python && ln -s /usr/bin/python3.8 /usr/bin/python \
+    && ln -s /usr/bin/pip3 /usr/bin/pip
 
 # 安装中文
 RUN apt install -y locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
@@ -56,18 +57,18 @@ RUN curl -L https://github.com/bazelbuild/bazel/releases/download/3.7.2/bazel-3.
 RUN	chmod 777 bazel-3.7.2-installer-linux-x86_64.sh && ./bazel-3.7.2-installer-linux-x86_64.sh
 
 # git-lfs
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-	apt install -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true -y --allow-unauthenticated --no-install-recommends git-lfs && \
-	git lfs install
+#RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+#	apt install -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true -y --allow-unauthenticated --no-install-recommends git-lfs && \
+#	git lfs install
 
 # tensorflow
-ARG TF_VERSION="2.6.2"
+ARG TF_VERSION="2.5.1"
 RUN pip3 install --upgrade pip && pip3 install tensorflow==$TF_VERSION
 
 # cmake
 WORKDIR /usr/local/share/cmake-3.15
-RUN curl -L https://cmake.org/files/v3.15/cmake-3.15.7-Linux-x86_64.sh -o make-3.15.7-Linux-x86_64.sh
-#COPY tools/make-3.15.7-Linux-x86_64.sh ./
+#RUN curl -L https://cmake.org/files/v3.15/cmake-3.15.7-Linux-x86_64.sh -o make-3.15.7-Linux-x86_64.sh
+COPY make-3.15.7-Linux-x86_64.sh ./
 RUN chmod 777 make-3.15.7-Linux-x86_64.sh && \
 	./make-3.15.7-Linux-x86_64.sh --skip-license --prefix=/usr
 
@@ -77,8 +78,7 @@ WORKDIR /app/recommenders-addons
 #ARG TFRA_VERSION_GIT_COMMIT=v0.3.1
 #RUN curl -sSL --retry 5 https://github.com/tensorflow/recommenders-addons/tarball/${TFRA_VERSION_GIT_COMMIT} | tar --strip-components=1 -xzf -
 COPY recommenders-addons/ /app/recommenders-addons/
-COPY patch/configure.py ./
-ARG BAZEL_OPTIONS="--remote_cache=grpc://bazel-cache.woa.com:9090"
+#ARG BAZEL_OPTIONS="--remote_cache=grpc://bazel-cache.woa.com:9090"
 RUN python3 configure.py && bazel build ${BAZEL_OPTIONS} --enable_runfiles build_pip_pkg && \
 	bazel-bin/build_pip_pkg artifacts
 
@@ -87,7 +87,7 @@ FROM org as trainer
 WORKDIR /app
 
 # tensorflow kafka
-ARG TF_VERSION="2.6.2"
+ARG TF_VERSION="2.5.1"
 RUN pip3 install --upgrade pip && pip3 install tensorflow_datasets numpy tensorflow==$TF_VERSION traceback2 kafka
 
 # tfra

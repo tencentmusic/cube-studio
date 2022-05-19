@@ -1,0 +1,60 @@
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: saver
+  namespace: tfra-dev
+spec:
+  serviceName: saver-svc
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      k8s-app: saver
+  template:
+    metadata:
+      name: saver
+      labels:
+        k8s-app: saver
+    spec:
+      nodeSelector:
+        train : "true"
+        cpu: "true"
+      containers:
+      - name: app
+        image: mirrors.tencent.com/uthermai/tmeps:trainning
+        imagePullPolicy: Always
+        env:
+        - name: "whoami"
+          value: "saver"
+        resources:
+          limits:
+            cpu: 4000m
+            memory: 8000Mi
+          requests:
+            cpu: 4000m
+            memory: 8000Mi
+        volumeMounts:
+        - name: uthermai-data
+          mountPath:  /mnt/uthermai
+      volumes:
+      - name: empty-dir
+        emptyDir: {}
+      - name: uthermai-data
+        hostPath:
+          path: /data/k8s/kubeflow/pipeline/workspace/uthermai
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: saver-svc
+  namespace: tfra-dev
+  labels:
+    k8s-app: saver
+spec:
+  ports:
+    - port: 2223
+  clusterIP: "None"
+  selector:
+    k8s-app: saver
