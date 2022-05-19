@@ -86,7 +86,7 @@ from multiprocessing import Pool
 from functools import partial
 import os, random
 
-WORLD_SIZE = int(os.getenv('VC_WORKER_NUM', ''))  # 总worker的数目
+WORLD_SIZE = int(os.getenv('VC_WORKER_NUM', '1'))  # 总worker的数目
 RANK = int(os.getenv("VC_TASK_INDEX", '0'))     # 当前是第几个worker 从0开始
 
 print(WORLD_SIZE, RANK)
@@ -112,3 +112,6 @@ if __name__ == '__main__':
     pool.close()
     pool.join()
 ```
+
+# 示例
+demo.py

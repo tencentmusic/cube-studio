@@ -106,7 +106,7 @@ kubectl create clusterrolebinding frameworkbarrier-kubeflow --clusterrole=framew
 
 # 部署volcano
 kubectl apply -f volcano/volcano-development.yaml
-
+kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 
 # 部署kubeflow(训练框架+istio)
 kubectl apply -f kubeflow/v1.2.0/sa-rbac.yaml
