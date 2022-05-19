@@ -21,6 +21,12 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 <img width="100%" alt="167874734-5b1629e0-c3bb-41b0-871d-ffa43d914066" src="https://user-images.githubusercontent.com/20157705/168214806-b8aceb3d-e1b4-48f0-a079-903ef8751f40.png">
 
+# 相关视频
+
+[新人使用教程](https://www.bilibili.com/video/BV1zA4y1f7Rf)
+
+[job模板制作教程](https://www.bilibili.com/video/BV15B4y197nm)
+
 # 功能简述
 
 ### 整体架构
@@ -99,13 +105,6 @@ cube支持在线jupyterlab/theia(vscode)等功能，多用户，多实例，支�
 tmeps支持tf框架实时训练，秒级上线，能应对embedding稀疏大模型推荐场景
 
 ![image](https://user-images.githubusercontent.com/20157705/167534836-418855cf-daef-45a5-85c9-3bb1b7135f4f.png)
-
-
-# 相关视频
-
-[新人使用教程](https://www.bilibili.com/video/BV1zA4y1f7Rf)
-
-[job模板制作教程](https://www.bilibili.com/video/BV15B4y197nm)
 
 
 
