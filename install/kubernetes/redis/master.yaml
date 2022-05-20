@@ -94,8 +94,8 @@ spec:
             cpu: 10
             memory: 10Gi
           requests:
-            cpu: 1
-            memory: 1G
+            cpu: 100m
+            memory: 200Mi
           
         volumeMounts:
         - name: health

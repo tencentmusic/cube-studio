@@ -529,8 +529,8 @@ spec:
           timeoutSeconds: 5
         resources:
           requests:
-            cpu: 500m
-            memory: 2048Mi
+            cpu: 200m
+            memory: 500Mi
         volumeMounts:
         - mountPath: /etc/istio/config
           name: config-volume
@@ -1010,8 +1010,8 @@ spec:
         - containerPort: 42422
         resources:
           requests:
-            cpu: 1000m
-            memory: 1G
+            cpu: 200m
+            memory: 500Mi
         volumeMounts:
         - mountPath: /etc/certs
           name: istio-certs
