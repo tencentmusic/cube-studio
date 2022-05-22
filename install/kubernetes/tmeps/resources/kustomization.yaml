@@ -60,15 +60,16 @@ patches:
       version: v1
       kind: StatefulSet
 
-# 模型、checkpoint、数据目录的路径
+# 模型、checkpoint、数据目录的路径。
+# 注意：configmap挂载的文件只读，所以会在启动命令里复制一下配置文件路径
   - patch: |-
       - op: add
         path: "/spec/template/spec/containers/0/env"
         value:
         - name: "model_serving_config_path"
-          value: "/tmp/conf/serving-models-conf/serving_models.conf"
+          value: "/tmp/conf_inner/serving-models-conf/serving_models.conf"
         - name: "model_tfra_redis_config_path"
-          value: "/tmp/conf/redis-backend-conf/redis_backend.conf"
+          value: "/tmp/conf_inner/redis-backend-conf/redis_backend.conf"
         - name: "checkpoint_path"
           value: "/mnt/uthermai/tmp/checkpoint"
         - name: "model_path"
@@ -85,7 +86,7 @@ patches:
         path: "/spec/template/spec/containers/0/env/-"
         value:
           name: "ps_cluster_config"
-          value: '{"cluster": {"evaluator": ["test-model-evaluator-0.test-model-evaluator-svc.tfra-dev.svc.cluster.local:2223"], "worker": ["test-model-worker-0.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-1.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-2.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-3.test-model-worker-svc.tfra-dev.svc.cluster.local:2223"], "ps": ["test-model-ps-0.test-model-ps-svc.tfra-dev.svc.cluster.local:2223"], "chief": ["test-model-chief-0.test-model-chief-svc.tfra-dev.svc.cluster.local:2223"]}}'
+          value: '{"cluster": {"evaluator": ["test-model-evaluator-0.test-model-evaluator-svc.tfra-dev.svc.cluster.local:2223"], "worker": ["test-model-worker-0.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-1.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-2.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-3.test-model-worker-svc.tfra-dev.svc.cluster.local:2223"], "ps": ["test-model-ps-0.test-model-ps-svc.tfra-dev.svc.cluster.local:2223","test-model-ps-1.test-model-ps-svc.tfra-dev.svc.cluster.local:2223"], "chief": ["test-model-chief-0.test-model-chief-svc.tfra-dev.svc.cluster.local:2223"]}}'
     target:
       version: v1
       kind: StatefulSet
@@ -96,7 +97,7 @@ patches:
         path: "/spec/template/spec/containers/0/env/-"
         value:
           name: "ps_cluster_config"
-          value: '{"cluster": {"evaluator": ["test-model-evaluator-0.test-model-evaluator-svc.tfra-dev.svc.cluster.local:2223"], "worker": ["test-model-worker-0.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-1.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-2.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-3.test-model-worker-svc.tfra-dev.svc.cluster.local:2223"], "ps": ["test-model-ps-0.test-model-ps-svc.tfra-dev.svc.cluster.local:2223"], "chief": ["test-model-chief-0.test-model-chief-svc.tfra-dev.svc.cluster.local:2223"], "saver":["test-model-saver-0.test-model-saver-svc.tfra-dev.svc.cluster.local:2223"]}}'
+          value: '{"cluster": {"evaluator": ["test-model-evaluator-0.test-model-evaluator-svc.tfra-dev.svc.cluster.local:2223"], "worker": ["test-model-worker-0.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-1.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-2.test-model-worker-svc.tfra-dev.svc.cluster.local:2223", "test-model-worker-3.test-model-worker-svc.tfra-dev.svc.cluster.local:2223"], "ps": ["test-model-ps-0.test-model-ps-svc.tfra-dev.svc.cluster.local:2223","test-model-ps-1.test-model-ps-svc.tfra-dev.svc.cluster.local:2223"], "chief": ["test-model-chief-0.test-model-chief-svc.tfra-dev.svc.cluster.local:2223"], "saver":["test-model-saver-0.test-model-saver-svc.tfra-dev.svc.cluster.local:2223"]}}'
     target:
       version: v1
       kind: StatefulSet

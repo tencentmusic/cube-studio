@@ -1,3 +1,5 @@
+set -ex
+
 kubectl --kubeconfig /mnt/uthermai/job-template/job/pkgs/config/tke-kubeconfig apply -f resources/ns.yaml
 sleep 2
 
@@ -15,6 +17,8 @@ else
         echo "kustomize 已安装"
 fi
 
-kustomize build resources | kubectl apply -f -
-#kustomize build resources | kubectl delete -f -
+kustomize build resources | kubectl delete -f -
+sleep 2
+
+#kustomize build resources | kubectl apply -f -
 

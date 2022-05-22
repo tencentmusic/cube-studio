@@ -67,8 +67,8 @@ RUN pip3 install --upgrade pip && pip3 install tensorflow==$TF_VERSION
 
 # cmake
 WORKDIR /usr/local/share/cmake-3.15
-#RUN curl -L https://cmake.org/files/v3.15/cmake-3.15.7-Linux-x86_64.sh -o make-3.15.7-Linux-x86_64.sh
-COPY make-3.15.7-Linux-x86_64.sh ./
+RUN curl -L https://cmake.org/files/v3.15/cmake-3.15.7-Linux-x86_64.sh -o make-3.15.7-Linux-x86_64.sh
+#COPY make-3.15.7-Linux-x86_64.sh ./
 RUN chmod 777 make-3.15.7-Linux-x86_64.sh && \
 	./make-3.15.7-Linux-x86_64.sh --skip-license --prefix=/usr
 
@@ -88,7 +88,7 @@ WORKDIR /app
 
 # tensorflow kafka
 ARG TF_VERSION="2.5.1"
-RUN pip3 install --upgrade pip && pip3 install tensorflow_datasets numpy tensorflow==$TF_VERSION traceback2 kafka
+RUN pip3 install --upgrade pip && pip3 install tensorflow_datasets numpy tensorflow==$TF_VERSION traceback2 kafka-python
 
 # tfra
 COPY --from=compiler /app/recommenders-addons/artifacts/tensorflow_recommenders_addons-*.whl ./
@@ -99,4 +99,5 @@ RUN pip3 install tensorflow_recommenders_addons-*.whl
 COPY src/ /app/
 ENV PYTHONPATH=/app:$PYTHONPATH
 
-ENTRYPOINT ["sleep", "99d"]
+#ENTRYPOINT ["sleep", "99d"]
+ENTRYPOINT ["python3", "launcher.py"]

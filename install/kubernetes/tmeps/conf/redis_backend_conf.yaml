@@ -2,10 +2,10 @@ apiVersion: v1
 data:
   redis_backend.conf: |-
     {
-      "redis_connection_mode": 0,
+      "redis_connection_mode": 1,
       "redis_master_name": "master",
       "redis_host_ip": [
-        "redis.tfra-dev"
+        "redis-svc.tfra-dev"
       ],
       "redis_host_port": [
         6379

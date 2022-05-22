@@ -4,42 +4,15 @@
 
 ### 代码结构
 
-	.  
-	├── build.sh       # build镜像  
-	├── deploy         # 部署到k8s的yaml文件  
-	├── docs  
-	├── patch          # 对serving代码和recommenders-addons代码的各种补丁  
-	├── README.md  
-	├── recommenders-addons  # 原生tfra0.3.1代码  
-	├── serving        # 原生tf-serving2.5.2代码  
-	└── src            # tf模型、数据类  
-	    ├── client.py    # 推理服务client  
-	    ├── common.py  
-	    ├── input_fn_builder.py   # 定义input_fn，描述输入  
-	    ├── launcher.py           # 定义Estimator  
-	    ├── model_fn_builder.py   # 定义model_fn，描述计算图  
-	    ├── redis_backend.conf    # redis后台配置  
-	    └── serving_models.conf   # serving 配置  
 
-### 如何部署训练
+### 如何部署
 
-1. 配置redis
-    kubectl apply -f deploy/redis.yaml （已经有redis就不用部署了）
-    修改src/redis_backend.conf，配置host/user/password。此处其他配置可参考：https://github.com/tensorflow/recommenders-addons/blob/master/docs/api_docs/tfra/dynamic_embedding/RedisBackend.md
-
-2. build镜像。
-    ./build.sh # 此处可以修改build.sh换成你的镜像库。
-    
-3. 调整模型和数据（有需要的话）
-    模型：model_fn_builder.py   
-    数据输入：input_fn_builder.py（支持流输入、文件输入等，参考demo的input_fn函数）
-
-3. 部署训练集群。
-    修改deploy/kustomization.yaml调整集群规模、修改分布式存储路径。  
-    kubectl apply -k deploy/kustomization.yaml  
+    sh deploy.sh   # 部署一个demo模型
 
 ### 如何请求推理服务
+
 跟请求原生tf-serving一样，参考src/client.py
+
 
 ### 如何更改tf和tf serving的版本（仅作参考，具体版本具体分析）
 

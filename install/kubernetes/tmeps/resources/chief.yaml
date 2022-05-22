@@ -23,6 +23,7 @@ spec:
       containers:
       - name: app
         image: mirrors.tencent.com/uthermai/tmeps:trainning
+        #image: mirrors.tencent.com/uthermai/tmeps:testing
         imagePullPolicy: Always
         env:
         - name: "whoami"
