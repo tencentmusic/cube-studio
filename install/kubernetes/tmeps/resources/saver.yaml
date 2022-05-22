@@ -34,15 +34,6 @@ spec:
           requests:
             cpu: 4000m
             memory: 8000Mi
-        volumeMounts:
-        - name: uthermai-data
-          mountPath:  /mnt/uthermai
-      volumes:
-      - name: empty-dir
-        emptyDir: {}
-      - name: uthermai-data
-        hostPath:
-          path: /data/k8s/kubeflow/pipeline/workspace/uthermai
 
 ---
 apiVersion: v1

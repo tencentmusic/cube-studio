@@ -6,15 +6,19 @@ resources:
 - server.yaml
 - saver.yaml
 
+# 命名空间
 namespace: tfra-dev
 
+# pod名字前缀，可以区分不同项目
 namePrefix: test-model-
+
 commonLabels:
   trainning-model: test-model
 
+# 集群规模
 replicas:
 - name: ps
-  count: 1
+  count: 2
 - name: worker
   count: 4
 - name: chief
@@ -27,31 +31,55 @@ replicas:
   count: 1
 
 patches:
+# 挂载conf文件、分布式存储目录
   - patch: |-
       - op: add
-        path: "/spec/template/spec/containers/0/env/-"
+        path: /spec/template/spec/containers/0/volumeMounts
         value:
-          name: "model_tfra_redis_config_path"
-          value: "/mnt/uthermai/tfra-redis-ps-trainer/src/redis_backend.conf"
+        - name: serving-models-conf
+          mountPath: /tmp/conf/serving-models-conf
+        - name: redis-backend-conf
+          mountPath: /tmp/conf/redis-backend-conf
+        - name: uthermai-data
+          mountPath: /mnt/uthermai
       - op: add
-        path: "/spec/template/spec/containers/0/env/-"
+        path: /spec/template/spec/volumes
         value:
-          name: "checkpoint_path"
+        - name: serving-models-conf
+          configMap:
+            name: serving-models-conf
+            defaultMode: 493
+        - name: redis-backend-conf
+          configMap:
+            name: redis-backend-conf
+            defaultMode: 493
+        - name: uthermai-data
+          hostPath:
+            path: /data/k8s/kubeflow/pipeline/workspace/uthermai
+    target:
+      version: v1
+      kind: StatefulSet
+
+# 模型、checkpoint、数据目录的路径
+  - patch: |-
+      - op: add
+        path: "/spec/template/spec/containers/0/env"
+        value:
+        - name: "model_serving_config_path"
+          value: "/tmp/conf/serving-models-conf/serving_models.conf"
+        - name: "model_tfra_redis_config_path"
+          value: "/tmp/conf/redis-backend-conf/redis_backend.conf"
+        - name: "checkpoint_path"
           value: "/mnt/uthermai/tmp/checkpoint"
-      - op: add
-        path: "/spec/template/spec/containers/0/env/-"
-        value:
-          name: "model_path"
+        - name: "model_path"
           value: "/mnt/uthermai/tmp/saved_model"
-      - op: add
-        path: "/spec/template/spec/containers/0/env/-"
-        value:
-          name: "data_path"
+        - name: "data_path"
           value: "/mnt/uthermai/tmp"
     target:
       version: v1
       kind: StatefulSet
 
+# 集群结构
   - patch: |-
       - op: add
         path: "/spec/template/spec/containers/0/env/-"

@@ -20,7 +20,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis-tfra
+  name: redis
   namespace: tfra-dev
   labels:
     k8s-app: redis-tfra
@@ -82,7 +82,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-tfra
+  name: redis-svc
   namespace: tfra-dev
   labels:
     k8s-app: redis-tfra

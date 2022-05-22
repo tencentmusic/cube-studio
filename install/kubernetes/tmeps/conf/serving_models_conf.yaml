@@ -1,0 +1,21 @@
+apiVersion: v1
+data:
+  serving_models.conf: |+
+    model_config_list {
+      config {
+        name: "test_model"
+        base_path: "/mnt/uthermai/"
+        model_platform: "tensorflow"
+        model_version_policy{
+            specific {
+               versions: 1
+            }
+        }
+      }
+    }
+
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: serving-models-conf
+  namespace: tfra-dev
