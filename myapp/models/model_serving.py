@@ -50,19 +50,6 @@ class service_common():
         return self.get_default_node_selector(self.project.node_selector,self.resource_gpu,'service')
 
 
-    @property
-    def polaris_url(self):
-
-        l5=json.loads(self.expand).get('alias_l5','') if self.expand else ''
-        if l5:
-            url = "http://v2.polaris.oa.com/#/services/alias?alias=%s&owner=%s&namespace=Production"%(l5,self.created_by.username)
-        else:
-            url='http://v2.polaris.oa.com/#/services/alias'
-
-        return Markup(f'<a target=_blank href="{url}">{l5}</a>')
-
-
-
 
 class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     __tablename__ = 'service'
@@ -121,6 +108,14 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     def __repr__(self):
         return self.name
 
+    @property
+    def ip(self):
+        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
+        if SERVICE_EXTERNAL_IP:
+            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
+            return SERVICE_EXTERNAL_IP+":"+str(30000+10*self.id)
+        else:
+            return "未开通"
 
     @property
     def host_url(self):

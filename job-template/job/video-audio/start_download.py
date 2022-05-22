@@ -555,32 +555,6 @@ def launcher_cluster(file_path=None,deal=None):
 
 
 
-def get_l5_hosts(namespace: str, server_name: str):
-    import asyncio
-    from polaris.api.consumer import create_consumer_by_config
-    from polaris.pkg.model.service import GetOneInstanceRequest, ServiceCallResult, RetStatus, GetInstancesRequest
-    from polaris.pkg.config.api import Configuration
-
-    config = Configuration()
-    config.set_default()
-    config.verify()
-    # config.consumer_config.get_load_balancer().type = "wr"
-    consumer = create_consumer_by_config(config)
-
-    loop = asyncio.get_event_loop()
-
-    request = GetInstancesRequest(namespace=namespace, service=server_name, timeout=10000)
-    ret = loop.run_until_complete(consumer.async_get_instances(request))
-    instance = ret.dest_instances
-    host = []
-    for ins in instance.instances:
-        host.append("%s:%s" % (ins.get_host(), ins.get_port()))
-    return host
-
-
-
-
-
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description="build component")
     arg_parser.add_argument('--num_workers', type=int, required=False, help="workers的数量", default=3)

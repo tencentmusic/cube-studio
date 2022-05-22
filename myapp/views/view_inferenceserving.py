@@ -674,55 +674,6 @@ instance_group [
         flash('服务清理完成', category='warning')
         return redirect('/inferenceservice_modelview/list/')
 
-    # @pysnooper.snoop()
-    def create_polaris(self,service):
-        try:
-            # l5的值创建以后是不应该变的，一个服务对应一个固定的l5，不然客户端需要修改代码
-            from myapp.utils.py.py_polaris import Polaris
-            polaris = Polaris()
-
-            alias_token = json.loads(service.expand).get('alias_token','') if service.expand else ''
-            alias_l5 = json.loads(service.expand).get('alias_l5','') if service.expand else ''   # 只创建一次
-            service_name = '%s.service' % (service.name)
-            username = service.created_by.username + "," + conf.get('ADMIN_USER')
-
-            if not alias_l5:
-
-                alias = polaris.get_alias(service_name)
-                if len(alias)>0 and alias[0]['alias']!=alias_l5:
-                    flash('创建失败，存在系统无法识别的北极星别名，请先联系管理员手动处理','warning')
-                    return
-
-                polaris.delete_instances(service_name)
-                polaris.delete_alias(service_name,alias_token)
-                polaris.delete_service(service_name)
-                polaris_service = polaris.register_service(username, service_name)
-                print(polaris_service)
-                service_token = polaris_service['token'] if polaris_service else ''
-
-                alias = polaris.register_alias(username, service_name)
-
-                expand = json.loads(service.expand) if service.expand else {}
-                expand.update(
-                    {
-                        "service_token": service_token,
-                        "alias_token": alias['service_token'],
-                        "alias_l5": alias['alias'],
-                    }
-                )
-                service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
-                db.session.commit()
-
-
-            polaris.delete_instances(service_name)
-            instances = polaris.register_instances(service_name,conf.get('SERVICE_EXTERNAL_IP'),30000+10*service.id)
-            print(instances)
-
-
-        except Exception as e:
-            print(e)
-            flash('部署北极星失败:%s'%str(e),'warning')
-
     #
     # # 针对kfserving框架，单独的部署方式
     # @pysnooper.snoop()
@@ -930,20 +881,19 @@ instance_group [
         )
 
 
-        # # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
-        # SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',None)
-        # if SERVICE_EXTERNAL_IP:
-        #     service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
-        #     service_external_name = (service.name + "-external").lower()[:60].strip('-')
-        #     k8s_client.create_service(
-        #         namespace=namespace,
-        #         name=service_external_name,
-        #         username=service.created_by.username,
-        #         ports=service_ports,
-        #         selector={"app": service.name, 'user': service.created_by.username},
-        #         externalIPs=conf.get('SERVICE_EXTERNAL_IP',None)
-        #     )
-        #     self.create_polaris(service)
+        # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
+        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',None)
+        if SERVICE_EXTERNAL_IP:
+            service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
+            service_external_name = (service.name + "-external").lower()[:60].strip('-')
+            k8s_client.create_service(
+                namespace=namespace,
+                name=service_external_name,
+                username=service.created_by.username,
+                ports=service_ports,
+                selector={"app": service.name, 'user': service.created_by.username},
+                externalIPs=conf.get('SERVICE_EXTERNAL_IP',None)
+            )
 
         if env!='debug':
             hpas = re.split(',|;', service.hpa)

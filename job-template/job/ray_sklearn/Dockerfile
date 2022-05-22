@@ -16,7 +16,6 @@ RUN apt install -y python3-dev gcc automake autoconf libtool make ffmpeg build-e
 
 # 安装pip库
 RUN pip install pysnooper cython
-RUN pip install polaris-python --index-url https://mirrors.cloud.tencent.com/pypi/simple/  --extra-index-url https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple/
 
 # 安装stern
 RUN wget https://github.com/wercker/stern/releases/download/1.11.0/stern_linux_amd64 && chmod +x stern_linux_amd64 && mv stern_linux_amd64 /usr/bin/stern

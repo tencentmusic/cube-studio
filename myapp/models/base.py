@@ -189,8 +189,6 @@ class MyappModelBase():
         "health":"健康检查",
         "transformer":"处理变换",
         "deploy_history":"部署记录",
-
-        "polaris_url": "北极星地址",
         "model_input": "模型输入",
         "input_html":"输入",
         "model_output": "模型输出",

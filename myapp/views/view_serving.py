@@ -89,7 +89,7 @@ class Service_ModelView(MyappModelView):
     help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
     show_columns = ['name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url','link']
     add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
-    list_columns = ['project','name_url','host_url','polaris_url','deploy','monitoring_url','creator','modified','clear']
+    list_columns = ['project','name_url','host_url','ip','deploy','monitoring_url','creator','modified','clear']
     edit_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','volume_mount','host',]
     base_order = ('id','desc')
     order_columns = ['id']
