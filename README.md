@@ -21,6 +21,7 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 | 模板  | 类型 | 组件说明 | 文档地址 |
 | :----- | :---- | :---- |:---- |
 | 自定义镜像 | 单机 | 完全自定义单机运行环境，可自由实现所有自定义单机功能 | 系统自带 |
+| datax | 单机 | 异构数据源导入导出 | job-template/job/datax |
 | ray | 分布式 | python ray框架 多机分布式功能，适用于超多文件在多机上的并发处理 | job-template/job/ray |
 | ray-sklearn | 分布式 | 基于ray框架的sklearn支持算法多机分布式并行计算  | job-template/job/ray_sklearn |
 | volcano | 分布式 | volcano框架的多机分布式，可紫玉控制代码，利用环境变量实现多机worker的工作与协同  | job-template/job/volcano |
