@@ -4,13 +4,13 @@ data:
     model_config_list {
       config {
         name: "test_model"
-        base_path: "/mnt/uthermai/"
+        base_path: "/mnt/uthermai/tmp/saved_model"
         model_platform: "tensorflow"
-        model_version_policy{
-            specific {
-               versions: 1
-            }
-        }
+        #        model_version_policy{
+                #            specific {
+                #               versions: 1
+                #            }
+                #        }
       }
     }
 

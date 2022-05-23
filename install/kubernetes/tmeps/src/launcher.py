@@ -125,7 +125,7 @@ def export_for_serving(checkpoint_path, model_fn, export_dir, ps_num):
     while True:
         start = time.time()
         estimator.export_saved_model(export_dir, serving_input_receiver_dense_fn())
-        end = time.clock()
+        end = time.time()
         logging.info("Saving process cost {}s".format(str(end-start)))
         logging.info("Waiting 600s brfore next saving...")
         time.sleep(600)

@@ -17,7 +17,7 @@ else
         echo "kustomize 已安装"
 fi
 
-kustomize build resources | kubectl delete -f -
+kustomize build resources | kubectl delete -f - || true
 sleep 2
 
 #kustomize build resources | kubectl apply -f -
