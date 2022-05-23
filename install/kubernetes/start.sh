@@ -116,7 +116,6 @@ mv kfctl /usr/bin/
 kfctl apply -V -f kubeflow/v1.2.0/kfctl_k8s_istio.v1.2.0.yaml
 
 kubectl delete apiservice v1beta1.webhook.cert-manager.io
-#  删除cert-manager 下面的pod
 
 # 部署kfp pipeline
 kubectl create -f kubeflow/pipeline/minio-pv-hostpath.yaml

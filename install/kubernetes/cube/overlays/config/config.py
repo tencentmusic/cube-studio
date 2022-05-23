@@ -583,7 +583,7 @@ class CeleryConfig(object):
         }
     }
 
-DOCUMENTATION_URL=''  # 帮助文档地址，显示在web导航栏
+DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/tree/master/docs/example'  # 帮助文档地址，显示在web导航栏
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
 
