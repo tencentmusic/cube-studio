@@ -716,7 +716,7 @@ HELP_URL={
     "service":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
     "inferenceservice":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
     "run":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "docker":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example"
+    "docker":"https://github.com/tencentmusic/cube-studio/tree/master/images"
 }
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称

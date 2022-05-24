@@ -517,7 +517,8 @@ class NNI_ModelView_Base():
         host = nni.project.cluster.get('NNI_DOMAIN',request.host)
         if not host:
             host=request.host
-
+        if ':' in host:
+            host = host[:host.rindex(':')]   # 如果捕获到端口号，要去掉
         vs_json = {
             "apiVersion": "networking.istio.io/v1alpha3",
             "kind": "VirtualService",
