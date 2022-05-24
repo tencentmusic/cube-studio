@@ -1,6 +1,6 @@
 # 在线构建镜像
 
-![](../pic/tapd_20424693_1630748567_87.png)
+![image](https://user-images.githubusercontent.com/20157705/167538625-39c19c33-a63d-44fa-a16a-2aaa7b480190.png)
 
 扩展字段高级配置(例如)：
 ```

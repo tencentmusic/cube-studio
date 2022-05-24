@@ -161,7 +161,7 @@ def init():
                         "range": "",
                         "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
                         "placeholder": "",
-                        "describe": "要调试的镜像，<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/docs/example/images'>基础镜像参考<a>",
+                        "describe": "要调试的镜像，<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/imagess'>基础镜像参考<a>",
                         "editable": 1,
                         "condition": "",
                         "sub_args": {}
