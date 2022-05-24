@@ -707,19 +707,16 @@ NOTEBOOK_GPU_TYPE='NVIDIA'
 
 # 各类model list界面的帮助文档
 HELP_URL={
-    "pipeline":"http://xx.xx/xx",
-    "job_template":"http://xx.xx/xx",
-    "task":"http://xx.xx/xx",
-    "hp":"http://xx.xx/xx",
-    "nni":"http://xx.xx/xx",
-    "images":"http://xx.xx/xx",
-    "notebook":"http://xx.xx/xx",
-    "service":"http://xx.xx/xx",
-    "kfserving":"http://xx.xx/xx",
-    "inferenceservice":"http://xx.xx/xx",
-    "model":"http://xx.xx/xx",
-    "run":"http://xx.xx/xx",
-    "docker":"http://xx.xx/xx"
+    "pipeline":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "job_template":"https://github.com/tencentmusic/cube-studio/tree/master/job-template",
+    "task":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "nni":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "images":"https://github.com/tencentmusic/cube-studio/tree/master/images",
+    "notebook":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "service":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "inferenceservice":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "run":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "docker":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example"
 }
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
