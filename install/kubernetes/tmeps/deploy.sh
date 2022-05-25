@@ -4,8 +4,8 @@ kubectl apply -f resources/ns.yaml
 sleep 2
 
 kubectl apply -f conf/
-kubectl -f resources/redis_standlone.yaml
-kubectl wait -f resources/redis_standlone.yaml --for condition=available
+kubectl apply -f resources/redis_standlone.yaml
+#kubectl wait -f resources/redis_standlone.yaml --for condition=available
 sleep 2
 
 if [ -z $(which kustomize) ];then
