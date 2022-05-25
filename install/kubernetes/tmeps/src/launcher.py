@@ -13,56 +13,62 @@ from input_fn_builder import *
 from model_fn_builder import *
 
 def redis_config_init():
-	redis_config_file_path = os.getenv('model_tfra_redis_config_path')
-	if not redis_config_file_path:
-		raise RuntimeError("redis_config_file_path not found")
-	logging.info(redis_config_file_path)
+    redis_config_file_path = os.getenv('model_tfra_redis_config_path')
+    if not redis_config_file_path:
+        raise RuntimeError("redis_config_file_path not found")
+    logging.info(redis_config_file_path)
 
-	with open(redis_config_file_path, 'r') as f:
-		redis_config_context = f.read()
-		if not redis_config_context:
-			raise RuntimeError("redis_config_context not found")
-		logging.info(redis_config_context)
-	return redis_config_context
+    with open(redis_config_file_path, 'r') as f:
+        redis_config_context = f.read()
+        if not redis_config_context:
+            raise RuntimeError("redis_config_context not found")
+        logging.info(redis_config_context)
+    return redis_config_context
 
 def tf_config_init():
-	tf_config = json.loads(os.environ.get('ps_cluster_config') or '{}')
-	if not tf_config:
-		raise RuntimeError("tf_config not found")
+    tf_config = json.loads(os.environ.get('ps_cluster_config') or '{}')
+    if not tf_config:
+        raise RuntimeError("tf_config not found")
 
-	#"task": {"type": "evaluator", "index": 0}
-	hostname = os.getenv('HOSTNAME')
-	node_type = hostname.split('-')[-2]
-	index = hostname.split('-')[-1]
-	if (node_type not in ('chief','ps','evaluator','worker','saver')):
-		raise RuntimeError("hostname illegal")
-	if not(index) or int(index) < 0:
-		raise RuntimeError("hostname illegal")
-	tf_config["task"] = {"type": node_type, "index": int(index)}
-	logging.info(tf_config)
-	os.environ['TF_CONFIG'] = json.dumps(tf_config)
-	return tf_config
+    #"task": {"type": "evaluator", "index": 0}
+    hostname = os.getenv('HOSTNAME')
+    node_type = hostname.split('-')[-2]
+    index = hostname.split('-')[-1]
+    if (node_type not in ('chief','ps','evaluator','worker','saver')):
+        raise RuntimeError("hostname illegal")
+    if not(index) or int(index) < 0:
+        raise RuntimeError("hostname illegal")
+    tf_config["task"] = {"type": node_type, "index": int(index)}
+    logging.info(tf_config)
+    os.environ['TF_CONFIG'] = json.dumps(tf_config)
+    return tf_config
 
-def model_path_init():	
-	model_path = os.getenv('model_path') + '/'
-	if (not model_path) or (not os.path.exists(model_path)):
-		raise RuntimeError("model_path not found")
-	logging.info(model_path)
-	return model_path
+def model_path_init():    
+    model_path = os.getenv('model_path') + '/'
+    if not model_path:
+        raise RuntimeError("model_path not found")
+    if not os.path.exists(model_path):
+        os.makedirs(model_path)
+    logging.info('model_path: ' + model_path)
+    return model_path
 
 def checkpoint_path_init():  
     checkpoint_path = os.getenv('checkpoint_path') + '/' 
-    if (not checkpoint_path) or (not os.path.exists(checkpoint_path)):
+    if not checkpoint_path:
         raise RuntimeError("checkpoint_path not found")
-    logging.info(checkpoint_path)
+    if not os.path.exists(checkpoint_path):
+        os.makedirs(checkpoint_path)
+    logging.info('checkpoint_path: ' + checkpoint_path)
     return checkpoint_path
 
-def data_path_init():	
-	data_path = os.getenv('data_path') + '/'
-	if (not data_path) or (not os.path.exists(data_path)):
-		raise RuntimeError("data_path not found")
-	logging.info(data_path)
-	return data_path
+def data_path_init():    
+    data_path = os.getenv('data_path') + '/'
+    if not data_path:
+        raise RuntimeError("data_path not found")
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+    logging.info('data_path: ' + data_path)
+    return data_path
 
 def train_and_evaluate(model_dir, model_fn, input_fn, ps_num):
     logging.info("Enter train_and_evaluate...")
@@ -131,22 +137,22 @@ def export_for_serving(checkpoint_path, model_fn, export_dir, ps_num):
         time.sleep(600)
 
 if __name__ == '__main__':
-	model_path = model_path_init()
-	checkpoint_path = checkpoint_path_init()
-	data_path = data_path_init()
+    model_path = model_path_init()
+    checkpoint_path = checkpoint_path_init()
+    data_path = data_path_init()
 
-	tf_config = tf_config_init()
-	redis_config_init()
-	ps_num = len(tf_config["cluster"]["ps"])
+    tf_config = tf_config_init()
+    redis_config_init()
+    ps_num = len(tf_config["cluster"]["ps"])
 
-	role = tf_config["task"]["type"]
-	if role != "saver":
-		try:
-			train_and_evaluate(checkpoint_path, model_fn, input_fn4, ps_num)
-		except Exception as e:
-			traceback.print_exc()
-	else:
-		tfra.dynamic_embedding.enable_inference_mode()
-		export_for_serving(checkpoint_path, model_fn, model_path, ps_num)
+    role = tf_config["task"]["type"]
+    if role != "saver":
+        try:
+            train_and_evaluate(checkpoint_path, model_fn, input_fn4, ps_num)
+        except Exception as e:
+            traceback.print_exc()
+    else:
+        tfra.dynamic_embedding.enable_inference_mode()
+        export_for_serving(checkpoint_path, model_fn, model_path, ps_num)
 
-	
+    
