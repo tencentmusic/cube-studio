@@ -100,4 +100,4 @@ COPY src/ /app/
 ENV PYTHONPATH=/app:$PYTHONPATH
 
 #ENTRYPOINT ["sleep", "99d"]
-ENTRYPOINT ["python3", "launcher.py"]
+ENTRYPOINT ["/bin/bash", "-c", "cp -r /tmp/conf /tmp/conf_inner && python3 launcher.py"]
