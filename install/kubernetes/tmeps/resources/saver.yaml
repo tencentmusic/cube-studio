@@ -22,7 +22,7 @@ spec:
         cpu: "true"
       containers:
       - name: app
-        image: mirrors.tencent.com/uthermai/tmeps:trainning
+        image: ai.tencentmusic.com/tme-public/tmeps:trainning
         imagePullPolicy: Always
         env:
         - name: "whoami"

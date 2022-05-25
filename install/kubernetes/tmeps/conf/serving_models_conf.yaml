@@ -4,7 +4,7 @@ data:
     model_config_list {
       config {
         name: "test_model"
-        base_path: "/mnt/uthermai/tmp/saved_model"
+        base_path: "/mnt/admin/tmp/saved_model"
         model_platform: "tensorflow"
         #        model_version_policy{
                 #            specific {

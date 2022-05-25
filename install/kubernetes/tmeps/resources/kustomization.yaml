@@ -40,8 +40,8 @@ patches:
           mountPath: /tmp/conf/serving-models-conf
         - name: redis-backend-conf
           mountPath: /tmp/conf/redis-backend-conf
-        - name: uthermai-data
-          mountPath: /mnt/uthermai
+        - name: admin-data
+          mountPath: /mnt/admin
       - op: add
         path: /spec/template/spec/volumes
         value:
@@ -53,9 +53,9 @@ patches:
           configMap:
             name: redis-backend-conf
             defaultMode: 493
-        - name: uthermai-data
+        - name: admin-data
           hostPath:
-            path: /data/k8s/kubeflow/pipeline/workspace/uthermai
+            path: /data/k8s/kubeflow/pipeline/workspace/admin
     target:
       version: v1
       kind: StatefulSet
@@ -71,11 +71,11 @@ patches:
         - name: "model_tfra_redis_config_path"
           value: "/tmp/conf_inner/redis-backend-conf/redis_backend.conf"
         - name: "checkpoint_path"
-          value: "/mnt/uthermai/tmp/checkpoint"
+          value: "/mnt/admin/tmp/checkpoint"
         - name: "model_path"
-          value: "/mnt/uthermai/tmp/saved_model"
+          value: "/mnt/admin/tmp/saved_model"
         - name: "data_path"
-          value: "/mnt/uthermai/tmp"
+          value: "/mnt/admin/tmp"
     target:
       version: v1
       kind: StatefulSet

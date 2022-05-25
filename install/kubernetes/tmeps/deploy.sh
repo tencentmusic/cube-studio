@@ -1,11 +1,11 @@
 set -ex
 
-kubectl --kubeconfig /mnt/uthermai/job-template/job/pkgs/config/tke-kubeconfig apply -f resources/ns.yaml
+kubectl apply -f resources/ns.yaml
 sleep 2
 
-kubectl --kubeconfig /mnt/uthermai/job-template/job/pkgs/config/tke-kubeconfig apply -f conf/
-kubectl --kubeconfig /mnt/uthermai/job-template/job/pkgs/config/tke-kubeconfig apply -f resources/redis_standlone.yaml
-#kubectl --kubeconfig /mnt/uthermai/job-template/job/pkgs/config/tke-kubeconfig wait -f resources/redis_standlone.yaml --for condition=available
+kubectl apply -f conf/
+kubectl -f resources/redis_standlone.yaml
+kubectl wait -f resources/redis_standlone.yaml --for condition=available
 sleep 2
 
 if [ -z $(which kustomize) ];then
@@ -14,11 +14,11 @@ if [ -z $(which kustomize) ];then
 	chmod 777 ./kustomize
 	mv ./kustomize /usr/local/bin/
 else
-        echo "kustomize 已安装"
+  echo "kustomize 已安装"
 fi
 
 kustomize build resources | kubectl delete -f - || true
 sleep 2
 
-#kustomize build resources | kubectl apply -f -
+kustomize build resources | kubectl apply -f -
 
