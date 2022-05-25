@@ -1,6 +1,10 @@
+import os,sys
+base_dir = os.path.split(os.path.realpath(__file__))[0]
+sys.path.append(base_dir)
+sys.path.append(os.path.realpath(__file__))
+
 import subprocess
 import fcntl
-import os,sys
 import time
 
 import logging

@@ -1,0 +1,51 @@
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: server
+  namespace: tfra-dev
+spec:
+  serviceName: server-svc
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      k8s-app: server
+  template:
+    metadata:
+      name: server
+      labels:
+        k8s-app: server
+    spec:
+      nodeSelector:
+        train : "true"
+        cpu: "true"
+      containers:
+      - name: app
+        image: ai.tencentmusic.com/tme-public/tmeps:serving
+        imagePullPolicy: Always
+        env:
+        - name: "whoami"
+          value: "server"
+        resources:
+#          limits:
+#            cpu: 4000m
+#            memory: 8000Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-svc
+  namespace: tfra-dev
+  labels:
+    k8s-app: server
+spec:
+  ports:
+    - port: 8501
+  clusterIP: "None"
+  selector:
+    k8s-app: server
