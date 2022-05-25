@@ -1,4 +1,5 @@
-![image](https://github.com/tencentmusic/cube-studio/blob/tfra-dev/install/kubernetes/tmeps/docs/tmpps%E6%9E%B6%E6%9E%84%E5%9B%BE.png)
+![image](https://user-images.githubusercontent.com/20157705/170186786-cb92a8c2-3b00-4fb1-9cfb-69adc231ec22.png)
+
 
 基于tfra v0.3.1: https://github.com/tensorflow/recommenders-addons.git
 
