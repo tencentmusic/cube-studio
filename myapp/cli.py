@@ -940,6 +940,62 @@ def init():
         print(e)
 
 
+
+    # 创建demo pipeline
+    def create_pipeline(tasks,pipeline):
+
+        # 创建pipeline
+        pipeline_model = db.session.query(Pipeline).filter_by(name=pipeline['name']).first()
+        org_project = db.session.query(Project).filter_by(name=pipeline['project']).filter_by(type='org').first()
+        if pipeline_model is None and org_project:
+            try:
+                pipeline_model = Pipeline()
+                pipeline_model.name = pipeline['name']
+                pipeline_model.describe = pipeline['describe']
+                pipeline_model.dag_json=json.dumps(pipeline['dag_json'])
+                pipeline_model.created_by_fk = 1
+                pipeline_model.changed_by_fk = 1
+                pipeline_model.project_id = org_project.id
+                pipeline_model.expand = json.dumps(pipeline['expand'])
+                db.session.add(pipeline_model)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+
+        # 创建task
+        for task in tasks:
+            task_model = db.session.query(Task).filter_by(name=task['name']).filter_by(pipeline_id=pipeline_model.id).first()
+            job_template = db.session.query(Job_Template).filter_by(name=task['job_templete']).first()
+            if task_model is None and job_template:
+                try:
+                    task_model = Task()
+                    task_model.name = task['name']
+                    task_model.label = task['label']
+                    task_model.working_dir = task.get('working_dir','')
+                    task_model.command = task.get('command', '')
+                    task_model.args = json.dumps(task['args'])
+                    task_model.volume_mount = task['volume_mount']
+                    task_model.resource_memory = task['resource_memory']
+                    task_model.resource_cpu = task['resource_cpu']
+                    task_model.resource_gpu = task['resource_gpu']
+                    task_model.created_by_fk = 1
+                    task_model.changed_by_fk = 1
+                    task_model.pipeline_id = pipeline_model.id
+                    task_model.job_template_id = job_template.id
+                    db.session.add(task_model)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+
+
+
+
+    try:
+        pass
+    except Exception as e:
+        print(e)
+
+
 @app.cli.command('init_db')
 @pysnooper.snoop()
 def init_db():
