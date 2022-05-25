@@ -28,12 +28,12 @@ spec:
         - name: "whoami"
           value: "worker"
         resources:
-          limits:
-            cpu: 2000m
-            memory: 4000Mi
+#          limits:
+#            cpu: 2000m
+#            memory: 4000Mi
           requests:
-            cpu: 2000m
-            memory: 4000Mi
+            cpu: 100m
+            memory: 200Mi
 
 ---
 apiVersion: v1

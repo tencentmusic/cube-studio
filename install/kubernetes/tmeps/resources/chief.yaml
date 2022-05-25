@@ -28,12 +28,12 @@ spec:
         - name: "whoami"
           value: "chief"
         resources:
-          limits:
-            cpu: 8000m
-            memory: 16000Mi
+#          limits:
+#            cpu: 8000m
+#            memory: 16000Mi
           requests:
-            cpu: 8000m
-            memory: 16000Mi
+            cpu: 100m
+            memory: 200Mi
 
 ---
 apiVersion: v1

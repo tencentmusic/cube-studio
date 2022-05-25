@@ -28,12 +28,12 @@ spec:
         - name: "whoami"
           value: "evaluator"
         resources:
-          limits:
-            cpu: 4000m
-            memory: 8000Mi
+#          limits:
+#            cpu: 4000m
+#            memory: 8000Mi
           requests:
-            cpu: 4000m
-            memory: 8000Mi
+            cpu: 100m
+            memory: 200Mi
 
 ---
 apiVersion: v1
