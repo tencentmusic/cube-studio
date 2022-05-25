@@ -936,6 +936,116 @@ def init():
             }
         )
 
+
+        #
+        # # 注册推理服务
+        # create_template(
+        #     repository_id=repository.id,
+        #     project_name='模型服务化',
+        #     image_name='ai.tencentmusic.com/tme-public/cube-service-deploy:latest',
+        #     image_describe='模型部署推理服务',
+        #     job_template_name='deploy-service',
+        #     job_template_describe='模型部署推理服务',
+        #     job_template_command='',
+        #     job_template_volume='',
+        #     job_template_account='',
+        #     job_template_env='',
+        #     job_template_expand={
+        #         "index": 6,
+        #         "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deploy-service"
+        #     },
+        #
+        #     job_template_args={
+        #         "shell": {
+        #             "--service_type": {
+        #                 "type": "str",
+        #                 "item_type": "str",
+        #                 "label": "模型服务类型",
+        #                 "require": 1,
+        #                 "choice": ['service','tfserving','torch-server','onnxruntime','triton-server'],
+        #                 "range": "",
+        #                 "default": "service",
+        #                 "placeholder": "",
+        #                 "describe": "模型服务类型",
+        #                 "editable": 1,
+        #                 "condition": "",
+        #                 "sub_args": {}
+        #             },
+        #             "--project_name": {
+        #                 "type": "str",
+        #                 "item_type": "str",
+        #                 "label": "项目组名称",
+        #                 "require": 0,
+        #                 "choice": [],
+        #                 "range": "",
+        #                 "default": "public",
+        #                 "placeholder": "",
+        #                 "describe": "项目组名称",
+        #                 "editable": 1,
+        #                 "condition": "",
+        #                 "sub_args": {}
+        #             },
+        #             "--model_name": {
+        #                 "type": "str",
+        #                 "item_type": "str",
+        #                 "label": "模型名",
+        #                 "require": 0,
+        #                 "choice": [],
+        #                 "range": "",
+        #                 "default": "",
+        #                 "placeholder": "",
+        #                 "describe": "模型名",
+        #                 "editable": 1,
+        #                 "condition": "",
+        #                 "sub_args": {}
+        #             },
+        #             "--model_version": {
+        #                 "type": "str",
+        #                 "item_type": "str",
+        #                 "label": "模型版本号",
+        #                 "require": 0,
+        #                 "choice": [],
+        #                 "range": "",
+        #                 "default": "",
+        #                 "placeholder": "",
+        #                 "describe": "模型版本号",
+        #                 "editable": 1,
+        #                 "condition": "",
+        #                 "sub_args": {}
+        #             },
+        #             "--images": {
+        #                 "type": "str",
+        #                 "item_type": "str",
+        #                 "label": "推理服务镜像",
+        #                 "require": 0,
+        #                 "choice": [],
+        #                 "range": "",
+        #                 "default": "",
+        #                 "placeholder": "",
+        #                 "describe": "推理服务镜像",
+        #                 "editable": 1,
+        #                 "condition": "",
+        #                 "sub_args": {}
+        #             },
+        #             "--model_path": {
+        #                 "type": "str",
+        #                 "item_type": "str",
+        #                 "label": "模型地址",
+        #                 "require": 0,
+        #                 "choice": [],
+        #                 "range": "",
+        #                 "default": "",
+        #                 "placeholder": "",
+        #                 "describe": "模型地址",
+        #                 "editable": 1,
+        #                 "condition": "",
+        #                 "sub_args": {}
+        #             }
+        #         }
+        #     }
+        # )
+
+
     except Exception as e:
         print(e)
 
@@ -988,10 +1098,19 @@ def init():
                     db.session.rollback()
 
 
-
-
     try:
-        pass
+        pipeline={
+            "name":"imageAI",
+            "describe":"图像预测+物体检测+视频跟踪",
+            "dag_json":{},
+            "project":"public",
+            "expand":{
+                "demo":"true",
+                "img":"https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg"
+            }
+        }
+        tasks=[]
+        create_pipeline(pipeline=pipeline,tasks=tasks)
     except Exception as e:
         print(e)
 
