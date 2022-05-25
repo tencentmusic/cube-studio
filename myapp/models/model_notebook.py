@@ -69,6 +69,13 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             host = "http://"+JUPYTER_DOMAIN
         else:
             host = "http://"+request.host # 使用当前域名打开
+
+        # 对于有边缘节点，直接使用边缘集群的代理ip
+        SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
+        if SERVICE_EXTERNAL_IP:
+            service_ports = 10000 + 10 * self.id
+            host = "http://%s:%s"%(SERVICE_EXTERNAL_IP,str(service_ports))
+            url='/#/mnt/%s'%self.created_by.username
         return Markup(f'<a target=_blank href="{host}{url}">{self.name}</a>')
 
     @property

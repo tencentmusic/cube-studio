@@ -292,7 +292,7 @@ class Notebook_ModelView_Base():
     def reset_theia(self, notebook):
         from myapp.utils.py.py_k8s import K8s
 
-        k8s = K8s(notebook.cluster['KUBECONFIG'])
+        k8s_client = K8s(notebook.cluster['KUBECONFIG'])
         namespace = conf.get('NOTEBOOK_NAMESPACE')
         port=3000
 
@@ -335,7 +335,7 @@ class Notebook_ModelView_Base():
                     image_secrets.append(hubsecret[0])
 
 
-        k8s.create_debug_pod(
+        k8s_client.create_debug_pod(
             namespace=namespace,
             name=notebook.name,
             labels={"app":notebook.name,'user':notebook.created_by.username},
@@ -358,7 +358,7 @@ class Notebook_ModelView_Base():
             accounts=conf.get('JUPYTER_ACCOUNTS'),
             username=notebook.created_by.username
         )
-        k8s.create_service(
+        k8s_client.create_service(
             namespace=namespace,
             name=notebook.name,
             username=notebook.created_by.username,
@@ -366,9 +366,9 @@ class Notebook_ModelView_Base():
 
         crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
         crd_name = "notebook-jupyter-%s"%notebook.name.replace('_', '-') #  notebook.name.replace('_', '-')
-        vs_obj = k8s.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
+        vs_obj = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
         if vs_obj:
-            k8s.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
+            k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
             time.sleep(1)
 
 
@@ -420,7 +420,27 @@ class Notebook_ModelView_Base():
         }
 
         # print(crd_json)
-        crd = k8s.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+        crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+
+        # 创建EXTERNAL_IP的服务
+        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
+        if not SERVICE_EXTERNAL_IP and notebook.project.expand:
+            SERVICE_EXTERNAL_IP = json.loads(notebook.project.expand).get('SERVICE_EXTERNAL_IP', SERVICE_EXTERNAL_IP)
+            if type(SERVICE_EXTERNAL_IP)==str:
+                SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
+
+        if SERVICE_EXTERNAL_IP:
+            service_ports = [[10000 + 10 * notebook.id + index, port] for index, port in enumerate([port])]
+            service_external_name = (notebook.name + "-external").lower()[:60].strip('-')
+            k8s_client.create_service(
+                namespace=namespace,
+                name=service_external_name,
+                username=notebook.created_by.username,
+                ports=service_ports,
+                selector={"app": notebook.name, 'user': notebook.created_by.username},
+                externalIPs=SERVICE_EXTERNAL_IP
+            )
+
         return crd
 
     # @event_logger.log_this

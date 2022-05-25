@@ -1304,7 +1304,7 @@ def init():
 
 
     # 添加demo 服务
-    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_mem='2G',resource_cpu='2',port='80'):
+    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_mem='2G',resource_cpu='2',ports='80'):
         service = db.session.query(Service).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
@@ -1318,7 +1318,7 @@ def init():
                 service.images=image_name
                 service.command = command
                 service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
-                service.port = port
+                service.ports = ports
                 db.session.add(service)
                 db.session.commit()
             except Exception as e:
@@ -1338,7 +1338,7 @@ def init():
             PMA_USER=root 
             PMA_PASSWORD=admin
             ''',
-            port='80'
+            ports='80'
         )
 
         # 部署redis-ui
@@ -1354,7 +1354,7 @@ def init():
             REDIS_PORT=6379
             REDIS_PASSWORD=admin
             ''',
-            port='7843'
+            ports='7843'
         )
 
         # 部署mongo ui
@@ -1377,7 +1377,7 @@ def init():
             VCAP_APP_PORT=8081
             ME_CONFIG_OPTIONS_EDITORTHEME=ambiance
             ''',
-            port='8081'
+            ports='8081'
         )
 
 
@@ -1391,7 +1391,7 @@ def init():
             env='''
             NEO4J_AUTH=neo4j/admin
             ''',
-            port='7474,7687'
+            ports='7474,7687'
         )
 
         # 部署jaeger链路追踪
@@ -1402,7 +1402,7 @@ def init():
             image_name='jaegertracing/all-in-one:1.29',
             command='',
             env='',
-            port='5775,16686'
+            ports='5775,16686'
         )
 
 

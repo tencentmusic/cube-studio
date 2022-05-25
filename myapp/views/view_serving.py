@@ -231,7 +231,13 @@ class Service_ModelView(MyappModelView):
                            )
 
         # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
-        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',None)
+        # 创建EXTERNAL_IP的服务
+        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
+        if not SERVICE_EXTERNAL_IP and service.project.expand:
+            SERVICE_EXTERNAL_IP = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', SERVICE_EXTERNAL_IP)
+            if type(SERVICE_EXTERNAL_IP)==str:
+                SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
+
         if SERVICE_EXTERNAL_IP:
             service_ports = [[30000+10*service.id+index,port] for index,port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
@@ -241,7 +247,7 @@ class Service_ModelView(MyappModelView):
                 username=service.created_by.username,
                 ports=service_ports,
                 selector={"app": service.name, 'user': service.created_by.username},
-                externalIPs=conf.get('SERVICE_EXTERNAL_IP',None)
+                externalIPs=SERVICE_EXTERNAL_IP
             )
 
 
