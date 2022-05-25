@@ -45,7 +45,7 @@ metadata:
     k8s-app: server
 spec:
   ports:
-    - port: 8051
+    - port: 8501
   clusterIP: "None"
   selector:
     k8s-app: server
