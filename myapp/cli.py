@@ -1110,7 +1110,7 @@ def init():
             }
         }
         tasks=[]
-        create_pipeline(pipeline=pipeline,tasks=tasks)
+        # create_pipeline(pipeline=pipeline,tasks=tasks)
     except Exception as e:
         print(e)
 
