@@ -22,6 +22,8 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 | :----- | :---- | :---- |:---- |
 | 自定义镜像 | 单机 | 完全自定义单机运行环境，可自由实现所有自定义单机功能 | 系统自带 |
 | datax | 单机 | 异构数据源导入导出 | job-template/job/datax |
+| xgb | 单机 | xgb模型训练 | job-template/job/xgb |
+| deploy-inferenceservice | 单机 | 部署云原生推理服务 | job-template/job/deploy-inferenceservice |
 | ray | 分布式 | python ray框架 多机分布式功能，适用于超多文件在多机上的并发处理 | job-template/job/ray |
 | ray-sklearn | 分布式 | 基于ray框架的sklearn支持算法多机分布式并行计算  | job-template/job/ray_sklearn |
 | volcano | 分布式 | volcano框架的多机分布式，可紫玉控制代码，利用环境变量实现多机worker的工作与协同  | job-template/job/volcano |
@@ -132,4 +134,11 @@ tmeps支持tf框架实时训练，秒级上线，能应对embedding稀疏大模�
 ![image](https://user-images.githubusercontent.com/20157705/167534836-418855cf-daef-45a5-85c9-3bb1b7135f4f.png)
 
 
+## 边缘计算
 
+通过边缘集群的形式，在中心节点部署平台，并将边缘节点加入调度，每个私有网用户，通过项目组，将notebook，pipeline，service部署在边缘节点  
+ - 1、避免数据到中心节点的带宽传输  
+ - 2、避免中心节点的算力成本，充分利用边缘节点算力
+ - 3、避免边缘节点的运维成本
+
+![图片 1](https://user-images.githubusercontent.com/20157705/170262037-12ad086a-c427-4746-a0fa-ce3bc1586729.png)
