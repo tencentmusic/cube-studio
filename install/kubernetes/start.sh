@@ -1,8 +1,9 @@
+
 mkdir -p ~/.kube/ kubeconfig /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives
 cp config ~/.kube/config
 cp config kubeconfig/dev-kubeconfig
 
-node=`kubectl get node |grep worker | awk '{print $1}' | head -n 1`
+node=`kubectl  get node -o wide |grep $1 |awk '{print $1}'| head -n 1`
 kubectl label node $node train=true cpu=true notebook=true service=true org=public istio=true knative=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true --overwrite
 # 拉取镜像
 sh pull_image_kubeflow.sh
