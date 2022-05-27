@@ -105,7 +105,7 @@ class Repository_ModelView_Base():
     def apply_hubsecret(self,hubsecret):
         from myapp.utils.py.py_k8s import K8s
         all_cluster=conf.get('CLUSTERS',{})
-        all_kubeconfig = [all_cluster[cluster]['KUBECONFIG'] for cluster in all_cluster]+['']
+        all_kubeconfig = [all_cluster[cluster].get('KUBECONFIG','') for cluster in all_cluster]+['']
         all_kubeconfig = list(set(all_kubeconfig))
         for kubeconfig in all_kubeconfig:
             k8s = K8s(kubeconfig)

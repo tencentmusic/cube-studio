@@ -907,9 +907,9 @@ class K8s():
         cred_payload = {
             "auths": {
                 server: {
-                    "username": user,
-                    "password": password,
-                    "auth": base64.b64encode((user+":"+password).encode()).decode(),
+                    "Username": user,
+                    "Password": password,
+                    "Email": ''
                 }
             }
         }
@@ -1647,10 +1647,11 @@ def check_status_time(status,hour=8):
 
     return status
 
-#
+
 # if __name__=='__main__':
 #     k8s_client = K8s(file_path='~/.kube/config')
-#
+#     k8s_client.apply_hubsecret(namespace='',name,user,password,serve)
+
 
 
 
