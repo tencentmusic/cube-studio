@@ -1,8 +1,4 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: volcano-system
----
+
 # Source: volcano/templates/admission.yaml
 apiVersion: v1
 kind: ServiceAccount
