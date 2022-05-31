@@ -22,12 +22,12 @@ CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLAT
 docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.10.01 -f install/docker/Dockerfile .
+docker build -t ai.tencentmusic.com/tme-public/kubeflow-dashboard:2022.05.01 -f install/docker/Dockerfile .
 ```
 
 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ai.tencentmusic.com/tme-public/kubeflow-dashboard:2021.10.01
+docker pull ai.tencentmusic.com/tme-public/kubeflow-dashboard:2022.05.01
 ```
 
 ## deploy myapp (docker-compose)
