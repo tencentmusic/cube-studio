@@ -493,7 +493,7 @@ class Task_ModelView_Base():
 
 
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(task.pipeline.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name="debug-"+task.pipeline.name.replace('_','-')+"-"+task.name.replace('_','-')
         pod_name=pod_name.lower()[:60].strip('-')
@@ -548,7 +548,7 @@ class Task_ModelView_Base():
     def run_task(self,task_id):
         task = db.session.query(Task).filter_by(id=task_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(task.pipeline.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('PIPELINE_NAMESPACE')
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name.lower()[:60].strip('-')
@@ -643,7 +643,7 @@ class Task_ModelView_Base():
     def clear_task(self,task_id):
         task = db.session.query(Task).filter_by(id=task_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(task.pipeline.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('PIPELINE_NAMESPACE')
 
         # 删除运行时容器
@@ -687,7 +687,7 @@ class Task_ModelView_Base():
     def log_task(self,task_id):
         task = db.session.query(Task).filter_by(id=task_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s = K8s(task.pipeline.project.cluster['KUBECONFIG'])
+        k8s = K8s(task.pipeline.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('PIPELINE_NAMESPACE')
         running_pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = running_pod_name.lower()[:60].strip('-')

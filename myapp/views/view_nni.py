@@ -466,7 +466,7 @@ class NNI_ModelView_Base():
                     image_secrets.append(hubsecret[0])
 
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(nni.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(nni.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('KATIB_NAMESPACE')
         run_id='nni-'+nni.name
 
@@ -789,7 +789,7 @@ frameworkcontrollerConfig:
     def log_task(self,nni_id):
         nni = db.session.query(NNI).filter_by(id=nni_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s = K8s(nni.project.cluster['KUBECONFIG'])
+        k8s = K8s(nni.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('KATIB_NAMESPACE')
         pod = k8s.get_pods(namespace=namespace, pod_name=nni.name)
         if pod:

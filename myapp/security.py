@@ -285,7 +285,7 @@ class MyappSecurityManager(SecurityManager):
         self.lm.header_loader(self.load_user_from_header)
 
     # 使用header 认证，通过rtx名获取用户
-    # @pysnooper.snoop(depth=1)
+    # @pysnooper.snoop()
     def load_user_from_header(self, authorization_value):
         # token=None
         # if 'token' in request.headers:

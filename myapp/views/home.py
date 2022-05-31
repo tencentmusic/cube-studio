@@ -113,7 +113,7 @@ class Myapp(BaseMyappView):
             if ip in nodes:
                 clusters = conf.get('CLUSTERS', {})
                 cluster = clusters[cluster_name]
-                k8s_client = K8s(cluster['KUBECONFIG'])
+                k8s_client = K8s(cluster.get('KUBECONFIG',''))
                 # 获取最新的节点信息
                 nodes = k8s_client.get_node(ip=ip)
                 if nodes:
@@ -136,7 +136,7 @@ class Myapp(BaseMyappView):
                 clusters = conf.get('CLUSTERS', {})
                 for cluster_name in clusters:
                     cluster = clusters[cluster_name]
-                    k8s_client = K8s(cluster['KUBECONFIG'])
+                    k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
                     all_node = k8s_client.get_node()
                     all_node_json = {}

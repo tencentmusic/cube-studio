@@ -369,7 +369,7 @@ const Model: React.FC<ModelProps> = props => {
             acc.push(
               (
                 <React.Fragment key={cur}>
-                  <Label>参数 {cur}</Label>
+                  <Label> {cur}</Label>
                   {mapCurrent.flat()}
                   <div className={style.splitLine}></div>
                 </React.Fragment>

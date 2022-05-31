@@ -101,26 +101,47 @@ def init():
 
         job_template = db.session.query(Job_Template).filter_by(name=job_template_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='job-template').first()
-        if job_template is None and project and images.id:
-            try:
-                job_template = Job_Template()
-                job_template.name = job_template_name
-                job_template.describe=job_template_describe
-                job_template.entrypoint=job_template_command,
-                job_template.volume_mount=job_template_volume,
-                job_template.accounts=job_template_account,
-                job_template.expand = json.dumps(job_template_expand,indent=4,ensure_ascii=False) if job_template_expand else '{}'
-                job_template.created_by_fk=1
-                job_template.changed_by_fk=1
-                job_template.project_id=project.id
-                job_template.images_id=images.id
-                job_template.version='Release'
-                job_template.env=job_template_env
-                job_template.args=json.dumps(job_template_args,indent=4,ensure_ascii=False) if job_template_args else '{}'
-                db.session.add(job_template)
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
+        if project and images.id:
+            if job_template is None:
+                try:
+                    job_template = Job_Template()
+                    job_template.name = job_template_name
+                    job_template.describe=job_template_describe
+                    job_template.entrypoint=job_template_command,
+                    job_template.volume_mount=job_template_volume,
+                    job_template.accounts=job_template_account,
+                    job_template.expand = json.dumps(job_template_expand,indent=4,ensure_ascii=False) if job_template_expand else '{}'
+                    job_template.created_by_fk=1
+                    job_template.changed_by_fk=1
+                    job_template.project_id=project.id
+                    job_template.images_id=images.id
+                    job_template.version='Release'
+                    job_template.env=job_template_env
+                    job_template.args=json.dumps(job_template_args,indent=4,ensure_ascii=False) if job_template_args else '{}'
+                    db.session.add(job_template)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+            else:
+                try:
+                    job_template.describe = job_template_describe
+                    job_template.entrypoint = job_template_command,
+                    job_template.volume_mount = job_template_volume,
+                    job_template.accounts = job_template_account,
+                    job_template.expand = json.dumps(job_template_expand, indent=4,ensure_ascii=False) if job_template_expand else '{}'
+                    job_template.created_by_fk = 1
+                    job_template.changed_by_fk = 1
+                    job_template.project_id = project.id
+                    job_template.images_id = images.id
+                    job_template.version = 'Release'
+                    job_template.env = job_template_env
+                    job_template.args = json.dumps(job_template_args, indent=4,
+                                                   ensure_ascii=False) if job_template_args else '{}'
+                    db.session.update(job_template)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+
 
 
 
@@ -151,7 +172,7 @@ def init():
             job_template_name=conf.get('CUSTOMIZE_JOB','自定义镜像') if conf.get('CUSTOMIZE_JOB','自定义镜像') else '自定义镜像',
             job_template_describe='使用用户自定义镜像作为运行镜像',
             job_template_args={
-                "shell": {
+                "参数": {
                     "images": {
                         "type": "str",
                         "item_type": "str",
@@ -220,17 +241,17 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "-f": {
                         "type": "str",
                         "item_type": "str",
-                        "label": "job.json文件地址",
+                        "label": "job.json文件地址，<a href='https://github.com/alibaba/DataX'>书写格式参考</a>",
                         "require": 1,
                         "choice": [],
                         "range": "",
                         "default": "/usr/local/datax/job/job.json",
                         "placeholder": "",
-                        "describe": "job.json文件地址",
+                        "describe": "job.json文件地址，<a href='https://github.com/alibaba/DataX'>书写格式参考</a>",
                         "editable": 1,
                         "condition": "",
                         "sub_args": {}
@@ -260,7 +281,21 @@ def init():
             TASK_RESOURCE_GPU=0
             '''.strip().replace(' ',''),
             job_template_args={
-                "shell": {
+                "参数": {
+                    "--image": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                        "placeholder": "",
+                        "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
                     "--working_dir": {
                         "type": "str",
                         "item_type": "str",
@@ -303,20 +338,7 @@ def init():
                         "condition": "",
                         "sub_args": {}
                     },
-                    "--image": {
-                        "type": "str",
-                        "item_type": "str",
-                        "label": "",
-                        "require": 1,
-                        "choice": [],
-                        "range": "",
-                        "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
-                        "placeholder": "",
-                        "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
-                        "editable": 1,
-                        "condition": "",
-                        "sub_args": {}
-                    }
+
                 }
             }
 
@@ -340,7 +362,7 @@ def init():
                 "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray"
             },
             job_template_args={
-                "shell": {
+                "参数": {
                     "-n": {
                         "type": "int",
                         "item_type": "",
@@ -410,7 +432,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--train_csv_file_path": {
                         "type": "str",
                         "item_type": "str",
@@ -530,6 +552,173 @@ def init():
 
 
 
+        # xgb 单机
+        create_template(
+            repository_id=repository.id,
+            project_name='机器学习',
+            image_name='ai.tencentmusic.com/tme-public/xgb_train_and_predict:v1',
+            image_describe='xgb算法单机',
+            job_template_name='xgb',
+            job_template_describe='xgb算法单机',
+            job_template_command='',
+            job_template_volume='',
+            job_template_account='',
+            job_template_env='',
+            job_template_expand={
+                "index": 8,
+                "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/xgb"
+            },
+
+            job_template_args={
+                "训练": {
+                    "--train_csv_file_path": {
+                        "type": "text",
+                        "item_type": "",
+                        "label": "训练集csv路径",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "/app/train.csv",
+                        "placeholder": "",
+                        "describe": "训练集csv路径，首行是header，首列是label。为空则不做训练，尝试从model_load_path加载模型。",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--sep": {
+                        "type": "str",
+                        "item_type": "",
+                        "label": "分隔符",
+                        "require": 1,
+                        "choice": [
+                            "space",
+                            "TAB",
+                            ","
+                        ],
+                        "range": "",
+                        "default": ",",
+                        "placeholder": "",
+                        "describe": "分隔符",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--classifier_or_regressor": {
+                        "type": "str",
+                        "item_type": "",
+                        "label": "分类还是回归",
+                        "require": 1,
+                        "choice": [
+                            "classifier",
+                            "regressor"
+                        ],
+                        "range": "",
+                        "default": "classifier",
+                        "placeholder": "",
+                        "describe": "分类还是回归",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--params": {
+                        "type": "json",
+                        "item_type": "str",
+                        "label": "xgb参数",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": {
+                            "max_depth":4,
+                            "learning_rate":0.4,
+                            "n_estimators":30,
+                            "objective":"reg:linear",
+                            "nthread":-1
+                        },
+                        "placeholder": "",
+                        "describe": "xgb参数, json格式",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--eval_result_path": {
+                        "type": "text",
+                        "item_type": "",
+                        "label": "模型评估报告保存路径",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "模型评估报告保存路径。默认为空，想看模型评估报告就填。",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--model_save_path": {
+                        "type": "text",
+                        "item_type": "",
+                        "label": "模型文件保存路径",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "模型文件保存路径。为空则不保存模型。",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    }
+                },
+                "离线推理":{
+                    "--model_load_path": {
+                        "type": "text",
+                        "item_type": "",
+                        "label": "模型加载路径",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "模型加载路径。为空则不加载。",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--predict_csv_file_path": {
+                        "type": "text",
+                        "item_type": "",
+                        "label": "预测数据集csv路径",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "预测数据集csv路径，格式和训练集一致，顺序保持一致，没有label列。为空则不做predict。",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--predict_result_path": {
+                        "type": "text",
+                        "item_type": "",
+                        "label": "预测结果保存路径",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "预测结果保存路径，为空则不做predict。",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    }
+                }
+            }
+        )
+
+
+
+
         # 注册tf runner分布式
         create_template(
             repository_id=repository.id,
@@ -553,7 +742,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--job": {
                         "type": "json",
                         "item_type": "str",
@@ -587,8 +776,6 @@ def init():
         )
 
 
-
-
         # 注册tf plain分布式
         create_template(
             repository_id=repository.id,
@@ -612,7 +799,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--job": {
                         "type": "json",
                         "item_type": "str",
@@ -671,7 +858,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--job": {
                         "type": "json",
                         "item_type": "str",
@@ -727,7 +914,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--job": {
                         "type": "json",
                         "item_type": "str",
@@ -783,7 +970,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--job": {
                         "type": "json",
                         "item_type": "str",
@@ -835,7 +1022,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--job": {
                         "type": "json",
                         "item_type": "str",
@@ -894,7 +1081,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--image": {
                         "type": "str",
                         "item_type": "str",
@@ -974,7 +1161,7 @@ def init():
                 "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
             },
             job_template_args={
-                "shell": {
+                "参数": {
                     "--num_worker": {
                         "type": "str",
                         "item_type": "str",
@@ -1040,7 +1227,7 @@ def init():
                 "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
             },
             job_template_args={
-                "shell": {
+                "参数": {
                     "--num_workers": {
                         "type": "str",
                         "item_type": "str",
@@ -1090,7 +1277,7 @@ def init():
                 "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
             },
             job_template_args={
-                "shell": {
+                "参数": {
                     "--num_workers": {
                         "type": "str",
                         "item_type": "str",
@@ -1151,7 +1338,7 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
                     "--working_dir": {
                         "type": "str",
                         "item_type": "str",
@@ -1235,7 +1422,21 @@ def init():
             },
 
             job_template_args={
-                "shell": {
+                "参数": {
+                    "--image": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                        "placeholder": "",
+                        "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
                     "--working_dir": {
                         "type": "str",
                         "item_type": "str",
@@ -1278,133 +1479,219 @@ def init():
                         "condition": "",
                         "sub_args": {}
                     },
-                    "--image": {
-                        "type": "str",
-                        "item_type": "str",
-                        "label": "",
-                        "require": 1,
-                        "choice": [],
-                        "range": "",
-                        "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
-                        "placeholder": "",
-                        "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
-                        "editable": 1,
-                        "condition": "",
-                        "sub_args": {}
-                    }
+
                 }
             }
         )
 
+        # 注册推理服务
+        create_template(
+            repository_id=repository.id,
+            project_name='模型服务化',
+            image_name='ai.tencentmusic.com/tme-public/deploy-service:20211001',
+            image_describe='模型部署推理服务',
+            job_template_name='deploy-service',
+            job_template_describe='模型部署推理服务',
+            job_template_command='',
+            job_template_volume='',
+            job_template_account='',
+            job_template_env='',
+            job_template_expand={
+                "index": 6,
+                "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deploy-service"
+            },
 
+            job_template_args={
+                "模型信息": {
+                    "--label": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "中文描述描述",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "demo推理服务",
+                        "placeholder": "",
+                        "describe": "推理服务描述",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--model_name": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "模型名",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "模型名",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--model_version": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "模型版本号",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "v2022.10.01.1",
+                        "placeholder": "",
+                        "describe": "模型版本号",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--model_path": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "模型地址",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "模型地址",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    }
+                },
+                "部署信息":{
+                    "--project_name": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "部署项目名",
+                        "require": 1,
+                        "choice": [],
+                        "range": "",
+                        "default": "public",
+                        "placeholder": "",
+                        "describe": "部署项目名",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--service_type": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "推理服务类型",
+                        "require": 0,
+                        "choice": ['service', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server'],
+                        "range": "",
+                        "default": "service",
+                        "placeholder": "",
+                        "describe": "推理服务类型",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--images": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "推理服务镜像",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "推理服务镜像",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
 
-        #
-        # # 注册推理服务
-        # create_template(
-        #     repository_id=repository.id,
-        #     project_name='模型服务化',
-        #     image_name='ai.tencentmusic.com/tme-public/cube-service-deploy:latest',
-        #     image_describe='模型部署推理服务',
-        #     job_template_name='deploy-service',
-        #     job_template_describe='模型部署推理服务',
-        #     job_template_command='',
-        #     job_template_volume='',
-        #     job_template_account='',
-        #     job_template_env='',
-        #     job_template_expand={
-        #         "index": 6,
-        #         "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deploy-service"
-        #     },
-        #
-        #     job_template_args={
-        #         "shell": {
-        #             "--service_type": {
-        #                 "type": "str",
-        #                 "item_type": "str",
-        #                 "label": "模型服务类型",
-        #                 "require": 1,
-        #                 "choice": ['service','tfserving','torch-server','onnxruntime','triton-server'],
-        #                 "range": "",
-        #                 "default": "service",
-        #                 "placeholder": "",
-        #                 "describe": "模型服务类型",
-        #                 "editable": 1,
-        #                 "condition": "",
-        #                 "sub_args": {}
-        #             },
-        #             "--project_name": {
-        #                 "type": "str",
-        #                 "item_type": "str",
-        #                 "label": "项目组名称",
-        #                 "require": 0,
-        #                 "choice": [],
-        #                 "range": "",
-        #                 "default": "public",
-        #                 "placeholder": "",
-        #                 "describe": "项目组名称",
-        #                 "editable": 1,
-        #                 "condition": "",
-        #                 "sub_args": {}
-        #             },
-        #             "--model_name": {
-        #                 "type": "str",
-        #                 "item_type": "str",
-        #                 "label": "模型名",
-        #                 "require": 0,
-        #                 "choice": [],
-        #                 "range": "",
-        #                 "default": "",
-        #                 "placeholder": "",
-        #                 "describe": "模型名",
-        #                 "editable": 1,
-        #                 "condition": "",
-        #                 "sub_args": {}
-        #             },
-        #             "--model_version": {
-        #                 "type": "str",
-        #                 "item_type": "str",
-        #                 "label": "模型版本号",
-        #                 "require": 0,
-        #                 "choice": [],
-        #                 "range": "",
-        #                 "default": "",
-        #                 "placeholder": "",
-        #                 "describe": "模型版本号",
-        #                 "editable": 1,
-        #                 "condition": "",
-        #                 "sub_args": {}
-        #             },
-        #             "--images": {
-        #                 "type": "str",
-        #                 "item_type": "str",
-        #                 "label": "推理服务镜像",
-        #                 "require": 0,
-        #                 "choice": [],
-        #                 "range": "",
-        #                 "default": "",
-        #                 "placeholder": "",
-        #                 "describe": "推理服务镜像",
-        #                 "editable": 1,
-        #                 "condition": "",
-        #                 "sub_args": {}
-        #             },
-        #             "--model_path": {
-        #                 "type": "str",
-        #                 "item_type": "str",
-        #                 "label": "模型地址",
-        #                 "require": 0,
-        #                 "choice": [],
-        #                 "range": "",
-        #                 "default": "",
-        #                 "placeholder": "",
-        #                 "describe": "模型地址",
-        #                 "editable": 1,
-        #                 "condition": "",
-        #                 "sub_args": {}
-        #             }
-        #         }
-        #     }
-        # )
+                    "--working_dir": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "推理容器工作目录",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "推理容器工作目录",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--command": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "推理容器启动命令",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "推理容器启动命令",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--args": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "推理容器启动参数",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "推理容器启动参数",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--env": {
+                        "type": "text",
+                        "item_type": "str",
+                        "label": "推理容器环境变量",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "",
+                        "placeholder": "",
+                        "describe": "推理容器环境变量",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--ports": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "推理容器暴露端口",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "80",
+                        "placeholder": "",
+                        "describe": "推理容器暴露端口",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+                    "--replicas": {
+                        "type": "str",
+                        "item_type": "str",
+                        "label": "pod副本数",
+                        "require": 0,
+                        "choice": [],
+                        "range": "",
+                        "default": "1",
+                        "placeholder": "",
+                        "describe": "pod副本数",
+                        "editable": 1,
+                        "condition": "",
+                        "sub_args": {}
+                    },
+
+                }
+            }
+        )
 
 
     except Exception as e:
@@ -1527,20 +1814,21 @@ def init():
         # 创建pipeline
         pipeline_model = db.session.query(Pipeline).filter_by(name=pipeline['name']).first()
         org_project = db.session.query(Project).filter_by(name=pipeline['project']).filter_by(type='org').first()
-        if pipeline_model is None and org_project:
-            try:
-                pipeline_model = Pipeline()
-                pipeline_model.name = pipeline['name']
-                pipeline_model.describe = pipeline['describe']
-                pipeline_model.dag_json=json.dumps(pipeline['dag_json'])
-                pipeline_model.created_by_fk = 1
-                pipeline_model.changed_by_fk = 1
-                pipeline_model.project_id = org_project.id
-                pipeline_model.expand = json.dumps(pipeline['expand'])
-                db.session.add(pipeline_model)
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
+        if org_project:
+            if pipeline_model is None:
+                try:
+                    pipeline_model = Pipeline()
+                    pipeline_model.name = pipeline['name']
+                    pipeline_model.describe = pipeline['describe']
+                    pipeline_model.dag_json=json.dumps(pipeline['dag_json'])
+                    pipeline_model.created_by_fk = 1
+                    pipeline_model.changed_by_fk = 1
+                    pipeline_model.project_id = org_project.id
+                    pipeline_model.parameter = json.dumps(pipeline['parameter'])
+                    db.session.add(pipeline_model)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
 
         # 创建task
         for task in tasks:
@@ -1574,13 +1862,13 @@ def init():
             "describe":"图像预测+物体检测+视频跟踪",
             "dag_json":{},
             "project":"public",
-            "expand":{
+            "parameter":{
                 "demo":"true",
                 "img":"https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg"
             }
         }
         tasks=[]
-        # create_pipeline(pipeline=pipeline,tasks=tasks)
+        create_pipeline(pipeline=pipeline,tasks=tasks)
     except Exception as e:
         print(e)
 

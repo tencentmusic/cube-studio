@@ -1647,11 +1647,10 @@ def check_status_time(status,hour=8):
 
     return status
 
-
+#
 # if __name__=='__main__':
 #     k8s_client = K8s(file_path='~/.kube/config')
-#     k8s_client.apply_hubsecret(namespace='',name,user,password,serve)
-
+#
 
 
 

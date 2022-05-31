@@ -19,12 +19,17 @@ https://github.com/rancher/rancher/releases/download/$rancher_version/rancher-im
 将依赖镜像在开发网拉取下来，然后重新tag成内网仓库镜像，例如docker.oa.com域名下的镜像，推送到docker.oa.com上，后面需要在idc每个机器上拉取下来，再tag成原始镜像名。例如
 
 ## 可以连接外网的机器上
+```bash
 docker pull rancher/rancher-agent:$rancher_version
 docker tag rancher/rancher-agent:$rancher_version docker.oa.com:8080/public/rancher/rancher-agent:$rancher_version
+```
 
 ## 内网idc机器
+```bash
 docker pull docker.oa.com/public/rancher/rancher-agent:$rancher_version
 docker tag docker.oa.com/public/rancher/rancher-agent:$rancher_version rancher/rancher-agent:$rancher_version
+```
+
 由于依赖镜像比较多，可以写一个脚本，批量的拉取和tag。
 
 # 初始化节点
@@ -43,8 +48,13 @@ reset_docker.sh 是为了在机器从rancher集群踢出以后，把rancher环�
 
 # 部署k8s集群
 
-单节点部署rancher server
+单节点部署rancher server  
+
 ```bash
+# 需要拉取镜像
+python3 all_image.py > pull_rancher_images.sh
+sh pull_rancher_images.sh
+
 export RANCHER_CONTAINER_TAG=v2.5.2
 sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
 ```

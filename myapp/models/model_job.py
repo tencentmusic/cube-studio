@@ -290,7 +290,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
         back_crds = []
         try:
-            k8s_client = py_k8s.K8s(self.project.cluster['KUBECONFIG'])
+            k8s_client = py_k8s.K8s(self.project.cluster.get('KUBECONFIG',''))
             crd_info = conf.get("CRD_INFO", {}).get('workflow', {})
             if crd_info:
                 crds = k8s_client.get_crd(group=crd_info['group'], version=crd_info['version'],

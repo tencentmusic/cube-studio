@@ -507,8 +507,8 @@ def job_template_args_definition():
     demo = '''
 {
     "group1":{               # 属性分组，仅做web显示使用
-       "attr1":{             # 属性名
-        "type":"str",        # int,str,text,bool,enum,float,multiple,date,datetime,file,dict,list
+       "--attr1":{             # 属性名
+        "type":"str",        # int,str,text,bool,enum,float,multiple,date,datetime,file,dict,list,json
         "item_type": "",     # 在type为enum,multiple,list时每个子属性的类型
         "label":"属性1",      # 中文名
         "require":1,         # 是否必须

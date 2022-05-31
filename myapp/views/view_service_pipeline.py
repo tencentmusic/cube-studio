@@ -374,7 +374,7 @@ class Service_Pipeline_ModelView_Base():
 
 
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(service_pipeline.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(service_pipeline.project.cluster.get('KUBECONFIG',''))
         dag_json=service_pipeline.dag_json if service_pipeline.dag_json else '{}'
 
         # 生成服务使用的configmap
@@ -509,7 +509,7 @@ class Service_Pipeline_ModelView_Base():
         service_pipeline = db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
 
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(service_pipeline.project.cluster['KUBECONFIG'])
+        k8s_client = K8s(service_pipeline.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('SERVICE_PIPELINE_NAMESPACE')
         k8s_client.delete_deployment(namespace=namespace, name=service_pipeline.name)
 

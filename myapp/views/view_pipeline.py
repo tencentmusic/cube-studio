@@ -226,6 +226,7 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
         container_envs.append(V1EnvVar("KFJ_TASK_RESOURCE_MEMORY", str(task.resource_memory)))
         container_envs.append(V1EnvVar("KFJ_TASK_RESOURCE_GPU", str(task.resource_gpu.replace("+",''))))
         container_envs.append(V1EnvVar("GPU_TYPE", os.environ.get("GPU_TYPE", "NVIDIA")))
+        container_envs.append(V1EnvVar("USERNAME", pipeline.created_by.username))
 
         container_kwargs['env']=container_envs
 
@@ -973,7 +974,7 @@ class Pipeline_ModelView_Base():
                     db_crd = db.session.query(Workflow).filter_by(name=crd['name']).first()
                     pipeline = db_crd.pipeline
                     if pipeline:
-                        k8s_client = py_k8s.K8s(pipeline.project.cluster['KUBECONFIG'])
+                        k8s_client = py_k8s.K8s(pipeline.project.cluster.get('KUBECONFIG',''))
                     else:
                         k8s_client = py_k8s.K8s()
 
@@ -1026,9 +1027,6 @@ class Pipeline_ModelView_Base():
         pipeline.delete_old_task()
 
         time.sleep(1)
-        # if pipeline.changed_on+datetime.timedelta(seconds=5)>datetime.datetime.now():
-        #     flash("发起运行实例，太过频繁，5s后重试",category='warning')
-        #     return redirect('/pipeline_modelview/list/?_flt_2_name=')
         back_crds = pipeline.get_workflow()
 
         # 把消息加入到源数据库

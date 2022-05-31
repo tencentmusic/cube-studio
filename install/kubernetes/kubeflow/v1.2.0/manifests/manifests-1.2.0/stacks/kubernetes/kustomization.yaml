@@ -12,7 +12,7 @@ resources:
   - ../../tf-training/tf-job-crds/overlays/application
   - ../../tf-training/tf-job-operator/overlays/application
   - ../../mxnet-job/mxnet-operator/overlays/application
-  - ../../mpi-job/mpi-operator/overlays/application
+#  - ../../mpi-job/mpi-operator/overlays/application
 
 generatorOptions:
   disableNameSuffixHash: true

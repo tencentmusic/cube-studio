@@ -68,7 +68,7 @@ def delete_old_crd(object_info):
     clusters = conf.get('CLUSTERS',{})
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
-        k8s_client = K8s(cluster['KUBECONFIG'])
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
         crd_objects = []
         try:
@@ -202,7 +202,7 @@ def delete_tfjob(task):
     clusters = conf.get('CLUSTERS', {})
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
-        k8s_client = K8s(cluster['KUBECONFIG'])
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
         deployments = k8s_client.AppsV1Api.list_namespaced_deployment(namespace='pipeline').items
         for deploy in deployments:
@@ -238,7 +238,7 @@ def delete_tfjob(task):
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
         try:
-            k8s_client = K8s(cluster['KUBECONFIG'])
+            k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
             daemon_sets = k8s_client.AppsV1Api.list_namespaced_daemon_set(namespace='pipeline').items
             for daemon_set in daemon_sets:
@@ -272,7 +272,7 @@ def delete_tfjob(task):
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
         try:
-            k8s_client = K8s(cluster['KUBECONFIG'])
+            k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
             stss = k8s_client.AppsV1Api.list_namespaced_stateful_set(namespace='pipeline').items
             for sts in stss:
@@ -317,7 +317,7 @@ def delete_notebook(task):
             notebooks = dbsession.query(Notebook).filter(Notebook.changed_on < alert_time).all()   # 需要删除或者需要通知续期的notebook
             for notebook in notebooks:
                 if notebook.changed_on < (datetime.datetime.now() - datetime.timedelta(seconds=timeout)):
-                    k8s_client = K8s(notebook.project.cluster['KUBECONFIG'])
+                    k8s_client = K8s(notebook.project.cluster.get('KUBECONFIG',''))
                     vscode_pods = k8s_client.get_pods(namespace=namespace,pod_name=notebook.name)
                     if vscode_pods:
                         vscode_pod=vscode_pods[0]
@@ -342,7 +342,7 @@ def delete_debug_docker(task):
         cluster = clusters[cluster_name]
         notebook_namespace = conf.get('NOTEBOOK_NAMESPACE')
         pipeline_namespace = conf.get('PIPELINE_NAMESPACE')
-        k8s_client = K8s(cluster['KUBECONFIG'])
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
         k8s_client.delete_pods(namespace=notebook_namespace,status='Succeeded')
         pipeline_pods = k8s_client.get_pods(pipeline_namespace)
         for pod in pipeline_pods:
@@ -583,7 +583,7 @@ def upload_timerun(pipeline_id,stop_time):
                             pass_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id == pipeline.id).filter(RunHistory.execution_date > start_time).filter(RunHistory.run_id == argo_run_id).first()
                             # 如果是定时任务发起的实例，并且已经过期，就直接删除
                             if pass_run and argo_run_id not in latest_run_ids:
-                                k8s_client = K8s(pipeline.project.cluster['KUBECONFIG'])
+                                k8s_client = K8s(pipeline.project.cluster.get('KUBECONFIG',''))
                                 k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace='pipeline',run_id=run_id)
                                 workflow = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).first()
                                 workflow.status='Deleted'
@@ -911,7 +911,7 @@ def watch_gpu(task):
     clusters = conf.get('CLUSTERS', {})
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
-        k8s_client = K8s(cluster['KUBECONFIG'])
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
         all_gpu_pods=k8s_client.get_uesd_gpu(namespaces=['pipeline','katib','jupyter','service'])
 
@@ -940,7 +940,7 @@ def adjust_node_resource(task):
     clusters = conf.get('CLUSTERS', {})
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
-        k8s_client = K8s(cluster['KUBECONFIG'])
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
         all_node = k8s_client.get_node()
         all_node_json = {}
         pending_pods={}

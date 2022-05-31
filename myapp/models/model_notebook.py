@@ -102,7 +102,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     @property
     def status(self):
         try:
-            k8s_client = py_k8s.K8s(self.cluster['KUBECONFIG'])
+            k8s_client = py_k8s.K8s(self.cluster.get('KUBECONFIG',''))
             namespace = conf.get('NOTEBOOK_NAMESPACE')
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
             status = pods[0]['status']

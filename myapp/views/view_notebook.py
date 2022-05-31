@@ -95,8 +95,9 @@ class Notebook_ModelView_Base():
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Notebook_Filter, lambda: []]]  # 设置权限过滤器
     order_columns = ['id']
-    add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
-    list_columns = ['project','ide_type','name_url','resource','status','renew','reset']
+    search_columns = ['created_by']
+    add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu']
+    list_columns = ['project','ide_type','name_url','describe','resource','status','renew','reset']
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
     }
@@ -128,6 +129,7 @@ class Notebook_ModelView_Base():
 
         self.add_form_extra_fields['project'] = QuerySelectField(
             _(self.datamodel.obj.lab('project')),
+            default='',
             description=_(r'部署项目组'),
             query_factory=filter_join_org_project,
             widget=MySelect2Widget(extra_classes="readonly" if notebook else None, new_web=False),
@@ -232,7 +234,11 @@ class Notebook_ModelView_Base():
 
     def post_add(self, item):
         flash('自动reset 一分钟后生效','warning')
-        self.reset_notebook(item)
+        try:
+            self.reset_notebook(item)
+        except Exception as e:
+            print(e)
+            flash('reset后查看运行运行状态','warning')
 
     # @pysnooper.snoop(watch_explode=('item'))
     def post_update(self, item):
@@ -292,7 +298,7 @@ class Notebook_ModelView_Base():
     def reset_theia(self, notebook):
         from myapp.utils.py.py_k8s import K8s
 
-        k8s_client = K8s(notebook.cluster['KUBECONFIG'])
+        k8s_client = K8s(notebook.cluster.get('KUBECONFIG',''))
         namespace = conf.get('NOTEBOOK_NAMESPACE')
         port=3000
 
@@ -352,7 +358,9 @@ class Notebook_ModelView_Base():
             image=notebook.images,
             hostAliases=conf.get('HOSTALIASES',''),
             env={
-             "NO_AUTH": "true"
+                "NO_AUTH": "true",
+                "USERNAME": notebook.created_by.username,
+                "NODE_OPTIONS":"--max-old-space-size=%s"%str(int(notebook.resource_memory.replace("G",''))*1024)
             },
             privileged=None,
             accounts=conf.get('JUPYTER_ACCOUNTS'),
@@ -474,7 +482,7 @@ class Notebook_ModelView_Base():
             abort(404)
         for item in items:
             try:
-                k8s_client = py_k8s.K8s(item.cluster['KUBECONFIG'])
+                k8s_client = py_k8s.K8s(item.cluster.get('KUBECONFIG',''))
                 k8s_client.delete_pods(namespace=item.namespace,pod_name=item.name)
                 k8s_client.delete_service(namespace=item.namespace,name=item.name)
                 crd_info = conf.get("CRD_INFO", {}).get('virtualservice', {})

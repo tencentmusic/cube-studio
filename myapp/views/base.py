@@ -325,7 +325,6 @@ class MyappModelView(ModelView):
 
     pre_add_get = None
     pre_update_get = None
-    pre_list = None
     post_list = None
     pre_show = None
     post_show = None

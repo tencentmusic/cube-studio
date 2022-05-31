@@ -356,6 +356,24 @@ class MyappModelRestApi(ModelRestApi):
         self.primary_key = self.datamodel.get_pk_name()
 
 
+    def _init_model_schemas(self):
+        # Create Marshmalow schemas if one is not specified
+        if self.list_model_schema is None:
+            self.list_model_schema = self.model2schemaconverter.convert(
+                self.list_columns
+            )
+        if self.add_model_schema is None:
+            self.add_model_schema = self.model2schemaconverter.convert(
+                self.add_columns, nested=False, enum_dump_by_name=True
+            )
+        if self.edit_model_schema is None:
+            self.edit_model_schema = self.model2schemaconverter.convert(
+                list(set(list(self.edit_columns+self.show_columns+self.list_columns))), nested=False, enum_dump_by_name=True
+            )
+        if self.show_model_schema is None:
+            self.show_model_schema = self.model2schemaconverter.convert(
+                self.show_columns
+            )
 
     # 每个用户对当前记录的权限，base_permissions 是对所有记录的权限
     def check_item_permissions(self,item):
@@ -382,7 +400,7 @@ class MyappModelRestApi(ModelRestApi):
     # @pysnooper.snoop(watch_explode=())
     def merge_add_field_info(self, response, **kwargs):
         _kwargs = kwargs.get("add_columns", {})
-        if not self.add_form_query_rel_fields:
+        if self.add_form_query_rel_fields:
             self.add_query_rel_fields = self.add_form_query_rel_fields
         add_columns = self._get_fields_info(
             self.add_columns,
@@ -397,7 +415,7 @@ class MyappModelRestApi(ModelRestApi):
     # @pysnooper.snoop(watch_explode=('edit_columns'))
     def merge_edit_field_info(self, response, **kwargs):
         _kwargs = kwargs.get("edit_columns", {})
-        if not self.edit_form_query_rel_fields:
+        if self.edit_form_query_rel_fields:
             self.edit_query_rel_fields = self.edit_form_query_rel_fields
         edit_columns = self._get_fields_info(
             self.edit_columns,
@@ -467,13 +485,14 @@ class MyappModelRestApi(ModelRestApi):
             # print(col)
             # print(self.datamodel.list_columns)
             # 对于外键全部可选值返回，或者还需要现场查询(现场查询用哪个字段是个问题)
-            if self.datamodel and self.edit_model_schema:   # 根据edit_column 生成的model_schema
+            if self.datamodel and self.edit_model_schema:   # 根据edit_column 生成的model_schema，编辑里面才会读取外键对象列表
                 if col in self.edit_model_schema.fields:
 
                     field = self.edit_model_schema.fields[col]
                     # print(field)
                     if isinstance(field, Related) or isinstance(field, RelatedList):
                         filter_rel_field = self.edit_query_rel_fields.get(col, [])
+                        # 获取外键对象list
                         search_filters[col]["count"], search_filters[col]["values"] = self._get_list_related_field(
                             field, filter_rel_field, page=0, page_size=1000
                         )
@@ -492,7 +511,7 @@ class MyappModelRestApi(ModelRestApi):
                 search_filters[col]['type'] = column_field.field_class.__name__.replace('Field', '').replace('My','')
                 search_filters[col]['choices'] = column_field_kwargs.get('choices', [])
                 # 选-填 字段在搜索时为填写字段
-                search_filters[col]['ui-type'] = 'input' if hasattr(column_field_kwargs['widget'],'can_input') and column_field_kwargs['widget'].can_input else False
+                search_filters[col]['ui-type'] = 'input' if hasattr(column_field_kwargs.get('widget',{}),'can_input') and column_field_kwargs['widget'].can_input else False
 
             search_filters[col] = self.make_ui_info(search_filters[col])
             # 多选字段在搜索时为单选字段
@@ -616,7 +635,7 @@ class MyappModelRestApi(ModelRestApi):
                 for related_views_class in self.related_views:
                     related_views = related_views_class()
                     related_views._init_model_schemas()
-                    if not related_views.add_form_query_rel_fields:
+                    if related_views.add_form_query_rel_fields:
                         related_views.add_query_rel_fields = related_views.add_form_query_rel_fields
 
                     # print(related_views.add_columns)
@@ -1371,6 +1390,7 @@ class MyappModelRestApi(ModelRestApi):
             if col_args:
                 page = col_args.get(API_PAGE_INDEX_RIS_KEY, None)
                 page_size = col_args.get(API_PAGE_SIZE_RIS_KEY, None)
+            page_size=1000
             ret.append(
                 self._get_field_info(
                     model_schema.fields[col],

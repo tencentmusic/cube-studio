@@ -569,7 +569,7 @@ class Hyperparameter_Tuning_ModelView_Base():
         hp = db.session.query(Hyperparameter_Tuning).filter(Hyperparameter_Tuning.id == int(id)).first()
         if hp:
             from myapp.utils.py.py_k8s import K8s
-            k8s_client = K8s(hp.project.cluster['KUBECONFIG'])
+            k8s_client = K8s(hp.project.cluster.get('KUBECONFIG',''))
             namespace = conf.get('KATIB_NAMESPACE')
             crd_info =conf.get('CRD_INFO')['experiment']
             print(hp.experiment)

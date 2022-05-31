@@ -80,7 +80,8 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def deploy(self):
-        return Markup(f'<a href="/service_modelview/deploy/{self.id}">部署</a>')
+        url = self.project.cluster.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
+        return Markup(f'<a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
 
     @property
     def clear(self):
@@ -167,7 +168,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     command = Column(String(1000),default='')
     args = Column(Text,default='')
     env = Column(Text,default='')  # 默认自带的环境变量
-    volume_mount = Column(String(200),default='')   # 挂载
+    volume_mount = Column(String(2000),default='')   # 挂载
     node_selector = Column(String(100),default='cpu=true,serving=true')   # 挂载
     min_replicas = Column(Integer,default=1)
     max_replicas = Column(Integer, default=1)
@@ -210,13 +211,17 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def operate_html(self):
         url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
-        dom=f'''
-        <a target=_blank href="/inferenceservice_modelview/debug/{self.id}">调试</a> | 
-        <a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a> | 
-        <a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a> |
-        <a target=_blank href="{url}">监控</a> |
-        <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
-        '''
+        if self.created_by.username==g.user.username or g.user.is_admin():
+            dom = f'''
+                    <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
+                    <a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a> | 
+                    <a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a> |
+                    <a target=_blank href="{url}">监控</a> |
+                    <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
+                    '''
+        else:
+            dom = f'''调试 | 部署测试 | 部署生产 | <a target=_blank href="{url}">监控</a> | 清理'''
+            # dom = f'''调试 | 部署测试</a> | 部署生产 | 监控 | 清理 '''
         return Markup(dom)
 
     @property
@@ -224,7 +229,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         return Markup('<pre><code>' + self.model_output + '</code></pre>')
 
     @property
-    def metric_html(self):
+    def metrics_html(self):
         return Markup('<pre><code>' + self.model_output + '</code></pre>')
 
     @property
@@ -242,6 +247,27 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def clear(self):
         return Markup(f'<a href="/inferenceservice_modelview/clear/{self.id}">清理</a>')
+
+
+
+    @property
+    def ip(self):
+
+        # 优先使用项目组配置的代理ip
+        SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
+        if SERVICE_EXTERNAL_IP:
+            host = SERVICE_EXTERNAL_IP+":"+str(20000+10*self.id)
+            return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+
+        # 再使用全局配置代理ip
+        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
+
+        if SERVICE_EXTERNAL_IP:
+            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
+            host = SERVICE_EXTERNAL_IP + ":" + str(20000 + 10 * self.id)
+            return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+        else:
+            return "未开通"
 
     def __repr__(self):
         return self.name
@@ -275,103 +301,48 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         return Markup(hosts)
 
 
-# 蓝绿部署（全新机器，流量切分）、金丝雀发布（灰度发布）（逐步替换旧机器）、A/B测试的准确定义（多个成熟的服务，看效果）
-class KfService(Model,AuditMixinNullable,MyappModelBase):
-    __tablename__ = 'kfservice'
 
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))  # 定义外键
-    project = relationship(
-        Project, foreign_keys=[project_id]
-    )
-    name = Column(String(100), nullable=False)   # 用于产生pod  service和location
-    label = Column(String(100), nullable=False)   # 别名
-    service_type= Column(Enum('predictor','transformer','explainer'),nullable=False,default='predictor')
-    default_service_id = Column(Integer, ForeignKey('service.id'))  # 定义外键
-    default_service = relationship(
-        Service, foreign_keys=[default_service_id]
-    )
-    canary_service_id = Column(Integer, ForeignKey('service.id'))  # 定义外键
-    canary_service = relationship(
-        Service, foreign_keys=[canary_service_id]
-    )
-    canary_traffic_percent = Column(Integer,default=0)
+    def clone(self):
+        return InferenceService(
+            project_id=self.project_id,
+            name = self.name+"-copy",
+            label = self.label,
+            service_type = self.service_type,
+            model_name = self.model_name,
+            model_version = self.model_version,
+            model_path = self.model_path,
+            model_type = self.model_type,
+            model_input = self.model_input,
+            model_output = self.model_output,
+            model_status = 'offline',
 
-    label_columns_spec = {
-        "default_service": "默认服务",
-        "canary_service": "灰度服务",
-        "canary_traffic_percent": "灰度流量",
-    }
-    label_columns = MyappModelBase.label_columns.copy()
-    label_columns.update(label_columns_spec)
+            transformer = self.transformer,
 
-    @property
-    def host(self):
-        domain = conf.get('KFSERVING_DOMAIN')
-        hosts = '%s.%s'%(self.name,domain)
-        if self.default_service:
-            hosts += '<br>'
-            hosts += '%s-%s-default.%s (%s%%)'%(self.name,self.service_type,domain,100-self.canary_traffic_percent)
-        if self.canary_service:
-            hosts += '<br>'
-            hosts += '%s-%s-canary.%s  (%s%%)' % (self.name, self.service_type, domain,self.canary_traffic_percent)
-        return Markup(f'<a href="">{hosts}</a>')
+            images = self.images,
+            working_dir = self.working_dir,
+            command = self.command,
+            args = self.args,
+            env = self.env,
+            volume_mount =self.volume_mount,
+            node_selector = self.node_selector,
+            min_replicas = self.min_replicas,
+            max_replicas = self.max_replicas,
+            hpa = self.hpa,
+            metrics = self.metrics,
+            health = self.health,
+            sidecar = self.sidecar,
+            ports = self.ports,
+            resource_memory = self.resource_memory,
+            resource_cpu = self.resource_cpu,
+            resource_gpu = self.resource_gpu,
+            deploy_time = '',
+            host = self.host,
+            expand = '{}',
+            canary = '',
+            shadow = '',
 
-    @property
-    def service(self):
-        url = ''
-        if self.default_service:
-            url += '<a href="/service_modelview/edit/%s">default(%s)</a>'%(self.default_service.id,self.default_service.name)
-        if self.canary_service:
-            if url:
-                url += '<br>'
-            url += '<a href="/service_modelview/edit/%s">canary(%s)</a>'%(self.canary_service.id,self.canary_service.name)
-        return Markup(f'%s'%url)
+            run_id = '',
+            run_time = '',
+            deploy_history = ''
 
-
-    @property
-    def deploy(self):
-        return Markup(f'<a href="/kfservice_modelview/deploy/{self.id}">部署</a>')
-
-    @property
-    def roll(self):
-        return Markup(f'<a href="/kfservice_modelview/roll/{self.id}">灰度</a>')
-
-    @property
-    def label_url(self):
-        # user_roles = [role.name.lower() for role in list(g.user.roles)]
-        # if "admin" in user_roles:
-        url = self.project.cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (conf.get('KFSERVING_NAMESPACE'), self.name.replace('_', '-'))
-        # else:
-        #     url = conf.get('K8S_DASHBOARD_PIPELINE', '') + '#/search?namespace=%s&q=%s' % (conf.get('KFSERVING_NAMESPACE'), self.name.replace('_', '-'))
-
-        return Markup(f'<a target=_blank href="{url}">{self.label}</a>')
-
-    @property
-    def k8s_yaml(self):
-        k8s = K8s(self.project.cluster['KUBECONFIG'])
-        namespace = conf.get('KFSERVING_NAMESPACE')
-        crd_info = conf.get('CRD_INFO')['inferenceservice']
-        crd_yaml = k8s.get_one_crd_yaml(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=namespace,name=self.name)
-        return Markup('<pre><code>' + crd_yaml + '</code></pre>')
-
-    @property
-    def status(self):
-        try:
-            k8s = K8s(self.project.cluster['KUBECONFIG'])
-            namespace = conf.get('KFSERVING_NAMESPACE')
-            crd_info = conf.get('CRD_INFO')['inferenceservice']
-            crd = k8s.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=self.name)
-            if crd:
-                status_more = json.loads(crd['status_more'])
-            # print(status_more)
-                url = crd['status']+":"+str(status_more.get('traffic',0))+"%"
-                return Markup(f'%s'%url)
-
-        except Exception as e:
-            print(e)
-        return 'unknown'
-
-
-    def __repr__(self):
-        return self.name
+        )

@@ -1,6 +1,7 @@
 """Contains the logic to create cohesive forms on the explore view"""
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from wtforms import Field
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
 
 from myapp import app
 
@@ -172,12 +173,13 @@ class MySelect2Widget(object):
 
     extra_classes = None
 
-    def __init__(self, extra_classes=None, style=None,multiple=False,new_web=True,value=''):
+    def __init__(self, extra_classes=None, style=None,multiple=False,new_web=True,value='',can_input=False):
         self.extra_classes = extra_classes
         self.style = style or u"width:350px"
         self.multiple = multiple
         self.value=value
         self.new_web=new_web
+        self.can_input = can_input
 
     # @pysnooper.snoop()
     def __call__(self, field, **kwargs):
@@ -229,6 +231,15 @@ class MyJsonIde(object):
         return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
         # return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
 
+
+class MySelect2ManyWidget(widgets.Select):
+    extra_classes = None
+
+    def __init__(self, extra_classes=None, style=None,can_input=False):
+        self.extra_classes = extra_classes
+        self.style = style or u"width:250px"
+        self.can_input=can_input
+        return super(MySelect2ManyWidget, self).__init__()
 
 
 from wtforms.fields.core import SelectField
