@@ -352,8 +352,8 @@ const Model: React.FC<ModelProps> = props => {
                           ></div>
                         );
                       }}
-                      multiline={args.type === 'json'}
-                      autoAdjustHeight={args.type === 'json'}
+                      multiline={args.type !== 'str'}
+                      autoAdjustHeight={args.type !== 'str'}
                       onChange={(event: FormEvent, value?: string) => {
                         handleOnChange(key, value ? value : '', args.type);
                       }}
@@ -369,7 +369,7 @@ const Model: React.FC<ModelProps> = props => {
             acc.push(
               (
                 <React.Fragment key={cur}>
-                  <Label>{cur}</Label>
+                  <Label>参数 {cur}</Label>
                   {mapCurrent.flat()}
                   <div className={style.splitLine}></div>
                 </React.Fragment>
