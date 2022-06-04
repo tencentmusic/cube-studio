@@ -402,6 +402,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     # 生成前端锁需要的扩展字段
     def fix_expand(self,dbsession=db.session):
+        # 补充expand 的基本节点信息（节点和关系）
         tasks_src = self.get_tasks(dbsession)
         tasks = {}
         for task in tasks_src:
@@ -414,9 +415,12 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
         # 已经不存在的task要删掉
         for item in expand_copy:
+            # 节点类型
             if "data" in item:
                 if item['id'] not in tasks:
                     expand_tasks.remove(item)
+
+            # 上下游关系类型
             else:
                 # if item['source'] not in tasks or item['target'] not in tasks:
                 expand_tasks.remove(item)   # 删除所有的上下游关系，后面全部重新
@@ -438,10 +442,10 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
                         "y": random.randint(100,1000)
                     },
                     "data": {
-                        "taskId": task_id,
-                        "taskName": tasks[task_id].name,
+                        # "taskId": task_id,
+                        # "taskName": tasks[task_id].name,
                         "name": tasks[task_id].name,
-                        "describe": tasks[task_id].label
+                        "label": tasks[task_id].label
                     }
                 })
 
@@ -457,7 +461,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
                         expand_tasks.append(
                             {
                                 "source": str(upstream_task_id),
-                                # "sourceHandle": None,
+                                "arrowHeadType": 'arrow',
                                 "target": str(task_id),
                                 # "targetHandle": None,
                                 "id": self.name + "__edge-%snull-%snull" % (upstream_task_id, task_id)

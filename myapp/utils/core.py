@@ -1963,56 +1963,33 @@ def sort_expand_index(items,dbsession):
         #     pass
     return back
 
+
 # 生成前端锁需要的扩展字段
-def fix_task_position(pipeline,tasks):
-    expand_tasks = []
+# @pysnooper.snoop()
+def fix_task_position(pipeline,tasks,expand_tasks):
+
     for task_name in tasks:
         task = tasks[task_name]
-        expand_task = {
-            "id": str(task['id']),
-            "type": "dataSet",
-            "position": {
-                "x": 0,
-                "y": 0
-            },
-            "data": {
-                "taskId": task['id'],
-                "taskName": task['name'],
-                "name": task['name'],
-                "describe": task['label']
-            }
-        }
-        expand_tasks.append(expand_task)
+
     # print(pipeline['dag_json'])
     dag_json = json.loads(pipeline['dag_json'])
     dag_json_sorted = sorted(dag_json.items(), key=lambda item: item[0])
     dag_json = {}
     for item in dag_json_sorted:
         dag_json[item[0]] = item[1]
-    # print(dag_json)
-    for task_name in dag_json:
-        upstreams = dag_json[task_name].get("upstream", [])
-        if upstreams:
-            for upstream_name in upstreams:
-                upstream_task_id = tasks[upstream_name]['id']
-                task_id = tasks[task_name]['id']
-                if upstream_task_id and task_id:
-                    expand_tasks.append(
-                        {
-                            "source": str(upstream_task_id),
-                            # "sourceHandle": None,
-                            "target": str(task_id),
-                            # "targetHandle": None,
-                            "id": pipeline['name'] + "__edge-%snull-%snull" % (upstream_task_id, task_id)
-                        }
-                    )
 
+    # 设置节点的位置
     def set_position(task_id, x, y):
         for task in expand_tasks:
             if str(task_id) == task['id']:
                 task['position']['x'] = x
                 task['position']['y'] = y
+    def read_position(task_id):
+        for task in expand_tasks:
+            if str(task_id) == task['id']:
+                return task['position']['x'],task['position']['y']
 
+    # 检查指定位置是否存在指定节点
     def has_exist_node(x, y, task_id):
         for task in expand_tasks:
             if 'position' in task:
@@ -2028,25 +2005,75 @@ def fix_task_position(pipeline,tasks):
             if task_name in dag_json[task_name1].get("upstream", []):
                 dag_json[task_name]['downstream'].append(task_name1)
 
-    # 计算每个节点的最大深度
+    # 获取节点下游节点总数目
+    def get_down_node_num(task_name):
+        down_nodes = dag_json[task_name].get('downstream',[])
+        if down_nodes:
+            return len(down_nodes)+sum([get_down_node_num(node) for node in down_nodes])
+        else:
+            return 0
+
+
+    # 计算每个根节点的下游叶子总数
     has_change = True
+    root_num=0
+    root_nodes = []
+    for task_name in dag_json:
+        task = dag_json[task_name]
+        # 为根节点记录第几颗树和deep
+        if not task.get("upstream",[]):
+            root_num+=1
+            task['deep'] = 1
+            root_nodes.append(task_name)
+            dag_json[task_name]['total_down_num']=get_down_node_num(task_name)
+
+
+    root_nodes = sorted(root_nodes, key=lambda task_name: dag_json[task_name]['total_down_num'],reverse=True)  # 按子孙数量排序
+    print(root_nodes)
+    for i in range(len(root_nodes)):
+        dag_json[root_nodes[i]]['index']=i
+
+
+    # 更新叶子深度和树index，下游节点总数目
+    max_deep=1
     while (has_change):
         has_change = False
         for task_name in dag_json:
             task = dag_json[task_name]
-            if 'deep' not in task:
+            downstream_tasks = dag_json[task_name]['downstream']
+
+            # 配置全部下游节点总数
+            if 'total_down_num' not in dag_json[task_name]:
                 has_change = True
-                task['deep'] = 1
-            else:
-                downstream_tasks = dag_json[task_name]['downstream']
-                for downstream_task_name in downstream_tasks:
-                    if 'deep' not in dag_json[downstream_task_name]:
+                dag_json[task_name]['total_down_num'] = get_down_node_num(task_name)
+
+            for downstream_task_name in downstream_tasks:
+                # 新出现的叶子节点，直接deep+1
+                if 'deep' not in dag_json[downstream_task_name]:
+                    has_change = True
+                    if 'deep' in task:
+                        dag_json[downstream_task_name]['deep'] = 1 + task['deep']
+                        if max_deep<(1 + task['deep']):
+                            max_deep = 1 + task['deep']
+                else:
+                    # 旧叶子，可能节点被多个不同deep的上游引导，使用deep最大的做为引导
+                    if dag_json[downstream_task_name]['deep'] < task['deep'] + 1:
                         has_change = True
                         dag_json[downstream_task_name]['deep'] = 1 + task['deep']
-                    else:
-                        if dag_json[downstream_task_name]['deep'] < task['deep'] + 1:
-                            has_change = True
-                            dag_json[downstream_task_name]['deep'] = 1 + task['deep']
+                        if max_deep<(1 + task['deep']):
+                            max_deep = 1 + task['deep']
+
+
+                # 叶子节点直接采用根节点的信息。有可能是多个根长出来的，选择index最小的根
+                if 'index' not in dag_json[downstream_task_name]:
+                    has_change = True
+                    if 'index' in task:
+                        dag_json[downstream_task_name]['index']=task['index']
+                else:
+                    if task['index']>dag_json[downstream_task_name]['index']:
+                        has_change = True
+                        dag_json[downstream_task_name]['index'] = task['index']
+
 
 
     # print(dag_json)
@@ -2054,84 +2081,48 @@ def fix_task_position(pipeline,tasks):
     start_x = 50
     start_y = 50
 
-    # 先把根的位置弄好
-    root_nodes = {}
-    for task_name in dag_json:
+    # 先把根的位置弄好，子节点多的排在左侧前方。
+
+    # @pysnooper.snoop()
+    def set_downstream_position(task_name):
         task_id = str(tasks[task_name]['id'])
-        if dag_json[task_name]['deep'] == 1:
-            set_position(task_id, start_x, start_y)
-            start_x += 400
-            root_nodes[task_name] = dag_json[task_name]
+        downstream_tasks = [x for x in dag_json[task_name]['downstream'] if dag_json[x]['index']==dag_json[task_name]['index']]  # 获取相同树的下游节点
+        downstream_tasks = sorted(downstream_tasks, key=lambda temp: dag_json[temp]['total_down_num'],reverse=True)  # 按子孙数目排序
+        for i in range(len(downstream_tasks)):
+            downstream_task = downstream_tasks[i]
+            y = dag_json[downstream_task]['deep']*150-100
+            # 获取前面的树有多少同一层叶子
+            front_task_num=0
+            for temp in dag_json:
+                # print(dag_json[temp]['index'],dag_json[task_name]['index'], dag_json[temp]['deep'],dag_json[task_name]['deep'])
+                if dag_json[temp]['index']<dag_json[downstream_task]['index'] and dag_json[temp]['deep']==dag_json[downstream_task]['deep']:
+                    front_task_num+=1
+            front_task_num+=i
+            # y至少要操作他的上游节点的最小值。下游节点有多上上游节点时，靠左排布
+            up = min([read_position(tasks[task_name]['id'])[0] for task_name in dag_json[downstream_task]['upstream']])  # 获取这个下游节点的全部上游节点的x值
+            x = max(up,400*front_task_num+50)
+            # x = 400*front_task_num+50
+            set_position(str(tasks[downstream_task]['id']),x,y)
 
-    deep = 2
-
-    # 广度遍历配置节点位置
-    while (root_nodes):
-        # print(root_nodes.keys())
-        for task_name in root_nodes:
-            task_id = str(tasks[task_name]['id'])
-            task_x = 0
-            task_y = 0
-            for task_item in expand_tasks:
-                if task_item['id'] == task_id:
-                    task_x = task_item['position']['x']
-                    task_y = task_item['position']['y']
-            # 只有当当前task位置定了，才能确定下面的节点的位置
-            if task_x >= 1 and task_y >= 1:
-                downstream_tasks_names = dag_json[task_name].get("downstream", [])
-                min_downstream_task_x = []
-                if downstream_tasks_names:
-                    for downstream_task_name in downstream_tasks_names:
-                        downstream_task_id = str(tasks[downstream_task_name]['id'])
-
-                        downstream_task_x = 0
-                        downstream_task_y = 0
-                        for task_item in expand_tasks:
-                            if task_item['id'] == downstream_task_id:
-                                downstream_task_x = task_item['position']['x']
-                                downstream_task_y = task_item['position']['y']
-                        # new_x = downstream_task_x
-                        # new_y = downstream_task_y
-
-                        if downstream_task_y == 0:
-                            new_x = task_x
-                            new_y = task_y + 100
-                            while has_exist_node(new_x, new_y, downstream_task_id):
-                                print('%s %s exist node' % (new_x, new_y))
-                                new_x += 300
-
-                            print(downstream_task_name, new_x, new_y)
-                            set_position(downstream_task_id, new_x, new_y)
-                            min_downstream_task_x.append(new_x)
-                        else:
-                            # 子节点  由父节点产生
-
-                            new_x = min(downstream_task_x, task_x)
-                            new_y = task_y + 100
-                            while has_exist_node(new_x, new_y, downstream_task_id):
-                                print('%s %s exist node' % (new_x, new_y))
-                                new_x += 300
-
-                            print(downstream_task_name, new_x, new_y)
-                            set_position(downstream_task_id, new_x, new_y)
-                            # 在右下方的子节点，又会影响父节点的位置。其他位置的子节点不影响父节点的位置
-                            if new_y == (task_y + 100) and new_x >= task_x:
-                                min_downstream_task_x.append(new_x)
+        # 布局下一层
+        for temp in downstream_tasks:
+            set_downstream_position(temp)
 
 
-                if min_downstream_task_x:
-                    new_x = min(min_downstream_task_x)
-                    print('父节点%s %s %s' % (task_name, new_x, task_y))
-                    set_position(task_id, new_x, task_y)
+    # print(dag_json)
+    # 一棵树一棵树的构建。优先布局下游叶子节点数量大的
+    for task_name in root_nodes:
+        task_id = str(tasks[task_name]['id'])
+        set_position(task_id, start_x, start_y)
+        start_x += 400
+        set_downstream_position(task_name)
 
-        root_nodes = {}
-        for task_name in dag_json:
-            if dag_json[task_name]['deep'] == deep:
-                root_nodes[task_name] = dag_json[task_name]
-        deep += 1
+
 
 
     return expand_tasks
+
+
 
 # import yaml
 # # @pysnooper.snoop(watch_explode=())

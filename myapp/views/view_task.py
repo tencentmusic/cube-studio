@@ -363,7 +363,6 @@ class Task_ModelView_Base():
     #         item.pipeline.pipeline_argo_id = pipeline_argo_id
     #     if version_id:
     #         item.pipeline.version_id = version_id
-    #     # db.session.update(item)
     #     db.session.commit()
 
 

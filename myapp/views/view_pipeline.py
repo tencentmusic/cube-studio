@@ -862,7 +862,7 @@ class Pipeline_ModelView_Base():
 
     def pre_update_get(self,item):
         item.dag_json = item.fix_dag_json()
-        # item.expand = json.dumps(item.fix_expand(),indent=4,ensure_ascii=False)
+        item.expand = json.dumps(item.fix_expand(),indent=4,ensure_ascii=False)
         db.session.commit()
 
     # 删除前先把下面的task删除了
@@ -1098,21 +1098,22 @@ class Pipeline_ModelView_Base():
     def web(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
 
-        pipeline.dag_json = pipeline.fix_dag_json()
-        # pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)
-        pipeline.expand = json.dumps(pipeline.fix_position(), indent=4, ensure_ascii=False)
+        pipeline.dag_json = pipeline.fix_dag_json()  # 修正 dag_json
+        pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)   # 修正 前端expand字段缺失
+        pipeline.expand = json.dumps(pipeline.fix_position(), indent=4, ensure_ascii=False)  # 修正 节点中心位置到视图中间
 
-        # db_tasks = pipeline.get_tasks(db.session)
-        # if db_tasks:
-        #     try:
-        #         tasks={}
-        #         for task in db_tasks:
-        #             tasks[task.name]=task.to_json()
-        #         expand = core.fix_task_position(pipeline.to_json(),tasks)
-        #         pipeline.expand=json.dumps(expand,indent=4,ensure_ascii=False)
-        #         db.session.commit()
-        #     except Exception as e:
-        #         print(e)
+        # 自动排版
+        db_tasks = pipeline.get_tasks(db.session)
+        if db_tasks:
+            try:
+                tasks={}
+                for task in db_tasks:
+                    tasks[task.name]=task.to_json()
+                expand = core.fix_task_position(pipeline.to_json(),tasks,json.loads(pipeline.expand))
+                pipeline.expand=json.dumps(expand,indent=4,ensure_ascii=False)
+                db.session.commit()
+            except Exception as e:
+                print(e)
 
         db.session.commit()
         print(pipeline_id)
