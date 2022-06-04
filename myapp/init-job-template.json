@@ -1,0 +1,1725 @@
+{
+    "自定义镜像":{
+        "project_name":"基础命令",
+        "image_name":"ubuntu:18.04",
+        "image_describe":"开源ubuntu:18.04基础镜像",
+        "job_template_name":"自定义镜像",
+        "job_template_describe":"使用用户自定义镜像作为运行镜像",
+        "job_template_args":{
+            "参数":{
+                "images":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"要调试的镜像",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "placeholder":"",
+                    "describe":"要调试的镜像，<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/imagess'>基础镜像参考<a>",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "workdir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"启动目录",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"/mnt/xx",
+                    "placeholder":"",
+                    "describe":"启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "command":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"启动命令",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"sh start.sh",
+                    "placeholder":"",
+                    "describe":"启动命令",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "datax":{
+        "project_name":"数据导入导出",
+        "image_name":"ai.tencentmusic.com/tme-public/datax:latest",
+        "image_describe":"datax异构数据源同步",
+        "job_template_name":"datax",
+        "job_template_describe":"datax异构数据源同步",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":1,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/datax"
+        },
+        "job_template_args":{
+            "参数":{
+                "-f":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"job.json文件地址，<a href='https://github.com/alibaba/DataX'>书写格式参考</a>",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"/usr/local/datax/job/job.json",
+                    "placeholder":"",
+                    "describe":"job.json文件地址，<a href='https://github.com/alibaba/DataX'>书写格式参考</a>",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "volcanojob":{
+        "project_name":"数据处理",
+        "image_name":"ai.tencentmusic.com/tme-public/volcano:20211001",
+        "image_describe":"有序分布式任务",
+        "job_template_name":"volcanojob",
+        "job_template_describe":"有序分布式任务",
+        "job_template_command":"",
+        "job_template_volume":"kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_expand":{
+            "index":1,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/volcano"
+        },
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_args":{
+            "参数":{
+                "--image":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "placeholder":"",
+                    "describe":"worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"启动目录",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"/mnt/xx",
+                    "placeholder":"",
+                    "describe":"启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--command":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"启动命令",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"echo aa",
+                    "placeholder":"",
+                    "describe":"启动命令",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--num_worker":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"占用机器个数",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"3",
+                    "placeholder":"",
+                    "describe":"占用机器个数",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "ray":{
+        "project_name":"数据处理",
+        "image_name":"ai.tencentmusic.com/tme-public/ray:gpu-20210601",
+        "image_describe":"ray分布式任务",
+        "job_template_name":"ray",
+        "job_template_describe":"python多机分布式任务，数据处理",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray"
+        },
+        "job_template_args":{
+            "参数":{
+                "-n":{
+                    "type":"int",
+                    "item_type":"",
+                    "label":"分布式任务worker的数量",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"$min,$max",
+                    "default":"3",
+                    "placeholder":"",
+                    "describe":"分布式任务worker的数量",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "-i":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"每个worker的初始化脚本文件地址，用来安装环境",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"每个worker的初始化脚本文件地址，用来安装环境",
+                    "describe":"每个worker的初始化脚本文件地址，用来安装环境",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "-f":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"python启动命令，例如 python3 /mnt/xx/xx.py",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"python启动命令，例如 python3 /mnt/xx/xx.py",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "ray-sklearn":{
+        "project_name":"机器学习",
+        "image_name":"ai.tencentmusic.com/tme-public/sklearn_estimator:v1",
+        "image_describe":"sklearn基于ray的分布式",
+        "job_template_name":"ray-sklearn",
+        "job_template_describe":"sklearn基于ray的分布式",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true",
+        "job_template_expand":{
+            "index":1,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray_sklearn"
+        },
+        "job_template_args":{
+            "参数":{
+                "--train_csv_file_path":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"训练集csv",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"训练集csv，|分割符，首行是列名",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--predict_csv_file_path":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"预测数据集csv",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"预测数据集csv，格式和训练集一致，默认为空，需要predict时填",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--label_name":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"label的列名，必填",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"label的列名，必填",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--model_name":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"模型名称，必填",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"训练用到的模型名称，如LogisticRegression，必填。常用的都支持，要加联系管理员",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--model_args_dict":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"模型参数",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型参数，json格式，默认为空",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--model_file_path":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"模型文件保存文件名，必填",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型文件保存文件名，必填",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--predict_result_path":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"预测结果保存文件名，默认为空，需要predict时填",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"预测结果保存文件名，默认为空，需要predict时填",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--worker_num":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"ray worker数量",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"ray worker数量",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "xgb":{
+        "project_name":"机器学习",
+        "image_name":"ai.tencentmusic.com/tme-public/xgb_train_and_predict:v1",
+        "image_describe":"xgb算法单机",
+        "job_template_name":"xgb",
+        "job_template_describe":"xgb算法单机",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/xgb"
+        },
+        "job_template_args":{
+            "训练":{
+                "--train_csv_file_path":{
+                    "type":"text",
+                    "item_type":"",
+                    "label":"训练集csv路径",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"/app/train.csv",
+                    "placeholder":"",
+                    "describe":"训练集csv路径，首行是header，首列是label。为空则不做训练，尝试从model_load_path加载模型。",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--sep":{
+                    "type":"str",
+                    "item_type":"",
+                    "label":"分隔符",
+                    "require":1,
+                    "choice":[
+                        "space",
+                        "TAB",
+                        ","
+                    ],
+                    "range":"",
+                    "default":",",
+                    "placeholder":"",
+                    "describe":"分隔符",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--classifier_or_regressor":{
+                    "type":"str",
+                    "item_type":"",
+                    "label":"分类还是回归",
+                    "require":1,
+                    "choice":[
+                        "classifier",
+                        "regressor"
+                    ],
+                    "range":"",
+                    "default":"classifier",
+                    "placeholder":"",
+                    "describe":"分类还是回归",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--params":{
+                    "type":"json",
+                    "item_type":"str",
+                    "label":"xgb参数",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":{
+                        "max_depth":4,
+                        "learning_rate":0.4,
+                        "n_estimators":30,
+                        "objective":"reg:linear",
+                        "nthread":-1
+                    },
+                    "placeholder":"",
+                    "describe":"xgb参数, json格式",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--eval_result_path":{
+                    "type":"text",
+                    "item_type":"",
+                    "label":"模型评估报告保存路径",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型评估报告保存路径。默认为空，想看模型评估报告就填。",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--model_save_path":{
+                    "type":"text",
+                    "item_type":"",
+                    "label":"模型文件保存路径",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型文件保存路径。为空则不保存模型。",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            },
+            "离线推理":{
+                "--model_load_path":{
+                    "type":"text",
+                    "item_type":"",
+                    "label":"模型加载路径",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型加载路径。为空则不加载。",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--predict_csv_file_path":{
+                    "type":"text",
+                    "item_type":"",
+                    "label":"预测数据集csv路径",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"预测数据集csv路径，格式和训练集一致，顺序保持一致，没有label列。为空则不做predict。",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--predict_result_path":{
+                    "type":"text",
+                    "item_type":"",
+                    "label":"预测结果保存路径",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"预测结果保存路径，为空则不做predict。",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "tfjob-runner":{
+        "project_name":"tf分布式",
+        "image_name":"ai.tencentmusic.com/tme-public/tf2.3_keras_train:latest",
+        "image_describe":"tf分布式-runner方式",
+        "job_template_name":"tfjob-runner",
+        "job_template_describe":"tf分布式-runner方式",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":1,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf_keras_train"
+        },
+        "job_template_args":{
+            "参数":{
+                "--job":{
+                    "type":"json",
+                    "item_type":"str",
+                    "label":"模型训练，json配置",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型训练，json配置",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--upstream-output-file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"上游输出文件",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"上游输出文件",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "tfjob-plain":{
+        "project_name":"tf分布式",
+        "image_name":"ai.tencentmusic.com/tme-public/tf2.3_plain_train:latest",
+        "image_describe":"tf分布式-plain方式",
+        "job_template_name":"tfjob-plain",
+        "job_template_describe":"tf分布式-plain方式",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf_plain_train"
+        },
+        "job_template_args":{
+            "参数":{
+                "--job":{
+                    "type":"json",
+                    "item_type":"str",
+                    "label":"模型训练，json配置",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型训练，json配置",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--upstream-output-file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"上游输出文件",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"上游输出文件",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "tfjob-train":{
+        "project_name":"tf分布式",
+        "image_name":"ai.tencentmusic.com/tme-public/tf_distributed_train:latest",
+        "image_describe":"tf分布式训练",
+        "job_template_name":"tfjob-train",
+        "job_template_describe":"tf分布式训练，内部支持plain和runner两种方式",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf_distributed_train"
+        },
+        "job_template_args":{
+            "参数":{
+                "--job":{
+                    "type":"json",
+                    "item_type":"str",
+                    "label":"模型训练，json配置",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型训练，json配置",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--upstream-output-file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"上游输出文件",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"上游输出文件",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "tf-model-evaluation":{
+        "project_name":"tf分布式",
+        "image_name":"ai.tencentmusic.com/tme-public/tf2.3_model_evaluation:latest",
+        "image_describe":"tensorflow2.3模型评估",
+        "job_template_name":"tf-model-evaluation",
+        "job_template_describe":"tensorflow2.3模型评估",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":4,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf_model_evaluation"
+        },
+        "job_template_args":{
+            "参数":{
+                "--job":{
+                    "type":"json",
+                    "item_type":"str",
+                    "label":"模型对比评估，json配置",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型对比评估，json配置",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--upstream-output-file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"上游输出文件",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"上游输出文件",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "tf-distribute-model-evaluation":{
+        "project_name":"tf分布式",
+        "image_name":"ai.tencentmusic.com/tme-public/tf_distributed_eval:latest",
+        "image_describe":"tensorflow2.3分布式模型评估",
+        "job_template_name":"tf-distribute-model-evaluation",
+        "job_template_describe":"tensorflow2.3分布式模型评估",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":5,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf_distributed_evaluation"
+        },
+        "job_template_args":{
+            "参数":{
+                "--job":{
+                    "type":"json",
+                    "item_type":"str",
+                    "label":"模型评估，json配置",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型评估，json配置",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--upstream-output-file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"上游输出文件",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"上游输出文件",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "tf-model-offline-predict":{
+        "project_name":"tf分布式",
+        "image_name":"ai.tencentmusic.com/tme-public/tf_model_offline_predict:latest",
+        "image_describe":"tf模型离线推理",
+        "job_template_name":"tf-model-offline-predict",
+        "job_template_describe":"tf模型离线推理",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":6,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf_model_offline_predict"
+        },
+        "job_template_args":{
+            "参数":{
+                "--job":{
+                    "type":"json",
+                    "item_type":"str",
+                    "label":"json配置",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"json配置",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--upstream-output-file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"上游输出文件",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"上游输出文件",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "pytorchjob-train":{
+        "project_name":"pytorch分布式",
+        "image_name":"ai.tencentmusic.com/tme-public/pytorch_distributed_train_k8s:20201010",
+        "image_describe":"pytorch分布式训练",
+        "job_template_name":"pytorchjob-train",
+        "job_template_describe":"pytorch 分布式训练",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":1,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/pytorch_distributed_train_k8s"
+        },
+        "job_template_args":{
+            "参数":{
+                "--image":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"worker镜像，直接运行你代码的环境镜像",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "placeholder":"",
+                    "describe":"worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/pytorchjob/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--command":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"启动命令，例如 python3 xxx.py",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"启动命令，例如 python3 xxx.py",
+                    "describe":"启动命令，例如 python3 xxx.py",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--num_worker":{
+                    "type":"int",
+                    "item_type":"str",
+                    "label":"分布式训练worker的数目",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"3",
+                    "placeholder":"分布式训练worker的数目",
+                    "describe":"分布式训练worker的数目",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "media-download":{
+        "project_name":"多媒体类模板",
+        "image_name":"ai.tencentmusic.com/tme-public/video-audio:20210601",
+        "image_describe":"分布式媒体文件处理",
+        "job_template_name":"media-download",
+        "job_template_describe":"分布式下载媒体文件",
+        "job_template_command":"python start_download.py",
+        "job_template_volume":"2G(memory):/dev/shm",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_expand":{
+            "index":1,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
+        },
+        "job_template_args":{
+            "参数":{
+                "--num_worker":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"分布式任务的worker数目",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"3",
+                    "placeholder":"分布式任务的worker数目",
+                    "describe":"分布式任务的worker数目",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--download_type":{
+                    "type":"enum",
+                    "item_type":"str",
+                    "label":"下载类型",
+                    "require":1,
+                    "choice":[
+                        "url"
+                    ],
+                    "range":"",
+                    "default":"url",
+                    "placeholder":"",
+                    "describe":"下载类型",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--input_file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"下载信息文件地址",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"下载信息文件地址<br>url类型，每行格式：$url $local_path",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "video-img":{
+        "project_name":"多媒体类模板",
+        "image_name":"ai.tencentmusic.com/tme-public/video-audio:20210601",
+        "image_describe":"分布式媒体文件处理",
+        "job_template_name":"video-img",
+        "job_template_describe":"视频提取图片(分布式版)",
+        "job_template_command":"python start_video_img.py",
+        "job_template_volume":"2G(memory):/dev/shm",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
+        },
+        "job_template_args":{
+            "参数":{
+                "--num_workers":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"worker数量",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--input_file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"配置文件地址，每行格式：<br>$local_video_path $des_img_dir $frame_rate",
+                    "describe":"配置文件地址，每行格式：<br>$local_video_path $des_img_dir $frame_rate",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "video-audio":{
+        "project_name":"多媒体类模板",
+        "image_name":"ai.tencentmusic.com/tme-public/video-audio:20210601",
+        "image_describe":"分布式媒体文件处理",
+        "job_template_name":"video-audio",
+        "job_template_describe":"视频提取音频(分布式版)",
+        "job_template_command":"python start_video_audio.py",
+        "job_template_volume":"2G(memory):/dev/shm",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
+        },
+        "job_template_args":{
+            "参数":{
+                "--num_workers":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"worker数量",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"worker数量",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--input_file":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"配置文件地址，每行格式：<br>$local_video_path $des_audio_path",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "kaldi-distributed-on-volcanojob":{
+        "project_name":"多媒体类模板",
+        "image_name":"ai.tencentmusic.com/tme-public/kaldi_distributed_on_volcano:v2",
+        "image_describe":"kaldi音频分布式",
+        "job_template_name":"kaldi-distributed-on-volcanojob",
+        "job_template_describe":"kaldi音频分布式训练",
+        "job_template_command":"",
+        "job_template_volume":"4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":11,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/kaldi_distributed_on_volcanojob"
+        },
+        "job_template_args":{
+            "参数":{
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"启动目录",
+                    "describe":"启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--user_cmd":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"./run.sh",
+                    "placeholder":"启动命令",
+                    "describe":"启动命令",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--num_worker":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"2",
+                    "placeholder":"worker数量",
+                    "describe":"worker数量",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--image":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"ai.tencentmusic.com/tme-public/kaldi_distributed_worker:v1",
+                    "placeholder":"",
+                    "describe":"worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "model-offline-predict":{
+        "project_name":"多媒体类模板",
+        "image_name":"ai.tencentmusic.com/tme-public/volcano:offline-predict-20220101",
+        "image_describe":"分布式离线推理",
+        "job_template_name":"model-offline-predict",
+        "job_template_describe":"分布式离线推理",
+        "job_template_command":"",
+        "job_template_volume":"kubernetes-config(configmap):/root/.kube",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_expand":{
+            "index":5,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_offline_predict"
+        },
+        "job_template_args":{
+            "参数":{
+                "--image":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "placeholder":"",
+                    "describe":"worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"启动目录",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"/mnt/xx",
+                    "placeholder":"",
+                    "describe":"启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--command":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"环境安装和任务启动命令",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"/mnt/xx/../start.sh",
+                    "placeholder":"",
+                    "describe":"环境安装和任务启动命令",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--num_worker":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"占用机器个数",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"3",
+                    "placeholder":"",
+                    "describe":"占用机器个数",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    },
+    "object-detection-on-darknet":{
+        "project_name":"多媒体类模板",
+        "image_name":"mirrors.tencent.com/uthermai/object_detection_on_darknet:v1",
+        "image_describe":"yolo目标识别",
+        "job_template_name":"object-detection-on-darknet",
+        "job_template_describe":"yolo目标识别",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":12,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/object_detection_on_darknet"
+        },
+        "job_template_args":{
+            "参数": {
+                "--train_cfg": {
+                    "type": "text",
+                    "item_type": "str",
+                    "label": "模型参数配置、训练配置",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "[net]\n# Testing\n# batch=1\n# subdivisions=1\n# Training\nbatch=64\nsubdivisions=16\nwidth=608\nheight=608\nchannels=3\nmomentum=0.9\ndecay=0.0005\nangle=0\nsaturation = 1.5\nexposure = 1.5\nhue=.1\n\nlearning_rate=0.001\nburn_in=1000\nmax_batches = 501500\npolicy=steps\nsteps=400000,450000\nscales=.1,.1\n\n[convolutional]\nbatch_normalize=1\nfilters=32\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=32\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n######################\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=1024\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=1024\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=1024\nactivation=leaky\n\n[convolutional]\nsize=1\nstride=1\npad=1\nfilters=255\nactivation=linear\n\n\n[yolo]\nmask = 6,7,8\nanchors = 10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326\nclasses=80\nnum=9\njitter=.3\nignore_thresh = .7\ntruth_thresh = 1\nrandom=1\n\n\n[route]\nlayers = -4\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[upsample]\nstride=2\n\n[route]\nlayers = -1, 61\n\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=512\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=512\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=512\nactivation=leaky\n\n[convolutional]\nsize=1\nstride=1\npad=1\nfilters=255\nactivation=linear\n\n\n[yolo]\nmask = 3,4,5\nanchors = 10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326\nclasses=80\nnum=9\njitter=.3\nignore_thresh = .7\ntruth_thresh = 1\nrandom=1\n\n\n\n[route]\nlayers = -4\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[upsample]\nstride=2\n\n[route]\nlayers = -1, 36\n\n\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=256\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=256\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=256\nactivation=leaky\n\n[convolutional]\nsize=1\nstride=1\npad=1\nfilters=255\nactivation=linear\n\n\n[yolo]\nmask = 0,1,2\nanchors = 10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326\nclasses=80\nnum=9\njitter=.3\nignore_thresh = .7\ntruth_thresh = 1\nrandom=1\n\n",
+                    "placeholder": "",
+                    "describe": "模型参数配置、训练配置",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--data_cfg": {
+                    "type": "text",
+                    "item_type": "str",
+                    "label": "训练数据配置",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "classes= 80\ntrain = /root/darknet/coco_data/coco/trainvalno5k.txt\n#valid = coco_testdev\nvalid = /root/darknet/coco_data/coco/5k.txt\nnames = /root/darknet/data/coco.names\nbackup = /root/darknet/backup\neval=coco\n\n",
+                    "placeholder": "",
+                    "describe": "训练数据配置",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--weights": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "权重文件",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "权重文件",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "deploy-service":{
+        "project_name":"模型服务化",
+        "image_name":"ai.tencentmusic.com/tme-public/deploy-service:20211001",
+        "image_describe":"模型部署推理服务",
+        "job_template_name":"deploy-service",
+        "job_template_describe":"模型部署推理服务",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":1,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deploy-service"
+        },
+        "job_template_args":{
+            "模型信息":{
+                "--label":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"中文描述描述",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"demo推理服务",
+                    "placeholder":"",
+                    "describe":"推理服务描述",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--model_name":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"模型名",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型名",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--model_version":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"模型版本号",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"v2022.10.01.1",
+                    "placeholder":"",
+                    "describe":"模型版本号",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--model_path":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"模型地址",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"模型地址",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            },
+            "部署信息":{
+                "--project_name":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"部署项目名",
+                    "require":1,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"public",
+                    "placeholder":"",
+                    "describe":"部署项目名",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--service_type":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"推理服务类型",
+                    "require":0,
+                    "choice":[
+                        "service",
+                        "tfserving",
+                        "torch-server",
+                        "onnxruntime",
+                        "triton-server"
+                    ],
+                    "range":"",
+                    "default":"service",
+                    "placeholder":"",
+                    "describe":"推理服务类型",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--images":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"推理服务镜像",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"推理服务镜像",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"推理容器工作目录",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"推理容器工作目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--command":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"推理容器启动命令",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"推理容器启动命令",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--args":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"推理容器启动参数",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"推理容器启动参数",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--env":{
+                    "type":"text",
+                    "item_type":"str",
+                    "label":"推理容器环境变量",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"推理容器环境变量",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--ports":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"推理容器暴露端口",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"80",
+                    "placeholder":"",
+                    "describe":"推理容器暴露端口",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--replicas":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"pod副本数",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"1",
+                    "placeholder":"",
+                    "describe":"pod副本数",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                }
+            }
+        }
+    }
+}

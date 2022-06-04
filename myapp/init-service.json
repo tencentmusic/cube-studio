@@ -1,0 +1,47 @@
+{
+    "mysql-ui": {
+        "project_name":"public",
+        "service_name":"mysql-ui",
+        "service_describe":"可视化编辑mysql数据库",
+        "image_name":"ai.tencentmusic.com/tme-public/phpmyadmin",
+        "command":"",
+        "env":"PMA_HOST=mysql-service.infra\nPMA_PORT=3306\nPMA_USER=root\nPMA_PASSWORD=admin",
+        "ports":"80"
+    },
+    "redis-ui": {
+        "project_name":"public",
+        "service_name":"redis-ui",
+        "service_describe":"可视化编辑redis数据库",
+        "image_name":"ai.tencentmusic.com/tme-public/patrikx3:latest",
+        "command":"",
+        "env":"REDIS_NAME=default\nREDIS_HOST=redis-master.infra\nREDIS_PORT=6379\nREDIS_PASSWORD=admin",
+        "ports":"7843"
+    },
+    "mongo-express": {
+        "project_name":"public",
+        "service_name":"mongo-express",
+        "service_describe":"可视化编辑mongo数据库",
+        "image_name":"mongo-express:0.54.0",
+        "command":"",
+        "env":"ME_CONFIG_MONGODB_SERVER=xx.xx.xx.xx\nME_CONFIG_MONGODB_PORT=xx\nME_CONFIG_MONGODB_ENABLE_ADMIN=true\nME_CONFIG_MONGODB_ADMINUSERNAME=xx\nME_CONFIG_MONGODB_ADMINPASSWORD=xx\nME_CONFIG_MONGODB_AUTH_DATABASE=xx\nME_CONFIG_MONGODB_AUTH_USERNAME=xx\nME_CONFIG_MONGODB_AUTH_PASSWORD=xx\nVCAP_APP_HOST=0.0.0.0\nVCAP_APP_PORT=8081\nME_CONFIG_OPTIONS_EDITORTHEME=ambiance",
+        "ports":"8081"
+    },
+    "neo4j": {
+        "project_name":"public",
+        "service_name":"neo4j",
+        "service_describe":"可视化编辑图数据库neo4j",
+        "image_name":"ai.tencentmusic.com/tme-public/neo4j:4.4",
+        "command":"",
+        "env":"NEO4J_AUTH=neo4j/admin",
+        "ports":"7474,7687"
+    },
+    "jaeger": {
+        "project_name":"public",
+        "service_name":"jaeger",
+        "service_describe":"jaeger链路追踪",
+        "image_name":"jaegertracing/all-in-one:1.29",
+        "command":"",
+        "env":"",
+        "ports":"5775,16686"
+    }
+}

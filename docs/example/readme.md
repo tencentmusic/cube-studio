@@ -356,6 +356,14 @@ NEO4J_AUTH=neo4j/admin
 
 端口：5775,16686
 
+
+## 服务暴露：
+
+ - 1、域名暴露需要平台配置泛域名，SERVICE_DOMAIN
+ - 2、ip暴露需要平台配置SERVICE_EXTERNAL_IP=[xx.xx.xx.xx]，或者项目中配置SERVICE_EXTERNAL_IP=xx.xx.xx.xx  ip需为集群中节点的ip或者clb的ip
+
+
+
 # 推理服务
 
 ## 版本/域名/pod的关系
@@ -433,5 +441,11 @@ K8S_POD_IP=
 K8S_HOST_IP=
 K8S_POD_NAME=
 ```
+
+
+## 服务暴露：
+
+ - 1、域名暴露需要平台配置泛域名，SERVICE_DOMAIN
+ - 2、ip暴露需要平台配置SERVICE_EXTERNAL_IP=[xx.xx.xx.xx]，或者项目中配置SERVICE_EXTERNAL_IP=xx.xx.xx.xx  ip需为集群中节点的ip或者clb的ip
 
 

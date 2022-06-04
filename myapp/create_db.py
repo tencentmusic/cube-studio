@@ -15,7 +15,7 @@ def init_db():
         cursor = conn.cursor()
 
         # 创建数据库的sql(如果数据库存在就不创建，防止异常)
-        sql = "CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"
+        sql = "CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"%uri.database
         # 执行创建数据库的sql
         cursor.execute(sql)
         conn.commit()
