@@ -59,7 +59,7 @@ class Myapp(BaseMyappView):
         from myapp.utils.py.py_k8s import K8s
         all_clusters = conf.get('CLUSTERS',{})
         if cluster_name in all_clusters:
-            kubeconfig = all_clusters[cluster_name]['KUBECONFIG']
+            kubeconfig = all_clusters[cluster_name].get('KUBECONFIG','')
             pod_url = all_clusters[cluster_name].get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
         else:
             kubeconfig = None

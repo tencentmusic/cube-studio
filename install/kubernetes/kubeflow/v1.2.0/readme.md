@@ -36,6 +36,12 @@ services:
 
 ```
 
+sealos部署的k8s修改kube-api启动参数
+```
+--service-account-issuer=kubernetes.default.svc
+--service-account-signing-key-file=/etc/kubernetes/pki/sa.key
+```
+
 tke联系腾讯云添加
 ```bash
     kube-api:

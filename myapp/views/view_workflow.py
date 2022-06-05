@@ -138,7 +138,7 @@ class Crd_ModelView_Base():
                     if 'pipeline-id' in labels:
                         pipeline = db.session.query(Pipeline).filter_by(id=int(labels['pipeline-id'])).first()
                         if pipeline:
-                            kubeconfig=pipeline.project.cluster['KUBECONFIG']
+                            kubeconfig=pipeline.project.cluster.get('KUBECONFIG','')
 
                     k8s_client = py_k8s.K8s(kubeconfig)
                     crd_info = conf.get("CRD_INFO", {}).get(self.crd_name, {})

@@ -36,7 +36,7 @@ if not cluster:
 else:
     clusters = conf.get('CLUSTERS',{})
     if clusters and cluster in clusters:
-        kubeconfig = clusters[cluster]['KUBECONFIG']
+        kubeconfig = clusters[cluster].get('KUBECONFIG','')
         k8s_config.kube_config.load_kube_config(config_file=kubeconfig)
     else:
         print('no kubeconfig in cluster %s' % cluster)

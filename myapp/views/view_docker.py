@@ -152,7 +152,7 @@ class Docker_ModelView_Base():
     def debug(self,docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG'))
+        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
         namespace = conf.get('NOTEBOOK_NAMESPACE')
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         pod = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
@@ -218,7 +218,7 @@ class Docker_ModelView_Base():
     def delete_pod(self,docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG'))
+        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
         namespace = conf.get('NOTEBOOK_NAMESPACE')
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
@@ -256,7 +256,7 @@ class Docker_ModelView_Base():
     def save(self,docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG'))
+        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
         namespace = conf.get('NOTEBOOK_NAMESPACE')
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         pod = k8s_client.v1.read_namespaced_pod(name=pod_name, namespace=namespace)
