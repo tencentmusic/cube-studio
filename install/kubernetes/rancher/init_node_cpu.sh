@@ -22,13 +22,19 @@ yum install -y wireshark
 systemctl stop docker
 # 将源docker目录下文件，复制到新目录下
 cp -R /var/lib/docker/* /data/docker/
-# 将docker新目录写入到配置文件中
-sed -i "s/containerd.sock/containerd.sock --graph \/data\/docker /g" /usr/lib/systemd/system/docker.service 
 
 # 将私有仓库写入到配置文件中
 mkdir -p /etc/docker/
-echo '{ "insecure-registries":["docker.oa.com"] } ' > /etc/docker/daemon.json
-# 重载配置
+
+(
+cat << EOF
+{
+    "insecure-registries":["docker.oa.com:8080","docker-images.music.isd.com"],
+    "data-root": "/data/docker"
+}
+EOF
+)> /etc/docker/daemon.json
+
 systemctl daemon-reload
 # 重启docker
 systemctl start docker 

@@ -1102,18 +1102,18 @@ class Pipeline_ModelView_Base():
         pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)   # 修正 前端expand字段缺失
         pipeline.expand = json.dumps(pipeline.fix_position(), indent=4, ensure_ascii=False)  # 修正 节点中心位置到视图中间
 
-        # 自动排版
-        db_tasks = pipeline.get_tasks(db.session)
-        if db_tasks:
-            try:
-                tasks={}
-                for task in db_tasks:
-                    tasks[task.name]=task.to_json()
-                expand = core.fix_task_position(pipeline.to_json(),tasks,json.loads(pipeline.expand))
-                pipeline.expand=json.dumps(expand,indent=4,ensure_ascii=False)
-                db.session.commit()
-            except Exception as e:
-                print(e)
+        # # 自动排版
+        # db_tasks = pipeline.get_tasks(db.session)
+        # if db_tasks:
+        #     try:
+        #         tasks={}
+        #         for task in db_tasks:
+        #             tasks[task.name]=task.to_json()
+        #         expand = core.fix_task_position(pipeline.to_json(),tasks,json.loads(pipeline.expand))
+        #         pipeline.expand=json.dumps(expand,indent=4,ensure_ascii=False)
+        #         db.session.commit()
+        #     except Exception as e:
+        #         print(e)
 
         db.session.commit()
         print(pipeline_id)

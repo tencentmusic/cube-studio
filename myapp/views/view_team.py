@@ -168,6 +168,11 @@ class Project_ModelView_Base():
         self.add_form_extra_fields = self.edit_form_extra_fields
 
 
+    def pre_add(self, item):
+        if item.expand:
+            core.validate_json(item.expand)
+            item.expand = json.dumps(json.loads(item.expand),indent=4,ensure_ascii=False)
+
     def pre_update(self, item):
         if item.expand:
             core.validate_json(item.expand)

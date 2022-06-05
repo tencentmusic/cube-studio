@@ -107,7 +107,7 @@ services部分示例
     kubelet:
       # dns服务的ip
       cluster_dns_server: 172.16.0.10
-      # 主机镜像回收触发门开
+      # 主机镜像回收触发门槛
       extra_args:
         image-gc-high-threshold: 90
         image-gc-low-threshold: 85

@@ -270,6 +270,9 @@ def init():
                 task_model.label = task['label']
                 task_model.args = json.dumps(task['args'],indent=4,ensure_ascii=False)
                 task_model.volume_mount = task.get('volume_mount', '')
+                task_model.node_selector = task.get('node_selector', 'cpu=true,train=true,org=public')
+                task_model.retry = int(task.get('retry', 0))
+                task_model.timeout = int(task.get('timeout', 0))
                 task_model.resource_memory = task.get('resource_memory', '2G')
                 task_model.resource_cpu = task.get('resource_cpu', '2')
                 task_model.resource_gpu = task.get('resource_gpu', '0')
@@ -279,6 +282,25 @@ def init():
                 task_model.job_template_id = job_template.id
                 db.session.commit()
 
+        # 修正pipeline
+        pipeline_model.dag_json = pipeline_model.fix_dag_json()  # 修正 dag_json
+        pipeline_model.expand = json.dumps(pipeline_model.fix_expand(), indent=4, ensure_ascii=False)   # 修正 前端expand字段缺失
+        pipeline_model.expand = json.dumps(pipeline_model.fix_position(), indent=4, ensure_ascii=False)  # 修正 节点中心位置到视图中间
+        db.session.commit()
+        # 自动排版
+        db_tasks = pipeline_model.get_tasks(db.session)
+        if db_tasks:
+            try:
+                tasks={}
+                for task in db_tasks:
+                    tasks[task.name]=task.to_json()
+
+                from myapp.utils import core
+                expand = core.fix_task_position(pipeline_model.to_json(),tasks,json.loads(pipeline_model.expand))
+                pipeline_model.expand=json.dumps(expand,indent=4,ensure_ascii=False)
+                db.session.commit()
+            except Exception as e:
+                print(e)
 
 
     try:

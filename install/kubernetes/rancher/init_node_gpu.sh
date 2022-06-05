@@ -28,6 +28,7 @@ rm -rf /etc/docker/ && mkdir -p /etc/docker/
 (
 cat << EOF
 {
+    "insecure-registries":["docker.oa.com:8080"],
     "default-runtime": "nvidia",
     "data-root": "/data/docker",
     "runtimes": {

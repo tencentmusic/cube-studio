@@ -36,7 +36,7 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 
 路径：项目组->项目分组。编辑项目组，添加组成员。creator角色的组成员可以添加其他用户进组
 
-### 项目组控制调度集群（管理员学习）
+### 项目组控制调度集群cluster（管理员学习）
 
 平台支持跨集群调度。需要管理员创建集群并配置到系统配置后，可通过项目组的expand字段控制项目组的调度集群
 	
@@ -44,13 +44,41 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 		"cluster": "dev"
 	}
 
-### 项目组控制调度机器（管理员学习）
+### 项目组控制调度机器node_selector（管理员学习）
 
-平台支持单集群中划分资源组。需要管理员配置不同机器所属的资源组后，可通过项目组的expand字段控制项目组的调度机器
+平台支持单集群中划分资源组。需要管理员配置不同机器所属的资源组后，可通过项目组的expand字段控制项目组的调度机器。
+
+调度机器可以是不同项目组，不同机型，不同区域等划分方式
 	
 	{
 		"node_selector": "org=public"
 	}
+
+### 项目组控制挂载volume_mount（管理员学习）
+
+平台支持单集群中划分挂载。可以配置项目组下成员将自有分布式存储挂载到平台，以及项目组内共享目录等功能，可通过项目组的expand字段控制项目组的挂载.
+
+- 挂载pvc，会自动挂载pvc下面的个人用户子目录。默认挂载kubeflow-user-workspace的pvc
+- 挂载hostpath，不会自动挂载个人子目录，可以用来控制多人共享同一个目录
+- 挂载memory，主要用来控制k8s中共享内存的挂载
+
+```
+	{
+		"volume_mount": "kubeflow-user-workspace(pvc):/mnt/;data/aidata(hostpath):/aidata;4G(memory):/dev/shm"
+	}
+```
+
+### 项目组控制服务service代理ip（管理员学习）
+
+平台支持单集群中划分服务的代理ip，多用于边缘集群，或多网关情况下。可通过项目组的expand字段控制项目组的服务的代理ip.
+
+```
+	{
+		"SERVICE_EXTERNAL_IP":"xx.xx.xx.xx"
+	}
+```
+
+
 
 
 # 在线notebook开发

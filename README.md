@@ -14,7 +14,7 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 # 平台部署
 
-参考install/README.md
+参考install/kubernetes/README.md
 
 平台完成部署之后如下:
 
@@ -22,9 +22,13 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 # 相关视频
 
+[单机部署教程](https://www.bilibili.com/video/BV18r4y147oj/)
+
 [新人使用教程](https://www.bilibili.com/video/BV1zA4y1f7Rf)
 
 [job模板制作教程](https://www.bilibili.com/video/BV15B4y197nm)
+
+[边缘计算方式部署和调度](https://www.bilibili.com/video/BV1qY4y1x7Yy/)
 
 # 支持模板
 提示：

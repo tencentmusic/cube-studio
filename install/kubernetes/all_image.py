@@ -31,7 +31,8 @@ kubeflow = [
     'kubeflow/mxnet-operator:v1.0.0-20200625',
     'gcr.io/kubeflow-images-public/profile-controller:vmaster-ga49f658f',
     'gcr.io/kubeflow-images-public/ingress-setup:latest',
-    'alpine:3.10'
+    'alpine:3.10',
+    "busybox"
 ]
 
 kubernetes_dashboard=['kubernetesui/dashboard:v2.2.0','kubernetesui/metrics-scraper:v1.0.6','quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0']
