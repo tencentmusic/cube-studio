@@ -122,7 +122,7 @@ def deploy(**kwargs):
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("deploy service launcher")
     arg_parser.add_argument('--project_name', type=str, help="所属项目组", default='public')
-    arg_parser.add_argument('--service_type', type=str, help="服务类型", default='service')
+    arg_parser.add_argument('--service_type', type=str, help="服务类型", default='serving')
     arg_parser.add_argument('--label', type=str, help="服务中文名", default='演示服务')
     arg_parser.add_argument('--model_name', type=str, help="模型名", default='demo')
     arg_parser.add_argument('--model_version', type=str, help="模型版本号", default=datetime.datetime.now().strftime('v%Y.%m.%d.1'))

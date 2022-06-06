@@ -49,14 +49,18 @@
                     "--model_name":"yolov3",
                     "--model_version":"v2022.10.01.1",
                     "--model_path":"",
-                    "--service_type":"service",
+                    "--service_type":"serving",
                     "--images":"ai.tencentmusic.com/tme-public/target-detection",
                     "--working_dir":"",
                     "--command":"",
                     "--args":"",
                     "--env":"YOLO_DATA_PATH=/mnt/admin/coco_data_sample/yolo/coco.data\nYOLO_CFG_PATH=/mnt/admin/coco_data_sample/yolo/yolov3.cfg\nYOLO_WEIGHTS_PATH=/mnt/admin/coco_data_sample/yolo/yolov3.weights",
                     "--ports":"8080",
-                    "--replicas":"1"
+                    "--replicas":"1",
+                    "--resource_memory": "5G",
+                    "--resource_cpu": "5",
+                    "--resource_gpu": "0"
+
                 }
             }
         ]

@@ -582,9 +582,6 @@ instance_group [
         # 先存储特定参数到expand
         expand = json.loads(item.expand) if item.expand else {}
         print(self.src_item_json)
-        expand['service_token'] = json.loads(self.src_item_json['expand']).get('service_token','') if item.id else ''
-        expand['alias_token'] = json.loads(self.src_item_json['expand']).get('alias_token', '') if item.id else ''
-        expand['alias_l5'] = json.loads(self.src_item_json['expand']).get('alias_l5', '') if item.id else ''
         model_version = item.model_version.replace('v','').replace('.','').replace(':','')
 
         if item.service_type=='tfserving':

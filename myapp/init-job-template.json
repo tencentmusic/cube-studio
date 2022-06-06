@@ -1559,7 +1559,7 @@
                     "label":"推理服务类型",
                     "require":0,
                     "choice":[
-                        "service",
+                        "serving",
                         "tfserving",
                         "torch-server",
                         "onnxruntime",
@@ -1695,6 +1695,60 @@
                     "default":"1",
                     "placeholder":"",
                     "describe":"pod副本数",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--resource_memory":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"每个pod占用内存",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"2G",
+                    "placeholder":"",
+                    "describe":"每个pod占用内存",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--resource_cpu":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"每个pod占用cpu",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"2",
+                    "placeholder":"",
+                    "describe":"每个pod占用cpu",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
+                "--resource_gpu":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"每个pod占用gpu",
+                    "require":0,
+                    "choice":[
+
+                    ],
+                    "range":"",
+                    "default":"0",
+                    "placeholder":"",
+                    "describe":"每个pod占用gpu",
                     "editable":1,
                     "condition":"",
                     "sub_args":{
