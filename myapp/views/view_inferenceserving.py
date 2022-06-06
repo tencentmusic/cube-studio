@@ -667,6 +667,8 @@ instance_group [
 
     # @pysnooper.snoop(watch_explode=('item',))
     def pre_update(self, item):
+        if not item.volume_mount:
+            item.volume_mount=item.project.volume_mount
         item.name = item.name.replace("_","-")
         # 修改了名称的话，要把之前的删掉
         self.use_expand(item)

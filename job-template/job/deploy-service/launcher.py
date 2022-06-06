@@ -2,7 +2,6 @@
 import os,sys
 base_dir = os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(base_dir)
-
 import argparse
 import datetime
 import json
@@ -13,14 +12,12 @@ import pysnooper
 import os,sys
 import re
 import requests
-import psutil
 import copy
+import os
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', 'admin')
-host = 'http://kubeflow-dashboard.infra'
-# host = 'http://127.0.0.1:80'
-# host = 'http://9.135.92.226'
+KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME','public')
 
-
+host = os.getenv('HOST','http://kubeflow-dashboard.infra').strip('/')
 
 @pysnooper.snoop()
 def deploy(**kwargs):

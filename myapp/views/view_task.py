@@ -423,6 +423,7 @@ class Task_ModelView_Base():
         task_env += 'KFJ_TASK_RESOURCE_CPU=' + str(task.resource_cpu) + "\n"
         task_env += 'KFJ_TASK_RESOURCE_MEMORY=' + str(task.resource_memory) + "\n"
         task_env += 'KFJ_TASK_RESOURCE_GPU=' + str(task.resource_gpu.replace('+', '')) + "\n"
+        task_env += 'KFJ_TASK_PROJECT_NAME=' + str(task.pipeline.project.name) + "\n"
         task_env += 'KFJ_PIPELINE_ID=' + str(task.pipeline_id) + "\n"
         task_env += 'KFJ_RUN_ID=' + run_id + "\n"
         task_env += 'KFJ_CREATOR=' + str(task.pipeline.created_by.username) + "\n"

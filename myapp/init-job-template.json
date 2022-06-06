@@ -1404,7 +1404,7 @@
     },
     "object-detection-on-darknet":{
         "project_name":"多媒体类模板",
-        "image_name":"mirrors.tencent.com/uthermai/object_detection_on_darknet:v1",
+        "image_name":"ai.tencentmusic.com/tme-public/object_detection_on_darknet:v1",
         "image_describe":"yolo目标识别",
         "job_template_name":"object-detection-on-darknet",
         "job_template_describe":"yolo目标识别",
@@ -1449,13 +1449,13 @@
                 "--weights": {
                     "type": "str",
                     "item_type": "str",
-                    "label": "权重文件",
+                    "label": "预训练模型权重文件",
                     "require": 1,
                     "choice": [],
                     "range": "",
                     "default": "",
                     "placeholder": "",
-                    "describe": "权重文件",
+                    "describe": "预训练模型权重文件",
                     "editable": 1,
                     "condition": "",
                     "sub_args": {}
@@ -1471,7 +1471,7 @@
         "job_template_describe":"模型部署推理服务",
         "job_template_command":"",
         "job_template_volume":"",
-        "job_template_account":"",
+        "job_template_account":"kubeflow-pipeline",
         "job_template_env":"",
         "job_template_expand":{
             "index":1,
@@ -1553,24 +1553,6 @@
                 }
             },
             "部署信息":{
-                "--project_name":{
-                    "type":"str",
-                    "item_type":"str",
-                    "label":"部署项目名",
-                    "require":1,
-                    "choice":[
-
-                    ],
-                    "range":"",
-                    "default":"public",
-                    "placeholder":"",
-                    "describe":"部署项目名",
-                    "editable":1,
-                    "condition":"",
-                    "sub_args":{
-
-                    }
-                },
                 "--service_type":{
                     "type":"str",
                     "item_type":"str",

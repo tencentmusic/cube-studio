@@ -21,4 +21,4 @@ done
 
 python3 setup_args.py --train_cfg "$train_cfg" --data_cfg "$data_cfg" --weights "$weights"
 
-/app/darknet/darknet detector train /app/darknet/cfg/data.cfg /app/darknet/cfg/train.cfg $weights 2>&1 | tee /mnt/uthermai/tmp/darknet/t.log
+/app/darknet/darknet detector train /app/darknet/cfg/data.cfg /app/darknet/cfg/train.cfg $weights 2>&1

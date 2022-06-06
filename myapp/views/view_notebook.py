@@ -485,6 +485,7 @@ class Notebook_ModelView_Base():
                 k8s_client = py_k8s.K8s(item.cluster.get('KUBECONFIG',''))
                 k8s_client.delete_pods(namespace=item.namespace,pod_name=item.name)
                 k8s_client.delete_service(namespace=item.namespace,name=item.name)
+                k8s_client.delete_service(namespace=item.namespace, name=(item.name + "-external").lower()[:60].strip('-'))
                 crd_info = conf.get("CRD_INFO", {}).get('virtualservice', {})
                 if crd_info:
                     k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'],

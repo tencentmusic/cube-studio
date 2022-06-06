@@ -36,11 +36,13 @@ app = Flask(__name__,
 
 UPLOAD_FOLDER = "UPLOAD_FOLDER"
 myfont = ImageFont.truetype('/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc', 20)
-YOLO_BASE_DIR = os.getenv('YOLO_BASE_DIR','yolo')
+YOLO_DATA_PATH = os.getenv('YOLO_DATA_PATH','yolo/coco.data')
+YOLO_CFG_PATH = os.getenv('YOLO_CFG_PATH','yolo/yolov3.cfg')
+YOLO_WEIGHTS_PATH = os.getenv('YOLO_WEIGHTS_PATH','yolo/yolov3.weights')
 
 class ImageDetector(object):
     def __init__(self):
-        self.detector = Detector(YOLO_BASE_DIR+'/coco.data',YOLO_BASE_DIR+'/yolov3.cfg',YOLO_BASE_DIR+'/yolov3.weights')
+        self.detector = Detector(YOLO_DATA_PATH,YOLO_CFG_PATH,YOLO_WEIGHTS_PATH)
 
     # @pysnooper.snoop()
     def classify_image(self, image_path):
