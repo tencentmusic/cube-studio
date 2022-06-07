@@ -20,6 +20,10 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 <img width="100%" alt="167874734-5b1629e0-c3bb-41b0-871d-ffa43d914066" src="https://user-images.githubusercontent.com/20157705/168214806-b8aceb3d-e1b4-48f0-a079-903ef8751f40.png">
 
+# 体验环境
+
+http://159.75.208.175/
+
 # 相关视频
 
 [单机部署教程](https://www.bilibili.com/video/BV18r4y147oj/)
@@ -40,7 +44,7 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 | 自定义镜像 | 单机 | 完全自定义单机运行环境，可自由实现所有自定义单机功能 | 系统自带 |
 | datax | 单机 | 异构数据源导入导出 | job-template/job/datax |
 | xgb | 单机 | xgb模型训练 | job-template/job/xgb |
-| deploy-inferenceservice | 单机 | 部署云原生推理服务 | job-template/job/deploy-inferenceservice |
+| deploy-service | 单机 | 部署云原生推理服务 | job-template/job/deploy-service |
 | ray | 分布式 | python ray框架 多机分布式功能，适用于超多文件在多机上的并发处理 | job-template/job/ray |
 | ray-sklearn | 分布式 | 基于ray框架的sklearn支持算法多机分布式并行计算  | job-template/job/ray_sklearn |
 | volcano | 分布式 | volcano框架的多机分布式，可紫玉控制代码，利用环境变量实现多机worker的工作与协同  | job-template/job/volcano |
