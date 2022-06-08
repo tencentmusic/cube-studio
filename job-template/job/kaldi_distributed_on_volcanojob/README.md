@@ -1,5 +1,5 @@
 # kaldi分布式训练 模板
-镜像：ai.tencentmusic.com/tme-public/kaldi_distributed_on_volcano:v2
+镜像：ccr.ccs.tencentyun.com/cube-studio/kaldi_distributed_on_volcano:v2
 挂载：4G(memory):/dev/shm,kubernetes-config(configmap):/root/.kube
 环境变量：
 ```bash
@@ -62,7 +62,7 @@ TASK_RESOURCE_GPU=0
             "require": 1,
             "choice": [],
             "range": "",
-            "default": "ai.tencentmusic.com/tme-public/kaldi_distributed_worker:v1",
+            "default": "ccr.ccs.tencentyun.com/cube-studio/kaldi_distributed_worker:v1",
             "placeholder": "",
             "describe": "worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
             "editable": 1,

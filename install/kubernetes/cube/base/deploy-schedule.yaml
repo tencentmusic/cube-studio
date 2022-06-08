@@ -41,7 +41,7 @@ spec:
       serviceAccount: kubeflow-dashboard
       containers:
         - name: kubeflow-dashboard-schedule
-          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always
           command: ["bash","-c",'celery beat --loglevel=info --app=myapp.tasks.celery_app:celery_app']
           resources:       

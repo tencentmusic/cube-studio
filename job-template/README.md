@@ -32,7 +32,7 @@
 ### 2.4.关于镜像
 建议镜像的tag使用日期
 
-`ai.tencentmusic.com/tme-public/$image_name:$image_tag`
+`ccr.ccs.tencentyun.com/cube-studio/$image_name:$image_tag`
 
 # 3.注册模板
 ### 3.1.模板注册入口

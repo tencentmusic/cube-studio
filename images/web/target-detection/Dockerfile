@@ -1,4 +1,4 @@
-# docker build -t ai.tencentmusic.com/tme-public/target-detection  .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/target-detection  .
 
 FROM ubuntu:18.04
 
@@ -35,5 +35,5 @@ WORKDIR /app
 #RUN wget https://pengluan-76009.sz.gfp.tencent-cloud.com/github/yolov3.zip && apt install unzip && unzip yolov3.zip && rm yolov3.zip
 COPY . /app/
 ENTRYPOINT ["python", "server-web.py"]
-# docker run --name darknet --privileged -it --rm -v $PWD:/app -p 8080:8080 --entrypoint='' ai.tencentmusic.com/tme-public/target-detection  bash
+# docker run --name darknet --privileged -it --rm -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/target-detection  bash
 

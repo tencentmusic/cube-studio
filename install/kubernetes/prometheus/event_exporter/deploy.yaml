@@ -80,7 +80,7 @@ spec:
         - command:
             - ./event_exporter
           env: []
-          image: ai.tencentmusic.com/tme-public/event-exporter
+          image: ccr.ccs.tencentyun.com/cube-studio/event-exporter
           imagePullPolicy: IfNotPresent
           name: event-exporter
           ports:

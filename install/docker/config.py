@@ -734,7 +734,7 @@ KFSERVING_NAMESPACE = 'kfserving'
 SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
 
-KATIB_JOB_DEFAULT_IMAGE='ai.tencentmusic.com/tme-public/katib'
+KATIB_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/katib'
 KATIB_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
 KATIB_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
@@ -747,11 +747,11 @@ HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,KATIB_NAMESPACE,NOTEBOOK_NAMESPACE,SERVI
 
 # notebook使用的镜像
 NOTEBOOK_IMAGES=[
-    ['ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-cpu-base', 'vscode（cpu）'],
-    ['ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-gpu-base', 'vscode（gpu）'],
-    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-cpu-base', 'jupyter（cpu）'],
-    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-gpu-base','jupyter（gpu）'],
-    ['ai.tencentmusic.com/tme-public/notebook:jupyter-ubuntu-cpu-1.0.0', 'jupyter（tensorboard）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base', 'vscode（cpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base', 'vscode（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base', 'jupyter（cpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-gpu-base','jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-1.0.0', 'jupyter（tensorboard）'],
 ]
 
 # 定时检查大小的目录列表。需要再celery中启动检查任务
@@ -773,7 +773,7 @@ ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 PROMETHEUS = 'prometheus-k8s.monitoring:9090'
 KFP_HOST = "http://ml-pipeline.kubeflow:8888"
 
-NNI_IMAGES='ai.tencentmusic.com/tme-public/nni:20211003'
+NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
 
 ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
@@ -812,21 +812,21 @@ ALL_LINKS=[
     }
 ]
 
-TFSERVING_IMAGES=['ai.tencentmusic.com/tme-public/serving:1.11.0','ai.tencentmusic.com/tme-public/serving:1.11.0-gpu','ai.tencentmusic.com/tme-public/serving:1.12.0','ai.tencentmusic.com/tme-public/serving:1.12.0-gpu','ai.tencentmusic.com/tme-public/serving:1.13.0','ai.tencentmusic.com/tme-public/serving:1.13.0-gpu','ai.tencentmusic.com/tme-public/serving:1.14.0','ai.tencentmusic.com/tme-public/serving:1.14.0-gpu','ai.tencentmusic.com/tme-public/serving:2.0.0','ai.tencentmusic.com/tme-public/serving:2.0.0-gpu','ai.tencentmusic.com/tme-public/serving:2.1.4','ai.tencentmusic.com/tme-public/serving:2.1.4-gpu','ai.tencentmusic.com/tme-public/serving:2.2.3','ai.tencentmusic.com/tme-public/serving:2.2.3-gpu','ai.tencentmusic.com/tme-public/serving:2.3.4','ai.tencentmusic.com/tme-public/serving:2.3.4-gpu','ai.tencentmusic.com/tme-public/serving:2.4.3','ai.tencentmusic.com/tme-public/serving:2.4.3-gpu','ai.tencentmusic.com/tme-public/serving:2.5.2','ai.tencentmusic.com/tme-public/serving:2.5.2-gpu','ai.tencentmusic.com/tme-public/serving:2.6.0','ai.tencentmusic.com/tme-public/serving:2.6.0-gpu']
-TRITONSERVER_IMAGES=['ai.tencentmusic.com/tme-public/tritonserver:21.12-py3','ai.tencentmusic.com/tme-public/tritonserver:21.09-py3']
-TORCHSERVER_IMAGES=['ai.tencentmusic.com/tme-public/torchserve:0.5.0-cpu','ai.tencentmusic.com/tme-public/torchserve:0.5.0-gpu','ai.tencentmusic.com/tme-public/torchserve:0.4.2-cpu','ai.tencentmusic.com/tme-public/torchserve:0.4.2-gpu']
+TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/serving:1.11.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.11.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:1.12.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.12.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:1.13.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.13.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:1.14.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.14.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.0.0','ccr.ccs.tencentyun.com/cube-studio/serving:2.0.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.1.4','ccr.ccs.tencentyun.com/cube-studio/serving:2.1.4-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.2.3','ccr.ccs.tencentyun.com/cube-studio/serving:2.2.3-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.3.4','ccr.ccs.tencentyun.com/cube-studio/serving:2.3.4-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.4.3','ccr.ccs.tencentyun.com/cube-studio/serving:2.4.3-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.5.2','ccr.ccs.tencentyun.com/cube-studio/serving:2.5.2-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.6.0','ccr.ccs.tencentyun.com/cube-studio/serving:2.6.0-gpu']
+TRITONSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.09-py3']
+TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu']
 INFERNENCE_IMAGES={
     "tfserving":TFSERVING_IMAGES,
     'torch-server':TORCHSERVER_IMAGES,
-    'onnxruntime':['ai.tencentmusic.com/tme-public/onnxruntime:v1.0.0','ai.tencentmusic.com/tme-public/onnxruntime:server-latest'],
+    'onnxruntime':['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:v1.0.0','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:server-latest'],
     'triton-server':TRITONSERVER_IMAGES,
     'kfserving-tf': TFSERVING_IMAGES,
     "kfserving-torch":TORCHSERVER_IMAGES,
     "kfserving-triton": TRITONSERVER_IMAGES,
-    'kfserving-sklearn': ['ai.tencentmusic.com/tme-public/sklearnserver:v0.7.0'],
-    'kfserving-xgboost': ['ai.tencentmusic.com/tme-public/sklearnserver:v0.7.0'],
-    'kfserving-lightgbm':['ai.tencentmusic.com/tme-public/lgbserver:v0.7.0'],
-    'kfserving-paddle':['ai.tencentmusic.com/tme-public/paddleserver:v0.7.0']
+    'kfserving-sklearn': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
+    'kfserving-xgboost': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
+    'kfserving-lightgbm':['ccr.ccs.tencentyun.com/cube-studio/lgbserver:v0.7.0'],
+    'kfserving-paddle':['ccr.ccs.tencentyun.com/cube-studio/paddleserver:v0.7.0']
 }
 
 INFERNENCE_COMMAND={

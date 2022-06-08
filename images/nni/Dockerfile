@@ -1,7 +1,7 @@
 
-# docker build -t ai.tencentmusic.com/tme-public/nni:20211003 .
-# docker run --name nni -it -v $PWD:/app -p 8888:8888 ai.tencentmusic.com/tme-public/nni:20211003 bash
-# docker run --name nni -it -p 8888:8888 ai.tencentmusic.com/tme-public/nni:20211003 bash
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/nni:20211003 .
+# docker run --name nni -it -v $PWD:/app -p 8888:8888 ccr.ccs.tencentyun.com/cube-studio/nni:20211003 bash
+# docker run --name nni -it -p 8888:8888 ccr.ccs.tencentyun.com/cube-studio/nni:20211003 bash
 
 #docker run --name nni -it -p 8888:8888 nvidia/cuda:10.1-cudnn7-runtime-ubuntu18.04 bash
 FROM nvidia/cuda:10.1-cudnn7-runtime-ubuntu18.04

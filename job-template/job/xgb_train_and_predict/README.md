@@ -1,5 +1,5 @@
 # volcanojob 模板
-镜像：ai.tencentmusic.com/tme-public/xgb_train_and_predict:v1
+镜像：ccr.ccs.tencentyun.com/cube-studio/xgb_train_and_predict:v1
 
 环境变量：
 ```bash
@@ -62,7 +62,7 @@ TASK_RESOURCE_GPU=0
             "require": 1,
             "choice": [],
             "range": "",
-            "default": "ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+            "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
             "placeholder": "",
             "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://docs.qq.com/doc/DU0ptZEpiSmtMY1JT'>基础镜像</a>",
             "editable": 1,

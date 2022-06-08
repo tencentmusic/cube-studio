@@ -19,11 +19,11 @@ TRAINER_TYPE_RUNNER = "runner"
 
 TRAINER_SPECS = {
     TRAINER_TYPE_PLAIN: {
-        "image": "ai.tencentmusic.com/tme-public/tf2.3_plain_train:latest",
+        "image": "ccr.ccs.tencentyun.com/cube-studio/tf2.3_plain_train:latest",
         "cmd": ["python3", "-m", "job.tf_plain_train.plain_train"]
     },
     TRAINER_TYPE_RUNNER: {
-        "image": "ai.tencentmusic.com/tme-public/tf2.3_keras_train:latest",
+        "image": "ccr.ccs.tencentyun.com/cube-studio/tf2.3_keras_train:latest",
         "cmd": ["python3", "-m", "job.tf_keras_train.runner_train"]
     }
 }

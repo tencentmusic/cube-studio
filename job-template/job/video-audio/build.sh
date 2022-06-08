@@ -2,8 +2,8 @@
 
 set -ex
 
-docker build -t ai.tencentmusic.com/tme-public/video-audio:20210601 -f job/video-audio/Dockerfile-cpu .
-docker push ai.tencentmusic.com/tme-public/video-audio:20210601
+docker build -t ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601 -f job/video-audio/Dockerfile-cpu .
+docker push ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601
 
 
 

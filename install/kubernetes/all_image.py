@@ -78,7 +78,6 @@ new_prometheus = [
     'quay.io/prometheus/node-exporter:v0.15.2',
     'quay.io/coreos/kube-rbac-proxy:v0.3.1',
     'quay.io/coreos/addon-resizer:1.0',
-    'ai.tencentmusic.com/tme-public/prometheus:grafana-6.0.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.56.1',
     "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",
     'grafana/grafana:7.5.2'
@@ -96,30 +95,6 @@ new_serving = ['gcr.io/kfserving/alibi-explainer:0.2.2', 'gcr.io/kfserving/logge
                'gcr.io/kfserving/storage-initializer:0.2.2',
                'gcr.io/knative-releases/knative.dev/serving/cmd/queue:792f6945c7bc73a49a470a5b955c39c8bd174705743abf5fb71aa0f4c04128eb']
 
-new_kfserving=['kserve/kserve-controller:v0.7.0']
-
-knative_sha256 = [
-    'gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:ffa3d72ee6c2eeb2357999248191a643405288061b7080381f22875cb703e929',
-    'gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler@sha256:f89fd23889c3e0ca3d8e42c9b189dc2f93aa5b3a91c64e8aab75e952a210eeb3',
-    'gcr.io/knative-releases/knative.dev/serving/cmd/controller@sha256:b86ac8ecc6b2688a0e0b9cb68298220a752125d0a048b8edf2cf42403224393c',
-    'gcr.io/knative-releases/knative.dev/net-istio/cmd/webhook@sha256:e6b142c0f82e0e0b8cb670c11eb4eef6ded827f98761bbf4bea7bdb777b80092',
-    'gcr.io/knative-releases/knative.dev/net-istio/cmd/controller@sha256:75c7918ca887622e7242ec1965f87036db1dc462464810b72735a8e64111f6f7',
-    'gcr.io/knative-releases/knative.dev/serving/cmd/webhook@sha256:7e6df0fda229a13219bbc90ff72a10434a0c64cd7fe13dc534b914247d1087f4',
-    'gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:d066ae5b642885827506610ae25728d442ce11447b82df6e9cc4c174bb97ecb3',
-    'gcr.io/knative-releases/knative.dev/eventing/cmd/controller@sha256:c99f08229c464407e5ba11f942d29b969e0f7dd2e242973d50d480cc45eebf28',
-    'gcr.io/knative-releases/knative.dev/eventing/cmd/channel_broker@sha256:5065eaeb3904e8b0893255b11fdcdde54a6bac1d0d4ecc8c9ce4c4c32073d924',
-    'gcr.io/knative-releases/knative.dev/eventing/cmd/webhook@sha256:a3046d0426b4617fe9186fb3d983e350de82d2e3f33dcc13441e591e24410901',
-    'gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_controller@sha256:9a084ba0ed6a12862adb3ca00de069f0ec1715fe8d4db6c9921fcca335c675bb',
-    'gcr.io/knative-releases/knative.dev/eventing/cmd/in_memory/channel_dispatcher@sha256:8df896444091f1b34185f0fa3da5d41f32e84c43c48df07605c728e0fe49a9a8'
-    ]
-
-knative = ['ai.tencentmusic.com/tme-public/knative:serving-activator',
-           'ai.tencentmusic.com/tme-public/knative:serving-autoscaler',
-           'ai.tencentmusic.com/tme-public/knative:serving-controller',
-           'ai.tencentmusic.com/tme-public/knative:serving-webhook',
-           'ai.tencentmusic.com/tme-public/knative:net-istio-webhook',
-           'ai.tencentmusic.com/tme-public/knative:net-istio-controller']
-
 volcano = ['volcanosh/vc-controller-manager:v1.4.0', 'volcanosh/vc-scheduler:v1.4.0',
            'volcanosh/vc-webhook-manager:v1.4.0']
 
@@ -127,13 +102,13 @@ kube_batch = ['kubesigs/kube-batch:v0.5']
 nni = ['frameworkcontrolle/frameworkcontrolle']
 
 
-images = new_katib + kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + knative_sha256 + knative + volcano
+images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano
+
 # images = new_pipline
 images = list(set(images))
 
-# 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网ai.tencentmusic.com的仓库
-HOST = 'ai.tencentmusic.com/tme-public/'
-
+# 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网docker.oa.com的仓库
+HOST = 'ccr.ccs.tencentyun.com/cube-studio/'
 for image in images:
     # print(image)
     image = image.replace('<none>', '')

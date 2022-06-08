@@ -45,7 +45,7 @@ spec:
       serviceAccount: kubeflow-dashboard
       containers:
         - name: kubeflow-watch-workflow
-          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always  # IfNotPresent
           workingDir: /home/myapp/myapp/tools
           command: ["python","watch_workflow.py"]

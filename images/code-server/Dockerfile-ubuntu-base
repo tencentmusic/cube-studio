@@ -1,4 +1,4 @@
-# docker build -t ai.tencentmusic.com/tme-public/notebook:code-server-ubuntu-base -f Dockerfile-ubuntu-base .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/notebook:code-server-ubuntu-base -f Dockerfile-ubuntu-base .
 # docker run -it -p 127.0.0.1:8080:8080 -v "$PWD:/home/coder/project" --user root  gashirar/code-server-on-k8s:latest
 
 FROM gashirar/code-server-on-k8s

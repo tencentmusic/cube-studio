@@ -2,8 +2,8 @@
 
 set -ex
 
-docker build -t ai.tencentmusic.com/tme-public/deploy-service:20211001 -f job/deploy-service/Dockerfile .
-docker push ai.tencentmusic.com/tme-public/deploy-service:20211001
+docker build -t ccr.ccs.tencentyun.com/cube-studio/deploy-service:20211001 -f job/deploy-service/Dockerfile .
+docker push ccr.ccs.tencentyun.com/cube-studio/deploy-service:20211001
 
 
 

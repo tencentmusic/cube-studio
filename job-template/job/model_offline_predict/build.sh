@@ -2,8 +2,8 @@
 
 set -ex
 
-docker build -t ai.tencentmusic.com/tme-public/volcano:offline-predict-20220101 -f job/volcano_predict/Dockerfile .
-docker push ai.tencentmusic.com/tme-public/volcano:offline-predict-20220101
+docker build -t ccr.ccs.tencentyun.com/cube-studio/volcano:offline-predict-20220101 -f job/volcano_predict/Dockerfile .
+docker push ccr.ccs.tencentyun.com/cube-studio/volcano:offline-predict-20220101
 
 
 

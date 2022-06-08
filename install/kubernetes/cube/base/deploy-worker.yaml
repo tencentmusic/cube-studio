@@ -45,7 +45,7 @@ spec:
       serviceAccount: kubeflow-dashboard
       containers:
         - name: kubeflow-dashboard-worker
-          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always
           command: ["bash","-c",'celery worker --app=myapp.tasks.celery_app:celery_app --loglevel=info --pool=prefork -Ofair -c 20']
           resources:       

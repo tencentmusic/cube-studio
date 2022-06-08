@@ -1,5 +1,5 @@
 #FROM rayproject/ray:nightly
-FROM ai.tencentmusic.com/tme-public/ray:gpu
+FROM ccr.ccs.tencentyun.com/cube-studio/ray:gpu
 USER root
 
 #COPY job/pkgs/config/pip.conf /root/.pip/pip.conf

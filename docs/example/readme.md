@@ -328,7 +328,7 @@ if __name__ == '__main__':
 
 ## mysql web服务
 
-镜像：ai.tencentmusic.com/tme-public/phpmyadmin
+镜像：ccr.ccs.tencentyun.com/cube-studio/phpmyadmin
 
 环境变量：
 ```
@@ -357,7 +357,7 @@ ME_CONFIG_OPTIONS_EDITORTHEME=ambiance
 端口：8081
 
 ## redis web
-镜像：ai.tencentmusic.com/tme-public/patrikx3:latest
+镜像：ccr.ccs.tencentyun.com/cube-studio/patrikx3:latest
 
 环境变量
 ```
@@ -370,7 +370,7 @@ REDIS_PASSWORD=xx
 
 ## 图数据库neo4j
 
-镜像：ai.tencentmusic.com/tme-public/neo4j:4.4
+镜像：ccr.ccs.tencentyun.com/cube-studio/neo4j:4.4
 
 环境变量
 ```

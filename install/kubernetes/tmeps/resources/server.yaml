@@ -22,7 +22,7 @@ spec:
         cpu: "true"
       containers:
       - name: app
-        image: ai.tencentmusic.com/tme-public/tmeps:serving
+        image: ccr.ccs.tencentyun.com/cube-studio/tmeps:serving
         imagePullPolicy: Always
         env:
         - name: "whoami"

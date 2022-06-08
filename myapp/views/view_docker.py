@@ -292,7 +292,7 @@ class Docker_ModelView_Base():
             resource_gpu='0',
             image_pull_policy='Always',
             image_pull_secrets=conf.get('HUBSECRET', []),
-            image='ai.tencentmusic.com/tme-public/docker',
+            image='ccr.ccs.tencentyun.com/cube-studio/docker',
             hostAliases=hostAliases,
             env=None,
             privileged=None,

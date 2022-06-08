@@ -15,7 +15,7 @@ from job.pkgs.k8s.tfjob import TFJob
 from job.pkgs.utils import parse_timedelta
 
 EVALUATOR_SPEC = {
-    "image": "ai.tencentmusic.com/tme-public/tf2.3_model_evaluation:latest",
+    "image": "ccr.ccs.tencentyun.com/cube-studio/tf2.3_model_evaluation:latest",
     "cmd": ["python", "-m", "job.tf_model_evaluation.model_evaluation"]
 }
 

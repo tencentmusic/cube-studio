@@ -1,6 +1,6 @@
-# docker build -t ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-gpu-base -f Dockerfile-gpu-base .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base -f Dockerfile-gpu-base .
 
-FROM ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-gpu-theia
+FROM ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-theia
 
 USER root
 # 安装中文，和基础的apt工具包

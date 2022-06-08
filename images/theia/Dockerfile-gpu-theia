@@ -1,8 +1,8 @@
-# docker build -t ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-gpu-theia -f Dockerfile-gpu-theia .
-# docker run --name gpu --rm -it --user root -p 3000:3000 ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-gpu-theia bash
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-theia -f Dockerfile-gpu-theia .
+# docker run --name gpu --rm -it --user root -p 3000:3000 ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-theia bash
 
 ARG NODE_VERSION=12.18.3
-FROM ai.tencentmusic.com/tme-public/theia-python
+FROM ccr.ccs.tencentyun.com/cube-studio/theia-python
 
 FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 

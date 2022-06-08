@@ -1,4 +1,4 @@
-FROM ai.tencentmusic.com/tme-public/tf_distributed_train:latest
+FROM ccr.ccs.tencentyun.com/cube-studio/tf_distributed_train:latest
 
 RUN pip3 install nni tensorflow==2.3.0 tensorboard-plugin-profile==2.3.0 tensorflow-addons pandas sklearn scipy==1.4.1 prettytable
 

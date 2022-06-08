@@ -21,7 +21,7 @@
                 "label":"下载标注数据",
                 "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
                 "args":{
-                    "images":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "images":"ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
                     "workdir":"/mnt/admin/coco_data_sample",
                     "command":"bash reset_file.sh"
                 }
@@ -50,7 +50,7 @@
                     "--model_version":"v2022.10.01.1",
                     "--model_path":"",
                     "--service_type":"serving",
-                    "--images":"ai.tencentmusic.com/tme-public/target-detection",
+                    "--images":"ccr.ccs.tencentyun.com/cube-studio/target-detection",
                     "--working_dir":"",
                     "--command":"",
                     "--args":"",

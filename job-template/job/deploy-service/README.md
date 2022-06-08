@@ -1,5 +1,5 @@
 # deploy-service 模板
-镜像：ai.tencentmusic.com/tme-public/deploy-service:20211001
+镜像：ccr.ccs.tencentyun.com/cube-studio/deploy-service:20211001
 启动参数：
 ```bash
 {

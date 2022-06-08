@@ -62,56 +62,56 @@
 
 ### ubuntu
     cuda10.1-cudnn7
-    - ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7
+    - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7
 		
 	python3.6
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6
 		
 	python3.7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.7
 		
 	python3.8
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.8
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.8
 		
 		
 	cuda10.0-cudnn7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7
 		
 	python3.6
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.6
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.6
 		
 	python3.7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.7
 		
 	python3.8
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.0-cudnn7-python3.8
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.8
 		
 		
 	cuda9.1-cudnn7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7
 		
 	python3.6
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.6
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6
 		
 	python3.7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.7
 		
 	python3.8
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.1-cudnn7-python3.8
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8
 		
 	
 	cuda9.0-cudnn7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7
 		
 	python3.6
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7-python3.6
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.6
 		
 	python3.7
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7-python3.7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.7
 		
 	python3.8
-		- ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda9.0-cudnn7-python3.8
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.8
 		
 		
 	cuda10.1-cuda10.0-cuda9.0-cudnn7.6
-		- ai.tencentmusic.com/tme-public/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base
+		- ccr.ccs.tencentyun.com/cube-studio/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base

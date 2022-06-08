@@ -16,7 +16,7 @@
 
                     ],
                     "range":"",
-                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "default":"ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
                     "placeholder":"",
                     "describe":"要调试的镜像，<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/imagess'>基础镜像参考<a>",
                     "editable":1,
@@ -66,7 +66,7 @@
     },
     "datax":{
         "project_name":"数据导入导出",
-        "image_name":"ai.tencentmusic.com/tme-public/datax:latest",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/datax:latest",
         "image_describe":"datax异构数据源同步",
         "job_template_name":"datax",
         "job_template_describe":"datax异构数据源同步",
@@ -103,7 +103,7 @@
     },
     "volcanojob":{
         "project_name":"数据处理",
-        "image_name":"ai.tencentmusic.com/tme-public/volcano:20211001",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/volcano:20211001",
         "image_describe":"有序分布式任务",
         "job_template_name":"volcanojob",
         "job_template_describe":"有序分布式任务",
@@ -126,7 +126,7 @@
 
                     ],
                     "range":"",
-                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "default":"ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
                     "placeholder":"",
                     "describe":"worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
                     "editable":1,
@@ -194,7 +194,7 @@
     },
     "ray":{
         "project_name":"数据处理",
-        "image_name":"ai.tencentmusic.com/tme-public/ray:gpu-20210601",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/ray:gpu-20210601",
         "image_describe":"ray分布式任务",
         "job_template_name":"ray",
         "job_template_describe":"python多机分布式任务，数据处理",
@@ -266,7 +266,7 @@
     },
     "ray-sklearn":{
         "project_name":"机器学习",
-        "image_name":"ai.tencentmusic.com/tme-public/sklearn_estimator:v1",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/sklearn_estimator:v1",
         "image_describe":"sklearn基于ray的分布式",
         "job_template_name":"ray-sklearn",
         "job_template_describe":"sklearn基于ray的分布式",
@@ -429,7 +429,7 @@
     },
     "xgb":{
         "project_name":"机器学习",
-        "image_name":"ai.tencentmusic.com/tme-public/xgb_train_and_predict:v1",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/xgb_train_and_predict:v1",
         "image_describe":"xgb算法单机",
         "job_template_name":"xgb",
         "job_template_describe":"xgb算法单机",
@@ -621,7 +621,7 @@
     },
     "tfjob-runner":{
         "project_name":"tf分布式",
-        "image_name":"ai.tencentmusic.com/tme-public/tf2.3_keras_train:latest",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/tf2.3_keras_train:latest",
         "image_describe":"tf分布式-runner方式",
         "job_template_name":"tfjob-runner",
         "job_template_describe":"tf分布式-runner方式",
@@ -676,7 +676,7 @@
     },
     "tfjob-plain":{
         "project_name":"tf分布式",
-        "image_name":"ai.tencentmusic.com/tme-public/tf2.3_plain_train:latest",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/tf2.3_plain_train:latest",
         "image_describe":"tf分布式-plain方式",
         "job_template_name":"tfjob-plain",
         "job_template_describe":"tf分布式-plain方式",
@@ -731,7 +731,7 @@
     },
     "tfjob-train":{
         "project_name":"tf分布式",
-        "image_name":"ai.tencentmusic.com/tme-public/tf_distributed_train:latest",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/tf_distributed_train:latest",
         "image_describe":"tf分布式训练",
         "job_template_name":"tfjob-train",
         "job_template_describe":"tf分布式训练，内部支持plain和runner两种方式",
@@ -786,7 +786,7 @@
     },
     "tf-model-evaluation":{
         "project_name":"tf分布式",
-        "image_name":"ai.tencentmusic.com/tme-public/tf2.3_model_evaluation:latest",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/tf2.3_model_evaluation:latest",
         "image_describe":"tensorflow2.3模型评估",
         "job_template_name":"tf-model-evaluation",
         "job_template_describe":"tensorflow2.3模型评估",
@@ -841,7 +841,7 @@
     },
     "tf-distribute-model-evaluation":{
         "project_name":"tf分布式",
-        "image_name":"ai.tencentmusic.com/tme-public/tf_distributed_eval:latest",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/tf_distributed_eval:latest",
         "image_describe":"tensorflow2.3分布式模型评估",
         "job_template_name":"tf-distribute-model-evaluation",
         "job_template_describe":"tensorflow2.3分布式模型评估",
@@ -896,7 +896,7 @@
     },
     "tf-model-offline-predict":{
         "project_name":"tf分布式",
-        "image_name":"ai.tencentmusic.com/tme-public/tf_model_offline_predict:latest",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/tf_model_offline_predict:latest",
         "image_describe":"tf模型离线推理",
         "job_template_name":"tf-model-offline-predict",
         "job_template_describe":"tf模型离线推理",
@@ -951,7 +951,7 @@
     },
     "pytorchjob-train":{
         "project_name":"pytorch分布式",
-        "image_name":"ai.tencentmusic.com/tme-public/pytorch_distributed_train_k8s:20201010",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/pytorch_distributed_train_k8s:20201010",
         "image_describe":"pytorch分布式训练",
         "job_template_name":"pytorchjob-train",
         "job_template_describe":"pytorch 分布式训练",
@@ -974,7 +974,7 @@
 
                     ],
                     "range":"",
-                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "default":"ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
                     "placeholder":"",
                     "describe":"worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
                     "editable":1,
@@ -1042,7 +1042,7 @@
     },
     "media-download":{
         "project_name":"多媒体类模板",
-        "image_name":"ai.tencentmusic.com/tme-public/video-audio:20210601",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
         "image_describe":"分布式媒体文件处理",
         "job_template_name":"media-download",
         "job_template_describe":"分布式下载媒体文件",
@@ -1114,7 +1114,7 @@
     },
     "video-img":{
         "project_name":"多媒体类模板",
-        "image_name":"ai.tencentmusic.com/tme-public/video-audio:20210601",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
         "image_describe":"分布式媒体文件处理",
         "job_template_name":"video-img",
         "job_template_describe":"视频提取图片(分布式版)",
@@ -1168,7 +1168,7 @@
     },
     "video-audio":{
         "project_name":"多媒体类模板",
-        "image_name":"ai.tencentmusic.com/tme-public/video-audio:20210601",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
         "image_describe":"分布式媒体文件处理",
         "job_template_name":"video-audio",
         "job_template_describe":"视频提取音频(分布式版)",
@@ -1222,7 +1222,7 @@
     },
     "kaldi-distributed-on-volcanojob":{
         "project_name":"多媒体类模板",
-        "image_name":"ai.tencentmusic.com/tme-public/kaldi_distributed_on_volcano:v2",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/kaldi_distributed_on_volcano:v2",
         "image_describe":"kaldi音频分布式",
         "job_template_name":"kaldi-distributed-on-volcanojob",
         "job_template_describe":"kaldi音频分布式训练",
@@ -1299,7 +1299,7 @@
 
                     ],
                     "range":"",
-                    "default":"ai.tencentmusic.com/tme-public/kaldi_distributed_worker:v1",
+                    "default":"ccr.ccs.tencentyun.com/cube-studio/kaldi_distributed_worker:v1",
                     "placeholder":"",
                     "describe":"worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
                     "editable":1,
@@ -1313,7 +1313,7 @@
     },
     "model-offline-predict":{
         "project_name":"多媒体类模板",
-        "image_name":"ai.tencentmusic.com/tme-public/volcano:offline-predict-20220101",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/volcano:offline-predict-20220101",
         "image_describe":"分布式离线推理",
         "job_template_name":"model-offline-predict",
         "job_template_describe":"分布式离线推理",
@@ -1336,7 +1336,7 @@
 
                     ],
                     "range":"",
-                    "default":"ai.tencentmusic.com/tme-public/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+                    "default":"ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
                     "placeholder":"",
                     "describe":"worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
                     "editable":1,
@@ -1404,7 +1404,7 @@
     },
     "object-detection-on-darknet":{
         "project_name":"多媒体类模板",
-        "image_name":"ai.tencentmusic.com/tme-public/object_detection_on_darknet:v1",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/object_detection_on_darknet:v1",
         "image_describe":"yolo目标识别",
         "job_template_name":"object-detection-on-darknet",
         "job_template_describe":"yolo目标识别",
@@ -1465,7 +1465,7 @@
     },
     "deploy-service":{
         "project_name":"模型服务化",
-        "image_name":"ai.tencentmusic.com/tme-public/deploy-service:20211001",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/deploy-service:20211001",
         "image_describe":"模型部署推理服务",
         "job_template_name":"deploy-service",
         "job_template_describe":"模型部署推理服务",

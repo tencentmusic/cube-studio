@@ -150,8 +150,7 @@ images = [
 
 images = list(set(images))
 # 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网ai.tencentmusic.com的仓库
-HOST = 'ai.tencentmusic.com/tme-public/'
-
+HOST = 'ccr.ccs.tencentyun.com/cube-rancher/'
 for image in images:
     # print(image)
     image = image.replace('<none>', '')
@@ -162,7 +161,7 @@ for image in images:
     # print('docker tag %s %s' % (image, image_name))
     # print('docker push %s' % (image_name))
 
-    # 内网机器上拉取私有仓库镜像
+    # # 内网机器上拉取私有仓库镜像
     image=image.replace('@sha256','')
     print("docker pull %s" % image_name)
     print("docker tag %s %s"%(image_name,image))

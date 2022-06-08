@@ -1,6 +1,6 @@
-# docker build -t ai.tencentmusic.com/tme-public/notebook:vscode-ubuntu-cpu-base -f Dockerfile-cpu-base .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base -f Dockerfile-cpu-base .
 
-FROM ai.tencentmusic.com/tme-public/theia-python:latest
+FROM ccr.ccs.tencentyun.com/cube-studio/theia-python:latest
 
 USER root
 # 安装中文，和基础的apt工具包

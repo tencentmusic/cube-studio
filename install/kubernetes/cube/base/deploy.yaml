@@ -47,7 +47,7 @@ spec:
       serviceAccount: kubeflow-dashboard
       containers:
         - name: kubeflow-dashboard
-          image: ai.tencentmusic.com/tme-public/kubeflow-dashboard
+          image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always  # IfNotPresent
           command: ["bash","/entrypoint.sh"]
           env:
