@@ -740,7 +740,7 @@ KATIB_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
 # 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
-REPOSITORY_ORG='ai.tencentmusic/tme-public/'
+REPOSITORY_ORG='ccr.ccs.tencentyun.com/cube-studio/'
 # notebook每个pod使用的用户账号
 JUPYTER_ACCOUNTS='jupyter-user'
 HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,KATIB_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE,KFSERVING_NAMESPACE]

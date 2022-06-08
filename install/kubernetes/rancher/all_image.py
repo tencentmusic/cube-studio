@@ -149,7 +149,7 @@ images = [
 ]
 
 images = list(set(images))
-# 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网ai.tencentmusic.com的仓库
+# 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网ccr.ccs.tencentyun.com的仓库
 HOST = 'ccr.ccs.tencentyun.com/cube-rancher/'
 for image in images:
     # print(image)

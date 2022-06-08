@@ -1,5 +1,5 @@
 set -ex
-hubhost=ai.tencentmusic.com/tme-public
+hubhost=ccr.ccs.tencentyun.com/cube-studio
 
 base_image=nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
 docker build -t $hubhost/ubuntu-gpu:cuda10.2-cudnn7 --build-arg FROM_IMAGES=$base_image -f cuda/Dockerfile .
