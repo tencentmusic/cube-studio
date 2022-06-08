@@ -75,7 +75,10 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if SERVICE_EXTERNAL_IP:
             service_ports = 10000 + 10 * self.id
             host = "http://%s:%s"%(SERVICE_EXTERNAL_IP,str(service_ports))
-            url = '/notebook/jupyter/%s/lab/tree/mnt/%s'%(self.name,self.created_by.username)
+            if self.ide_type=='theia':
+                url = "/" + "#/mnt/" + self.created_by.username
+            else:
+                url = '/notebook/jupyter/%s/lab/tree/mnt/%s'%(self.name,self.created_by.username)
         return Markup(f'<a target=_blank href="{host}{url}">{self.name}</a>')
 
     @property
