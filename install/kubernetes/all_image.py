@@ -7,7 +7,7 @@ kubeflow = [
     'docker.io/kubeflowkatib/katib-controller:v1beta1-a96ff59', 'argoproj/argoui:v2.3.0',
     'gcr.io/istio-release/proxy_init:release-1.3-latest-daily',
     'gcr.io/istio-release/kubectl:release-1.3-latest-daily', 'gcr.io/google_containers/spartakus-amd64:v1.1.0',
-    'gcr.io/istio-release/proxyv2:release-1.3-latest-daily', 'mpioperator/mpi-operator:latest',
+    'gcr.io/istio-release/proxyv2:release-1.3-latest-daily', 'mpioperator/mpi-operator:latest',"mpioperator/kubectl-delivery:latest",
     'gcr.io/kubeflow-images-public/admission-webhook:vmaster-ge5452b6f',
     'gcr.io/kubeflow-images-public/tf_operator:vmaster-gda226016', 'istio/proxyv2:1.3.1',
     'gcr.io/istio-release/galley:release-1.3-latest-daily', 'quay.io/jetstack/cert-manager-cainjector:v0.11.0',

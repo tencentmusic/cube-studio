@@ -135,7 +135,8 @@ cd ../../../../
 
 # 部署xgb
 #kubectl kustomize  kubeflow/xgboost-operator/manifests/base | kubectl apply -f -
-
+# 部署mpi-operator
+kubectl apply -f kubeflow/mpi-operator.yaml
 
 # 部署管理平台
 kubectl delete configmap kubernetes-config -n infra

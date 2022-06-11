@@ -58,6 +58,11 @@ kubectl apply -f pipeline/minio-artifact-secret.yaml
 kubectl apply -f pipeline/pipeline-runner-rolebinding.yaml
 ```
 
+# 部署mpi-operator
+
+```bash
+kubectl apply -f mpi-operator.yaml
+```
 
 
 # 部署xgboost-operator
