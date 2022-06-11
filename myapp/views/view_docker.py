@@ -276,7 +276,7 @@ class Docker_ModelView_Base():
         # return redirect('/docker_modelview/list/')
 
         pod_name = "docker-commit-%s-%s" % (docker.created_by.username, str(docker.id))
-        command = ['sh', '-c', 'docker login csighub.tencentyun.com -u pengluan -p 19910101a && docker commit %s %s && docker push %s'%(container_id,docker.target_image,docker.target_image)]
+        command = ['sh', '-c', 'docker commit %s %s && docker push %s'%(container_id,docker.target_image,docker.target_image)]
         hostAliases = conf.get('HOSTALIASES')
         k8s_client.create_debug_pod(
             namespace=namespace,

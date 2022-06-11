@@ -162,7 +162,7 @@ class Service_Pipeline_ModelView_Base():
         ),
         "images":StringField(
                 _(datamodel.obj.lab('images')),
-                default='csighub.tencentyun.com/tme-kubeflow/service-pipeline',
+                default='ccr.ccs.tencentyun.com/cube-studio/service-pipeline',
                 description="推理服务镜像",
                 widget=BS3TextFieldWidget(),
                 validators=[DataRequired()]
@@ -657,7 +657,7 @@ class Service_Pipeline_ModelView_Base():
                                 }
                             }
                         },
-                        "username": "pengluan",
+                        "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
                         "label": "kafka",
@@ -690,7 +690,7 @@ class Service_Pipeline_ModelView_Base():
                                 }
                             }
                         },
-                        "username": "pengluan",
+                        "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
                         "label": "switch-case逻辑节点",
@@ -780,7 +780,7 @@ class Service_Pipeline_ModelView_Base():
                                 }
                             }
                         },
-                        "username": "pengluan",
+                        "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
                         "label": "http请求",
@@ -811,7 +811,7 @@ class Service_Pipeline_ModelView_Base():
                                 },
                             }
                         },
-                        "username": "pengluan",
+                        "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
                         "label": "http请求",
@@ -833,7 +833,7 @@ class Service_Pipeline_ModelView_Base():
                 template['template_id'] = index
                 template['changed_on'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 template['created_on'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                template['username'] = 'pengluan'
+                template['username'] = g.user.username,
                 index += 1
 
         return jsonify(all_template)

@@ -135,9 +135,6 @@ def create_header_deploy(name):
                     "imagePullSecrets": [
                         {
                             "name": "hubsecret"
-                        },
-                        {
-                            "name": "csig-hubsecret"
                         }
                     ],
                     "affinity": {
@@ -319,9 +316,6 @@ def create_worker_deploy(header_name,worker_name):
                     "imagePullSecrets": [
                         {
                             "name": "hubsecret"
-                        },
-                        {
-                            "name": "csig-hubsecret"
                         }
                     ],
                     "restartPolicy": "Always",

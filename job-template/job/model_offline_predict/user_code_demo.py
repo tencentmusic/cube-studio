@@ -12,11 +12,11 @@ class My_Offline_Predict(Offline_Predict):
         gpus = tf.config.list_physical_devices('GPU')
         # print(gpus)
         tf.config.experimental.set_memory_growth(gpus[0], True)
-        self.model = tf.saved_model.load('/mnt/pengluan/ray/ori/')
+        self.model = tf.saved_model.load('/mnt/admin/ray/ori/')
 
     # 定义所有要处理的数据源，返回字符串列表
     def datasource(self):
-        all_lines = open('/mnt/pengluan/ray/aa.txt', mode='r').readlines()
+        all_lines = open('/mnt/admin/ray/aa.txt', mode='r').readlines()
         return all_lines
 
     # 定义一条数据的处理逻辑

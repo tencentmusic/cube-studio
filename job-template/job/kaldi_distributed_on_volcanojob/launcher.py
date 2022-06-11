@@ -77,9 +77,6 @@ def make_volcanojob(name, num_workers, image, working_dir, worker_command, maste
                 "imagePullSecrets": [
                     {
                         "name": "hubsecret"
-                    },
-                    {
-                        "name": "csig-hubsecret"
                     }
                 ],
                 "affinity": {

@@ -118,11 +118,11 @@ watch --color -n1 gpustat -cpu
 可以添加启动start.sh，启动3个进程。每个进程在原有基础上添加`--process_index xx --process_num xx` 参数。并放在在后端运行，并在最后wait所有后端程序。
 
 ```
-python3 /mnt/pengluan/mytask.py --lr xx ... --process_index 0 --process_num 3 > /process0.file 2>&1 &
+python3 /mnt/admin/mytask.py --lr xx ... --process_index 0 --process_num 3 > /process0.file 2>&1 &
 
-python3 /mnt/pengluan/mytask.py --lr xx ... --process_index 1 --process_num 3 > /process1.file 2>&1 &
+python3 /mnt/admin/mytask.py --lr xx ... --process_index 1 --process_num 3 > /process1.file 2>&1 &
 
-python3 /mnt/pengluan/mytask.py --lr xx ... --process_index 2 --process_num 3 > /process2.file 2>&1 &
+python3 /mnt/admin/mytask.py --lr xx ... --process_index 2 --process_num 3 > /process2.file 2>&1 &
 
 wait
 ```
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     # 以下参数列表只是示例，实际使用时请按需自己增删改
     arg_parser = argparse.ArgumentParser("多进程启动")
     process_num=3
-    python_path="/mnt/pengluan/mytask.py"
+    python_path="/mnt/admin/mytask.py"
     commands = [["/usr/bin/python3",python_path,"--process_index",str(process_index),"--process_num",str(process_num)]+sys.argv[1:] for process_index in range(process_num)]
     print(commands)
     all_process = [subprocess.Popen(command) for command in commands]
