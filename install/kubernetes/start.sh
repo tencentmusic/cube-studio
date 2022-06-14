@@ -34,7 +34,9 @@ kubectl create -f kube-batch/deploy.yaml
 cd prometheus
 mkdir -p /data/k8s/monitoring/grafana/
 chmod -R 777 /data/k8s/monitoring/grafana/
-kubectl apply -f ./operator/bundle.yaml
+kubectl apply -f ./operator/operator-rbac.yml
+kubectl apply -f ./operator/operator-dp.yml
+kubectl apply -f ./operator/operator-crd.yml
 kubectl apply -f ./alertmanater/alertmanager-main-sa.yml
 kubectl apply -f ./alertmanater/alertmanager-main-secret.yml
 kubectl apply -f ./alertmanater/alertmanager-main-svc.yml

@@ -64,7 +64,7 @@ new_katib = ['docker.io/kubeflowkatib/katib-ui:v1beta1-a96ff59',
              'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-chocolate']
 
-new_gpu = ['nvidia/k8s-device-plugin:v0.7.1', 'nvidia/dcgm-exporter:2.0.13-2.1.2-ubuntu20.04',
+new_gpu = ['nvidia/k8s-device-plugin:v0.7.1', 'nvidia/dcgm-exporter:2.0.13-2.1.2-ubuntu20.04','nvidia/dcgm-exporter:2.3.1-2.6.1-ubuntu20.04',
            'nvidia/pod-gpu-metrics-exporter:v1.0.0-alpha']
 
 new_prometheus = [
@@ -78,6 +78,7 @@ new_prometheus = [
     'quay.io/prometheus/node-exporter:v0.15.2',
     'quay.io/coreos/kube-rbac-proxy:v0.3.1',
     'quay.io/coreos/addon-resizer:1.0',
+    "quay.io/prometheus-operator/prometheus-operator:v0.46.0"
     'quay.io/prometheus-operator/prometheus-operator:v0.56.1',
     "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",
     'grafana/grafana:7.5.2'

@@ -12,7 +12,9 @@ kubectl create ns monitoring
 
 # 部署operator
 ```
-kubectl apply -f ./operator/bundle.yaml
+kubectl apply -f ./operator/operator-rbac.yml
+kubectl apply -f ./operator/operator-dp.yml
+kubectl apply -f ./operator/operator-crd.yml
 ```
 
 

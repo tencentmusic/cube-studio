@@ -1,22 +1,53 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/name: prometheus-operator
+    app.kubernetes.io/version: 0.46.0
+  name: prometheus-operator
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/name: prometheus-operator
+    app.kubernetes.io/version: 0.46.0
+  name: prometheus-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-operator
+subjects:
+- kind: ServiceAccount
+  name: prometheus-operator
+  namespace: monitoring
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/name: prometheus-operator
+    app.kubernetes.io/version: 0.46.0
   name: prometheus-operator
 rules:
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - '*'
 - apiGroups:
   - monitoring.coreos.com
   resources:
   - alertmanagers
+  - alertmanagers/finalizers
+  - alertmanagerconfigs
   - prometheuses
   - prometheuses/finalizers
-  - alertmanagers/finalizers
+  - thanosrulers
+  - thanosrulers/finalizers
   - servicemonitors
+  - podmonitors
+  - probes
   - prometheusrules
   verbs:
   - '*'
@@ -44,11 +75,13 @@ rules:
   - ""
   resources:
   - services
+  - services/finalizers
   - endpoints
   verbs:
   - get
   - create
   - update
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -61,18 +94,15 @@ rules:
   resources:
   - namespaces
   verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
   - list
   - watch
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: prometheus-operator
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: prometheus-operator
-subjects:
-- kind: ServiceAccount
-  name: prometheus-operator
-  namespace: monitoring
