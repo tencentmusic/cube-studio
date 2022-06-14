@@ -1,12 +1,10 @@
-
 import time,datetime,logging,os,sys
 
 dir_common = os.path.split(os.path.realpath(__file__))[0] + '/../'
 sys.path.append(dir_common)   # 将根目录添加到系统目录,才能正常引用common文件夹
 import re
 from kubernetes import client,config,watch
-from kubernetes.client.models import v1_pod,v1_object_meta,v1_pod_spec,apps_v1beta1_deployment,apps_v1beta1_deployment_spec
-
+from kubernetes.client.models import v1_pod,v1_object_meta,v1_pod_spec,v1_deployment,v1_deployment_spec
 import yaml
 from os import path
 import json
@@ -33,7 +31,6 @@ class K8s():
         else:
             config.load_incluster_config()   # 使用为pod配置的rbac访问集群
         self.v1 = client.CoreV1Api()
-        self.v1beta1 = client.ExtensionsV1beta1Api()
         self.AppsV1Api = client.AppsV1Api()
         self.v1.api_client.configuration.verify_ssl = False  # 只能设置 /usr/local/lib/python3.6/dist-packages/kubernetes/client/configuration.py:   self.verify_ssl= True ---> False
 
@@ -83,17 +80,37 @@ class K8s():
                 cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources  and container.resources.requests]
                 gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
 
+                node_selector = {}
+                try:
+                    # aa=client.V1NodeSelector
+                    match_expressions = pod.spec.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms
+                    match_expressions = [ex.match_expressions for ex in match_expressions]
+                    match_expressions = match_expressions[0]
+                    for match_expression in match_expressions:
+                        if match_expression.operator == 'In':
+                            node_selector[match_expression.key]=match_expression.values[0]
+                        if match_expression.operator == 'Equal':
+                            node_selector[match_expression.key]=match_expression.values
+
+                except Exception as e:
+                    pass
+                    # print(e)
+                if pod.spec.node_selector:
+                    node_selector.update(pod.spec.node_selector)
+
                 temp={
                     'name':metadata.name,
                     'host_ip':pod.status.host_ip,
                     'pod_ip':pod.status.pod_ip,
                     'status':status,   # 每个容器都正常才算正常
+                    'status_more':pod.status.to_dict(),   # 无法json序列化
                     'node_name':pod.spec.node_name,
                     "labels":metadata.labels,
                     "memory":sum(memory),
                     "cpu":sum(cpu),
                     "gpu":sum(gpu),
-                    "start_time":metadata.creation_timestamp+datetime.timedelta(hours=8)   # 时间格式
+                    "start_time":(metadata.creation_timestamp+datetime.timedelta(hours=8)).replace(tzinfo=None),   # 时间格式
+                    "node_selector":node_selector
                 }
                 back_pods.append(temp)
             # print(back_pods)
@@ -139,7 +156,7 @@ class K8s():
 
     # 获取指定label的nodeip列表
     # @pysnooper.snoop()
-    def get_node(self,label=None):
+    def get_node(self,label=None,name=None,ip=None):
         try:
             back_nodes=[]
             all_node = self.v1.list_node(label_selector=label).items
@@ -156,10 +173,16 @@ class K8s():
                 back_node['memory'] = int(node.status.allocatable.get('memory', '0').replace('Ki', '')) // 1024//1024
                 back_node['gpu'] = int(node.status.allocatable.get('nvidia.com/gpu', '0'))
                 back_node['labels']=node.metadata.labels
+                back_node['name']=node.metadata.name
                 for address in adresses:
                     if address.type=='InternalIP':
                         back_node['hostip']=address.address
-                back_nodes.append(back_node)
+                if name and back_node['name']==name:
+                    back_nodes.append(back_node)
+                elif ip and back_node['hostip']==ip:
+                    back_nodes.append(back_node)
+                elif not name and not ip:
+                    back_nodes.append(back_node)
 
                 # if back_node['hostip']=='10.101.140.141':
                 #     print(node.status.allocatable)
@@ -170,7 +193,7 @@ class K8s():
             return []
 
     # 获取指定label的nodeip列表
-    def label_node(self,ips, label):
+    def label_node(self,ips, labels):
         try:
             all_node_ip = []
             all_node = self.v1.list_node().items
@@ -189,9 +212,7 @@ class K8s():
                 if InternalIP in ips:
                     body = {
                         "metadata": {
-                            "labels": {
-                                label: "true"
-                            }
+                            "labels": labels
                         }
                     }
                     api_response = self.v1.patch_node(Hostname, body)
@@ -307,7 +328,7 @@ class K8s():
 
             # vcjob的结束时间
             elif 'status' in crd_object and 'state' in crd_object['status'] and 'lastTransitionTime' in crd_object['status']['state']:
-                if crd_object['status']['state'].get('phase','')=='Completed':
+                if crd_object['status']['state'].get('phase','')=='Completed' or crd_object['status']['state'].get('phase','')=='Aborted' or crd_object['status']['state'].get('phase','')=='Failed' or crd_object['status']['state'].get('phase','')=='Terminated':
                     finish_time = crd_object['status']['state']['lastTransitionTime'].replace('T', ' ').replace('Z', '')
                     finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -499,9 +520,10 @@ class K8s():
             # 不能删除pod，因为task的模板也是有这个run-id的，所以不能删除
 
 
+
     def delete_service(self,namespace,name):
         try:
-            self.v1.delete_namespaced_service(name=name,namespace=namespace)
+            self.v1.delete_namespaced_service(name=name,namespace=namespace,grace_period_seconds=0)
         except Exception as e:
             print(e)
     #
@@ -559,7 +581,7 @@ class K8s():
                     volume, mount = one_volume_mount.split(":")[0].strip(), one_volume_mount.split(":")[1].strip()
                     if "(pvc)" in volume:
                         pvc_name = volume.replace('(pvc)', '').replace(' ', '')
-                        volumn_name = pvc_name.replace('_', '-').lower()
+                        volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
                         k8s_volumes.append({
                             "name":volumn_name,
                             "persistentVolumeClaim":{
@@ -578,7 +600,7 @@ class K8s():
                         hostpath_name = volume.replace('(hostpath)', '').replace(' ', '')
                         temps = re.split('_|\.|/', hostpath_name)
                         temps = [temp for temp in temps if temp]
-                        volumn_name = '-'.join(temps).lower()  # hostpath_name.replace('_', '-').replace('/', '-').replace('.', '-')
+                        volumn_name = '-'.join(temps).lower()[-60:].strip('-')  # hostpath_name.replace('_', '-').replace('/', '-').replace('.', '-')
                         k8s_volumes.append(
                             {
                                 "name":volumn_name,
@@ -594,7 +616,7 @@ class K8s():
 
                     if "(configmap)" in volume:
                         configmap_name = volume.replace('(configmap)', '').replace(' ', '')
-                        volumn_name = configmap_name.replace('_', '-').replace('/', '-').replace('.', '-').lower()
+                        volumn_name = configmap_name.replace('_', '-').replace('/', '-').replace('.', '-').lower()[-60:].strip('-')
                         k8s_volumes.append({
                             "name":volumn_name,
                             "configMap":{
@@ -609,7 +631,8 @@ class K8s():
 
                     if "(memory)" in volume:
                         memory_size = volume.replace('(memory)', '').replace(' ', '').lower().replace('g','')
-                        volumn_name = 'memory-%s'%memory_size
+                        volumn_name = ('memory-%s'%memory_size)[-60:].strip('-')
+
                         k8s_volumes.append({
                             "name":volumn_name,
                             "emptyDir":{
@@ -642,7 +665,7 @@ class K8s():
 
 
     # @pysnooper.snoop(watch_explode=())
-    def make_container(self,name,command,args,volume_mount,working_dir,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image,env,privileged=False,username='',ports=None):
+    def make_container(self,name,command,args,volume_mount,working_dir,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image,env,privileged=False,username='',ports=None,health=None):
 
         if not '~' in resource_memory:
             resource_memory = resource_memory.strip() + "~" + resource_memory.strip()
@@ -697,22 +720,55 @@ class K8s():
             "memory": limits_memory
         }
 
-        if gpu_type == 'NVIDIA':
-            gpu_num = get_gpu(resource_gpu)[0]
-            if gpu_num:
-                resources_requests['nvidia.com/gpu'] = str(gpu_num)
-                resources_limits['nvidia.com/gpu'] = str(gpu_num)
+        resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
+        resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
 
-        resources_obj = client.V1ResourceRequirements(requests=resources_requests, limits=resources_limits)
+
+        gpu_num = get_gpu(resource_gpu)[0]
+        if gpu_num:
+            resources_requests['nvidia.com/gpu'] = str(gpu_num)
+            resources_limits['nvidia.com/gpu'] = str(gpu_num)
+
+
+        resources_tencent = client.V1ResourceRequirements(requests=resources_requests, limits=resources_limits)
+        resources_obj=resources_tencent
+
 
         if ports:
             if type(ports)==str:
                 ports = [int(port) for port in ports.split(',')]
-            ports = [client.V1ContainerPort(name='port%s' % index, protocol='TCP', container_port=port) for index, port in
-                 enumerate(ports)] if ports else None
+            # ports_k8s = [client.V1ContainerPort(name='port%s' % index, protocol='TCP', container_port=port) for index, port in enumerate(ports)] if ports else None
+            ports_k8s = [client.V1ContainerPort(name='port%s' % str(port), protocol='TCP', container_port=port) for port in ports] if ports else None
         else:
-            ports=None
+            ports_k8s=[]
 
+
+        #         readinessProbe:
+        #           failureThreshold: 2
+        #           httpGet:
+        #             path: /v1/models/resnet50/versions/2/metadata
+        #             port: http
+        #           initialDelaySeconds: 10
+        #           periodSeconds: 10
+        #           timeoutSeconds: 5
+
+        # 端口检测或者脚本检测   8080:/health    shell:python /health.py
+        if health:
+            if health[0:health.index(":")]=='shell':
+                command = health.replace("shell:").split(' ')
+                command = [c for c in command if c]
+                readiness_probe = client.V1Probe(_exec=client.V1ExecAction(command=command),failure_threshold=1,period_seconds=120,timeout_seconds=60)
+            else:
+                port = health[0:health.index(":")]  # 健康检查的port
+                path = health[health.index(":")+1:]
+                port_name = "port"+port
+                # 端口只能用名称，不能用数字，而且要在里面定义
+                if int(port) not in ports:
+                    ports_k8s.append(client.V1ContainerPort(name=port_name, protocol='TCP', container_port=port))
+
+                readiness_probe = client.V1Probe(http_get=client.V1HTTPGetAction(path=path,port=port_name),failure_threshold=1,period_seconds=120,timeout_seconds=60)
+
+            print(readiness_probe)
         container = client.V1Container(
             name=name,
             command=command,
@@ -724,14 +780,15 @@ class K8s():
             resources=resources_obj,
             env=env_list,
             security_context=security_context,
-            ports=ports
+            ports=ports_k8s,
+            readiness_probe=readiness_probe if health else None
         )
 
         return container
 
 
     # @pysnooper.snoop()
-    def make_pod(self,namespace,name,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports=None,restart_policy='OnFailure',scheduler_name='default-scheduler',node_name=''):
+    def make_pod(self,namespace,name,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports=None,restart_policy='OnFailure',scheduler_name='default-scheduler',node_name='',health=None):
         annotations = None
         if scheduler_name == 'kube-batch':
             annotations = {
@@ -746,6 +803,17 @@ class K8s():
                 selector=selector.strip()
                 if selector:
                     nodeSelector[selector.strip().split('=')[0].strip()]=selector.strip().split('=')[1].strip()
+
+        gpu_type = None
+        if '(' in resource_gpu:
+            gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
+            gpu_type = gpu_type[0] if gpu_type else None
+        if '（' in resource_gpu:
+            gpu_type = re.findall(r"（(.+?)）", resource_gpu)
+            gpu_type = gpu_type[0] if gpu_type else None
+
+        if gpu_type and gpu_type.strip():
+            nodeSelector['gpu-type']=gpu_type
 
         k8s_volumes, k8s_volume_mounts = self.get_volume_mounts(volume_mount, username)
 
@@ -762,7 +830,9 @@ class K8s():
                                           env=env,
                                           privileged=privileged,
                                           username=username,
-                                          ports=ports)]
+                                          ports=ports,
+                                          health=health
+                                          )]
 
         # 添加host
         host_aliases = []
@@ -786,7 +856,7 @@ class K8s():
     # @pysnooper.snoop()
     def create_debug_pod(self,namespace,name,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,scheduler_name='default-scheduler',node_name=''):
         try:
-            self.v1.delete_namespaced_pod(name, namespace=namespace,grace_period_seconds=0)
+            self.v1.delete_namespaced_pod(name=name, namespace=namespace,grace_period_seconds=0)
             # time.sleep(1)
         except Exception as e:
             pass
@@ -858,8 +928,7 @@ class K8s():
 
     # 创建notebook
     def create_crd(self,group,version,plural,namespace,body):
-        self.crd = client.CustomObjectsApi()
-        crd_objects = self.crd.create_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural,body=body)
+        crd_objects = client.CustomObjectsApi().create_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural,body=body)
         return crd_objects
 
     # 创建pod
@@ -876,7 +945,7 @@ class K8s():
     def delete_deployment(self,namespace,name=None,labels=None):
         if name:
             try:
-                client.AppsV1Api().delete_namespaced_deployment(name=name, namespace=namespace)
+                client.AppsV1Api().delete_namespaced_deployment(name=name, namespace=namespace,grace_period_seconds=0)
             except Exception as e:
                 print(e)
         elif labels:
@@ -885,12 +954,12 @@ class K8s():
                 labels_str=','.join(labels_arr)
                 deploys = self.AppsV1Api.list_namespaced_deployment(namespace=namespace,label_selector=labels_str).items
                 for deploy in deploys:
-                    client.AppsV1Api().delete_namespaced_deployment(name = deploy.metadata.name, namespace=namespace)
+                    client.AppsV1Api().delete_namespaced_deployment(name = deploy.metadata.name, namespace=namespace,grace_period_seconds=0)
             except Exception as e:
                 print(e)
 
     # @pysnooper.snoop(watch_explode=())
-    def create_deployment(self,namespace,name,replicas,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports,scheduler_name='default-scheduler'):
+    def create_deployment(self,namespace,name,replicas,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports,scheduler_name='default-scheduler',health=None):
         pod,pod_spec = self.make_pod(
             namespace=namespace,
             name=name,
@@ -912,30 +981,60 @@ class K8s():
             accounts=accounts,
             username=username,
             ports=ports,
-            scheduler_name=scheduler_name
+            scheduler_name=scheduler_name,
+            health=health
         )
+
         pod_spec.restart_policy='Always'  # dp里面必须是Always
+
+        pod_spec.affinity=client.V1Affinity(
+            pod_anti_affinity=client.V1PodAntiAffinity(
+            preferred_during_scheduling_ignored_during_execution=[client.V1WeightedPodAffinityTerm(
+                weight=10,
+                pod_affinity_term=client.V1PodAffinityTerm(
+                    label_selector=client.V1LabelSelector(
+                        match_expressions=[client.V1LabelSelectorRequirement(
+                            key=label[0],
+                            operator='In',
+                            values=[label[1]]
+                        )]
+                    ),
+                    topology_key="kubernetes.io/hostname"
+                )
+
+            ) for label in labels.items()]
+        ))
+
         dp_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
         selector = client.models.V1LabelSelector(match_labels={"app":name,'user':username})
         template_metadata = v1_object_meta.V1ObjectMeta(labels={"app":name,'user':username})
         template = client.models.V1PodTemplateSpec(metadata=template_metadata,spec=pod_spec)
-        dp_spec = apps_v1beta1_deployment_spec.AppsV1beta1DeploymentSpec(replicas=int(replicas), selector=selector,template=template)
-        dp = apps_v1beta1_deployment.AppsV1beta1Deployment(api_version='apps/v1', kind='Deployment', metadata=dp_metadata, spec=dp_spec)
+        dp_spec = v1_deployment_spec.V1DeploymentSpec(replicas=int(replicas), selector=selector,template=template)
+        dp = v1_deployment.V1Deployment(api_version='apps/v1', kind='Deployment', metadata=dp_metadata, spec=dp_spec)
         # print(dp.to_str())
-        try:
-            client.AppsV1Api().delete_namespaced_deployment(name, namespace)
-        except Exception as e:
-            print(e)
+        # try:
+        #     client.AppsV1Api().delete_namespaced_deployment(name, namespace)
+        # except Exception as e:
+        #     print(e)
 
         try:
-            dp = client.AppsV1Api().create_namespaced_deployment(namespace, dp)
-        except Exception as e:
-            print(e)
-            try:
-                client.AppsV1Api().patch_namespaced_deployment(name=name,namespace=namespace,body=dp)
-            except Exception as e1:
-                print(e1)
-        # time.sleep(2)
+            exist_dp = client.AppsV1Api().read_namespaced_deployment(name=name,namespace=namespace)
+            client.AppsV1Api().patch_namespaced_deployment(name=name, namespace=namespace, body=dp)
+        except ApiException as e:
+            if e.status == 404:
+                dp = client.AppsV1Api().create_namespaced_deployment(namespace, dp)
+
+
+
+        # try:
+        #     dp = client.AppsV1Api().create_namespaced_deployment(namespace, dp)
+        # except Exception as e:
+        #     print(e)
+        #     try:
+        #         client.AppsV1Api().patch_namespaced_deployment(name=name,namespace=namespace,body=dp)
+        #     except Exception as e1:
+        #         print(e1)
+        # # time.sleep(2)
 
 
     # 删除statefulset
@@ -1010,12 +1109,18 @@ class K8s():
 
     # 创建pod
     # @pysnooper.snoop()
-    def create_service(self,namespace,name,username,ports,selector=None):
-        svc_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username})
-        ports = [client.V1ServicePort(name='http%s'%index, port=int(port), protocol='TCP', target_port=int(port)) for index,port in enumerate(ports)]
-        svc_spec = client.V1ServiceSpec(ports=ports, selector={"app": name, 'user': username}, type='ClusterIP')
+    def create_service(self,namespace,name,username,ports,selector=None,service_type='ClusterIP',external_ip=None,annotations=None,load_balancer_ip=None):
+        svc_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username},annotations=annotations)
+        service_ports=[]
+        for index,port in enumerate(ports):
+            if type(port)==list and len(port)>1:
+                service_ports.append(client.V1ServicePort(name='http%s'%index, port=int(port[0]), protocol='TCP', target_port=int(port[1])))
+            else:
+                service_ports.append(client.V1ServicePort(name='http%s' % index, port=int(port), protocol='TCP', target_port=int(port)))
+
+        svc_spec = client.V1ServiceSpec(ports=service_ports, selector={"app": name, 'user': username}, type=service_type,external_i_ps=external_ip,load_balancer_ip=load_balancer_ip)
         if selector:
-            svc_spec = client.V1ServiceSpec(ports=ports, selector=selector, type='ClusterIP')
+            svc_spec = client.V1ServiceSpec(ports=service_ports, selector=selector, type=service_type,external_i_ps=external_ip,load_balancer_ip=load_balancer_ip)
         service = client.V1Service(api_version='v1', kind='Service', metadata=svc_metadata, spec=svc_spec)
         # print(service.to_dict())
         try:
@@ -1091,8 +1196,9 @@ class K8s():
 
 
 
+
     # @pysnooper.snoop()
-    def create_istio_ingress(self,namespace,name,host,ports):
+    def create_istio_ingress(self,namespace,name,host,ports,canary=None,shadow=None):
         crd_info={
             "group": "networking.istio.io",
             "version": "v1alpha3",
@@ -1108,6 +1214,8 @@ class K8s():
                 self.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                                namespace=namespace, name=vs_obj['name'])
                 time.sleep(1)
+
+
 
         if len(ports)>0:
             crd_json = {
@@ -1136,13 +1244,67 @@ class K8s():
                                     }
                                 }
                             ],
-                            "timeout": "300s"
+                            "timeout": "3000s"
                         }
                     ]
                 }
             }
-            crd = self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
-                                 namespace=namespace, body=crd_json)
+
+            def get_canary(gateway_service, canarys):
+                canarys = re.split(',|;', canarys)
+                des_canary = {}
+                for canary in canarys:
+                    service_name, traffic = canary.split(':')[0], canary.split(':')[1]
+                    des_canary[service_name] = int(traffic.replace('%', ''))
+                sum_traffic = sum(des_canary.values())
+                gateway_service_traffic = 100 - sum_traffic
+                if gateway_service_traffic>0:
+                    des_canary[gateway_service] = gateway_service_traffic
+                    return des_canary
+                else:
+                    return {}
+
+
+            # 添加分流配置
+            if canary:
+                canarys = get_canary(name,canary)
+                if canarys:
+                    route = []
+                    for service_name in canarys:
+                        destination = {
+                            "destination": {
+                                "host": "%s.%s.svc.cluster.local" % (service_name,namespace),
+                                "port": {
+                                    "number": int(ports[0])
+                                }
+                            },
+                            "weight":int(canarys[service_name])
+                        }
+                        route.append(destination)
+
+                    crd_json['spec']['http'][0]['route']=route
+
+            # 添加流量镜像
+            if shadow:
+                shadow = re.split(',|;', shadow)[0]  # 只能添加一个流量复制
+                service_name, traffic = shadow.split(':')[0], int(shadow.split(':')[1].replace("%",''))
+
+                mirror={
+                    "host": "%s.%s.svc.cluster.local" % (service_name,namespace),
+                    "port": {
+                        "number": int(ports[0])
+                    }
+                }
+                mirror_percent=traffic
+
+                crd_json['spec']['http'][0]['mirror'] = mirror
+                crd_json['spec']['http'][0]['mirror_percent'] = mirror_percent
+
+
+
+            print(crd_json)
+            crd = self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+
         if len(ports)>1:
             crd_json = {
                 "apiVersion": "networking.istio.io/v1alpha3",
@@ -1170,15 +1332,148 @@ class K8s():
                                     }
                                 }
                             ],
-                            "timeout": "300s"
+                            "timeout": "3000s"
                         }
                     ]
                 }
             }
-            crd = self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
-                                 namespace=namespace, body=crd_json)
+            crd = self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
 
 
+
+
+
+    def delete_configmap(self,namespace,name):
+        try:
+            self.v1.delete_namespaced_config_map(name=name,namespace=namespace,grace_period_seconds=0)
+        except Exception as e:
+            print(e)
+
+    # @pysnooper.snoop()
+    def create_configmap(self,namespace,name,data,labels):
+        try:
+            self.v1.delete_namespaced_config_map(name=name,namespace=namespace)
+        except Exception as e:
+            print(e)
+        try:
+            meta=client.V1ObjectMeta(name=name,labels=labels)
+            configmap=client.V1ConfigMap(data=data,metadata=meta)
+            self.v1.create_namespaced_config_map(namespace=namespace,body=configmap)
+        except Exception as e:
+            print(e)
+
+
+    def delete_hpa(self,namespace,name):
+        try:
+            client.AutoscalingV2beta1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
+        except Exception as e:
+            print(e)
+        try:
+            client.AutoscalingV1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
+        except Exception as e:
+            print(e)
+
+    # @pysnooper.snoop()
+    def create_hpa(self,namespace,name,min_replicas,max_replicas,hpa):
+        self.delete_hpa(namespace,name)
+        hpa = re.split(',|;', hpa)
+
+        hpa_json = {
+            "apiVersion": "autoscaling/v2beta1",
+            "kind": "HorizontalPodAutoscaler",
+            "metadata": {
+                "name": name,
+                "namespace": namespace
+            },
+            "spec": {
+                "scaleTargetRef": {
+                  "apiVersion":"apps/v1",
+                    "kind":"Deployment",
+                    "name":name
+                },
+                "minReplicas": min_replicas,
+                "maxReplicas":max_replicas,
+                "metrics": [
+
+                ]
+            }
+        }
+
+
+
+        for threshold in hpa:
+            if 'mem' in threshold:
+                mem_threshold = re.split(':|=', threshold)[1].replace('%','')
+                hpa_json['spec']['metrics'].append(
+                    {
+                        "type": "Resource",
+                        "resource": {
+                            "name": "memory",
+                            "targetAverageUtilization":int(mem_threshold)
+                            # "target": {
+                            #     "type": "AverageUtilization",
+                            #     "averageUtilization": int(mem_threshold)
+                            # }
+                        }
+                    }
+                )
+
+            if 'cpu' in threshold:
+                cpu_threshold = re.split(':|=', threshold)[1].replace('%', '')
+                hpa_json['spec']['metrics'].append(
+                    {
+                        "type": "Resource",
+                        "resource": {
+                            "name": "cpu",
+                            "targetAverageUtilization":int(cpu_threshold)
+                            # "target": {
+                            #     "type": "AverageUtilization",
+                            #     "averageUtilization": int(cpu_threshold)
+                            # }
+                        }
+                    }
+                )
+
+
+            if 'gpu' in threshold:
+                gpu_threshold = re.split(':|=', threshold)[1].replace('%', '')
+                hpa_json['spec']['metrics'].append(
+                    {
+                        "type": "Pods",
+                        "pods": {
+                            "metricName": "container_gpu_usage",
+                            "targetAverageValue": int(gpu_threshold) / 100
+                        }
+                    }
+                )
+
+        my_conditions = []
+        # my_conditions.append(client.V2beta1HorizontalPodAutoscalerCondition(status="True", type='AbleToScale'))
+        #
+        # status = client.V2beta1HorizontalPodAutoscalerStatus(conditions=my_conditions, current_replicas=max_replicas,
+        #                                                      desired_replicas=max_replicas)
+        # # 自定义指标进行hpa，需要在autoscaling/v2beta1下面
+        # body = client.V2beta1HorizontalPodAutoscaler(
+        #     api_version='autoscaling/v2beta1',
+        #     kind='HorizontalPodAutoscaler',
+        #     metadata=client.V1ObjectMeta(name=name),
+        #     spec=client.V2beta1HorizontalPodAutoscalerSpec(
+        #         max_replicas=max_replicas,
+        #         min_replicas=min_replicas,
+        #         metrics=my_metrics,
+        #         scale_target_ref=client.V2beta1CrossVersionObjectReference(kind='Deployment', name=name,
+        #                                                                    api_version='apps/v1'),
+        #     ),
+        #     status=status
+        # )
+        print(json.dumps(hpa_json,indent=4,ensure_ascii=4))
+        try:
+            ret = client.AutoscalingV2beta1Api().create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=hpa_json, pretty=True)
+        except ValueError as e:
+            if str(e) == 'Invalid value for `conditions`, must not be `None`':
+                print(e)
+            else:
+                raise e
 
 
     # @pysnooper.snoop()
@@ -1239,7 +1534,7 @@ class K8s():
 
 
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def exec_command(self,name,namespace,command):
         try:
             resp = self.v1.read_namespaced_pod(name=name,namespace=namespace)
@@ -1259,14 +1554,37 @@ class K8s():
             # tty = True
         )
 
-    # 实时跟踪指定pod日志，直到pod结束
-    def watch_pod_log(self,name,namespace,):
-        print('begin follow log')
-        w = watch.Watch()
-        for event in w.stream(self.v1.read_namespaced_pod_log, name=name, namespace=namespace):
-            print(event)
 
-        print('end follow log')
+
+    # 实时跟踪指定pod日志，直到pod结束
+    def watch_pod_log(self, name,namespace, tail_lines=100):
+        """
+        获取pod的日志
+        :param tail_lines: # 显示最后多少行
+        :return:
+        """
+        try:
+            # stream pod log
+            streams = self.v1.read_namespaced_pod_log(
+                name,
+                namespace,
+                follow=True,
+                _preload_content=False,
+                tail_lines=tail_lines).stream()
+            return streams
+
+        except ApiException as e:
+            if e.status == 404:
+                print("Get Log not fund Podname: {0}".format(name))
+                raise Exception("获取日志时，未找到此pod: {0}".format(name))
+            if e.status == 400:
+                raise Exception("容器并未创建成功，请联系运维人员进行排查。")
+            raise e
+        except Exception as e:
+            print("Get Log Fail: {0}".format(str(e)))
+            raise e
+
+
 
     def watch_tfjob_log(self,name,namespace,):
         print('begin follow log')
@@ -1281,11 +1599,14 @@ class K8s():
         all_gpu_pods = []
         def get_used_gpu(pod):
             name = pod.metadata.name
-            user = pod.metadata.labels.get('run-rtx', '')
-            if not user:
-                user = pod.metadata.labels.get('user', '')
-            if not user:
-                user = pod.metadata.labels.get('rtx-user','')
+            user=''
+            if pod.metadata.labels:
+                user = pod.metadata.labels.get('run-rtx', '')
+                if not user:
+                    user = pod.metadata.labels.get('user', '')
+                if not user:
+                    user = pod.metadata.labels.get('rtx-user','')
+
             containers = pod.spec.containers
 
             gpu = 0
@@ -1322,6 +1643,12 @@ class K8s():
 
         return all_gpu_pods
 
+
+    def make_sidecar(self,agent_name):
+        if agent_name.upper()=='L5':
+            pass
+        pass
+
 # @pysnooper.snoop()
 def check_status_time(status,hour=8):
     if type(status)==dict:
@@ -1342,10 +1669,16 @@ def check_status_time(status,hour=8):
 
     return status
 
-#
+
 # if __name__=='__main__':
 #     k8s_client = K8s(file_path='~/.kube/config')
-#
+#     deployment = k8s_client.AppsV1Api.read_namespaced_deployment(name='serving-test-202204022',namespace='service')
+#     ready_replicas = deployment.status.ready_replicas
+#     replicas = deployment.status.replicas
+#     print(ready_replicas,replicas)
+
+
+
 
 
 

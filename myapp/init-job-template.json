@@ -1040,6 +1040,67 @@
             }
         }
     },
+    "horovod":{
+        "project_name":"pytorch分布式",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/horovod:20210401",
+        "image_describe":"horovod分布式训练",
+        "job_template_name":"horovod",
+        "job_template_describe":"horovod分布式训练",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/horovod"
+        },
+        "job_template_args":{
+            "参数": {
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /horovod/examples/tensorflow2/tensorflow2_mnist.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/horovod:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
     "media-download":{
         "project_name":"多媒体类模板",
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",

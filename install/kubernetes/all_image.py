@@ -2,7 +2,7 @@
 kubeflow = [
     'gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
     'gcr.io/ml-pipeline/metadata-writer:1.0.4', 'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1',
-    'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:8.0.3',
+    'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:5.7',
     'docker.io/kubeflowkatib/katib-db-manager:v1beta1-a96ff59',
     'docker.io/kubeflowkatib/katib-controller:v1beta1-a96ff59', 'argoproj/argoui:v2.3.0',
     'gcr.io/istio-release/proxy_init:release-1.3-latest-daily',
@@ -22,7 +22,7 @@ kubeflow = [
     'gcr.io/kubeflow-images-public/kubernetes-sigs/application:1.0-beta',
     'gcr.io/kubeflow-images-public/centraldashboard:vmaster-g8097cfeb',
     'gcr.io/kubeflow-images-public/xgboost-operator:v0.1.0', 'quay.io/jetstack/cert-manager-controller:v0.11.0',
-    'mysql:8', 'seldonio/seldon-core-operator:1.4.0', 'gcr.io/kfserving/kfserving-controller:v0.4.1',
+    'seldonio/seldon-core-operator:1.4.0', 'gcr.io/kfserving/kfserving-controller:v0.4.1',
     'gcr.io/istio-release/node-agent-k8s:release-1.3-latest-daily',
     'gcr.io/kubeflow-images-public/notebook-controller:vmaster-g6eb007d0',
     'gcr.io/kubeflow-images-public/pytorch-operator:vmaster-g518f9c76',
@@ -55,7 +55,7 @@ new_pipline = [
 
 
 new_katib = ['docker.io/kubeflowkatib/katib-ui:v1beta1-a96ff59',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-db-manager', 'mysql:5.7','mysql:8.0.26',
+             'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-db-manager',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/file-metrics-collector',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-ui',
              'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-controller', 'docker.io/kubeflowkatib/mxnet-mnist',

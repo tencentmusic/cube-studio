@@ -1,0 +1,54 @@
+apiVersion: kubeflow.org/v1
+kind: MPIJob
+metadata:
+  name: tensorflow-mnist
+spec:
+  slotsPerWorker: 1
+  cleanPodPolicy: Running
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - image: ccr.ccs.tencentyun.com/cube-studio/horovod:20210401
+            name: mpi-launcher
+            command:
+            - mpirun
+            args:
+            - -np
+            - "2"
+            - --allow-run-as-root
+            - -bind-to
+            - none
+            - -map-by
+            - slot
+            - -x
+            - LD_LIBRARY_PATH
+            - -x
+            - PATH
+            - -mca
+            - pml
+            - ob1
+            - -mca
+            - btl
+            - ^openib
+            - python
+            - /horovod/examples/tensorflow2/tensorflow2_mnist.py
+            resources:
+              limits:
+                cpu: 1
+                memory: 2Gi
+    Worker:
+      replicas: 2
+      template:
+        spec:
+          containers:
+          - image: ccr.ccs.tencentyun.com/cube-studio/horovod:20210401
+            name: mpi-worker
+            resources:
+              limits:
+                cpu: 2
+                memory: 4Gi
+
+
