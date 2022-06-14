@@ -8,6 +8,8 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
  - 5、推理服务：tf/pytorch/onnx模型的推理服务，serverless流量管控，triton gpu推理加速，依据gpu利用率/qps等指标的hpa能力，虚拟化gpu，虚拟显存等服务化能力；
  - 6、资源统筹：多集群多项目组资源统筹，联邦调度，边缘计算；
 
+帮助文档：https://github.com/tencentmusic/cube-studio/wiki
+
 # 开源共建
 
 有意向进行开源共建的同学请微信添加767065521并备注"Cube Studio开源共建"进入微信群.
