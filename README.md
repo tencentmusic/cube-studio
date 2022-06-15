@@ -12,7 +12,9 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 # 开源共建
 
-有意向进行开源共建的同学请微信添加767065521并备注"Cube Studio开源共建"进入微信群.
+### 学习、部署、体验、开源建设 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>
+
+<img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
 
 # 平台部署
 
