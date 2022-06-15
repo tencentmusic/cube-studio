@@ -34,9 +34,11 @@ kubectl create -f kube-batch/deploy.yaml
 cd prometheus
 mkdir -p /data/k8s/monitoring/grafana/
 chmod -R 777 /data/k8s/monitoring/grafana/
-kubectl apply -f ./operator/operator-rbac.yml
-kubectl apply -f ./operator/operator-dp.yml
+kubectl delete -f ./operator/operator-crd.yml
 kubectl apply -f ./operator/operator-crd.yml
+kubectl apply -f ./operator/operator-rbac.yml
+kubectl wait crd/podmonitors.monitoring.coreos.com --for condition=established --timeout=60s
+kubectl apply -f ./operator/operator-dp.yml
 kubectl apply -f ./alertmanater/alertmanager-main-sa.yml
 kubectl apply -f ./alertmanater/alertmanager-main-secret.yml
 kubectl apply -f ./alertmanater/alertmanager-main-svc.yml
@@ -64,6 +66,8 @@ kubectl apply -f ./prometheus/prometheus-secret.yml
 kubectl apply -f ./prometheus/prometheus-rules.yml
 kubectl apply -f ./prometheus/prometheus-rbac.yml
 kubectl apply -f ./prometheus/prometheus-svc.yml
+kubectl wait crd/prometheuses.monitoring.coreos.com --for condition=established --timeout=60s
+kubectl delete -f ./prometheus/prometheus-main.yml
 kubectl apply -f ./prometheus/prometheus-main.yml
 kubectl apply -f ./servicemonitor/alertmanager-sm.yml
 kubectl apply -f ./servicemonitor/coredns-sm.yml
