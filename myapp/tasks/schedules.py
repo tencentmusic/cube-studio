@@ -51,7 +51,7 @@ class Pusherror(Exception):
 
 
 conf = app.config
-logging.getLogger("task.delete_tfjob").setLevel(logging.INFO)
+logging.getLogger("task.delete_workflow").setLevel(logging.INFO)
 
 
 model_map = {
@@ -141,8 +141,8 @@ def delete_old_crd(object_info):
 
 
 # 删除过期任务
-@celery_app.task(name="task.delete_tfjob", bind=True)
-def delete_tfjob(task):
+@celery_app.task(name="task.delete_workflow", bind=True)
+def delete_workflow(task):
     print('begin delete task')
 
     workflow_info = conf.get("CRD_INFO", {}).get('workflow', {})
@@ -365,7 +365,7 @@ def deliver_message(pipeline,message=''):
     receivers+=alert_users
     # 失败的时候将详细推送给管理员
     # if message:
-    #     bcc = conf.get('PIPELINE_TASK_BCC_ADDRESS','')  # 暗抄送列表
+    #     bcc = conf.get('PUSH_BCC_ADDRESS','')  # 暗抄送列表
     #     bcc = bcc.split(',')
     #     for bc in bcc:
     #         receivers.append(bc)

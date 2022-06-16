@@ -465,7 +465,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS=False
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'admin')   # default must set None
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
-WEBDRIVER_BASEURL=os.getenv('WEBDRIVER_BASEURL', 'http://127.0.0.1/')
 SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')  # default must set None
 
 from celery.schedules import crontab
@@ -502,7 +501,7 @@ class CeleryConfig(object):
 
     # 任务的限制，key是celery_task的name，值是限制配置
     CELERY_ANNOTATIONS = {
-        'task.delete_tfjob': {
+        'task.delete_workflow': {
             'rate_limit': '1/h',
             # 'time_limit': 1200,   # 就是 hard_time_limit ， 不可以catch
             'soft_time_limit': 1200,  # 运行时长限制soft_time_limit 可以内catch
@@ -528,7 +527,7 @@ class CeleryConfig(object):
     # 定时任务的配置项，key为celery_task的name，值是调度配置
     CELERYBEAT_SCHEDULE = {
         'task_task1': {
-            'task': 'task.delete_tfjob',
+            'task': 'task.delete_workflow',
             # 'schedule': 10.0,
             'schedule': crontab(minute='1'),
         },
@@ -560,11 +559,6 @@ class CeleryConfig(object):
         'task_task6':{
             'task':"task.check_pipeline_run",
             'schedule': crontab(minute='10', hour='11'),
-        },
-        'task_task7': {
-            'task': 'task.list_train_model',
-            # 'schedule': 10.0,
-            'schedule': crontab(minute='20', hour='10'),
         },
         'task_task8': {
             'task': 'task.delete_debug_docker',
@@ -722,16 +716,14 @@ HELP_URL={
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
 CUSTOMIZE_JOB='自定义镜像'
 
-PIPELINE_TASK_BCC_ADDRESS = 'admin'
+PUSH_BCC_ADDRESS = 'admin'
 ADMIN_USER='admin'
 PIPELINE_NAMESPACE = 'pipeline'
 SERVICE_PIPELINE_NAMESPACE='service'
 KATIB_NAMESPACE = 'katib'
 NOTEBOOK_NAMESPACE = 'jupyter'
 SERVICE_NAMESPACE = 'service'
-PRE_SERVICE_NAMESPACE = 'pre-service'
 KFSERVING_NAMESPACE = 'kfserving'
-SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
 
 KATIB_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/katib'
@@ -858,8 +850,7 @@ GRAFANA_TASK_PATH='/grafana/d/pod-info/pod-info?var-pod='
 GRAFANA_SERVICE_PATH="/grafana/d/istio-service/istio-service?var-namespace=service&var-service="
 GRAFANA_CLUSTER_PATH="/grafana/d/all-node/all-node?var-org="
 GRAFANA_NODE_PATH="/grafana/d/node/node?var-node="
-GPU_CHOICE_ARR = ["0","1(T4)","2(T4)","1(V100)","2(V100)","1(A100)","2(A100)","1(vgpu)"]
-GPU_CHOICES = [[choice,choice] for choice in GPU_CHOICE_ARR]
+
 # 当前控制器所在的集群
 ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV').lower()
 # 所有训练集群的信息

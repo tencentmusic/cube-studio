@@ -834,7 +834,6 @@ instance_group [
     def deploy(self,service_id,env='prod'):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         namespace = conf.get('SERVICE_NAMESPACE','service')
-        pre_namespace = conf.get('PRE_SERVICE_NAMESPACE','pre-service')
         name =  service.name
         command = service.command
         deployment_replicas = service.min_replicas
