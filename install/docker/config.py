@@ -25,24 +25,13 @@ APP_THEME = "readable.css"
 FAB_UPDATE_PERMS=True
 FAB_STATIC_FOLDER = BASE_DIR + "/static/appbuilder/"
 
-# ---------------------------------------------------------
-# Myapp specific config
-# ---------------------------------------------------------
-# PACKAGE_DIR = os.path.join(BASE_DIR, "static", "assets")
-# PACKAGE_FILE = os.path.join(PACKAGE_DIR, "package.json")
-# with open(PACKAGE_FILE) as package_file:
-#     VERSION_STRING = json.load(package_file)["version"]
-
 MYAPP_WORKERS = 2  # deprecated
 MYAPP_CELERY_WORKERS = 32  # deprecated
 
 MYAPP_WEBSERVER_ADDRESS = "0.0.0.0"
 MYAPP_WEBSERVER_PORT = 80
 
-# This is an important setting, and should be lower than your
-# [load balancer / proxy / envoy / kong / ...] timeout settings.
-# You should also make sure to configure your WSGI server
-# (gunicorn, nginx, apache, ...) timeout setting to be <= to this setting
+# 前面页面静态文件的缓存超时时间，单位s
 MYAPP_WEBSERVER_TIMEOUT = 300
 
 
@@ -50,20 +39,16 @@ MYAPP_WEBSERVER_TIMEOUT = 300
 # 设置才能正常使用session
 SECRET_KEY = "\2\1thisismyscretkey\1\2\e\y\y\h"  # noqa
 
-# The SQLAlchemy connection string.
-# SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(DATA_DIR, "myapp.db")
-# SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
-# SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
-# SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')  # default must set None
-
+# csv导出文件编码
 CSV_EXPORT = {"encoding": "utf_8_sig"}
 # Flask-WTF flag for CSRF
+# 跨域配置
 WTF_CSRF_ENABLED = False
 
-# Add endpoints that need to be exempt from CSRF protection
-WTF_CSRF_EXEMPT_LIST = ["myapp.views.core.log"]
+# 跨域访问允许通过的站点
+WTF_CSRF_EXEMPT_LIST = ['example.local.com']
 
-# Whether to run the web server in debug mode or not
+# 是否debug模式运行
 DEBUG = os.environ.get("FLASK_ENV") == "development"
 FLASK_USE_RELOAD = True
 
@@ -78,26 +63,25 @@ ENABLE_PROXY_FIX = False
 # ------------------------------
 # GLOBALS FOR APP Builder
 # ------------------------------
-# Uncomment to setup Your App name
-APP_NAME = "Kubeflow"
+# 应用名
+APP_NAME = "Cube-Studio"
 
-# Uncomment to setup an App icon
+# 图标
 APP_ICON = "/static/assets/images/myapp-logo.png"
 APP_ICON_WIDTH = 126
 
-# Uncomment to specify where clicking the logo would take the user
-# e.g. setting it to '/welcome' would take the user to '/myapp/welcome'
+# 配置logo点击后的跳转链接，例如'/welcome'  会跳转到'/myapp/welcome'
 LOGO_TARGET_PATH = None
 
 
 # ----------------------------------------------------
-# AUTHENTICATION CONFIG
+# 认证相关的配置
 # ----------------------------------------------------
-# The authentication type
-# AUTH_OID : Is for OpenID
-# AUTH_DB : Is for database (username/password()
-# AUTH_LDAP : Is for LDAP
-# AUTH_REMOTE_USER : Is for using REMOTE_USER from web server
+# 认证类型
+# AUTH_OID : OpenID认证
+# AUTH_DB : 数据库账号密码配置
+# AUTH_LDAP : LDAP认证
+# AUTH_REMOTE_USER : 远程用户认证
 AUTH_TYPE = AUTH_DB
 
 # AUTH_TYPE = AUTH_REMOTE_USER
@@ -107,10 +91,10 @@ AUTH_TYPE = AUTH_DB
 # Uncomment to setup Public role name, no authentication needed
 # AUTH_ROLE_PUBLIC = 'Public'
 
-# Will allow user self registration
+# 是否允许用户注册
 AUTH_USER_REGISTRATION = False
 
-# The default user self registration role
+# 用户的默认角色
 AUTH_USER_REGISTRATION_ROLE = "Gamma"
 
 # RECAPTCHA_PUBLIC_KEY = 'GOOGLE PUBLIC KEY FOR RECAPTCHA'
@@ -118,19 +102,19 @@ AUTH_USER_REGISTRATION_ROLE = "Gamma"
 
 OAUTH_PROVIDERS=[]
 
-# When using LDAP Auth, setup the ldap server
+#LDAP认证时, ldap server
 # AUTH_LDAP_SERVER = "ldap://ldapserver.new"
 
-# Uncomment to setup OpenID providers example for OpenID authentication
+# OpenID认证的提供方
 # OPENID_PROVIDERS = [
 #    { 'name': 'Yahoo', 'url': 'https://open.login.yahoo.com/' },
 #    { 'name': 'Flickr', 'url': 'https://www.flickr.com/<username>' },
 
 
 # ---------------------------------------------------
-# Babel config for translations
+# 语言翻译上的配置
 # ---------------------------------------------------
-# Setup default language
+# 默认使用的语言
 BABEL_DEFAULT_LOCALE = "en"
 # Your application default translation path
 BABEL_DEFAULT_FOLDER = "myapp/translations"
@@ -169,7 +153,7 @@ DEFAULT_FEATURE_FLAGS = {
 GET_FEATURE_FLAGS_FUNC = None
 
 # ---------------------------------------------------
-# Image and file configuration
+# 图片和文件相关的配置
 # ---------------------------------------------------
 # The file upload folder, when using models with files
 UPLOAD_FOLDER = BASE_DIR + "/static/file/uploads/"
@@ -265,8 +249,7 @@ WARNING_MSG = None
 from celery.schedules import crontab
 from werkzeug.contrib.cache import RedisCache
 
-# Additional static HTTP headers to be served by your Myapp server. Note
-# Flask-Talisman aplies the relevant security HTTP headers.
+# 自动添加到响应头的配置
 HTTP_HEADERS = {
     "Access-Control-Allow-Origin":"*",
     "Access-Control-Allow-Methods":"*",
@@ -462,10 +445,12 @@ SQLALCHEMY_MAX_OVERFLOW = 300
 SQLALCHEMY_TRACK_MODIFICATIONS=False
 
 # redis的配置
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'admin')   # default must set None
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'admin')   #
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
-SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')  # default must set None
+
+# 数据库配置地址
+SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')
 
 from celery.schedules import crontab
 from werkzeug.contrib.cache import RedisCache
@@ -476,7 +461,7 @@ RESULTS_BACKEND = RedisCache(
 class CeleryConfig(object):
     # 任务队列
     BROKER_URL =  'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
-    # celery_task的定义模块
+    # celery_task的定义模块地址
     CELERY_IMPORTS = (
         'myapp.tasks',
     )
@@ -501,22 +486,26 @@ class CeleryConfig(object):
 
     # 任务的限制，key是celery_task的name，值是限制配置
     CELERY_ANNOTATIONS = {
+        # 删除历史workflow，以及相关任务
         'task.delete_workflow': {
             'rate_limit': '1/h',
             # 'time_limit': 1200,   # 就是 hard_time_limit ， 不可以catch
             'soft_time_limit': 1200,  # 运行时长限制soft_time_limit 可以内catch
             'ignore_result': True,
         },
+        # 检查运行定时pipeline
         'task.run_workflow': {
             'rate_limit': '1/s',
             # 'time_limit': 1,
             'soft_time_limit': 600,   # 只在 prefork pool 里支持
             'ignore_result': True,
         },
+        # 检查在线构架镜像的docker pod
         'task.check_docker_commit': {
             'rate_limit': '1/s',
             'ignore_result': True,
         },
+        # 上传workflow信息
         'task.upload_workflow': {
             'rate_limit': '10/s',
             'ignore_result': True,
@@ -527,57 +516,53 @@ class CeleryConfig(object):
     # 定时任务的配置项，key为celery_task的name，值是调度配置
     CELERYBEAT_SCHEDULE = {
         'task_task1': {
-            'task': 'task.delete_workflow',
+            'task': 'task.delete_workflow',   # 定时删除旧的workflow
             # 'schedule': 10.0,
             'schedule': crontab(minute='1'),
         },
         'task_task2': {
-            'task': 'task.make_timerun_config',
+            'task': 'task.make_timerun_config',  # 定时产生定时任务的yaml信息
             # 'schedule': 10.0,     #10s中执行一次
             'schedule': crontab(minute='*/5'),
         },
-        # 'task_task3': {
-        #     'task': 'task.upload_timerun',
-        #     # 'schedule': 10.0,     #10s中执行一次
-        #     'schedule': crontab(minute='*/5'),
-        # },
         'task_task4': {
-            'task': 'task.delete_old_data',
+            'task': 'task.delete_old_data',   # 定时删除旧数据
             # 'schedule': 100.0,     #10s中执行一次
             'schedule': crontab(minute='1', hour='1'),
         },
         'task_task5': {
-            'task': 'task.delete_notebook',
+            'task': 'task.delete_notebook',  # 定时停止notebook
             # 'schedule': 10.0,
             'schedule': crontab(minute='1', hour='4'),
         },
         # 'task_task6': {
-        #     'task': 'task.push_workspace_size',
+        #     'task': 'task.push_workspace_size',   # 定时推送用户文件大小
         #     # 'schedule': 10.0,
         #     'schedule': crontab(minute='10', hour='10'),
         # },
         'task_task6':{
-            'task':"task.check_pipeline_run",
+            'task':"task.check_pipeline_run",   # 定时检查pipeline的运行时长
             'schedule': crontab(minute='10', hour='11'),
         },
         'task_task8': {
-            'task': 'task.delete_debug_docker',
+            'task': 'task.delete_debug_docker',   # 定时删除debug的pod
             # 'schedule': 10.0,
             'schedule': crontab(minute='30', hour='22'),
         },
         'task_task9': {
-            'task': 'task.watch_gpu',
+            'task': 'task.watch_gpu',   # 定时推送gpu的使用情况
             # 'schedule': 10.0,
             'schedule': crontab(minute='10',hour='8-23/2'),
         },
         'task_task10': {
-            'task': 'task.adjust_node_resource',
+            'task': 'task.adjust_node_resource',  # 定时在多项目组间进行资源均衡
             # 'schedule': 10.0,
             'schedule': crontab(minute='*/10'),
         }
     }
 
-DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/tree/master/docs/example'  # 帮助文档地址，显示在web导航栏
+ # 帮助文档地址，显示在web导航栏
+DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/tree/master/docs/example'
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
 
@@ -594,6 +579,7 @@ CACHE_DEFAULT_TIMEOUT = 10*60  # 缓存默认过期时间，10分钟才过期
 CELERY_CONFIG = CeleryConfig
 
 REMEMBER_COOKIE_NAME="remember_token"   # 使用cookie认证用户的方式
+# api方式访问认证header头
 AUTH_HEADER_NAME = 'Authorization'   # header方式认证的header 头
 
 # k8s中用到的各种自动自定义资源
@@ -693,6 +679,8 @@ GLOBAL_ENV={
     "KFJ_GPU_MEM_MAX":"13G",
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
 }
+
+# 各种环节使用的gpu驱动类型
 GPU_TYPE = os.environ.get("GPU_TYPE", "NVIDIA")
 
 TASK_GPU_TYPE='NVIDIA'
@@ -715,19 +703,30 @@ HELP_URL={
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
 CUSTOMIZE_JOB='自定义镜像'
-
+# 推送必带接收人
 PUSH_BCC_ADDRESS = 'admin'
+# admin管理员用户
 ADMIN_USER='admin'
+# pipeline任务的运行空间，目前必填pipeline
 PIPELINE_NAMESPACE = 'pipeline'
+# 服务pipeline运行的空间，必填service
 SERVICE_PIPELINE_NAMESPACE='service'
+# 超参搜索命名空间，必填katib
 KATIB_NAMESPACE = 'katib'
+# notebook必填空间，必填jupyter
 NOTEBOOK_NAMESPACE = 'jupyter'
+# 内部服务命名空间，必填service
 SERVICE_NAMESPACE = 'service'
+# kfserving命名空间，必填kfserving
 KFSERVING_NAMESPACE = 'kfserving'
+# 服务链路追踪地址
+SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
-
+# katib任务默认镜像
 KATIB_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/katib'
+# katib的tfjob任务默认镜像
 KATIB_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
+# katib的pytorchjob任务默认镜像
 KATIB_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
@@ -763,18 +762,20 @@ WORKSPACE_HOST_PATH = '/data/k8s/kubeflow/pipeline/workspace'
 ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 # prometheus地址
 PROMETHEUS = 'prometheus-k8s.monitoring:9090'
+# kfp地址
 KFP_HOST = "http://ml-pipeline.kubeflow:8888"
-
+# nni默认镜像
 NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
 
-ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用
+
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
 K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
 
 PIPELINE_URL = '/pipeline/#/'
 KATIB_URL = '/katib/#'
 
-# 这两部分功能需要泛化域名。没有泛化域名此部分功能受限
+# 这两部分功能需要泛化域名。没有泛化域名此部分功能受限。ISTIO_INGRESS_DOMAIN为泛域名后缀
+ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用
 KFSERVING_DOMAIN = 'kfserving.%s' % ISTIO_INGRESS_DOMAIN
 SERVICE_DOMAIN = 'service.%s' % ISTIO_INGRESS_DOMAIN
 
@@ -782,10 +783,10 @@ SERVICE_DOMAIN = 'service.%s' % ISTIO_INGRESS_DOMAIN
 HOSTALIASES='''
 127.0.0.1 localhost
 '''
-
+# 默认服务代理的ip
 SERVICE_EXTERNAL_IP=[]
 
-
+# 链接菜单
 ALL_LINKS=[
     {
         "label":"Minio",
@@ -804,6 +805,7 @@ ALL_LINKS=[
     }
 ]
 
+# 推理服务的各种配置
 TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/serving:1.11.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.11.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:1.12.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.12.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:1.13.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.13.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:1.14.0','ccr.ccs.tencentyun.com/cube-studio/serving:1.14.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.0.0','ccr.ccs.tencentyun.com/cube-studio/serving:2.0.0-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.1.4','ccr.ccs.tencentyun.com/cube-studio/serving:2.1.4-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.2.3','ccr.ccs.tencentyun.com/cube-studio/serving:2.2.3-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.3.4','ccr.ccs.tencentyun.com/cube-studio/serving:2.3.4-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.4.3','ccr.ccs.tencentyun.com/cube-studio/serving:2.4.3-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.5.2','ccr.ccs.tencentyun.com/cube-studio/serving:2.5.2-gpu','ccr.ccs.tencentyun.com/cube-studio/serving:2.6.0','ccr.ccs.tencentyun.com/cube-studio/serving:2.6.0-gpu']
 TRITONSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.09-py3']
 TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu']
@@ -812,13 +814,13 @@ INFERNENCE_IMAGES={
     'torch-server':TORCHSERVER_IMAGES,
     'onnxruntime':['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:v1.0.0','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:server-latest'],
     'triton-server':TRITONSERVER_IMAGES,
-    'kfserving-tf': TFSERVING_IMAGES,
-    "kfserving-torch":TORCHSERVER_IMAGES,
-    "kfserving-triton": TRITONSERVER_IMAGES,
-    'kfserving-sklearn': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
-    'kfserving-xgboost': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
-    'kfserving-lightgbm':['ccr.ccs.tencentyun.com/cube-studio/lgbserver:v0.7.0'],
-    'kfserving-paddle':['ccr.ccs.tencentyun.com/cube-studio/paddleserver:v0.7.0']
+    # 'kfserving-tf': TFSERVING_IMAGES,
+    # "kfserving-torch":TORCHSERVER_IMAGES,
+    # "kfserving-triton": TRITONSERVER_IMAGES,
+    # 'kfserving-sklearn': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
+    # 'kfserving-xgboost': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
+    # 'kfserving-lightgbm':['ccr.ccs.tencentyun.com/cube-studio/lgbserver:v0.7.0'],
+    # 'kfserving-paddle':['ccr.ccs.tencentyun.com/cube-studio/paddleserver:v0.7.0']
 }
 
 INFERNENCE_COMMAND={
@@ -846,9 +848,14 @@ INFERNENCE_HEALTH={
     "torch-server":"8080:/ping",
     "triton-server":"8000:/v2/health/ready"
 }
+
+# 任务资源使用情况地址
 GRAFANA_TASK_PATH='/grafana/d/pod-info/pod-info?var-pod='
+# 推理服务监控地址
 GRAFANA_SERVICE_PATH="/grafana/d/istio-service/istio-service?var-namespace=service&var-service="
+# 集群资源监控地址
 GRAFANA_CLUSTER_PATH="/grafana/d/all-node/all-node?var-org="
+# 节点资源监控地址
 GRAFANA_NODE_PATH="/grafana/d/node/node?var-node="
 
 # 当前控制器所在的集群
