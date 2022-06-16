@@ -12,7 +12,7 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 # 开源共建
 
-### 学习、部署、体验、开源建设 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>
+ 学习、部署、体验、开源建设 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>
 
 <img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
 
