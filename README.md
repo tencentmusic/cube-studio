@@ -1,5 +1,10 @@
 # Cube Studio
 
+### 整体架构
+
+
+![image](https://user-images.githubusercontent.com/20157705/167534673-322f4784-e240-451e-875e-ada57f121418.png)
+
 cube是tme开源的一站式云原生机器学习平台，目前主要包含
  - 1、数据管理：特征平台，支持在/离线特征；数据源管理，支持结构数据和媒体标注数据管理；
  - 2、在线开发：在线的vscode/jupyter代码开发；在线镜像调试，支持免dockerfile，增量构建；
@@ -8,7 +13,9 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
  - 5、推理服务：tf/pytorch/onnx模型的推理服务，serverless流量管控，triton gpu推理加速，依据gpu利用率/qps等指标的hpa能力，虚拟化gpu，虚拟显存等服务化能力；
  - 6、资源统筹：多集群多项目组资源统筹，联邦调度，边缘计算；
 
-帮助文档：https://github.com/tencentmusic/cube-studio/wiki
+# 帮助文档
+
+https://github.com/tencentmusic/cube-studio/wiki
 
 # 开源共建
 
@@ -67,17 +74,11 @@ cube是tme开源的一站式云原生机器学习平台，目前主要包含
 
 # 功能简述
 
-### 整体架构
-
 完整的平台包含
  - 1、机器的标准化
  - 2、分布式存储(单机可忽略)、k8s集群、监控体系(prometheus/efk/zipkin)
  - 3、基础能力(tf/pytorch/mxnet/valcano/ray等分布式，nni/katib超参搜索)
  - 4、平台web部分(oa/权限/项目组、在线构建镜像、在线开发、pipeline拖拉拽、超参搜索、推理服务管理等)
-
-![image](https://user-images.githubusercontent.com/20157705/167534673-322f4784-e240-451e-875e-ada57f121418.png)
-
-[点击](https://blog.csdn.net/luanpeng825485697/article/details/123619334)查看更多细节内容
 
 ### 多集群管控
 
