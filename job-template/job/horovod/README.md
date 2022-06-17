@@ -1,4 +1,4 @@
-# deploy-service 模板
+# horovod 模板
 镜像：ccr.ccs.tencentyun.com/cube-studio/horovod:20210401
 k8s账号: kubeflow-pipeline
 启动参数：
