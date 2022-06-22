@@ -61,6 +61,27 @@
 # 常用基础镜像
 
 ### ubuntu
+
+    cuda11.0.3-cudnn8
+    - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8
+		
+	python3.7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8-python3.7
+		
+	python3.8
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8-python3.8
+		
+
+    cuda10.2-cudnn7
+    - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7
+		
+	python3.7
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7-python3.7
+		
+	python3.8
+		- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7-python3.8
+		
+		
     cuda10.1-cudnn7
     - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7
 		
