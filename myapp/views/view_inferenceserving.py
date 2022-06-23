@@ -920,6 +920,7 @@ instance_group [
             except Exception as e:
                 print(e)
 
+            pod_ports = list(set(pod_ports))
             k8s_client.create_deployment(
                 namespace=namespace,
                 name=name,
