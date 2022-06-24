@@ -2,6 +2,9 @@ ARG FROM_IMAGES
 FROM $FROM_IMAGES
 
 RUN apt update
+ENV TZ=Asia/Shanghai
+ENV DEBIAN_FRONTEND=noninteractive
+
 # 安装运维工具
 RUN apt install -y --force-yes --no-install-recommends software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip
 
