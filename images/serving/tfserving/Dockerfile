@@ -13,12 +13,14 @@ ENV TZ Asia/Shanghai
 RUN apt update -y && apt-get install -y wget
 
 # 安装运维工具
-RUN apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl locales zip
+RUN apt install -y --force-yes --no-install-recommends vim apt-transport-https software-properties-common gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl locales zip
 
 # 安装python
-RUN apt install -y python3.6-dev python3-pip libsasl2-dev libpq-dev \
-    && ln -s /usr/bin/python3 /usr/bin/python \
-    && ln -s /usr/bin/pip3 /usr/bin/pip
+RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update -y && apt install -y  libsasl2-dev libpq-dev python3-distutils
+RUN set -x; rm -rf /usr/bin/python; apt install -y --fix-missing python3.8 && ln -s /usr/bin/python3.8 /usr/bin/python
+
+RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ignore-installed" \
+    && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip && pip install pip --upgrade
 
 # 安装中文
 RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
