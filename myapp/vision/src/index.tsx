@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 initializeIcons();
 
 // 全局样式
+// 样式可替换
 mergeStyles({
   ':global(body,html,#app)': {
     margin: 0,
