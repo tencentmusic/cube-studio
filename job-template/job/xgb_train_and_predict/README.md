@@ -13,13 +13,141 @@ TASK_RESOURCE_GPU=0
 
 启动参数：  
 ```bash
-sep： 分隔符
-classifier_or_regressor： 分类还是回归
-params： xgb参数, json格式，透传给xgboost类构建函数
-train_csv_file_path： 训练集csv路径，首行是header，首列是label。为空则不做训练，尝试从model_load_path加载模型。
-model_load_path： 模型加载路径。为空则不加载。
-predict_csv_file_path： 预测数据集csv路径，格式和训练集一致，顺序保持一致，没有label列。为空则不做predict。
-predict_result_path： 预测结果保存路径，为空则不做predict。
-model_save_path： 模型文件保存路径。为空则不保存模型。
-eval_result_path： 模型评估报告保存路径。默认为空，想看模型评估报告可填。
+{
+    "shell": {
+        "--sep": {
+            "type": "str",
+            "item_type": "",
+            "label": "分隔符",
+            "require": 1,
+            "choice": [
+                "space",
+                "TAB",
+                ","
+            ],
+            "range": "",
+            "default": ",",
+            "placeholder": "",
+            "describe": "分隔符",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--classifier_or_regressor": {
+            "type": "str",
+            "item_type": "",
+            "label": "分类还是回归",
+            "require": 1,
+            "choice": [
+                "classifier",
+                "regressor"
+            ],
+            "range": "",
+            "default": "classifier",
+            "placeholder": "",
+            "describe": "分类还是回归",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--params": {
+            "type": "json",
+            "item_type": "str",
+            "label": "xgb参数",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "xgb参数, json格式",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--train_csv_file_path": {
+            "type": "text",
+            "item_type": "",
+            "label": "训练集csv路径",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "训练集csv路径，首行是header，首列是label。为空则不做训练，尝试从model_load_path加载模型。",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--model_load_path": {
+            "type": "text",
+            "item_type": "",
+            "label": "模型加载路径",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "模型加载路径。为空则不加载。",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--predict_csv_file_path": {
+            "type": "text",
+            "item_type": "",
+            "label": "预测数据集csv路径",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "预测数据集csv路径，格式和训练集一致，顺序保持一致，没有label列。为空则不做predict。",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--predict_result_path": {
+            "type": "text",
+            "item_type": "",
+            "label": "预测结果保存路径",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "预测结果保存路径，为空则不做predict。",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--model_save_path": {
+            "type": "text",
+            "item_type": "",
+            "label": "模型文件保存路径",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "模型文件保存路径。为空则不保存模型。",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--eval_result_path": {
+            "type": "text",
+            "item_type": "",
+            "label": "模型评估报告保存路径",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "模型评估报告保存路径。默认为空，想看模型评估报告就填。",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        }
+    }
+}
 ```
