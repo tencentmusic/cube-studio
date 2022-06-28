@@ -610,7 +610,7 @@ class Hyperparameter_Tuning_ModelView_Base():
                 image_secrets = image_secrets,
                 hostAliases=conf.get('HOSTALIASES',''),
                 workingDir=item.working_dir,
-                image_pull_policy=item.image_pull_policy,
+                image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
                 resource_memory=item.resource_memory,
                 resource_cpu=item.resource_cpu,
                 command=item.tf_worker_command
@@ -628,7 +628,7 @@ class Hyperparameter_Tuning_ModelView_Base():
                 image_secrets=image_secrets,
                 hostAliases=conf.get('HOSTALIASES',''),
                 workingDir=item.working_dir,
-                image_pull_policy=item.image_pull_policy,
+                image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
                 resource_memory=item.resource_memory,
                 resource_cpu=item.resource_cpu,
                 command=item.job_worker_command
@@ -647,7 +647,7 @@ class Hyperparameter_Tuning_ModelView_Base():
                 image_secrets=image_secrets,
                 hostAliases=conf.get('HOSTALIASES', ''),
                 workingDir=item.working_dir,
-                image_pull_policy=item.image_pull_policy,
+                image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
                 resource_memory=item.resource_memory,
                 resource_cpu=item.resource_cpu,
                 master_command=item.pytorch_master_command,

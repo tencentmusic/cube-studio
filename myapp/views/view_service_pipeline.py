@@ -402,7 +402,7 @@ class Service_Pipeline_ModelView_Base():
             resource_memory=service_pipeline.resource_memory,
             resource_cpu=service_pipeline.resource_cpu,
             resource_gpu=service_pipeline.resource_gpu if service_pipeline.resource_gpu else '',
-            image_pull_policy='Always',
+            image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
             image_pull_secrets=image_secrets,
             image=service_pipeline.images,
             hostAliases=conf.get('HOSTALIASES',''),

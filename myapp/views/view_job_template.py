@@ -367,7 +367,7 @@ class Job_Template_ModelView_Base():
                                  resource_cpu=resource_cpu,
                                  resource_memory=resource_memory,
                                  resource_gpu=0,
-                                 image_pull_policy='Always',
+                                 image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
                                  image_pull_secrets=[job_template.images.repository.hubsecret],
                                  image=job_template.images.name,
                                  hostAliases=hostAliases,

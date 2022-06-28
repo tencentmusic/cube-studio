@@ -353,7 +353,7 @@ class Notebook_ModelView_Base():
             resource_memory="0G~"+notebook.resource_memory,
             resource_cpu="0~"+notebook.resource_cpu,
             resource_gpu=notebook.resource_gpu,
-            image_pull_policy=notebook.image_pull_policy,
+            image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
             image_pull_secrets=image_secrets,
             image=notebook.images,
             hostAliases=conf.get('HOSTALIASES',''),

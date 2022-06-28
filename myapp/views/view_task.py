@@ -474,7 +474,7 @@ class Task_ModelView_Base():
                              working_dir=working_dir,
                              node_selector=task.get_node_selector(), resource_memory=resource_memory,
                              resource_cpu=resource_cpu, resource_gpu=resource_gpu,
-                             image_pull_policy=task.pipeline.image_pull_policy,
+                             image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
                              image_pull_secrets=[task.job_template.images.repository.hubsecret],
                              image=image,
                              hostAliases=hostAliases,

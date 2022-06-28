@@ -511,8 +511,8 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
 
 
     # 配置默认拉取策略
-    if pipeline.image_pull_policy:
-        pipeline_conf.image_pull_policy = pipeline.image_pull_policy
+    # if pipeline.image_pull_policy:
+    pipeline_conf.image_pull_policy = conf.get('IMAGE_PULL_POLICY','Always')
 
     # 设置并发
     if pipeline.parallelism:

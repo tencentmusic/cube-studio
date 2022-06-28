@@ -196,7 +196,7 @@ class Service_ModelView_base():
                               resource_memory=service.resource_memory,
                               resource_cpu=service.resource_cpu,
                               resource_gpu=service.resource_gpu if service.resource_gpu else '',
-                              image_pull_policy='Always',
+                              image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
                               image_pull_secrets=image_secrets,
                               image=service.images,
                               hostAliases=conf.get('HOSTALIASES',''),
