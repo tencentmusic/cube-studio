@@ -1,0 +1,15 @@
+set -ex
+hubhost=ccr.ccs.tencentyun.com/cube-studio
+
+arr=("torchserve:0.4.2-cpu" "torchserve:0.4.2-gpu" "torchserve:0.5.0-cpu" "torchserve:0.5.0-gpu" "torchserve:0.6.0-cpu" "torchserve:0.6.0-gpu")
+
+for value in ${arr[@]}
+do
+    echo $value
+    docker build -t $hubhost/$value --build-arg FROM_IMAGES=pytorch/$value .
+    docker push $hubhost/$value
+done
+
+
+
+
