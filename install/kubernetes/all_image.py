@@ -193,7 +193,7 @@ cube_studio = [
 
 ]
 
-images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano
+images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano + cube_studio
 
 # images = new_pipline
 images = list(set(images))
