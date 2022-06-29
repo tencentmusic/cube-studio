@@ -10,13 +10,15 @@ ENV LC_MESSAGES en_US.UTF-8
 ENV TZ Asia/Shanghai
 
 # 切换内部源
-RUN apt update -y && apt-get install -y wget
+COPY ubuntu-sources.list /etc/apt/sources.list
+#RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tencent/ubuntu-sources.list && cp ubuntu-sources.list /etc/apt/sources.list
+RUN apt update -y ; apt-get install -y wget
 
 # 安装运维工具
-RUN apt install -y --force-yes --no-install-recommends vim apt-transport-https software-properties-common gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl locales zip
+RUN apt install -y --force-yes --no-install-recommends vim apt-transport-https software-properties-common gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl locales zip unzip
 
 # 安装python
-RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update -y && apt install -y  libsasl2-dev libpq-dev python3-distutils
+RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update -y ; apt install -y  libsasl2-dev libpq-dev python-distutils-extra python3-distutils
 RUN set -x; rm -rf /usr/bin/python; apt install -y --fix-missing python3.8 && ln -s /usr/bin/python3.8 /usr/bin/python
 
 RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ignore-installed" \

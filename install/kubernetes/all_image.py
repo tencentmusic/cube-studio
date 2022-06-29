@@ -83,18 +83,20 @@ new_prometheus = [
     "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",
     'grafana/grafana:7.5.2'
 ]
-new_serving = ['gcr.io/kfserving/alibi-explainer:0.2.2', 'gcr.io/kfserving/logger:0.2.2', 'tensorflow/serving:1.14.0',
-               'tensorflow/serving:1.14.0-gpu', 'tensorflow/serving:1.11.0', 'tensorflow/serving:1.11.0-gpu',
-               'tensorflow/serving:1.12.0', 'tensorflow/serving:1.12.0-gpu', 'tensorflow/serving:1.13.0',
-               'tensorflow/serving:1.13.0-gpu', 'tensorflow/serving:1.14.0', 'tensorflow/serving:1.14.0-gpu',
-               'tensorflow/serving:2.0.0', 'tensorflow/serving:2.0.0-gpu', 'tensorflow/serving:2.1.0',
-               'tensorflow/serving:2.1.0-gpu', 'tensorflow/serving:2.2.0', 'tensorflow/serving:2.2.0-gpu',
-               'tensorflow/serving:2.3.0', 'tensorflow/serving:2.3.0-gpu', 'tensorflow/serving:2.4.0',
-               'tensorflow/serving:2.4.0-gpu', 'mcr.microsoft.com/onnxruntime/server:v0.5.1',
-               'gcr.io/kfserving/sklearnserver:0.2.2', 'gcr.io/kfserving/xgbserver:0.2.2',
-               'gcr.io/kfserving/pytorchserver:0.2.2', 'nvcr.io/nvidia/tensorrtserver:19.05-py3',
-               'gcr.io/kfserving/storage-initializer:0.2.2',
-               'gcr.io/knative-releases/knative.dev/serving/cmd/queue:792f6945c7bc73a49a470a5b955c39c8bd174705743abf5fb71aa0f4c04128eb']
+new_serving = [
+    'gcr.io/kfserving/alibi-explainer:0.2.2', 'gcr.io/kfserving/logger:0.2.2', 'tensorflow/serving:1.14.0',
+    'tensorflow/serving:1.14.0-gpu', 'tensorflow/serving:1.11.0', 'tensorflow/serving:1.11.0-gpu',
+    'tensorflow/serving:1.12.0', 'tensorflow/serving:1.12.0-gpu', 'tensorflow/serving:1.13.0',
+    'tensorflow/serving:1.13.0-gpu', 'tensorflow/serving:1.14.0', 'tensorflow/serving:1.14.0-gpu',
+    'tensorflow/serving:2.0.0', 'tensorflow/serving:2.0.0-gpu', 'tensorflow/serving:2.1.0',
+    'tensorflow/serving:2.1.0-gpu', 'tensorflow/serving:2.2.0', 'tensorflow/serving:2.2.0-gpu',
+    'tensorflow/serving:2.3.0', 'tensorflow/serving:2.3.0-gpu', 'tensorflow/serving:2.4.0',
+    'tensorflow/serving:2.4.0-gpu', 'mcr.microsoft.com/onnxruntime/server:v0.5.1',
+    'gcr.io/kfserving/sklearnserver:0.2.2', 'gcr.io/kfserving/xgbserver:0.2.2',
+    'gcr.io/kfserving/pytorchserver:0.2.2', 'nvcr.io/nvidia/tensorrtserver:19.05-py3',
+    'gcr.io/kfserving/storage-initializer:0.2.2',
+    'gcr.io/knative-releases/knative.dev/serving/cmd/queue:792f6945c7bc73a49a470a5b955c39c8bd174705743abf5fb71aa0f4c04128eb'
+]
 
 volcano = ['volcanosh/vc-controller-manager:v1.4.0', 'volcanosh/vc-scheduler:v1.4.0',
            'volcanosh/vc-webhook-manager:v1.4.0']
@@ -112,12 +114,6 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-gpu-base',
     'ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-1.0.0',
     'ccr.ccs.tencentyun.com/cube-studio/nni:20211003',
-    'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.11.0',
-    'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.11.0-gpu',
-    'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.12.0',
-    'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.12.0-gpu',
-    'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.13.0',
-    'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.13.0-gpu',
     'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0',
     'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0-gpu',
     'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0',
@@ -140,9 +136,8 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.0-gpu',
     'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu',
     'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu',
-    'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:cpu',
-    'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:cuda',
-    'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:tensorrt',
+    'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest',
+    'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda',
 
     # 任务模板的镜像
     "ubuntu:18.04",
@@ -185,12 +180,7 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.6',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.8'
-
+    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8'
 ]
 
 images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano + cube_studio
