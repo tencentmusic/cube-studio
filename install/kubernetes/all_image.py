@@ -78,7 +78,7 @@ new_prometheus = [
     'quay.io/prometheus/node-exporter:v0.15.2',
     'quay.io/coreos/kube-rbac-proxy:v0.3.1',
     'quay.io/coreos/addon-resizer:1.0',
-    "quay.io/prometheus-operator/prometheus-operator:v0.46.0"
+    "quay.io/prometheus-operator/prometheus-operator:v0.46.0",
     'quay.io/prometheus-operator/prometheus-operator:v0.56.1',
     "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",
     'grafana/grafana:7.5.2'
