@@ -57,9 +57,6 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 ![cube](https://user-images.githubusercontent.com/20157705/174762561-29b18237-7d45-417e-b7c0-14f5ef96a0e6.gif)
 
-# 体验环境
-
-[http://159.75.208.175/](http://81.69.195.6/)
 
 # 贡献
 算法：
