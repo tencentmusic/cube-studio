@@ -81,4 +81,4 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 # 落地公司
 
-![图片 1](https://user-images.githubusercontent.com/20157705/174600451-2fe38ff1-ff78-4bc8-bc63-2a6f5246e0af.png)
+![image](https://user-images.githubusercontent.com/20157705/176909239-f24cbf8d-8fb5-4326-abed-6fbc3f5a2d1f.png)
