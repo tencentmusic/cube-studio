@@ -13,7 +13,7 @@ from sqlalchemy.exc import InvalidRequestError,OperationalError
 import pysnooper
 import copy
 import myapp
-from myapp.utils.py.py_k8s import check_status_time
+from myapp.utils.py.py_k8s import check_status_time,K8s
 from myapp.utils.py.py_prometheus import Prometheus
 from myapp.project import push_admin,push_message
 from myapp import app, db, security_manager
@@ -34,7 +34,8 @@ else:
     clusters = conf.get('CLUSTERS',{})
     if clusters and cluster in clusters:
         kubeconfig = clusters[cluster].get('KUBECONFIG','')
-        k8s_config.kube_config.load_kube_config(config_file=kubeconfig)
+        k8s_client = K8s(kubeconfig)
+        # k8s_config.kube_config.load_kube_config(config_file=kubeconfig)
     else:
         print('no kubeconfig in cluster %s' % cluster)
         exit(1)

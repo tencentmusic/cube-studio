@@ -24,7 +24,7 @@ class K8s():
 
     def __init__(self,file_path=None):  # kubeconfig
         kubeconfig = os.getenv('KUBECONFIG','')
-        if file_path:
+        if file_path and os.path.exists(file_path) and ''.join(open(file_path).readlines()).strip():
             config.kube_config.load_kube_config(config_file=file_path)
         elif kubeconfig:
             config.kube_config.load_kube_config(config_file=kubeconfig)
