@@ -2,31 +2,22 @@
 kubeflow = [
     'gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
     'gcr.io/ml-pipeline/metadata-writer:1.0.4', 'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1',
-    'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:5.7',
-    'docker.io/kubeflowkatib/katib-db-manager:v1beta1-a96ff59',
-    'docker.io/kubeflowkatib/katib-controller:v1beta1-a96ff59', 'argoproj/argoui:v2.3.0',
+    'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:5.7','argoproj/argoui:v2.3.0',
     'gcr.io/istio-release/proxy_init:release-1.3-latest-daily',
     'gcr.io/istio-release/kubectl:release-1.3-latest-daily', 'gcr.io/google_containers/spartakus-amd64:v1.1.0',
     'gcr.io/istio-release/proxyv2:release-1.3-latest-daily', 'mpioperator/mpi-operator:latest',"mpioperator/kubectl-delivery:latest",
     'gcr.io/kubeflow-images-public/admission-webhook:vmaster-ge5452b6f',
     'gcr.io/kubeflow-images-public/tf_operator:vmaster-gda226016', 'istio/proxyv2:1.3.1',
     'gcr.io/istio-release/galley:release-1.3-latest-daily', 'quay.io/jetstack/cert-manager-cainjector:v0.11.0',
-    'gcr.io/istio-release/citadel:release-1.3-latest-daily',
-    'gcr.io/kubeflow-images-public/jupyter-web-app:vmaster-g845af298', 'python:3.7',
+    'gcr.io/istio-release/citadel:release-1.3-latest-daily', 'python:3.7',
     'gcr.io/istio-release/mixer:release-1.3-latest-daily', 'gcr.io/istio-release/pilot:release-1.3-latest-daily',
     'gcr.io/spark-operator/spark-operator:v1beta2-1.1.0-2.4.5', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0',
-    'gcr.io/tfx-oss-public/ml_metadata_store_server:0.22.1',
-    'gcr.io/tfx-oss-public/ml_metadata_store_server:0.25.1',
     'gcr.io/istio-release/sidecar_injector:release-1.3-latest-daily',
     'quay.io/jetstack/cert-manager-webhook:v0.11.0',
     'gcr.io/kubeflow-images-public/kubernetes-sigs/application:1.0-beta',
-    'gcr.io/kubeflow-images-public/centraldashboard:vmaster-g8097cfeb',
     'gcr.io/kubeflow-images-public/xgboost-operator:v0.1.0', 'quay.io/jetstack/cert-manager-controller:v0.11.0',
-    'seldonio/seldon-core-operator:1.4.0', 'gcr.io/kfserving/kfserving-controller:v0.4.1',
     'gcr.io/istio-release/node-agent-k8s:release-1.3-latest-daily',
-    'gcr.io/kubeflow-images-public/notebook-controller:vmaster-g6eb007d0',
-    'gcr.io/kubeflow-images-public/pytorch-operator:vmaster-g518f9c76',
-    'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1', 'metacontroller/metacontroller:v0.3.0',
+    'gcr.io/kubeflow-images-public/pytorch-operator:vmaster-g518f9c76', 'metacontroller/metacontroller:v0.3.0',
     'prom/prometheus:v2.8.0', 'gcr.io/kubeflow-images-public/kfam:vmaster-g9f3bfd00',
     'kubeflow/mxnet-operator:v1.0.0-20200625',
     'gcr.io/kubeflow-images-public/profile-controller:vmaster-ga49f658f',
@@ -53,16 +44,6 @@ new_pipline = [
     "gcr.io/ml-pipeline/argoexec:v2.12.9-license-compliance"
 ]
 
-
-new_katib = ['docker.io/kubeflowkatib/katib-ui:v1beta1-a96ff59',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-db-manager',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/file-metrics-collector',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-ui',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/katib-controller', 'docker.io/kubeflowkatib/mxnet-mnist',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/tfevent-metrics-collector',
-             'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0',
-             'gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-chocolate']
 
 new_gpu = ['nvidia/k8s-device-plugin:v0.7.1', 'nvidia/dcgm-exporter:2.0.13-2.1.2-ubuntu20.04','nvidia/dcgm-exporter:2.3.1-2.6.1-ubuntu20.04',
            'nvidia/pod-gpu-metrics-exporter:v1.0.0-alpha']
@@ -106,7 +87,6 @@ nni = ['frameworkcontrolle/frameworkcontrolle']
 
 cube_studio = [
     # 平台构建的镜像
-    'ccr.ccs.tencentyun.com/cube-studio/katib',
     'ccr.ccs.tencentyun.com/cube-studio/',
     'ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base',
     'ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base',
@@ -183,7 +163,7 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8'
 ]
 
-images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano + cube_studio
+images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano + kube_batch + nni+ cube_studio
 
 # images = new_pipline
 images = list(set(images))
