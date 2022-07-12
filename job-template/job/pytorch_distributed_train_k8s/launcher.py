@@ -331,7 +331,7 @@ def launch_pytorchjob(name, num_workers, image,working_dir, worker_command):
         # 实时打印日志
         line='>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
         print('begin follow log\n%s'%line, flush=True)
-        command = "stern %s --namespace %s --kubeconfig /root/.kube/%s-kubeconfig --exclude-container init-pytorch --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE,os.getenv("KFJ_ENVIRONMENT",'dev'))
+        command = "stern %s --namespace %s --exclude-container init-pytorch --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE)
         print(command, flush=True)
         run_shell(command)
         print('%s\nend follow log'%line, flush=True)
@@ -358,11 +358,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     print("{} args: {}".format(__file__, args))
 
-    # 模板使用时需要添加kubeconfig挂载到/root/.kube/下面
-    config_path='/root/.kube/%s-kubeconfig'%os.getenv("KFJ_ENVIRONMENT",'dev')
-    if not os.path.exists(config_path):
-        print(config_path+" not exits")
-        exit(1)
+
     launch_pytorchjob(name=default_job_name(),num_workers=args.num_worker,image=args.image,working_dir=args.working_dir,worker_command=args.command)
 
 

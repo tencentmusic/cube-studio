@@ -38,8 +38,8 @@ class K8sCRD(object):
             print("WARNING: found no stern installed, can not trace worker log: {}".format(e), flush=True)
             return None
 
-        cmd = "stern {} --namespace {} --kubeconfig /root/.kube/{}-kubeconfig"\
-            .format(name, namespace, os.getenv("KFJ_ENVIRONMENT", 'tke'))
+        cmd = "stern {} --namespace {}"\
+            .format(name, namespace)
 
         subproc = subprocess.Popen(cmd, universal_newlines=False, shell=True, bufsize=0)
         print("worker log tracer started: {}".format(subproc.pid), flush=True)

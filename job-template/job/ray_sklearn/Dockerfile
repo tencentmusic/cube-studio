@@ -17,8 +17,7 @@ RUN apt install -y python3-dev gcc automake autoconf libtool make ffmpeg build-e
 # 安装pip库
 RUN pip install pysnooper cython
 
-# 安装stern
-RUN wget https://github.com/wercker/stern/releases/download/1.11.0/stern_linux_amd64 && chmod +x stern_linux_amd64 && mv stern_linux_amd64 /usr/bin/stern
+# 安装kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
 
 # 便捷操作

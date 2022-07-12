@@ -319,7 +319,7 @@ def launch_volcanojob(name, num_workers, image,working_dir, worker_command):
         # 实时打印日志,由于stern跟踪时长有限制，所以会每个小时重启一次ster进程
         line='>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
         print('begin follow log\n%s %s'%(line,datetime.datetime.now()), flush=True)
-        command = "stern %s --namespace %s --kubeconfig /root/.kube/%s-kubeconfig --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE,os.getenv("KFJ_ENVIRONMENT",'dev'))
+        command = "stern %s --namespace %s --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE)
         print(command, flush=True)
         run_shell(command)
         print('%s %s\nend follow log'%(line,datetime.datetime.now()), flush=True)
@@ -345,12 +345,6 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
     print("{} args: {}".format(__file__, args))
-    # 模板使用时需要添加kubeconfig挂载到/root/.kube/下面
-    config_path='/root/.kube/%s-kubeconfig'%os.getenv("KFJ_ENVIRONMENT",'dev')
-    if not os.path.exists(config_path):
-        print(config_path+" not exits")
-        exit(1)
-
 
     launch_volcanojob(name=default_job_name(),num_workers=args.num_worker,image=args.image,working_dir=args.working_dir,worker_command=args.command)
 
