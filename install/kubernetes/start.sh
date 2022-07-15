@@ -85,13 +85,13 @@ kubectl apply -f ./prometheus_adapter/metric_rule.yaml
 kubectl apply -f ./prometheus_adapter/prometheus_adapter.yaml
 cd ../
 
+
 # 部署gpu的监控
 kubectl apply -f gpu/nvidia-device-plugin.yml
 kubectl apply -f gpu/dcgm-exporter.yaml
 kubectl apply -f gpu/dcgm-exporter-sm.yaml
 
 # 部署frameworkcontroller
-
 kubectl create serviceaccount frameworkcontroller --namespace service
 kubectl create serviceaccount frameworkcontroller --namespace pipeline
 kubectl create serviceaccount frameworkcontroller --namespace katib
@@ -123,6 +123,8 @@ kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 kubectl apply -f kubeflow/sa-rbac.yaml
 
 # 部署istio
+kubectl apply -f istio/install-crd.yaml
+kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --timeout=60s
 kubectl apply -f istio/install.yaml
 
 

@@ -505,11 +505,11 @@
         "options": [
           {
             "selected": true,
-            "text": "rikochen-mtl-daily-usermode-abt",
-            "value": "rikochen-mtl-daily-usermode-abt"
+            "text": "-",
+            "value": "-"
           }
         ],
-        "query": "rikochen-mtl-daily-usermode-abt",
+        "query": "-",
         "skipUrlSync": false,
         "type": "textbox"
       }
