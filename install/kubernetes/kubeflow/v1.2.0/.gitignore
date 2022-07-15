@@ -1,9 +1,0 @@
-/kfctl
-.idea
-.DS_Store
-manifests/manifests-1.2.0/tests
-manifests/manifests-1.2.0/stacks/aws
-manifests/manifests-1.2.0/stacks/azure
-manifests/manifests-1.2.0/stacks/gcp
-manifests/manifests-1.2.0/stacks/ibm
-manifests/manifests-1.2.0/stacks/openshift

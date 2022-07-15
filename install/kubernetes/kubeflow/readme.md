@@ -2,9 +2,6 @@
 # 基础环境需求
 k8s集群，分布式存储，这些都假设在前面的步骤已经完成
 
-# 先创建官方kubeflow
-参考v1.2.0/readme.md
-
 # 部署kubeflow-pipeline
 
 kubeflow每一部分相应的可以独立升级
@@ -58,17 +55,11 @@ kubectl apply -f pipeline/minio-artifact-secret.yaml
 kubectl apply -f pipeline/pipeline-runner-rolebinding.yaml
 ```
 
-# 部署mpi-operator
+# 部署train-operator
+
+支持 [TensorFlow/PyTorch/Apache MXNet/XGBoost/MPI jobs](https://github.com/kubeflow/training-operator/tree/v1.4.0)
 
 ```bash
-kubectl apply -f mpi-operator.yaml
+kubectl apply -k train-operator/manifests/overlays/standalone
 ```
 
-
-# 部署xgboost-operator
-下载github官方版本
-在官方github的xgboost-operator/manifests/中是部署文件
-
-```bash
-kubectl kustomize  xgboost-operator/manifests/base | kubectl apply -f -
-```

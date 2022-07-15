@@ -1,5 +1,0 @@
-varReference:
-- path: metadata/annotations/getambassador.io\/config
-  kind: Service
-- path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
-  kind: Deployment

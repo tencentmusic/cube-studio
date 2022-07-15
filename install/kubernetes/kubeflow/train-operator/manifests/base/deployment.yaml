@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: training-operator
+  labels:
+    control-plane: kubeflow-training-operator
+spec:
+  selector:
+    matchLabels:
+      control-plane: kubeflow-training-operator
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: kubeflow-training-operator
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - command:
+            - /manager
+          image: kubeflow/training-operator
+          name: training-operator
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          securityContext:
+            allowPrivilegeEscalation: false
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 100m
+              memory: 30Mi
+            requests:
+              cpu: 100m
+              memory: 20Mi
+      serviceAccountName: training-operator
+      terminationGracePeriodSeconds: 10
