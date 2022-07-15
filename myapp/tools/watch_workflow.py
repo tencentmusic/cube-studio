@@ -2,8 +2,7 @@
 
 import time,datetime,logging,os,sys
 import asyncio
-from kubernetes import client as k8s_client
-from kubernetes import config as k8s_config
+from kubernetes import client
 from kubernetes import watch
 from os import path
 import json
@@ -34,7 +33,7 @@ else:
     clusters = conf.get('CLUSTERS',{})
     if clusters and cluster in clusters:
         kubeconfig = clusters[cluster].get('KUBECONFIG','')
-        k8s_client = K8s(kubeconfig)
+        K8s(kubeconfig)
         # k8s_config.kube_config.load_kube_config(config_file=kubeconfig)
     else:
         print('no kubeconfig in cluster %s' % cluster)
@@ -337,8 +336,7 @@ def save_history(workflow,dbsession):
 
 # @pysnooper.snoop()
 def check_crd_exist(group,version,namespace,plural,name):
-    client = k8s_client.CustomObjectsApi()
-    exist_crd = client.get_namespaced_custom_object(group,version,namespace,plural,name)
+    exist_crd = client.CustomObjectsApi().get_namespaced_custom_object(group,version,namespace,plural,name)
     return exist_crd
 
 
@@ -408,7 +406,7 @@ def listen_workflow():
     print('begin listen')
     while(True):
         try:
-            for event in w.stream(k8s_client.CustomObjectsApi().list_namespaced_custom_object, group=workflow_info['group'],
+            for event in w.stream(client.CustomObjectsApi().list_namespaced_custom_object, group=workflow_info['group'],
                                   version=workflow_info["version"],
                                   namespace=namespace, plural=workflow_info["plural"]):  # label_selector=label,
                 if event['type']=='ADDED' or event['type']=='MODIFIED':  # ADDED  MODIFIED DELETED
