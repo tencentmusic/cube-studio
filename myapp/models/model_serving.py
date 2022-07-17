@@ -182,7 +182,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     resource_gpu= Column(String(100), default='0')
     deploy_time = Column(String(100), nullable=True,default=datetime.datetime.now)
     host = Column(String(200), default='')  # 挂载
-    expand = Column(Text(65536), default='')
+    expand = Column(Text(65536), default='{}')
     canary = Column(String(400), default='')   # 分流
     shadow = Column(String(400), default='')  # 镜像
 

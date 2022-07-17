@@ -1,0 +1,77 @@
+{
+    "wenet": {
+        "project_name":"public",
+        "service_name":"serving-wenet-20220701",
+        "service_describe":"语音识别",
+        "model_name": "wenet",
+        "model_version": "v2022.07.01",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/wenet-mini:latest",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"80,10086"
+    },
+    "yolo": {
+        "project_name":"public",
+        "service_name":"serving-yolo-darknet-20220701",
+        "service_describe":"多目标识别",
+        "model_name": "yolo-darknet",
+        "model_version": "v2022.07.01",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/target-detection",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
+    },
+    "face": {
+        "project_name":"public",
+        "service_name":"serving-face-20220701",
+        "service_describe":"人脸检测",
+        "model_name": "face",
+        "model_version": "v2022.07.01",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/face:20220701",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
+    },
+    "openpose": {
+        "project_name":"public",
+        "service_name":"serving-openpose-20220701",
+        "service_describe":"人体检测",
+        "model_name": "openpose",
+        "model_version": "v2022.07.01",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/openpose:gpu",
+        "command":"gunicorn --bind  0.0.0.0:8080 --workers 3 --timeout 300 server:app",
+        "resource_memory": "5G",
+        "resource_gpu": "1",
+        "env":"MODEL_POSE=COCO\nNET_RESOLUTION=64x64\nRENDER_POSE=-1\nPERIOD=100\nGPU=true",
+        "ports":"8080"
+    },
+    "cartoonize": {
+        "project_name":"public",
+        "service_name":"serving-cartoonize-20220701",
+        "service_describe":"卡通化",
+        "model_name": "cartoonize",
+        "model_version": "v2022.07.01",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/cartoonize:latest",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
+    },
+    "chatbot": {
+        "project_name":"public",
+        "service_name":"serving-chatbot-20220701",
+        "service_describe":"聊天机器人",
+        "model_name": "chatbot",
+        "model_version": "v2022.07.01",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/chatbot:base",
+        "command":"python /app/app.py",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
+    }
+}
+
+

@@ -33,7 +33,9 @@
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/neo4j:4.4",
         "command":"",
         "env":"NEO4J_AUTH=neo4j/admin",
-        "ports":"7474,7687"
+        "ports":"7474,7687",
+        "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/neo4j(hostpath):/var/lib/neo4j/data"
+
     },
     "jaeger": {
         "project_name":"public",
@@ -43,5 +45,15 @@
         "command":"",
         "env":"",
         "ports":"5775,16686"
+    },
+    "label-studio": {
+        "project_name":"public",
+        "service_name":"label-studio",
+        "service_describe":"标注平台",
+        "image_name":"heartexlabs/label-studio:latest",
+        "command":"",
+        "env":"LOCAL_FILES_SERVING_ENABLED=true",
+        "ports":"8080",
+        "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/label-studio(hostpath):/label-studio/data"
     }
 }

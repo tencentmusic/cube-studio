@@ -53,7 +53,7 @@ def init():
                     project_user.user_id=1
                     db.session.add(project_user)
                     db.session.commit()
-
+                    print('add project %s'%name)
                 except Exception as e:
                     db.session.rollback()
 
@@ -96,6 +96,7 @@ def init():
                 images.repository_id=repository_id
                 db.session.add(images)
                 db.session.commit()
+                print('add images %s' % image_name)
             except Exception as e:
                 db.session.rollback()
 
@@ -121,6 +122,7 @@ def init():
                     job_template.args=json.dumps(job_template_args,indent=4,ensure_ascii=False) if job_template_args else '{}'
                     db.session.add(job_template)
                     db.session.commit()
+                    print('add job_template %s' % job_template_name.replace('_','-'))
                 except Exception as e:
                     db.session.rollback()
             else:
@@ -138,6 +140,7 @@ def init():
                     job_template.env = job_template_env
                     job_template.args = json.dumps(job_template_args, indent=4,ensure_ascii=False) if job_template_args else '{}'
                     db.session.commit()
+                    print('update job_template %s' % job_template_name.replace('_', '-'))
                 except Exception as e:
                     db.session.rollback()
 
@@ -159,6 +162,7 @@ def init():
                 repository.changed_by_fk=1
                 db.session.add(repository)
                 db.session.commit()
+                print('add repository hubsecret')
             except Exception as e:
                 db.session.rollback()
 
@@ -174,7 +178,7 @@ def init():
 
 
     # 添加demo 服务
-    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_mem='2G',resource_cpu='2',ports='80'):
+    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_mem='2G',resource_cpu='2',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt'):
         service = db.session.query(Service).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
@@ -189,8 +193,10 @@ def init():
                 service.command = command
                 service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
                 service.ports = ports
+                service.volume_mount=volume_mount
                 db.session.add(service)
                 db.session.commit()
+                print('add service %s'%service_name)
             except Exception as e:
                 db.session.rollback()
 
@@ -204,6 +210,46 @@ def init():
         print(e)
 
 
+
+    # 添加 demo 推理 服务
+    def create_inference(project_name,service_name,service_describe,image_name,command,env,model_name,model_version='',model_path='',service_type='serving',resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt'):
+        service = db.session.query(InferenceService).filter_by(name=service_name).first()
+        project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
+        if service is None and project:
+            try:
+                service = InferenceService()
+                service.name = service_name.replace('_','-')
+                service.label=service_describe
+                service.service_type=service_type,
+                service.model_name=model_name,
+                service.model_version=model_version if model_version else datetime.now().strftime('v%Y.%m.%d.1'),
+                service.model_path = model_path,
+                service.created_by_fk=1
+                service.changed_by_fk=1
+                service.project_id=project.id
+                service.images=image_name
+                service.resource_memory=resource_memory,
+                service.resource_cpu=resource_cpu,
+                service.resource_gpu = resource_gpu,
+                service.command = command
+                service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
+                service.ports = ports
+                service.volume_mount=volume_mount
+                service.expand = "{}"
+                db.session.add(service)
+                db.session.commit()
+                print('add inference %s' % service_name)
+            except Exception as e:
+                db.session.rollback()
+
+    try:
+
+        inferences = json.load(open('myapp/init-inference.json',mode='r'))
+        for inference_name in inferences:
+            inference = inferences[inference_name]
+            create_inference(**inference)
+    except Exception as e:
+        print(e)
 
 
     # 创建demo pipeline
@@ -232,6 +278,7 @@ def init():
                 pipeline_model.parameter = json.dumps(pipeline.get('parameter',{}))
                 db.session.add(pipeline_model)
                 db.session.commit()
+                print('add pipeline %s' % pipeline['name'])
             except Exception as e:
                 db.session.rollback()
         else:
@@ -241,6 +288,7 @@ def init():
             pipeline_model.changed_by_fk = 1
             pipeline_model.project_id = org_project.id
             pipeline_model.parameter = json.dumps(pipeline.get('parameter', {}))
+            print('update pipeline %s' % pipeline['name'])
             db.session.commit()
 
 
@@ -264,6 +312,7 @@ def init():
                     task_model.job_template_id = job_template.id
                     db.session.add(task_model)
                     db.session.commit()
+                    print('add task %s' % task['name'])
                 except Exception as e:
                     db.session.rollback()
             else:
@@ -280,6 +329,7 @@ def init():
                 task_model.changed_by_fk = 1
                 task_model.pipeline_id = pipeline_model.id
                 task_model.job_template_id = job_template.id
+                print('update task %s' % task['name'])
                 db.session.commit()
 
         # 修正pipeline
