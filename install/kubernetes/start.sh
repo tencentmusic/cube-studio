@@ -91,7 +91,7 @@ kubectl apply -f gpu/nvidia-device-plugin.yml
 kubectl apply -f gpu/dcgm-exporter.yaml
 kubectl apply -f gpu/dcgm-exporter-sm.yaml
 
-# 部署frameworkcontroller
+# 部署frameworkcontroller nni超参搜索使用
 kubectl create serviceaccount frameworkcontroller --namespace kubeflow
 kubectl create clusterrolebinding frameworkcontroller-kubeflow --clusterrole=cluster-admin --user=system:serviceaccount:kubeflow:frameworkcontroller
 kubectl create -f frameworkcontroller/frameworkcontroller-with-default-config.yaml
@@ -128,6 +128,11 @@ kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=6
 #kustomize build env/platform-agnostic/  | kubectl apply -f -
 kubectl apply -k env/platform-agnostic
 cd ../../../../
+
+# 部署trainjob:tfjob/pytorchjob/mpijob/mxnetjob/xgboostjobs
+kubectl apply -k kubeflow/train-operator/manifests/overlays/standalone
+# 部署sparkjob
+kubectl apply -f spark/install.yaml
 
 
 # 部署管理平台

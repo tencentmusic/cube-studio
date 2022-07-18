@@ -33,6 +33,6 @@ COPY job/pkgs /app/job/pkgs
 WORKDIR /app
 ENV PYTHONPATH=/app:$PYTHONPATH
 
-ENTRYPOINT ["python3", "pytorchjob_launcher.py"]
+ENTRYPOINT ["python3", "launcher.py"]
 
 
