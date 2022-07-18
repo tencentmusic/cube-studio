@@ -1,5 +1,5 @@
 
-mkdir -p ~/.kube/ kubeconfig /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives
+mkdir -p ~/.kube/ kubeconfig /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives /data/k8s/infra/mysql
 cp config ~/.kube/config
 cp config kubeconfig/dev-kubeconfig
 
@@ -92,43 +92,31 @@ kubectl apply -f gpu/dcgm-exporter.yaml
 kubectl apply -f gpu/dcgm-exporter-sm.yaml
 
 # 部署frameworkcontroller
-kubectl create serviceaccount frameworkcontroller --namespace service
-kubectl create serviceaccount frameworkcontroller --namespace pipeline
-kubectl create serviceaccount frameworkcontroller --namespace katib
 kubectl create serviceaccount frameworkcontroller --namespace kubeflow
-kubectl create clusterrolebinding frameworkcontroller-service --clusterrole=cluster-admin --user=system:serviceaccount:service:frameworkcontroller
-kubectl create clusterrolebinding frameworkcontroller-pipeline --clusterrole=cluster-admin --user=system:serviceaccount:pipeline:frameworkcontroller
-kubectl create clusterrolebinding frameworkcontroller-katib --clusterrole=cluster-admin --user=system:serviceaccount:katib:frameworkcontroller
 kubectl create clusterrolebinding frameworkcontroller-kubeflow --clusterrole=cluster-admin --user=system:serviceaccount:kubeflow:frameworkcontroller
 kubectl create -f frameworkcontroller/frameworkcontroller-with-default-config.yaml
 kubectl wait crd/frameworks.frameworkcontroller.microsoft.com --for condition=established --timeout=60s
 
-kubectl create serviceaccount frameworkbarrier --namespace service
 kubectl create serviceaccount frameworkbarrier --namespace pipeline
 kubectl create serviceaccount frameworkbarrier --namespace katib
 kubectl create serviceaccount frameworkbarrier --namespace kubeflow
 kubectl create clusterrole frameworkbarrier --verb=get,list,watch --resource=frameworks
-kubectl create clusterrolebinding frameworkbarrier-service --clusterrole=frameworkbarrier  --user=system:serviceaccount:service:frameworkbarrier
 kubectl create clusterrolebinding frameworkbarrier-pipeline --clusterrole=frameworkbarrier  --user=system:serviceaccount:pipeline:frameworkbarrier
 kubectl create clusterrolebinding frameworkbarrier-katib --clusterrole=frameworkbarrier  --user=system:serviceaccount:katib:frameworkbarrier
 kubectl create clusterrolebinding frameworkbarrier-kubeflow --clusterrole=frameworkbarrier  --user=system:serviceaccount:kubeflow:frameworkbarrier
-
 
 # 部署volcano
 kubectl delete -f volcano/volcano-development.yaml
 kubectl apply -f volcano/volcano-development.yaml
 kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 
-# 部署kubeflow(训练框架+istio)
-kubectl apply -f kubeflow/sa-rbac.yaml
-
 # 部署istio
 kubectl apply -f istio/install-crd.yaml
 kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --timeout=60s
 kubectl apply -f istio/install.yaml
 
-
 # 部署kfp pipeline
+kubectl apply -f kubeflow/sa-rbac.yaml
 kubectl create -f kubeflow/pipeline/minio-pv-hostpath.yaml
 kubectl apply -f kubeflow/pipeline/minio-artifact-secret.yaml
 kubectl apply -f kubeflow/pipeline/pipeline-runner-rolebinding.yaml

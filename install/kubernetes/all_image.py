@@ -1,27 +1,8 @@
 # 所需要的所有镜像
 kubeflow = [
-    'gcr.io/kubeflow-images-public/xgboost-operator:vmaster-g56c2c075',
-    'gcr.io/ml-pipeline/metadata-writer:1.0.4', 'gcr.io/tfx-oss-public/ml_metadata_store_server:v0.21.1',
-    'gcr.io/ml-pipeline/envoy:metadata-grpc', 'mysql:5.7','argoproj/argoui:v2.3.0',
-    'gcr.io/istio-release/proxy_init:release-1.3-latest-daily',
-    'gcr.io/istio-release/kubectl:release-1.3-latest-daily', 'gcr.io/google_containers/spartakus-amd64:v1.1.0',
-    'gcr.io/istio-release/proxyv2:release-1.3-latest-daily', 'mpioperator/mpi-operator:latest',"mpioperator/kubectl-delivery:latest",
-    'gcr.io/kubeflow-images-public/admission-webhook:vmaster-ge5452b6f',
-    'gcr.io/kubeflow-images-public/tf_operator:vmaster-gda226016', 'istio/proxyv2:1.3.1',
-    'gcr.io/istio-release/galley:release-1.3-latest-daily', 'quay.io/jetstack/cert-manager-cainjector:v0.11.0',
-    'gcr.io/istio-release/citadel:release-1.3-latest-daily', 'python:3.7',
-    'gcr.io/istio-release/mixer:release-1.3-latest-daily', 'gcr.io/istio-release/pilot:release-1.3-latest-daily',
-    'gcr.io/spark-operator/spark-operator:v1beta2-1.1.0-2.4.5', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0',
-    'gcr.io/istio-release/sidecar_injector:release-1.3-latest-daily',
-    'quay.io/jetstack/cert-manager-webhook:v0.11.0',
-    'gcr.io/kubeflow-images-public/kubernetes-sigs/application:1.0-beta',
-    'gcr.io/kubeflow-images-public/xgboost-operator:v0.1.0', 'quay.io/jetstack/cert-manager-controller:v0.11.0',
-    'gcr.io/istio-release/node-agent-k8s:release-1.3-latest-daily',
-    'gcr.io/kubeflow-images-public/pytorch-operator:vmaster-g518f9c76', 'metacontroller/metacontroller:v0.3.0',
-    'prom/prometheus:v2.8.0', 'gcr.io/kubeflow-images-public/kfam:vmaster-g9f3bfd00',
-    'kubeflow/mxnet-operator:v1.0.0-20200625',
-    'gcr.io/kubeflow-images-public/profile-controller:vmaster-ga49f658f',
-    'gcr.io/kubeflow-images-public/ingress-setup:latest',
+    'mysql:5.7',
+    'gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0',
+    'metacontroller/metacontroller:v0.3.0',
     'alpine:3.10',
     "busybox"
 ]
@@ -160,7 +141,8 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8'
+    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8',
+    'ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1'
 ]
 
 images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano + kube_batch + nni+ cube_studio
@@ -172,6 +154,9 @@ images = list(set(images))
 HOST = 'ccr.ccs.tencentyun.com/cube-studio/'
 for image in images:
     # print(image)
+    if 'gpu' in image:
+        continue
+
     image = image.replace('<none>', '')
     image_name = HOST + image.replace(HOST,'').replace('/', '-').replace('@sha256', '')
 

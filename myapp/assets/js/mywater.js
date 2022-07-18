@@ -101,7 +101,7 @@ function get_username() {
     if(!id)
         id='';
     content = username;
-    src = id+" @TME Kubeflow";
+    src = id+" @TME Cube-Studio";
     $(document).ready(function(){
         drawWaterMark({content:content,src:src});
     });
