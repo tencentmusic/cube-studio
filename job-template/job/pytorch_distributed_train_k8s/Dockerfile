@@ -1,5 +1,4 @@
 FROM ubuntu:18.04
-COPY job/pkgs/config/ubuntu-sources.list /etc/apt/sources.list
 RUN apt-get update && apt-get -y install gcc g++ libjpeg-dev zlib1g-dev cmake
 
 # 安装运维工具
@@ -27,8 +26,6 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
 
 RUN pip install kubernetes==12.0.1 pysnooper psutil
 COPY job/pytorch_distributed_train_k8s/* /app/
-#COPY job/pkgs/config/ubuntu-sources.list /etc/apt/sources.list
-COPY job/pkgs/config/pip.conf /root/.pip/pip.conf
 COPY job/pkgs /app/job/pkgs
 WORKDIR /app
 ENV PYTHONPATH=/app:$PYTHONPATH

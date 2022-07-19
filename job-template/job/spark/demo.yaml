@@ -1,0 +1,104 @@
+# 如果觉得好用，请收藏或则分享本站
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  namespace: pipeline
+  name: sparkjob-pipeline1-2d4c
+  labels:
+    run-id: run-2-7
+    run-rtx: admin
+    pipeline-rtx: admin
+    pipeline-id: '2'
+    pipeline-name: pipeline1
+    task-id: '7'
+    task-name: spark-1658152032310
+spec:
+  type: Python
+  mode: cluster
+  proxyUser: admin
+  image: 'ccr.ccs.tencentyun.com/cube-studio/spark-operator:spark-v3.1.1'
+  imagePullPolicy: Always
+  mainClass: ''
+  mainApplicationFile: 'local:///opt/spark/examples/src/main/python/pi.py'
+  arguments: []
+  sparkConf: {}
+  hadoopConf: {}
+  nodeSelector:
+    org: public
+    cpu: 'true'
+    train: 'true'
+  sparkVersion: 3.1.1
+  pythonVersion: '3'
+  batchScheduler: kube-batch
+  restartPolicy:
+    type: Never
+  timeToLiveSeconds: 172800
+  volumes:
+    - name: kubeflow-user-workspace
+      persistentVolumeClaim:
+        claimName: kubeflow-user-workspace
+    - name: kubeflow-archives
+      persistentVolumeClaim:
+        claimName: kubeflow-archives
+    - name: tz-config
+      hostPath:
+        path: /usr/share/zoneinfo/Asia/Shanghai
+    - name: spark-local-dir-1
+      hostPath:
+        path: /data/k8s/kubeflow/pipeline/workspace/admin
+
+  driver:
+    cores: 2
+    coreLimit: '2'
+    memory: 2G
+#     memoryLimit: 2G
+    labels:
+      run-id: run-2-7
+      run-rtx: admin
+      pipeline-rtx: admin
+      pipeline-id: '2'
+      pipeline-name: pipeline1
+      task-id: '7'
+      task-name: spark-1658152032310
+    serviceAccount: spark
+    volumeMounts:
+      - name: kubeflow-user-workspace
+        mountPath: /mnt/admin
+        subPath: admin
+      - name: kubeflow-archives
+        mountPath: /archives/admin
+        subPath: admin
+      - name: tz-config
+        mountPath: /etc/localtime
+  executor:
+    instances: 3
+    cores: 2
+    coreLimit: '2'
+    memory: 2G
+#     memoryLimit: 2G
+    labels:
+      run-id: run-2-7
+      run-rtx: admin
+      pipeline-rtx: admin
+      pipeline-id: '2'
+      pipeline-name: pipeline1
+      task-id: '7'
+      task-name: spark-1658152032310
+    volumeMounts:
+      - name: kubeflow-user-workspace
+        mountPath: /mnt/admin
+        subPath: admin
+      - name: kubeflow-archives
+        mountPath: /archives/admin
+        subPath: admin
+      - name: tz-config
+        mountPath: /etc/localtime
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 5
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  task-name: spark-1658152032310

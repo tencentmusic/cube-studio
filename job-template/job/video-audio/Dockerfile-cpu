@@ -19,8 +19,6 @@ ENV RAY_CLIENT_SERVER_MAX_THREADS=1000
 USER root
 COPY job/video-audio /app
 COPY job/pkgs /app/job/pkgs
-# COPY job/pkgs/config/pip.conf /root/.pip/pip.conf
-# COPY job/pkgs/config/ubuntu-sources.list /etc/apt/sources.list
 
 WORKDIR /app
 ENTRYPOINT ["python", "start_download.py"]

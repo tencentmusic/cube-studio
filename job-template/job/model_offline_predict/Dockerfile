@@ -1,8 +1,5 @@
 FROM ubuntu:18.04
 
-#https://docker-76009.sz.gfp.tencent-cloud.com/tencent/ubuntu-sources.list
-#COPY job/pkgs/config/ubuntu-sources.list /etc/apt/sources.list
-
 # 安装运维工具
 RUN apt-get update && apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl locales zip
 # 安装python

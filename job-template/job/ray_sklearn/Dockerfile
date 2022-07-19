@@ -2,8 +2,6 @@
 FROM ccr.ccs.tencentyun.com/cube-studio/ray:gpu
 USER root
 
-#COPY job/pkgs/config/pip.conf /root/.pip/pip.conf
-#COPY job/pkgs/config/ubuntu-sources.list /etc/apt/sources.list
 
 # 安装调试相关工具
 RUN apt update && apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip software-properties-common

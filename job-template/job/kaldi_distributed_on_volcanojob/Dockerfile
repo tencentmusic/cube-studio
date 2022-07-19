@@ -1,9 +1,5 @@
 FROM ubuntu:18.04
 
-## 换内网源
-#COPY job/pkgs/config/ubuntu-sources.list /etc/apt/sources.list
-#COPY job/pkgs/config/pip.conf /root/.pip/pip.conf
-
 # 安装运维工具
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt install -y --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq wget git dnsutils iputils-ping net-tools curl locales zip tzdata

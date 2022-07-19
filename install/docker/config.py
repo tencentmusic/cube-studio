@@ -660,6 +660,13 @@ CRD_INFO={
         'kind': 'Job',
         "plural": "jobs",
         "timeout": 60 * 60 * 24 * 2
+    },
+    "sparkjob": {
+        "group": "sparkoperator.k8s.io",
+        "version": "v1beta2",
+        'kind': 'SparkApplication',
+        "plural": "sparkapplications",
+        "timeout": 60 * 60 * 24 * 2
     }
 }
 

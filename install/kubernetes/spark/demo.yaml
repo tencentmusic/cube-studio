@@ -4,12 +4,12 @@ metadata:
   name: spark-pi
   namespace: pipeline
 spec:
-  type: Scala
+  type: Scala   # Scala  Python
   mode: cluster
-  image: "ccr.ccs.tencentyun.com/cube-studio/spark-operator:spark-v3.1.1"
+  image: "ccr.ccs.tencentyun.com/cube-studio/spark-operator:spark-v3.1.1"  # "gcr.io/spark-operator/spark-py:v3.1.1"  #
   imagePullPolicy: Always
   mainClass: org.apache.spark.examples.SparkPi
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.1.1.jar"
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.1.1.jar" # local:///opt/spark/examples/src/main/python/pi.py    # "local:///opt/spark/examples/jars/spark-examples_2.12-3.1.1.jar"
   sparkVersion: "3.1.1"
   restartPolicy:
     type: Never

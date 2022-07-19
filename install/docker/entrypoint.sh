@@ -4,8 +4,8 @@ set -ex
 
 rm -rf /home/myapp/myapp/static/assets
 ln -s /home/myapp/myapp/assets /home/myapp/myapp/static/
-rm -rf /home/myapp/myapp/static/appbuilder/mnt
-ln -s /data/k8s/kubeflow/global/static /home/myapp/myapp/static/appbuilder/mnt
+rm -rf /home/myapp/myapp/static/mnt
+ln -s /data/k8s/kubeflow/pipeline/workspace /home/myapp/myapp/static/mnt
 
 export FLASK_APP=myapp:app
 python myapp/create_db.py

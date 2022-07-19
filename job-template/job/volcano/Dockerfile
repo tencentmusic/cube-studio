@@ -25,8 +25,6 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
 
 RUN pip install kubernetes==12.0.1 pysnooper psutil
 COPY job/volcano/* /app/
-#COPY job/pkgs/config/ubuntu-sources.list /etc/apt/sources.list
-#COPY job/pkgs/config/pip.conf /root/.pip/pip.conf
 COPY job/pkgs /app/job/pkgs
 WORKDIR /app
 ENV PYTHONPATH=/app:$PYTHONPATH

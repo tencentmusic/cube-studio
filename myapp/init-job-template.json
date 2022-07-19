@@ -264,6 +264,142 @@
             }
         }
     },
+    "sparkjob":{
+        "project_name":"数据处理",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/spark:20221010",
+        "image_describe":"spark serverless分布式任务",
+        "job_template_name":"sparkjob",
+        "job_template_describe":"spark serverless分布式任务",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/spark"
+        },
+        "job_template_env":"NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
+        "job_template_args":{
+            "参数":{
+                "--image": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "执行镜像",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/spark-operator:spark-v3.1.1",
+                    "placeholder": "",
+                    "describe": "执行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "executor 数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "3",
+                    "placeholder": "",
+                    "describe": "executor 数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--code_type": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "语言类型",
+                    "require": 1,
+                    "choice": [
+                        "Java",
+                        "Python",
+                        "Scala",
+                        "R"
+                    ],
+                    "range": "",
+                    "default": "Python",
+                    "placeholder": "",
+                    "describe": "语言类型",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--code_class": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "Java/Scala类名",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "Java/Scala类名，其他语言下不填",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--code_file": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "代码文件地址",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "local:///opt/spark/examples/src/main/python/pi.py",
+                    "placeholder": "",
+                    "describe": "代码文件地址，支持local://,http://,hdfs://,s3a://,gcs://",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--code_arguments": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "代码参数",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "代码参数",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--sparkConf": {
+                    "type": "text",
+                    "item_type": "str",
+                    "label": "spark配置",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "spark配置，每行一个配置，xx=yy",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--hadoopConf": {
+                    "type": "text",
+                    "item_type": "str",
+                    "label": "hadoop配置，每行一个配置，xx=yy",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "hadoop配置",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
     "ray-sklearn":{
         "project_name":"机器学习",
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/sklearn_estimator:v1",
