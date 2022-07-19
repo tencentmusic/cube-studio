@@ -4,8 +4,8 @@ set -ex
 
 rm -rf /home/myapp/myapp/static/assets
 ln -s /home/myapp/myapp/assets /home/myapp/myapp/static/
-rm -rf /home/myapp/myapp/static/appbuilder/mnt
-ln -s /data/k8s/kubeflow/global/static /home/myapp/myapp/static/appbuilder/mnt
+rm -rf /home/myapp/myapp/static/mnt
+ln -s /data/k8s/kubeflow/pipeline/workspace /home/myapp/myapp/static/mnt
 
 export FLASK_APP=myapp:app
 python myapp/create_db.py
@@ -17,7 +17,8 @@ myapp db upgrade   # 数据库表同步更新到mysql
 myapp init
 
 if [ "$STAGE" = "build" ]; then
-  cd /home/myapp/myapp/vision && yarn && yarn build
+#  cd /home/myapp/myapp/vision && yarn && yarn build
+  cd /home/myapp/myapp/vision && npm install && yarn build
 
 elif [ "$STAGE" = "dev" ]; then
   export FLASK_APP=myapp:app

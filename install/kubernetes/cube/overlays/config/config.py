@@ -660,6 +660,13 @@ CRD_INFO={
         'kind': 'Job',
         "plural": "jobs",
         "timeout": 60 * 60 * 24 * 2
+    },
+    "sparkjob": {
+        "group": "sparkoperator.k8s.io",
+        "version": "v1beta2",
+        'kind': 'SparkApplication',
+        "plural": "sparkapplications",
+        "timeout": 60 * 60 * 24 * 2
     }
 }
 
@@ -849,6 +856,7 @@ INFERNENCE_HEALTH={
     "triton-server":"8000:/v2/health/ready"
 }
 
+# notebook，pipeline镜像拉取策略
 IMAGE_PULL_POLICY='Always'    # IfNotPresent   Always
 
 # 任务资源使用情况地址
