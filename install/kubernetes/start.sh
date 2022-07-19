@@ -107,6 +107,7 @@ kubectl create clusterrolebinding frameworkbarrier-kubeflow --clusterrole=framew
 
 # 部署volcano
 kubectl delete -f volcano/volcano-development.yaml
+kubectl delete  secret volcano-admission-secret -n volcano-system
 kubectl apply -f volcano/volcano-development.yaml
 kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 
