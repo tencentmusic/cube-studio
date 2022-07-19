@@ -43,14 +43,14 @@ NUM_WORKER = 3
 HEADER_NAME = os.getenv('RAY_HOST', '')
 WORKER_NAME = HEADER_NAME.replace('header', 'worker')
 INIT_FILE=''
-crd_info={
+
+crd_info = {
     "group": "kubeflow.org",
     "version": "v1",
-    'kind': 'PyTorchJob',
-    "plural": "pytorchjobs",
-    "timeout": 60 * 60 * 24 * 2
+    "plural": "tfjobs",
+    'kind':'TFJob',
+    "timeout": 60*60*24*2
 }
-
 
 k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CREATOR)
 
@@ -64,12 +64,7 @@ print(GPU_TYPE,GPU_RESOURCE)
 
 
 def default_job_name():
-    # import re
-    # ctx = KFJobContext.get_context()
-    # p_name = str(ctx.pipeline_name) or ''
-    # p_name = re.sub(r'[^-a-z0-9]', '-', p_name)
-    # return "-".join([str(ctx.creator), p_name, "pytorchjob", str(uuid.uuid1())])
-    name = "pytorchjob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
+    name = "tfjob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
     return name[0:54]
 
 
@@ -103,7 +98,7 @@ def run_shell(shell):
 
 
 
-# 监控指定名称的pytorchjob
+# 监控指定名称的tfjob
 def monitoring(crd_k8s,name,namespace):
     time.sleep(10)
     # 杀掉stern 进程
@@ -121,12 +116,12 @@ def monitoring(crd_k8s,name,namespace):
         return back
     check_time = datetime.datetime.now()
     while(True):
-        pytorchjob = crd_k8s.get_one_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=namespace,name=name)
-        if pytorchjob:
-            print('pytorchjob status %s'%pytorchjob['status'], flush=True)
+        tfjob = crd_k8s.get_one_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=namespace,name=name)
+        if tfjob:
+            print('tfjob status %s'%tfjob['status'], flush=True)
         else:
-            print('pytorchjob not exist', flush=True)
-        if pytorchjob and (pytorchjob['status']=="Succeeded" or pytorchjob['status']=="Failed"):    # Created, Running, Restarting, Succeeded, or Failed
+            print('tfjob not exist', flush=True)
+        if tfjob and (tfjob['status']=="Succeeded" or tfjob['status']=="Failed"):    # Created, Running, Restarting, Succeeded, or Failed
             pids = get_pid("stern")
             if pids:
                 for pid in pids:
@@ -147,7 +142,7 @@ def monitoring(crd_k8s,name,namespace):
 
 
 # @pysnooper.snoop()
-def make_pytorchjob(name,num_workers,image,working_dir,command):
+def make_tfjob(name,num_workers,image,working_dir,command):
     # if type(command)==str:
     #     command=command.split(" ")
     #     command = [c for c in command if c]
@@ -163,7 +158,7 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                     "task-name": KFJ_TASK_NAME,
                     'rtx-user': KFJ_RUNNER,
                     "component": name,
-                    "type": "pytorchjob",
+                    "type": "tfjob",
                     "run-id": KFJ_RUN_ID,
                 }
             },
@@ -171,29 +166,8 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                 "schedulerName": "kube-batch",
                 "restartPolicy": "Never",
                 "volumes": k8s_volumes,
-                # "imagePullSecrets": [
-                #     {
-                #         "name": "hubsecret"
-                #     }
-                # ],
+                "nodeSelector":KFJ_TASK_NODE_SELECTOR,
                 "affinity": {
-                    "nodeAffinity": {
-                        "requiredDuringSchedulingIgnoredDuringExecution": {
-                            "nodeSelectorTerms": [
-                                {
-                                    "matchExpressions": [
-                                        {
-                                            "key": node_selector_key,
-                                            "operator": "In",
-                                            "values": [
-                                                KFJ_TASK_NODE_SELECTOR[node_selector_key]
-                                            ]
-                                        } for node_selector_key in KFJ_TASK_NODE_SELECTOR
-                                    ]
-                                }
-                            ]
-                        }
-                    },
                     "podAntiAffinity": {
                         "preferredDuringSchedulingIgnoredDuringExecution": [
                             {
@@ -203,7 +177,7 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                                     "labelSelector": {
                                         "matchLabels": {
                                             "component": name,
-                                            "type": "pytorchjob"
+                                            "type": "tfjob"
                                         }
                                     }
                                 }
@@ -213,28 +187,11 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                 },
                 "containers": [
                     {
-                        "name": "pytorch",
+                        "name": "tfjob",
                         "image": image if image else KFJ_TASK_IMAGES,
                         "imagePullPolicy": "Always",
                         "workingDir":working_dir,
-                        "env":[
-                            {
-                                "name": "NCCL_DEBUG",
-                                "value":"INFO"
-                            },
-                            {
-                                "name": "NCCL_IB_DISABLE",
-                                "value": "1"
-                            },
-                            # {
-                            #     "name": "NCCL_DEBUG_SUBSYS",
-                            #     "value": "ALL"
-                            # },
-                            {
-                                "name": "NCCL_SOCKET_IFNAME",
-                                "value": "eth0"
-                            }
-                        ],
+                        "env":[],
                         "command": ['bash','-c',command],
                         "volumeMounts": k8s_volume_mounts,
                         "resources": {
@@ -259,11 +216,11 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
         pod_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
 
     worker_pod_spec = copy.deepcopy(pod_spec)
-    worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker
+    worker_pod_spec['replicas']=int(num_workers)
 
-    pytorch_deploy = {
+    tfjob_deploy = {
         "apiVersion": "kubeflow.org/v1",
-        "kind": "PyTorchJob",
+        "kind": "TFJob",
         "metadata": {
             "namespace": KFJ_NAMESPACE,
             "name": name,
@@ -280,47 +237,29 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
         "spec": {
             "backoffLimit":num_workers,
             "cleanPodPolicy": "None",
-            "pytorchReplicaSpecs": {
-                "Master":pod_spec,
+            "tfReplicaSpecs": {
                 "Worker":worker_pod_spec
             }
 
         }
     }
 
-    return pytorch_deploy
+    return tfjob_deploy
 
 
 # @pysnooper.snoop()
-def launch_pytorchjob(name, num_workers, image,working_dir, worker_command):
-    """
-    由给定参数启动PytorchJob进行模型训练
-    Args:
-        name: TFJob任务名字，如果不传，默认为"pytorchjob_<uuid>"
-        namespace: pytorchJob的namespace，如果不传，默认为"kubeflow"
-        num_workers: 训练使用的机器数
-        driver_cmd: 训练镜像的入口命令
-        driver_image: 训练镜像地址
-        driver_args: 训练脚本启动参数
-        driver_envs: 环境变量
-        driver_pvc_name: 训练docker挂载的pvc的名字
-        driver_pvc_mount_path: pvc挂载到训练docker中的路径
-        node_select: 节点选择
-        job_timeout: 训练任务的最大运行时间，
-    Returns:
-    """
-
+def launch_tfjob(name, num_workers, image,working_dir, worker_command):
     if KFJ_RUN_ID:
-        print('delete old pytorch, run-id %s'%KFJ_RUN_ID, flush=True)
+        print('delete old tfjob, run-id %s'%KFJ_RUN_ID, flush=True)
         k8s_client.delete_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,labels={"run-id":KFJ_RUN_ID})
         time.sleep(10)
-    # 删除旧的pytorch
+    # 删除旧的tfjob
     k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=KFJ_NAMESPACE, name=name)
     time.sleep(10)
-    # 创建新的pytorch
-    pytorchjob_json = make_pytorchjob(name=name,num_workers= num_workers,image = image,working_dir=working_dir,command=worker_command)
-    print('create new pytorch %s' % name, flush=True)
-    k8s_client.create_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,body=pytorchjob_json)
+    # 创建新的tfjob
+    tfjob_json = make_tfjob(name=name,num_workers= num_workers,image = image,working_dir=working_dir,command=worker_command)
+    print('create new tfjob %s' % name, flush=True)
+    k8s_client.create_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,body=tfjob_json)
     time.sleep(10)
 
     print('begin start monitoring thred', flush=True)
@@ -331,25 +270,25 @@ def launch_pytorchjob(name, num_workers, image,working_dir, worker_command):
         # 实时打印日志
         line='>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
         print('begin follow log\n%s'%line, flush=True)
-        command = "stern %s --namespace %s --exclude-container init-pytorch --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE)
+        command = "stern %s --namespace %s --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE)
         print(command, flush=True)
         run_shell(command)
         print('%s\nend follow log'%line, flush=True)
         time.sleep(10)
 
-        pytorchjob = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'], namespace=KFJ_NAMESPACE, name=name)
-        if pytorchjob and (pytorchjob['status'] == "Succeeded" or pytorchjob['status'] == "Failed"):
+        tfjob = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'], namespace=KFJ_NAMESPACE, name=name)
+        if tfjob and (tfjob['status'] == "Succeeded" or tfjob['status'] == "Failed"):
             break
 
-    pytorchjob = k8s_client.get_one_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,name=name)
-    print("pytorchJob %s finished, status %s"%(name, pytorchjob['status']))
+    tfjob = k8s_client.get_one_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,name=name)
+    print("tfjob %s finished, status %s"%(name, tfjob['status']))
 
-    if pytorchjob['status']!='Succeeded':
+    if tfjob['status']!='Succeeded':
         exit(1)
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser("Pytorchjob launcher")
+    arg_parser = argparse.ArgumentParser("TFjob launcher")
     arg_parser.add_argument('--working_dir', type=str, help="运行job的工作目录", default='/mnt/')
     arg_parser.add_argument('--command', type=str, help="运行job的命令", default='python3 mnist.py')
     arg_parser.add_argument('--num_worker', type=int, help="运行job所在的机器", default=3)
@@ -359,6 +298,6 @@ if __name__ == "__main__":
     print("{} args: {}".format(__file__, args))
 
 
-    launch_pytorchjob(name=default_job_name(),num_workers=args.num_worker,image=args.image,working_dir=args.working_dir,worker_command=args.command)
+    launch_tfjob(name=default_job_name(),num_workers=args.num_worker,image=args.image,working_dir=args.working_dir,worker_command=args.command)
 
 

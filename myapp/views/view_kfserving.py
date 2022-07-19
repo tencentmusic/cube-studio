@@ -47,7 +47,6 @@ from .base import (
     api,
     BaseMyappView,
     check_ownership,
-    CsvResponse,
     data_payload_response,
     DeleteMixin,
     generate_download_headers,

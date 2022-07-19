@@ -169,7 +169,6 @@ def has_access_api(f):
     return functools.update_wrapper(wraps, f)
 
 
-
 def get_error_msg():
     if conf.get("SHOW_STACKTRACE"):
         error_msg = traceback.format_exc()
