@@ -35,12 +35,14 @@ https://github.com/tencentmusic/cube-studio/wiki
 | media-download | 数据处理 | 	分布式媒体文件下载  | 
 | video-audio | 数据处理 | 	分布式视频提取音频  | 
 | video-img | 数据处理 | 	分布式视频提取图片  | 
+| sparkjob | 数据处理 | spark serverless 分布式数据计算 |
 | ray | 数据处理 | python ray框架 多机分布式功能，适用于超多文件在多机上的并发处理 |
 | xgb | 机器学习 | xgb模型训练 |
 | ray-sklearn | 机器学习 | 基于ray框架的sklearn支持算法多机分布式并行计算  |
 | volcano | 数据处理 | volcano框架的多机分布式，可紫玉控制代码，利用环境变量实现多机worker的工作与协同  | 
 | pytorchjob-train | 训练 | 	pytorch的多机多卡分布式训练  | 
 | horovod-train | 训练 | 	horovod的多机多卡分布式训练  | 
+| tfjob | 训练 | tf分布式训练，k8s云原生方式 | 
 | tfjob-train | 训练 | tf分布式训练，内部支持plain和runner两种方式  | 
 | tfjob-runner | 训练 | tf分布式-runner方式  | 
 | tfjob-plain | 训练 | tf分布式-plain方式  | 
