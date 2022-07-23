@@ -98,32 +98,27 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
         return Markup(f'<a target=_blank href="{url}">{self.label}</a>')
 
-    @property
-    def link(self):
-        namespace = conf.get('SERVICE_NAMESPACE')
-        # hosts = '%s.%s:%s' % (self.name, namespace, self.ports)
-
-        hosts='/service_modelview/link/%s'%self.id
-        return Markup(f'<a href="{hosts}">{hosts}</a>')
-
     def __repr__(self):
         return self.name
 
     @property
     def ip(self):
-
+        port = 30000+10*self.id
         # 优先使用项目组配置的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
-        if SERVICE_EXTERNAL_IP:
-            host = SERVICE_EXTERNAL_IP+":"+str(30000+10*self.id)
-            return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+        if not SERVICE_EXTERNAL_IP:
+            # 再使用全局配置代理ip
+            SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
+            if SERVICE_EXTERNAL_IP:
+                SERVICE_EXTERNAL_IP=SERVICE_EXTERNAL_IP[0]
 
-        # 再使用全局配置代理ip
-        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
+        if not SERVICE_EXTERNAL_IP:
+            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host # 如果捕获到端口号，要去掉
+            if core.checkip(ip):
+                SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
-            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
-            host = SERVICE_EXTERNAL_IP + ":" + str(30000 + 10 * self.id)
+            host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
         else:
             return "未开通"
@@ -253,21 +248,26 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def ip(self):
 
+        port = 20000+10*self.id
         # 优先使用项目组配置的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
-        if SERVICE_EXTERNAL_IP:
-            host = SERVICE_EXTERNAL_IP+":"+str(20000+10*self.id)
-            return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+        if not SERVICE_EXTERNAL_IP:
+            # 再使用全局配置代理ip
+            SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', [])
+            if SERVICE_EXTERNAL_IP:
+                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
 
-        # 再使用全局配置代理ip
-        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
+        if not SERVICE_EXTERNAL_IP:
+            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  # 如果捕获到端口号，要去掉
+            if core.checkip(ip):
+                SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
-            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
-            host = SERVICE_EXTERNAL_IP + ":" + str(20000 + 10 * self.id)
+            host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
         else:
             return "未开通"
+
 
     def __repr__(self):
         return self.name
@@ -276,10 +276,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def inference_host_url(self):
-        if 'kfserving' in self.service_type:
-            url = "http://" + self.name + "." + self.project.cluster.get('KFSERVING_DOMAIN',conf.get('KFSERVING_DOMAIN'))
-        else:
-            url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
+        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
                 url = self.host

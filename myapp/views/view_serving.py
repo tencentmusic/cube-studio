@@ -87,7 +87,7 @@ class Service_Filter(MyappFilter):
 class Service_ModelView_base():
     datamodel = SQLAInterface(Service)
     help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
-    show_columns = ['name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url','link']
+    show_columns = ['name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url']
     add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
     list_columns = ['project','name_url','host_url','ip','creator','modified','deploy']
     edit_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','volume_mount','host',]
@@ -232,11 +232,24 @@ class Service_ModelView_base():
 
         # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
         # 创建EXTERNAL_IP的服务
-        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
-        if not SERVICE_EXTERNAL_IP and service.project.expand:
-            SERVICE_EXTERNAL_IP = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', SERVICE_EXTERNAL_IP)
-            if type(SERVICE_EXTERNAL_IP)==str:
-                SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
+
+        SERVICE_EXTERNAL_IP=[]
+        # 使用项目组ip
+        if service.project.expand:
+            ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
+            if ip and type(SERVICE_EXTERNAL_IP)==str:
+                SERVICE_EXTERNAL_IP = [ip]
+
+        # 使用全局ip
+        if not SERVICE_EXTERNAL_IP:
+            SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
+
+        # 使用当前ip
+        if not SERVICE_EXTERNAL_IP:
+            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  # 如果捕获到端口号，要去掉
+            if core.checkip(ip):
+                SERVICE_EXTERNAL_IP=[ip]
+
 
         if SERVICE_EXTERNAL_IP:
             service_ports = [[30000+10*service.id+index,port] for index,port in enumerate(ports)]
@@ -310,23 +323,6 @@ class Service_ModelView_base():
         flash('服务部署完成',category='warning')
         return redirect('/service_modelview/list/')
 
-
-
-    @expose('/link/<service_id>')
-    def link(self, service_id):
-        service = db.session.query(Service).filter_by(id=service_id).first()
-        url = "http://" + service.name + "." + conf.get('SERVICE_DOMAIN')
-        if service.host:
-            if 'http://' in service.host or 'https://' in service.host:
-                url = service.host
-            else:
-                url = "http://"+service.host
-        data={
-            "url":url   # 'http://127.0.0.1:8080/video_sample/' #
-        }
-
-        # 返回模板
-        return self.render_template('link.html', data=data)
 
 
 class Service_ModelView(Service_ModelView_base,MyappModelView,DeleteMixin):

@@ -967,10 +967,8 @@ instance_group [
             annotations=annotations
         )
         # 如果域名配置的gateway，就用这个
-        if 'kfserving' in service.service_type:
-            host = service.name + "." + service.project.cluster.get('KFSERVING_DOMAIN', conf.get('KFSERVING_DOMAIN'))
-        else:
-            host = service.name+"."+ service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
+
+        host = service.name+"."+ service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
 
         if service.host:
             host=service.host.replace('http://','').replace('https://','').strip()
@@ -992,11 +990,24 @@ instance_group [
 
 
         # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
-        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',None)
-        if not SERVICE_EXTERNAL_IP and service.project.expand:
-            SERVICE_EXTERNAL_IP = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', SERVICE_EXTERNAL_IP)
-            if type(SERVICE_EXTERNAL_IP)==str:
-                SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
+
+        SERVICE_EXTERNAL_IP=[]
+        # 使用项目组ip
+        if service.project.expand:
+            ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
+            if ip and type(SERVICE_EXTERNAL_IP)==str:
+                SERVICE_EXTERNAL_IP = [ip]
+
+        # 使用全局ip
+        if not SERVICE_EXTERNAL_IP:
+            SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
+
+        # 使用当前ip
+        if not SERVICE_EXTERNAL_IP:
+            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host # 如果捕获到端口号，要去掉
+            if core.checkip(ip):
+                SERVICE_EXTERNAL_IP=[ip]
+
 
         if SERVICE_EXTERNAL_IP:
             service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]

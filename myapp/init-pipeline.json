@@ -1,7 +1,7 @@
 {
     "darknet-yolov3":{
         "pipeline":{
-            "name":"darknet-yolov3",
+            "name":"imageAI",
             "describe":"图像预测+物体检测+视频跟踪",
             "project":"public",
             "parameter":{

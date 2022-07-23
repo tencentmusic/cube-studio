@@ -1173,7 +1173,7 @@ class Pipeline_ModelView_Base():
     def web_pod(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
         data = {
-            "url": pipeline.project.cluster.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (conf.get('PIPELINE_NAMESPACE'), pipeline.name.replace('_', '-')),
+            "url": pipeline.project.cluster.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (conf.get('PIPELINE_NAMESPACE'), pipeline.name.replace('_', '-').lower()),
             "target":"div.kd-chrome-container.kd-bg-background",
             "delay":500,
             "loading": True

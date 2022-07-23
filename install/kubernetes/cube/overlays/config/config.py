@@ -783,7 +783,6 @@ KATIB_URL = '/katib/#'
 
 # 这两部分功能需要泛化域名。没有泛化域名此部分功能受限。ISTIO_INGRESS_DOMAIN为泛域名后缀
 ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用
-KFSERVING_DOMAIN = 'kfserving.%s' % ISTIO_INGRESS_DOMAIN
 SERVICE_DOMAIN = 'service.%s' % ISTIO_INGRESS_DOMAIN
 
 # 多行分割内网特定host
