@@ -360,7 +360,8 @@ EMAIL_REPORT_FROM_ADDRESS = "reports@myapp.org"
 
 # Send bcc of all reports to this address. Set to None to disable.
 # This is useful for maintaining an audit trail of all email deliveries.
-
+# 响应支持中文序列化
+JSON_AS_ASCII = False
 
 # User credentials to use for generating reports
 # This user should have permissions to browse all the dashboards and
@@ -396,7 +397,8 @@ TALISMAN_CONFIG = {
     "force_https": True,
     "force_https_permanent": False,
 }
-
+# 前端静态文件的默认缓存时间
+SEND_FILE_MAX_AGE_DEFAULT=300
 
 try:
     if CONFIG_PATH_ENV_VAR in os.environ:
@@ -566,7 +568,7 @@ DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/tree/master/docs/
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
 
-FAB_API_MAX_PAGE_SIZE=100    # 最大翻页数目，不设置的话就会是20
+FAB_API_MAX_PAGE_SIZE=1000    # 最大翻页数目，不设置的话就会是20
 CACHE_DEFAULT_TIMEOUT = 10*60  # 缓存默认过期时间，10分钟才过期
 
 # CACHE_CONFIG = {
@@ -710,8 +712,6 @@ HELP_URL={
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
 CUSTOMIZE_JOB='自定义镜像'
-# 推送必带接收人
-PUSH_BCC_ADDRESS = 'admin'
 # admin管理员用户
 ADMIN_USER='admin'
 # pipeline任务的运行空间，目前必填pipeline

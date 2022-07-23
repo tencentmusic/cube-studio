@@ -1,7 +1,7 @@
 {
     "darknet-yolov3":{
         "pipeline":{
-            "name":"imageAI",
+            "name":"darknet-yolov3",
             "describe":"图像预测+物体检测+视频跟踪",
             "project":"public",
             "parameter":{
@@ -18,12 +18,12 @@
             {
                 "job_templete":"自定义镜像",
                 "name":"download-data",
-                "label":"下载标注数据",
+                "label":"下载处理标注数据",
                 "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
                 "args":{
                     "images":"ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
-                    "workdir":"/mnt/admin/coco_data_sample",
-                    "command":"bash reset_file.sh"
+                    "workdir":"/mnt/admin/",
+                    "command":"wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/pipeline/coco_data_sample.zip && unzip coco_data_sample.zip && cd  coco_data_sample && bash reset_file.sh"
                 }
             },
             {

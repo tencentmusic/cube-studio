@@ -1,7 +1,7 @@
 
 mkdir -p ~/.kube/ kubeconfig /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives /data/k8s/infra/mysql
 cp config ~/.kube/config
-cp config kubeconfig/dev-kubeconfig
+echo "" > kubeconfig/dev-kubeconfig
 
 curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && mv kubectl /usr/bin/
 node=`kubectl  get node -o wide |grep $1 |awk '{print $1}'| head -n 1`
@@ -31,8 +31,8 @@ kubectl create -f kube-batch/deploy.yaml
 
 # 部署prometheus
 cd prometheus
-mkdir -p /data/k8s/monitoring/grafana/
-chmod -R 777 /data/k8s/monitoring/grafana/
+mkdir -p /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/
+chmod -R 777 /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/
 kubectl delete -f ./operator/operator-crd.yml
 kubectl apply -f ./operator/operator-crd.yml
 kubectl apply -f ./operator/operator-rbac.yml

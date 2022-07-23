@@ -13,10 +13,22 @@ spec:
       port: web
   image: quay.io/prometheus/prometheus:v2.27.1
   replicas: 1
-  retention: 7d
+  retention: 3d
   resources:
     requests:
       memory: 400Mi
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        selector:
+          matchLabels:
+            monitoring-pvname: monitoring-prometheus-pv
+      status: {}
   ruleSelector:
     matchLabels:
       prometheus: k8s
