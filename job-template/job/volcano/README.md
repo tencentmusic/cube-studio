@@ -95,7 +95,7 @@ print(WORLD_SIZE, RANK)
 # 子进程要执行的代码
 def task(key):
     print('worker:',RANK,', task:',key,flush=True)
-    time.sleep(1)
+    # time.sleep(1)
 
 
 if __name__ == '__main__':
