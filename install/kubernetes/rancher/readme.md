@@ -51,6 +51,9 @@ reset_docker.sh 是为了在机器从rancher集群踢出以后，把rancher环�
 单节点部署rancher server  
 
 ```bash
+# 清理历史部署痕迹
+reset_docker.sh
+
 # 需要拉取镜像
 python3 all_image.py > pull_rancher_images.sh
 sh pull_rancher_images.sh
