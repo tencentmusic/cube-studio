@@ -29,7 +29,7 @@ mkdir -p /etc/docker/
 (
 cat << EOF
 {
-    "insecure-registries":["docker.oa.com:8080","docker-images.music.isd.com"],
+    "insecure-registries":["docker.oa.com:8080"],
     "data-root": "/data/docker"
 }
 EOF

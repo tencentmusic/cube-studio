@@ -67,6 +67,7 @@ kubectl apply -f ./prometheus/prometheus-svc.yml
 
 # prometheus-operator  部署成功后才能创建成功  
 ```bash
+kubectl apply -f ./prometheus/pv-pvc-hostpath.yaml
 kubectl apply -f ./prometheus/prometheus-main.yml
 ```
 

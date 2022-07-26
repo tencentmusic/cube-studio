@@ -453,7 +453,7 @@ REDIS_PORT = os.getenv('REDIS_PORT', '6379')
 
 # 数据库配置地址
 SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')
-
+SQLALCHEMY_BINDS = {}
 from celery.schedules import crontab
 from werkzeug.contrib.cache import RedisCache
 
@@ -463,7 +463,7 @@ RESULTS_BACKEND = RedisCache(
 class CeleryConfig(object):
     # 任务队列
     BROKER_URL =  'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
-    # celery_task的定义模块地址
+    # celery_task的定义模块
     CELERY_IMPORTS = (
         'myapp.tasks',
     )
@@ -792,6 +792,8 @@ HOSTALIASES='''
 # 默认服务代理的ip
 SERVICE_EXTERNAL_IP=[]
 
+# json响应是否按字母顺序排序
+JSON_SORT_KEYS=False
 # 链接菜单
 ALL_LINKS=[
     {

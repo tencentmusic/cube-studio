@@ -57,6 +57,7 @@ sh pull_rancher_images.sh
 
 export RANCHER_CONTAINER_TAG=v2.5.2
 sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
+
 ```
 
 进去rancher server的https://xx.xx.xx.xx/ 的web界面，选择添加集群->选择自定义集群->填写集群名称

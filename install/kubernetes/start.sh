@@ -69,6 +69,7 @@ kubectl apply -f ./prometheus/prometheus-rbac.yml
 kubectl apply -f ./prometheus/prometheus-svc.yml
 kubectl wait crd/prometheuses.monitoring.coreos.com --for condition=established --timeout=60s
 kubectl delete -f ./prometheus/prometheus-main.yml
+kubectl apply -f ./prometheus/pv-pvc-hostpath.yaml
 kubectl apply -f ./prometheus/prometheus-main.yml
 kubectl apply -f ./servicemonitor/alertmanager-sm.yml
 kubectl apply -f ./servicemonitor/coredns-sm.yml
