@@ -58,7 +58,7 @@ class Docker(Model,AuditMixinNullable,MyappModelBase):
     # 清空激活
     @property
     def debug(self):
-        return Markup(f'<a href="/docker_modelview/debug/{self.id}">调试</a> | <a href="/docker_modelview/delete_pod/{self.id}">清理</a>')
+        return Markup(f'<a target=_blank href="/docker_modelview/debug/{self.id}">调试</a> | <a  href="/docker_modelview/delete_pod/{self.id}">清理</a> | <a href="/docker_modelview/save/{self.id}">保存</a>')
 
     @property
     def image_history(self):

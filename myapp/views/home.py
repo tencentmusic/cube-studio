@@ -26,6 +26,7 @@ from myapp.views.base import BaseMyappView
 
 from flask_appbuilder import ModelView,AppBuilder,expose,BaseView,has_access
 from myapp import app, appbuilder
+from flask import stream_with_context, request
 
 resource_used = {
     "check_time": None,

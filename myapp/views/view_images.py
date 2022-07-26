@@ -79,9 +79,10 @@ class Repository_ModelView_Base():
     add_form_extra_fields = {
         "password": StringField(
             _(datamodel.obj.lab('password')),
-            widget=BS3PasswordFieldWidget()  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            widget=BS3TextFieldWidget()  # 传给widget函数的是外层的field对象，以及widget函数的参数
         )
     }
+
     edit_form_extra_fields = add_form_extra_fields
 
     # @pysnooper.snoop()

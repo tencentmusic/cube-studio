@@ -42,8 +42,8 @@ import pysnooper
 class Repository(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'repository'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique = True, nullable=False)
-    server = Column(String(100), nullable=False)
+    name = Column(String(200), unique = True, nullable=False)
+    server = Column(String(200), nullable=False)
     user = Column(String(100), nullable=False)
     password = Column(String(100), nullable=False)
     hubsecret = Column(String(100))
@@ -68,8 +68,8 @@ class Images(Model,AuditMixinNullable,MyappModelBase):
         "Project", foreign_keys=[project_id]
     )
 
-    name = Column(String(200), nullable=False)
-    describe = Column(Text)
+    name = Column(String(500), nullable=False)
+    describe = Column(String(1000), nullable=False)
     repository_id = Column(Integer, ForeignKey('repository.id'))    # 定义外键
     repository = relationship(
         "Repository", foreign_keys=[repository_id]
@@ -102,14 +102,14 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
-    name = Column(String(100), nullable=False,unique=True)
+    name = Column(String(500), nullable=False,unique=True)
     version = Column(Enum('Release','Alpha'),nullable=False,default='Release')
     images_id = Column(Integer, ForeignKey('images.id'))  # 定义外键
     images = relationship(
         Images, foreign_keys=[images_id]
     )
     hostAliases = Column(Text)   # host文件
-    describe = Column(Text)
+    describe = Column(String(500), nullable=False)
     workdir=Column(String(400))
     entrypoint=Column(String(200))
     args=Column(Text)
@@ -212,7 +212,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     @property
     def pipeline_url(self):
         pipeline_url="/pipeline_modelview/web/" +str(self.id)
-        return Markup(f'<a href="{pipeline_url}">{self.describe}</a>')
+        return Markup(f'<a target=_blank href="{pipeline_url}">{self.describe}</a>')
 
     @property
     def run_pipeline(self):
@@ -510,7 +510,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     command = Column(String(1000),default='')
     overwrite_entrypoint = Column(Boolean,default=False)   # 是否覆盖入口
     args = Column(Text)
-    volume_mount = Column(String(200),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')   # 挂载
+    volume_mount = Column(String(400),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')   # 挂载
     node_selector = Column(String(100),default='cpu=true,train=true')   # 挂载
     resource_memory = Column(String(100),default='2G')
     resource_cpu = Column(String(100), default='2')
@@ -612,7 +612,7 @@ class RunHistory(Model,MyappModelBase):
     run_id = Column(String(100))
     message = Column(Text, default='')
     created_on = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    execution_date=Column(String(100), nullable=False)
+    execution_date=Column(String(200), nullable=False)
     status = Column(String(100),default='comed')   # commed表示已经到了该调度的时间，created表示已经发起了调度。注意操作前校验去重
 
 
@@ -859,6 +859,9 @@ class Workflow(Model,Crd,MyappModelBase):
 
         return Markup(f'日志')
 
+    @property
+    def stop(self):
+        return Markup(f'<a href="/workflow_modelview/stop/{self.id}">停止</a>')
 
 # 定义model
 class Tfjob(Model,Crd,MyappModelBase):

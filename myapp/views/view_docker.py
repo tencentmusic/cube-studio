@@ -90,37 +90,48 @@ class Docker_ModelView_Base():
     order_columns = ['id']
     add_columns=['project','describe','base_image','target_image','need_gpu','consecutive_build','expand']
     edit_columns=add_columns
-    list_columns=['id','project','describe','consecutive_build','image_history','debug','save']
-    add_form_extra_fields=[]
-    edit_form_extra_fields=add_form_extra_fields
+    list_columns=['project','describe','consecutive_build','image_history','debug']
+
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields=add_form_query_rel_fields
-    # @pysnooper.snoop()
-    def pre_add_get(self,docker=None):
-
-        self.add_form_extra_fields['describe'] = StringField(
-            _(self.datamodel.obj.lab('describe')),
+    expand={
+        "volume_mount":"kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory":"8G",
+        "resource_cpu": "4"
+    }
+    add_form_extra_fields={
+        "describe":StringField(
+            _(datamodel.obj.lab('describe')),
             default='',
-            description="目标环境描述",
+            description="目标镜像描述",
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
+        ),
+        "base_image":StringField(
+            _(datamodel.obj.lab('base_image')),
+            default='ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8',
+            description=Markup(f'基础镜像和构建方法可参考：<a href="%s">点击打开</a>'%(conf.get('HELP_URL').get('docker',''))),
+            widget=BS3TextFieldWidget()
+        ),
+        "expand":StringField(
+            _(datamodel.obj.lab('expand')),
+            default=json.dumps(expand,ensure_ascii=False,indent=4),
+            description=Markup(f'扩展字段'),
+            widget=MyBS3TextAreaFieldWidget(rows=3)
         )
 
+    }
+    edit_form_extra_fields=add_form_extra_fields
+    # @pysnooper.snoop()
+    def pre_add_get(self,docker=None):
         self.add_form_extra_fields['target_image']=StringField(
             _(self.datamodel.obj.lab('target_image')),
             default=conf.get('REPOSITORY_ORG')+g.user.username+":xx",
             description="目标镜像名，必须为%s%s:xxx"%(conf.get('REPOSITORY_ORG'),g.user.username),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(),Regexp("^%s%s:"%(conf.get('REPOSITORY_ORG'),g.user.username))]
-        )
-
-        self.add_form_extra_fields['base_image'] = StringField(
-            _(self.datamodel.obj.lab('base_image')),
-            default='',
-            description=Markup(f'基础镜像和构建方法可参考：<a href="%s">点击打开</a>'%(conf.get('HELP_URL').get('docker',''))),
-            widget=BS3TextFieldWidget()
         )
         # # if g.user.is_admin():
         # self.edit_columns=['describe','base_image','target_image','need_gpu','consecutive_build']
@@ -176,7 +187,7 @@ class Docker_ModelView_Base():
             k8s_client.create_debug_pod(namespace,
                                         name=pod_name,
                                         command=command,
-                                        labels={},
+                                        labels={"app":"docker","user":g.user.username,"pod-type":"docker"},
                                         args=None,
                                         volume_mount=json.loads(docker.expand).get('volume_mount',default_volume_mount) if docker.expand else default_volume_mount,
                                         working_dir='/mnt/%s'%docker.created_by.username,
@@ -188,12 +199,14 @@ class Docker_ModelView_Base():
                                         image_pull_secrets=conf.get('HUBSECRET',[]),
                                         image= docker.last_image if docker.last_image and docker.consecutive_build else docker.base_image,
                                         hostAliases=hostAliases,
-                                        env=None,
+                                        env={
+                                            "USERNAME": docker.created_by.username
+                                        },
                                         privileged=None,
                                         accounts=None,
                                         username=docker.created_by.username)
 
-        try_num=5
+        try_num=20
         while(try_num>0):
             pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
             # print(pod)
@@ -282,7 +295,7 @@ class Docker_ModelView_Base():
             namespace=namespace,
             name=pod_name,
             command=command,
-            labels={},
+            labels={"app":"docker","user":g.user.username,"pod-type":"docker"},
             args=None,
             volume_mount='/var/run/docker.sock(hostpath):/var/run/docker.sock',
             working_dir='/mnt/%s' % docker.created_by.username,
@@ -294,7 +307,9 @@ class Docker_ModelView_Base():
             image_pull_secrets=conf.get('HUBSECRET', []),
             image='ccr.ccs.tencentyun.com/cube-studio/docker',
             hostAliases=hostAliases,
-            env=None,
+            env={
+                "USERNAME": docker.created_by.username
+            },
             privileged=None,
             accounts=None,
             username=docker.created_by.username,

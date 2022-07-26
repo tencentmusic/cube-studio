@@ -533,7 +533,7 @@ class K8s():
 
     def delete_service(self,namespace,name):
         try:
-            self.v1.delete_namespaced_service(name=name,namespace=namespace)
+            self.v1.delete_namespaced_service(name=name,namespace=namespace,grace_period_seconds=0)
         except Exception as e:
             print(e)
     #
@@ -544,7 +544,7 @@ class K8s():
     #     if volume_mount and ":" in volume_mount:
     #         volume_mount = volume_mount.strip()
     #         if volume_mount:
-    #             volume_mounts_temp = re.split(',|;', volume_mount)
+    #             volume_mounts_temp = re.split(',|;', volumdelete_workflowe_mount)
     #             volume_mounts_temp = [volume_mount_temp.strip() for volume_mount_temp in volume_mounts_temp if volume_mount_temp.strip()]
     #
     #             for volume_mount in volume_mounts_temp:
@@ -591,7 +591,7 @@ class K8s():
                     volume, mount = one_volume_mount.split(":")[0].strip(), one_volume_mount.split(":")[1].strip()
                     if "(pvc)" in volume:
                         pvc_name = volume.replace('(pvc)', '').replace(' ', '')
-                        volumn_name = pvc_name.replace('_', '-').lower()[:60].strip('-')
+                        volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
                         k8s_volumes.append({
                             "name":volumn_name,
                             "persistentVolumeClaim":{
@@ -610,7 +610,7 @@ class K8s():
                         hostpath_name = volume.replace('(hostpath)', '').replace(' ', '')
                         temps = re.split('_|\.|/', hostpath_name)
                         temps = [temp for temp in temps if temp]
-                        volumn_name = '-'.join(temps).lower()[:60].strip('-')  # hostpath_name.replace('_', '-').replace('/', '-').replace('.', '-')
+                        volumn_name = '-'.join(temps).lower()[-60:].strip('-')  # hostpath_name.replace('_', '-').replace('/', '-').replace('.', '-')
                         k8s_volumes.append(
                             {
                                 "name":volumn_name,
@@ -626,7 +626,7 @@ class K8s():
 
                     if "(configmap)" in volume:
                         configmap_name = volume.replace('(configmap)', '').replace(' ', '')
-                        volumn_name = configmap_name.replace('_', '-').replace('/', '-').replace('.', '-').lower()[:60].strip('-')
+                        volumn_name = configmap_name.replace('_', '-').replace('/', '-').replace('.', '-').lower()[-60:].strip('-')
                         k8s_volumes.append({
                             "name":volumn_name,
                             "configMap":{
@@ -641,7 +641,7 @@ class K8s():
 
                     if "(memory)" in volume:
                         memory_size = volume.replace('(memory)', '').replace(' ', '').lower().replace('g','')
-                        volumn_name = ('memory-%s'%memory_size)[:60].strip('-')
+                        volumn_name = ('memory-%s'%memory_size)[-60:].strip('-')
 
                         k8s_volumes.append({
                             "name":volumn_name,
@@ -771,7 +771,7 @@ class K8s():
             if health[0:health.index(":")]=='shell':
                 command = health.replace("shell:").split(' ')
                 command = [c for c in command if c]
-                readiness_probe = client.V1Probe(_exec=client.V1ExecAction(command=command),failure_threshold=1,period_seconds=300,timeout_seconds=60)
+                readiness_probe = client.V1Probe(_exec=client.V1ExecAction(command=command),failure_threshold=1,period_seconds=60,timeout_seconds=30)
             else:
                 port = health[0:health.index(":")]  # 健康检查的port
                 path = health[health.index(":")+1:]
@@ -780,7 +780,7 @@ class K8s():
                 if int(port) not in ports:
                     ports_k8s.append(client.V1ContainerPort(name=port_name, protocol='TCP', container_port=port))
 
-                readiness_probe = client.V1Probe(http_get=client.V1HTTPGetAction(path=path,port=port_name),failure_threshold=1,period_seconds=300,timeout_seconds=60)
+                readiness_probe = client.V1Probe(http_get=client.V1HTTPGetAction(path=path,port=port_name),failure_threshold=1,period_seconds=60,timeout_seconds=30)
 
             print(readiness_probe)
         container = client.V1Container(
@@ -870,7 +870,7 @@ class K8s():
     # @pysnooper.snoop()
     def create_debug_pod(self,namespace,name,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,scheduler_name='default-scheduler',node_name=''):
         try:
-            self.v1.delete_namespaced_pod(name, namespace=namespace,grace_period_seconds=0)
+            self.v1.delete_namespaced_pod(name=name, namespace=namespace,grace_period_seconds=0)
             # time.sleep(1)
         except Exception as e:
             pass
@@ -916,9 +916,9 @@ class K8s():
         cred_payload = {
             "auths": {
                 server: {
-                    "Username": user,
-                    "Password": password,
-                    "Email": ''
+                    "username": user,
+                    "password": password,
+                    "auth": base64.b64encode((user+":"+password).encode()).decode(),
                 }
             }
         }
@@ -959,7 +959,7 @@ class K8s():
     def delete_deployment(self,namespace,name=None,labels=None):
         if name:
             try:
-                client.AppsV1Api().delete_namespaced_deployment(name=name, namespace=namespace)
+                client.AppsV1Api().delete_namespaced_deployment(name=name, namespace=namespace,grace_period_seconds=0)
             except Exception as e:
                 print(e)
         elif labels:
@@ -968,7 +968,7 @@ class K8s():
                 labels_str=','.join(labels_arr)
                 deploys = self.AppsV1Api.list_namespaced_deployment(namespace=namespace,label_selector=labels_str).items
                 for deploy in deploys:
-                    client.AppsV1Api().delete_namespaced_deployment(name = deploy.metadata.name, namespace=namespace)
+                    client.AppsV1Api().delete_namespaced_deployment(name = deploy.metadata.name, namespace=namespace,grace_period_seconds=0)
             except Exception as e:
                 print(e)
 
@@ -1020,8 +1020,8 @@ class K8s():
         ))
 
         dp_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
-        selector = client.models.V1LabelSelector(match_labels={"app":name,'user':username})
-        template_metadata = v1_object_meta.V1ObjectMeta(labels={"app":name,'user':username})
+        selector = client.models.V1LabelSelector(match_labels=labels)
+        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels)
         template = client.models.V1PodTemplateSpec(metadata=template_metadata,spec=pod_spec)
         dp_spec = v1_deployment_spec.V1DeploymentSpec(replicas=int(replicas), selector=selector,template=template)
         dp = v1_deployment.V1Deployment(api_version='apps/v1', kind='Deployment', metadata=dp_metadata, spec=dp_spec)
@@ -1102,8 +1102,8 @@ class K8s():
                 'scheduling.k8s.io/group-name': name
             }
         sts_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
-        selector = client.models.V1LabelSelector(match_labels={"app":name,'user':username})
-        template_metadata = v1_object_meta.V1ObjectMeta(labels={"app":name,'user':username},annotations=annotations)
+        selector = client.models.V1LabelSelector(match_labels=labels)
+        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels,annotations=annotations)
         template = client.models.V1PodTemplateSpec(metadata=template_metadata,spec=pod_spec)
         sts_spec = client.models.V1StatefulSetSpec(pod_management_policy='Parallel',replicas=int(replicas), selector=selector,template=template,service_name=name)
         sts = client.models.V1StatefulSet(api_version='apps/v1', kind='StatefulSet', metadata=sts_metadata, spec=sts_spec)
@@ -1123,17 +1123,17 @@ class K8s():
 
     # 创建pod
     # @pysnooper.snoop()
-    def create_service(self,namespace,name,username,ports,selector=None,service_type='ClusterIP',externalIPs=None,annotations=None):
-        svc_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username},annotations=annotations)
+    def create_service(self,namespace,name,username,ports,selector,service_type='ClusterIP',external_ip=None,annotations=None,load_balancer_ip=None):
+        svc_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=selector,annotations=annotations)
         service_ports=[]
         for index,port in enumerate(ports):
             if type(port)==list and len(port)>1:
                 service_ports.append(client.V1ServicePort(name='http%s'%index, port=int(port[0]), protocol='TCP', target_port=int(port[1])))
             else:
                 service_ports.append(client.V1ServicePort(name='http%s' % index, port=int(port), protocol='TCP', target_port=int(port)))
-        svc_spec = client.V1ServiceSpec(ports=service_ports, selector={"app": name, 'user': username}, type=service_type,external_i_ps=externalIPs)
-        if selector:
-            svc_spec = client.V1ServiceSpec(ports=service_ports, selector=selector, type=service_type,external_i_ps=externalIPs)
+
+        svc_spec = client.V1ServiceSpec(ports=service_ports, selector=selector, type=service_type,external_i_ps=external_ip,load_balancer_ip=load_balancer_ip)
+
         service = client.V1Service(api_version='v1', kind='Service', metadata=svc_metadata, spec=svc_spec)
         # print(service.to_dict())
         try:
@@ -1257,7 +1257,7 @@ class K8s():
                                     }
                                 }
                             ],
-                            "timeout": "300s"
+                            "timeout": "3000s"
                         }
                     ]
                 }
@@ -1297,7 +1297,7 @@ class K8s():
 
                     crd_json['spec']['http'][0]['route']=route
 
-            # 添加流量镜像
+            # 添加流量复制
             if shadow:
                 shadow = re.split(',|;', shadow)[0]  # 只能添加一个流量复制
                 service_name, traffic = shadow.split(':')[0], int(shadow.split(':')[1].replace("%",''))
@@ -1345,7 +1345,7 @@ class K8s():
                                     }
                                 }
                             ],
-                            "timeout": "300s"
+                            "timeout": "3000s"
                         }
                     ]
                 }
@@ -1358,7 +1358,7 @@ class K8s():
 
     def delete_configmap(self,namespace,name):
         try:
-            self.v1.delete_namespaced_config_map(name=name,namespace=namespace)
+            self.v1.delete_namespaced_config_map(name=name,namespace=namespace,grace_period_seconds=0)
         except Exception as e:
             print(e)
 
@@ -1378,11 +1378,11 @@ class K8s():
 
     def delete_hpa(self,namespace,name):
         try:
-            client.AutoscalingV2beta1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace)
+            client.AutoscalingV2beta1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
         except Exception as e:
             print(e)
         try:
-            client.AutoscalingV1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace)
+            client.AutoscalingV1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
         except Exception as e:
             print(e)
 
@@ -1422,9 +1422,9 @@ class K8s():
                         "type": "Resource",
                         "resource": {
                             "name": "memory",
-                            "targetAverageUtilization":int(mem_threshold)
-                            # "target": {
-                            #     "type": "AverageUtilization",
+                            "targetAverageUtilization":int(mem_threshold),   # V1的书写格式
+                            # "target": {       # V2 的书写格式
+                            #     "type": "Utilization",
                             #     "averageUtilization": int(mem_threshold)
                             # }
                         }
@@ -1438,9 +1438,9 @@ class K8s():
                         "type": "Resource",
                         "resource": {
                             "name": "cpu",
-                            "targetAverageUtilization":int(cpu_threshold)
-                            # "target": {
-                            #     "type": "AverageUtilization",
+                            "targetAverageUtilization":int(cpu_threshold),   # V1的书写格式
+                            # "target": {       # V2 的书写格式
+                            #     "type": "Utilization",
                             #     "averageUtilization": int(cpu_threshold)
                             # }
                         }
@@ -1486,6 +1486,7 @@ class K8s():
             if str(e) == 'Invalid value for `conditions`, must not be `None`':
                 print(e)
             else:
+                print(e)
                 raise e
 
 
@@ -1567,33 +1568,63 @@ class K8s():
             # tty = True
         )
 
+
+
     # 实时跟踪指定pod日志，直到pod结束
-    def watch_pod_log(self,name,namespace,):
+    def get_pod_log_stream(self, name,namespace, tail_lines=100):
+        """
+        获取pod的日志
+        :param tail_lines: # 显示最后多少行
+        :return:
+        """
+        try:
+            # stream pod log
+            streams = self.v1.read_namespaced_pod_log(
+                name,
+                namespace,
+                follow=True,
+                _preload_content=False,
+                tail_lines=tail_lines).stream()
+            return streams
+
+        except ApiException as e:
+            if e.status == 404:
+                print("Get Log not fund Podname: {0}".format(name))
+                raise Exception("获取日志时，未找到此pod: {0}".format(name))
+            if e.status == 400:
+                raise Exception("容器并未创建成功，请联系运维人员进行排查。")
+            raise e
+        except Exception as e:
+            print("Get Log Fail: {0}".format(str(e)))
+            raise e
+
+    def watch_pod_log(self,name,namespace):
         print('begin follow log')
-        w = watch.Watch()
-        for event in w.stream(self.v1.read_namespaced_pod_log, name=name, namespace=namespace):
-            print(event)
+        logs = self.v1.read_namespaced_pod_log(
+            name=name,
+            namespace=namespace,
+            follow=True,
+            _preload_content=False,
+        )
+        for line in logs:
+            print(str(line,'utf-8'))
 
         print('end follow log')
 
-    def watch_tfjob_log(self,name,namespace,):
-        print('begin follow log')
-        w = watch.Watch()
-        for event in w.stream(self.v1.read_namespaced_pod_log, name=name, namespace=namespace):
-            print(event)
-
-        print('end follow log')
 
 
     def get_uesd_gpu(self,namespaces):
         all_gpu_pods = []
         def get_used_gpu(pod):
             name = pod.metadata.name
-            user = pod.metadata.labels.get('run-rtx', '')
-            if not user:
-                user = pod.metadata.labels.get('user', '')
-            if not user:
-                user = pod.metadata.labels.get('rtx-user','')
+            user=''
+            if pod.metadata.labels:
+                user = pod.metadata.labels.get('run-rtx', '')
+                if not user:
+                    user = pod.metadata.labels.get('user', '')
+                if not user:
+                    user = pod.metadata.labels.get('rtx-user','')
+
             containers = pod.spec.containers
 
             gpu = 0

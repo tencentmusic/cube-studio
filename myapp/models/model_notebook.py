@@ -40,10 +40,10 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         "Project", foreign_keys=[project_id]
     )
     name = Column(String(200), unique = True, nullable=True)
-    describe = Column(Text)
+    describe = Column(String(200), nullable=True)
     namespace = Column(String(200), nullable=True,default='jupyter')
     images=Column(String(200), nullable=True,default='')
-    ide_type = Column(String(200), default='jupyter')
+    ide_type = Column(String(100), default='jupyter')
     working_dir = Column(String(200), default='')  # 挂载
     volume_mount = Column(String(400), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
     node_selector = Column(String(200), default='cpu=true,notebook=true')  # 挂载
@@ -61,7 +61,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if self.ide_type=='theia':
             url = "/notebook/"+self.namespace + "/" + self.name+"/" + "#"+self.mount
         else:
-            url = "/notebook/"+self.namespace + "/" + self.name+"/lab/tree"+self.mount
+            url = "/notebook/"+self.namespace + "/" + self.name+"/lab?#"+self.mount
 
         # url= url + "#"+self.mount
         JUPYTER_DOMAIN = self.project.cluster.get('JUPYTER_DOMAIN',request.host)
@@ -83,19 +83,19 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def mount(self):
-        if "(hostpath)" in self.volume_mount:
-            mount = self.volume_mount[self.volume_mount.index('(hostpath)'):]
-            mount=mount.replace('(hostpath):','')
-            if ',' in mount:
-                mount = mount[:mount.index(',')]
-                return mount
-            else:
-                return mount
+        # if "(hostpath)" in self.volume_mount:
+        #     mount = self.volume_mount[self.volume_mount.index('(hostpath)'):]
+        #     mount=mount.replace('(hostpath):','')
+        #     if ',' in mount:
+        #         mount = mount[:mount.index(',')]
+        #         return mount
+        #     else:
+        #         return mount
+        # else:
+        if self.created_by:
+            return "/mnt/%s"% self.created_by.username
         else:
-            if self.created_by:
-                return "/mnt/%s"% self.created_by.username
-            else:
-                return "/mnt/"
+            return "/mnt/%s"%g.user.username
 
 
     @property

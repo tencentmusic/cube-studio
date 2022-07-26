@@ -339,6 +339,35 @@ class MyappModelView(ModelView):
         "can_show": True
     }
 
+
+    # 建构响应体
+    @staticmethod
+    # @pysnooper.snoop()
+    def response(code, **kwargs):
+        """
+            Generic HTTP JSON response method
+
+        :param code: HTTP code (int)
+        :param kwargs: Data structure for response (dict)
+        :return: HTTP Json response
+        """
+        # 添flash的信息
+        flashes = session.get("_flashes", [])
+
+        # flashes.append((category, message))
+        session["_flashes"] = []
+
+        _ret_json = jsonify(kwargs)
+        resp = make_response(_ret_json, code)
+        flash_json=[]
+        for flash in flashes:
+            flash_json.append([flash[0],flash[1]])
+        resp.headers["api_flashes"] = json.dumps(flash_json)
+        resp.headers["Content-Type"] = "application/json; charset=utf-8"
+        return resp
+
+
+
     # 配置增删改查页面标题
     def _init_titles(self):
 
@@ -937,13 +966,7 @@ class MyappFilter(BaseFilter):
                 vm.add(vm_name)
         return vm
 
-# 下载csv
-class CsvResponse(Response):
-    """
-    Override Response to take into account csv encoding from config.py
-    """
-    if conf and conf.get("CSV_EXPORT"):
-        charset = conf.get("CSV_EXPORT").get("encoding", "utf-8")
+
 
 # 检查是否有权限
 def check_ownership(obj, raise_if_false=True):

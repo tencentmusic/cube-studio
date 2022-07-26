@@ -31,6 +31,7 @@ from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLi
 from myapp.utils.py import py_k8s
 import os, zipfile
 import shutil
+from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
 from myapp.views.view_team import filter_join_org_project
 from flask import (
     current_app,
@@ -125,7 +126,7 @@ class InferenceService_ModelView_base():
         "transformer":StringField(_(datamodel.obj.lab('transformer')), default=InferenceService.transformer.default.arg,description='前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架',widget=BS3TextFieldWidget()),
         'resource_gpu':StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
                                                         description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
-                                                        widget=BS3TextFieldWidget()),
+                                                        widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
             _(datamodel.obj.lab('sidecar')), default='',
@@ -262,7 +263,7 @@ class InferenceService_ModelView_base():
         self.add_form_extra_fields["hpa"]=StringField(
             _(self.datamodel.obj.lab('hpa')),
             default=service.hpa if service else 'cpu:50%,gpu:50%',
-            description='弹性伸缩容的触发条件：可以使用cpu/mem/gpu/qps等信息，可以使用其中一个指标或者多个指标，示例：cpu:50%,mem:%50,gpu:50%',
+            description='弹性伸缩容的触发条件：可以使用cpu/mem/gpu/qps等信息，可以使用其中一个指标或者多个指标，示例：cpu:50%,mem:50%,gpu:50%',
             widget=BS3TextFieldWidget()
         )
 
@@ -281,9 +282,15 @@ class InferenceService_ModelView_base():
         )
 
         self.add_form_extra_fields['shadow'] = StringField(
-            _('流量镜像'),
+            _('流量复制'),
             default=json.loads(service.expand).get('shadow','') if service else '',
-            description='流量镜像，将该服务的所有请求，按比例复制到目标服务上，格式 service1:20%,service2:30%，表示复制20%流量到service1，30%到service2',
+            description='流量复制，将该服务的所有请求，按比例复制到目标服务上，格式 service1:20%,service2:30%，表示复制20%流量到service1，30%到service2',
+            widget=BS3TextFieldWidget()
+        )
+        self.add_form_extra_fields['volume_mount'] = StringField(
+            _(self.datamodel.obj.lab('volume_mount')),
+            default=service.project.volume_mount if service else '',
+            description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',
             widget=BS3TextFieldWidget()
         )
 
@@ -644,22 +651,21 @@ instance_group [
         self.use_expand(item)
 
     def delete_old_service(self,service_name,cluster):
-        for service_name in ['debug-'+service_name,'test-'+service_name,service_name]:
-            from myapp.utils.py.py_k8s import K8s
-            k8s_client = K8s(cluster.get('KUBECONFIG',''))
-            service_namespace = conf.get('SERVICE_NAMESPACE')
-            kfserving_namespace = conf.get('KFSERVING_NAMESPACE')
-            for namespace in [service_namespace,kfserving_namespace]:
-                for name in [service_name,'debug-'+service_name,'test-'+service_name]:
-                    service_external_name = (name + "-external").lower()[:60].strip('-')
-                    k8s_client.delete_deployment(namespace=namespace, name=name)
-                    k8s_client.delete_service(namespace=namespace, name=name)
-                    k8s_client.delete_service(namespace=namespace, name=service_external_name)
-                    k8s_client.delete_istio_ingress(namespace=namespace, name=name)
-                    k8s_client.delete_hpa(namespace=namespace, name=name)
-                    k8s_client.delete_configmap(namespace=namespace, name=name)
-                    isvc_crd=conf.get('CRD_INFO')['inferenceservice']
-                    k8s_client.delete_crd(isvc_crd['group'],isvc_crd['version'],isvc_crd['plural'],namespace=namespace,name=name)
+        from myapp.utils.py.py_k8s import K8s
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
+        service_namespace = conf.get('SERVICE_NAMESPACE')
+        kfserving_namespace = conf.get('KFSERVING_NAMESPACE')
+        for namespace in [service_namespace,kfserving_namespace]:
+            for name in [service_name,'debug-'+service_name,'test-'+service_name]:
+                service_external_name = (name + "-external").lower()[:60].strip('-')
+                k8s_client.delete_deployment(namespace=namespace, name=name)
+                k8s_client.delete_service(namespace=namespace, name=name)
+                k8s_client.delete_service(namespace=namespace, name=service_external_name)
+                k8s_client.delete_istio_ingress(namespace=namespace, name=name)
+                k8s_client.delete_hpa(namespace=namespace, name=name)
+                k8s_client.delete_configmap(namespace=namespace, name=name)
+                isvc_crd=conf.get('CRD_INFO')['inferenceservice']
+                k8s_client.delete_crd(isvc_crd['group'],isvc_crd['version'],isvc_crd['plural'],namespace=namespace,name=name)
 
 
     # @pysnooper.snoop(watch_explode=('item',))
@@ -670,12 +676,17 @@ instance_group [
         # 修改了名称的话，要把之前的删掉
         self.use_expand(item)
 
+        # 如果模型版本和名称变了，需要把之前的服务删除掉
+        if self.src_item_json.get('name','') and item.name!=self.src_item_json.get('name',''):
+            self.delete_old_service(self.src_item_json.get('name',''), item.project.cluster)
+            flash('发现模型服务变更，启动清理服务%s:%s'%(self.src_item_json.get('model_name',''),self.src_item_json.get('model_version','')),'success')
+
+
     def pre_delete(self, item):
         self.delete_old_service(item.name,item.project.cluster)
         flash('服务已清理完成', category='warning')
 
     @expose('/clear/<service_id>', methods=['POST', "GET"])
-    # @pysnooper.snoop()
     def clear(self, service_id):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         if service:
@@ -902,7 +913,7 @@ instance_group [
             except Exception as e:
                 print(e)
         # 因为所有的服务流量通过ingress实现，所以没有isito的envoy代理
-        label = {"app":name,"username":service.created_by.username}
+        labels = {"app":name,"user":service.created_by.username,'pod-type':"inference"}
 
         try:
             pod_ports = copy.deepcopy(ports)
@@ -925,7 +936,7 @@ instance_group [
                 namespace=namespace,
                 name=name,
                 replicas=deployment_replicas,
-                labels=label,
+                labels=labels,
                 command=['sh','-c',command] if command else None,
                 args=None,
                 volume_mount=volume_mount,
@@ -964,7 +975,8 @@ instance_group [
             name=name,
             username=service.created_by.username,
             ports=ports,
-            annotations=annotations
+            annotations=annotations,
+            selector=labels
         )
         # 如果域名配置的gateway，就用这个
 
@@ -1017,13 +1029,15 @@ instance_group [
                 name=service_external_name,
                 username=service.created_by.username,
                 ports=service_ports,
-                selector={"app": service.name, 'user': service.created_by.username},
-                externalIPs=SERVICE_EXTERNAL_IP
+                selector=labels,
+                external_ip=SERVICE_EXTERNAL_IP
             )
 
-        if env!='debug':
+
+        if env=='prod':
             hpas = re.split(',|;', service.hpa)
-            if not int(service.resource_gpu):
+            regex = re.compile(r"\(.*\)")
+            if not int(regex.sub('', service.resource_gpu)):
                 for hpa in copy.deepcopy(hpas):
                     if 'gpu' in hpa:
                         hpas.remove(hpa)

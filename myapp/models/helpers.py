@@ -336,6 +336,7 @@ class AuditMixinNullable(AuditMixin):
     @renders("created_by")
     def creator(self):  # noqa
         return self._user_link(self.created_by)
+        # return self.created_by.username
 
     @property
     def changed_by_(self):
@@ -355,7 +356,8 @@ class AuditMixinNullable(AuditMixin):
     # 修改时间到目前的时间距离
     @renders("changed_on")
     def modified(self):
-        return Markup(f'<span class="no-wrap">{self.changed_on_humanized}</span>')
+        # return Markup(f'<span class="no-wrap">{self.changed_on_humanized}</span>')
+        return self.changed_on_humanized
 
 
 class QueryResult(object):

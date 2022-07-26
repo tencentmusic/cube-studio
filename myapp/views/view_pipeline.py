@@ -636,6 +636,12 @@ class Pipeline_ModelView_Base():
             widget=BS3TextFieldWidget(),
             validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54),DataRequired()]
         ),
+        "describe": StringField(
+            _(datamodel.obj.lab('describe')),
+            description="中文描述",
+            widget=BS3TextFieldWidget(),
+            validators=[DataRequired()]
+        ),
         "project":QuerySelectField(
             _(datamodel.obj.lab('project')),
             query_factory=filter_join_org_project,
@@ -698,6 +704,7 @@ class Pipeline_ModelView_Base():
         ),
         "schedule_type":SelectField(
             _(datamodel.obj.lab('schedule_type')),
+            default='once',
             description="调度类型，once仅运行一次，crontab周期运行，crontab配置保存一个小时候后才生效",
             widget=Select2Widget(),
             choices=[['once','once'],['crontab','crontab']]

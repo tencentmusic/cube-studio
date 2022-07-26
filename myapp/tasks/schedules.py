@@ -18,7 +18,6 @@ from dateutil.tz import tzlocal
 import shutil
 import os,sys,io,json,datetime,time
 import subprocess
-from datetime import datetime, timedelta
 import os
 import sys
 import time
@@ -39,6 +38,7 @@ from myapp.models.model_job import (
     Task
 )
 from myapp.models.model_notebook import Notebook
+from myapp.models.model_serving import InferenceService
 from myapp.security import (
     MyUser
 )
@@ -314,7 +314,10 @@ def delete_notebook(task):
         # 删除vscode的pod
         try:
             alert_time = datetime.datetime.now() - datetime.timedelta(seconds=timeout) + datetime.timedelta(days=1)
-            notebooks = dbsession.query(Notebook).filter(Notebook.changed_on < alert_time).all()   # 需要删除或者需要通知续期的notebook
+            # notebooks = dbsession.query(Notebook).filter(Notebook.changed_on < alert_time).all()   # 需要删除或者需要通知续期的notebook
+
+            # 获取过期的gpu notebook  删除
+            notebooks = dbsession.query(Notebook).filter(Notebook.changed_on < alert_time).filter(Notebook.resource_gpu!='0').all()
             for notebook in notebooks:
                 if notebook.changed_on < (datetime.datetime.now() - datetime.timedelta(seconds=timeout)):
                     k8s_client = K8s(notebook.project.cluster.get('KUBECONFIG',''))
@@ -338,6 +341,7 @@ def delete_notebook(task):
 @celery_app.task(name="task.delete_debug_docker", bind=True)
 def delete_debug_docker(task):
     clusters = conf.get('CLUSTERS',{})
+    # 删除完成的任务
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
         notebook_namespace = conf.get('NOTEBOOK_NAMESPACE')
@@ -352,7 +356,75 @@ def delete_debug_docker(task):
                     k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace=pipeline_namespace,run_id=run_id)
                     k8s_client.delete_pods(namespace=pipeline_namespace, labels={"run-id": run_id})
 
-        push_message(conf.get('ADMIN_USER', '').split(','), 'debug pod 清理完毕')
+    # 删除debug和test的服务
+    for cluster_name in clusters:
+        cluster = clusters[cluster_name]
+        namespace = conf.get('SERVICE_NAMESPACE')
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
+        with session_scope(nullpool=True) as dbsession:
+            try:
+                inferenceservices = dbsession.query(InferenceService).all()
+                for inferenceservic in inferenceservices:
+                    try:
+                        name = 'debug-'+inferenceservic.name
+                        k8s_client.delete_deployment(namespace=namespace, name=name)
+                        k8s_client.delete_configmap(namespace=namespace, name=name)
+                        k8s_client.delete_service(namespace=namespace, name=name)
+                        k8s_client.delete_istio_ingress(namespace=namespace, name=name)
+                        if inferenceservic.model_status=='debug':
+                            inferenceservic.model_status='offline'
+                            dbsession.commit()
+
+                        name = 'test-' + inferenceservic.name
+                        k8s_client.delete_deployment(namespace=namespace, name=name)
+                        k8s_client.delete_configmap(namespace=namespace, name=name)
+                        k8s_client.delete_service(namespace=namespace, name=name)
+                        k8s_client.delete_istio_ingress(namespace=namespace, name=name)
+                        if inferenceservic.model_status == 'test':
+                            inferenceservic.model_status = 'offline'
+                            dbsession.commit()
+
+                    except Exception as e1:
+                        print(e1)
+
+            except Exception as e:
+                print(e)
+
+    push_message(conf.get('ADMIN_USER', '').split(','), 'debug pod 清理完毕')
+
+    # 删除 notebook 容器
+    print('begin delete idex')
+    namespace = conf.get('NOTEBOOK_NAMESPACE')
+    for cluster_name in clusters:
+        cluster = clusters[cluster_name]
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
+        pods = k8s_client.get_pods(namespace=namespace,labels={'pod-type':"jupyter"})
+        for pod in pods:
+            try:
+                k8s_client.v1.delete_namespaced_pod(pod['name'], namespace,grace_period_seconds=0)
+            except Exception as e:
+                print(e)
+            try:
+                k8s_client.v1.delete_namespaced_service(pod['name'], namespace, grace_period_seconds=0)
+            except Exception as e:
+                print(e)
+            try:
+                object_info = conf.get("CRD_INFO", {}).get('virtualservice', {})
+                k8s_client.delete_crd(group=object_info['group'], version=object_info['version'],plural=object_info['plural'], namespace=namespace,name=pod['name'])
+
+            except Exception as e:
+                print(e)
+
+    push_message(conf.get('ADMIN_USER', '').split(','), 'idex jupter pod 清理完毕')
+
+    # 删除调试镜像的pod 和commit pod
+    namespace = conf.get('NOTEBOOK_NAMESPACE')
+    for cluster_name in clusters:
+        cluster = clusters[cluster_name]
+        k8s_client = K8s(cluster.get('KUBECONFIG',''))
+        k8s_client.delete_pods(namespace=namespace,labels={'pod-type':"docker"})
+
+    push_message(conf.get('ADMIN_USER', '').split(','), 'docker 调试构建 pod 清理完毕')
 
 
 # 推送微信消息
@@ -364,11 +436,6 @@ def deliver_message(pipeline,message=''):
     alert_users = [alert_user.strip() for alert_user in alert_users if alert_user.strip()]
     receivers+=alert_users
     # 失败的时候将详细推送给管理员
-    # if message:
-    #     bcc = conf.get('PUSH_BCC_ADDRESS','')  # 暗抄送列表
-    #     bcc = bcc.split(',')
-    #     for bc in bcc:
-    #         receivers.append(bc)
     receivers = list(set(receivers))
     if not receivers:
         print('no receivers')
@@ -856,28 +923,42 @@ def check_pipeline_run(task):
     check_pipeline_resource()
 
 
-# 获取目录的大小
+@pysnooper.snoop()
 def get_dir_size(dir):
-    dir_size={}
-    files = os.listdir(dir)
-    for file in files:
-        filePath = dir + "/" + file
-        if os.path.isdir(filePath):
-            """disk usage in human readable format (e.g. '2,1GB')"""
-            size = subprocess.check_output(['du','-sh', filePath]).split()[0].decode('utf-8')
-            print(file, size)
-            if 'K' in size:
-                size=float(size.replace('K',''))
-            elif 'M' in size:
-                size=float(size.replace('M',''))*1024
-            elif 'G' in size:
-                size=float(size.replace('G',''))*1024*1024
-            elif 'T' in size:
-                size=float(size.replace('T',''))*1024*1024*1024
+    dir_size = {}
+    try:
+        if os.path.isdir(dir):
+            command = 'ls -lh %s'%dir
+            result = subprocess.getoutput(command)
+            # print(result)
+            rows = result.split('\n')
+            for row in rows:
+                row =[item for item in row.split(' ') if item]
+                # print(row)
+                if len(row)==9:
+                    size,file_name = row[4],row[8]
+                    # print(size,username)
 
-            dir_size[file]=round(float(size)/1024/1024,2)
+                    if 'K' in size:
+                        size = float(size.replace('K', ''))
+                    elif 'M' in size:
+                        size = float(size.replace('M', '')) * 1024
+                    elif 'G' in size:
+                        size = float(size.replace('G', '')) * 1024 * 1024
+                    elif 'T' in size:
+                        size = float(size.replace('T', '')) * 1024 * 1024 * 1024
 
+                    dir_size[file_name] = round(float(size) / 1024 / 1024, 2)
+                    # dir_size[file_name] = float(size) / 1024 / 1024
+
+            # size = subprocess.check_output(command)
+            # print(size)
+    except Exception as e:
+        print(e)
+
+    print(dir_size)
     return dir_size
+
 
 
 @celery_app.task(name="task.push_workspace_size", bind=True)
@@ -894,14 +975,16 @@ def push_workspace_size(task):
             dir_size = dir_sizes[i]
             message+=str(dir_size[0])+":"+str(dir_size[1])+"G\n"
 
-        push_admin(message)
+        # push_admin(message)
 
         for dir_size in dir_sizes:
             user = dir_size[0]
             size = float(dir_size[1])
-            if size>1200:   # 如果操作1200G，就提醒
+            if size>2500:   # 如果操作1200G，就提醒
                 try:
-                    push_message([user],'检测到您的工作目录当前占用磁盘大小为%sG。目前每个用户工作目录上限为1500G，超出后部分功能可能受限，请及时进入个人notebook清理旧数据'%str(size))
+                    push_message([user],'%s 检测到您的工作目录当前占用磁盘大小为%sG。目前每个用户工作目录上限为2500G，超出后部分功能可能受限，请及时进入个人notebook清理旧数据'%(user,str(size)))
+                    push_admin('%s 检测到您的工作目录当前占用磁盘大小为%sG。目前每个用户工作目录上限为2500G，超出后部分功能可能受限，请及时进入个人notebook清理旧数据' % (user,str(size)))
+
                 except Exception as e:
                     print(e)
 
@@ -935,7 +1018,6 @@ def watch_gpu(task):
 
 # 各项目组之间相互均衡的方案，一台机器上可能并不能被一个项目组占完，所以可能会跑多个项目组的任务
 @celery_app.task(name="task.adjust_node_resource", bind=True)
-@pysnooper.snoop()
 def adjust_node_resource(task):
     clusters = conf.get('CLUSTERS', {})
     for cluster_name in clusters:

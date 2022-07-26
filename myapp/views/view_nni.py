@@ -240,7 +240,7 @@ class NNI_ModelView_Base():
     edit_form_extra_fields['parameters'] = StringField(
         _(datamodel.obj.lab('parameters')),
         default=datamodel.obj.parameters.default.arg,
-        description='搜索参数，注意：所有整型、浮点型都写成字符串型',
+        description=Markup(('搜索参数，注意：所有整型、浮点型都写成字符串型,示例：\n'+"<pre><code>%s</code></pre>"%core.nni_parameters_demo()).replace('\n','<br>')),
         widget=MyBS3TextAreaFieldWidget(rows=10),
         validators=[DataRequired()]
     )
@@ -481,7 +481,7 @@ class NNI_ModelView_Base():
 
 
         volume_mount = nni.volume_mount+",/usr/share/zoneinfo/Asia/Shanghai(hostpath):/etc/localtime"
-        labels={"nni": nni.name, "username": nni.created_by.username,'run-id':run_id}
+        labels={"app": nni.name, "user": nni.created_by.username,'run-id':run_id,'pod-type':"nni"}
 
         k8s_client.create_debug_pod(
             namespace=namespace,

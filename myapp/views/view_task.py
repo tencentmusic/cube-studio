@@ -126,7 +126,7 @@ class Task_ModelView_Base():
         ),
         "volume_mount":StringField(
             label = _(datamodel.obj.lab('volume_mount')),
-            description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录',
+            description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',
             widget=BS3TextFieldWidget(),
             default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
         ),
@@ -184,7 +184,7 @@ class Task_ModelView_Base():
 
     }
 
-    add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default=0,
+    add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
                                                                   description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
                                                                   widget=BS3TextFieldWidget())
 
@@ -310,6 +310,8 @@ class Task_ModelView_Base():
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_update(self, item):
         item.name = item.name.replace('_', '-')[0:54].lower()
+        if item.resource_gpu:
+            item.resource_gpu=str(item.resource_gpu).upper()
         if item.job_template is None:
             raise MyappException("Job Template 为必选")
         # if item.job_template.volume_mount and item.job_template.volume_mount not in item.volume_mount:
@@ -363,6 +365,7 @@ class Task_ModelView_Base():
     #         item.pipeline.pipeline_argo_id = pipeline_argo_id
     #     if version_id:
     #         item.pipeline.version_id = version_id
+    #     # db.session.update(item)
     #     db.session.commit()
 
 
@@ -467,7 +470,7 @@ class Task_ModelView_Base():
             hostAliases+="\n"+task.job_template.hostAliases
         k8s_client.create_debug_pod(namespace,
                              name=pod_name,
-                             labels={"pipeline": task.pipeline.name, 'task': task.name, 'run-rtx': g.user.username,'run-id': run_id},
+                             labels={"pipeline": task.pipeline.name, 'task': task.name, 'user': g.user.username,'run-id': run_id,'pod-type':"task"},
                              command=command,
                              args=args,
                              volume_mount=volume_mount,

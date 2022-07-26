@@ -65,7 +65,7 @@ from sqlalchemy import and_, or_, select
 from .baseApi import (
     MyappModelRestApi
 )
-
+from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
 from flask_appbuilder import CompactCRUDMixin, expose
 import pysnooper,datetime,time,json
 conf = app.config
@@ -95,19 +95,16 @@ class Service_ModelView_base():
     order_columns = ['id']
     label_title = '云原生服务'
     base_filters = [["id", Service_Filter, lambda: []]]  # 设置权限过滤器
-
+    add_form_query_rel_fields = {
+        "project": [["name", Project_Join_Filter, 'org']]
+    }
+    edit_form_query_rel_fields = add_form_query_rel_fields
 
     add_form_extra_fields={
-        "project": QuerySelectField(
-            _(datamodel.obj.lab('project')),
-            query_factory=filter_join_org_project,
-            allow_blank=True,
-            widget=Select2Widget()
-        ),
         "name":StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
         "label":StringField(_(datamodel.obj.lab('label')), description='中文名', widget=BS3TextFieldWidget(),validators=[DataRequired()]),
         "images": StringField(_(datamodel.obj.lab('images')), description='镜像全称', widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "volume_mount":StringField(_(datamodel.obj.lab('volume_mount')),description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录',widget=BS3TextFieldWidget(),default=''),
+        "volume_mount":StringField(_(datamodel.obj.lab('volume_mount')),description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',widget=BS3TextFieldWidget(),default=''),
         "working_dir": StringField(_(datamodel.obj.lab('working_dir')),description='工作目录，容器启动的初始所在目录，不填默认使用Dockerfile内定义的工作目录',widget=BS3TextFieldWidget()),
         "command":StringField(_(datamodel.obj.lab('command')), description='启动命令，支持多行命令',widget=MyBS3TextAreaFieldWidget(rows=3)),
         "node_selector":StringField(_(datamodel.obj.lab('node_selector')), description='运行当前服务所在的机器',widget=BS3TextFieldWidget(),default='cpu=true,serving=true'),
@@ -122,15 +119,11 @@ class Service_ModelView_base():
     }
 
     gpu_type = conf.get('GPU_TYPE')
-    if gpu_type == 'TENCENT':
-        add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')),
-                                                                  default='0,0',
-                                                                  description='gpu的资源使用限制(core,memory)，示例:10,2（10%的单卡核数和2*256M的显存），其中core为小于100的整数或100的整数倍，表示占用的单卡的百分比例，memory为整数，表示n*256M的显存',
-                                                                  widget=BS3TextFieldWidget())
-    if gpu_type == 'NVIDIA':
-        add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
-                                                                  description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
-                                                                  widget=BS3TextFieldWidget())
+
+
+    add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
+                                                              description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
+                                                              widget=BS3TextFieldWidget())
 
     edit_form_extra_fields = add_form_extra_fields
     # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
@@ -183,11 +176,11 @@ class Service_ModelView_base():
         namespace = conf.get('SERVICE_NAMESPACE')
 
         volume_mount = service.volume_mount
-
+        labels = {"app":service.name,"user":service.created_by.username,"pod-type":"service"}
         k8s_client.create_deployment(namespace=namespace,
                               name=service.name,
                               replicas=service.replicas,
-                              labels={"app":service.name,"username":service.created_by.username},
+                              labels=labels,
                               command=['bash','-c',service.command] if service.command else None,
                               args=None,
                               volume_mount=volume_mount,
@@ -214,7 +207,8 @@ class Service_ModelView_base():
             namespace=namespace,
             name=service.name,
             username=service.created_by.username,
-            ports=ports
+            ports=ports,
+            selector=labels
         )
         # 如果域名配置的gateway，就用这个
         host = service.name+"."+conf.get('SERVICE_DOMAIN')
@@ -259,8 +253,8 @@ class Service_ModelView_base():
                 name=service_external_name,
                 username=service.created_by.username,
                 ports=service_ports,
-                selector={"app": service.name, 'user': service.created_by.username},
-                externalIPs=SERVICE_EXTERNAL_IP
+                selector=labels,
+                external_ip=SERVICE_EXTERNAL_IP
             )
 
 

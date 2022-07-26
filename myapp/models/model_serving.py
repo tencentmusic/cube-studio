@@ -189,10 +189,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def model_name_url(self):
-        if 'kfserving' not in self.service_type:
-            url = self.project.cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
-        else:
-            url = self.project.cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (conf.get('KFSERVING_NAMESPACE'), self.name.replace('_', '-'))
+        url = self.project.cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
     @property
@@ -206,17 +203,17 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def operate_html(self):
         url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
-        if self.created_by.username==g.user.username or g.user.is_admin():
-            dom = f'''
-                    <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
-                    <a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a> | 
-                    <a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a> |
-                    <a target=_blank href="{url}">监控</a> |
-                    <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
-                    '''
-        else:
-            dom = f'''调试 | 部署测试 | 部署生产 | <a target=_blank href="{url}">监控</a> | 清理'''
-            # dom = f'''调试 | 部署测试</a> | 部署生产 | 监控 | 清理 '''
+        # if self.created_by.username==g.user.username or g.user.is_admin():
+        dom = f'''
+                <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
+                <a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a> | 
+                <a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a> |
+                <a target=_blank href="{url}">监控</a> |
+                <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
+                '''
+        # else:
+        #     dom = f'''调试 | 部署测试 | 部署生产 | <a target=_blank href="{url}">监控</a> | 清理'''
+        #     # dom = f'''调试 | 部署测试</a> | 部署生产 | 监控 | 清理 '''
         return Markup(dom)
 
     @property

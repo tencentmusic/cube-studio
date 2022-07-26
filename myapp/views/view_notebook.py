@@ -96,7 +96,7 @@ class Notebook_ModelView_Base():
     base_filters = [["id", Notebook_Filter, lambda: []]]  # 设置权限过滤器
     order_columns = ['id']
     search_columns = ['created_by']
-    add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu']
+    add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
     list_columns = ['project','ide_type','name_url','describe','resource','status','renew','reset']
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -157,7 +157,7 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['volume_mount'] = StringField(
             _(self.datamodel.obj.lab('volume_mount')),
             default=notebook.project.volume_mount if notebook else '',
-            description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$pvc_name2(pvc):/$container_path2',
+            description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',
             widget=BS3TextFieldWidget()
         )
         self.add_form_extra_fields['working_dir'] = StringField(
@@ -257,7 +257,7 @@ class Notebook_ModelView_Base():
         db.session.commit()
 
     def post_list(self,items):
-        flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行',category='warning')
+        flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。个人持久化目录在/mnt/%s/下'%g.user.username,category='warning')
         # items.sort(key=lambda item:item.created_by.username==g.user.username,reverse=True)
         return items
 
@@ -312,17 +312,17 @@ class Notebook_ModelView_Base():
         if notebook.ide_type=='jupyter':
             rewrite_url = '/notebook/jupyter/%s/' % notebook.name
             workingDir = '/mnt/%s' % notebook.created_by.username
-            # command = ["sh", "-c", "%s jupyter lab --notebook-dir=%s --ip=0.0.0.0 "
-            #                         "--no-browser --allow-root --port=%s "
-            #                         "--NotebookApp.token='' --NotebookApp.password='' "
-            #                         "--NotebookApp.allow_origin='*' "
-            #                         "--NotebookApp.base_url=%s" % (pre_command,notebook.mount,port,rewrite_url)]
-
-            command = ["sh", "-c", "%s jupyter lab --notebook-dir=/ --ip=0.0.0.0 "
+            command = ["sh", "-c", "%s jupyter lab --notebook-dir=%s --ip=0.0.0.0 "
                                     "--no-browser --allow-root --port=%s "
                                     "--NotebookApp.token='' --NotebookApp.password='' "
                                     "--NotebookApp.allow_origin='*' "
-                                    "--NotebookApp.base_url=%s" % (pre_command,port,rewrite_url)]
+                                    "--NotebookApp.base_url=%s" % (pre_command,notebook.mount,port,rewrite_url)]
+
+            # command = ["sh", "-c", "%s jupyter lab --notebook-dir=/ --ip=0.0.0.0 "
+            #                         "--no-browser --allow-root --port=%s "
+            #                         "--NotebookApp.token='' --NotebookApp.password='' "
+            #                         "--NotebookApp.allow_origin='*' "
+            #                         "--NotebookApp.base_url=%s" % (pre_command,port,rewrite_url)]
 
 
         elif notebook.ide_type=='theia':
@@ -340,11 +340,11 @@ class Notebook_ModelView_Base():
                 if hubsecret[0] not in image_secrets:
                     image_secrets.append(hubsecret[0])
 
-
+        labels = {"app":notebook.name,'user':notebook.created_by.username,'pod-type':"notebook"}
         k8s_client.create_debug_pod(
             namespace=namespace,
             name=notebook.name,
-            labels={"app":notebook.name,'user':notebook.created_by.username},
+            labels=labels,
             command=command,
             args=None,
             volume_mount=volume_mount,
@@ -370,7 +370,9 @@ class Notebook_ModelView_Base():
             namespace=namespace,
             name=notebook.name,
             username=notebook.created_by.username,
-            ports=[port,])
+            ports=[port,],
+            selector=labels
+        )
 
         crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
         crd_name = "notebook-jupyter-%s"%notebook.name.replace('_', '-') #  notebook.name.replace('_', '-')
@@ -445,8 +447,8 @@ class Notebook_ModelView_Base():
                 name=service_external_name,
                 username=notebook.created_by.username,
                 ports=service_ports,
-                selector={"app": notebook.name, 'user': notebook.created_by.username},
-                externalIPs=SERVICE_EXTERNAL_IP
+                selector=labels,
+                external_ip=SERVICE_EXTERNAL_IP
             )
 
         return crd

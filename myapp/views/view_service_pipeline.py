@@ -203,7 +203,7 @@ class Service_Pipeline_ModelView_Base():
         "resource_cpu": StringField(_(datamodel.obj.lab('resource_cpu')), default=Service_Pipeline.resource_cpu.default.arg,
                                     description='cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管路员',
                                     widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "resource_gpu": StringField(_(datamodel.obj.lab('resource_gpu')), default=0,
+        "resource_gpu": StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
                                     description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
                                     widget=BS3TextFieldWidget()),
         "replicas": StringField(_(datamodel.obj.lab('replicas')), default=Service_Pipeline.replicas.default.arg,
@@ -388,11 +388,12 @@ class Service_Pipeline_ModelView_Base():
             env['JAEGER_HOST']=conf.get('SERVICE_PIPELINE_JAEGER','')
             env['SERVICE_NAME'] = name
 
+        labels = {"app": name, "user": service_pipeline.created_by.username,"pod-type":"service-pipeline"}
         k8s_client.create_deployment(
             namespace=namespace,
             name=name,
             replicas=service_pipeline.replicas,
-            labels={"app":name,"username":service_pipeline.created_by.username},
+            labels=labels,
             # command=['sh','-c',command] if command else None,
             command=['bash', '-c', "python mq-pipeline/cube_kafka.py"],
             args=None,
