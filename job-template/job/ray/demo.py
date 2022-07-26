@@ -2,18 +2,18 @@ import ray,os,time
 
 
 @ray.remote
-def fun1(index):
+def fun1(arg):
     # 这里是耗时的任务，函数内不能引用全局变量，只能使用函数内的局部变量。
-    print(index)
+    print(arg)
     time.sleep(1)
     return 'back_data'
 
 
 def main():
-    tasks = []
-    all_data=range(100)  # 假设要处理的所有数据
-    for index in all_data:
-        tasks.append(fun1.remote(index))  # 建立远程函数
+    tasks=[]
+    tasks_args = range(100)
+    for arg in tasks_args:
+        tasks.append(fun1.remote(arg))  # 建立远程函数
     result = ray.get(tasks)  # 获取任务结果
 
 

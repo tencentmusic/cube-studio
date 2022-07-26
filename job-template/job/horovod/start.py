@@ -22,18 +22,19 @@ base_dir = os.path.split(os.path.realpath(__file__))[0]
 KFJ_NAMESPACE = os.getenv('KFJ_NAMESPACE', '')
 KFJ_TASK_ID = os.getenv('KFJ_TASK_ID', '')
 # KFJ_TASK_NAME = os.getenv('KFJ_TASK_NAME', '')
-KFJ_TASK_NAME = "mpijob-" + str(uuid.uuid1())
+
 task_node_selectors = re.split(',|;|\n|\t', os.getenv('KFJ_TASK_NODE_SELECTOR', ''))
 KFJ_TASK_NODE_SELECTOR = {}
 for task_node_selector in task_node_selectors:
     KFJ_TASK_NODE_SELECTOR[task_node_selector.split('=')[0]] = task_node_selector.split('=')[1]
-
 
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '')
 KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', '')
 KFJ_RUNNER = os.getenv('KFJ_RUNNER')
 KFJ_PIPELINE_NAME = os.getenv('KFJ_PIPELINE_NAME', '')
+KFJ_TASK_NAME = os.getenv('KFJ_TASK_NAME', '')
+
 KFJ_TASK_IMAGES = os.getenv('KFJ_TASK_IMAGES', '')
 KFJ_TASK_VOLUME_MOUNT = os.getenv('KFJ_TASK_VOLUME_MOUNT', '')
 KFJ_TASK_RESOURCE_CPU = os.getenv('KFJ_TASK_RESOURCE_CPU', '')
@@ -41,7 +42,7 @@ KFJ_TASK_RESOURCE_MEMORY = os.getenv('KFJ_TASK_RESOURCE_MEMORY', '')
 NUM_WORKER = 3
 COMMAND=''
 WORK_IMAGES='csighub.tencentyun.com/tme-kubeflow/horovod:cpu-20210401'
-
+WORKIMG_DIR ='/mnt/admin'
 
 k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CREATOR)
 
@@ -70,7 +71,9 @@ CRD_INFO={
     "timeout": 60 * 60 * 24 * 2
 }
 
-
+def default_job_name():
+    name = "mpijob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
+    return name[0:54]
 
 # @pysnooper.snoop()
 def make_mpijob(name):
@@ -98,26 +101,23 @@ def make_mpijob(name):
                         "metadata": {
                             "labels": {
                                 "pipeline-id": KFJ_PIPELINE_ID,
+                                "task-id": KFJ_TASK_ID,
                                 "pipeline-name": KFJ_PIPELINE_NAME,
                                 "task-name": KFJ_TASK_NAME,
                                 'rtx-user': KFJ_RUNNER,
                                 "component": name,
                                 "type": "mpijob",
+                                "mpi-role":"Launcher",
                                 "run-id": os.getenv('KFJ_RUN_ID', 'unknown'),
                             }
                         },
                         "spec": {
                             "volumes": k8s_volumes,
-                            "imagePullSecrets": [
-                                {
-                                    "name": "hubsecret"
-                                }
-                            ],
-
                             "containers": [
                                 {
                                     "image": WORK_IMAGES,
                                     "name": "mpi-launcher",
+                                    "workingDir":WORKIMG_DIR,
                                     "command": [
                                         "mpirun"
                                     ],
@@ -173,21 +173,18 @@ def make_mpijob(name):
                         "metadata": {
                             "labels": {
                                 "pipeline-id": KFJ_PIPELINE_ID,
+                                "task-id": KFJ_TASK_ID,
                                 "pipeline-name": KFJ_PIPELINE_NAME,
                                 "task-name": KFJ_TASK_NAME,
                                 'rtx-user': KFJ_RUNNER,
                                 "component": name,
                                 "type": "mpijob",
+                                "mpi-role": "Worker",
                                 "run-id": os.getenv('KFJ_RUN_ID', 'unknown'),
                             }
                         },
                         "spec": {
                             "volumes": k8s_volumes,
-                            "imagePullSecrets": [
-                                {
-                                    "name": "hubsecret"
-                                }
-                            ],
                             "affinity": {
                                 "nodeAffinity": {
                                     "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -227,6 +224,7 @@ def make_mpijob(name):
                                 {
                                     "image": WORK_IMAGES,
                                     "name": "mpi-worker",
+                                    "workingDir": WORKIMG_DIR,
                                     "env": [
                                         {
                                             "name": "MY_CPU_REQUEST",
@@ -277,22 +275,22 @@ def watch_pod_log(name,namespace,container='main'):
     print('end follow log')
 
 
-# @pysnooper.snoop(watch_explode=('mpijob_json',))
+# @pysnooper.snoop(watch_explode=())
 def main():
     k8s_client = K8s()
 
     # 删除旧的mpi
     if KFJ_RUN_ID:
-        print('begin delete old mpijob: run-id %s'%KFJ_RUN_ID)
+        print('begin delete old mpijob: run-id %s'%KFJ_RUN_ID,flush=True)
         k8s_client.delete_crd(group=CRD_INFO['group'],
                               version=CRD_INFO['version'],
                               plural=CRD_INFO['plural'],
                               namespace=KFJ_NAMESPACE,
                               labels={"run-id":KFJ_RUN_ID})
         time.sleep(60)
-
-    mpijob_json = make_mpijob(KFJ_TASK_NAME)
-    print('begin create new mpijob: run-id %s' % KFJ_TASK_NAME)
+    job_name = default_job_name()
+    mpijob_json = make_mpijob(job_name)
+    print('begin create new mpijob: run-id %s' % KFJ_TASK_NAME,flush=True)
     k8s_client.create_crd(
         group=CRD_INFO['group'],
         version=CRD_INFO['version'],
@@ -300,47 +298,58 @@ def main():
         namespace=KFJ_NAMESPACE,
         body=mpijob_json
     )
-    # 等待创建完成
-    time.sleep(200)
+    # 等待创建完成，拉取镜像可能比较耗时
+    time.sleep(100)
 
-    pods = k8s_client.get_pods(namespace=KFJ_NAMESPACE,labels={
-        "mpi_job_name": KFJ_TASK_NAME
-    })
+    pods = k8s_client.get_pods(namespace=KFJ_NAMESPACE,labels={"component": job_name,"mpi-role":"Launcher"})
     if pods:
         pod=pods[0]
         print('begin listen mpijob launcher pod %s' % pod['name'])
-        k8s_client.watch_pod_log(name=pod['name'],namespace=KFJ_NAMESPACE)
+        from kubernetes import client,watch
+        v1 = client.CoreV1Api()
+        w = watch.Watch()
+        for e in w.stream(v1.read_namespaced_pod_log, name=pod['name'], namespace=KFJ_NAMESPACE):
+            print(e)
+
+        # k8s_client.watch_pod_log(name=pod['name'],namespace=KFJ_NAMESPACE)  # 阻塞的，直到pod结束
+
+        time.sleep(10) # 等待crd状态更新结束
         crd = k8s_client.get_one_crd(
             group=CRD_INFO['group'],
             version=CRD_INFO['version'],
             plural=CRD_INFO['plural'],
             namespace=KFJ_NAMESPACE,
-            name=KFJ_TASK_NAME
+            name=job_name
         )
-        print('begin delete mpijob %s' % KFJ_TASK_NAME)
-        # 删除旧的mpi
-        if KFJ_RUN_ID:
-            k8s_client.delete_crd(group=CRD_INFO['group'],
-                                  version=CRD_INFO['version'],
-                                  plural=CRD_INFO['plural'],
-                                  namespace=KFJ_NAMESPACE,
-                                  labels={"run-id": KFJ_RUN_ID})
+
+        # print('begin delete mpijob %s' % KFJ_TASK_NAME)
+        # # 删除旧的mpi
+        # if KFJ_RUN_ID:
+        #     k8s_client.delete_crd(group=CRD_INFO['group'],
+        #                           version=CRD_INFO['version'],
+        #                           plural=CRD_INFO['plural'],
+        #                           namespace=KFJ_NAMESPACE,
+        #                           labels={"run-id": KFJ_RUN_ID})
         print(crd)
-        if crd['status']=='Succeeded':
-            exit(0)
-        else:
+        try:
+            status = json.loads(crd['status_more']).get('conditions',[])[-1].get('type','')
+            if status=='Succeeded':
+                exit(0)
+            else:
+                exit(1)
+        except Exception as e:
+            print(e)
             exit(1)
     else:
         print('cluster fail build')
-        print('begin delete mpijob %s' % KFJ_TASK_NAME)
-        # 删除旧的mpi
-        if KFJ_RUN_ID:
-            k8s_client.delete_crd(group=CRD_INFO['group'],
-                                  version=CRD_INFO['version'],
-                                  plural=CRD_INFO['plural'],
-                                  namespace=KFJ_NAMESPACE,
-                                  labels={"run-id": KFJ_RUN_ID})
-
+        # print('begin delete mpijob %s' % KFJ_TASK_NAME)
+        # # 删除旧的mpi
+        # if KFJ_RUN_ID:
+        #     k8s_client.delete_crd(group=CRD_INFO['group'],
+        #                           version=CRD_INFO['version'],
+        #                           plural=CRD_INFO['plural'],
+        #                           namespace=KFJ_NAMESPACE,
+        #                           labels={"run-id": KFJ_RUN_ID})
         exit(1)
 
 
@@ -349,12 +358,13 @@ if __name__ == '__main__':
     parser.add_argument('--num_worker', type=int, default=2, help='并行worker的数目 (default: 2)')
     parser.add_argument('--command', type=str, default='python /horovod/examples/tensorflow2/tensorflow2_mnist.py', help='启动命令')
     parser.add_argument('--work_images', type=str, default='ccr.ccs.tencentyun.com/cube-studio/horovod:20210401', help='worker镜像')
-
+    parser.add_argument('--working_dir', type=str, default='/mnt/admin',help='工作目录')
     args = parser.parse_args()
     print(args)
     NUM_WORKER = args.num_worker
     COMMAND = args.command
     WORK_IMAGES = args.work_images
+    WORKIMG_DIR = args.working_dir
 
     main()
 

@@ -291,9 +291,6 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.working_dir):
         raise RuntimeError # (args.working_dir + " not exits!!!")
-    # 注入host到启动pod
-    if os.system("echo '10.101.140.98 cls-g9v4gmm0.ccs.tencent-cloud.com' >> /etc/hosts"):
-        raise RuntimeError # ("Init hosts fail!!!")
     # 创建run_dir到工作目录
     run_dir = "{}/run_{}/".format(args.working_dir, KFJ_RUN_ID)
     if os.system("mkdir -p {}".format(run_dir)):

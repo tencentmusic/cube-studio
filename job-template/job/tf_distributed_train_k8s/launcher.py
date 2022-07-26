@@ -40,8 +40,7 @@ KFJ_TASK_VOLUME_MOUNT = os.getenv('KFJ_TASK_VOLUME_MOUNT', '')
 KFJ_TASK_RESOURCE_CPU = os.getenv('KFJ_TASK_RESOURCE_CPU', '')
 KFJ_TASK_RESOURCE_MEMORY = os.getenv('KFJ_TASK_RESOURCE_MEMORY', '')
 NUM_WORKER = 3
-HEADER_NAME = os.getenv('RAY_HOST', '')
-WORKER_NAME = HEADER_NAME.replace('header', 'worker')
+
 INIT_FILE=''
 
 crd_info = {
@@ -92,9 +91,6 @@ def run_shell(shell):
             break
 
     return cmd.returncode
-
-
-
 
 
 
@@ -187,7 +183,7 @@ def make_tfjob(name,num_workers,image,working_dir,command):
                 },
                 "containers": [
                     {
-                        "name": "tfjob",
+                        "name": "tensorflow",  # 容器的名称必须是tensorflow
                         "image": image if image else KFJ_TASK_IMAGES,
                         "imagePullPolicy": "Always",
                         "workingDir":working_dir,
@@ -211,7 +207,7 @@ def make_tfjob(name,num_workers,image,working_dir,command):
     }
 
 
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
+    if GPU_RESOURCE:
         pod_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
         pod_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
 
@@ -270,7 +266,7 @@ def launch_tfjob(name, num_workers, image,working_dir, worker_command):
         # 实时打印日志
         line='>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
         print('begin follow log\n%s'%line, flush=True)
-        command = "stern %s --namespace %s --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE)
+        command = '''stern %s --namespace %s --since 10s --template '{{.PodName}} {{.Message}} {{"\\n"}}' ''' % (name, KFJ_NAMESPACE)
         print(command, flush=True)
         run_shell(command)
         print('%s\nend follow log'%line, flush=True)

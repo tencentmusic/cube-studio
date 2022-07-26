@@ -1,5 +1,7 @@
 镜像：ccr.ccs.tencentyun.com/cube-studio/tf_distributed_train_k8s:20221010
+
 账号：kubeflow-pipeline
+
 参数：
 ```bash
 {
@@ -70,3 +72,11 @@ TASK_RESOURCE_CPU=2
 TASK_RESOURCE_MEMORY=4G
 TASK_RESOURCE_GPU=0
 ```
+
+示例代码
+
+启动脚本
+```
+python demo.py
+```
+示例代码 [demo.py](https://github.com/kubeflow/training-operator/blob/master/examples/tensorflow/mnist_with_summaries/mnist_with_summaries.py)

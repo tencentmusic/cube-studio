@@ -64,11 +64,6 @@ print(GPU_TYPE,GPU_RESOURCE)
 
 
 def default_job_name():
-    # import re
-    # ctx = KFJobContext.get_context()
-    # p_name = str(ctx.pipeline_name) or ''
-    # p_name = re.sub(r'[^-a-z0-9]', '-', p_name)
-    # return "-".join([str(ctx.creator), p_name, "pytorchjob", str(uuid.uuid1())])
     name = "pytorchjob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
     return name[0:54]
 
@@ -331,7 +326,8 @@ def launch_pytorchjob(name, num_workers, image,working_dir, worker_command):
         # 实时打印日志
         line='>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
         print('begin follow log\n%s'%line, flush=True)
-        command = "stern %s --namespace %s --exclude-container init-pytorch --tail 10 --template '{{.PodName}} {{.Message}}'"%(name,KFJ_NAMESPACE)
+        command = '''stern %s --namespace %s --exclude-container init-pytorch --since 10s --template '{{.PodName}} {{.Message}} {{"\\n"}}' '''%(name,KFJ_NAMESPACE)
+
         print(command, flush=True)
         run_shell(command)
         print('%s\nend follow log'%line, flush=True)

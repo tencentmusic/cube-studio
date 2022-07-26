@@ -11,7 +11,7 @@ print(WORLD_SIZE, RANK)
 
 # 子进程要执行的代码
 def task(key):
-    print('worker:', RANK, ', task:', key, flush=True)
+    print(datetime.datetime.now(),'worker:', RANK, ', task:', key, flush=True)
     time.sleep(1)
 
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     # if os.path.exists('./success%s' % RANK):
     #     os.remove('./success%s' % RANK)
 
-    input = range(30000)  # 所有要处理的数据
+    input = range(300)  # 所有要处理的数据
     local_task = []  # 当前worker需要处理的任务
     for index in input:
         if index % WORLD_SIZE == RANK:

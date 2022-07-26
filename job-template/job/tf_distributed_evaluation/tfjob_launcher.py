@@ -116,8 +116,6 @@ class TFJobLauncher(JobComponentRunner):
                      job_polling_interval=None, delete_after_finish=False, node_selector={}, privileged=False,
                      creator=''):
 
-        subprocess.check_call("echo '10.101.140.98 cls-g9v4gmm0.ccs.tencent-cloud.com' >> /etc/hosts", shell=True)
-
         k8s_config.load_incluster_config()
         k8s_api_client = k8s_client.ApiClient()
         tfjob = TFJob("v1", k8s_api_client)

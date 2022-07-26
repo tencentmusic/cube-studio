@@ -66,6 +66,34 @@ def default_job_name():
     return name[0:54]
 
 
+
+
+import subprocess
+# @pysnooper.snoop()
+def run_shell(shell):
+    print('begin run shell: %s'%shell,flush=True)
+    cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
+                           stdout=subprocess.PIPE, universal_newlines=True, shell=True, bufsize=1)
+    # 实时输出
+    while True:
+        line = cmd.stdout.readline()
+        status = subprocess.Popen.poll(cmd)
+        if status:
+            print(status,line,end='', flush=True)
+        else:
+            print(line, end='', flush=True)
+        if status == 0:  # 判断子进程是否结束
+            print('shell finish %s'%status,flush=True)
+            break
+        if status==-9 or status==-15 or status==143:   # 外界触发kill
+        # if status!=0:  # 外界触发kill
+            print('shell finish %s'%status,flush=True)
+            break
+
+    return cmd.returncode
+
+
+
 # @pysnooper.snoop()
 def make_sparkjob(name,**kwargs):
 
