@@ -228,7 +228,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"每个worker的初始化脚本文件地址，用来安装环境",
-                    "require":1,
+                    "require":0,
                     "choice":[
                     ],
                     "range":"",
@@ -328,7 +328,7 @@
                     "type": "str",
                     "item_type": "str",
                     "label": "Java/Scala类名",
-                    "require": 1,
+                    "require": 0,
                     "choice": [],
                     "range": "",
                     "default": "",
@@ -356,7 +356,7 @@
                     "type": "str",
                     "item_type": "str",
                     "label": "代码参数",
-                    "require": 1,
+                    "require": 0,
                     "choice": [],
                     "range": "",
                     "default": "",
@@ -370,7 +370,7 @@
                     "type": "text",
                     "item_type": "str",
                     "label": "spark配置",
-                    "require": 1,
+                    "require": 0,
                     "choice": [],
                     "range": "",
                     "default": "",
@@ -384,7 +384,7 @@
                     "type": "text",
                     "item_type": "str",
                     "label": "hadoop配置，每行一个配置，xx=yy",
-                    "require": 1,
+                    "require": 0,
                     "choice": [],
                     "range": "",
                     "default": "",
@@ -1766,7 +1766,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"中文描述描述",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],
@@ -1784,7 +1784,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"模型名",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],
@@ -1802,7 +1802,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"模型版本号",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],
@@ -1840,7 +1840,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"推理服务类型",
-                    "require":0,
+                    "require":1,
                     "choice":[
                         "serving",
                         "tfserving",
@@ -1862,7 +1862,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"推理服务镜像",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],
@@ -1885,9 +1885,9 @@
 
                     ],
                     "range":"",
-                    "default":"/mnt/xx",
+                    "default":"",
                     "placeholder":"",
-                    "describe":"推理容器工作目录",
+                    "describe":"推理容器工作目录,个人工作目录/mnt/$username",
                     "editable":1,
                     "condition":"",
                     "sub_args":{
@@ -1970,7 +1970,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"pod副本数",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],
@@ -1988,7 +1988,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"每个pod占用内存",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],
@@ -2006,7 +2006,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"每个pod占用cpu",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],
@@ -2024,7 +2024,7 @@
                     "type":"str",
                     "item_type":"str",
                     "label":"每个pod占用gpu",
-                    "require":0,
+                    "require":1,
                     "choice":[
 
                     ],

@@ -5,7 +5,6 @@ kubeflow = [
     'metacontroller/metacontroller:v0.3.0',
     'alpine:3.10',
     "busybox",
-    "gcr.io/spark-operator/spark-operator:v1beta2-1.3.0-3.1.1",
     "ccr.ccs.tencentyun.com/cube-studio/kubeflow:training-operator",
     'ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1',
 ]
@@ -48,20 +47,7 @@ new_prometheus = [
     "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",
     'grafana/grafana:7.5.2'
 ]
-new_serving = [
-    'gcr.io/kfserving/alibi-explainer:0.2.2', 'gcr.io/kfserving/logger:0.2.2', 'tensorflow/serving:1.14.0',
-    'tensorflow/serving:1.14.0-gpu', 'tensorflow/serving:1.11.0', 'tensorflow/serving:1.11.0-gpu',
-    'tensorflow/serving:1.12.0', 'tensorflow/serving:1.12.0-gpu', 'tensorflow/serving:1.13.0',
-    'tensorflow/serving:1.13.0-gpu', 'tensorflow/serving:1.14.0', 'tensorflow/serving:1.14.0-gpu',
-    'tensorflow/serving:2.0.0', 'tensorflow/serving:2.0.0-gpu', 'tensorflow/serving:2.1.0',
-    'tensorflow/serving:2.1.0-gpu', 'tensorflow/serving:2.2.0', 'tensorflow/serving:2.2.0-gpu',
-    'tensorflow/serving:2.3.0', 'tensorflow/serving:2.3.0-gpu', 'tensorflow/serving:2.4.0',
-    'tensorflow/serving:2.4.0-gpu', 'mcr.microsoft.com/onnxruntime/server:v0.5.1',
-    'gcr.io/kfserving/sklearnserver:0.2.2', 'gcr.io/kfserving/xgbserver:0.2.2',
-    'gcr.io/kfserving/pytorchserver:0.2.2', 'nvcr.io/nvidia/tensorrtserver:19.05-py3',
-    'gcr.io/kfserving/storage-initializer:0.2.2',
-    'gcr.io/knative-releases/knative.dev/serving/cmd/queue:792f6945c7bc73a49a470a5b955c39c8bd174705743abf5fb71aa0f4c04128eb'
-]
+
 istio=[
     "istio/proxyv2:1.14.1","istio/pilot:1.14.1"
 ]
@@ -146,11 +132,10 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.7',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8',
-
 ]
 
-images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + istio + volcano + kube_batch + nni+ cube_studio
-images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + istio + volcano + kube_batch + nni
+# images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + volcano + kube_batch + nni+ cube_studio
+images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + volcano + kube_batch + nni
 # images = new_pipline
 images = list(set(images))
 
