@@ -1,6 +1,8 @@
 # volcanojob 模板
 镜像：ccr.ccs.tencentyun.com/cube-studio/volcano:20211001
+
 挂载：kubernetes-config(configmap):/root/.kube
+
 环境变量：
 ```bash
 NO_RESOURCE_CHECK=true
@@ -8,7 +10,9 @@ TASK_RESOURCE_CPU=2
 TASK_RESOURCE_MEMORY=4G
 TASK_RESOURCE_GPU=0
 ```
+
 账号：kubeflow-pipeline
+
 启动参数：
 ```bash
 {
