@@ -7,3 +7,4 @@ resources:
 - sa-rbac.yaml
 - deploy.yaml
 - deploy-schedule.yaml
+- virtual.yaml

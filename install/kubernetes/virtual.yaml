@@ -1,21 +1,21 @@
-# 通过vs代理访问其他的服务，包括katib、pipline,argp,minio,grafana等
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: infra-kubeflow-dashboard
-  namespace: infra
-spec:
-  gateways:
-  - kubeflow/kubeflow-gateway
-  hosts:
-  - "*"    # 管理平台的域名   kubeflow.local.com
-  http:
-  - route:
-    - destination:
-        host: kubeflow-dashboard.infra.svc.cluster.local
-        port:
-          number: 80
----
+## 通过vs代理访问其他的服务，包括katib、pipline,argp,minio,grafana等
+#apiVersion: networking.istio.io/v1alpha3
+#kind: VirtualService
+#metadata:
+#  name: infra-kubeflow-dashboard
+#  namespace: infra
+#spec:
+#  gateways:
+#  - kubeflow/kubeflow-gateway
+#  hosts:
+#  - "*"    # 管理平台的域名   kubeflow.local.com
+#  http:
+#  - route:
+#    - destination:
+#        host: kubeflow-dashboard.infra.svc.cluster.local
+#        port:
+#          number: 80
+#---
 # 通过vs代理访问其他的服务，包括katib、pipline,argp,minio,grafana等
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
