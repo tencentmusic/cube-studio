@@ -1,12 +1,13 @@
 # 所需要的所有镜像
 kubeflow = [
     'mysql:5.7',
-    'gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0',
+    'bitnami/redis',
     'metacontroller/metacontroller:v0.3.0',
     'alpine:3.10',
     "busybox",
     "gcr.io/spark-operator/spark-operator:v1beta2-1.3.0-3.1.1",
-    "ccr.ccs.tencentyun.com/cube-studio/kubeflow:training-operator"
+    "ccr.ccs.tencentyun.com/cube-studio/kubeflow:training-operator",
+    'ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1',
 ]
 
 kubernetes_dashboard=['kubernetesui/dashboard:v2.2.0','kubernetesui/metrics-scraper:v1.0.6','quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0']
@@ -28,7 +29,7 @@ new_pipline = [
 ]
 
 
-new_gpu = ['nvidia/k8s-device-plugin:v0.7.1', 'nvidia/dcgm-exporter:2.0.13-2.1.2-ubuntu20.04','nvidia/dcgm-exporter:2.3.1-2.6.1-ubuntu20.04',
+new_gpu = ['nvidia/k8s-device-plugin:v0.7.1','nvidia/dcgm-exporter:2.3.1-2.6.1-ubuntu20.04',
            'nvidia/pod-gpu-metrics-exporter:v1.0.0-alpha']
 
 new_prometheus = [
@@ -61,12 +62,14 @@ new_serving = [
     'gcr.io/kfserving/storage-initializer:0.2.2',
     'gcr.io/knative-releases/knative.dev/serving/cmd/queue:792f6945c7bc73a49a470a5b955c39c8bd174705743abf5fb71aa0f4c04128eb'
 ]
-
+istio=[
+    "istio/proxyv2:1.14.1","istio/pilot:1.14.1"
+]
 volcano = ['volcanosh/vc-controller-manager:v1.4.0', 'volcanosh/vc-scheduler:v1.4.0',
            'volcanosh/vc-webhook-manager:v1.4.0']
 
 kube_batch = ['kubesigs/kube-batch:v0.5']
-nni = ['frameworkcontrolle/frameworkcontrolle']
+nni = ['frameworkcontroller/frameworkcontroller']
 
 cube_studio = [
     # 平台构建的镜像
@@ -143,11 +146,11 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.7',
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8',
-    'ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1'
+
 ]
 
-images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + volcano + kube_batch + nni+ cube_studio
-
+images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + new_serving + istio + volcano + kube_batch + nni+ cube_studio
+images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + istio + volcano + kube_batch + nni
 # images = new_pipline
 images = list(set(images))
 
@@ -167,12 +170,16 @@ for image in images:
     # print('docker push %s' % (image_name))
 
     # 内网机器上拉取私有仓库镜像
+    # image=image.replace('@sha256','')
+    # print("docker pull %s" % image_name)
+    # print("docker tag %s %s"%(image_name,image))
+
     image=image.replace('@sha256','')
-    print("docker pull %s" % image_name)
-    print("docker tag %s %s"%(image_name,image))
+    print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
 
 
-
+print('')
+print('wait')
 
 
 
