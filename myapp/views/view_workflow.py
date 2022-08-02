@@ -214,11 +214,12 @@ class Workflow_Filter(MyappFilter):
         ).order_by(self.model.create_time.desc())
 
 # list正在运行的workflow
-class Workflow_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
+class Workflow_ModelView_Base(Crd_ModelView_Base):
 
     base_filters = [["id", Workflow_Filter, lambda: []]]  # 设置权限过滤器
 
     # 删除之前的 workflow和相关容器
+    # @pysnooper.snoop()
     def delete_workflow(self, workflow):
         try:
             k8s_client = py_k8s.K8s(workflow.pipeline.project.cluster.get('KUBECONFIG',''))
@@ -240,26 +241,32 @@ class Workflow_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
         self.delete_workflow(workflow)
 
         flash('清理完成','warning')
-        self.update_redirect()
-        return redirect(self.get_redirect())
-
+        url = conf.get('MODEL_URLS',{}).get('workflow','')
+        return redirect(url)
 
     label_title = '运行实例'
     datamodel = SQLAInterface(Workflow)
     list_columns = ['project','pipeline_url', 'create_time','change_time','elapsed_time', 'final_status','status', 'username', 'log','stop']
+    cols_width = {
+        "project": {"type": "ellip2", "width": 200},
+        "pipeline_url": {"type": "ellip2", "width": 400},
+        "create_time": {"type": "ellip2", "width": 200},
+        "change_time": {"type": "ellip2", "width": 200}
+    }
     show_columns = ['name', 'namespace', 'create_time', 'status','task_status', 'annotations_html', 'labels_html', 'spec_html','status_more_html', 'info_json_html']
     crd_name = 'workflow'
 
+class Workflow_ModelView(Workflow_ModelView_Base,MyappModelView,DeleteMixin):
+    datamodel = SQLAInterface(Workflow)
+
+
 appbuilder.add_view(Workflow_ModelView,"运行实例",href='/workflow_modelview/list/?_flt_2_name=&_flt_2_labels=',icon = 'fa-tasks',category = '训练')
 
-
 # 添加api
-class Workflow_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
+class Workflow_ModelView_Api(Workflow_ModelView_Base,MyappModelRestApi):
 
     datamodel = SQLAInterface(Workflow)
     route_base = '/workflow_modelview/api'
-    list_columns = ['name', 'namespace_url', 'create_time', 'status', 'username', 'log']
-    crd_name = 'workflow'
 
 appbuilder.add_api(Workflow_ModelView_Api)
 

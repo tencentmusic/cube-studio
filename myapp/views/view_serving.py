@@ -84,12 +84,21 @@ class Service_Filter(MyappFilter):
         return query.filter(self.model.project_id.in_(join_projects_id))
 
 
+
+
 class Service_ModelView_base():
     datamodel = SQLAInterface(Service)
-    help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
-    show_columns = ['name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url']
+
+    show_columns = ['project','name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url']
     add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
-    list_columns = ['project','name_url','host_url','ip','creator','modified','deploy']
+    list_columns = ['project','name_url','host_url','ip','deploy','creator','modified']
+    cols_width={
+        "name_url":{"type": "ellip2", "width": 200},
+        "host_url": {"type": "ellip2", "width": 400},
+        "ip": {"type": "ellip2", "width": 200},
+        "deploy": {"type": "ellip2", "width": 200},
+        "modified": {"type": "ellip2", "width": 150}
+    }
     edit_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','volume_mount','host',]
     base_order = ('id','desc')
     order_columns = ['id']
@@ -158,8 +167,9 @@ class Service_ModelView_base():
     def clear(self, service_id):
         service = db.session.query(Service).filter_by(id=service_id).first()
         self.delete_old_service(service.name,service.project.cluster)
-        flash('服务清理完成', category='warning')
-        return redirect('/service_modelview/list/')
+        flash('服务清理完成', category='success')
+        return redirect(conf.get('MODEL_URLS',{}).get('service',''))
+
 
     @expose('/deploy/<service_id>',methods=['POST',"GET"])
     def deploy(self,service_id):
@@ -257,7 +267,6 @@ class Service_ModelView_base():
                 external_ip=SERVICE_EXTERNAL_IP
             )
 
-
         # # 创建虚拟服务做代理
         # crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
         # crd_name =  "service-%s"%service.name
@@ -313,14 +322,17 @@ class Service_ModelView_base():
         # # return crd
 
 
+        flash('服务部署完成',category='success')
+        return redirect(conf.get("MODEL_URLS",{}).get("service",'/'))
 
-        flash('服务部署完成',category='warning')
-        return redirect('/service_modelview/list/')
+
+
 
 
 
 class Service_ModelView(Service_ModelView_base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Service)
+
 appbuilder.add_view(Service_ModelView,"内部服务",icon = 'fa-internet-explorer',category = '服务化')
 
 
@@ -329,3 +341,5 @@ class Service_ModelView_Api(Service_ModelView_base,MyappModelRestApi):
     route_base = '/service_modelview/api'
 
 appbuilder.add_api(Service_ModelView_Api)
+
+

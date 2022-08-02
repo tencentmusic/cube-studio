@@ -153,6 +153,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     model_type = Column(String(200),default='')
     model_input = Column(Text(65536), default='')
     model_output = Column(Text(65536), default='')
+    inference_config = Column(Text(65536), default='')   # 推理配置，挂载成configmap
     model_status = Column(String(200),default='offline')
     # model_status = Column(Enum('offline','test','online','delete'),nullable=True,default='offline')
 
@@ -185,7 +186,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     run_time = Column(String(100))
     deploy_history = Column(Text(65536), default='')  # 部署记录
 
-
+    priority = Column(Integer,default=1)   # 服务优先级，优先满足高优先级的资源需求
 
     @property
     def model_name_url(self):

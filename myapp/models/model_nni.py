@@ -57,6 +57,8 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
     job_json = Column(Text, default='{}')  # 根据不同算法和参数写入的task模板
     trial_spec=Column(Text,default='')    # 根据不同算法和参数写入的task模板
     # code_dir = Column(String(200), default='')  # 代码挂载
+    job_worker_image = Column(String(200),nullable=True,default='')
+    job_worker_command = Column(String(200), nullable=True, default='')
     working_dir = Column(String(200), default='')  # 挂载
     volume_mount = Column(String(100), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
     node_selector = Column(String(100), default='cpu=true,train=true')  # 挂载

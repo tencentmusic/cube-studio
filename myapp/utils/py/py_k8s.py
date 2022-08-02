@@ -974,6 +974,7 @@ class K8s():
 
     # @pysnooper.snoop(watch_explode=())
     def create_deployment(self,namespace,name,replicas,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports,scheduler_name='default-scheduler',health=None):
+
         pod,pod_spec = self.make_pod(
             namespace=namespace,
             name=name,

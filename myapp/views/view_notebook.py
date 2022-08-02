@@ -86,9 +86,9 @@ class Notebook_Filter(MyappFilter):
 class Notebook_ModelView_Base():
     datamodel = SQLAInterface(Notebook)
     label_title='notebook'
-    check_redirect_list_url = '/notebook_modelview/list/'
+    check_redirect_list_url = conf.get('MODEL_URLS',{}).get('notebook','')
     crd_name = 'notebook'
-    help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
+
     datamodel = SQLAInterface(Notebook)
     conv = GeneralModelConverter(datamodel)
     base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']  # 默认为这些
@@ -98,10 +98,19 @@ class Notebook_ModelView_Base():
     search_columns = ['created_by']
     add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
     list_columns = ['project','ide_type','name_url','describe','resource','status','renew','reset']
+    cols_width={
+        "project":{"type": "ellip2", "width": 200},
+        "name_url":{"type": "ellip2", "width": 300},
+        "describe":{"type": "ellip2", "width": 300},
+        "resource":{"type": "ellip2", "width": 300},
+        "status":{"type": "ellip2", "width": 100},
+        "renew": {"type": "ellip2", "width": 200},
+    }
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
+
     # @pysnooper.snoop()
     def set_column(self, notebook=None):
         # 对编辑进行处理
@@ -137,11 +146,10 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['images'] = SelectField(
             _(self.datamodel.obj.lab('images')),
             description=_(r'notebook基础环境镜像，如果显示不准确，请删除新建notebook'),
-            widget=MySelect2Widget(extra_classes="readonly" if notebook else None,new_web=False),
-            choices=conf.get('NOTEBOOK_IMAGES',[]),
-            # validators=[DataRequired()]
+            widget=MySelect2Widget(extra_classes="readonly" if notebook else None,new_web=False,can_input=True),
+            choices=[[x[0],x[0]] for x in conf.get('NOTEBOOK_IMAGES',[])],
+            validators=[DataRequired()]
         )
-
         self.add_form_extra_fields['node_selector'] = StringField(
             _(self.datamodel.obj.lab('node_selector')),
             default='cpu=true,notebook=true',
@@ -185,11 +193,10 @@ class Notebook_ModelView_Base():
             default='0',
             description='gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
             widget=BS3TextFieldWidget(),
-            # choices=conf.get('GPU_CHOICES', [[]]),
             validators=[DataRequired()]
         )
 
-        columns = ['name','describe','images','resource_memory','resource_cpu','resource_gpu']
+        columns = ['name','describe','images','resource_memory','resource_cpu']
 
         self.add_columns = ['project']+columns   # 添加的时候没有挂载配置，使用项目中的挂载配置
 
@@ -198,6 +205,9 @@ class Notebook_ModelView_Base():
             columns.append('volume_mount')
         self.edit_columns = ['project']+columns
         self.edit_form_extra_fields=self.add_form_extra_fields
+        self.default_filter={
+            "created_by":g.user.id
+        }
 
 
     # @pysnooper.snoop()
@@ -462,11 +472,13 @@ class Notebook_ModelView_Base():
             notebook_crd = self.reset_notebook(notebook)
             flash('已重置，Running状态后可进入。注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。','warning')
         except Exception as e:
-            flash('重置失败，稍后重试。%s'%str(e), 'warning')
+            message = '重置失败，稍后重试。%s'%str(e)
+            flash(message, 'warning')
+            return self.response(400, **{"message": message, "status": 1, "result": {}})
 
-        self.update_redirect()
-        return redirect(self.get_redirect())
-        # return redirect(self.check_redirect_list_url)
+
+        return redirect(conf.get('MODEL_URLS',{}).get('notebook',''))
+
 
     # @event_logger.log_this
     @expose('/renew/<notebook_id>',methods=['GET','POST'])
@@ -474,8 +486,7 @@ class Notebook_ModelView_Base():
         notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
         notebook.changed_on=datetime.datetime.now()
         db.session.commit()
-        self.update_redirect()
-        return redirect(self.get_redirect())
+        return redirect(conf.get('MODEL_URLS',{}).get('notebook',''))
 
     # 基础批量删除
     # @pysnooper.snoop()
@@ -547,6 +558,8 @@ appbuilder.add_view(Notebook_ModelView,"notebook",href="/notebook_modelview/list
 class Notebook_ModelView_Api(Notebook_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Notebook)
     route_base = '/notebook_modelview/api'
+
+
 
 appbuilder.add_api(Notebook_ModelView_Api)
 

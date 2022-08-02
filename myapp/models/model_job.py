@@ -620,7 +620,8 @@ class RunHistory(Model,MyappModelBase):
     def status_url(self):
         if self.status=='comed':
             return self.status
-        return Markup(f'<a target=_blank href="/workflow_modelview/list/?_flt_2_labels={self.run_id}">{self.status}</a>')
+        path=conf.get('MODEL_URLS',{}).get('workflow','')+'/labels='+self.run_id
+        return Markup(f'<a target=_blank href="{path}">{self.status}</a>')
 
     @property
     def creator(self):
@@ -633,8 +634,9 @@ class RunHistory(Model,MyappModelBase):
 
     @property
     def history(self):
-        url = r'/workflow_modelview/list/?_flt_2_labels="pipeline-id"%3A+"' + '%s"' % self.pipeline_id
-        return Markup(f"<a href='{url}'>运行记录</a>")
+        path=conf.get('MODEL_URLS',{}).get('workflow','')+'/labels="pipeline-id"%3A+"' + '%s"' % self.pipeline_id
+        # url = r'/workflow_modelview/list/?_flt_2_labels="pipeline-id"%3A+"' + '%s"' % self.pipeline_id
+        return Markup(f"<a href='{path}'>运行记录</a>")
 
     @property
     def log(self):

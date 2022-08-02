@@ -67,11 +67,15 @@ class Repository_ModelView_Base():
     datamodel = SQLAInterface(Repository)
 
     label_title='仓库'
-    check_redirect_list_url = '/repository_modelview/list/'
+    check_redirect_list_url = conf.get('MODEL_URLS',{}).get('repository','')
     base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']  # 默认为这些
     base_order = ('id', 'desc')
     order_columns = ['id']
     list_columns = ['name','hubsecret','creator','modified']
+    cols_width = {
+        "name":{"type": "ellip2", "width": 250},
+        "hubsecret": {"type": "ellip2", "width": 250},
+    }
     show_exclude_columns = ['password']
     add_columns = ['name','server','user','password','hubsecret']
     edit_columns = add_columns
@@ -125,11 +129,11 @@ class Repository_ModelView_Base():
     def post_update(self, item):
         self.apply_hubsecret(item)
 
-class Repository_ModelView(Repository_ModelView_Base,MyappModelView,DeleteMixin):
-    datamodel = SQLAInterface(Repository)
-
-# 添加视图和菜单
-appbuilder.add_view(Repository_ModelView,"仓库",icon = 'fa-shopping-basket',category = '训练',category_icon = 'fa-sitemap')
+# class Repository_ModelView(Repository_ModelView_Base,MyappModelView,DeleteMixin):
+#     datamodel = SQLAInterface(Repository)
+#
+# # 添加视图和菜单
+# appbuilder.add_view(Repository_ModelView,"仓库",icon = 'fa-shopping-basket',category = '训练',category_icon = 'fa-sitemap')
 
 # 添加api
 class Repository_ModelView_Api(Repository_ModelView_Base,MyappModelRestApi):
@@ -159,10 +163,12 @@ class Images_Filter(MyappFilter):
 class Images_ModelView_Base():
     label_title='镜像'
     datamodel = SQLAInterface(Images)
-    check_redirect_list_url = '/images_modelview/list/?_flt_2_name='
-    help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
-    list_columns = ['images_url','creator','modified']
+    check_redirect_list_url = conf.get('MODEL_URLS',{}).get('images','')
 
+    list_columns = ['images_url','creator','modified']
+    cols_width = {
+        "images_url":{"type": "ellip2", "width": 500},
+    }
     base_order = ('id', 'desc')
     order_columns = ['id']
     add_columns = ['repository', 'name', 'describe', 'dockerfile', 'gitpath']
@@ -201,7 +207,7 @@ appbuilder.add_view(Images_ModelView,"模板镜像",href="/images_modelview/list
 class Images_ModelView_Api(Images_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Images)
     route_base = '/images_modelview/api'
-    list_columns = ['images_url', 'repository', 'name', 'describe', 'dockerfile', 'gitpath','modified','creator']
+    list_columns = ['images_url', 'modified','creator']
 
 appbuilder.add_api(Images_ModelView_Api)
 

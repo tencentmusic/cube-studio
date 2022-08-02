@@ -7,6 +7,7 @@ from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import uuid
 import re
+import urllib.parse
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
 # 将model添加成视图，并控制在前端的显示
@@ -29,7 +30,7 @@ from jinja2 import Environment, BaseLoader, DebugUndefined, StrictUndefined
 import os,sys
 from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
 from myapp.forms import JsonValidator
-from myapp.views.view_task import Task_ModelView
+from myapp.views.view_task import Task_ModelView,Task_ModelView_Api
 from sqlalchemy import and_, or_, select
 from myapp.exceptions import MyappException
 from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
@@ -611,7 +612,7 @@ def run_pipeline(pipeline_file,pipeline_name,kfp_host,pipeline_argo_id,pipeline_
 class Pipeline_ModelView_Base():
     label_title='任务流'
     datamodel = SQLAInterface(Pipeline)
-    check_redirect_list_url = '/pipeline_modelview/list/?_flt_2_name='
+    check_redirect_list_url = conf.get('MODEL_URLS',{}).get('pipeline','')
 
     base_permissions = ['can_show','can_edit','can_list','can_delete','can_add']
     base_order = ("changed_on", "desc")
@@ -619,8 +620,16 @@ class Pipeline_ModelView_Base():
     order_columns = ['id']
 
     list_columns = ['id','project','pipeline_url','creator','modified']
+    cols_width={
+        "id":{"type": "ellip2", "width": 100},
+        "project": {"type": "ellip2", "width": 200},
+        "pipeline_url":{"type": "ellip2", "width": 500},
+        "modified": {"type": "ellip2", "width": 150}
+    }
     add_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','alert_status','alert_user','parameter']
-    show_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','dag_json_html','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand_html','parameter_html']
+    show_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','dag_json','pipeline_file','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand','parameter']
+    # show_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','dag_json','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand']
+    search_columns = ['id', 'created_by', 'name', 'describe', 'schedule_type', 'project']
     edit_columns = add_columns
 
 
@@ -933,37 +942,7 @@ class Pipeline_ModelView_Base():
         )
         return res
 
-
-    # @event_logger.log_this
-    @action(
-        "download", __("Download"), __("Download Yaml"), "fa-download", multiple=False, single=True
-    )
-    def download(self, item):
-        file_name = item.name+'-download.yaml'
-        file_dir = os.path.join(conf.get('DOWNLOAD_FOLDER'),'pipeline')
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
-        file = open(os.path.join(file_dir,file_name), mode='wb')
-        pipeline_file = item.pipeline_file
-        try:
-            import yaml
-            pipeline_yaml = yaml.safe_load(pipeline_file)
-            pipeline_yaml['metadata']['name']=item.name+'-'+uuid.uuid4().hex[:4]
-            pipeline_yaml['metadata']['namespace'] = 'pipeline'
-            pipeline_file = yaml.safe_dump(pipeline_yaml)
-        except Exception as e:
-            print(e)
-
-        file.write(bytes(pipeline_file, encoding='utf-8'))
-        file.close()
-        response = make_response(send_from_directory(file_dir, file_name, as_attachment=True, conditional=True))
-
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename={file_name}"
-        logging.info("Ready to return response")
-        return response
-
+    
 
 
 
@@ -1123,13 +1102,16 @@ class Pipeline_ModelView_Base():
         #     except Exception as e:
         #         print(e)
 
+
         db.session.commit()
         print(pipeline_id)
+        url = '/static/appbuilder/vison/index.html?pipeline_id=%s'%pipeline_id  # 前后端集成完毕，这里需要修改掉
         data = {
-            "url": '/static/appbuilder/vison/index.html?pipeline_id=%s'%pipeline_id  # 前后端集成完毕，这里需要修改掉
+            "url": url
         }
+        return redirect('/frontend/showOutLink?url=%s'%urllib.parse.quote(url, safe=""))
         # 返回模板
-        return self.render_template('link.html', data=data)
+        # return self.render_template('link.html', data=data)
 
 
     # # @event_logger.log_this
@@ -1196,7 +1178,7 @@ class Pipeline_ModelView_Base():
     def copy_db(self,pipeline):
         new_pipeline = pipeline.clone()
         expand = json.loads(pipeline.expand) if pipeline.expand else {}
-        new_pipeline.name = new_pipeline.name.replace('_', '-') + "-copy-" + uuid.uuid4().hex[:4]
+        new_pipeline.name = new_pipeline.name.replace('_', '-') + "-" + uuid.uuid4().hex[:4]
         new_pipeline.created_on = datetime.datetime.now()
         new_pipeline.changed_on = datetime.datetime.now()
         db.session.add(new_pipeline)
@@ -1265,6 +1247,80 @@ class Pipeline_ModelView_Base():
         return redirect(request.referrer)
 
 
+
+    @expose("/config/<pipeline_id>",methods=("GET",'POST'))
+    # @pysnooper.snoop()
+    def pipeline_config(self,pipeline_id):
+        print(pipeline_id)
+        pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
+
+        if not pipeline:
+            return jsonify({
+                "status":1,
+                "message":"任务流不存在",
+                "result":{}
+            })
+        if request.method.lower()=='post':
+
+            if g.user.username != pipeline.created_by.username and not g.user.is_admin():
+                return jsonify({
+                    "result": {},
+                    "message": "只有创建者或管理员可修改",
+                    "status": -1
+                })
+
+
+        config = {
+            "id":pipeline.id,
+            "name":pipeline.name,
+            "label":pipeline.describe,
+            "project":pipeline.project.describe,
+            "pipeline_jump_button": [
+                {
+                    "name":"调度实例",
+                    "action_url":conf.get('MODEL_URLS',{}).get('workflow')+'?filter='+urllib.parse.quote(json.dumps([{"key":"label","value":'"pipeline-id": "%s"'%pipeline_id}],ensure_ascii=False)),
+                    "icon_svg":'<svg t="1658745802720" class="icon" viewBox="0 0 1239 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3024" width="200" height="200"><path d="M662.929155 1023.027623a83.489741 83.489741 0 0 1-33.395896-7.235778 86.272732 86.272732 0 0 1-51.207041-79.593553v-311.695031L140.839976 1001.876889a82.376544 82.376544 0 0 1-89.612321 15.028153A86.272732 86.272732 0 0 1 0.020614 936.198292V86.82933A86.272732 86.272732 0 0 1 51.784253 7.235778a82.376544 82.376544 0 0 1 89.612322 15.584751l436.373044 377.373628V86.82933a86.272732 86.272732 0 0 1 51.76364-79.593552 82.376544 82.376544 0 0 1 90.16892 15.584751L1210.621854 445.278617a87.385929 87.385929 0 0 1 0 128.574201L718.588982 1001.876889a82.933142 82.933142 0 0 1-55.659827 21.150734z m-578.862202-87.385929l492.58947-424.127883-490.919675-426.910874v851.595355z m577.749005 0l492.589471-424.127883-490.919676-426.910874v851.595355z" fill="#245fd1" p-id="3025"></path></svg>'
+                },
+                {
+                    "name": "日志",
+                    "action_url": '/pipeline_modelview/web/log/%s'%pipeline_id,
+                    "icon_svg": '<svg t="1658745990874" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2268" width="200" height="200"><path d="M819.9 472.9L675 723.9l1.7 99.4 86.9-48.3 144.9-251-88.6-51.1zM871.1 384.3L837 443.4l88.6 51.1 34.1-59.1-88.6-51.1zM544.3 703h-288c-17.7 0-32 14.3-32 32s14.3 32 32 32h288c17.7 0 32-14.3 32-32s-14.3-32-32-32zM256.3 511c-17.7 0-32 14.3-32 32s14.3 32 32 32h384c17.7 0 32-14.3 32-32s-14.3-32-32-32h-384zM256.3 319c-17.7 0-32 14.3-32 32s14.3 32 32 32h384c17.7 0 32-14.3 32-32s-14.3-32-32-32h-384zM288 64h64v160h-64zM384 128h128v64H384zM544 64h64v160h-64z" p-id="2269" fill="#245fd1"></path><path d="M768 864c0 17.7-14.3 32-32 32H160c-17.7 0-32-14.3-32-32V224c0-17.7 14.3-32 32-32h96v-64h-96c-53 0-96 43-96 96v640c0 53 43 96 96 96h576c53 0 96-43 96-96V686.7L768 798v66zM832 224c0-53-43-96-96-96h-96v64h96c17.7 0 32 14.3 32 32v311l64-111.3V224z" p-id="2270" fill="#245fd1"></path></svg>'
+                },
+                {
+                    "name": "容器",
+                    "action_url": '/pipeline_modelview/web/pod/%s'%pipeline_id,
+                    "icon_svg": '<svg t="1658746095720" class="icon" viewBox="0 0 1472 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4861" width="200" height="200"><path d="M1449.66628 358.737a233.848 233.848 0 0 0-166.348-35.445 268.717 268.717 0 0 0-108.127-152.273l-31.158-20.026-22.265 30.455a258.736 258.736 0 0 0-22.01 265.39 177.353 177.353 0 0 1-74.28 21.241h-24.953V309.536H830.08228V0H624.44928v154.768H287.27328v154.704H118.68528V468.08H8.44728L3.26528 504.42a493.032 493.032 0 0 0 95.97 353.3c90.149 110.11 234.232 165.964 428.284 165.964a749.848 749.848 0 0 0 585.42-255.025 804.871 804.871 0 0 0 139.86-226.874c187.718-3.391 213.246-134.359 214.27-139.99l4.863-27.447-22.01-15.61z m-766.291-49.84v-92.068h87.717v92.068h-87.717z m-337.176 154.64v-92.068h87.59v92.068h-87.59z m168.588 0v-92.068h87.589v92.068h-87.589z m168.588 0v-92.068h87.717v92.068h-87.717z m170.38-92.068h87.524v92.068h-87.525v-92.068zM683.37428 62.125h87.717v92.003h-87.717V62.125zM514.78728 216.829h87.589v92.068h-87.525v-92.068z m-168.588 0h87.59v92.068h-87.59v-92.068zM177.61228 371.47h87.525v92.068H177.61228v-92.068zM527.19928 938.4a609.348 609.348 0 0 1-235-40.564 399.493 399.493 0 0 0 151.058-66.092 44.018 44.018 0 0 0 7.87-57.582 39.54 39.54 0 0 0-54.575-11.9 375.18 375.18 0 0 1-215.998 62.508 262.639 262.639 0 0 1-19.194-21.433 392.455 392.455 0 0 1-79.591-249.523h943.9a250.035 250.035 0 0 0 155.216-62.06l4.99-4.671a682.157 682.157 0 0 1-658.42 451.636z m699.432-482.412l-25.144-1.215-15.163-21.178a186.566 186.566 0 0 1-21.626-161.358 145.619 145.619 0 0 1 42.483 100.769l-1.663 60.525 54.83-18.682a205.505 205.505 0 0 1 111.07-1.664 170.123 170.123 0 0 1-144.787 42.803zM544.41028 629.31a69.738 69.738 0 1 1-66.412 69.674 68.139 68.139 0 0 1 66.412-69.674z m0 85.413a15.74 15.74 0 1 0-14.971-15.675 15.291 15.291 0 0 0 14.97 15.675z m0 0" p-id="4862" fill="#245fd1"></path></svg>'
+                },
+                {
+                    "name": "定时记录",
+                    "action_url": conf.get('MODEL_URLS', {}).get('runhistory')+'?filter='+urllib.parse.quote(json.dumps([{"key":"pipeline","value":pipeline_id}],ensure_ascii=False)),
+                    "icon_svg": '<svg t="1658746184808" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7122" width="200" height="200"><path d="M972.1 345.3c-7.6 0-14.8-4.3-18.2-11.6-58-126.1-167.3-221.3-299.9-261.4-10.6-3.2-16.6-14.4-13.4-24.9S655 30.8 665.5 34C809 77.4 927.3 180.5 990.1 317c4.6 10 0.2 21.9-9.8 26.5-2.5 1.2-5.4 1.8-8.2 1.8zM55.3 345.2c-2.8 0-5.6-0.6-8.4-1.8-10-4.6-14.4-16.5-9.8-26.5C98.2 184.2 212.8 82.3 351.4 37.2c10.5-3.4 21.8 2.3 25.2 12.8 3.4 10.5-2.3 21.8-12.8 25.2C235.8 116.8 130 211 73.5 333.5c-3.4 7.4-10.7 11.7-18.2 11.7zM510.3 181.4c47.9 0 94.3 9.4 138 27.9 42.2 17.9 80.2 43.4 112.7 76 32.6 32.6 58.2 70.5 76 112.7 18.5 43.7 27.9 90.1 27.9 138 0 47.9-9.4 94.3-27.9 138-17.9 42.2-43.4 80.2-76 112.7-32.6 32.6-70.5 58.2-112.7 76-43.7 18.5-90.1 27.9-138 27.9s-94.3-9.4-138-27.9c-42.2-17.9-80.2-43.4-112.7-76-32.6-32.6-58.2-70.5-76-112.7-18.5-43.7-27.9-90.1-27.9-138 0-47.9 9.4-94.3 27.9-138 17.9-42.2 43.4-80.2 76-112.7s70.5-58.2 112.7-76c43.7-18.5 90.1-27.9 138-27.9m0-41.8c-218.9 0-396.4 177.5-396.4 396.4s177.5 396.4 396.4 396.4S906.7 755 906.7 536.1 729.3 139.6 510.3 139.6z" fill="#245fd1" p-id="7123"></path><path d="M513.7 556.1c-3.8 0-7.5-1.1-10.8-3.2-5.7-3.7-9.2-10-9.2-16.8V232.5c0-11 9-20 20-20s20 9 20 20V505l171-77.9c10-4.6 21.9-0.1 26.5 9.9 4.6 10.1 0.1 21.9-9.9 26.5L522 554.3c-2.7 1.2-5.5 1.8-8.3 1.8zM202 991.8c-5.1 0-10.2-2-14.1-5.9-7.8-7.8-7.8-20.5 0-28.3l99.8-99.8c7.8-7.8 20.5-7.8 28.3 0s7.8 20.5 0 28.3l-99.8 99.8c-3.9 3.9-9 5.9-14.2 5.9zM818.6 991.8c-5.1 0-10.2-2-14.1-5.9l-99.8-99.8c-7.8-7.8-7.8-20.5 0-28.3 7.8-7.8 20.5-7.8 28.3 0l99.8 99.8c7.8 7.8 7.8 20.5 0 28.3-4 3.9-9.1 5.9-14.2 5.9z" fill="#245fd1" p-id="7124"></path></svg>'
+                },
+                {
+                    "name": "监控",
+                    "action_url": '/pipeline_modelview/web/monitoring/%s'%pipeline_id,
+                    "icon_svg": '<svg t="1658746229697" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8210" width="200" height="200"><path d="M512 302.037c-83.338 0-161.688 32.454-220.617 91.383C232.454 452.348 200 530.698 200 614.036c0 17.673 14.327 32 32 32s32-14.327 32-32c0-66.243 25.796-128.521 72.638-175.362 46.841-46.841 109.119-72.638 175.362-72.638s128.521 25.796 175.362 72.638C734.203 485.515 760 547.793 760 614.036c0 17.673 14.327 32 32 32s32-14.327 32-32c0-83.338-32.454-161.688-91.383-220.617C673.688 334.49 595.338 302.037 512 302.037z" fill="#245fd1" p-id="8211"></path><path d="M512 158C264.576 158 64 358.576 64 606c0 89.999 26.545 173.796 72.224 244h751.553C933.455 779.796 960 695.999 960 606c0-247.424-200.576-448-448-448z m339.288 628H172.712C143.373 730.813 128 669.228 128 606c0-51.868 10.144-102.15 30.15-149.451 19.337-45.719 47.034-86.792 82.321-122.078 35.286-35.287 76.359-62.983 122.078-82.321C409.85 232.144 460.132 222 512 222c51.868 0 102.15 10.144 149.451 30.15 45.719 19.337 86.792 47.034 122.078 82.321 35.287 35.286 62.983 76.359 82.321 122.078C885.856 503.85 896 554.132 896 606c0 63.228-15.373 124.813-44.712 180z" fill="#245fd1" p-id="8212"></path><path d="M532.241 586.466a79.753 79.753 0 0 0-29.217 5.529l-69.087-69.087c-12.497-12.499-32.758-12.497-45.255-0.001-12.497 12.497-12.497 32.759 0 45.255l69.088 69.088a79.753 79.753 0 0 0-5.529 29.217c0 44.183 35.817 80 80 80s80-35.817 80-80-35.818-80.001-80-80.001z" fill="#245fd1" p-id="8213"></path></svg>'
+                }
+            ],
+            "pipeline_run_button": [
+                {
+                    "name": "运行",
+                    "action_url": "/pipeline_modelview/run_pipeline/%s"%pipeline.id
+                },
+                {
+                    "name": "复制",
+                    "action_url": "/pipeline_modelview/copy_pipeline/%s" % pipeline.id
+                }
+            ],
+            "message": "success",
+            "status": 0
+        }
+
+
+        return jsonify(config)
+
+
+
 class Pipeline_ModelView(Pipeline_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Pipeline)
     # base_order = ("changed_on", "desc")
@@ -1272,17 +1328,31 @@ class Pipeline_ModelView(Pipeline_ModelView_Base,MyappModelView,DeleteMixin):
 
 appbuilder.add_view(Pipeline_ModelView,"任务流",href="/pipeline_modelview/list/?_flt_0_created_by=",icon = 'fa-sitemap',category = '训练')
 
+
 # 添加api
 class Pipeline_ModelView_Api(Pipeline_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Pipeline)
     route_base = '/pipeline_modelview/api'
-    show_columns = ['project','name','describe','namespace','schedule_type','cron_time','node_selector','image_pull_policy','depends_on_past','max_active_runs','parallelism','global_env','dag_json','pipeline_file','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand']
-    # show_columns = ['name','describe','project','dag_json','namespace','global_env','schedule_type','cron_time','pipeline_file','pipeline_argo_id','version_id','run_id','node_selector','image_pull_policy','parallelism','alert_status']
-    list_columns = show_columns
-    add_columns = ['project','name','describe','namespace','schedule_type','cron_time','node_selector','image_pull_policy','depends_on_past','max_active_runs','parallelism','dag_json','global_env','expand']
-    edit_columns = add_columns
+    # show_columns = ['project','name','describe','namespace','schedule_type','cron_time','node_selector','depends_on_past','max_active_runs','parallelism','global_env','dag_json','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand']
+    list_columns = ['id','project','pipeline_url','creator','modified']
+    add_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','alert_status','expand']
+    edit_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','dag_json','global_env','alert_status','expand','created_by']
+
+    related_views = [Task_ModelView_Api,]
+
+    def pre_add_get(self):
+        self.default_filter = {
+            "created_by": g.user.id
+        }
+
+    add_form_query_rel_fields = {
+        "project": [["name", Project_Join_Filter, 'org']]
+    }
+    edit_form_query_rel_fields=add_form_query_rel_fields
+
 
 appbuilder.add_api(Pipeline_ModelView_Api)
+
 
 
 

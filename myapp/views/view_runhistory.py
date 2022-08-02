@@ -63,6 +63,10 @@ class RunHistory_ModelView_Base():
     order_columns = ['id']
 
     list_columns = ['pipeline_url','creator','created_on','execution_date','status_url','log','history']
+    cols_width={
+        "pipeline_url": {"type": "ellip2", "width": 400},
+        "created_on":{"type": "ellip2", "width": 300}
+    }
     edit_columns = ['status']
     base_filters = [["id", RunHistory_Filter, lambda: []]]  # 设置权限过滤器
     add_form_extra_fields = {

@@ -86,12 +86,32 @@ class Task_ModelView_Base():
     datamodel = SQLAInterface(Task)
     check_redirect_list_url = '/pipeline_modelview/edit/'
     help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
-    list_columns = ['name','label','job_template_url','volume_mount','debug','run','clear','log']
+    list_columns =['name', 'label','pipeline', 'job_template','volume_mount','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_on','changed_on','monitoring','expand']
+    # list_columns = ['name','label','job_template_url','volume_mount','debug','run','clear','log']
+    cols_width={
+        "name":{"type": "ellip2", "width": 300},
+        "label":{"type": "ellip2", "width": 300},
+        "pipeline": {"type": "ellip2", "width": 300},
+        "job_template":{"type": "ellip2", "width": 300},
+        "volume_mount":{"type": "ellip2", "width": 600},
+        "args":{"type": "ellip2", "width": 400},
+        "resource_memory": {"type": "ellip2", "width": 100},
+        "resource_cpu": {"type": "ellip2", "width": 100},
+        "resource_gpu": {"type": "ellip2", "width": 100},
+        "timeout": {"type": "ellip2", "width": 100},
+        "retry": {"type": "ellip2", "width": 100},
+        "created_on": {"type": "ellip2", "width": 300},
+        "changed_on": {"type": "ellip2", "width": 300},
+        "monitoring": {"type": "ellip2", "width": 300},
+        "expand": {"type": "ellip2", "width": 300},
+    }
     show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','command','overwrite_entrypoint','working_dir', 'args_html','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_by','changed_by','created_on','changed_on','monitoring_html']
     add_columns = ['job_template', 'name', 'label', 'pipeline', 'volume_mount','command','working_dir']
     edit_columns = add_columns
     base_order = ('id','desc')
     order_columns = ['id']
+    search_columns = ['pipeline']
+
     conv = GeneralModelConverter(datamodel)
 
     add_form_extra_fields = {
@@ -138,7 +158,7 @@ class Task_ModelView_Base():
         "command":StringField(
             label = _(datamodel.obj.lab('command')),
             description='启动命令',
-            widget=MyBS3TextAreaFieldWidget(rows=3)
+            widget=BS3TextFieldWidget()
         ),
         "overwrite_entrypoint":BooleanField(
             label = _(datamodel.obj.lab('overwrite_entrypoint')),
@@ -491,8 +511,11 @@ class Task_ModelView_Base():
         task = db.session.query(Task).filter_by(id=task_id).first()
         if task.job_template.name != conf.get('CUSTOMIZE_JOB'):
             if not g.user.is_admin() and task.job_template.created_by.username!=g.user.username:
-                flash('仅管理员或当前任务模板创建者，可启动debug模式', 'warning')
-                return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
+                message='仅管理员或当前任务模板创建者，可启动debug模式'
+                flash(message, 'warning')
+                return self.response(400,**{"status":1,"result":{},"message":message})
+
+                # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
 
         from myapp.utils.py.py_k8s import K8s
@@ -526,7 +549,7 @@ class Task_ModelView_Base():
                 args=None
             )
 
-        try_num=5
+        try_num=30
         while(try_num>0):
             pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
             # print(pod)
@@ -538,8 +561,10 @@ class Task_ModelView_Base():
             try_num=try_num-1
             time.sleep(2)
         if try_num==0:
-            flash('启动时间过长，一分钟后重试','warning')
-            return redirect('/pipeline_modelview/web/%s'%str(task.pipeline.id))
+            message='启动时间过长，一分钟后重试'
+            flash(message,'warning')
+            return self.response(400, **{"status": 1, "result": {}, "message": message})
+            # return redirect('/pipeline_modelview/web/%s'%str(task.pipeline.id))
 
 
         return redirect("/myapp/web/debug/%s/%s/%s/%s"%(task.pipeline.project.cluster['NAME'],namespace,pod_name,pod_name))
@@ -572,8 +597,10 @@ class Task_ModelView_Base():
                 pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
                 check_date = datetime.datetime.now()
                 if (check_date-delete_time).seconds>60:
-                    flash("超时，请稍后重试",category='warning')
-                    return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
+                    message="超时，请稍后重试"
+                    flash(message,category='warning')
+                    return self.response(400, **{"status": 1, "result": {}, "message": message})
+                    # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
 
 
@@ -634,8 +661,10 @@ class Task_ModelView_Base():
             try_num = try_num - 1
             time.sleep(2)
         if try_num == 0:
-            flash('启动时间过长，一分钟后重试', 'warning')
-            return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
+            message = '启动时间过长，一分钟后重试'
+            flash(message, 'warning')
+            return self.response(400, **{"status": 1, "result": {}, "message": message})
+            # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
         return redirect("/myapp/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
 
@@ -716,7 +745,6 @@ class Task_ModelView_Api(Task_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Task)
     route_base = '/task_modelview/api'
     # list_columns = ['name','label','job_template_url','volume_mount','debug']
-    list_columns =['name', 'label','pipeline', 'job_template','volume_mount','node_selector','command','overwrite_entrypoint','working_dir', 'args','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_by','changed_by','created_on','changed_on','monitoring','expand']
     add_columns = ['name','label','job_template','pipeline','working_dir','command','args','volume_mount','node_selector','resource_memory','resource_cpu','resource_gpu','timeout','retry','expand']
     edit_columns = add_columns
     show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','node_selector','command','overwrite_entrypoint','working_dir', 'args','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_by','changed_by','created_on','changed_on','monitoring','expand']

@@ -48,8 +48,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     volume_mount = Column(String(400), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
     node_selector = Column(String(200), default='cpu=true,notebook=true')  # 挂载
     image_pull_policy = Column(Enum('Always', 'IfNotPresent'), nullable=True, default='Always')
-    resource_memory = Column(String(100), default='2G')
-    resource_cpu = Column(String(100), default='2')
+    resource_memory = Column(String(100), default='10G')
+    resource_cpu = Column(String(100), default='10')
     resource_gpu = Column(String(100), default='0')
     expand = Column(Text(65536), default='')
 

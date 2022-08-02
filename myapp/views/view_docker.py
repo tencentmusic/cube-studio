@@ -80,9 +80,10 @@ class Docker_Filter(MyappFilter):
 class Docker_ModelView_Base():
     datamodel = SQLAInterface(Docker)
     label_title='docker'
-    check_redirect_list_url = '/docker_modelview/list/'
+    check_redirect_list_url = conf.get('MODEL_URLS',{}).get('docker')
+
     crd_name = 'docker'
-    help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
+
     conv = GeneralModelConverter(datamodel)
     base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']  # 默认为这些
     base_order = ('changed_on', 'desc')
@@ -91,6 +92,12 @@ class Docker_ModelView_Base():
     add_columns=['project','describe','base_image','target_image','need_gpu','consecutive_build','expand']
     edit_columns=add_columns
     list_columns=['project','describe','consecutive_build','image_history','debug']
+    cols_width={
+        "project": {"type": "ellip2", "width": 200},
+        "describe":{"type": "ellip2", "width": 200},
+        "image_history":{"type": "ellip3", "width": 700},
+        "debug":{"type": "ellip2", "width": 300}
+    }
 
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -111,7 +118,7 @@ class Docker_ModelView_Base():
         ),
         "base_image":StringField(
             _(datamodel.obj.lab('base_image')),
-            default='ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8',
+            default='',
             description=Markup(f'基础镜像和构建方法可参考：<a href="%s">点击打开</a>'%(conf.get('HELP_URL').get('docker',''))),
             widget=BS3TextFieldWidget()
         ),
@@ -128,10 +135,10 @@ class Docker_ModelView_Base():
     def pre_add_get(self,docker=None):
         self.add_form_extra_fields['target_image']=StringField(
             _(self.datamodel.obj.lab('target_image')),
-            default=conf.get('REPOSITORY_ORG')+g.user.username+":xx",
-            description="目标镜像名，必须为%s%s:xxx"%(conf.get('REPOSITORY_ORG'),g.user.username),
+            default=conf.get('REPOSITORY_ORG')+g.user.username+":"+datetime.datetime.now().strftime('%Y.%m.%d'+".1"),
+            description="目标镜像名，将直接推送到目标目标仓库",
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(),Regexp("^%s%s:"%(conf.get('REPOSITORY_ORG'),g.user.username))]
+            validators=[DataRequired(),]
         )
         # # if g.user.is_admin():
         # self.edit_columns=['describe','base_image','target_image','need_gpu','consecutive_build']
@@ -218,8 +225,10 @@ class Docker_ModelView_Base():
             try_num=try_num-1
             time.sleep(2)
         if try_num==0:
-            flash('启动时间过长，一分钟后重试','warning')
-            return redirect('/docker_modelview/list/')
+            message='拉取镜像时间过长，一分钟后刷新此页面'
+            flash(message,'warning')
+            return self.response(400,**{"message":message,"status":1,"result":pod['status_more']})
+            # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
         flash('镜像调试只安装环境，请不要运行业务代码。当晚前请注意保存镜像','warning')
         return redirect("/docker_modelview/web/debug/%s/%s/%s"%(conf.get('ENVIRONMENT'),namespace,pod_name))
@@ -236,7 +245,7 @@ class Docker_ModelView_Base():
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
         flash('清理结束，可重新进行调试','success')
-        return redirect("/docker_modelview/list/")
+        return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
 
     @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>", methods=["GET", "POST"])
@@ -282,11 +291,13 @@ class Docker_ModelView_Base():
                 container_id = containers[0].container_id.replace('docker://','')
 
         if not node_name or not container_id:
-            flash('没有发现正在运行的调试镜像，请先调试惊险，安装环境后，再保存生成新镜像',category='warning')
-            return redirect('/docker_modelview/list/')
+            message = '没有发现正在运行的调试镜像，请先调试惊险，安装环境后，再保存生成新镜像'
+            flash(message,category='warning')
+            return self.response(400,**{"message":message,"status":1,"result":{}})
+            # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
         # flash('新镜像正在保存推送中，请留意消息通知',category='success')
-        # return redirect('/docker_modelview/list/')
+        # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
         pod_name = "docker-commit-%s-%s" % (docker.created_by.username, str(docker.id))
         command = ['sh', '-c', 'docker commit %s %s && docker push %s'%(container_id,docker.target_image,docker.target_image)]
@@ -333,7 +344,15 @@ class Docker_ModelView(Docker_ModelView_Base,MyappModelView,DeleteMixin):
 # 添加视图和菜单
 appbuilder.add_view(Docker_ModelView,"镜像调试",href="/docker_modelview/list/",icon = 'fa-cubes',category = '在线开发',category_icon = 'fa-glass')
 
+# 添加api
+class Docker_ModelView_Api(Docker_ModelView_Base,MyappModelRestApi):
+    datamodel = SQLAInterface(Docker)
+    route_base = '/docker_modelview/api'
+    add_columns = ['project', 'describe', 'base_image', 'target_image', 'need_gpu', 'consecutive_build', 'expand']
+    edit_columns = add_columns
+    search_columns = ['created_by','project']
 
+appbuilder.add_api(Docker_ModelView_Api)
 
 
 
