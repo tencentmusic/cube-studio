@@ -5,11 +5,12 @@ const { myapp_username, t_uid, km_uid } = cookie.parse(document.cookie);
 const Authorization = myapp_username || t_uid || km_uid || '';
 
 axios.defaults.baseURL =
-  process.env.NODE_ENV === 'development' ? process.env.REACT_APP_API_HOST : window.location.origin;
+  process.env.NODE_ENV === 'development' ? 'http://localhost' || process.env.REACT_APP_API_HOST : window.location.origin;
 
 axios.defaults.headers = Object.assign(axios.defaults.headers, {
   'Content-Type': 'application/json',
-  Authorization,
+ 
+  // Authorization,
 });
 
 axios.interceptors.response.use(
@@ -38,6 +39,7 @@ const Ajax = {
           resolve(response.data);
         })
         .catch(err => {
+          console.log(err, "888");
           this._errHandle(err);
           reject(err);
         });

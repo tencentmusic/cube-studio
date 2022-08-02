@@ -6,7 +6,7 @@
 {% set logo_target_path = appbuilder.app.config.get('LOGO_TARGET_PATH') or '/profile/{}/'.format(current_user.username)
 %}
 
-<div class="navbar navbar-static-top {{menu.extra_classes}}" role="navigation">
+<!-- <div class="navbar navbar-static-top {{menu.extra_classes}}" role="navigation">
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -16,8 +16,7 @@
       </button>
 {#      <a class="navbar-brand" href="{{ '/myapp' + logo_target_path if current_user.username is defined else '#' }}">#}
       <a class="navbar-brand" href="/myapp/home">
-          <img height="{{ app_icon_height }}" src="{{ appbuilder.app_icon }}" alt="{{ appbuilder.app_name }}" />
-{#        <img height="{{ app_icon_height }}" src="/static/assets/images/logo.svg" alt="{{ appbuilder.app_name }}" />#}
+        <img height="{{ app_icon_height }}" src="/static/assets/images/logo2.svg" alt="{{ appbuilder.app_name }}" />
       </a>
     </div>
     <div class="navbar-collapse collapse">
@@ -34,4 +33,4 @@
       </ul>
     </div>
   </div>
-</div>
+</div> -->

@@ -3,7 +3,7 @@
  */
 /* Global */
 html, body {
-	font: 20px/2 "SF Pro SC","SF Pro Text","SF Pro Icons","PingFang SC","Microsoft Yahei","Helvetica Neue","Helvetica","Arial",sans-serif;
+	/* font: 20px/2 "SF Pro SC","SF Pro Text","SF Pro Icons","PingFang SC","Microsoft Yahei","Helvetica Neue","Helvetica","Arial",sans-serif; */
 	color: #333;
 	height: 100%;
 }
@@ -98,7 +98,8 @@ textarea.form-control {
 		margin-left: 20px;
 	}
 	.navbar-inverse .navbar-nav>li>a {
-		font-size: .8rem;
+		/* font-size: .8rem; */
+		font-size: 1.4rem;
 		color: white;
 		margin: 12px 6px;
 		transition: all .25s;
@@ -108,14 +109,16 @@ textarea.form-control {
 	}
 	.nav .open>a, .nav .open>a:hover, .nav .open>a:focus,
 	.navbar-nav>li>a:hover, .navbar-nav>li>a:active {
-		border-color: #4b84ee;
+		/* border-color: #4b84ee; */
+		border-color: transparent !important;
 	}
 	.navbar-brand {
-		min-width: 200px;
+		padding-left: 32px;
+    	padding-right: 0;
 		height: 64px;
 		padding-top: 12px;
 		padding-bottom: 12px;
-		/* background-color: #1f222c!important; */
+		/* background-color: #1e1653!important; */
 	}
 	.navbar-inverse .navbar-right>li>a {
 		/* color: rgba(0, 0, 0, .85); */

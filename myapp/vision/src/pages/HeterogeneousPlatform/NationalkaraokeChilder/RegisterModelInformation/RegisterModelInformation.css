@@ -1,0 +1,32 @@
+@import '~antd/dist/antd.css';
+.RegisterModelInformationClass {
+  margin: 80px;
+  position: relative;
+}
+.RegisterModelInformationClass .bodyClass {
+  width: 400px;
+  margin: 0 auto;
+}
+.RegisterModelInformationClass .ButtonClass {
+  width: 24px;
+  height: 24px;
+  margin-left: 26px;
+  line-height: 24px;
+}
+.RegisterModelInformationClass .SceneHeader {
+  color: #000000;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+.RegisterModelInformationClass .preservationClass {
+  width: 294px;
+  height: 40px;
+  color: #ffffff;
+  background-color: #ff5733;
+  border-radius: 4px;
+  font-size: 14px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}

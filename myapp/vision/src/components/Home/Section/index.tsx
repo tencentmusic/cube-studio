@@ -33,19 +33,21 @@ const Section: React.FC<ISectionProps> = props => {
       })
       .then((res: any) => {
         if (res?.status === 0 && res?.message === 'success') {
-          if (window.self === window.top) {
-            window.location.href = `${window.location.origin}${location.pathname}?pipeline_id=${res?.result?.id}`;
-          } else {
-            window.parent.postMessage(
-              {
-                type: 'link',
-                message: {
-                  pipelineId: res?.result?.id,
-                },
-              },
-              `${window.location.origin}`,
-            );
-          }
+          const url = `${window.location.origin}${location.pathname}?pipeline_id=${res?.result?.id}`;
+          window.open(`${window.location.origin}/frontend/showOutLink?url=${encodeURIComponent(url)}`, 'bank');
+          // if (window.self === window.top) {
+          //   (window.top || window).location.href = `${window.location.origin}${location.pathname}?pipeline_id=${res?.result?.id}`;
+          // } else {
+          //   window.parent.postMessage(
+          //     {
+          //       type: 'link',
+          //       message: {
+          //         pipelineId: res?.result?.id,
+          //       },
+          //     },
+          //     `${window.location.origin}`,
+          //   );
+          // }
         }
       })
       .catch(err => {
@@ -56,21 +58,23 @@ const Section: React.FC<ISectionProps> = props => {
   };
 
   const handleClick = (item: any) => {
+    const url = `${window.location.origin}${location.pathname}?pipeline_id=${item?.id}`;
     switch (item.type) {
       case 'link':
-        if (window.self === window.top) {
-          window.location.href = `${window.location.origin}${location.pathname}?pipeline_id=${item?.id}`;
-        } else {
-          window.parent.postMessage(
-            {
-              type: 'link',
-              message: {
-                pipelineId: item?.id,
-              },
-            },
-            `${window.location.origin}`,
-          );
-        }
+        window.open(`${window.location.origin}/frontend/showOutLink?url=${encodeURIComponent(url)}`, 'bank');
+        // if (window.self === window.top) {
+        //   (window.top || window).location.href = `${window.location.origin}${location.pathname}?pipeline_id=${item?.id}`;
+        // } else {
+        //   window.parent.postMessage(
+        //     {
+        //       type: 'link',
+        //       message: {
+        //         pipelineId: item?.id,
+        //       },
+        //     },
+        //     `${window.location.origin}`,
+        //   );
+        // }
         break;
       case 'outside':
         window.open(item.url, '_blank');

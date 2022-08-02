@@ -3,6 +3,197 @@ import { IPipelineAdd, IPipelineEdit } from '../types/pipeline';
 import { ITaskAdd, ITaskEdit } from '../types/task';
 
 const QuestUrl = 'http://11.150.126.122:8081/api/'
+const TestUrl = 'http://11.161.238.209:8080/api/'
+
+
+// 注册场景 1
+const featureRegisterScenePostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureRegisterScene`,
+    data: {
+      data: {
+        ...data,
+      },
+    },
+  });
+}
+// 注册模型 1
+const featureRegisterModelConfigPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureRegisterModelConfig`,
+    data: {
+      data: {
+        ...data,
+      },
+    },
+  });
+}
+
+
+// 注册特征插件配置 1
+const featureRegisterFeProcConfigQUEST = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureRegisterFeProcConfig`,
+    data: {
+      ...data,
+    },
+  });
+}
+
+// 更新特征配置
+const featureUpdateIsomerismFeatureFeatureInfoQUEST = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureUpdateIsomerismFeatureFeatureInfo`,
+    data: {
+      data: {
+        ...data,
+      },
+    },
+  });
+}
+
+
+// 注册模型服务路由 1
+const featureRegisterModelServRouterPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureRegisterModelServRouter`,
+    data: {
+      data: {
+        ...data,
+      },
+    },
+  });
+}
+// 更新模型服务路由 1
+const featureUpdateModelConfigPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureUpdateModelConfig`,
+    data: {
+      data: {
+        ...data,
+      },
+    },
+  });
+}
+
+// 注册特征拉取服务路由 1
+const featureRegisterFeatureServRouterPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureRegisterFeatureServRouter`,
+    data: {
+      data: {
+        ...data,
+      },
+    },
+  });
+}
+
+// 注册特征  
+const featureRegisterIsomerismFeatureFeatureInfoPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureRegisterIsomerismFeatureFeatureInfo`,
+    data: {
+      data: {
+        ...data,
+      }
+    }
+  })
+}
+
+// 注册算子  1
+const featureRegisterOpPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureRegisterOp`,
+    data: {
+      data: {
+        ...data,
+      }
+    }
+  })
+}
+// 更新特征集合配置  1
+const featureUpdateSetPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureUpdateSet`,
+    data: {
+      data: {
+        ...data,
+      }
+    }
+  })
+}
+// 修改插件特征配置  1
+const featureUpdateInputItemPost = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureUpdateInputItem`,
+    data: {
+      ...data,
+    }
+  })
+}
+// 修改算子特征配置  1
+const featureUpdateOpItemPost = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureUpdateOpItem`,
+    data: {
+      ...data,
+    }
+  })
+}
+
+
+
+// 所有场景
+const featureScenePagesDisplayPostQuest = (id: number, idTwo: number, rtx: any, business: number): Promise<any> => {
+  return ajax.get(`${TestUrl}featureScenePagesDisplay?p=${id}&s=${idTwo}&rtx=${rtx}&business=${business}`);
+}
+
+// 获取场景  
+const featureSceneDisplayGetQuest = (id: any): Promise<any> => {
+  return ajax.get(`${TestUrl}featureSceneDisplay?id=${id}`);
+};
+
+// 输入特征配置  
+const featureFeProcConfigDetailDisplayGetQuest = (id: any): Promise<any> => {
+  return ajax.get(`${TestUrl}featureFeProcConfigDetailDisplay?feId=${id}`);
+};
+
+// 获取插件配置  
+const featureFeProcConfigDisplayGetQuest = (id: any, server: string): Promise<any> => {
+  return ajax.get(`${TestUrl}featureFeProcConfigDisplay?scene_id=${id}&table=${server}`);
+};
+// 获取特征配置  
+const featureDisplaySetGetQuest = (id: any, server: any, threeBool: any): Promise<any> => {
+  return ajax.get(`${TestUrl}featureDisplaySet?featureSetId=${id}&isomerism=${server}&isFeatureServRouter=${threeBool}`);
+};
+// 获取算子  
+const featureDisplayOpGetQuest = (): Promise<any> => {
+  return ajax.get(`${TestUrl}featureDisplayOp`);
+};
+
+// 生成配置  
+const featureBuildConfigurationGetQuest = (id: any, versionDesc: string): Promise<any> => {
+  return ajax.get(`${TestUrl}featureBuildConfiguration?sceneId=${id}&versionDesc=${versionDesc}`);
+};
+
+
+
+
+
+
+// 拉取app归属数据 1
+const featureKVDataDisplayPostQuest = (data: any): Promise<any> => {
+  return ajax.post({
+    url: `${TestUrl}featureKVDataDisplay`,
+    data: {
+      ...data,
+    },
+  });
+}
+
+
+
+
 // 8.1 回滚策略
 const rollback = (data: any): Promise<any> => {
   return ajax.post({
@@ -37,7 +228,6 @@ const real_release = (data: any): Promise<any> => {
 
 // 8.12 统一物料召回查询
 const get_strategys = (data: any): Promise<any> => {
-  // return ajax.get(`http://11.150.126.122:8081/api/get_strategys?opr=${"get_strategys"}&&strategy_ids=[1,2]`);
   return ajax.post({
     url: `${QuestUrl}get_strategys`,
     data: {
@@ -178,7 +368,16 @@ const mod_component_info = (data: any): Promise<any> => {
 
 // 获取任务模板列表
 const job_template_modelview = (): Promise<any> => {
-  return ajax.get('/job_template_modelview/api/');
+  return ajax.get('/job_template_modelview/api/', {
+    params: {
+      form_data: JSON.stringify({
+        columns: ['project', 'name', 'version', 'describe', 'images', 'workdir', 'entrypoint', 'args', 'demo', 'env',
+          'hostAliases', 'privileged', 'accounts', 'created_by', 'changed_by', 'created_on', 'changed_on',
+          'expand'],
+        str_related: 0
+      })
+    }
+  });
 };
 
 const project_all = (): Promise<any> => {
@@ -311,13 +510,34 @@ const api = {
   get_components_info,
   modify_strategy,
   mod_component_info,
-
   config_check,
   rollback,
   test_release,
   real_release,
   get_component_config,
-  get_component_config2
+  get_component_config2,
+
+  featureRegisterScenePostQuest,
+  featureRegisterModelConfigPostQuest,
+  featureRegisterFeProcConfigQUEST,
+  featureRegisterModelServRouterPostQuest,
+  featureUpdateModelConfigPostQuest,
+  featureRegisterFeatureServRouterPostQuest,
+  featureKVDataDisplayPostQuest,
+  featureRegisterOpPostQuest,
+  featureUpdateSetPostQuest,
+  featureUpdateInputItemPost,
+  featureUpdateOpItemPost,
+  featureRegisterIsomerismFeatureFeatureInfoPostQuest,
+  featureSceneDisplayGetQuest,
+  featureFeProcConfigDetailDisplayGetQuest,
+  featureFeProcConfigDisplayGetQuest,
+  featureDisplaySetGetQuest,
+  featureDisplayOpGetQuest,
+  featureScenePagesDisplayPostQuest,
+  featureUpdateIsomerismFeatureFeatureInfoQUEST,
+  featureBuildConfigurationGetQuest,
+
 };
 
 export default api;

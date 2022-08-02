@@ -1,0 +1,14 @@
+.abtset-form .config-item{
+    margin-bottom:  0px;
+  }
+.abtset-form .config-title{
+      height: 32px;
+      text-align: center;
+      background-color: #efefef;
+      line-height: 32px;
+      color: #666;
+  }
+  .ant-card-bordered {
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
+  }

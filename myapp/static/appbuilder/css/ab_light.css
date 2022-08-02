@@ -22,11 +22,12 @@ body {
 	cursor: pointer;
 }
 .container {
-	min-height: calc(100vh - 64px);
+	/* min-height: calc(100vh - 64px); */
+	height: 100%;
 	width: 100%;
 	margin: 0;
-	padding: 20px;
-	padding-bottom: 140px;
+	/* padding: 20px; */
+	/* padding-bottom: 140px; */
 	box-sizing: border-box;
 }
 .container .row {

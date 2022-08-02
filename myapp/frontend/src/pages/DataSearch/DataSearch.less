@@ -1,0 +1,18 @@
+.tag-result{
+    padding: 1px 8px 1px 16px;
+    display: inline-block;
+    position: relative;
+    left: 0;
+    &:after{
+        content: '';
+        display: inline-block;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-width: 12px;
+        border-style: solid;
+        border-color: transparent transparent transparent ~'var(--ant-primary-color)';
+    }
+}

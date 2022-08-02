@@ -101,9 +101,9 @@ export const getAllList =
           const list: any[] = res.result.data.map((item: any) => {
             return {
               id: item.id,
-              name: item.name,
-              describe: item.describe,
-              changed_on: item.changed_on,
+              name: item.pipeline_url,
+              describe: item.project.describe,
+              changed_on: item.project.changed_on,
               project_id: item.project.id,
             };
           });

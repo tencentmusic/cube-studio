@@ -126,19 +126,21 @@ const Home: React.FC = () => {
 
   // 跳转指定pipeline
   const goPipeline = (item: any) => {
-    if (window.self === window.top) {
-      window.location.href = `${window.location.origin}${location.pathname}?pipeline_id=${item?.id}`;
-    } else {
-      window.parent.postMessage(
-        {
-          type: 'link',
-          message: {
-            pipelineId: item?.id,
-          },
-        },
-        `${window.location.origin}`,
-      );
-    }
+    const url = `${window.location.origin}${location.pathname}?pipeline_id=${item?.id}`;
+    window.open(`${window.location.origin}/frontend/showOutLink?url=${encodeURIComponent(url)}`, 'bank');
+    // if (window.self === window.top) {
+    //   window.location.href = `${window.location.origin}${location.pathname}?pipeline_id=${item?.id}`;
+    // } else {
+    //   window.parent.postMessage(
+    //     {
+    //       type: 'link',
+    //       message: {
+    //         pipelineId: item?.id,
+    //       },
+    //     },
+    //     `${window.location.origin}`,
+    //   );
+    // }
   };
 
   // 删除指定pipeline

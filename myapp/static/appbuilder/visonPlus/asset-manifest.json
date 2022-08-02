@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.js": "./static/js/main.0998f0bf.js",
+    "static/js/805.28186454.chunk.js": "./static/js/805.28186454.chunk.js",
+    "static/js/31.0a6c8d04.chunk.js": "./static/js/31.0a6c8d04.chunk.js",
+    "static/js/392.6cc16ad5.chunk.js": "./static/js/392.6cc16ad5.chunk.js",
+    "static/js/361.00804789.chunk.js": "./static/js/361.00804789.chunk.js",
+    "static/js/335.f31b51a2.chunk.js": "./static/js/335.f31b51a2.chunk.js",
+    "static/js/249.168dce85.chunk.js": "./static/js/249.168dce85.chunk.js",
+    "static/js/333.b47ed2ae.chunk.js": "./static/js/333.b47ed2ae.chunk.js",
+    "static/js/25.f9c03840.chunk.js": "./static/js/25.f9c03840.chunk.js",
+    "static/css/299.2ed47564.chunk.css": "./static/css/299.2ed47564.chunk.css",
+    "static/js/299.b7e0cb26.chunk.js": "./static/js/299.b7e0cb26.chunk.js",
+    "static/js/46.6119d322.chunk.js": "./static/js/46.6119d322.chunk.js",
+    "css.worker.js": "./css.worker.js",
+    "json.worker.js": "./json.worker.js",
+    "editor.worker.js": "./editor.worker.js",
+    "static/media/codicon.ttf": "./static/media/codicon.00aa018e3ae78d50160b.ttf",
+    "index.html": "./index.html",
+    "static/media/app.less": "./static/media/app.eab37f702388f3e63396.less"
+  },
+  "entrypoints": [
+    "static/js/main.0998f0bf.js"
+  ]
+}
