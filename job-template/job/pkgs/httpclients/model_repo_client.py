@@ -7,7 +7,7 @@ from ..constants import ModelStatus
 from ..exceptions.model_repo_exception import *
 from ..context import KFJobContext
 
-API_BASE_URL = "http://kubeflow.music.woa.com"
+API_BASE_URL = "http://kubeflow-dashboard.infra"
 INNER_API_BASE_URL = "http://kubeflow-dashboard.infra"
 MODEL_API_URI = "training_model_modelview/api"
 DEPLOY_API_URI = "training_model_deploy_modelview/api"

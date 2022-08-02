@@ -78,6 +78,10 @@ https://github.com/tencentmusic/cube-studio/wiki
 <br>
 <br>
 
+[![Stargazers repo roster for @tencentmusic/cube-studio](https://reporoster.com/stars/tencentmusic/cube-studio)](https://github.com/tencentmusic/cube-studio/stargazers)
+
+[![Forkers repo roster for @tencentmusic/cube-studio](https://reporoster.com/forks/tencentmusic/cube-studio)](https://github.com/tencentmusic/cube-studio/network/members)
+
 # 落地公司
 
 ![image](https://user-images.githubusercontent.com/20157705/176909239-f24cbf8d-8fb5-4326-abed-6fbc3f5a2d1f.png)

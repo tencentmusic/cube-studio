@@ -5,9 +5,8 @@ RUN git clone https://github.com/pjreddie/darknet.git
 RUN cd darknet && sed -i 's@OPENMP=0@OPENMP=1@g' Makefile && make
 COPY setup_args.py /app
 COPY launcher.sh /app
-RUN wget https://pengluan-76009.sz.gfp.tencent-cloud.com/github/yolov3.weights
-
-RUN wget https://pengluan-76009.sz.gfp.tencent-cloud.com/github/coco_data_sample.zip
+RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/service/yolov3.weights
+RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/pipeline/coco_data_sample.zip
 RUN unzip coco_data_sample.zip && cd coco_data_sample && bash reset_list.sh
 
 RUN apt install -y python3.6-dev python3-pip libsasl2-dev libpq-dev \

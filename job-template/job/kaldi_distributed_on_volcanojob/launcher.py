@@ -284,7 +284,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('--working_dir', type=str, help="运行job的工作目录,需要分布式存储", default='')
     arg_parser.add_argument('--num_worker', type=int, help="workder数量", default=3)
     arg_parser.add_argument('--user_cmd', type=str, help="执行命令", default='./run.sh')
-    arg_parser.add_argument('--image', type=str, help="worker的镜像", default='mirrors.tencent.com/raw-kaldi/liutaozhang_kaldi_gpu:latest')
+    arg_parser.add_argument('--image', type=str, help="worker的镜像", default='ccr.ccs.tencentyun.com/cube-studio/kaldi_distributed_worker:v1')
 
     args = arg_parser.parse_args()
     logging.info("{} args: {}".format(__file__, args))
