@@ -12,6 +12,6 @@ spec:
   http:
   - route:
     - destination:
-        host: kubeflow-dashboard.infra.svc.cluster.local
+        host: kubeflow-dashboard-frontend.infra.svc.cluster.local
         port:
           number: 80

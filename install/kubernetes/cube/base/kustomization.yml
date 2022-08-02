@@ -6,5 +6,6 @@ resources:
 - deploy-worker.yaml
 - sa-rbac.yaml
 - deploy.yaml
+- deploy-frontend.yaml
 - deploy-schedule.yaml
 - virtual.yaml

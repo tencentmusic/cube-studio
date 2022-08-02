@@ -9,8 +9,6 @@ kubectl label node $node train=true cpu=true notebook=true service=true org=publ
 # 拉取镜像
 sh pull_image_kubeflow.sh
 
-#wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.1/kustomize_v4.5.1_linux_amd64.tar.gz && tar -zxvf kustomize_v4.5.1_linux_amd64.tar.gz && chmod +x kustomize && mv kustomize /usr/bin/
-#wget https://pengluan-76009.sz.gfp.tencent-cloud.com/github/kustomize_v4.5.1_linux_amd64.tar.gz && tar -zxvf kustomize_v4.5.1_linux_amd64.tar.gz && chmod +x kustomize && mv kustomize /usr/bin/
 # 创建命名空间
 sh create_ns_secret.sh
 # 部署dashboard
