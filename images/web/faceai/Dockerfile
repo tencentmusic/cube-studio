@@ -34,7 +34,7 @@ COPY . /app/
 
 ENTRYPOINT ["bash","-c","gunicorn --bind  0.0.0.0:8080 --workers 5 --timeout 300 --limit-request-line 0 --limit-request-field_size 0 --log-level=info server:app"]
 
-# docker run --rm --name face -it -p 8080:8080 -v $PWD:/app csighub.tencentyun.com/tme-kubeflow/ai:face bash
+# docker run --rm --name face -it -p 8080:8080 -v $PWD:/app ccr.ccs.tencentyun.com/cube-studio/face:20220701 bash
 # gunicorn --bind  0.0.0.0:8080 --workers 20 --timeout 300 --limit-request-line 0 --limit-request-field_size 0 --log-level=info server:app
 # docker run --rm --name face -it -p 8080:8080 ccr.ccs.tencentyun.com/cube-studio/face:20220701 bash
 

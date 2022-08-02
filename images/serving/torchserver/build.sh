@@ -1,7 +1,7 @@
-set -ex
+#set -ex
 hubhost=ccr.ccs.tencentyun.com/cube-studio
 
-arr=("torchserve:0.4.2-cpu" "torchserve:0.4.2-gpu" "torchserve:0.5.0-cpu" "torchserve:0.5.0-gpu" "torchserve:0.6.0-cpu" "torchserve:0.6.0-gpu")
+arr=("torchserve:0.4.2-cpu" "torchserve:0.4.2-gpu" "torchserve:0.5.3-cpu" "torchserve:0.5.3-gpu" "torchserve:0.6.0-cpu" "torchserve:0.6.0-gpu")
 
 for value in ${arr[@]}
 do

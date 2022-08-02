@@ -6,7 +6,7 @@ USER root
 WORKDIR /root
 
 ## 切换内部源
-RUN apt update && apt-get install wget
+RUN apt update -y && apt-get install -y --force-yes wget
 
 # 安装运维工具
 RUN apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl locales zip unzip
