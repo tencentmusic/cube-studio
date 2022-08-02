@@ -147,28 +147,28 @@ images = [
     'rancher/webhook-receiver:v0.2.4',
     'registry:2'
 ]
-images=[
-    'rancher/mirrored-coreos-flannel:v0.15.1',
-    'rancher/hyperkube:v1.18.20-rancher1',
-    'rancher/rke-tools:v0.1.75',
-    'rancher/mirrored-coreos-etcd:v3.4.15-rancher1',
-    'rancher/rancher-agent:v2.5.2',
-    'rancher/rancher:v2.5.2',
-    'rancher/fleet-agent:v0.3.1',
-    'rancher/nginx-ingress-controller:nginx-0.35.0-rancher2',
-    'rancher/rke-tools:v0.1.65',
-    'rancher/mirrored-calico-node:v3.13.4',
-    'rancher/mirrored-calico-pod2daemon-flexvol:v3.13.4',
-    'rancher/mirrored-calico-cni:v3.13.4',
-    'rancher/mirrored-coredns-coredns:1.6.9',
-    'rancher/kube-api-auth:v0.1.4',
-    'rancher/mirrored-metrics-server:v0.3.6',
-    'rancher/mirrored-cluster-proportional-autoscaler:1.7.1',
-    'rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1',
-    'rancher/mirrored-pause:3.1',
-    'registry:2',
-    'busybox'
-]
+# images=[
+#     'rancher/mirrored-coreos-flannel:v0.15.1',
+#     'rancher/hyperkube:v1.18.20-rancher1',
+#     'rancher/rke-tools:v0.1.75',
+#     'rancher/mirrored-coreos-etcd:v3.4.15-rancher1',
+#     'rancher/rancher-agent:v2.5.2',
+#     'rancher/rancher:v2.5.2',
+#     'rancher/fleet-agent:v0.3.1',
+#     'rancher/nginx-ingress-controller:nginx-0.35.0-rancher2',
+#     'rancher/rke-tools:v0.1.65',
+#     'rancher/mirrored-calico-node:v3.13.4',
+#     'rancher/mirrored-calico-pod2daemon-flexvol:v3.13.4',
+#     'rancher/mirrored-calico-cni:v3.13.4',
+#     'rancher/mirrored-coredns-coredns:1.6.9',
+#     'rancher/kube-api-auth:v0.1.4',
+#     'rancher/mirrored-metrics-server:v0.3.6',
+#     'rancher/mirrored-cluster-proportional-autoscaler:1.7.1',
+#     'rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1',
+#     'rancher/mirrored-pause:3.1',
+#     'registry:2',
+#     'busybox'
+# ]
 
 images = list(set(images))
 # 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网ccr.ccs.tencentyun.com的仓库，共约26G
