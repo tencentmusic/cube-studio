@@ -12,7 +12,11 @@ from myapp import app, appbuilder, db, security_manager
 from myapp.models.model_notebook import Notebook
 from myapp.models.model_team import Project,Project_User
 from myapp.models.model_job import Repository,Images,Job_Template,Pipeline,Task
+from myapp.models.model_dataset import Dataset
 from myapp.models.model_serving import Service,InferenceService
+from myapp.models.model_train_model import Training_Model
+import csv
+import uuid
 conf = app.config
 import requests
 
@@ -55,6 +59,7 @@ def init():
                     db.session.commit()
                     print('add project %s'%name)
                 except Exception as e:
+                    print(e)
                     db.session.rollback()
 
 
@@ -80,7 +85,7 @@ def init():
         print(e)
 
 
-    def create_template(repository_id,project_name,image_name,image_describe,job_template_name,job_template_describe='',job_template_command='',job_template_args=None,job_template_volume='',job_template_account='',job_template_expand=None,job_template_env=''):
+    def create_template(repository_id,project_name,image_name,image_describe,job_template_name,job_template_describe='',job_template_command='',job_template_args=None,job_template_volume='',job_template_account='',job_template_expand=None,job_template_env='',gitpath=''):
         if not repository_id:
             return
         images = db.session.query(Images).filter_by(name=image_name).first()
@@ -94,10 +99,12 @@ def init():
                 images.changed_by_fk=1
                 images.project_id=project.id
                 images.repository_id=repository_id
+                images.gitpath = gitpath
                 db.session.add(images)
                 db.session.commit()
                 print('add images %s' % image_name)
             except Exception as e:
+                print(e)
                 db.session.rollback()
 
 
@@ -109,9 +116,9 @@ def init():
                     job_template = Job_Template()
                     job_template.name = job_template_name.replace('_','-')
                     job_template.describe=job_template_describe
-                    job_template.entrypoint=job_template_command,
-                    job_template.volume_mount=job_template_volume,
-                    job_template.accounts=job_template_account,
+                    job_template.entrypoint=job_template_command
+                    job_template.volume_mount=job_template_volume
+                    job_template.accounts=job_template_account
                     job_template.expand = json.dumps(job_template_expand,indent=4,ensure_ascii=False) if job_template_expand else '{}'
                     job_template.created_by_fk=1
                     job_template.changed_by_fk=1
@@ -124,13 +131,14 @@ def init():
                     db.session.commit()
                     print('add job_template %s' % job_template_name.replace('_','-'))
                 except Exception as e:
+                    print(e)
                     db.session.rollback()
             else:
                 try:
                     job_template.describe = job_template_describe
-                    job_template.entrypoint = job_template_command,
-                    job_template.volume_mount = job_template_volume,
-                    job_template.accounts = job_template_account,
+                    job_template.entrypoint = job_template_command
+                    job_template.volume_mount = job_template_volume
+                    job_template.accounts = job_template_account
                     job_template.expand = json.dumps(job_template_expand, indent=4,ensure_ascii=False) if job_template_expand else '{}'
                     job_template.created_by_fk = 1
                     job_template.changed_by_fk = 1
@@ -142,6 +150,7 @@ def init():
                     db.session.commit()
                     print('update job_template %s' % job_template_name.replace('_', '-'))
                 except Exception as e:
+                    print(e)
                     db.session.rollback()
 
 
@@ -149,6 +158,7 @@ def init():
 
     # 初始化创建仓库镜像模板任务流
     try:
+        print('begin init repository')
         repository = db.session.query(Repository).filter_by(name='hubsecret').first()
         if repository is None:
             try:
@@ -164,93 +174,16 @@ def init():
                 db.session.commit()
                 print('add repository hubsecret')
             except Exception as e:
+                print(e)
                 db.session.rollback()
 
+        print('begin init job_templates')
         job_templates = json.load(open('myapp/init-job-template.json',mode='r'))
         for job_template_name in job_templates:
             job_template = job_templates[job_template_name]
             job_template['repository_id']=repository.id
             create_template(**job_template)
 
-    except Exception as e:
-        print(e)
-
-
-
-    # 添加demo 服务
-    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt'):
-        service = db.session.query(Service).filter_by(name=service_name).first()
-        project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
-        if service is None and project:
-            try:
-                service = Service()
-                service.name = service_name.replace('_','-')
-                service.label=service_describe
-                service.created_by_fk=1
-                service.changed_by_fk=1
-                service.project_id=project.id
-                service.images=image_name
-                service.command = command
-                service.resource_memory=resource_memory,
-                service.resource_cpu=resource_cpu,
-                service.resource_gpu=resource_gpu,
-                service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
-                service.ports = ports
-                service.volume_mount=volume_mount
-                db.session.add(service)
-                db.session.commit()
-                print('add service %s'%service_name)
-            except Exception as e:
-                db.session.rollback()
-
-    try:
-
-        services = json.load(open('myapp/init-service.json',mode='r'))
-        for service_name in services:
-            service = services[service_name]
-            create_service(**service)
-    except Exception as e:
-        print(e)
-
-
-
-    # 添加 demo 推理 服务
-    def create_inference(project_name,service_name,service_describe,image_name,command,env,model_name,model_version='',model_path='',service_type='serving',resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt'):
-        service = db.session.query(InferenceService).filter_by(name=service_name).first()
-        project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
-        if service is None and project:
-            try:
-                service = InferenceService()
-                service.name = service_name.replace('_','-')
-                service.label=service_describe
-                service.service_type=service_type,
-                service.model_name=model_name,
-                service.model_version=model_version if model_version else datetime.now().strftime('v%Y.%m.%d.1'),
-                service.model_path = model_path,
-                service.created_by_fk=1
-                service.changed_by_fk=1
-                service.project_id=project.id
-                service.images=image_name
-                service.resource_memory=resource_memory,
-                service.resource_cpu=resource_cpu,
-                service.resource_gpu = resource_gpu,
-                service.command = command
-                service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
-                service.ports = ports
-                service.volume_mount=volume_mount
-                service.expand = "{}"
-                db.session.add(service)
-                db.session.commit()
-                print('add inference %s' % service_name)
-            except Exception as e:
-                db.session.rollback()
-
-    try:
-
-        inferences = json.load(open('myapp/init-inference.json',mode='r'))
-        for inference_name in inferences:
-            inference = inferences[inference_name]
-            create_inference(**inference)
     except Exception as e:
         print(e)
 
@@ -283,6 +216,7 @@ def init():
                 db.session.commit()
                 print('add pipeline %s' % pipeline['name'])
             except Exception as e:
+                print(e)
                 db.session.rollback()
         else:
             pipeline_model.describe = pipeline['describe']
@@ -317,6 +251,7 @@ def init():
                     db.session.commit()
                     print('add task %s' % task['name'])
                 except Exception as e:
+                    print(e)
                     db.session.rollback()
             else:
                 task_model.label = task['label']
@@ -357,6 +292,7 @@ def init():
 
 
     try:
+        print('begin init pipeline')
         pipelines = json.load(open('myapp/init-pipeline.json',mode='r'))
         for pipeline_name in pipelines:
             pipeline = pipelines[pipeline_name]['pipeline']
@@ -364,5 +300,184 @@ def init():
             create_pipeline(pipeline=pipeline,tasks=tasks)
     except Exception as e:
         print(e)
+
+
+    # 添加 demo 推理 服务
+    def create_dataset(name,field,label,status,describe,url,industry,source,source_type,file_type,research,storage_class,storage_size,download_url):
+        dataset = db.session.query(Dataset).filter_by(name=name).first()
+        if not dataset:
+            try:
+                dataset = Dataset()
+                dataset.name = name
+                dataset.field=field
+                dataset.label=label
+                dataset.status=status
+                dataset.describe=describe
+                dataset.url = url
+                dataset.source=source
+                dataset.industry=industry
+                dataset.source_type=source_type
+                dataset.file_type=file_type
+                dataset.research=research
+                dataset.storage_class=storage_class
+                dataset.storage_size = storage_size
+                dataset.download_url = download_url
+                dataset.owner = '*'
+                dataset.created_by_fk=1
+                dataset.changed_by_fk=1
+                db.session.add(dataset)
+                db.session.commit()
+                print('add dataset %s' % name)
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+    try:
+        print('begin init dataset')
+        datasets = db.session.query(Dataset).all()  # 空白数据集才初始化
+        if not datasets:
+            import csv
+            csv_reader = csv.reader(open('myapp/init-dataset.csv', mode='r', encoding='utf-8-sig'))
+            header = None
+            for line in csv_reader:
+                if not header:
+                    header = line
+                    continue
+                data = dict(zip(header, line))
+                create_dataset(**data)
+
+    except Exception as e:
+        print(e)
+
+
+
+
+    # 添加 示例 模型
+    # @pysnooper.snoop()
+    def create_train_model(name,describe,path,project_name,version,framework,api_type):
+        train_model = db.session.query(Training_Model).filter_by(name=name).filter_by(version=version).filter_by(framework=framework).first()
+        project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
+        if not train_model and project:
+            try:
+                train_model = Training_Model()
+                train_model.name = name
+                train_model.describe=describe
+                train_model.path=path
+                train_model.project_id=project.id
+                train_model.describe=describe
+                train_model.version = version
+                train_model.framework=framework
+                train_model.api_type=api_type
+                train_model.created_by_fk=1
+                train_model.changed_by_fk=1
+                train_model.run_id='random_run_id_'+uuid.uuid4().hex[:32]
+                db.session.add(train_model)
+                db.session.commit()
+                print('add train model %s' % name)
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+    try:
+        print('begin init train_models')
+        train_models = json.load(open('myapp/init-train-model.json',mode='r'))
+        for train_model_name in train_models:
+            train_model = train_models[train_model_name]
+            create_train_model(**train_model)
+    except Exception as e:
+        print(e)
+
+
+
+    # 添加demo 服务
+    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt'):
+        service = db.session.query(Service).filter_by(name=service_name).first()
+        project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
+        if service is None and project:
+            try:
+                service = Service()
+                service.name = service_name.replace('_','-')
+                service.label=service_describe
+                service.created_by_fk=1
+                service.changed_by_fk=1
+                service.project_id=project.id
+                service.images=image_name
+                service.command = command
+                service.resource_memory=resource_memory
+                service.resource_cpu=resource_cpu
+                service.resource_gpu=resource_gpu
+                service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
+                service.ports = ports
+                service.volume_mount=volume_mount
+                db.session.add(service)
+                db.session.commit()
+                print('add service %s'%service_name)
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+    try:
+        print('begin init services')
+        services = json.load(open('myapp/init-service.json',mode='r'))
+        for service_name in services:
+            service = services[service_name]
+            create_service(**service)
+    except Exception as e:
+        print(e)
+
+
+
+    # 添加 demo 推理 服务
+    def create_inference(project_name,service_name,service_describe,image_name,command,env,model_name,workdir='',model_version='',model_path='',service_type='serving',resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt',metrics='',health='',inference_config=''):
+        service = db.session.query(InferenceService).filter_by(name=service_name).first()
+        project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
+        if service is None and project:
+            try:
+                service = InferenceService()
+                service.name = service_name.replace('_','-')
+                service.label=service_describe
+                service.service_type=service_type
+                service.model_name=model_name
+                service.model_version=model_version if model_version else datetime.now().strftime('v%Y.%m.%d.1')
+                service.model_path = model_path
+                service.created_by_fk=1
+                service.changed_by_fk=1
+                service.project_id=project.id
+                service.images=image_name
+                service.resource_memory=resource_memory
+                service.resource_cpu=resource_cpu
+                service.resource_gpu = resource_gpu
+                service.working_dir=workdir
+                service.command = command
+                service.inference_config = inference_config
+                service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
+                service.ports = ports
+                service.volume_mount=volume_mount
+                service.metrics=metrics
+                service.health=health
+                service.expand = "{}"
+
+                from myapp.views.view_inferenceserving import InferenceService_ModelView_base
+                inference_class = InferenceService_ModelView_base()
+                inference_class.src_item_json = {}
+                inference_class.pre_add(service)
+
+                db.session.add(service)
+                db.session.commit()
+                print('add inference %s' % service_name)
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+    try:
+        print('begin init inferences')
+        inferences = json.load(open('myapp/init-inference.json',mode='r'))
+        for inference_name in inferences:
+            inference = inferences[inference_name]
+            create_inference(**inference)
+    except Exception as e:
+        print(e)
+
+
 
 

@@ -105,13 +105,14 @@ def get_manifest():
 
 #######################################blueprints##########################
 
-for bp in conf.get("BLUEPRINTS"):
-    try:
-        print("Registering blueprint: '{}'".format(bp.name))
-        app.register_blueprint(bp)
-    except Exception as e:
-        print("blueprint registration failed")
-        logging.exception(e)
+if conf.get("BLUEPRINTS"):
+    for bp in conf.get("BLUEPRINTS"):
+        try:
+            print("Registering blueprint: '{}'".format(bp.name))
+            app.register_blueprint(bp)
+        except Exception as e:
+            print("blueprint registration failed")
+            logging.exception(e)
 
 if conf.get("SILENCE_FAB"):
     logging.getLogger("flask_appbuilder").setLevel(logging.ERROR)
@@ -139,7 +140,7 @@ migrate = Migrate(app, db, directory=APP_DIR + "/migrations")
 
 # Logging configuration
 logging.basicConfig(format=app.config.get("LOG_FORMAT"))
-logging.getLogger().setLevel(app.config.get("LOG_LEVEL"))
+logging.getLogger().setLevel( app.config.get("LOG_LEVEL") if app.config.get("LOG_LEVEL") else 1)
 
 # 系统日志输出，myapp的输出。在gunicor是使用
 if conf.get("ENABLE_TIME_ROTATE"):
@@ -182,8 +183,9 @@ if conf.get("UPLOAD_FOLDER"):
     except OSError:
         pass
 
-for middleware in conf.get("ADDITIONAL_MIDDLEWARE"):
-    app.wsgi_app = middleware(app.wsgi_app)
+if conf.get("ADDITIONAL_MIDDLEWARE"):
+    for middleware in conf.get("ADDITIONAL_MIDDLEWARE"):
+        app.wsgi_app = middleware(app.wsgi_app)
 
 
 class MyIndexView(IndexView):
@@ -192,8 +194,8 @@ class MyIndexView(IndexView):
     def index(self):
         if not g.user or not g.user.get_id():
             return redirect(appbuilder.get_url_for_login)
-        return redirect("/myapp/home")
-        # return redirect('pipeline_modelview/list/?_flt_2_name=')
+        # return redirect("/myapp/home")
+        return redirect("/frontend/")
 
 
 custom_sm = conf.get("CUSTOM_SECURITY_MANAGER") or MyappSecurityManager
@@ -246,7 +248,7 @@ def is_feature_enabled(feature):
 if conf.get("ENABLE_FLASK_COMPRESS"):
     Compress(app)
 
-if conf["TALISMAN_ENABLED"]:
+if conf.get("TALISMAN_ENABLED"):
     talisman_config = conf.get("TALISMAN_CONFIG")
     Talisman(app, **talisman_config)
 
@@ -260,6 +262,30 @@ if flask_app_mutator:
 
 # from flask import Flask, json, make_response
 # 添加每次请求后的操作函数，必须要返回res
+from flask import request
+
+
+# @app.before_request
+# # @pysnooper.snoop(watch_explode='aa')
+# def check_login():
+#     login_url = appbuilder.get_url_for_login
+#     # index_url = appbuilder.get_url_for_index
+#     if login_url not in request.path and '/myapp/active' not in request.path:
+#         if not g.user or not g.user.get_id():
+#             g.back_url = request.url
+#             # aa = request.url
+#             redirect_url = appbuilder.get_url_for_login # +"?login_url="+request.url
+#             return redirect(redirect_url)
+
+
+    # if index_url in request.path:
+    #     back_url = request.cookies.get('back_url', '')
+    #     if back_url:
+    #         request.cookies.set('back_url', '')
+    #         return redirect(appbuilder.get_url_for_login)
+
+
+
 @app.after_request
 def myapp_after_request(resp):
     try:

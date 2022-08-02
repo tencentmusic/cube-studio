@@ -55,5 +55,67 @@
         "env":"LOCAL_FILES_SERVING_ENABLED=true",
         "ports":"8080",
         "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/label-studio(hostpath):/label-studio/data"
+    },
+
+    "wenet": {
+        "project_name":"public",
+        "service_name":"wenet",
+        "service_describe":"语音识别",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/wenet-mini:latest",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"80,10086"
+    },
+    "yolo": {
+        "project_name":"public",
+        "service_name":"yolo-darknet",
+        "service_describe":"多目标识别",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/target-detection",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
+    },
+    "face": {
+        "project_name":"public",
+        "service_name":"face",
+        "service_describe":"人脸检测",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/face:20220701",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
+    },
+    "openpose": {
+        "project_name":"public",
+        "service_name":"openpose",
+        "service_describe":"人体检测",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/openpose:gpu",
+        "command":"gunicorn --bind  0.0.0.0:8080 --workers 3 --timeout 300 server:app",
+        "resource_memory": "5G",
+        "resource_gpu": "1",
+        "env":"MODEL_POSE=COCO\nNET_RESOLUTION=64x64\nRENDER_POSE=-1\nPERIOD=100\nGPU=true",
+        "ports":"8080"
+    },
+    "cartoonize": {
+        "project_name":"public",
+        "service_name":"cartoonize",
+        "service_describe":"卡通化",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/cartoonize:latest",
+        "command":"",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
+    },
+    "chatbot": {
+        "project_name":"public",
+        "service_name":"chatbot",
+        "service_describe":"聊天机器人",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/chatbot:base",
+        "command":"python /app/app.py",
+        "resource_memory": "5G",
+        "env":"",
+        "ports":"8080"
     }
 }
