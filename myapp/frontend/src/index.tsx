@@ -12,7 +12,6 @@ import {
   BrowserRouter, HashRouter
 } from "react-router-dom";
 import { handleTips } from './api';
-import Aegis from '@tencent/aegis-web-sdk';
 import { changeTheme } from './theme';
 import LoadingStar from './components/LoadingStar/LoadingStar';
 
@@ -24,17 +23,6 @@ const userName = cookies.get('myapp_username')
 
 if (!!userName) {
   isLogin = true
-
-  if (process.env.NODE_ENV !== 'development') {
-    // 如果使用 cdn 的话，Aegis 会自动绑定在 window 对象上
-    const aegis = new Aegis({
-      id: 'NUehmRjuAcfkWgtOTM', // 项目key
-      uin: userName, // 用户唯一 ID（可选）
-      reportApiSpeed: true, // 接口测速
-      reportAssetSpeed: true, // 静态资源测速
-      spa: true, // spa 页面需要开启，页面切换的时候上报pv
-    })
-  }
 } else {
   handleTips.gotoLogin()
 }
