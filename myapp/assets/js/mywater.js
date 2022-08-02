@@ -20,7 +20,7 @@ function drawWaterMark({
     font = '40px "-apple-system-font", "Helvetica Neue", "sans-serif"',
     fillStyle = 'rgba(184, 184, 184, 0.4)',
     content = '请勿外传',
-    src='@TME Myapp',
+    src='@Myapp',
     rotate = '30',
     zIndex = 1000
 } = {}) {
@@ -101,7 +101,7 @@ function get_username() {
     if(!id)
         id='';
     content = username;
-    src = id+" @TME Cube-Studio";
+    src = id+" @Cube-Studio";
     $(document).ready(function(){
         drawWaterMark({content:content,src:src});
     });

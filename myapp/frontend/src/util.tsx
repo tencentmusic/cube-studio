@@ -108,7 +108,7 @@ function drawWaterMark({
     font = '40px "-apple-system-font", "Helvetica Neue", "sans-serif"',
     fillStyle = 'rgba(184, 184, 184, 0.4)',
     content = '请勿外传',
-    src = '@TME Myapp',
+    src = '@Myapp',
     rotate = 30,
     zIndex = 1000
 } = {}) {
@@ -185,7 +185,7 @@ export function drawWater() {
     if (!id)
         id = '';
     const content = username;
-    const src = id + " @TME Cube Studio";
+    const src = id + " @Cube Studio";
 
     window.onload = function () {
         drawWaterMark({ content: content, src: src });
@@ -202,7 +202,7 @@ export function drawWaterNow() {
     if (!id)
         id = '';
     const content = username;
-    const src = id + " @TME Cube Studio";
+    const src = id + " @Cube Studio";
 
     drawWaterMark({ content: content, src: src });
 }

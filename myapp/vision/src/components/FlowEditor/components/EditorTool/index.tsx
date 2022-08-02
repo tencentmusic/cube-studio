@@ -70,7 +70,7 @@ const EditorTool: React.FC = () => {
       onClick: () => {
         if (pipelineId) {
           window.open(
-            `${window.location.origin}/workflow_modelview/list/?_flt_2_labels=%22pipeline-id%22%3A+%22${pipelineId}%22`,
+            `${window.location.origin}/pipeline_modelview/web/workflow/${pipelineId}`,
           );
         }
       },
@@ -116,7 +116,7 @@ const EditorTool: React.FC = () => {
       text: '定时记录',
       onClick: () => {
         if (pipeline?.name) {
-          window.open(`${window.location.origin}/runhistory_modelview/list/?_flt_0_pipeline=${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/web/runhistory/${pipelineId}`);
         }
       },
     },
