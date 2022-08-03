@@ -44,7 +44,7 @@
         "image_name":"jaegertracing/all-in-one:1.29",
         "command":"",
         "env":"",
-        "ports":"5775,16686"
+        "ports":"16686,5775"
     },
     "label-studio": {
         "project_name":"public",

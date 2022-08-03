@@ -111,7 +111,8 @@ class Training_Model_ModelView_Base():
         "path": "模型文件",
         "framework":"算法框架",
         "api_type":"推理框架",
-        "pipeline_id":"任务流id"
+        "pipeline_id":"任务流id",
+        "deploy": "发布"
     }
 
     label_title = '模型'

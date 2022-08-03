@@ -57,8 +57,8 @@
                     "--env":"YOLO_DATA_PATH=/mnt/admin/coco_data_sample/yolo/coco.data\nYOLO_CFG_PATH=/mnt/admin/coco_data_sample/yolo/yolov3.cfg\nYOLO_WEIGHTS_PATH=/mnt/admin/coco_data_sample/yolo/yolov3.weights",
                     "--ports":"8080",
                     "--replicas":"1",
-                    "--resource_memory": "2G",
-                    "--resource_cpu": "2",
+                    "--resource_memory": "5G",
+                    "--resource_cpu": "5",
                     "--resource_gpu": "0"
 
                 }
