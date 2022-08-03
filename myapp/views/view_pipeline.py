@@ -1182,7 +1182,7 @@ class Pipeline_ModelView_Base():
 
     @expose("/web/workflow/<pipeline_id>", methods=["GET"])
     def web_workflow(self,pipeline_id):
-        url = conf.get('MODEL_URLS', {}).get('workflow', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "label", "value": '"pipeline-id": "%s"'%pipeline_id}], ensure_ascii=False))
+        url = conf.get('MODEL_URLS', {}).get('workflow', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "labels", "value": '"pipeline-id": "%s"'%pipeline_id}], ensure_ascii=False))
         print(url)
         return redirect(url)
 
