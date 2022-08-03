@@ -7,11 +7,11 @@ English | [简体中文](README_CN.md)
 
 ![image](https://user-images.githubusercontent.com/20157705/167534673-322f4784-e240-451e-875e-ada57f121418.png)
 
-cube-studio is a one-stop cloud-native machine learning platform open sourced by Tencent Music, Currently mainly includes the following functions:
- - 1、data management：Feature Store: Online and offline features；Dataset management，structure data and media data，Label Platform；
- - 2、develop: notrbook(vscode/jupyter); docker Image management; image build online；
- - 3、train：Pipeline Drag and drop online; Open Template Market; Distributed computing/training tasks, example tf/pytorch/mxnet/spark/ray/horovod/kaldi/volcano; batch priority scheduling; Resource Monitoring Alarm Balancing；Cron Scheduling
- - 4、Hyperparameter Search：nni，katib，ray；
+cube-studio is a one-stop cloud-native machine learning platform open sourced by Tencent Music, Currently mainly includes the following functions
+ - 1、data management：Feature Store: Online and offline features; Dataset management, structure data and media data, Data Label Platform
+ - 2、develop: notrbook(vscode/jupyter); docker Image management; image build online
+ - 3、train：Pipeline Drag and drop online; Open Template Market; Distributed computing/training tasks, example tf/pytorch/mxnet/spark/ray/horovod/kaldi/volcano; batch priority scheduling; Resource Monitoring Alarm Balancing; Cron Scheduling
+ - 4、Hyperparameter Search：nni, katib, ray
  - 5、inference：model manager; serverless traffic control; tf/pytorch/onnx/tensorrt model deploy, tfserving/torchserver/onnxruntime/triton inference; VGPU; Load Balancing、High availability、Elastic scaling
  - 6、infra：Multi-user;Multi-project; Multi-cluster; Edge Cluster Mode; blockchain sharing;
 
