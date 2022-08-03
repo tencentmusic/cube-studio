@@ -1,15 +1,11 @@
 
 import os,sys
-base_dir = os.path.split(os.path.realpath(__file__))[0]
-sys.path.append(base_dir)
 import argparse
 import datetime
 import json
 import time
 import uuid
-import os
 import pysnooper
-import os,sys
 import re
 import requests
 import copy
@@ -61,7 +57,7 @@ def deploy(**kwargs):
     })
 
     # print(url)
-    res = requests.get(url,headers=headers)
+    res = requests.get(url,headers=headers, allow_redirects=False)
     # print(res.content)
     if res.status_code==200:
 
@@ -93,7 +89,7 @@ def deploy(**kwargs):
         # 不存在就创建新的服务
         if not exist_services:
             url = host + "/inferenceservice_modelview/api/"
-            res = requests.post(url, headers=headers,json=payload)
+            res = requests.post(url, headers=headers,json=payload, allow_redirects=False)
             if res.status_code==200:
                 new_service = res.json().get('result', {})
             # print(res)
@@ -102,20 +98,26 @@ def deploy(**kwargs):
             exist_service=exist_services[0]
             # 更新服务
             url = host + "/inferenceservice_modelview/api/%s"%exist_service['id']
-            res = requests.put(url, headers=headers, json=payload)
+            res = requests.put(url, headers=headers, json=payload, allow_redirects=False)
             if res.status_code==200:
                 new_service = res.json().get('result',{})
             # print(res)
 
         if new_service:
+            time.sleep(5)  # 等待数据刷入数据库
             print(new_service)
             url = host + "/inferenceservice_modelview/deploy/prod/%s"%new_service['id']
-            res = requests.post(url,headers=headers)
+            res = requests.get(url,headers=headers, allow_redirects=False)
             if res.status_code==302 or res.status_code==200:
                 print('部署成功')
             else:
+                print(res.content)
                 print('部署失败')
+                exit(1)
 
+    else:
+        print(res.content)
+        exit(1)
 
 
 

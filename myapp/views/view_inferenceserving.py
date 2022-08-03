@@ -115,7 +115,7 @@ class InferenceService_ModelView_base():
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 300},
     }
-    search_columns = ['name','created_by','project','label','model_name','host','model_status','resource_gpu']
+    search_columns = ['name','created_by','project','service_type','label','model_name','model_version','model_path','host','model_status','resource_gpu']
 
     label_title = '推理服务'
     base_order = ('id','desc')
@@ -123,7 +123,6 @@ class InferenceService_ModelView_base():
 
     base_filters = [["id",InferenceService_Filter, lambda: []]]  # 设置权限过滤器
     custom_service = 'serving'
-    # service_type_choices= ['',custom_service,'tfserving','torch-server','onnxruntime','triton-server','kfserving-tf','kfserving-torch','kfserving-onnx','kfserving-sklearn','kfserving-xgboost','kfserving-lightgbm','kfserving-paddle']
     service_type_choices= [custom_service,'tfserving','torch-server','onnxruntime','triton-server']
     # label_columns = {
     #     "host": _("域名：测试环境test.xx，调试环境 debug.xx"),
@@ -716,8 +715,7 @@ output %s
             from myapp.utils.py.py_k8s import K8s
             k8s_client = K8s(cluster.get('KUBECONFIG',''))
             service_namespace = conf.get('SERVICE_NAMESPACE')
-            kfserving_namespace = conf.get('KFSERVING_NAMESPACE')
-            for namespace in [service_namespace,kfserving_namespace]:
+            for namespace in [service_namespace,]:
                 for name in [service_name,'debug-'+service_name,'test-'+service_name]:
                     service_external_name = (name + "-external").lower()[:60].strip('-')
                     k8s_client.delete_deployment(namespace=namespace, name=name)
@@ -767,55 +765,8 @@ output %s
 	            service.deploy_history=''
 	        service.deploy_history = service.deploy_history + "\n" + "clear：%s" % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	        db.session.commit()
-	        flash('服务清理完成', category='warning')
+	        flash('服务清理完成', category='success')
         return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice',''))
-
-
-    # # 针对kfserving框架，单独的部署方式
-    # @pysnooper.snoop()
-    # def deploy_kfserving(self,service):
-    #     from myapp.utils.py.py_k8s import K8s
-    #     k8s_client = K8s(service.project.cluster.get('KUBECONFIG',''))
-    #     namespace = conf.get('KFSERVING_NAMESPACE')
-    #
-    #     crd_info=conf.get('CRD_INFO')['inferenceservice']
-    #
-    #
-    #     crd_list = k8s_client.get_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace)
-    #     for vs_obj in crd_list:
-    #         if vs_obj['name'] == service.name:
-    #             k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=vs_obj['name'])
-    #             time.sleep(1)
-    #
-    #     crd_json = {
-    #         "apiVersion": "%s/%s"%(crd_info['group'],crd_info['version']),
-    #         "kind": crd_info['kind'],
-    #         "metadata": {
-    #             "name": service.name,
-    #             "namespace": namespace,
-    #             "labels": {
-    #                 "app": service.name,
-    #                 "rtx-user": service.created_by.username
-    #             }
-    #         },
-    #         "spec": {
-    #             "predictor":
-    #                 {
-    #                     "min_replicas":service.min_replicas,
-    #                     "max_replicas":service.max_replicas,
-    #                     "pytorch": {
-    #                         "storageUri": "gs://kfserving-examples/models/torchserve/image_classifier"
-    #                     }
-    #                 }
-    #         }
-    #     }
-    #
-    #     print(crd_json)
-    #     crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
-    #
-    #
-    #     flash('服务部署完成', category='success')
-    #     return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice',''))
 
 
     @expose('/deploy/debug/<service_id>',methods=['POST',"GET"])
@@ -912,7 +863,7 @@ output %s
                 "message":"service not exist or service not online"
             })
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def deploy(self,service_id,env='prod'):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         namespace = conf.get('SERVICE_NAMESPACE','service')
@@ -929,9 +880,6 @@ output %s
             name = env+'-'+service.name
             # namespace=pre_namespace
 
-        # if 'kfserving' in service.service_type:
-        #     return self.deploy_kfserving(service)
-
         image_secrets = conf.get('HUBSECRET', [])
         user_hubsecrets = db.session.query(Repository.hubsecret).filter(Repository.created_by_fk == g.user.id).all()
         if user_hubsecrets:
@@ -943,35 +891,20 @@ output %s
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(service.project.cluster.get('KUBECONFIG',''))
 
-        # expand=json.loads(service.expand)
-        # config_data={}
-        # if service.service_type=='tfserving':
-        #     config_data={
-        #         "models.config":expand.get('models.config').replace('\r\n','\n'),
-        #         "monitoring.config":expand.get('monitoring.config').replace('\r\n','\n'),
-        #         "platform.config": expand.get('platform.config').replace('\r\n','\n')
-        #     }
-        # if service.service_type=='torch-server':
-        #     config_data={
-        #         "config.properties":expand.get('config.properties').replace('\r\n','\n'),
-        #         "log4j2.xml":expand.get('log4j2.xml').replace('\r\n','\n'),
-        #     }
-        #
-        # if service.service_type=='triton-server':
-        #     config_data={
-        #         "config.pbtxt":expand.get('config.pbtxt').replace('\r\n','\n')
-        #     }
-        # print('=============',service.inference_config.strip())
         config_datas = service.inference_config.strip().split("\n---")
+        config_datas = [x.strip() for x in config_datas if x.strip()]
+        volume_mount = service.volume_mount
         print('文件个数：',len(config_datas))
         config_data={}
         for data in config_datas:
             file_name = re.sub('^-*', '',data.split('\n')[0]).strip()
             file_content = '\n'.join(data.split('\n')[1:])
-            config_data[file_name] = file_content
-
-        k8s_client.create_configmap(namespace=namespace,name=name,data=config_data,labels={'app':name})
-        volume_mount = service.volume_mount+",%s(configmap):/config/"%name
+            if file_name and file_content:
+                config_data[file_name] = file_content
+        if config_data:
+            print('create configmap')
+            k8s_client.create_configmap(namespace=namespace,name=name,data=config_data,labels={'app':name})
+            volume_mount += ",%s(configmap):/config/"%name
         ports = [int(port) for port in service.ports.split(',')]
 
 
@@ -987,6 +920,7 @@ output %s
 
         if env=='test' or env =='debug':
             try:
+                print('delete deployment')
                 k8s_client.delete_deployment(namespace=namespace,name=name)
             except Exception as e:
                 print(e)
@@ -1010,6 +944,7 @@ output %s
                 print(e)
 
             pod_ports = list(set(pod_ports))
+            print('create deployment')
             k8s_client.create_deployment(
                 namespace=namespace,
                 name=name,
@@ -1047,7 +982,7 @@ output %s
             }
         else:
             annotations={}
-
+        print('deploy service')
         k8s_client.create_service(
             namespace=namespace,
             name=name,
@@ -1057,10 +992,7 @@ output %s
             selector=labels
         )
         # 如果域名配置的gateway，就用这个
-        if 'kfserving' in service.service_type:
-            host = service.name + "." + service.project.cluster.get('KFSERVING_DOMAIN', conf.get('KFSERVING_DOMAIN'))
-        else:
-            host = service.name+"."+ service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
+        host = service.name+"."+ service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
 
         if service.host:
             host=service.host.replace('http://','').replace('https://','').strip()
@@ -1070,16 +1002,18 @@ output %s
         # 前缀来区分不同的环境服务
         if env=='debug' or env=='test':
             host=env+'.'+host
-
-        k8s_client.create_istio_ingress(
-            namespace=namespace,
-            name=name,
-            host = host,
-            ports=service.ports.split(','),
-            canary=service.canary,
-            shadow=service.shadow
-        )
-
+        try:
+            print('deploy istio ingressgateway')
+            k8s_client.create_istio_ingress(
+                namespace=namespace,
+                name=name,
+                host = host,
+                ports=service.ports.split(','),
+                canary=service.canary,
+                shadow=service.shadow
+            )
+        except Exception as e:
+            print(e)
 
         # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
 
@@ -1104,6 +1038,7 @@ output %s
         if SERVICE_EXTERNAL_IP:
             service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
+            print('deploy proxy ip')
             k8s_client.create_service(
                 namespace=namespace,
                 name=service_external_name,
@@ -1112,6 +1047,7 @@ output %s
                 selector=labels,
                 external_ip=SERVICE_EXTERNAL_IP
             )
+
 
 
         if env=='prod':
@@ -1126,6 +1062,7 @@ output %s
             if int(service.max_replicas)>int(service.min_replicas) and service.hpa:
                 try:
                     # 创建+绑定deployment
+                    print('create hpa')
                     k8s_client.create_hpa(
                         namespace=namespace,
                         name=name,
@@ -1156,6 +1093,7 @@ output %s
             pods = k8s_client.get_pods(namespace=namespace,labels={"app":name})
             if pods:
                 pod = pods[0]
+                print('deploy debug success')
                 return redirect("/myapp/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
 
         # 生产环境才有域名代理灰度的问题
@@ -1169,7 +1107,7 @@ output %s
             upgrade_service.apply_async(kwargs=kwargs)
 
         flash('服务部署完成，正在进行同域名服务版本切换', category='success')
-
+        print('deploy prod success')
         return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice',''))
 
 
