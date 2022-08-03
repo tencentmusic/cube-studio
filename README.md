@@ -21,7 +21,7 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 # WeChat group
 
- learning、deploy、experience、contributions join group, wechart id luanpeng1234 remark<open source>, [construction guide](https://github.com/tencentmusic/cube-studio/wiki/%E5%85%B1%E5%BB%BA%E6%8C%87%E5%8D%97)
+ learning、deploy、experience、contributions join group, wechart id luanpeng1234 remark`<open source>`, [construction guide](https://github.com/tencentmusic/cube-studio/wiki/%E5%85%B1%E5%BB%BA%E6%8C%87%E5%8D%97)
 
 <img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
  
