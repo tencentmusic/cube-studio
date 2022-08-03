@@ -35,9 +35,13 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.08.01
 本地开发使用
 
 docker-compose.yaml文件在install/docker目录下，这里提供了mac和linux版本的docker-compose.yaml。
+
 可自行修改
+
 image：刚才构建的镜像
+
 LOGIN_URL地址：登录重定向地址
+
 MYSQL_SERVICE：mysql的地址
 
 
