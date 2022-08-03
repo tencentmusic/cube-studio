@@ -8,12 +8,12 @@ English | [简体中文](README_CN.md)
 ![image](https://user-images.githubusercontent.com/20157705/167534673-322f4784-e240-451e-875e-ada57f121418.png)
 
 cube-studio is a one-stop cloud-native machine learning platform open sourced by Tencent Music, Currently mainly includes the following functions
- - 1、data management：Feature Store: Online and offline features; Dataset management, structure data and media data, Data Label Platform
- - 2、develop: notrbook(vscode/jupyter); docker Image management; image build online
- - 3、train：Pipeline Drag and drop online; Open Template Market; Distributed computing/training tasks, example tf/pytorch/mxnet/spark/ray/horovod/kaldi/volcano; batch priority scheduling; Resource Monitoring Alarm Balancing; Cron Scheduling
- - 4、Hyperparameter Search：nni, katib, ray
- - 5、inference：model manager; serverless traffic control; tf/pytorch/onnx/tensorrt model deploy, tfserving/torchserver/onnxruntime/triton inference; VGPU; Load Balancing、High availability、Elastic scaling
- - 6、infra：Multi-user;Multi-project; Multi-cluster; Edge Cluster Mode; blockchain sharing;
+ - 1、data management: feature store, online and offline features; dataset management, structure data and media data, data label platform
+ - 2、develop: notebook(vscode/jupyter); docker image management; image build online
+ - 3、train: pipeline drag and drop online; open template market; distributed computing/training tasks, example tf/pytorch/mxnet/spark/ray/horovod/kaldi/volcano; batch priority scheduling; resource monitoring/alarm/balancing; cron scheduling
+ - 4、automl: nni, katib, ray
+ - 5、inference: model manager; serverless traffic control; tf/pytorch/onnx/tensorrt model deploy, tfserving/torchserver/onnxruntime/triton inference; VGPU; load balancing、high availability、elastic scaling
+ - 6、infra: multi-user; multi-project; multi-cluster; edge cluster mode; blockchain sharing;
 
 # Doc
 
@@ -21,14 +21,14 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 # WeChat group
 
- learning、deploy、experience、contributions join group, wechart id luanpeng1234 remark`<open source>`, [construction guide](https://github.com/tencentmusic/cube-studio/wiki/%E5%85%B1%E5%BB%BA%E6%8C%87%E5%8D%97)
+ learning、deploy、consult、contribution、cooperation, join group, wechart id luanpeng1234 remark`<open source>`, [construction guide](https://github.com/tencentmusic/cube-studio/wiki/%E5%85%B1%E5%BB%BA%E6%8C%87%E5%8D%97)
 
 <img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
  
 # Job Template
 
-tips：
-- 1、Easy to develop and more suitable for your own scenarios
+tips: 
+- 1、You can develop your own template, Easy to develop and more suitable for your own scenarios
 
 | template  | type | describe |
 | :----- | :---- | :---- |
@@ -64,14 +64,14 @@ tips：
 
 # Contributor
 
-algorithm：
+algorithm: 
 @hujunaifuture <img width="5%" src="https://avatars.githubusercontent.com/u/19547589?v=4" />
 @jaffe-fly <img width="5%" src="https://avatars.githubusercontent.com/u/49515380?s=96&v=4" />
 @JLWLL  <img width="5%" src="https://avatars.githubusercontent.com/u/86763551?s=96&v=4" />
 @ma-chengcheng<img width="5%" src="https://avatars.githubusercontent.com/u/15444349?s=96&v=4" />
 @chendile <img width="5%" src="https://avatars.githubusercontent.com/u/42484658?s=96&v=4" />
 
-platform：
+platform: 
 @xiaoyangmai <img width="5%" src="https://avatars.githubusercontent.com/u/10969390?s=96&v=4" />
 @VincentWei2021 <img width="5%" src="https://avatars.githubusercontent.com/u/77832074?v=4" />
 @SeibertronSS <img width="5%" src="https://avatars.githubusercontent.com/u/69496864?v=4" />
