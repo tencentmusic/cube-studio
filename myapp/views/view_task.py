@@ -339,6 +339,13 @@ class Task_ModelView_Base():
         #         item.volume_mount += ","+item.job_template.volume_mount
         #     else:
         #         item.volume_mount = item.job_template.volume_mount
+
+        if item.volume_mount and ':' not in item.volume_mount:
+            item.volume_mount = self.src_item_json.get('volume_mount','')
+
+        if item.volume_mount:
+            item.volume_mount = ','.join([x.strip() for x in item.split(',') if x.strip()])
+
         if item.outputs:
             core.validate_json(item.outputs)
             item.outputs = json.dumps(json.loads(item.outputs),indent=4,ensure_ascii=False)
