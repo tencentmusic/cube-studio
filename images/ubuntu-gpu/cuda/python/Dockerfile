@@ -10,6 +10,6 @@ RUN set -x; rm -rf /usr/bin/python; apt install -y --fix-missing ${PYTHON_VERSIO
 RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ignore-installed" \
     && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
 
-RUN pip install --upgrade pip && pip install flask requests kubernetes numpy pandas tornado pysnooper
+RUN pip install -U pip && pip install flask requests kubernetes numpy pandas tornado pysnooper
 
 
