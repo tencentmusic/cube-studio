@@ -4,8 +4,7 @@ English | [简体中文](README_CN.md)
 
 ### Infra
 
-
-![image](https://user-images.githubusercontent.com/20157705/167534673-322f4784-e240-451e-875e-ada57f121418.png)
+<img width="1442" alt="image" src="https://user-images.githubusercontent.com/20157705/182568155-f0d06046-8bfc-49dd-b283-720db0e556bc.png">
 
 cube-studio is a one-stop cloud-native machine learning platform open sourced by Tencent Music, Currently mainly includes the following functions
  - 1、data management: feature store, online and offline features; dataset management, structure data and media data, data label platform

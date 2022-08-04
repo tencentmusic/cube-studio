@@ -2,8 +2,8 @@
 
 ### 整体架构
 
+<img width="1437" alt="image" src="https://user-images.githubusercontent.com/20157705/182564530-2c965f5f-407d-4baa-8772-73cb2645901b.png">
 
-![image](https://user-images.githubusercontent.com/20157705/167534673-322f4784-e240-451e-875e-ada57f121418.png)
 
 cube是 腾讯音乐 开源的一站式云原生机器学习平台，目前主要包含
  - 1、数据管理：特征平台，支持在/离线特征；数据源管理，支持结构数据和媒体标注数据管理；
