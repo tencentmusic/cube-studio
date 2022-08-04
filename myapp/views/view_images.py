@@ -14,7 +14,7 @@ from sqlalchemy.exc import InvalidRequestError
 from myapp.models.model_job import Repository,Images
 from myapp.views.view_team import Project_Filter
 from myapp import app, appbuilder,db,event_logger
-
+from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
 from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
 
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
@@ -81,9 +81,21 @@ class Repository_ModelView_Base():
     edit_columns = add_columns
 
     add_form_extra_fields = {
+        "server": StringField(
+            _(datamodel.obj.lab('server')),
+            widget=BS3TextFieldWidget(),
+            default='harbor.oa.com',
+            description="镜像仓库服务地址"
+        ),
+        "user": StringField(
+            _(datamodel.obj.lab('user')),
+            widget=BS3TextFieldWidget(),
+            description="镜像仓库的用户名"
+        ),
         "password": StringField(
             _(datamodel.obj.lab('password')),
-            widget=BS3TextFieldWidget()  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            widget=BS3TextFieldWidget(),
+            description="镜像仓库的链接密码"
         )
     }
 
@@ -94,13 +106,16 @@ class Repository_ModelView_Base():
         self.add_form_extra_fields['name'] = StringField(
             _(self.datamodel.obj.lab('name')),
             default=g.user.username+"-",
-            widget=BS3TextFieldWidget()  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            description = "仓库名称"
         )
 
         self.add_form_extra_fields['hubsecret'] = StringField(
             _(self.datamodel.obj.lab('hubsecret')),
-            default=g.user.username + "-",
-            widget=BS3TextFieldWidget()  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            default=g.user.username + "-hubsecret",
+            widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            description="在k8s中创建的hub secret",
+            validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54),DataRequired()]
         )
 
     pre_add_get = set_column

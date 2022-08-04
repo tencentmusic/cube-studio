@@ -116,6 +116,13 @@ class Myauthdbview(AuthDBView):
         )
 
 
+    @expose('/logout')
+    def logout(self):
+        login_url = 'http://%s/login/' % request.host
+        session.pop('user', None)
+        g.user = None
+        logout_user()
+        return redirect(login_url)
 
 
 

@@ -120,7 +120,8 @@ class Docker_ModelView_Base():
             _(datamodel.obj.lab('base_image')),
             default='',
             description=Markup(f'基础镜像和构建方法可参考：<a href="%s">点击打开</a>'%(conf.get('HELP_URL').get('docker',''))),
-            widget=BS3TextFieldWidget()
+            widget=BS3TextFieldWidget(),
+            validators=[DataRequired(),]
         ),
         "expand":StringField(
             _(datamodel.obj.lab('expand')),
@@ -136,7 +137,7 @@ class Docker_ModelView_Base():
         self.add_form_extra_fields['target_image']=StringField(
             _(self.datamodel.obj.lab('target_image')),
             default=conf.get('REPOSITORY_ORG')+g.user.username+":"+datetime.datetime.now().strftime('%Y.%m.%d'+".1"),
-            description="目标镜像名，将直接推送到目标目标仓库",
+            description="目标镜像名，将直接推送到目标仓库，需在镜像仓库中配置了相应仓库的账号密码",
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(),]
         )
@@ -300,7 +301,16 @@ class Docker_ModelView_Base():
         # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
         pod_name = "docker-commit-%s-%s" % (docker.created_by.username, str(docker.id))
-        command = ['sh', '-c', 'docker commit %s %s && docker push %s'%(container_id,docker.target_image,docker.target_image)]
+        login_command=''
+        all_repositorys = db.session.query(Repository).all()
+        for repo in all_repositorys:
+            if repo.server in docker.target_image:
+                login_command = 'docker login --username %s --password %s %s'%(repo.user,repo.password,repo.server)
+        if login_command:
+            command = ['sh', '-c', 'docker commit %s %s && %s && docker push %s'%(container_id,docker.target_image,login_command,docker.target_image)]
+        else:
+            command = ['sh', '-c', 'docker commit %s %s && docker push %s'%(container_id,docker.target_image,docker.target_image)]
+
         hostAliases = conf.get('HOSTALIASES')
         k8s_client.create_debug_pod(
             namespace=namespace,

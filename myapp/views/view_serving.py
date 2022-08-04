@@ -130,9 +130,12 @@ class Service_ModelView_base():
     gpu_type = conf.get('GPU_TYPE')
 
 
-    add_form_extra_fields['resource_gpu'] = StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
-                                                              description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
-                                                              widget=BS3TextFieldWidget())
+    add_form_extra_fields['resource_gpu'] = StringField(
+        _(datamodel.obj.lab('resource_gpu')), default='0',
+        description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
+        widget=BS3TextFieldWidget(),
+        validators=[DataRequired()]
+    )
 
     edit_form_extra_fields = add_form_extra_fields
     # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),

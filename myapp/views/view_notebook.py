@@ -196,7 +196,7 @@ class Notebook_ModelView_Base():
             validators=[DataRequired()]
         )
 
-        columns = ['name','describe','images','resource_memory','resource_cpu']
+        columns = ['name','describe','images','resource_memory','resource_cpu','resource_gpu']
 
         self.add_columns = ['project']+columns   # 添加的时候没有挂载配置，使用项目中的挂载配置
 

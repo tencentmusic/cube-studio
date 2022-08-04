@@ -9,6 +9,7 @@ from inspect import isfunction
 from sqlalchemy import create_engine
 from flask_appbuilder.actions import action
 from apispec import yaml_utils
+
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from flask_appbuilder.actions import ActionItem
@@ -1586,16 +1587,24 @@ class MyappModelRestApi(ModelRestApi):
             ret["remember"] = False
         ret["label"] = _(self.label_columns.get(field.name, ""))
         ret["description"] = _(self.description_columns.get(field.name, ""))
+        if field.validate and isinstance(field.validate, list):
+            ret["validators"] = [v for v in field.validate]
+        elif field.validate:
+            ret["validators"] = [field.validate]
+        else:
+            ret["validators"]=[]
+
         # Handles related fields
         if isinstance(field, Related) or isinstance(field, RelatedList):
             ret["count"], ret["values"] = self._get_list_related_field(
                 field, filter_rel_field, page=page, page_size=page_size
             )
+            ret["validators"].append(validators.DataRequired())
 
-        if field.validate and isinstance(field.validate, list):
-            ret["validators"] = [v for v in field.validate]
-        elif field.validate:
-            ret["validators"] = [field.validate]
+
+
+        # 如果是外键，都加必填
+        # if
 
         # 对于非数据库中字段使用字段信息描述类型
         ret["type"] = field.__class__.__name__ if 'type' not in ret else ret["type"]
@@ -1616,7 +1625,7 @@ class MyappModelRestApi(ModelRestApi):
                 ret['description'] = self.description_columns.get(field.name,column_field_kwargs.get('description', ''))
                 ret['label'] = self.label_columns.get(field.name,column_field_kwargs.get('label', ''))
                 ret['default'] = column_field_kwargs.get('default', '')
-                ret['validators'] = column_field_kwargs.get('validators', [])
+                ret['validators'] = column_field_kwargs.get('validators', ret["validators"])
                 ret['choices'] = column_field_kwargs.get('choices', [])
                 if 'widget' in column_field_kwargs:
                     ret['widget']=column_field_kwargs['widget'].__class__.__name__.replace('Widget','').replace('Field','').replace('My','')
