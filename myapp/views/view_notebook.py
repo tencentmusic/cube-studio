@@ -324,7 +324,7 @@ class Notebook_ModelView_Base():
             workingDir = '/mnt/%s' % notebook.created_by.username
             command = ["sh", "-c", "%s jupyter lab --notebook-dir=%s --ip=0.0.0.0 "
                                     "--no-browser --allow-root --port=%s "
-                                    "--NotebookApp.token='' --NotebookApp.password='' "
+                                    "--NotebookApp.token='' --NotebookApp.password='' --ServerApp.disable_check_xsrf=True "
                                     "--NotebookApp.allow_origin='*' "
                                     "--NotebookApp.base_url=%s" % (pre_command,notebook.mount,port,rewrite_url)]
 
