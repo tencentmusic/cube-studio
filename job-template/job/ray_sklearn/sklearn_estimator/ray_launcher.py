@@ -135,9 +135,6 @@ def create_header_deploy(name):
                     "imagePullSecrets": [
                         {
                             "name": "hubsecret"
-                        },
-                        {
-                            "name": "csig-hubsecret"
                         }
                     ],
                     "affinity": {
@@ -319,9 +316,6 @@ def create_worker_deploy(header_name,worker_name):
                     "imagePullSecrets": [
                         {
                             "name": "hubsecret"
-                        },
-                        {
-                            "name": "csig-hubsecret"
                         }
                     ],
                     "restartPolicy": "Always",
@@ -372,23 +366,9 @@ def create_worker_deploy(header_name,worker_name):
         }
     }
 
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
+    if GPU_RESOURCE:
         worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
         worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-
-    if GPU_TYPE=='TENCENT' and GPU_RESOURCE:
-        if len(GPU_RESOURCE.split(','))==2:
-            gpu_core,gpu_mem = GPU_RESOURCE.split(',')[0],str(4*int(GPU_RESOURCE.split(',')[1]))
-            if gpu_core and gpu_mem:
-                worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests'][
-                    'tencent.com/vcuda-core'] = gpu_core
-                worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests'][
-                    'tencent.com/vcuda-memory'] = gpu_mem
-                worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits'][
-                    'tencent.com/vcuda-core'] = gpu_core
-                worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits'][
-                    'tencent.com/vcuda-memory'] = gpu_mem
-
 
     return worker_deploy
 

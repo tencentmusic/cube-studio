@@ -14,9 +14,6 @@ RUN apt install -y python3-dev gcc automake autoconf libtool make ffmpeg build-e
 # 安装pip库
 RUN pip install pysnooper cython
 
-# 安装kubectl
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
-
 # 便捷操作
 RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
     echo "alias la='ls -A'" >> /root/.bashrc && \
@@ -24,7 +21,7 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
     /bin/bash -c "source /root/.bashrc"
 
 WORKDIR /app
-RUN pip3 install kubernetes==12.0.1 pysnooper psutil
+RUN pip3 install kubernetes==18.20.0 pysnooper psutil
 RUN pip3 install scikit-learn==0.23.2 pandas numpy joblib 
 
 COPY job/ray_sklearn/sklearn_estimator/* /app/
