@@ -344,7 +344,7 @@ class Task_ModelView_Base():
             item.volume_mount = self.src_item_json.get('volume_mount','')
 
         if item.volume_mount:
-            item.volume_mount = ','.join([x.strip() for x in item.split(',') if x.strip()])
+            item.volume_mount = ','.join([x.strip() for x in item.volume_mount.split(',') if x.strip()])
 
         if item.outputs:
             core.validate_json(item.outputs)
