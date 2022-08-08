@@ -16,7 +16,6 @@ import re,os
 from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
-# 将model添加成视图，并控制在前端的显示
 from myapp import app, appbuilder,db,event_logger
 from myapp.utils import core
 from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
@@ -109,7 +108,7 @@ class Metadata_metric_ModelView_base():
     add_columns = ['app','metric_data_type','name','label','describe','metric_type','metric_level','metric_dim','metric_responsible','caliber','task_id','public']
     # show_columns = ['project','name','describe','config_html','dag_json_html','created_by','changed_by','created_on','changed_on','expand_html']
     edit_columns = add_columns
-    base_filters = [["id", Metadata_Metrics_table_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Metadata_Metrics_table_Filter, lambda: []]]
     add_form_extra_fields = {
         "app": SelectField(
             label=_(datamodel.obj.lab('app')),

@@ -26,7 +26,6 @@ from .model_job import Pipeline
 from myapp import app,db
 from myapp.models.base import MyappModelBase
 from myapp.models.helpers import ImportMixin
-# 添加自定义model
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
@@ -54,27 +53,27 @@ class service_common():
 class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     __tablename__ = 'service'
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))  # 定义外键
+    project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(
         Project, foreign_keys=[project_id]
     )
 
-    name = Column(String(100), nullable=False,unique=True)   # 用于产生pod  service和location
-    label = Column(String(100), nullable=False)   # 别名
-    images = Column(String(200), nullable=False)   # 别名
+    name = Column(String(100), nullable=False,unique=True)   # Used to generate pod service and vs
+    label = Column(String(100), nullable=False)
+    images = Column(String(200), nullable=False)
     working_dir = Column(String(100),default='')
     command = Column(String(1000),default='')
     args = Column(Text,default='')
-    env = Column(Text,default='')  # 默认自带的环境变量
-    volume_mount = Column(String(200),default='')   # 挂载
-    node_selector = Column(String(100),default='cpu=true,serving=true')   # 挂载
+    env = Column(Text,default='')
+    volume_mount = Column(String(200),default='')
+    node_selector = Column(String(100),default='cpu=true,serving=true')
     replicas = Column(Integer,default=1)
-    ports = Column(String(100),default='80')   # 挂载
+    ports = Column(String(100),default='80')
     resource_memory = Column(String(100),default='2G')
     resource_cpu = Column(String(100), default='2')
     resource_gpu= Column(String(100), default='0')
     deploy_time = Column(String(100), nullable=False,default=datetime.datetime.now)
-    host = Column(String(200), default='')  # 挂载
+    host = Column(String(200), default='')
     expand = Column(Text(65536), default='')
 
 
@@ -104,16 +103,16 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def ip(self):
         port = 30000+10*self.id
-        # 优先使用项目组配置的代理ip
+        # first, Use the proxy ip configured by the project group
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
         if not SERVICE_EXTERNAL_IP:
-            # 再使用全局配置代理ip
+            # second, Use the global configuration proxy ip
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
             if SERVICE_EXTERNAL_IP:
                 SERVICE_EXTERNAL_IP=SERVICE_EXTERNAL_IP[0]
 
         if not SERVICE_EXTERNAL_IP:
-            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host # 如果捕获到端口号，要去掉
+            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host # remove port in host
             if core.checkip(ip):
                 SERVICE_EXTERNAL_IP = ip
 
@@ -138,13 +137,13 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     __tablename__ = 'inferenceservice'
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))  # 定义外键
+    project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(
         Project, foreign_keys=[project_id]
     )
 
-    name = Column(String(100), nullable=True,unique=True)   # 用于产生pod  service和location
-    label = Column(String(100), nullable=False)   # 别名
+    name = Column(String(100), nullable=True,unique=True)
+    label = Column(String(100), nullable=False)
 
     service_type= Column(String(100),nullable=True,default='serving')
     model_name = Column(String(200),default='')
@@ -153,40 +152,40 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     model_type = Column(String(200),default='')
     model_input = Column(Text(65536), default='')
     model_output = Column(Text(65536), default='')
-    inference_config = Column(Text(65536), default='')   # 推理配置，挂载成configmap
+    inference_config = Column(Text(65536), default='')   # make configmap
     model_status = Column(String(200),default='offline')
     # model_status = Column(Enum('offline','test','online','delete'),nullable=True,default='offline')
 
-    transformer=Column(String(200),default='')  # 前后置处理逻辑的文件
+    transformer=Column(String(200),default='')  # pre process and post process
 
-    images = Column(String(200), nullable=False)   # 别名
+    images = Column(String(200), nullable=False)
     working_dir = Column(String(100),default='')
     command = Column(String(1000),default='')
     args = Column(Text,default='')
-    env = Column(Text,default='')  # 默认自带的环境变量
-    volume_mount = Column(String(2000),default='')   # 挂载
-    node_selector = Column(String(100),default='cpu=true,serving=true')   # 挂载
+    env = Column(Text,default='')
+    volume_mount = Column(String(2000),default='')
+    node_selector = Column(String(100),default='cpu=true,serving=true')
     min_replicas = Column(Integer,default=1)
     max_replicas = Column(Integer, default=1)
-    hpa = Column(String(400), default='')  # 弹性伸缩
-    metrics = Column(Text(65536), default='')  # 指标监控
-    health = Column(String(400), default='')  # 健康检查
-    sidecar = Column(String(400), default='')  # sidecar的名称
-    ports = Column(String(100),default='80')   # 挂载
+    hpa = Column(String(400), default='')
+    metrics = Column(Text(65536), default='')
+    health = Column(String(400), default='')
+    sidecar = Column(String(400), default='')
+    ports = Column(String(100),default='80')
     resource_memory = Column(String(100),default='2G')
     resource_cpu = Column(String(100), default='2')
     resource_gpu= Column(String(100), default='0')
     deploy_time = Column(String(100), nullable=True,default=datetime.datetime.now)
-    host = Column(String(200), default='')  # 挂载
+    host = Column(String(200), default='')
     expand = Column(Text(65536), default='{}')
-    canary = Column(String(400), default='')   # 分流
-    shadow = Column(String(400), default='')  # 镜像
+    canary = Column(String(400), default='')
+    shadow = Column(String(400), default='')
 
-    run_id = Column(String(100),nullable=True)   # 可能同一个pipeline产生多个模型
+    run_id = Column(String(100),nullable=True)
     run_time = Column(String(100))
-    deploy_history = Column(Text(65536), default='')  # 部署记录
+    deploy_history = Column(Text(65536), default='')
 
-    priority = Column(Integer,default=1)   # 服务优先级，优先满足高优先级的资源需求
+    priority = Column(Integer,default=1)   # giving priority to meeting high-priority resource needs
 
     @property
     def model_name_url(self):
@@ -212,9 +211,6 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
                 <a target=_blank href="{url}">监控</a> |
                 <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
                 '''
-        # else:
-        #     dom = f'''调试 | 部署测试 | 部署生产 | <a target=_blank href="{url}">监控</a> | 清理'''
-        #     # dom = f'''调试 | 部署测试</a> | 部署生产 | 监控 | 清理 '''
         return Markup(dom)
 
     @property
@@ -247,16 +243,16 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     def ip(self):
 
         port = 20000+10*self.id
-        # 优先使用项目组配置的代理ip
+        # first, Use the proxy ip configured by the project group
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
         if not SERVICE_EXTERNAL_IP:
-            # 再使用全局配置代理ip
+            # second, Use the global configuration proxy ip
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', [])
             if SERVICE_EXTERNAL_IP:
                 SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
 
         if not SERVICE_EXTERNAL_IP:
-            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  # 如果捕获到端口号，要去掉
+            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  #  remove port in host
             if core.checkip(ip):
                 SERVICE_EXTERNAL_IP = ip
 

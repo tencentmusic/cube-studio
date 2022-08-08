@@ -25,7 +25,7 @@ from .model_team import Project
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 # from myapp.models.base import MyappModel
-# 添加自定义model
+
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
@@ -38,7 +38,7 @@ import re
 from myapp.utils.py import py_k8s
 import pysnooper
 
-# 定义model
+
 class Repository(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'repository'
     id = Column(Integer, primary_key=True)
@@ -59,18 +59,18 @@ class Repository(Model,AuditMixinNullable,MyappModelBase):
     label_columns=MyappModelBase.label_columns.copy()
     label_columns.update(label_columns_spec)
 
-# 定义model
+
 class Images(Model,AuditMixinNullable,MyappModelBase):
     __tablename__='images'
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))  # 定义外键
+    project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
 
     name = Column(String(500), nullable=False)
     describe = Column(String(1000), nullable=False)
-    repository_id = Column(Integer, ForeignKey('repository.id'))    # 定义外键
+    repository_id = Column(Integer, ForeignKey('repository.id'))
     repository = relationship(
         "Repository", foreign_keys=[repository_id]
     )
@@ -94,17 +94,17 @@ class Images(Model,AuditMixinNullable,MyappModelBase):
         return self.name
 
 
-# 定义model
+
 class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     __tablename__='job_template'
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))  # 定义外键
+    project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
     name = Column(String(500), nullable=False,unique=True)
     version = Column(Enum('Release','Alpha'),nullable=False,default='Release')
-    images_id = Column(Integer, ForeignKey('images.id'))  # 定义外键
+    images_id = Column(Integer, ForeignKey('images.id'))
     images = relationship(
         Images, foreign_keys=[images_id]
     )
@@ -116,7 +116,7 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     env = Column(Text)   # 默认自带的环境变量
     volume_mount = Column(String(400),default='')  # 强制必须挂载
     privileged = Column(Boolean, default=False)   # 是否启用特权模式
-    accounts = Column(String(100))   # 使用账户
+    accounts = Column(String(100))   # 使用k8s账户
     demo=Column(Text)
     expand = Column(Text(65536), default='{}')
 
@@ -176,7 +176,6 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
         )
 
 
-# 定义model
 class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'pipeline'
     id = Column(Integer, primary_key=True)
@@ -195,7 +194,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     pipeline_argo_id = Column(String(100))
     version_id = Column(String(100))
     run_id = Column(String(100))
-    node_selector = Column(String(100), default='cpu=true,train=true')  # 挂载
+    node_selector = Column(String(100), default='cpu=true,train=true')
     image_pull_policy = Column(Enum('Always','IfNotPresent'),nullable=False,default='Always')
     parallelism = Column(Integer, nullable=False,default=1)  # 同一个pipeline，最大并行的task数目
     alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated')   # 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated

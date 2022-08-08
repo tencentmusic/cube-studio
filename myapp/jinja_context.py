@@ -12,7 +12,7 @@ from flask import g, request
 from jinja2.sandbox import SandboxedEnvironment
 
 from myapp import app
-# 模板渲染的上下午函数
+# template context
 conf = app.config
 BASE_CONTEXT = {
     "datetime": datetime,

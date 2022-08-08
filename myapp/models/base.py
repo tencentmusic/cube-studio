@@ -3,7 +3,6 @@ from flask_babel import lazy_gettext as _
 import re
 from myapp.utils import core
 
-# 定义model
 class MyappModelBase():
 
     label_columns={
@@ -279,14 +278,12 @@ class MyappModelBase():
         return _(re.sub("[._]", " ", col).title())
 
 
-
-    # 获取node选择器
     def get_default_node_selector(self,node_selector,resource_gpu,model_type):
-        # 先使用项目中定义的选择器
+        # prefer already defined selectors
         if not node_selector:
             node_selector=''
 
-        # 不使用用户的填写，完全平台决定
+        # completely determined by the platform
         if core.get_gpu(resource_gpu)[0]:
             node_selector = node_selector.replace('cpu=true', 'gpu=true') + ",gpu=true,%s=true"%model_type
         else:

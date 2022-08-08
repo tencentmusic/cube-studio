@@ -1,7 +1,6 @@
 from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import Blueprint, current_app, jsonify, make_response, request
-# 将model添加成视图，并控制在前端的显示
 from myapp.models.model_serving import Service
 from myapp.models.model_train_model import Training_Model
 from myapp.models.model_serving import InferenceService
@@ -84,12 +83,10 @@ class Training_Model_Filter(MyappFilter):
 
 
 
-# 定义数据库视图
-# class Training_Model_ModelView(JsonResModelView,DeleteMixin):
 class Training_Model_ModelView_Base():
 
     datamodel = SQLAInterface(Training_Model)
-    base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']  # 默认为这些
+    base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('changed_on', 'desc')
     order_columns = ['id']
     list_columns = ['project_url','name','version','framework','api_type','pipeline_url','creator','modified','deploy']
@@ -116,7 +113,7 @@ class Training_Model_ModelView_Base():
     }
 
     label_title = '模型'
-    base_filters = [["id", Training_Model_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Training_Model_Filter, lambda: []]]
 
 
     path_describe= r'''
@@ -240,11 +237,10 @@ class Training_Model_ModelView_Base():
 class Training_Model_ModelView(Training_Model_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Training_Model)
 
-# 添加视图和菜单
 appbuilder.add_view(Training_Model_ModelView,"模型管理",icon = 'fa-hdd-o',category = '服务化',category_icon = 'fa-tasks')
 
 
-# 添加api
+
 class Training_Model_ModelView_Api(Training_Model_ModelView_Base,MyappModelRestApi):  # noqa
     datamodel = SQLAInterface(Training_Model)
     # base_order = ('id', 'desc')

@@ -4,7 +4,6 @@ from flask_appbuilder import ModelView, ModelRestApi
 from flask_appbuilder import ModelView,AppBuilder,expose,BaseView,has_access
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-# 将model添加成视图，并控制在前端的显示
 from myapp.models.model_team import Project,Project_User
 from flask_appbuilder.actions import action
 from wtforms import BooleanField, IntegerField, SelectField, StringField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
@@ -100,7 +99,7 @@ class Project_User_ModelView(Project_User_ModelView_Base,CompactCRUDMixin, Myapp
 
 appbuilder.add_view_no_menu(Project_User_ModelView)
 
-# 添加api
+
 class Project_User_ModelView_Api(Project_User_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Project_User)
     route_base = '/project_user_modelview/api'
@@ -135,7 +134,7 @@ class Project_Join_Filter(MyappFilter):
 
 
 
-# 获取查询自己所在的项目组的project
+# query joined project
 def filter_join_org_project():
     query = db.session.query(Project)
     # user_roles = [role.name.lower() for role in list(get_user_roles())]
@@ -143,7 +142,6 @@ def filter_join_org_project():
     if g.user.is_admin():
         return query.filter(Project.type=='org').order_by(Project.id.desc())
 
-    # 查询自己拥有的项目
     my_user_id = g.user.get_id() if g.user else 0
     owner_ids_query = db.session.query(Project_User.project_id).filter(Project_User.user_id == my_user_id)
 
@@ -153,7 +151,7 @@ def filter_join_org_project():
 class Project_ModelView_Base():
     label_title='项目组'
     datamodel = SQLAInterface(Project)
-    base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']  # 默认为这些
+    base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('id', 'desc')
     list_columns = ['name','user','type']
     cols_width = {
@@ -189,9 +187,7 @@ class Project_ModelView_Base():
         if not g.user.username in item.get_creators():
             raise MyappException('just creator can add/edit')
 
-        # 检测是否具有编辑权限，只有creator和admin可以编辑
-
-    # 打开编辑前，校验权限
+    # before update, check permission
     def pre_update_get(self, item):
         self.pre_add_get()
         self.check_item_permissions(item)
@@ -199,7 +195,7 @@ class Project_ModelView_Base():
             flash('just creator can add/edit user','warning')
             raise MyappException('just creator can add/edit user')
 
-    # 对当前记录是否有权限
+    # check permission
     def check_item_permissions(self,item):
         if g.user.is_admin() or g.user.username in item.get_creators():
             self.user_permissions = {
@@ -218,7 +214,7 @@ class Project_ModelView_Base():
 
 
 
-    # 添加创始人
+    # add project user
     def post_add(self, item):
         if not item.type:
             item.type = self.project_type
@@ -235,19 +231,18 @@ class Project_ModelView_Base():
 
 # class Project_ModelView_job_template(Project_ModelView_Base,MyappModelView):
 #     project_type = 'job-template'
-#     base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+#     base_filters = [["id", Project_Filter, project_type]]
 #     datamodel = SQLAInterface(Project)
 #     label_title = '模板分类'
 #
 # appbuilder.add_view(Project_ModelView_job_template,"模板分类",icon = 'fa-tasks',category = '项目组',category_icon = 'fa-users')
 
 
-# 添加api
 class Project_ModelView_job_template_Api(Project_ModelView_Base,MyappModelRestApi):
     route_base = '/project_modelview/job_template/api'
     datamodel = SQLAInterface(Project)
     project_type = 'job-template'
-    base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+    base_filters = [["id", Project_Filter, project_type]]
     related_views = [Project_User_ModelView_Api, ]
     label_title = '模板分类'
     edit_form_extra_fields={
@@ -271,19 +266,19 @@ appbuilder.add_api(Project_ModelView_job_template_Api)
 
 # class Project_ModelView_org(Project_ModelView_Base,MyappModelView):
 #     project_type='org'
-#     base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+#     base_filters = [["id", Project_Filter, project_type]]
 #     datamodel = SQLAInterface(Project)
 #     label_title = '项目分组'
 #
 # appbuilder.add_view(Project_ModelView_org,"项目分组",icon = 'fa-sitemap',category = '项目组',category_icon = 'fa-users')
 #
 
-# 添加api
+
 class Project_ModelView_org_Api(Project_ModelView_Base,MyappModelRestApi):
     route_base = '/project_modelview/org/api'
     datamodel = SQLAInterface(Project)
     project_type = 'org'
-    base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+    base_filters = [["id", Project_Filter, project_type]]
     related_views = [Project_User_ModelView_Api, ]
     label_title = '项目分组'
     edit_form_extra_fields={
@@ -309,21 +304,20 @@ appbuilder.add_api(Project_ModelView_org_Api)
 
 # class Project_ModelView_train_model(Project_ModelView_Base,MyappModelView):
 #     project_type = 'model'
-#     base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+#     base_filters = [["id", Project_Filter, project_type]]
 #     datamodel = SQLAInterface(Project)
 #     label_title = '模型分组'
 #
-# # 添加视图和菜单
 # appbuilder.add_view(Project_ModelView_train_model,"模型分组",icon = 'fa-address-book-o',category = '项目组',category_icon = 'fa-users')
 #
 
-# 添加api
+
 class Project_ModelView_train_model_Api(Project_ModelView_Base,MyappModelRestApi):
     route_base = '/project_modelview/model/api'
     datamodel = SQLAInterface(Project)
     project_type = 'model'
     label_title = '模型分组'
-    base_filters = [["id", Project_Filter, project_type]]  # 设置权限过滤器
+    base_filters = [["id", Project_Filter, project_type]]
     related_views = [Project_User_ModelView_Api, ]
     edit_form_extra_fields={
         'type': StringField(
@@ -340,7 +334,6 @@ appbuilder.add_api(Project_ModelView_train_model_Api)
 
 
 
-# 添加api
 class Project_ModelView_Api(Project_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Project)
     route_base = '/project_modelview/api'

@@ -25,7 +25,6 @@ from .model_team import Project
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 # from myapp.models.base import MyappModel
-# 添加自定义model
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
@@ -39,13 +38,12 @@ from myapp.utils.py import py_k8s
 import pysnooper
 
 
-# 定义model
 class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'service_pipeline'
     id = Column(Integer, primary_key=True)
     name = Column(String(100),nullable=False,unique=True)
     describe = Column(String(200),nullable=False)
-    project_id = Column(Integer, ForeignKey('project.id'),nullable=False)  # 定义外键
+    project_id = Column(Integer, ForeignKey('project.id'),nullable=False)
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
@@ -53,13 +51,13 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     namespace=Column(String(100),default='service')
     env = Column(String(500),default='')
     run_id = Column(String(100))
-    node_selector = Column(String(100), default='cpu=true,train=true')  # 挂载
-    images = Column(String(200), nullable=False)  # 别名
+    node_selector = Column(String(100), default='cpu=true,train=true')
+    images = Column(String(200), nullable=False)
     working_dir = Column(String(100),default='')
     command = Column(String(1000),default='')
-    volume_mount = Column(String(200),default='')   # 挂载
+    volume_mount = Column(String(200),default='')
     image_pull_policy = Column(Enum('Always','IfNotPresent'),nullable=False,default='Always')
-    replicas = Column(Integer, default=1)   # 中控组件的副本数目
+    replicas = Column(Integer, default=1)  
     resource_memory = Column(String(100),default='2G')
     resource_cpu = Column(String(100), default='2')
     resource_gpu= Column(String(100), default='0')

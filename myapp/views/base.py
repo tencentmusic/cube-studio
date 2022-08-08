@@ -291,6 +291,7 @@ class BaseMyappView(BaseView):
             status=status,
             mimetype="application/json",
         )
+
     # 前端显示数据
     def common_bootstrap_payload(self):
         """Common data always sent to the client"""

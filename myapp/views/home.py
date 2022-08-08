@@ -47,20 +47,17 @@ class Myapp(BaseMyappView):
         else:
             msg = 'Hello '+g.user.username+" !"
 
-        # 返回模板
         return self.render_template('hello.html', msg=msg)
 
     @expose('/home')
     def home(self):
-        # 返回模板
         return self.render_template('home.html')
 
 
     @expose('/menu')
     def menu(self):
-        # 返回模板
+
         menu=[
-            # 项目组
             {
                 "name": 'group',
                 "title": '项目空间',

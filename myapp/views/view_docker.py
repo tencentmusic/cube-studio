@@ -11,7 +11,6 @@ import re
 from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
-# 将model添加成视图，并控制在前端的显示
 from myapp.models.model_job import Repository,Images
 from myapp.views.view_team import Project_Filter
 from myapp import app, appbuilder,db,event_logger
@@ -39,7 +38,6 @@ from flask import (
     url_for,
 )
 from myapp import security_manager
-import kfp    # 使用自定义的就要把pip安装的删除了
 from werkzeug.datastructures import FileStorage
 from .base import (
     api,
@@ -76,7 +74,6 @@ class Docker_Filter(MyappFilter):
 
 
 
-# 定义数据库视图
 class Docker_ModelView_Base():
     datamodel = SQLAInterface(Docker)
     label_title='docker'
@@ -87,7 +84,7 @@ class Docker_ModelView_Base():
     conv = GeneralModelConverter(datamodel)
     base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']  # 默认为这些
     base_order = ('changed_on', 'desc')
-    base_filters = [["id", Docker_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Docker_Filter, lambda: []]]
     order_columns = ['id']
     add_columns=['project','describe','base_image','target_image','need_gpu','consecutive_build','expand']
     edit_columns=add_columns
@@ -265,7 +262,7 @@ class Docker_ModelView_Base():
             "loading": True,
             "currentHeight": 128
         }
-        # 返回模板
+
         if cluster_name==conf.get('ENVIRONMENT'):
             return self.render_template('link.html', data=data)
         else:
@@ -351,7 +348,6 @@ class Docker_ModelView_Base():
 class Docker_ModelView(Docker_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Docker)
 
-# 添加视图和菜单
 appbuilder.add_view(Docker_ModelView,"镜像调试",href="/docker_modelview/list/",icon = 'fa-cubes',category = '在线开发',category_icon = 'fa-glass')
 
 # 添加api

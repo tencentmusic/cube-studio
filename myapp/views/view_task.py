@@ -9,7 +9,6 @@ import uuid
 import re
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
-# 将model添加成视图，并控制在前端的显示
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 from myapp.models.model_team import Project,Project_User
 from flask_appbuilder.actions import action
@@ -57,7 +56,7 @@ from flask import (
     url_for,
 )
 from myapp import security_manager
-import kfp    # 使用自定义的就要把pip安装的删除了
+
 from werkzeug.datastructures import FileStorage
 from .base import (
     api,
@@ -117,7 +116,7 @@ class Task_ModelView_Base():
     add_form_extra_fields = {
         "args": StringField(
             _(datamodel.obj.lab('args')),
-            widget=MyBS3TextAreaFieldWidget(rows=10),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            widget=MyBS3TextAreaFieldWidget(rows=10),
         ),
         "pipeline": QuerySelectField(
             datamodel.obj.lab('pipeline'),

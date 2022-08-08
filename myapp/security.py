@@ -81,7 +81,7 @@ import json
 
 
 
-# 用户列表页面模板
+# user list page template
 class MyappSecurityListWidget(ListWidget):
     """
         Redeclaring to avoid circular imports
@@ -89,7 +89,7 @@ class MyappSecurityListWidget(ListWidget):
     template = "myapp/fab_overrides/list.html"
 
 
-# 角色列表页模板
+# role list page template
 class MyappRoleListWidget(ListWidget):
     """
         Role model view from FAB already uses a custom list widget override
@@ -102,7 +102,7 @@ class MyappRoleListWidget(ListWidget):
 
 
 
-# 自定义list,add,edit页面内容
+# customize list,add,edit page
 UserModelView.list_columns= ["username", "active", "roles"]
 UserModelView.edit_columns= ["first_name", "last_name", "username", "active", "email"]
 UserModelView.add_columns= ["first_name", "last_name", "username", "email", "active", "roles"]
@@ -115,20 +115,18 @@ PermissionViewModelView.list_widget = MyappSecurityListWidget
 PermissionModelView.list_widget = MyappSecurityListWidget
 
 
-# 自定义扩展系统自带的user
+# expand user
 from flask_appbuilder.security.sqla.models import User,Role
 from sqlalchemy import Column, Integer, ForeignKey, String, Sequence, Table
 
 
 
-# 修改绑定
 class MyUser(User):
     __tablename__ = 'ab_user'
-    org = Column(String(200))   # 新增的属性，组织架构
+    org = Column(String(200))   # Organization
     def get_full_name(self):
         return self.username
 
-    # 使用用户名为名称
     def __repr__(self):
         return self.username
 
@@ -146,10 +144,10 @@ class MyUser(User):
             # timestamp = int(func.date_format(self.changed_on))
             timestamp = int(self.changed_on.timestamp())
             payload = {
-                "iss": self.username  # 用户名作为身份
-                # "iat": timestamp,  # 签发期
-                # "nbf": timestamp,  # 生效期
-                # "exp": timestamp + 60 * 60 * 24 * 30 * 12,  # 有效期12个月
+                "iss": self.username
+                # "iat": timestamp,  # Issue period
+                # "nbf": timestamp,  # Effective Date
+                # "exp": timestamp + 60 * 60 * 24 * 30 * 12,  # Valid for 12 months
             }
 
             global_password = 'myapp'
@@ -159,7 +157,7 @@ class MyUser(User):
         return ''
 
 
-# 自定义role view 视图
+# customize role view
 class MyRoleModelView(RoleModelView):
 
     datamodel = SQLAInterface(Role)
@@ -168,7 +166,6 @@ class MyRoleModelView(RoleModelView):
     list_columns = ["name", "permissions"]
 
 
-# 自定义用户展示
 class MyUserRemoteUserModelView(UserModelView):
 
     list_columns = ["username", "active", "roles", ]
@@ -259,14 +256,14 @@ from myapp.project import Myauthdbview
 # @pysnooper.snoop()
 class MyappSecurityManager(SecurityManager):
 
-    user_model = MyUser  # 用户使用自定义的用户
+    user_model = MyUser
     rolemodelview = MyRoleModelView  #
 
-    # 远程认证
+    # Remote Authentication
     userremoteusermodelview = MyUserRemoteUserModelView
     authremoteuserview = MyCustomRemoteUserView
 
-    # 账号密码认证
+    # Account password authentication
     userdbmodelview = MyUserRemoteUserModelView
     authdbview = Myauthdbview
 

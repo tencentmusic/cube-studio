@@ -10,7 +10,7 @@ import re
 import urllib.parse
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 from myapp.models.model_team import Project,Project_User
 from myapp.views.view_team import Project_Join_Filter
@@ -65,7 +65,7 @@ from flask import (
 )
 from myapp import security_manager
 from myapp.views.view_team import filter_join_org_project
-import kfp    # 使用自定义的就要把pip安装的删除了
+import kfp  
 from werkzeug.datastructures import FileStorage
 from kubernetes import client as k8s_client
 from .base import (
@@ -113,7 +113,7 @@ class Pipeline_Filter(MyappFilter):
 
 from sqlalchemy.exc import InvalidRequestError,OperationalError
 
-# 将定义pipeline的流程
+# 将dag 转为argo pipeline yaml
 # @pysnooper.snoop(watch_explode=())
 def dag_to_pipeline(pipeline,dbsession,**kwargs):
     if not pipeline.id:

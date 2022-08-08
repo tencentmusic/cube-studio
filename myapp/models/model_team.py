@@ -20,7 +20,7 @@ from myapp.models.helpers import AuditMixinNullable, ImportMixin
 from sqlalchemy.orm import backref, relationship
 from myapp.models.base import MyappModelBase
 from myapp.models.helpers import ImportMixin
-# 添加自定义model
+
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup

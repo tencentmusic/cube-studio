@@ -26,7 +26,6 @@ from .model_team import Project
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 # from myapp.models.base import MyappModel
-# 添加自定义model
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
@@ -40,10 +39,6 @@ from myapp.utils.py import py_k8s
 import pysnooper
 
 
-
-
-
-# 定义model
 class Dimension_table(Model,ImportMixin,MyappModelBase):
     __tablename__ = 'dimension'
 
