@@ -60,7 +60,7 @@ class Myauthdbview(AuthDBView):
     login_template = "appbuilder/general/security/login_db.html"
 
     @expose("/login/", methods=["GET", "POST"])
-    @pysnooper.snoop(watch_explode=('form',))
+    # @pysnooper.snoop(watch_explode=('form',))
     def login(self):
 
         if 'rtx' in request.args:
@@ -118,7 +118,7 @@ class Myauthdbview(AuthDBView):
 
     @expose('/logout')
     def logout(self):
-        login_url = 'http://%s/login/' % request.host
+        login_url = request.host_url.strip('/')+'/login/'
         session.pop('user', None)
         g.user = None
         logout_user()
