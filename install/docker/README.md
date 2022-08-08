@@ -40,8 +40,6 @@ docker-compose.yaml文件在install/docker目录下，这里提供了mac和linux
 
 image：刚才构建的镜像
 
-LOGIN_URL地址：登录重定向地址
-
 MYSQL_SERVICE：mysql的地址
 
 

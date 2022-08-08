@@ -302,13 +302,10 @@ class Metadata_table_ModelView_Api(Metadata_table_ModelView_base,MyappModelRestA
             if storage_cost:
                 item['storage_cost']=round(float(storage_cost), 6)
 
-
     # # 在info信息中添加特定参数
     # @pysnooper.snoop()
     def add_more_info(self,response,**kwargs):
-
         pass
-
 
     remember_columns=['app','db']
     label_title='hive库表'
