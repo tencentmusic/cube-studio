@@ -68,7 +68,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if JUPYTER_DOMAIN:
             host = "http://"+JUPYTER_DOMAIN
         else:
-            host = "http://"+request.host # 使用当前域名打开
+            host = request.host_url.strip('/') # 使用当前域名打开
 
         # 对于有边缘节点，直接使用边缘集群的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None

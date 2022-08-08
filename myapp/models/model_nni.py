@@ -103,7 +103,7 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
         if NNI_DOMAIN:
             host = "http://"+NNI_DOMAIN
         else:
-            host = "http://"+request.host # 使用当前域名打开
+            host = request.host_url.strip('/') # 使用当前域名打开
 
         return Markup(f'<a target=_blank href="{host}/nni/{self.name}/">{self.describe}</a>')
 
