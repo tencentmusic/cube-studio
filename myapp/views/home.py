@@ -309,7 +309,7 @@ class Myapp(BaseMyappView):
                     #             "title": 'sqllab',
                     #             "icon": '<svg t="1649746944636" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2366" width="200" height="200"><path d="M832 960H192V64h384l256 256zM576 160v160h160z m-64 224V128H256v768h512V384z" fill="#262626" p-id="2367"></path><path d="M672 736v-160h-32v192h96v-32zM601.6 673.28c-1.6-63.04-28.16-95.68-80-97.28-52.16 1.92-79.04 34.24-80.96 97.28 0.96 58.56 24.96 89.92 71.36 94.72h0.32c3.2 0.32 14.72 0.32 17.28 0H608v-32h-25.28c12.48-16.32 18.88-37.12 18.88-62.72z m-80 68.8c-28.48 0.64-42.88-22.4-42.88-68.8 0.64-45.12 14.72-67.84 42.88-67.84 27.52 0 41.6 22.72 41.92 67.84-0.32 45.44-14.4 68.16-41.92 68.8zM352 608c13.44-0.64 28.48 11.52 32 32h32c-6.08-37.12-27.84-64-64-64-35.2 1.92-55.36 19.84-57.92 54.08-0.96 27.2 12.48 45.12 40.64 53.12 11.52 3.2 20.8 6.4 27.84 10.24 8.64 3.84 13.12 10.24 13.44 19.52-0.64 11.84-11.2 22.4-24 23.04-16.64 0-28.48-6.4-32-32H288c7.04 44.8 25.28 65.28 64 64 38.72-0.64 63.04-19.2 64-56-0.64-21.76-8.64-38.08-24.96-49.28-8.96-6.08-20.48-11.2-34.56-15.04-15.68-3.84-22.72-10.24-21.76-19.52s7.36-19.52 17.28-20.16z" fill="#262626" p-id="2368"></path></svg>',
                     #             "menu_type": "innerRoute",
-                    #             "url": "http://{host}/frontend/dataSearch".format(host=request.host)
+                    #             "url": "{host}/frontend/dataSearch".format(host=request.host_url.strip('/'))
                     #         }
                     #     ],
                     # },
@@ -481,13 +481,6 @@ class Myapp(BaseMyappView):
                         "url": "/service_pipeline_modelview/api/"
                     },
                 ]
-            },
-            {
-                "name": 'index',
-                "title": '首页',
-                "menu_type": "iframe",
-                "hidden":True,
-                "url": "/static/appbuilder/vison/index.html#/home"
             }
         ]
 
@@ -535,10 +528,12 @@ class Myapp(BaseMyappView):
                         "title": link.get('label',''),
                         "icon": '<svg t="1653033023483" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2982" width="200" height="200"><path d="M618.24 439.381333a152.746667 152.746667 0 0 1 0 216l-135.893333 135.893334a163.370667 163.370667 0 1 1-231.04-231.04l66.922666-66.944 45.269334 45.269333-66.944 66.944a99.370667 99.370667 0 1 0 140.522666 140.522667l135.893334-135.893334a88.746667 88.746667 0 0 0 0-125.482666z m182.528-197.589333a163.370667 163.370667 0 0 1 0 231.04L733.866667 539.776l-45.269334-45.248 66.944-66.944a99.370667 99.370667 0 1 0-140.522666-140.522667l-135.893334 135.893334a88.746667 88.746667 0 0 0 0 125.482666l-45.269333 45.269334a152.746667 152.746667 0 0 1 0-216l135.893333-135.893334a163.370667 163.370667 0 0 1 231.04 0z" p-id="2983"></path></svg>',
                         "menu_type": "out_link",
-                        "url": 'http://'+request.host+link.get('url','') if 'http' not in link.get('url','') else link.get('url',''),
+                        "url": request.host_url.strip('/')+link.get('url','') if 'http' not in link.get('url','') else link.get('url',''),
                     } for link in conf.get('ALL_LINKS',[])
                 ]
             }
+
+            print(request.host_url)
 
             menu[0]['children'].append(setting)
             menu[0]['children'].append(links)
