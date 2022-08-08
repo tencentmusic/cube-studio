@@ -8,3 +8,4 @@ myapp/test
 /myapp/static/appbuilder/mnt
 /myapp/static/appbuilder/assets/
 /images/web/target-detection/yolo/
+/install/docker/data/mysql/
