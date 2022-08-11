@@ -21,7 +21,7 @@ from myapp.models.helpers import AuditMixinNullable, ImportMixin
 from flask import escape, g, Markup, request
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
-# 添加自定义model
+
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
@@ -31,7 +31,7 @@ conf = app.config
 from myapp.utils.py import py_k8s
 
 
-# 定义model
+
 class Notebook(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'notebook'
     id = Column(Integer, primary_key=True)

@@ -41,7 +41,7 @@ else:
         print('no kubeconfig in cluster %s' % cluster)
         exit(1)
 
-# 推送微信消息
+# 推送消息
 # @pysnooper.snoop()
 def deliver_message(tfjob):
     if not tfjob:

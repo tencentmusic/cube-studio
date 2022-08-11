@@ -12,7 +12,7 @@ from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regex
 
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 from myapp.models.model_team import Project,Project_User
 from flask_appbuilder.actions import action
@@ -82,7 +82,7 @@ class Job_Tempalte_Filter(MyappFilter):
         # logging.info(join_projects_id)
         return query.filter(self.model.version=='Release')
 
-# 定义数据库视图
+
 class Job_Template_ModelView_Base():
     datamodel = SQLAInterface(Job_Template)
     label_title='任务模板'
@@ -99,7 +99,7 @@ class Job_Template_ModelView_Base():
     add_columns = ['project','images','name','version','describe','workdir','entrypoint','volume_mount','job_args_definition','args','env','hostAliases','privileged','accounts','demo','expand']
     edit_columns = add_columns
 
-    base_filters = [["id", Job_Tempalte_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Job_Tempalte_Filter, lambda: []]]
     base_order = ('id', 'desc')
     order_columns = ['id']
     add_form_query_rel_fields = {

@@ -5,7 +5,6 @@ from flask_appbuilder import ModelView,AppBuilder,expose,BaseView,has_access
 from importlib import reload
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-# 将model添加成视图，并控制在前端的显示
 import uuid
 from myapp.models.model_nni import NNI
 from myapp.models.model_job import Repository
@@ -91,8 +90,6 @@ class NNI_Filter(MyappFilter):
         ).order_by(self.model.id.desc())
 
 
-
-# 定义数据库视图
 class NNI_ModelView_Base():
     datamodel = SQLAInterface(NNI)
     conv = GeneralModelConverter(datamodel)
@@ -100,9 +97,9 @@ class NNI_ModelView_Base():
     check_redirect_list_url = conf.get('MODEL_URLS',{}).get('nni','')
 
 
-    base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']  # 默认为这些
+    base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('id', 'desc')
-    base_filters = [["id", NNI_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", NNI_Filter, lambda: []]]
     order_columns = ['id']
     list_columns = ['project','describe_url','job_type','creator','modified','run','log']
     show_columns = ['created_by','changed_by','created_on','changed_on','job_type','name','namespace','describe',

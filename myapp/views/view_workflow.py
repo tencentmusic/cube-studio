@@ -3,7 +3,7 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 
 from flask_babel import gettext as __
 
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 from myapp.models.model_team import Project,Project_User
 from flask_appbuilder.actions import action
@@ -93,7 +93,7 @@ class Crd_ModelView_Base():
     # }
     crd_name = ''
     base_order = ('create_time', 'desc')
-    base_filters = [["id", CRD_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", CRD_Filter, lambda: []]]
 
 
     # list
@@ -216,7 +216,7 @@ class Workflow_Filter(MyappFilter):
 # list正在运行的workflow
 class Workflow_ModelView_Base(Crd_ModelView_Base):
 
-    base_filters = [["id", Workflow_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Workflow_Filter, lambda: []]]
 
     # 删除之前的 workflow和相关容器
     # @pysnooper.snoop()

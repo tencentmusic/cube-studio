@@ -25,7 +25,7 @@ from .model_team import Project
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 # from myapp.models.base import MyappModel
-# 添加自定义model
+
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
@@ -38,7 +38,7 @@ import re
 from myapp.utils.py import py_k8s
 import pysnooper
 
-# 定义model
+
 class ETL_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'etl_pipeline'
     id = Column(Integer, primary_key=True)
@@ -103,7 +103,7 @@ class ETL_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             expand=self.expand,
         )
 
-# 定义model
+
 class ETL_Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'etl_task'
     id = Column(Integer, primary_key=True)

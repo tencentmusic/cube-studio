@@ -10,7 +10,7 @@ import re
 import urllib.parse
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_etl_pipeline import ETL_Pipeline,ETL_Task
 from myapp.models.model_team import Project,Project_User
 from myapp.views.view_team import Project_Join_Filter
@@ -65,7 +65,7 @@ from flask import (
 )
 from myapp import security_manager
 from myapp.views.view_team import filter_join_org_project
-import kfp    # 使用自定义的就要把pip安装的删除了
+
 from werkzeug.datastructures import FileStorage
 from kubernetes import client as k8s_client
 from .base import (
@@ -180,7 +180,7 @@ class ETL_Pipeline_ModelView_Base():
     edit_columns = ['project','name','describe','created_by']
 
 
-    base_filters = [["id", ETL_Pipeline_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", ETL_Pipeline_Filter, lambda: []]]
     conv = GeneralModelConverter(datamodel)
 
     # related_views = [ETL_Task_ModelView,]

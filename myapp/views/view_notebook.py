@@ -6,7 +6,7 @@ from importlib import reload
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import random
-# 将model添加成视图，并控制在前端的显示
+
 import uuid
 from myapp.models.model_notebook import Notebook
 from myapp.models.model_job import Repository
@@ -82,7 +82,7 @@ class Notebook_Filter(MyappFilter):
 
 
 
-# 定义数据库视图
+
 class Notebook_ModelView_Base():
     datamodel = SQLAInterface(Notebook)
     label_title='notebook'
@@ -91,9 +91,9 @@ class Notebook_ModelView_Base():
 
     datamodel = SQLAInterface(Notebook)
     conv = GeneralModelConverter(datamodel)
-    base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']  # 默认为这些
+    base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']
     base_order = ('changed_on', 'desc')
-    base_filters = [["id", Notebook_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Notebook_Filter, lambda: []]]
     order_columns = ['id']
     search_columns = ['created_by']
     add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']

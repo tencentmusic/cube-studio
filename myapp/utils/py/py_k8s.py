@@ -1,7 +1,4 @@
 import time,datetime,logging,os,sys
-
-dir_common = os.path.split(os.path.realpath(__file__))[0] + '/../'
-sys.path.append(dir_common)   # 将根目录添加到系统目录,才能正常引用common文件夹
 import re
 from kubernetes import client,config,watch
 from kubernetes.client.models import v1_pod,v1_object_meta,v1_pod_spec,v1_deployment,v1_deployment_spec
@@ -19,7 +16,6 @@ from kubernetes import config
 from kubernetes.client.rest import ApiException
 
 
-# K8s操作类型
 class K8s():
 
     def __init__(self,file_path=None):  # kubeconfig
@@ -29,7 +25,7 @@ class K8s():
         elif kubeconfig:
             config.kube_config.load_kube_config(config_file=kubeconfig)
         else:
-            config.load_incluster_config()   # 使用为pod配置的rbac访问集群
+            config.load_incluster_config()
         self.v1 = client.CoreV1Api()
         self.v1beta1 = client.ExtensionsV1beta1Api()
         self.AppsV1Api = client.AppsV1Api()

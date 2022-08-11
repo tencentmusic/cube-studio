@@ -82,7 +82,7 @@ class Docker_ModelView_Base():
     crd_name = 'docker'
 
     conv = GeneralModelConverter(datamodel)
-    base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']  # 默认为这些
+    base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Docker_Filter, lambda: []]]
     order_columns = ['id']

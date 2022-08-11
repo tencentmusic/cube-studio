@@ -491,7 +491,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         )
 
 
-# 定义model
+
 class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'task'
     id = Column(Integer, primary_key=True)
@@ -708,7 +708,7 @@ class Crd:
     def stop(self):
         return Markup(f'<a href="../stop/{self.id}">停止</a>')
 
-# 定义model
+
 class Workflow(Model,Crd,MyappModelBase):
     __tablename__ = 'workflow'
 
@@ -864,7 +864,7 @@ class Workflow(Model,Crd,MyappModelBase):
     def stop(self):
         return Markup(f'<a href="/workflow_modelview/stop/{self.id}">停止</a>')
 
-# 定义model
+
 class Tfjob(Model,Crd,MyappModelBase):
     __tablename__ = 'tfjob'
 
@@ -894,11 +894,11 @@ class Tfjob(Model,Crd,MyappModelBase):
         return Markup(f'未知')
 
 
-# 定义model
+
 class Xgbjob(Model,Crd,MyappModelBase):
     __tablename__ = 'xgbjob'
 
 
-# 定义model
+
 class Pytorchjob(Model,Crd,MyappModelBase):
     __tablename__ = 'pytorchjob'

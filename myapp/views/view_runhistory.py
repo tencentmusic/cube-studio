@@ -1,7 +1,7 @@
 from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
 
 from myapp import app, appbuilder,db,event_logger
@@ -68,7 +68,7 @@ class RunHistory_ModelView_Base():
         "created_on":{"type": "ellip2", "width": 300}
     }
     edit_columns = ['status']
-    base_filters = [["id", RunHistory_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", RunHistory_Filter, lambda: []]]
     add_form_extra_fields = {
         "status": SelectField(
             _(datamodel.obj.lab('status')),

@@ -633,7 +633,7 @@ class Pipeline_ModelView_Base():
     edit_columns = add_columns
 
 
-    base_filters = [["id", Pipeline_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Pipeline_Filter, lambda: []]]
     conv = GeneralModelConverter(datamodel)
 
 

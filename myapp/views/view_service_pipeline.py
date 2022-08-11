@@ -10,7 +10,7 @@ import uuid
 import re
 from kfp import compiler
 from sqlalchemy.exc import InvalidRequestError
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_service_pipeline import Service_Pipeline
 from myapp.models.model_job import Repository
 from myapp.models.model_team import Project,Project_User
@@ -132,7 +132,7 @@ class Service_Pipeline_ModelView_Base():
     edit_columns = add_columns
 
 
-    base_filters = [["id", Service_Pipeline_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Service_Pipeline_Filter, lambda: []]]
     conv = GeneralModelConverter(datamodel)
 
 

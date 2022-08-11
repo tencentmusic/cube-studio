@@ -38,7 +38,7 @@ class Project(Model,AuditMixinNullable,MyappModelBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     describe = Column(String(500), nullable=False)
-    type = Column(String(50))   # 项目类型。组织架构项目组，功能项目组
+    type = Column(String(50))   # org, job_template, model
     expand = Column(Text(65536), default='{}')
 
     export_children = ["user"]

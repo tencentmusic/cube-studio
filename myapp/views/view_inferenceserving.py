@@ -1,7 +1,7 @@
 from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import Blueprint, current_app, jsonify, make_response, request
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_serving import InferenceService
 from myapp.models.model_team import Project,Project_User
 from myapp.utils import core
@@ -88,7 +88,7 @@ class InferenceService_ModelView_base():
     datamodel = SQLAInterface(InferenceService)
     check_redirect_list_url = conf.get('MODEL_URLS',{}).get('inferenceservice','')
 
-    # 外层的add_column和edit_columns 还有show_columns 一定要全，不然在gunicorn形式下get的不一定能被翻译
+
     # add_columns = ['service_type','project','name', 'label','images','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host','hpa','metrics','health']
     add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path', 'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority', 'canary', 'shadow', 'host','inference_config',  'working_dir', 'command','volume_mount', 'env', 'ports', 'metrics', 'health','expand']
     show_columns = ['service_type','project', 'name', 'label','model_name', 'model_version', 'images', 'model_path', 'input_html', 'output_html', 'images', 'volume_mount','working_dir', 'command', 'env', 'resource_memory',
@@ -121,7 +121,7 @@ class InferenceService_ModelView_base():
     base_order = ('id','desc')
     order_columns = ['id']
 
-    base_filters = [["id",InferenceService_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id",InferenceService_Filter, lambda: []]]
     custom_service = 'serving'
     service_type_choices= [custom_service,'tfserving','torch-server','onnxruntime','triton-server']
     # label_columns = {

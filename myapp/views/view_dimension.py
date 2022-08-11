@@ -22,7 +22,7 @@ import re,os
 from sqlalchemy import and_, or_, select
 from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
 from kfp import compiler
-# 将model添加成视图，并控制在前端的显示
+
 from myapp import app, appbuilder,db,event_logger
 from myapp.utils import core
 from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
@@ -209,7 +209,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         "table_html":"表名",
         "table_name":"表名"
     }
-    base_filters = [["id", Dimension_table_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Dimension_table_Filter, lambda: []]]
 
     add_fieldsets = [
         (

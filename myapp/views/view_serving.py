@@ -1,7 +1,7 @@
 from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import Blueprint, current_app, jsonify, make_response, request
-# 将model添加成视图，并控制在前端的显示
+
 from myapp.models.model_serving import Service
 from myapp.models.model_team import Project,Project_User
 from myapp.utils import core
@@ -103,7 +103,7 @@ class Service_ModelView_base():
     base_order = ('id','desc')
     order_columns = ['id']
     label_title = '云原生服务'
-    base_filters = [["id", Service_Filter, lambda: []]]  # 设置权限过滤器
+    base_filters = [["id", Service_Filter, lambda: []]]
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
     }
