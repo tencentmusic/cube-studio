@@ -1,0 +1,17 @@
+service: "service:svc"  # Same as the argument passed to `bentoml serve`
+labels:
+   owner: zjlab
+   stage: predict
+include:
+- "*.py"  # A pattern for matching which files to include in the bento
+- "BiLSTM_CRF_tags.txt"
+- "BiLSTM_CRF_voc.txt"
+python:
+   packages:  # Additional pip packages required by the service
+   - torch>=1.7.1+cu110
+   - numpy>=1.19.5
+   - transformers>=4.20.1
+   - matplotlib>=3.3.4
+   - tqdm>=4.64.0
+   - bentoml>=1.0.0
+   - minio>=7.1.10
