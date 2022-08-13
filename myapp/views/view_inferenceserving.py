@@ -698,6 +698,8 @@ output %s
 
     # @pysnooper.snoop()
     def pre_add(self, item):
+        if not item.model_path:
+            item.model_path=''
 
         if not item.volume_mount:
             item.volume_mount=item.project.volume_mount
