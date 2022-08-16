@@ -106,41 +106,6 @@ def get_volume_mounts(volume_mount,username):
 
 k8s_volumes, k8s_volume_mounts = get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CREATOR)
 
-
-# k8s_volumes.append(
-#     {
-#         "name": "dshm",
-#         "emptyDir": {
-#             "medium": "Memory"
-#         }
-#     }
-# )
-
-k8s_volume_mounts.append(
-    {
-        "name":'tz-config',
-        "mountPath":"/etc/localtime"
-    }
-)
-
-
-
-k8s_volumes.append(
-    {
-        "name": "tz-config",
-        "hostPath": {
-            "path": '/usr/share/zoneinfo/Asia/Shanghai'
-        }
-    }
-)
-
-# k8s_volume_mounts.append(
-#     {
-#         "name":'dshm',
-#         "mountPath":"/dev/shm"
-#     }
-# )
-
 print(k8s_volumes)
 print(k8s_volume_mounts)
 

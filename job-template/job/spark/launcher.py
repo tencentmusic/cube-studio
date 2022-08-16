@@ -213,7 +213,7 @@ def launch_sparkjob(name, **kwargs):
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("sparkjob launcher")
     arg_parser.add_argument('--image', type=str, help="运行job的镜像", default='ccr.ccs.tencentyun.com/cube-studio/spark-operator:spark-v3.1.1')
-    arg_parser.add_argument('--num_worker', type=int, help="运行job所在的机器", default=3)
+    arg_parser.add_argument('--num_worker', type=int, help="分布式worker的数量", default=3)
     arg_parser.add_argument('--code_type', type=str, help="代码类型", default='')  # Java Python R Scala
     arg_parser.add_argument('--code_class', type=str, help="代码类型", default='')  #
     arg_parser.add_argument('--code_file', type=str, help="代码地址", default='')  #  local://,http://,hdfs://,s3a://,gcs://

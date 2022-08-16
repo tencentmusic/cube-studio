@@ -661,6 +661,21 @@ class K8s():
                         "mountPath": '/etc/localtime'
                     }
                 )
+            if '/dev/shm' not in volume_mount:
+                k8s_volume_mounts.append(
+                    {
+                        "name": 'dshm',
+                        "mountPath": "/dev/shm"
+                    }
+                )
+                k8s_volumes.append(
+                    {
+                        "name": "dshm",
+                        "emptyDir": {
+                            "medium": "Memory"
+                        }
+                    }
+                )
         return k8s_volumes,k8s_volume_mounts
 
 

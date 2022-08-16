@@ -46,16 +46,6 @@ WORKIMG_DIR ='/mnt/admin'
 
 k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CREATOR)
 
-
-# k8s_volumes.append(
-#     {
-#         "name": "dshm",
-#         "emptyDir": {
-#             "medium": "Memory"
-#         }
-#     }
-# )
-
 print(k8s_volumes)
 print(k8s_volume_mounts)
 

@@ -24,7 +24,7 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
     echo "alias vi='vim'" >> /root/.bashrc && \
     /bin/bash -c "source /root/.bashrc"
 
-RUN pip install kubernetes==12.0.1 pysnooper psutil
+RUN pip install kubernetes==18.20.0 pysnooper psutil
 COPY job/pytorch_distributed_train_k8s/* /app/
 COPY job/pkgs /app/job/pkgs
 WORKDIR /app

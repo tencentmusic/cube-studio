@@ -23,7 +23,7 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
     /bin/bash -c "source /root/.bashrc"
 
 
-RUN pip install kubernetes==12.0.1 pysnooper psutil pika
+RUN pip install kubernetes==18.20.0 pysnooper psutil pika
 COPY job/volcano_predict/* /app/
 COPY job/pkgs /app/job/pkgs
 WORKDIR /app

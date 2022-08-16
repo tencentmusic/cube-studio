@@ -40,8 +40,6 @@ KFJ_TASK_VOLUME_MOUNT = os.getenv('KFJ_TASK_VOLUME_MOUNT', '')
 KFJ_TASK_RESOURCE_CPU = os.getenv('KFJ_TASK_RESOURCE_CPU', '')
 KFJ_TASK_RESOURCE_MEMORY = os.getenv('KFJ_TASK_RESOURCE_MEMORY', '')
 NUM_WORKER = 3
-HEADER_NAME = os.getenv('RAY_HOST', '')
-WORKER_NAME = HEADER_NAME.replace('header', 'worker')
 INIT_FILE=''
 crd_info={
     "group": "kubeflow.org",
@@ -288,23 +286,6 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
 
 # @pysnooper.snoop()
 def launch_pytorchjob(name, num_workers, image,working_dir, worker_command):
-    """
-    由给定参数启动PytorchJob进行模型训练
-    Args:
-        name: TFJob任务名字，如果不传，默认为"pytorchjob_<uuid>"
-        namespace: pytorchJob的namespace，如果不传，默认为"kubeflow"
-        num_workers: 训练使用的机器数
-        driver_cmd: 训练镜像的入口命令
-        driver_image: 训练镜像地址
-        driver_args: 训练脚本启动参数
-        driver_envs: 环境变量
-        driver_pvc_name: 训练docker挂载的pvc的名字
-        driver_pvc_mount_path: pvc挂载到训练docker中的路径
-        node_select: 节点选择
-        job_timeout: 训练任务的最大运行时间，
-    Returns:
-    """
-
     if KFJ_RUN_ID:
         print('delete old pytorch, run-id %s'%KFJ_RUN_ID, flush=True)
         k8s_client.delete_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,labels={"run-id":KFJ_RUN_ID})
@@ -318,10 +299,10 @@ def launch_pytorchjob(name, num_workers, image,working_dir, worker_command):
     k8s_client.create_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,body=pytorchjob_json)
     time.sleep(10)
 
-    print('begin start monitoring thred', flush=True)
+    print('begin start monitoring thread', flush=True)
     # # 后台启动监控脚本
-    monitoring_thred = threading.Thread(target=monitoring,args=(k8s_client,name,KFJ_NAMESPACE))
-    monitoring_thred.start()
+    monitoring_thread = threading.Thread(target=monitoring,args=(k8s_client,name,KFJ_NAMESPACE))
+    monitoring_thread.start()
     while True:
         # 实时打印日志
         line='>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
@@ -348,7 +329,7 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("Pytorchjob launcher")
     arg_parser.add_argument('--working_dir', type=str, help="运行job的工作目录", default='/mnt/')
     arg_parser.add_argument('--command', type=str, help="运行job的命令", default='python3 mnist.py')
-    arg_parser.add_argument('--num_worker', type=int, help="运行job所在的机器", default=3)
+    arg_parser.add_argument('--num_worker', type=int, help="分布式worker的数量", default=3)
     arg_parser.add_argument('--image', type=str, help="运行job的镜像", default='')
 
     args = arg_parser.parse_args()

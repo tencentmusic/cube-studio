@@ -307,10 +307,10 @@ def launch_volcanojob(name, num_workers, image,working_dir, worker_command):
     k8s_client.create_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=KFJ_NAMESPACE,body=volcanojob_json)
     time.sleep(10)
 
-    print('begin start monitoring thred', flush=True)
+    print('begin start monitoring thread', flush=True)
     # # 后台启动监控脚本
-    monitoring_thred = threading.Thread(target=monitoring,args=(k8s_client,name,KFJ_NAMESPACE))
-    monitoring_thred.start()
+    monitoring_thread = threading.Thread(target=monitoring,args=(k8s_client,name,KFJ_NAMESPACE))
+    monitoring_thread.start()
     while True:
         # 实时打印日志,由于stern跟踪时长有限制，所以会每个小时重启一次ster进程
         line='>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("volcanojob launcher")
     arg_parser.add_argument('--working_dir', type=str, help="运行job的工作目录", default='/mnt/')
     arg_parser.add_argument('--command', type=str, help="运行job的命令", default='python3 mnist.py')
-    arg_parser.add_argument('--num_worker', type=int, help="运行job所在的机器", default=3)
+    arg_parser.add_argument('--num_worker', type=int, help="分布式worker的数量", default=3)
     arg_parser.add_argument('--image', type=str, help="运行job的镜像", default='')
 
     args = arg_parser.parse_args()
