@@ -676,6 +676,20 @@ CRD_INFO={
         'kind': 'SparkApplication',
         "plural": "sparkapplications",
         "timeout": 60 * 60 * 24 * 2
+    },
+    "paddlejob":{
+        "group": "batch.paddlepaddle.org",
+        "version": "v1",
+        'kind': 'PaddleJob',
+        "plural": "paddlejobs",
+        "timeout": 60 * 60 * 24 * 2
+    },
+    "mxjob":{
+        "group": "kubeflow.org",
+        "version": "v1",
+        'kind': 'MXJob',
+        "plural": "mxjobs",
+        "timeout": 60 * 60 * 24 * 2
     }
 }
 
@@ -853,7 +867,7 @@ INFERNENCE_PORTS={
     "tfserving":'8501',
     "torch-server":"8080,8081",
     "onnxruntime":"8001",
-    "triton-server":"8000,8002"
+    "triton-server":"8000"
 }
 INFERNENCE_METRICS={
     "tfserving":'8501:/metrics',
@@ -898,7 +912,7 @@ MODEL_URLS = {
     "etl_pipeline":"/frontend/dev/data_pipeline/etl_pipeline",
     "etl_task":"/frontend/dev/data_pipeline/task_manager",
     "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
-    "dataset":"/frontend/dataleap/media_data/label_data"
+    "dataset":"/frontend/dataleap/media_data/dataset"
 }
 
 

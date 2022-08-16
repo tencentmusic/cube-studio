@@ -484,7 +484,26 @@ class K8s():
             except Exception as e:
                 print(e)
 
+            # 删除paddlejob
+            try:
+                crd_info = all_crd_info['paddlejob']
+                crd_names = self.delete_crd(
+                    group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
+                    namespace=namespace, labels={'run-id': run_id}
+                )
+            except Exception as e:
+                print(e)
 
+
+            # 删除mxjob
+            try:
+                crd_info = all_crd_info['mxjob']
+                crd_names = self.delete_crd(
+                    group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
+                    namespace=namespace, labels={'run-id': run_id}
+                )
+            except Exception as e:
+                print(e)
 
             # 删除deployment
             try:

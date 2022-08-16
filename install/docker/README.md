@@ -71,11 +71,6 @@ docker-compose -f docker-compose.yml  up
 
 ## 可视化页面
 
-页面资源镜像制作：
-```sh
-cd myapp/vision && docker build --no-cache ./ -t your_images_name:your_label --network host
-```
-
 项目资源打包：
 ```
 开发环境要求：

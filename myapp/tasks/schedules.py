@@ -148,21 +148,30 @@ def delete_workflow(task):
     workflow_info = conf.get("CRD_INFO", {}).get('workflow', {})
     print(workflow_info)
     if workflow_info:
-        delete_old_crd(workflow_info)
+        try:
+            delete_old_crd(workflow_info)
+        except Exception as e:
+            print(e)
 
     time.sleep(10)
 
     tfjob_info = conf.get("CRD_INFO", {}).get('tfjob', {})
     print(tfjob_info)
     if tfjob_info:
-        delete_old_crd(tfjob_info)
+        try:
+            delete_old_crd(tfjob_info)
+        except Exception as e:
+            print(e)
 
     time.sleep(10)
 
     pytorchjob_info = conf.get("CRD_INFO", {}).get('pytorchjob', {})
     print(pytorchjob_info)
     if pytorchjob_info:
-        delete_old_crd(pytorchjob_info)
+        try:
+            delete_old_crd(pytorchjob_info)
+        except Exception as e:
+            print(e)
 
     time.sleep(10)
 
@@ -170,21 +179,60 @@ def delete_workflow(task):
     xgbjob_info = conf.get("CRD_INFO", {}).get('xgbjob', {})
     print(xgbjob_info)
     if xgbjob_info:
-        delete_old_crd(xgbjob_info)
+        try:
+            delete_old_crd(xgbjob_info)
+        except Exception as e:
+            print(e)
 
     time.sleep(10)
 
-    xgbjob_info = conf.get("CRD_INFO", {}).get('mpijob', {})
-    print(xgbjob_info)
-    if xgbjob_info:
-        delete_old_crd(xgbjob_info)
+    mpijob_info = conf.get("CRD_INFO", {}).get('mpijob', {})
+    print(mpijob_info)
+    if mpijob_info:
+        try:
+            delete_old_crd(mpijob_info)
+        except Exception as e:
+            print(e)
 
     time.sleep(10)
 
     vcjob_info = conf.get("CRD_INFO", {}).get('vcjob', {})
     print(vcjob_info)
     if vcjob_info:
-        delete_old_crd(vcjob_info)
+        try:
+            delete_old_crd(vcjob_info)
+        except Exception as e:
+            print(e)
+
+    time.sleep(10)
+
+    sparkjob_info = conf.get("CRD_INFO", {}).get('sparkjob', {})
+    print(sparkjob_info)
+    if sparkjob_info:
+        try:
+            delete_old_crd(sparkjob_info)
+        except Exception as e:
+            print(e)
+
+    time.sleep(10)
+
+    paddlejob_info = conf.get("CRD_INFO", {}).get('paddlejob', {})
+    print(paddlejob_info)
+    if paddlejob_info:
+        try:
+            delete_old_crd(paddlejob_info)
+        except Exception as e:
+            print(e)
+
+    time.sleep(10)
+
+    mxjob_info = conf.get("CRD_INFO", {}).get('mxjob', {})
+    print(mxjob_info)
+    if mxjob_info:
+        try:
+            delete_old_crd(mxjob_info)
+        except Exception as e:
+            print(e)
 
     time.sleep(10)
 

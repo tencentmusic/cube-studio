@@ -133,7 +133,9 @@ cd ../../../../
 kubectl apply -k kubeflow/train-operator/manifests/overlays/standalone
 # 部署sparkjob
 kubectl apply -f spark/install.yaml
-
+# 部署paddlejob
+kubectl apply -f paddle/crd.yaml
+kubectl apply -f paddle/operator.yaml
 
 # 部署管理平台
 kubectl delete configmap kubernetes-config -n infra
