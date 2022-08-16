@@ -5,7 +5,7 @@ FROM $FROM_IMAGES
 
 USER root
 # 安装中文，和基础的apt工具包
-RUN apt update && apt install -y --force-yes --no-install-recommends software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && \
+RUN apt update && apt install -y --force-yes --no-install-recommends software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client zip unzip locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && \
     locale-gen zh_CN && locale-gen zh_CN.utf8
 
 ENV LANG zh_CN.UTF-8
