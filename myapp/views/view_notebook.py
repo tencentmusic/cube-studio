@@ -117,7 +117,7 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['name'] = StringField(
             _(self.datamodel.obj.lab('name')),
             default="%s-"%g.user.username+uuid.uuid4().hex[:4],
-            description='英文名(字母、数字、-组成)，最长50个字符',
+            description='英文名(小写字母、数字、-组成)，最长50个字符',
             widget=MyBS3TextFieldWidget(readonly=True if notebook else False),
             validators=[DataRequired(),Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]   # 注意不能以-开头和结尾
         )

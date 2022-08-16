@@ -110,7 +110,7 @@ class Service_ModelView_base():
     edit_form_query_rel_fields = add_form_query_rel_fields
 
     add_form_extra_fields={
-        "name":StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
+        "name":StringField(_(datamodel.obj.lab('name')), description='英文名(小写字母、数字、- 组成)，最长50个字符',widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
         "label":StringField(_(datamodel.obj.lab('label')), description='中文名', widget=BS3TextFieldWidget(),validators=[DataRequired()]),
         "images": StringField(_(datamodel.obj.lab('images')), description='镜像全称', widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "volume_mount":StringField(_(datamodel.obj.lab('volume_mount')),description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',widget=BS3TextFieldWidget(),default=''),
@@ -138,7 +138,7 @@ class Service_ModelView_base():
     )
 
     edit_form_extra_fields = add_form_extra_fields
-    # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
+    # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(小写字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
 
 
     def pre_add(self, item):

@@ -111,24 +111,28 @@ class Job_Template_ModelView_Base():
     add_form_extra_fields = {
         "name": StringField(
             _(datamodel.obj.lab('name')),
-            description='英文名(字母、数字、- 组成)，最长50个字符',
+            description='英文名(小写字母、数字、- 组成)，最长50个字符',
+            default='',
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
             validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54)]
         ),
         "describe": StringField(
             _(datamodel.obj.lab('describe')),
             description="模板的描述将直接显示在pipeline编排界面",
+            default='',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
         "version": SelectField(
             _(datamodel.obj.lab('version')),
             description="job模板的版本，release版本的模板才能被所有用户看到",
+            default='Release',
             widget=Select2Widget(),
             choices=version_list
         ),
         "volume_mount": StringField(
             _(datamodel.obj.lab('volume_mount')),
+            default='',
             description='使用该模板的task，会在添加时，自动添加该挂载。<br>外部挂载，格式示例:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         ),
@@ -140,6 +144,7 @@ class Job_Template_ModelView_Base():
         "entrypoint": StringField(
             _(datamodel.obj.lab('entrypoint')),
             description='镜像的入口命令，直接写成单行字符串，例如python xx.py，无需添加[]',
+            default='',
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         ),
         "job_args_definition": StringField(
@@ -165,11 +170,13 @@ class Job_Template_ModelView_Base():
         ),
         "env": StringField(
             _(datamodel.obj.lab('env')),
+            default='',
             description='使用模板的task自动添加的环境变量，支持模板变量。<br>书写格式:每行一个环境变量env_key=env_value',
             widget=MyBS3TextAreaFieldWidget(rows=3),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         ),
         "hostAliases": StringField(
             _(datamodel.obj.lab('hostAliases')),
+            default='',
             description='添加到容器内的host映射。<br>书写格式:每行一个dns解析记录，ip host1 host2，<br>示例：1.1.1.1 example1.oa.com example2.oa.com',
             widget=MyBS3TextAreaFieldWidget(rows=3),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         ),
@@ -180,6 +187,7 @@ class Job_Template_ModelView_Base():
         ),
         "accounts": StringField(
             _(datamodel.obj.lab('accounts')),
+            default='',
             description='k8s的ServiceAccount，在此类任务运行时会自动挂载此账号，多用于模板用于k8s pod/cr时使用',
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
             validators=[]

@@ -140,7 +140,7 @@ class Service_Pipeline_ModelView_Base():
 
         "name": StringField(
             _(datamodel.obj.lab('name')),
-            description="英文名(字母、数字、- 组成)，最长50个字符",
+            description="英文名(小写字母、数字、- 组成)，最长50个字符",
             widget=BS3TextFieldWidget(),
             validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54),DataRequired()]
         ),

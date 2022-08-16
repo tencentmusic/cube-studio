@@ -131,17 +131,20 @@ class Dataset_ModelView_base():
         "name": StringField(
             label=_(datamodel.obj.lab('name')),
             description='数据集英文名',
+            default='',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
         "label": StringField(
             label=_(datamodel.obj.lab('label')),
+            default='',
             description='数据集中文名',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
         "describe": StringField(
             label=_(datamodel.obj.lab('describe')),
+            default='',
             description='数据集描述',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]

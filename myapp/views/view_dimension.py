@@ -93,13 +93,15 @@ class Dimension_table_Filter(MyappFilter):
 Metadata_column_fields = {
     "name":StringField(
         label=_("列名"),
-        description='列名(字母、数字、_ 组成)，最长50个字符',
+        description='列名(小写字母、数字、_ 组成)，最长50个字符',
+        default='',
         widget=BS3TextFieldWidget(),
         validators=[Regexp("^[a-z][a-z0-9_]*[a-z0-9]$"), Length(1, 54),DataRequired()]
     ),
     "describe": StringField(
         label=_('列描述'),
         description='列名描述',
+        default='',
         widget=BS3TextFieldWidget(),
         validators=[DataRequired()]
     ),

@@ -87,11 +87,13 @@ class Repository_ModelView_Base():
         ),
         "user": StringField(
             _(datamodel.obj.lab('user')),
+            default='',
             widget=BS3TextFieldWidget(),
             description="镜像仓库的用户名"
         ),
         "password": StringField(
             _(datamodel.obj.lab('password')),
+            default='',
             widget=BS3TextFieldWidget(),
             description="镜像仓库的链接密码"
         )
@@ -164,7 +166,7 @@ class Images_Filter(MyappFilter):
     def apply(self, query, func):
         user_roles = [role.name.lower() for role in list(self.get_user_roles())]
         if "admin" in user_roles:
-            return query
+            return query.order_by(self.model.id.desc())
 
         result = query.order_by(self.model.id.desc())
         return result
@@ -188,16 +190,19 @@ class Images_ModelView_Base():
         "dockerfile": StringField(
             _(datamodel.obj.lab('dockerfile')),
             description='镜像的构建Dockerfile全部内容',
+            default='',
             widget=MyBS3TextAreaFieldWidget(rows=10),
         ),
         "name": StringField(
             _(datamodel.obj.lab('name')),
             description='镜像名称全称，例如ubuntu:20.04',
+            default='',
             widget=BS3TextFieldWidget(),
         ),
         "entrypoint": StringField(
             _(datamodel.obj.lab('entrypoint')),
             description='镜像的入口命令，直接写成单行字符串，例如python xx.py，无需添加[]',
+            default='',
             widget=BS3TextFieldWidget(),
         )
     }

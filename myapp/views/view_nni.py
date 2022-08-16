@@ -126,7 +126,7 @@ class NNI_ModelView_Base():
 
     edit_form_extra_fields['name'] = StringField(
         _(datamodel.obj.lab('name')),
-        description='英文名(字母、数字、- 组成)，最长50个字符',
+        description='英文名(小写字母、数字、- 组成)，最长50个字符',
         widget=BS3TextFieldWidget(),
         validators=[DataRequired(), Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54)]
     )

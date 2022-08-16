@@ -75,13 +75,15 @@ logging = app.logger
 Metadata_column_fields = {
     "name":StringField(
         label=_("列名"),
-        description='列名(字母、数字、_ 组成)，最长50个字符',
+        default='',
+        description='列名(小写字母、数字、_ 组成)，最长50个字符',
         widget=BS3TextFieldWidget(),
         validators=[Regexp("^[a-z][a-z0-9_]*[a-z0-9]$"), Length(1, 54),DataRequired()]
     ),
 
     "describe": StringField(
         label=_('列描述'),
+        default='',
         description='列名描述',
         widget=BS3TextFieldWidget(),
         validators=[DataRequired()]
@@ -96,6 +98,7 @@ Metadata_column_fields = {
     "remark": StringField(
         label=_('备注'),
         description='备注',
+        default='',
         widget=BS3TextFieldWidget(),
     ),
     "partition_type": SelectField(
