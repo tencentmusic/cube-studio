@@ -72,20 +72,22 @@ def init():
 
         add_project('job-template', '基础命令', 'python/bash等直接在服务器命令行中执行命令的模板',{"index":1})
         add_project('job-template', '数据导入导出', '集群与用户机器或其他集群之间的数据迁移',{"index":2})
-        add_project('job-template', '数据处理', '数据的单机或分布式处理任务',{"index":3})
+        add_project('job-template', '数据处理', '数据的单机或分布式处理任务,ray/spark/hadoop/volcanojob',{"index":3})
         add_project('job-template', '机器学习', '传统机器学习，lr/决策树/gbdt/xgb/fm等', {"index": 4})
-        add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 5})
-        add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 6})
-        add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 7})
-        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 8})
-        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 9})
-        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 10})
-        add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 11})
+        add_project('job-template', '深度学习', '深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等', {"index": 5})
+        add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 6})
+        add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 7})
+        add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 8})
+        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 9})
+        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 10})
+        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 11})
+        add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 12})
+
     except Exception as e:
         print(e)
 
 
-    def create_template(repository_id,project_name,image_name,image_describe,job_template_name,job_template_describe='',job_template_command='',job_template_args=None,job_template_volume='',job_template_account='',job_template_expand=None,job_template_env='',gitpath=''):
+    def create_template(repository_id,project_name,image_name,image_describe,job_template_name,job_template_old_names=[],job_template_describe='',job_template_command='',job_template_args=None,job_template_volume='',job_template_account='',job_template_expand=None,job_template_env='',gitpath=''):
         if not repository_id:
             return
         images = db.session.query(Images).filter_by(name=image_name).first()
@@ -107,8 +109,13 @@ def init():
                 print(e)
                 db.session.rollback()
 
-
         job_template = db.session.query(Job_Template).filter_by(name=job_template_name).first()
+        if not job_template:
+            for old_name in job_template_old_names:
+                job_template = db.session.query(Job_Template).filter_by(name=old_name).first()
+                if job_template:
+                    break
+
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='job-template').first()
         if project and images.id:
             if job_template is None:
@@ -119,6 +126,7 @@ def init():
                     job_template.entrypoint=job_template_command
                     job_template.volume_mount=job_template_volume
                     job_template.accounts=job_template_account
+                    job_template_expand['source']="github"
                     job_template.expand = json.dumps(job_template_expand,indent=4,ensure_ascii=False) if job_template_expand else '{}'
                     job_template.created_by_fk=1
                     job_template.changed_by_fk=1
@@ -139,6 +147,7 @@ def init():
                     job_template.entrypoint = job_template_command
                     job_template.volume_mount = job_template_volume
                     job_template.accounts = job_template_account
+                    job_template_expand['source'] = "github"
                     job_template.expand = json.dumps(job_template_expand, indent=4,ensure_ascii=False) if job_template_expand else '{}'
                     job_template.created_by_fk = 1
                     job_template.changed_by_fk = 1
