@@ -79,7 +79,3 @@ platform:
 @wulingling0108 <img width="5%" src="https://avatars.githubusercontent.com/u/45533757?v=4" />
 <br>
 <br>
-
-# Company
-
-![image](https://user-images.githubusercontent.com/20157705/176909239-f24cbf8d-8fb5-4326-abed-6fbc3f5a2d1f.png)
