@@ -4,14 +4,14 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: volcano-admission
-  namespace: volcano-system
+  namespace: kubeflow
 ---
 # Source: volcano/templates/admission.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: volcano-admission-configmap
-  namespace: volcano-system
+  namespace: kubeflow
 data:
   volcano-admission.conf: |
     #resourceGroups:
@@ -80,7 +80,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: volcano-admission
-    namespace: volcano-system
+    namespace: kubeflow
 roleRef:
   kind: ClusterRole
   name: volcano-admission
@@ -93,7 +93,7 @@ metadata:
   labels:
     app: volcano-admission
   name: volcano-admission-service
-  namespace: volcano-system
+  namespace: kubeflow
 spec:
   ports:
     - port: 443
@@ -110,7 +110,7 @@ metadata:
   labels:
     app: volcano-admission
   name: volcano-admission
-  namespace: volcano-system
+  namespace: kubeflow
 spec:
   replicas: 1
   selector:
@@ -128,7 +128,7 @@ spec:
             - --tls-private-key-file=/admission.local.config/certificates/tls.key
             - --ca-cert-file=/admission.local.config/certificates/ca.crt
             - --admission-conf=/admission.local.config/configmap/volcano-admission.conf
-            - --webhook-namespace=volcano-system
+            - --webhook-namespace=kubeflow
             - --webhook-service-name=volcano-admission-service
             - --logtostderr
             - --port=8443
@@ -157,7 +157,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: volcano-admission-init
-  namespace: volcano-system
+  namespace: kubeflow
   labels:
     app: volcano-admission-init
 spec:
@@ -171,7 +171,7 @@ spec:
           image: volcanosh/vc-webhook-manager:v1.4.0
           imagePullPolicy: IfNotPresent
           command: ["./gen-admission-secret.sh", "--service", "volcano-admission-service", "--namespace",
-                    "volcano-system", "--secret", "volcano-admission-secret"]
+                    "kubeflow", "--secret", "volcano-admission-secret"]
 ---
 # Source: volcano/templates/batch_v1alpha1_job.yaml
 apiVersion: apiextensions.k8s.io/v1
@@ -7423,7 +7423,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: volcano-controllers
-  namespace: volcano-system
+  namespace: kubeflow
 ---
 # Source: volcano/templates/controllers.yaml
 kind: ClusterRole
@@ -7479,7 +7479,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: volcano-controllers
-    namespace: volcano-system
+    namespace: kubeflow
 roleRef:
   kind: ClusterRole
   name: volcano-controllers
@@ -7490,7 +7490,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: volcano-controllers
-  namespace: volcano-system
+  namespace: kubeflow
   labels:
     app: volcano-controller
 spec:
@@ -7518,14 +7518,14 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: volcano-scheduler
-  namespace: volcano-system
+  namespace: kubeflow
 ---
 # Source: volcano/templates/scheduler.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: volcano-scheduler-configmap
-  namespace: volcano-system
+  namespace: kubeflow
 data:
   volcano-scheduler.conf: |
     actions: "enqueue, allocate, backfill"
@@ -7611,7 +7611,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: volcano-scheduler
-    namespace: volcano-system
+    namespace: kubeflow
 roleRef:
   kind: ClusterRole
   name: volcano-scheduler
@@ -7626,7 +7626,7 @@ metadata:
     prometheus.io/port: "8080"
     prometheus.io/scrape: "true"
   name: volcano-scheduler-service
-  namespace: volcano-system 
+  namespace: kubeflow
 spec:
   ports:
   - port: 8080
@@ -7641,7 +7641,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: volcano-scheduler
-  namespace: volcano-system
+  namespace: kubeflow
   labels:
     app: volcano-scheduler
 spec:

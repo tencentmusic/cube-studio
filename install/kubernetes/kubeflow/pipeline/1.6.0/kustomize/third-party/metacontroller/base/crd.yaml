@@ -1,5 +1,5 @@
 ---
-apiVersion: apiextensions.k8s.io/v1
+apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: compositecontrollers.metacontroller.k8s.io
@@ -15,7 +15,7 @@ spec:
   scope: Cluster
   version: v1alpha1
 ---
-apiVersion: apiextensions.k8s.io/v1
+apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: controllerrevisions.metacontroller.k8s.io
@@ -28,7 +28,7 @@ spec:
   scope: Namespaced
   version: v1alpha1
 ---
-apiVersion: apiextensions.k8s.io/v1
+apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: decoratorcontrollers.metacontroller.k8s.io
