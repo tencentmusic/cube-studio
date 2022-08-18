@@ -1,7 +1,8 @@
-
+# download_minio 模板
 镜像：ccr.ccs.tencentyun.com/cube-studio/ner:20220812
 启动参数：
 ```bash
+{
  "参数分组1": {
         "--model": {
             "type": "str",
@@ -10,7 +11,7 @@
             "require": 1,
             "choice": [],
             "range": "",
-            "default": "BiLSTM_CRF",
+            "default": "模型",
             "placeholder": "",
             "describe": "model",
             "editable": 1,
@@ -29,7 +30,7 @@
             "range": "",
             "default": "resume_BIO.txt",
             "placeholder": "",
-            "describe": "resume_BIO",
+            "describe": "训练数据集选择",
             "editable": 1,
             "condition": "",
             "sub_args": {}
@@ -57,24 +58,7 @@
             "range": "",
             "default": "/mnt/admin/NER/zdata/",
             "placeholder": "",
-            "describe": "path",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
-        },
-        "-n": {
-            "type": "str",
-            "item_type": "str",
-            "label": "参数5",
-            "require": 1,
-            "choice": [
-                "resume_BIO.txt",
-                "people_daily_BIO.txt"
-            ],
-            "range": "",
-            "default": "resume_BIO.txt",
-            "placeholder": "",
-            "describe": "和objectname 保持一致",
+            "describe": "数据集路径",
             "editable": 1,
             "condition": "",
             "sub_args": {}
@@ -96,12 +80,6 @@
     }
 }
 ```
-
-## 注意：
-
-训练需要的 txt 文件，以及训练结束后生成的 `.pkl` 文件，因为太大了，我都用 git 忽略了。
-
-要运行项目，请在钉钉群里下载 data 和 zdata 两个文件夹，然后放置到本目录中。
 
 ## 参考资料：
 

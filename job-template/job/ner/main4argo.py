@@ -12,8 +12,6 @@ def parse_args():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-m", "--model", type=str, default='HMM', help="There are five models of NER, they are HMM, CRF, BiLSTM, BiLSTM_CRF and Bert_BiLSTM_CRF.")
     parser.add_argument("-p", "--path", type=str, default='./zdata/', help="data path")
-    parser.add_argument('-n', '--name', type=str, default='annotated_data.txt', help='data file name')
-    parser.add_argument('-bn', '--bucketname', type=str, default='data', help='MinIO bucket name')
     parser.add_argument('-on', '--objectname', type=str, default='people_daily_BIO.txt', help='MinIO object name')
     parser.add_argument('-dr', '--datarate', type=list, default=[0.7, 0.1, 0.2], help='The rate of train_data, dev_data and test_data')
     parser.add_argument('-e', '--epochs', type=int, default=10, help='train epoch')
@@ -27,28 +25,10 @@ if __name__ == "__main__":
     args = parse_args()
     print(args)
 
-    # contact to Minio
-    # minio_client = Minio(
-    #     '10.101.32.11:9000',
-    #     access_key='admin',
-    #     secret_key='root123456',
-    #     secure=False
-    # )
-
-    # download data from MinIO
-    # try:
-    #     minio_client.fget_object(
-    #         bucket_name=args.bucketname,
-    #         object_name=args.objectname,
-    #         file_path=args.path+args.name
-    #     )
-    # except BaseException as err:
-    #     print(err)
-
     # preprocessing data
     data_preprocessing = Preprocessing(
         file_path=args.path,
-        file_name=args.name
+        file_name=args.objectname
     )
     data_preprocessing.train_test_dev_split(data_rate=args.datarate)
     data_preprocessing.construct_vocabulary_labels()
@@ -103,12 +83,3 @@ if __name__ == "__main__":
         )
     
     save_model(model, args.pklpath)
-    # upload data from MinIO
-    # try:
-    #     minio_client.fput_object(
-    #         bucket_name=args.bucketname,
-    #         object_name=f'{args.model}_model.pkl',
-    #         file_path='./ckpts/model.pkl'
-    #     )
-    # except BaseException as err:
-    #     print(err)
