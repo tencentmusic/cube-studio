@@ -486,8 +486,9 @@ class Task_ModelView_Base():
             if global_env_key not in task_env:
                 task_env += global_env_key + '=' + platform_global_envs[global_env_key] + "\n"
         new_args=[]
-        for arg in args:
-            new_args.append(template_str(arg))
+        if args:
+            for arg in args:
+                new_args.append(template_str(arg))
 
         volume_mount = task.volume_mount
 
