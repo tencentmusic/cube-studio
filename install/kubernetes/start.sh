@@ -3,7 +3,7 @@ mkdir -p ~/.kube/ kubeconfig /data/k8s/kubeflow/pipeline/workspace /data/k8s/kub
 cp config ~/.kube/config
 echo "" > kubeconfig/dev-kubeconfig
 
-curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && mv kubectl /usr/bin/
+curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && cp kubectl /usr/bin/ && mv kubectl /usr/local/bin/
 node=`kubectl  get node -o wide |grep $1 |awk '{print $1}'| head -n 1`
 kubectl label node $node train=true cpu=true notebook=true service=true org=public istio=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true --overwrite
 # 拉取镜像
@@ -106,7 +106,7 @@ kubectl create clusterrolebinding frameworkbarrier-kubeflow --clusterrole=framew
 
 # 部署volcano
 kubectl delete -f volcano/volcano-development.yaml
-kubectl delete  secret volcano-admission-secret -n volcano-system
+kubectl delete secret volcano-admission-secret -n kubeflow
 kubectl apply -f volcano/volcano-development.yaml
 kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 
@@ -122,6 +122,7 @@ kubectl apply -f kubeflow/pipeline/minio-artifact-secret.yaml
 kubectl apply -f kubeflow/pipeline/pipeline-runner-rolebinding.yaml
 
 cd kubeflow/pipeline/1.6.0/kustomize/
+
 #kustomize build cluster-scoped-resources/ | kubectl apply -f -
 kubectl apply -k cluster-scoped-resources
 kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s

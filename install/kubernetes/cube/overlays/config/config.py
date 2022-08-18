@@ -740,13 +740,11 @@ PIPELINE_NAMESPACE = 'pipeline'
 # 服务pipeline运行的空间，必填service
 SERVICE_PIPELINE_NAMESPACE='service'
 # 超参搜索命名空间，必填katib
-KATIB_NAMESPACE = 'katib'
+AUTOML_NAMESPACE = 'katib'
 # notebook必填空间，必填jupyter
 NOTEBOOK_NAMESPACE = 'jupyter'
 # 内部服务命名空间，必填service
 SERVICE_NAMESPACE = 'service'
-# kfserving命名空间，必填kfserving
-KFSERVING_NAMESPACE = 'kfserving'
 # 服务链路追踪地址
 SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
@@ -762,7 +760,7 @@ HUBSECRET = ['hubsecret']
 REPOSITORY_ORG='ccr.ccs.tencentyun.com/cube-studio/'
 # notebook每个pod使用的用户账号
 JUPYTER_ACCOUNTS='jupyter-user'
-HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,KATIB_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE,KFSERVING_NAMESPACE]
+HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,AUTOML_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE]
 
 # notebook使用的镜像
 NOTEBOOK_IMAGES=[
@@ -845,13 +843,6 @@ INFERNENCE_IMAGES={
     'torch-server':TORCHSERVER_IMAGES,
     'onnxruntime':ONNXRUNTIME_IMAGES,
     'triton-server':TRITONSERVER_IMAGES,
-    # 'kfserving-tf': TFSERVING_IMAGES,
-    # "kfserving-torch":TORCHSERVER_IMAGES,
-    # "kfserving-triton": TRITONSERVER_IMAGES,
-    # 'kfserving-sklearn': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
-    # 'kfserving-xgboost': ['ccr.ccs.tencentyun.com/cube-studio/sklearnserver:v0.7.0'],
-    # 'kfserving-lightgbm':['ccr.ccs.tencentyun.com/cube-studio/lgbserver:v0.7.0'],
-    # 'kfserving-paddle':['ccr.ccs.tencentyun.com/cube-studio/paddleserver:v0.7.0']
 }
 
 INFERNENCE_COMMAND={

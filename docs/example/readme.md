@@ -412,7 +412,7 @@ NEO4J_AUTH=neo4j/admin
 
 ## 系统自带域名
 
-自动配置域名需要泛域名支持。例如泛域名为domain = *.kfserving.woa.com
+自动配置域名需要泛域名支持。例如泛域名为domain = *.woa.com
 
 生产域名
 

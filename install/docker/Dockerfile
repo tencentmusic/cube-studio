@@ -8,7 +8,7 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash
 RUN apt-get -y install nodejs && npm install yarn -g
 
 RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python && rm /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
-RUN pip install pip --upgrade && pip install docstring_parser kfp==1.8.0  kfserving
+RUN pip install pip --upgrade && pip install docstring_parser kfp==1.8.0
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
 RUN mkdir /kubeflow && wget -P /kubeflow/ https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/src.tar.gz && tar -zxvf /kubeflow/src.tar.gz -C /kubeflow/ && rm /kubeflow/src.tar.gz
 
@@ -19,7 +19,7 @@ COPY install/docker/docker-add-file/__init__.py /usr/local/lib/python3.6/dist-pa
 COPY myapp /home/myapp/myapp
 COPY myapp/static/appbuilder/frontend /data/web/frontend
 ENV PATH=/home/myapp/myapp/bin:$PATH
-ENV PYTHONPATH=/home/myapp:/kubeflow/src/pipelines/sdk/python/:/kubeflow/src/fairing/:/kubeflow/src/kfserving/python/kfserving/:/kubeflow/src/tf-operator/sdk/python/:/kubeflow/src/xgboost-operator/sdk/python/:/kubeflow/src/katib/sdk/python/v1alpha3/:$PYTHONPATH
+ENV PYTHONPATH=/home/myapp:/kubeflow/src/pipelines/sdk/python/:$PYTHONPATH
 
 USER root
 COPY install/docker/entrypoint.sh /entrypoint.sh
