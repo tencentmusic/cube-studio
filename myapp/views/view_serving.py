@@ -99,6 +99,8 @@ class Service_ModelView_base():
         "deploy": {"type": "ellip2", "width": 200},
         "modified": {"type": "ellip2", "width": 150}
     }
+    search_columns = ['created_by','project','name','label','images','resource_memory','resource_cpu','resource_gpu','volume_mount','host']
+
     edit_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','volume_mount','host',]
     base_order = ('id','desc')
     order_columns = ['id']

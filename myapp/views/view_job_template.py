@@ -126,7 +126,7 @@ class Job_Template_ModelView_Base():
         "version": SelectField(
             _(datamodel.obj.lab('version')),
             description="job模板的版本，release版本的模板才能被所有用户看到",
-            default='Release',
+            default='',
             widget=Select2Widget(),
             choices=version_list
         ),

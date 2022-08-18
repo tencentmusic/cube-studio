@@ -485,6 +485,9 @@ class Task_ModelView_Base():
         for global_env_key in platform_global_envs:
             if global_env_key not in task_env:
                 task_env += global_env_key + '=' + platform_global_envs[global_env_key] + "\n"
+        new_args=[]
+        for arg in args:
+            new_args.append(template_str(arg))
 
         volume_mount = task.volume_mount
 
@@ -498,7 +501,7 @@ class Task_ModelView_Base():
                              name=pod_name,
                              labels={"pipeline": task.pipeline.name, 'task': task.name, 'user': g.user.username,'run-id': run_id,'pod-type':"task"},
                              command=command,
-                             args=args,
+                             args=new_args,
                              volume_mount=volume_mount,
                              working_dir=working_dir,
                              node_selector=task.get_node_selector(), resource_memory=resource_memory,

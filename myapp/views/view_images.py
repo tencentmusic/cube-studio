@@ -69,6 +69,7 @@ class Repository_ModelView_Base():
     base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('id', 'desc')
     order_columns = ['id']
+    search_columns=['name','server','hubsecret','user']
     list_columns = ['name','hubsecret','creator','modified']
     cols_width = {
         "name":{"type": "ellip2", "width": 250},
@@ -181,6 +182,7 @@ class Images_ModelView_Base():
     cols_width = {
         "images_url":{"type": "ellip2", "width": 500},
     }
+    search_columns = ['created_by','project','repository', 'name', 'describe']
     base_order = ('id', 'desc')
     order_columns = ['id']
     add_columns = ['repository', 'name', 'describe', 'dockerfile', 'gitpath']

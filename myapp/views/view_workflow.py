@@ -247,6 +247,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
     label_title = '运行实例'
     datamodel = SQLAInterface(Workflow)
     list_columns = ['project','pipeline_url', 'create_time','change_time','elapsed_time', 'final_status','status', 'username', 'log','stop']
+    search_columns = ['status','labels','name','annotations','spec','status_more','username','create_time']
     cols_width = {
         "project": {"type": "ellip2", "width": 200},
         "pipeline_url": {"type": "ellip2", "width": 400},

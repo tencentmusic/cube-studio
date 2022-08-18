@@ -835,6 +835,10 @@ class Pipeline_ModelView_Base():
 
     # @pysnooper.snoop()
     def pre_add(self, item):
+        if not item.project:
+            project=db.session.query(Project).filter_by(name='public').filter_by(type='org').first()
+            if project:
+                item.project = project
         item.name = item.name.replace('_', '-')[0:54].lower().strip('-')
         # item.alert_status = ','.join(item.alert_status)
         self.pipeline_args_check(item)
