@@ -12,7 +12,21 @@ TASK_RESOURCE_GPU=0
 启动参数：
 ```bash
 {
-    "shell": {
+    "参数": {
+        "--image": {
+            "type": "str",
+            "item_type": "str",
+            "label": "",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
+            "placeholder": "",
+            "describe": "worker镜像，直接运行你代码的环境镜像<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
         "--working_dir": {
             "type": "str",
             "item_type": "str",
@@ -51,20 +65,6 @@ TASK_RESOURCE_GPU=0
             "default": "3",
             "placeholder": "",
             "describe": "占用机器个数",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
-        },
-        "--image": {
-            "type": "str",
-            "item_type": "str",
-            "label": "",
-            "require": 1,
-            "choice": [],
-            "range": "",
-            "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6",
-            "placeholder": "",
-            "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
             "editable": 1,
             "condition": "",
             "sub_args": {}

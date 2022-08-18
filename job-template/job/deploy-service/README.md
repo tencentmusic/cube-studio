@@ -3,40 +3,12 @@
 启动参数：
 ```bash
 {
-    "shell": {
-        "--project_name": {
-            "type": "str",
-            "item_type": "str",
-            "label": "部署项目名",
-            "require": 1,
-            "choice": [],
-            "range": "",
-            "default": "public",
-            "placeholder": "",
-            "describe": "部署项目名",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
-        },
-        "--service_type": {
-            "type": "str",
-            "item_type": "str",
-            "label": "推理服务类型",
-            "require": 0,
-            "choice": ['service','tfserving','torch-server','onnxruntime','triton-server'],
-            "range": "",
-            "default": "service",
-            "placeholder": "",
-            "describe": "推理服务类型",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
-        },
+    "模型信息": {
         "--label": {
             "type": "str",
             "item_type": "str",
-            "label": "推理服务描述",
-            "require": 0,
+            "label": "中文描述描述",
+            "require": 1,
             "choice": [],
             "range": "",
             "default": "demo推理服务",
@@ -50,7 +22,7 @@
             "type": "str",
             "item_type": "str",
             "label": "模型名",
-            "require": 0,
+            "require": 1,
             "choice": [],
             "range": "",
             "default": "",
@@ -64,7 +36,7 @@
             "type": "str",
             "item_type": "str",
             "label": "模型版本号",
-            "require": 0,
+            "require": 1,
             "choice": [],
             "range": "",
             "default": "v2022.10.01.1",
@@ -87,31 +59,39 @@
             "editable": 1,
             "condition": "",
             "sub_args": {}
+        }
+    },
+    "部署信息": {
+        "--service_type": {
+            "type": "str",
+            "item_type": "str",
+            "label": "推理服务类型",
+            "require": 1,
+            "choice": [
+                "serving",
+                "tfserving",
+                "torch-server",
+                "onnxruntime",
+                "triton-server"
+            ],
+            "range": "",
+            "default": "service",
+            "placeholder": "",
+            "describe": "推理服务类型",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
         },
         "--images": {
             "type": "str",
             "item_type": "str",
             "label": "推理服务镜像",
-            "require": 0,
+            "require": 1,
             "choice": [],
             "range": "",
             "default": "",
             "placeholder": "",
             "describe": "推理服务镜像",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
-        },
-        "--replicas": {
-            "type": "str",
-            "item_type": "str",
-            "label": "pod副本数",
-            "require": 0,
-            "choice": [],
-            "range": "",
-            "default": "1",
-            "placeholder": "",
-            "describe": "pod副本数",
             "editable": 1,
             "condition": "",
             "sub_args": {}
@@ -125,7 +105,7 @@
             "range": "",
             "default": "",
             "placeholder": "",
-            "describe": "推理容器工作目录",
+            "describe": "推理容器工作目录,个人工作目录/mnt/$username",
             "editable": 1,
             "condition": "",
             "sub_args": {}
@@ -186,7 +166,62 @@
             "condition": "",
             "sub_args": {}
         },
-
+        "--replicas": {
+            "type": "str",
+            "item_type": "str",
+            "label": "pod副本数",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "1",
+            "placeholder": "",
+            "describe": "pod副本数",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--resource_memory": {
+            "type": "str",
+            "item_type": "str",
+            "label": "每个pod占用内存",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "2G",
+            "placeholder": "",
+            "describe": "每个pod占用内存",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--resource_cpu": {
+            "type": "str",
+            "item_type": "str",
+            "label": "每个pod占用cpu",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "2",
+            "placeholder": "",
+            "describe": "每个pod占用cpu",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--resource_gpu": {
+            "type": "str",
+            "item_type": "str",
+            "label": "每个pod占用gpu",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "0",
+            "placeholder": "",
+            "describe": "每个pod占用gpu",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        }
     }
 }
 ```

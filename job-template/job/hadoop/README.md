@@ -6,7 +6,7 @@
 参数
 ```bash
 {
-    "shell": {
+    "参数": {
         "--command": {
             "type": "str",
             "item_type": "str",

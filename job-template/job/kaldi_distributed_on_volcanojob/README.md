@@ -12,7 +12,7 @@ TASK_RESOURCE_GPU=0
 启动参数：
 ```bash
 {
-    "shell": {
+    "参数": {
         "--working_dir": {
             "type": "str",
             "item_type": "str",
@@ -20,7 +20,7 @@ TASK_RESOURCE_GPU=0
             "require": 1,
             "choice": [],
             "range": "",
-            "default": "",
+            "default": "/mnt/xx",
             "placeholder": "启动目录",
             "describe": "启动目录",
             "editable": 1,
@@ -64,7 +64,7 @@ TASK_RESOURCE_GPU=0
             "range": "",
             "default": "ccr.ccs.tencentyun.com/cube-studio/kaldi_distributed_worker:v1",
             "placeholder": "",
-            "describe": "worker镜像，直接运行你代码的环境镜像 <a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+            "describe": "worker镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
             "editable": 1,
             "condition": "",
             "sub_args": {}

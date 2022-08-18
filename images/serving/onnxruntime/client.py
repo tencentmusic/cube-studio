@@ -15,7 +15,7 @@ headers={
 }
 
 # onnxruntime
-SERVER_URL = 'http://onnxruntime-resnet50-202112281143.kfserving/v1/models/resnet50'
+SERVER_URL = 'http://onnxruntime-resnet50-202112281143/v1/models/resnet50'
 IMAGE_PATH = 'smallcat.jpg'
 files = {'data': open(IMAGE_PATH, 'rb')}
 response = requests.post(SERVER_URL, data=files,headers=headers)

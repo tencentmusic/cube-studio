@@ -3,7 +3,7 @@
 参数
 ```bash
 {
-    "shell": {
+    "参数": {
         "--image": {
             "type": "str",
             "item_type": "str",
@@ -55,12 +55,12 @@
             "type": "str",
             "item_type": "str",
             "label": "Java/Scala类名",
-            "require": 1,
+            "require": 0,
             "choice": [],
             "range": "",
             "default": "",
             "placeholder": "",
-            "describe": "Java/Scala类名",
+            "describe": "Java/Scala类名，其他语言下不填",
             "editable": 1,
             "condition": "",
             "sub_args": {}
@@ -83,7 +83,7 @@
             "type": "str",
             "item_type": "str",
             "label": "代码参数",
-            "require": 1,
+            "require": 0,
             "choice": [],
             "range": "",
             "default": "",
@@ -97,7 +97,7 @@
             "type": "text",
             "item_type": "str",
             "label": "spark配置",
-            "require": 1,
+            "require": 0,
             "choice": [],
             "range": "",
             "default": "",
@@ -111,7 +111,7 @@
             "type": "text",
             "item_type": "str",
             "label": "hadoop配置，每行一个配置，xx=yy",
-            "require": 1,
+            "require": 0,
             "choice": [],
             "range": "",
             "default": "",

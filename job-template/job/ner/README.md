@@ -1,4 +1,4 @@
-# download_minio 模板
+
 镜像：ccr.ccs.tencentyun.com/cube-studio/ner:20220812
 启动参数：
 ```bash
@@ -35,7 +35,7 @@
             "sub_args": {}
         },
         "--epochs": {
-            "type": "int",
+            "type": "str",
             "item_type": "str",
             "label": "参数3",
             "require": 1,
