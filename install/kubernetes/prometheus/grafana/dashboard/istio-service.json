@@ -72,7 +72,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (destination_service_name) (istio_requests_total{destination_service_namespace=\"$namespace\",destination_service_name=~\"($service)\"})",
+          "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"})",
           "format": "time_series",
           "hide": true,
           "interval": "",
@@ -82,10 +82,10 @@
         },
         {
           "exemplar": true,
-          "expr": "sum by (destination_service_name,response_code) (irate(istio_requests_total{destination_service_namespace=\"$namespace\",destination_service_name=~\"($service)\"}[1m]))",
+          "expr": "sum by (destination_workload,response_code) (irate(istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "hide": false,
           "interval": "",
-          "legendFormat": "{{response_code}} , {{destination_service_name}}",
+          "legendFormat": "{{response_code}} , {{destination_workload}}",
           "refId": "A"
         }
       ],
@@ -183,12 +183,12 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (destination_service_name) (irate(istio_request_bytes_sum{destination_service_namespace=\"$namespace\",destination_service_name=~\"($service)\"}[1m]))",
+          "expr": "sum by (destination_workload) (irate(istio_request_bytes_sum{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{destination_service_name}}",
+          "legendFormat": "{{destination_workload}}",
           "refId": "B"
         }
       ],
@@ -284,12 +284,12 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "avg by (destination_service_name) (rate(istio_request_duration_milliseconds_sum{destination_service_namespace=\"$namespace\",destination_service_name=~\"($service)\"}[1m])/rate(istio_request_duration_milliseconds_count{destination_service_namespace=\"$namespace\",destination_service_name=~\"($service)\"}[1m]))",
+          "expr": "avg by (destination_workload) (rate(istio_request_duration_milliseconds_sum{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m])/rate(istio_request_duration_milliseconds_count{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{destination_service_name}}",
+          "legendFormat": "{{destination_workload}}",
           "refId": "B"
         }
       ],
@@ -808,12 +808,12 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (destination_service_name) (istio_requests_total{destination_service_namespace=\"$namespace\"})",
+          "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{destination_service_name}}",
+          "legendFormat": "{{destination_workload}}",
           "refId": "B"
         }
       ],

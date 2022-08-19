@@ -10,6 +10,6 @@ do
 done
 
 kubectl label ns katib katib-metricscollector-injection=enabled --overwrite
-
+kubectl label ns service istio-injection-
 
 

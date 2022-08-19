@@ -817,12 +817,10 @@ class K8s():
 
 
     # @pysnooper.snoop()
-    def make_pod(self,namespace,name,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports=None,restart_policy='OnFailure',scheduler_name='default-scheduler',node_name='',health=None):
-        annotations = None
+    def make_pod(self,namespace,name,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports=None,restart_policy='OnFailure',scheduler_name='default-scheduler',node_name='',health=None,annotations={}):
+
         if scheduler_name == 'kube-batch':
-            annotations = {
-                'scheduling.k8s.io/group-name': name
-            }
+            annotations['scheduling.k8s.io/group-name']=name
         metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)
         image_pull_secrets = [client.V1LocalObjectReference(image_pull_secret) for image_pull_secret in image_pull_secrets]
         nodeSelector = None
@@ -988,12 +986,13 @@ class K8s():
                 print(e)
 
     # @pysnooper.snoop(watch_explode=())
-    def create_deployment(self,namespace,name,replicas,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports,scheduler_name='default-scheduler',health=None):
+    def create_deployment(self,namespace,name,replicas,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports,scheduler_name='default-scheduler',health=None,annotations={}):
 
         pod,pod_spec = self.make_pod(
             namespace=namespace,
             name=name,
             labels=labels,
+            annotations=annotations,
             command=command,
             args=args,
             volume_mount=volume_mount,
@@ -1086,7 +1085,7 @@ class K8s():
                 print(e)
 
     # @pysnooper.snoop(watch_explode=())
-    def create_statefulset(self,namespace,name,replicas,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports,restart_policy='Always',scheduler_name='default-scheduler'):
+    def create_statefulset(self,namespace,name,replicas,labels,command,args,volume_mount,working_dir,node_selector,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image_pull_secrets,image,hostAliases,env,privileged,accounts,username,ports,restart_policy='Always',scheduler_name='default-scheduler',annotations={}):
 
         pod,pod_spec = self.make_pod(
             namespace=namespace,
@@ -1112,11 +1111,9 @@ class K8s():
             restart_policy=restart_policy,
             scheduler_name=scheduler_name
         )
-        annotations = None
+
         if scheduler_name == 'kube-batch':
-            annotations = {
-                'scheduling.k8s.io/group-name': name
-            }
+            annotations['scheduling.k8s.io/group-name'] = name
         sts_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
         selector = client.models.V1LabelSelector(match_labels=labels)
         template_metadata = v1_object_meta.V1ObjectMeta(labels=labels,annotations=annotations)

@@ -90,7 +90,7 @@ class InferenceService_ModelView_base():
 
 
     # add_columns = ['service_type','project','name', 'label','images','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host','hpa','metrics','health']
-    add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path', 'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority', 'canary', 'shadow', 'host','inference_config',  'working_dir', 'command','volume_mount', 'env', 'ports', 'metrics', 'health','expand']
+    add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path', 'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority', 'canary', 'shadow', 'host','inference_config',  'working_dir', 'command','volume_mount', 'env', 'ports', 'metrics', 'health','expand','sidecar']
     show_columns = ['service_type','project', 'name', 'label','model_name', 'model_version', 'images', 'model_path', 'input_html', 'output_html', 'images', 'volume_mount','working_dir', 'command', 'env', 'resource_memory',
                     'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'inference_host_url','hpa','priority', 'canary', 'shadow', 'health','model_status', 'expand_html','metrics_html','deploy_history','host','inference_config']
 
@@ -142,10 +142,12 @@ class InferenceService_ModelView_base():
                                                         widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
-            _(datamodel.obj.lab('sidecar')), default='',
-            description='容器的agent代理',
+            _(datamodel.obj.lab('sidecar')),
+            default='',
+            description='容器的agent代理,istio用于服务网格',
             widget=Select2ManyWidget(),
-            choices=[]
+            validators=[],
+            choices=[['istio','istio']]
         ),
         "priority": SelectField(
             _('服务优先级'),
@@ -345,7 +347,7 @@ class InferenceService_ModelView_base():
 
 
         model_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path']
-        service_columns = ['resource_memory', 'resource_cpu','resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority','canary','shadow','host','volume_mount']
+        service_columns = ['resource_memory', 'resource_cpu','resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority','canary','shadow','host','volume_mount','sidecar']
         admin_columns = ['inference_config','working_dir','command','env','ports','metrics','health','expand']
 
 
@@ -948,11 +950,17 @@ output %s
 
             pod_ports = list(set(pod_ports))
             print('create deployment')
+            annotations={}
+            # https://istio.io/latest/docs/reference/config/annotations/
+            if service.sidecar and 'istio' in service.sidecar and service.service_type=='serving':
+                labels['sidecar.istio.io/inject']='true'
+
             k8s_client.create_deployment(
                 namespace=namespace,
                 name=name,
                 replicas=deployment_replicas,
                 labels=labels,
+                annotations=annotations,
                 command=['sh','-c',command] if command else None,
                 args=None,
                 volume_mount=volume_mount,
