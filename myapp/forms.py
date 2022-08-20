@@ -2,13 +2,51 @@
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from wtforms import Field
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-
+from wtforms import widgets
 from myapp import app
 
 conf = app.config
 
 
 from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp,ValidationError
+# from myapp.models.base import MyappModelBase
+# model_base=MyappModelBase()
+#
+# class StringField(Field):
+#     """
+#     This field is the base for most of the more complicated fields, and
+#     represents an ``<input type="text">``.
+#     """
+#     widget = widgets.TextInput()
+#
+#
+#     def __init__(self, label=None, validators=None, filters=tuple(),
+#                  description='', id=None, default=None, widget=None,
+#                  render_kw=None, _form=None, _name=None, _prefix='',
+#                  _translations=None, _meta=None):
+#         label=_(model_base.lab('server')) if label==None  else label
+#         default='' if default==None else default
+#         widget=BS3TextFieldWidget() if widget==None else widget
+#         description=description if description else ''
+#         validators = [] if validators==None else validators
+#
+#         return super(StringField, self).__init__(label=label,default=default,widget=widget,validators=validators,description=description)
+#
+#     # @pysnooper.snoop()
+#     def process_formdata(self, valuelist):
+#         # aa = self.data
+#         if not self.data:
+#             self.data=''
+#         if valuelist:
+#             self.data = valuelist[0]
+#         elif self.data is None:
+#             self.data = ''
+#         aa = self.data
+#
+#     # @pysnooper.snoop()
+#     def _value(self):
+#         return text_type(self.data) if self.data is not None else ''
+
 
 # 处理完再校验
 class JsonValidator(object):

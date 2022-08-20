@@ -9,7 +9,8 @@ from inspect import isfunction
 from sqlalchemy import create_engine
 from flask_appbuilder.actions import action
 from apispec import yaml_utils
-
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
+from wtforms import Field
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from flask_appbuilder.actions import ActionItem
@@ -29,6 +30,7 @@ from sqlalchemy.orm.relationships import RelationshipProperty
 from werkzeug.exceptions import BadRequest
 from flask import render_template,redirect
 import yaml
+from wtforms import widgets
 from marshmallow import validate
 from wtforms import validators
 from flask_appbuilder.api.convert import Model2SchemaConverter
@@ -94,7 +96,9 @@ API_PERMISSIONS_RIS_KEY="permissions"
 API_USER_PERMISSIONS_RIS_KEY="user_permissions"
 API_RELATED_RIS_KEY="related"
 API_COLS_WIDTH_RIS_KEY='cols_width'
+API_EXIST_ADD_ARGS_RIS_KEY='exist_add_args'
 API_IMPORT_DATA_RIS_KEY = 'import_data'
+API_DOWNLOAD_DATA_RIS_KEY = 'download_data'
 
 def get_error_msg():
     if current_app.config.get("FAB_API_SHOW_STACKTRACE"):
@@ -282,7 +286,9 @@ class MyappModelRestApi(ModelRestApi):
     base_permissions=['can_add','can_show','can_edit','can_list','can_delete']
     cols_width={}
     import_data=False
+    download_data=False
     pre_upload = None
+    set_columns_related=None
 
     # def pre_list(self,**kargs):
     #     return
@@ -381,6 +387,10 @@ class MyappModelRestApi(ModelRestApi):
 
     def _init_model_schemas(self):
         # Create Marshmalow schemas if one is not specified
+        for column_name in self.edit_columns:
+            if column_name not in self.add_columns:
+                self.add_columns.append(column_name)
+
         if self.list_model_schema is None:
             self.list_model_schema = self.model2schemaconverter.convert(
                 self.list_columns
@@ -439,13 +449,35 @@ class MyappModelRestApi(ModelRestApi):
         # 固定常用的几个字段的宽度
         # print(self.cols_width)
 
-
+    # 将列宽信息加入
     def merge_cols_width(self, response, **kwargs):
         response[API_COLS_WIDTH_RIS_KEY] = self.cols_width
 
-    def merge_import_data(self, response, **kwargs):
+    # 将是否批量导入加入
+    def merge_ops_data(self, response, **kwargs):
         response[API_IMPORT_DATA_RIS_KEY] = self.import_data
+        response[API_DOWNLOAD_DATA_RIS_KEY] = self.download_data
 
+    # 重新渲染add界面
+    # @pysnooper.snoop()
+    def merge_exist_add_args(self, response, **kwargs):
+        exist_add_args = request.args.get('exist_add_args','')
+        if exist_add_args:
+            exist_add_args = json.loads(exist_add_args)
+            # 把这些值转为add_column中的默认值
+            # print(response[API_ADD_COLUMNS_RIS_KEY])
+            response_add_columns = {}
+            for column in response[API_ADD_COLUMNS_RIS_KEY]:
+                if column['name'] in exist_add_args and exist_add_args[column['name']]:
+                    column['default']=exist_add_args[column['name']]
+                response_add_columns[column['name']]=column
+            # 提供字段变换内容
+            if self.set_columns_related:
+                try:
+                    self.set_columns_related(exist_add_args,response_add_columns)
+                    response[API_ADD_COLUMNS_RIS_KEY] = list(response_add_columns.values())
+                except Exception as e:
+                    print(e)
 
     # 根据columnsfields 转化为 info的json信息
     # @pysnooper.snoop()
@@ -529,6 +561,10 @@ class MyappModelRestApi(ModelRestApi):
             self.edit_query_rel_fields,
             **_kwargs,
         )
+        # 处理retry_info，如果有这种类型，就禁止编辑
+        for column in edit_columns:
+            if column.get('retry_info',False):
+                column['disable']=True
         response[API_EDIT_COLUMNS_RES_KEY] = edit_columns
 
 
@@ -790,7 +826,8 @@ class MyappModelRestApi(ModelRestApi):
 
     @expose("/_info", methods=["GET"])
     @merge_response_func(merge_more_info,'more_info')
-    @merge_response_func(merge_import_data, API_IMPORT_DATA_RIS_KEY)
+    @merge_response_func(merge_ops_data, API_IMPORT_DATA_RIS_KEY)
+    @merge_response_func(merge_exist_add_args, API_EXIST_ADD_ARGS_RIS_KEY)
     @merge_response_func(merge_cols_width, API_COLS_WIDTH_RIS_KEY)
     @merge_response_func(merge_base_permissions, API_PERMISSIONS_RIS_KEY)
     @merge_response_func(merge_user_permissions, API_USER_PERMISSIONS_RIS_KEY)
@@ -1630,6 +1667,7 @@ class MyappModelRestApi(ModelRestApi):
                 if 'widget' in column_field_kwargs:
                     ret['widget']=column_field_kwargs['widget'].__class__.__name__.replace('Widget','').replace('Field','').replace('My','')
                     ret['disable']=column_field_kwargs['widget'].readonly if hasattr(column_field_kwargs['widget'],'readonly') else False
+                    ret['retry_info'] = column_field_kwargs['widget'].retry_info if hasattr(column_field_kwargs['widget'],'retry_info') else False
                     # if hasattr(column_field_kwargs['widget'],'can_input'):
                     #     print(field.name,column_field_kwargs['widget'].can_input)
                     ret['ui-type'] = 'input-select' if hasattr(column_field_kwargs['widget'],'can_input') and column_field_kwargs['widget'].can_input else False
