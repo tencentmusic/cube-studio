@@ -112,6 +112,12 @@ class Service_ModelView_base():
     edit_form_query_rel_fields = add_form_query_rel_fields
 
     add_form_extra_fields={
+        "project": QuerySelectField(
+            _(datamodel.obj.lab('project')),
+            query_factory=filter_join_org_project,
+            allow_blank=True,
+            widget=Select2Widget()
+        ),
         "name":StringField(_(datamodel.obj.lab('name')), description='英文名(小写字母、数字、- 组成)，最长50个字符',widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
         "label":StringField(_(datamodel.obj.lab('label')), description='中文名', widget=BS3TextFieldWidget(),validators=[DataRequired()]),
         "images": StringField(_(datamodel.obj.lab('images')), description='镜像全称', widget=BS3TextFieldWidget(), validators=[DataRequired()]),

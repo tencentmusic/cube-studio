@@ -201,6 +201,10 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         return Markup('<pre><code>' + self.model_input + '</code></pre>')
 
     @property
+    def resource(self):
+        return 'cpu:%s,memory:%s,gpu:%s'%(self.resource_cpu,self.resource_memory,self.resource_gpu)
+
+    @property
     def operate_html(self):
         url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():

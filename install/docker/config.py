@@ -45,8 +45,8 @@ CSV_EXPORT = {"encoding": "utf_8_sig"}
 # 跨域配置
 WTF_CSRF_ENABLED = False
 
-# 跨域访问允许通过的站点
-WTF_CSRF_EXEMPT_LIST = ['example.local.com']
+# Add endpoints that need to be exempt from CSRF protection
+WTF_CSRF_EXEMPT_LIST = ["myapp.views.core.log"]
 
 # 是否debug模式运行
 DEBUG = os.environ.get("FLASK_ENV") == "development"

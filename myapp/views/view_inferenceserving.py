@@ -102,10 +102,10 @@ class InferenceService_ModelView_base():
     edit_form_query_rel_fields = add_form_query_rel_fields
 
 
-    list_columns = ['project','service_type','label','model_name_url','model_version','inference_host_url','ip','model_status','creator','modified','operate_html']
+    list_columns = ['project','service_type','label','model_name_url','model_version','inference_host_url','ip','model_status','resource','creator','modified','operate_html']
     cols_width={
         "project":{"type": "ellip2", "width": 150},
-        "label": {"type": "ellip2", "width": 350},
+        "label": {"type": "ellip2", "width": 300},
         "service_type": {"type": "ellip2", "width": 100},
         "model_name_url":{"type": "ellip2", "width": 300},
         "model_version": {"type": "ellip2", "width": 200},
@@ -114,6 +114,7 @@ class InferenceService_ModelView_base():
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 300},
+        "resource": {"type": "ellip2", "width": 300},
     }
     search_columns = ['name','created_by','project','service_type','label','model_name','model_version','model_path','host','model_status','resource_gpu']
 
@@ -123,12 +124,21 @@ class InferenceService_ModelView_base():
 
     base_filters = [["id",InferenceService_Filter, lambda: []]]
     custom_service = 'serving'
-    service_type_choices= [custom_service,'tfserving','torch-server','onnxruntime','triton-server']
-    # label_columns = {
-    #     "host": _("域名：测试环境test.xx，调试环境 debug.xx"),
-    # }
+    # service_type_choices= ['',custom_service,'tfserving','torch-server','onnxruntime','triton-server','kfserving-tf','kfserving-torch','kfserving-onnx','kfserving-sklearn','kfserving-xgboost','kfserving-lightgbm','kfserving-paddle']
+    service_type_choices= ['',custom_service,'tfserving','torch-server','onnxruntime','triton-server']
+    sepc_label_columns = {
+        # "host": _("域名：测试环境test.xx，调试环境 debug.xx"),
+        "resource":"资源"
+    }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
     add_form_extra_fields={
+        "project": QuerySelectField(
+            _(datamodel.obj.lab('project')),
+            query_factory=filter_join_org_project,
+            allow_blank=True,
+            widget=Select2Widget(),
+            validators=[DataRequired()]
+        ),
         "resource_memory":StringField(_(datamodel.obj.lab('resource_memory')),default='5G',description='内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管路员',widget=BS3TextFieldWidget(),validators=[DataRequired()]),
         "resource_cpu":StringField(_(datamodel.obj.lab('resource_cpu')), default='5',description='cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管路员',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "min_replicas": StringField(_(datamodel.obj.lab('min_replicas')), default=InferenceService.min_replicas.default.arg,description='最小副本数，用来配置高可用，流量变动自动伸缩',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
@@ -764,13 +774,13 @@ output %s
     def clear(self, service_id):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         if service:
-	        self.delete_old_service(service.name,service.project.cluster)
-	        service.model_status='offline'
-	        if not service.deploy_history:
-	            service.deploy_history=''
-	        service.deploy_history = service.deploy_history + "\n" + "clear：%s" % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	        db.session.commit()
-	        flash('服务清理完成', category='success')
+            self.delete_old_service(service.name, service.project.cluster)
+            service.model_status='offline'
+            if not service.deploy_history:
+                service.deploy_history=''
+            service.deploy_history = service.deploy_history + "\n" + "clear: %s %s" % (g.user.username,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            db.session.commit()
+            flash('服务清理完成', category='success')
         return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice',''))
 
 

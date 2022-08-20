@@ -315,8 +315,6 @@ class Notebook_ModelView_Base():
         command=None
         workingDir=None
         volume_mount = notebook.volume_mount
-        if '/dev/shm' not in volume_mount:
-            volume_mount += ',10G(memory):/dev/shm'
         rewrite_url = '/'
         pre_command = '(nohup sh /init.sh > /notebook_init.log 2>&1 &) ; (nohup sh /mnt/%s/init.sh > /init.log 2>&1 &) ; '%notebook.created_by.username
         if notebook.ide_type=='jupyter':
@@ -442,10 +440,10 @@ class Notebook_ModelView_Base():
         # print(crd_json)
         crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
 
-        # 创建EXTERNAL_IP的服务
-        SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
-        if not SERVICE_EXTERNAL_IP and notebook.project.expand:
-            SERVICE_EXTERNAL_IP = json.loads(notebook.project.expand).get('SERVICE_EXTERNAL_IP', SERVICE_EXTERNAL_IP)
+        # 边缘模式时，需要根据项目组中的配置设置代理ip
+        SERVICE_EXTERNAL_IP = ''
+        if notebook.project.expand:
+            SERVICE_EXTERNAL_IP = json.loads(notebook.project.expand).get('SERVICE_EXTERNAL_IP', '')
             if type(SERVICE_EXTERNAL_IP)==str:
                 SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
 
