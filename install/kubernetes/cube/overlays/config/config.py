@@ -46,7 +46,7 @@ CSV_EXPORT = {"encoding": "utf_8_sig"}
 WTF_CSRF_ENABLED = False
 
 # 跨域访问允许通过的站点
-WTF_CSRF_EXEMPT_LIST = ['example.local.com']
+WTF_CSRF_EXEMPT_LIST = ["myapp.views.core.log"]
 
 # 是否debug模式运行
 DEBUG = os.environ.get("FLASK_ENV") == "development"
@@ -828,7 +828,7 @@ ALL_LINKS=[
     {
         "label":"Grafana",
         "name":"grafana",
-        "url": '/grafana/'  # 访问grafana的域名地址
+        "url": '/grafana/d/pod-info/pod-info?orgId=1&refresh=5s&from=now-15m&to=now'  # 访问grafana的域名地址
     }
 ]
 
@@ -842,7 +842,7 @@ INFERNENCE_IMAGES={
     "tfserving":TFSERVING_IMAGES,
     'torch-server':TORCHSERVER_IMAGES,
     'onnxruntime':ONNXRUNTIME_IMAGES,
-    'triton-server':TRITONSERVER_IMAGES,
+    'triton-server':TRITONSERVER_IMAGES
 }
 
 INFERNENCE_COMMAND={

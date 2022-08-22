@@ -828,7 +828,7 @@ ALL_LINKS=[
     {
         "label":"Grafana",
         "name":"grafana",
-        "url": '/grafana/'  # 访问grafana的域名地址
+        "url": '/grafana/d/pod-info/pod-info?orgId=1&refresh=5s&from=now-15m&to=now'  # 访问grafana的域名地址
     }
 ]
 
