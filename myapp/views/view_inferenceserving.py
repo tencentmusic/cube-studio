@@ -105,7 +105,7 @@ class InferenceService_ModelView_base():
     list_columns = ['project','service_type','label','model_name_url','model_version','inference_host_url','ip','model_status','resource','creator','modified','operate_html']
     cols_width={
         "project":{"type": "ellip2", "width": 150},
-        "label": {"type": "ellip2", "width": 300},
+        "label": {"type": "ellip1", "width": 250},
         "service_type": {"type": "ellip2", "width": 100},
         "model_name_url":{"type": "ellip2", "width": 300},
         "model_version": {"type": "ellip2", "width": 200},
@@ -113,7 +113,7 @@ class InferenceService_ModelView_base():
         "ip": {"type": "ellip2", "width": 200},
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
-        "operate_html": {"type": "ellip2", "width": 300},
+        "operate_html": {"type": "ellip2", "width": 350},
         "resource": {"type": "ellip2", "width": 300},
     }
     search_columns = ['name','created_by','project','service_type','label','model_name','model_version','model_path','host','model_status','resource_gpu']
@@ -906,7 +906,7 @@ output %s
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(service.project.cluster.get('KUBECONFIG',''))
 
-        config_datas = service.inference_config.strip().split("\n---")
+        config_datas = service.inference_config.strip().split("\n---") if service.inference_config else []
         config_datas = [x.strip() for x in config_datas if x.strip()]
         volume_mount = service.volume_mount
         print('文件个数：',len(config_datas))

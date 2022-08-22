@@ -278,61 +278,6 @@ class Service_ModelView_base():
                 external_ip=SERVICE_EXTERNAL_IP
             )
 
-        # # 创建虚拟服务做代理
-        # crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
-        # crd_name =  "service-%s"%service.name
-        # crd_list = k8s.get_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, return_dict=None)
-        # for vs_obj in crd_list:
-        #     if vs_obj['name'] == crd_name:
-        #         k8s.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
-        #         time.sleep(1)
-        # crd_json = {
-        #     "apiVersion": "networking.istio.io/v1alpha3",
-        #     "kind": "VirtualService",
-        #     "metadata": {
-        #         "name": crd_name,
-        #         "namespace": namespace
-        #     },
-        #     "spec": {
-        #         "gateways": [
-        #             "kubeflow/kubeflow-gateway"
-        #         ],
-        #         "hosts": [
-        #             "*"
-        #         ],
-        #         "http": [
-        #             {
-        #                 "match": [
-        #                     {
-        #                         "uri": {
-        #                             "prefix": "/service/%s/"%service.name
-        #                         }
-        #                     }
-        #                 ],
-        #                 "rewrite": {
-        #                     "uri": "/"
-        #                 },
-        #                 "route": [
-        #                     {
-        #                         "destination": {
-        #                             "host": "%s.service.svc.cluster.local"%service.name,
-        #                             "port": {
-        #                                 "number": int(service.ports.split(',')[0])
-        #                             }
-        #                         }
-        #                     }
-        #                 ],
-        #                 "timeout": "300s"
-        #             }
-        #         ]
-        #     }
-        # }
-        #
-        # # print(crd_json)
-        # crd = k8s.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
-        # # return crd
-
-
         flash('服务部署完成',category='success')
         return redirect(conf.get("MODEL_URLS",{}).get("service",'/'))
 

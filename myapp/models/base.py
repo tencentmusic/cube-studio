@@ -259,6 +259,7 @@ class MyappModelBase():
         "responsible":"责任人",
         "cycle_unit":"周期单位",
         "task_type":"任务类型",
+        "help":"帮助",
         "creator": "创建者",
         "created_by": "创建者",
         "changed_by": "修改者",

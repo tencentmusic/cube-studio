@@ -74,13 +74,22 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     resource_gpu= Column(String(100), default='0')
     deploy_time = Column(String(100), nullable=False,default=datetime.datetime.now)
     host = Column(String(200), default='')
-    expand = Column(Text(65536), default='')
-
+    expand = Column(Text(65536), default='{}')
 
     @property
     def deploy(self):
-        url = self.project.cluster.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
-        return Markup(f'<a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
+        monitoring_url = self.project.cluster.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
+        help_url=''
+        try:
+            help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
+        except Exception as e:
+            print(e)
+
+        if help_url:
+            return Markup(f'<a target=_blank href="{help_url}">帮助</a> | <a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{monitoring_url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
+        else:
+            return Markup(f'帮助 | <a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{monitoring_url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
+
 
     @property
     def clear(self):
@@ -206,15 +215,25 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def operate_html(self):
-        url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        help_url=''
+        try:
+            help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
+        except Exception as e:
+            print(e)
+
+        monitoring_url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
         dom = f'''
                 <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
                 <a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a> | 
                 <a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a> |
-                <a target=_blank href="{url}">监控</a> |
+                <a target=_blank href="{monitoring_url}">监控</a> |
                 <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
                 '''
+        if help_url:
+            dom=f'<a target=_blank href="{help_url}">帮助</a> | '+dom
+        else:
+            dom = f'帮助 | ' + dom
         return Markup(dom)
 
     @property
@@ -241,11 +260,8 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     def clear(self):
         return Markup(f'<a href="/inferenceservice_modelview/clear/{self.id}">清理</a>')
 
-
-
     @property
     def ip(self):
-
         port = 20000+10*self.id
         # first, Use the proxy ip configured by the project group
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
