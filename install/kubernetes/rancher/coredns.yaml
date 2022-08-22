@@ -22,8 +22,8 @@ data:
       errors
       cache 30
       hosts {
-        1.1.1.1    example1.local.com
-        2.2.2.2    example2.local.com
+        1.1.1.1    example1.oa.com
+        2.2.2.2    example2.oa.com
         fallthrough
       }
       forward . 4.4.4.4 5.5.5.5
