@@ -1,7 +1,0 @@
-torch>=1.7.1+cu110
-numpy>=1.19.5
-transformers>=4.20.1
-matplotlib>=3.3.4
-tqdm>=4.64.0
-bentoml>=1.0.0
-minio>=7.1.10

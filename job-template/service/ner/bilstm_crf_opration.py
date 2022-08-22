@@ -204,6 +204,7 @@ class BiLSTM_CRF_opration:
         wordlist = []
         for i in sentence:
             wordlist.append(i)
+        wordlist.append('<END>')
         with torch.no_grad():
             # wordlist = ['1', '9', '6', '2', '年', '1', '月', '出', '生', '，', '南', '京', '工', '学', '院', '毕', '业', '。']
             word_id_list = self._tokenizer([wordlist])
