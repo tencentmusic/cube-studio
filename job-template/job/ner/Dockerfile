@@ -7,5 +7,5 @@ RUN python3 -m pip install sklearn_crfsuite -i https://pypi.tuna.tsinghua.edu.cn
 RUN python3 -m pip install minio -i https://pypi.tuna.tsinghua.edu.cn/simple
 RUN python3 -m pip install tqdm -i https://pypi.tuna.tsinghua.edu.cn/simple
 RUN python3 -m pip install transformers -i https://pypi.tuna.tsinghua.edu.cn/simple
-WORKDIR /NER
-ENTRYPOINT ["python3", "main4argo.py"]
+
+ENTRYPOINT ["python3", "/NER/main4argo.py"]

@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-m", "--model", type=str, default='HMM', help="There are five models of NER, they are HMM, CRF, BiLSTM, BiLSTM_CRF and Bert_BiLSTM_CRF.")
     parser.add_argument("-p", "--path", type=str, default='./zdata/', help="data path")
-    parser.add_argument('-on', '--objectname', type=str, default='people_daily_BIO.txt', help='MinIO object name')
+    parser.add_argument('-on', '--filename', type=str, default='people_daily_BIO.txt', help='MinIO object name')
     parser.add_argument('-dr', '--datarate', type=list, default=[0.7, 0.1, 0.2], help='The rate of train_data, dev_data and test_data')
     parser.add_argument('-e', '--epochs', type=int, default=10, help='train epoch')
     parser.add_argument('-b', '--batch_size', type=int, default=16, help='batch size')
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # preprocessing data
     data_preprocessing = Preprocessing(
         file_path=args.path,
-        file_name=args.objectname
+        file_name=args.filename
     )
     data_preprocessing.train_test_dev_split(data_rate=args.datarate)
     data_preprocessing.construct_vocabulary_labels()
