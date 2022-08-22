@@ -6,6 +6,7 @@ from copy import deepcopy
 import json
 import logging
 from logging.handlers import TimedRotatingFileHandler
+from flask import redirect, g, flash, request, session, abort
 import os
 from flask import render_template,redirect
 from flask import Flask, redirect
@@ -265,24 +266,16 @@ if flask_app_mutator:
 from flask import request
 
 
-# @app.before_request
-# # @pysnooper.snoop(watch_explode='aa')
-# def check_login():
-#     login_url = appbuilder.get_url_for_login
-#     # index_url = appbuilder.get_url_for_index
-#     if login_url not in request.path and '/myapp/active' not in request.path:
-#         if not g.user or not g.user.get_id():
-#             g.back_url = request.url
-#             # aa = request.url
-#             redirect_url = appbuilder.get_url_for_login # +"?login_url="+request.url
-#             return redirect(redirect_url)
+@app.before_request
+# @pysnooper.snoop(watch_explode='aa')
+def check_login():
+    if '/static' in request.path or '/logout' in request.path or '/login' in request.path:
+        return
 
-
-    # if index_url in request.path:
-    #     back_url = request.cookies.get('back_url', '')
-    #     if back_url:
-    #         request.cookies.set('back_url', '')
-    #         return redirect(appbuilder.get_url_for_login)
+    if not g.user or not g.user.get_id():
+        redirect_url = appbuilder.get_url_for_login  # +"?login_url="+request.url
+        # return redirect(redirect_url)
+        abort(401)
 
 
 
