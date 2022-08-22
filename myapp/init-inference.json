@@ -3,7 +3,7 @@
         "project_name": "public",
         "service_name": "tfserving-mnist-202208011",
         "model_name": "mnist",
-        "service_describe": "tf mnist 图像分类 tfserving推理",
+        "service_describe": "tf 图像分类",
         "image_name": "ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4",
         "model_version": "v2022.08.01.1",
         "model_path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/tf-mnist.tar.gz",
@@ -15,13 +15,16 @@
         "health": "8501:/v1/models/mnist/versions/202207281/metadata",
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
         "resource_memory": "2G",
-        "resource_cpu": "2"
+        "resource_cpu": "2",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/tfserving/example"
+        }
     },
     "pytorch-resnet50": {
         "project_name": "public",
         "service_name": "torch-server-resnet50-202208012",
         "model_name": "resnet50",
-        "service_describe": "pytorch resnet50 图像分类 torch-server推理",
+        "service_describe": "pytorch 图像分类",
         "image_name": "ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-cpu",
         "model_version": "v2022.08.01.2",
         "model_path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/resnet50.mar",
@@ -34,13 +37,16 @@
         "health": "8080:/ping",
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
         "resource_memory": "5G",
-        "resource_cpu": "5"
+        "resource_cpu": "5",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/torchserver/example"
+        }
     },
     "torchscript-resnet50": {
         "project_name": "public",
         "service_name": "triton-server-resnet50-202208013",
         "model_name": "resnet50",
-        "service_describe": "torchscript resnet50 图像分类 triton推理",
+        "service_describe": "torchscript 图像分类",
         "image_name": "ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3",
         "model_version": "v2022.08.01.3",
         "model_path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/resnet50-torchscript.pt",
@@ -54,13 +60,16 @@
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
         "resource_memory": "5G",
         "resource_cpu": "5",
-        "inference_config":"\n---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"pytorch_libtorch\"\nmax_batch_size: 0\ninput \n[\n    {\n        name: \"INPUT__0\"\n        data_type: TYPE_FP32\n        format: FORMAT_NCHW\n        dims: [ 3, 224, 224 ]\n        reshape: {\n            shape: [ 1, 3, 224, 224 ]\n        }\n    }\n]\n    \noutput \n[\n    {\n        name: \"OUTPUT__0\"\n        data_type: TYPE_FP32\n        dims: [ 1000 ]\n        reshape: {\n            shape: [ 1, 1000 ]\n        }\n    }\n]\n    \n\nparameters: { key: \"DISABLE_OPTIMIZED_EXECUTION\" value: { string_value:\"true\" } }\nparameters: { key: \"INFERENCE_MODE\" value: { string_value: \"false\" } }\n"
+        "inference_config":"\n---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"pytorch_libtorch\"\nmax_batch_size: 0\ninput \n[\n    {\n        name: \"INPUT__0\"\n        data_type: TYPE_FP32\n        format: FORMAT_NCHW\n        dims: [ 3, 224, 224 ]\n        reshape: {\n            shape: [ 1, 3, 224, 224 ]\n        }\n    }\n]\n    \noutput \n[\n    {\n        name: \"OUTPUT__0\"\n        data_type: TYPE_FP32\n        dims: [ 1000 ]\n        reshape: {\n            shape: [ 1, 1000 ]\n        }\n    }\n]\n    \n\nparameters: { key: \"DISABLE_OPTIMIZED_EXECUTION\" value: { string_value:\"true\" } }\nparameters: { key: \"INFERENCE_MODE\" value: { string_value: \"false\" } }\n",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/triton-server/example"
+        }
     },
     "onnx-resnet50": {
         "project_name": "public",
         "service_name": "triton-server-resnet50-202208014",
         "model_name": "resnet50",
-        "service_describe": "onnx resnet50 图像分类 triton推理",
+        "service_describe": "onnx 图像分类",
         "image_name": "ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3",
         "model_version": "v2022.08.01.4",
         "model_path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/resnet50.onnx",
@@ -74,7 +83,10 @@
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
         "resource_memory": "5G",
         "resource_cpu": "5",
-        "inference_config": "---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"onnxruntime_onnx\"\nbackend: \"onnxruntime\"\nmax_batch_size : 0\n\ninput [\n  {\n    name: \"input_name\"\n    data_type: TYPE_FP32\n    format: FORMAT_NCHW\n    dims: [ 3, 224, 224 ]\n    reshape { shape: [ 1, 3, 224, 224 ] }\n  }\n]\noutput [\n  {\n    name: \"output_name\"\n    data_type: TYPE_FP32\n    dims: [ 1000 ]\n    reshape { shape: [ 1, 1000 ] }\n  }\n]\n\nparameters { key: \"intra_op_thread_count\" value: { string_value: \"10\" } }\nparameters { key: \"execution_mode\" value: { string_value: \"1\" } }\nparameters { key: \"inter_op_thread_count\" value: { string_value: \"10\" } }\n"
+        "inference_config": "---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"onnxruntime_onnx\"\nbackend: \"onnxruntime\"\nmax_batch_size : 0\n\ninput [\n  {\n    name: \"input_name\"\n    data_type: TYPE_FP32\n    format: FORMAT_NCHW\n    dims: [ 3, 224, 224 ]\n    reshape { shape: [ 1, 3, 224, 224 ] }\n  }\n]\noutput [\n  {\n    name: \"output_name\"\n    data_type: TYPE_FP32\n    dims: [ 1000 ]\n    reshape { shape: [ 1, 1000 ] }\n  }\n]\n\nparameters { key: \"intra_op_thread_count\" value: { string_value: \"10\" } }\nparameters { key: \"execution_mode\" value: { string_value: \"1\" } }\nparameters { key: \"inter_op_thread_count\" value: { string_value: \"10\" } }\n",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/triton-server/example"
+        }
     }
 }
 

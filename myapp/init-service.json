@@ -6,7 +6,10 @@
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/phpmyadmin",
         "command":"",
         "env":"PMA_HOST=mysql-service.infra\nPMA_PORT=3306\nPMA_USER=root\nPMA_PASSWORD=admin",
-        "ports":"80"
+        "ports":"80",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+        }
     },
     "redis-ui": {
         "project_name":"public",
@@ -15,7 +18,10 @@
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/patrikx3:latest",
         "command":"",
         "env":"REDIS_NAME=default\nREDIS_HOST=redis-master.infra\nREDIS_PORT=6379\nREDIS_PASSWORD=admin",
-        "ports":"7843"
+        "ports":"7843",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+        }
     },
     "mongo-express": {
         "project_name":"public",
@@ -24,7 +30,10 @@
         "image_name":"mongo-express:0.54.0",
         "command":"",
         "env":"ME_CONFIG_MONGODB_SERVER=xx.xx.xx.xx\nME_CONFIG_MONGODB_PORT=xx\nME_CONFIG_MONGODB_ENABLE_ADMIN=true\nME_CONFIG_MONGODB_ADMINUSERNAME=xx\nME_CONFIG_MONGODB_ADMINPASSWORD=xx\nME_CONFIG_MONGODB_AUTH_DATABASE=xx\nME_CONFIG_MONGODB_AUTH_USERNAME=xx\nME_CONFIG_MONGODB_AUTH_PASSWORD=xx\nVCAP_APP_HOST=0.0.0.0\nVCAP_APP_PORT=8081\nME_CONFIG_OPTIONS_EDITORTHEME=ambiance",
-        "ports":"8081"
+        "ports":"8081",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+        }
     },
     "neo4j": {
         "project_name":"public",
@@ -34,8 +43,10 @@
         "command":"",
         "env":"NEO4J_AUTH=neo4j/admin",
         "ports":"7474,7687",
-        "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/neo4j(hostpath):/var/lib/neo4j/data"
-
+        "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/neo4j(hostpath):/var/lib/neo4j/data",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+        }
     },
     "jaeger": {
         "project_name":"public",
@@ -44,7 +55,10 @@
         "image_name":"jaegertracing/all-in-one:1.29",
         "command":"",
         "env":"",
-        "ports":"16686,5775"
+        "ports":"16686,5775",
+        "expand": {
+            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+        }
     },
     "label-studio": {
         "project_name":"public",
@@ -56,7 +70,6 @@
         "ports":"8080",
         "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/label-studio(hostpath):/label-studio/data"
     },
-
     "wenet": {
         "project_name":"public",
         "service_name":"wenet",

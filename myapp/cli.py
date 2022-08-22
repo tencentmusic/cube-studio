@@ -199,6 +199,7 @@ def init():
 
 
     # 创建demo pipeline
+    # @pysnooper.snoop()
     def create_pipeline(tasks,pipeline):
         # 如果项目组或者task的模板不存在就丢失
         org_project = db.session.query(Project).filter_by(name=pipeline['project']).filter_by(type='org').first()
@@ -400,7 +401,8 @@ def init():
 
 
     # 添加demo 服务
-    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt'):
+    # @pysnooper.snoop()
+    def create_service(project_name,service_name,service_describe,image_name,command,env,resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt',expand={}):
         service = db.session.query(Service).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
@@ -419,6 +421,7 @@ def init():
                 service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
                 service.ports = ports
                 service.volume_mount=volume_mount
+                service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
                 db.session.add(service)
                 db.session.commit()
                 print('add service %s'%service_name)
@@ -438,7 +441,8 @@ def init():
 
 
     # 添加 demo 推理 服务
-    def create_inference(project_name,service_name,service_describe,image_name,command,env,model_name,workdir='',model_version='',model_path='',service_type='serving',resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt',metrics='',health='',inference_config=''):
+    # @pysnooper.snoop()
+    def create_inference(project_name,service_name,service_describe,image_name,command,env,model_name,workdir='',model_version='',model_path='',service_type='serving',resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt',metrics='',health='',inference_config='',expand={}):
         service = db.session.query(InferenceService).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
@@ -465,7 +469,7 @@ def init():
                 service.volume_mount=volume_mount
                 service.metrics=metrics
                 service.health=health
-                service.expand = "{}"
+                service.expand = json.dumps(expand,indent=4,ensure_ascii=False)
 
                 from myapp.views.view_inferenceserving import InferenceService_ModelView_base
                 inference_class = InferenceService_ModelView_base()
