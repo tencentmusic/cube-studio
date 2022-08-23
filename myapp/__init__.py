@@ -269,7 +269,7 @@ from flask import request
 @app.before_request
 # @pysnooper.snoop(watch_explode='aa')
 def check_login():
-    if '/static' in request.path or '/logout' in request.path or '/login' in request.path:
+    if '/static' in request.path or '/logout' in request.path or '/login' in request.path or '/health' in request.path:
         return
 
     if not g.user or not g.user.get_id():
