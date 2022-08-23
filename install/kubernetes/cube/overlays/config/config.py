@@ -870,7 +870,7 @@ INFERNENCE_HEALTH={
     "torch-server":"8080:/ping",
     "triton-server":"8000:/v2/health/ready"
 }
-
+DOCKER_IMAGES='ccr.ccs.tencentyun.com/cube-studio/docker'
 # notebook，pipeline镜像拉取策略
 IMAGE_PULL_POLICY='Always'    # IfNotPresent   Always
 

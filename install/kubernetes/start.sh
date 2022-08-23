@@ -1,13 +1,9 @@
 
-mkdir -p ~/.kube/ kubeconfig /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives /data/k8s/infra/mysql
-cp config ~/.kube/config
-echo "" > kubeconfig/dev-kubeconfig
+bash init_node.sh
 
 curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && cp kubectl /usr/bin/ && mv kubectl /usr/local/bin/
 node=`kubectl  get node -o wide |grep $1 |awk '{print $1}'| head -n 1`
 kubectl label node $node train=true cpu=true notebook=true service=true org=public istio=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true --overwrite
-# 拉取镜像
-sh pull_image_kubeflow.sh
 
 # 创建命名空间
 sh create_ns_secret.sh
@@ -29,8 +25,6 @@ kubectl create -f kube-batch/deploy.yaml
 
 # 部署prometheus
 cd prometheus
-mkdir -p /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/
-chmod -R 777 /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/
 kubectl delete -f ./operator/operator-crd.yml
 kubectl apply -f ./operator/operator-crd.yml
 kubectl apply -f ./operator/operator-rbac.yml
