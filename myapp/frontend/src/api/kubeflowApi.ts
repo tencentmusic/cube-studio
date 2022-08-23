@@ -1,11 +1,13 @@
 import { AxiosResponse } from 'axios'
 import axios, { AxiosResFormat } from '.'
 import { IADUGTemplateInfo, IAppMenuItem, ICustomDialog } from './interface/kubeflowInterface'
-const BASE_URL = 'http://localhost/' || 'http://kubeflow.tke.woa.com'
-
 
 export const getAppMenu = (): Promise<AxiosResponse<IAppMenuItem[]>> => {
     return axios.get('/myapp/menu')
+}
+
+export const userLogout = (): Promise<AxiosResponse<IAppMenuItem[]>> => {
+    return axios.get('/logout')
 }
 
 export const getADUGTemplateApiInfo = (url?: string, id?: string): Promise<AxiosResponse<IADUGTemplateInfo>> => {
@@ -52,4 +54,12 @@ export const actionADUGTemplateSingle = (url?: string): AxiosResFormat<any> => {
 
 export const actionADUGTemplateMuliple = (url?: string, params?: { ids: any[] }): AxiosResFormat<any> => {
     return axios.post(url || '', params)
+}
+
+export const actionADUGTemplateDownData = (url: string): AxiosResFormat<any> => {
+    return axios.get(url)
+}
+
+export const actionADUGTemplateRetryInfo = (url: string, params: any): Promise<AxiosResponse<IADUGTemplateInfo>> => {
+    return axios.get(url, { params })
 }

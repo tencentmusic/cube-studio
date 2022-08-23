@@ -1,9 +1,9 @@
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
-import { Modal, Form, Spin, Input } from 'antd';
+import { Modal, Form, Spin, Input, FormInstance } from 'antd';
 
 interface ModalFormProps {
 	visible: boolean;
-	onCreate: (values: any) => void;
+	onCreate: (values: any, form: FormInstance<any>) => void;
 	onCancel: () => void;
 	loading?: boolean;
 	children?: any;
@@ -52,7 +52,7 @@ const ModalForm = (props: ModalFormProps): JSX.Element => {
 				console.log(form.getFieldsValue())
 				form.validateFields()
 					.then((values) => {
-						props.onCreate(values);
+						props.onCreate(values, form);
 						// form.resetFields();
 					})
 					.catch((info) => {

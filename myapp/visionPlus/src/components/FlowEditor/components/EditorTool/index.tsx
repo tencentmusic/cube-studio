@@ -1,3 +1,4 @@
+import { AppstoreOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons';
 import { CommandBar, ICommandBarItemProps, Icon, Spinner, SpinnerSize, Stack } from '@fluentui/react';
 import api from '@src/api';
 import { updateErrMsg } from '@src/models/app';
@@ -13,7 +14,8 @@ import {
 } from '@src/models/pipeline';
 import { saveTaskList, selectTaskList } from '@src/models/task';
 import { toggle } from '@src/models/template';
-import React, { useEffect } from 'react';
+import { Button, message } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { isNode, removeElements } from 'react-flow-renderer';
 import style from './style';
 
@@ -23,11 +25,12 @@ const EditorTool: React.FC = () => {
   const dispatch = useAppDispatch();
   const elements = useAppSelector(selectElements);
   const saved = useAppSelector(selectSaved);
-  const pipeline = useAppSelector(selectInfo);
+  const info = useAppSelector(selectInfo);
   const pipelineId = useAppSelector(selectPipelineId);
   const taskList = useAppSelector(selectTaskList);
   const isEditing = useAppSelector(selectEditing);
   const selectedElements = useAppSelector(selectSelected);
+
   const commandItem: ICommandBarItemProps[] = [
     {
       // buttonStyles: style.commonButton,
@@ -150,22 +153,23 @@ const EditorTool: React.FC = () => {
         dispatch(updateElements(removeElements(selectedElements, elements)));
       },
     },
-    // {
-    //   // buttonStyles: style.commonButton,
-    //   // iconOnly: true,
-    //   key: 'monitor',
-    //   iconProps: {
-    //     iconName: 'NetworkTower',
-    //     styles: style.commonIcon,
-    //   },
-    //   text: '监控',
-    //   onClick: () => {
-    //     if (pipeline?.id) {
-    //       window.open(`${window.location.origin}/pipeline_modelview/web/monitoring/${pipelineId}`);
-    //     }
-    //   },
-    // },
   ];
+
+  const [commandList, setCommandList] = useState<any[]>([])
+
+  useEffect(() => {
+    if (info) {
+      const config = (info?.pipeline_jump_button || []).map((item: any) => {
+        const target = (<Button type="text" key={Math.random().toString(36).substring(2)} onClick={() => {
+          window.open(`${window.location.origin}${item.action_url}`);
+        }}>
+          <div className={style.btnIcon}><span dangerouslySetInnerHTML={{ __html: item.icon_svg }}></span><span>{item.name}</span></div>
+        </Button>)
+        return target
+      })
+      setCommandList(config)
+    }
+  }, [info])
 
   // task 发生编辑行为时状态变更
   useEffect(() => {
@@ -179,7 +183,24 @@ const EditorTool: React.FC = () => {
 
   return (
     <Item shrink styles={style.editorToolStyle}>
-      <CommandBar id="authoring-page-toolbar" styles={style.commandBarStyle} items={commandItem}></CommandBar>
+      {/* <CommandBar id="authoring-page-toolbar" styles={style.commandBarStyle} items={commandList}></CommandBar> */}
+      <div className={style.commandBarStyleCustom}>
+        <Button type="text" icon={<AppstoreOutlined />} onClick={() => {
+          dispatch(toggle());
+        }}>展开/关闭菜单</Button>
+        <Button type="text" icon={<SaveOutlined />} onClick={() => {
+          message.success('保存成功')
+          dispatch(savePipeline());
+        }}>保存</Button>
+        <Button type="text" icon={<DeleteOutlined />} onClick={() => {
+          if (isNode(selectedElements[0])) {
+            dispatch(savePipeline());
+          }
+          dispatch(updateEditing(true));
+          dispatch(updateElements(removeElements(selectedElements, elements)));
+        }}>删除节点</Button>
+        {commandList}
+      </div>
       <Stack
         horizontal
         verticalAlign="center"

@@ -4,14 +4,14 @@ import { Content } from 'antd/lib/layout/layout';
 import TitleHeader from '../components/TitleHeader/TitleHeader';
 import TableBox from '../components/TableBox/TableBox';
 import moment from "moment";
-import { CopyOutlined, DownOutlined, ExclamationCircleOutlined, PlusOutlined, QuestionCircleOutlined, RollbackOutlined, UploadOutlined } from '@ant-design/icons'
+import { CopyOutlined, DownOutlined, ExclamationCircleOutlined, ExportOutlined, PlusOutlined, QuestionCircleOutlined, RollbackOutlined, UploadOutlined } from '@ant-design/icons'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getParam, getTableScroll } from '../util';
 import ModalForm from '../components/ModalForm/ModalForm';
 import cookies from 'js-cookie';
 import { IADUGTemplateActionItem, IAppMenuItem } from '../api/interface/kubeflowInterface';
-import { getADUGTemplateList, getADUGTemplateApiInfo, actionADUGTemplateDelete, getADUGTemplateDetail, actionADUGTemplateAdd, actionADUGTemplateUpdate, actionADUGTemplateSingle, actionADUGTemplateMuliple, getCustomDialog } from '../api/kubeflowApi';
+import { getADUGTemplateList, getADUGTemplateApiInfo, actionADUGTemplateDelete, getADUGTemplateDetail, actionADUGTemplateAdd, actionADUGTemplateUpdate, actionADUGTemplateSingle, actionADUGTemplateMuliple, getCustomDialog, actionADUGTemplateDownData, actionADUGTemplateRetryInfo } from '../api/kubeflowApi';
 import { ColumnsType } from 'antd/lib/table';
 import MixSearch, { IMixSearchParamItem } from '../components/MixSearch/MixSearch';
 import DynamicForm, { calculateId, IDynamicFormConfigItem, IDynamicFormGroupConfigItem, ILinkageConfig, TDynamicFormType } from '../components/DynamicForm/DynamicForm';
@@ -30,7 +30,7 @@ interface ISorterParam {
 }
 
 export default function TaskListManager(props?: IAppMenuItem) {
-    const PAGE_SIZE = 10;
+    const PAGE_SIZE = 20;
     const navigate = useNavigate();
     const location = useLocation()
     const [dataList, setDataList] = useState<any[]>([]);
@@ -41,9 +41,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
     const [visableUpdate, setVisableUpdate] = useState(false)
     const [loadingDetail, setLoadingDetail] = useState(false)
     const [visableDetail, setVisableDetail] = useState(false)
-    const [customDialogVisable, setCustomDialogVisable] = useState(false)
-    const [customDialogTitle, setCustomDialogTitle] = useState<string>()
-    const [customDialogContent, setCustomDialogContent] = useState<string>()
     const [selectedRowKeys, setSelectedRowKeys] = useState<ReactText[]>([])
     const [dateInfo, setDateInfo] = useState<{
         startTime: string,
@@ -58,7 +55,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
         total: 0,
         showSizeChanger: true,
         showQuickJumper: true,
-        pageSizeOptions: [10, 20, 50, 100, 500],
+        pageSizeOptions: [20, 50, 100, 500],
         showTotal: (total) => `共${total}条`,
     };
     const [pageInfo, setPageInfo] = useState<TablePaginationConfig>(pageInfoInit);
@@ -80,6 +77,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
     const [dynamicFormConfigUpdate, setDynamicFormConfigUpdate] = useState<IDynamicFormConfigItem[]>([])
     const [dynamicFormGroupConfigAdd, setDynamicFormGroupConfigAdd] = useState<IDynamicFormGroupConfigItem[]>([])
     const [dynamicFormGroupConfigUpdate, setDynamicFormGroupConfigUpdate] = useState<IDynamicFormGroupConfigItem[]>([])
+    const [dynamicFormDataAdd, setDynamicFormDataAdd] = useState({})
     const [updateColumnsMap, setUpdateColumnsMap] = useState<Record<string, any>>({})
     const [labelMap, _setLabelMap] = useState<Record<string, string>>({})
     const labelMapRef = useRef(labelMap);
@@ -101,6 +99,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
         _setBaseUrl(data);
     };
     const [isImportData, setIsImportData] = useState(false)
+    const [isDownLoadData, setIsDownLoadData] = useState(false)
     const [columnRelateFormat, setColumnRelateFormat] = useState<ILinkageConfig[]>([])
     const [multipleAction, setMultipleAction] = useState<IADUGTemplateActionItem[]>([])
     const [sorterParam, setSorterParam] = useState<{
@@ -109,6 +108,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
     }>()
     const [primaryKey, setPrimaryKey] = useState('')
     const [labelTitle, setLabelTitle] = useState('')
+
 
     const [scrollY, setScrollY] = useState("")
 
@@ -124,16 +124,53 @@ export default function TaskListManager(props?: IAppMenuItem) {
     }, [])
 
     useEffect(() => {
-        const url = encodeURIComponent(location.pathname)
-        getCustomDialog(url).then(res => {
-            const { title, content, hit } = res.data
-            setCustomDialogTitle(title)
-            setCustomDialogContent(content)
-            setCustomDialogVisable(hit)
-        }).catch(err => {
-            console.log(err);
-        })
+        if (props && props.disable) {
+            navigate('/404')
+        }
     }, [])
+
+    // 表单字段处理
+    const createDyFormConfig = (data: Record<string, any>[], label_columns: Record<string, any>, description_columns: Record<string, any>): IDynamicFormConfigItem[] => {
+        return data.map((item, index) => {
+            let type = item['ui-type'] || 'input'
+            if (type === 'select2') {
+                type = 'select'
+            }
+            const label = item.label || label_columns[item.name]
+
+            // 校验规则
+            const rules = (item.validators || []).map((item: any) => {
+                switch (item.type) {
+                    case 'DataRequired':
+                        return { required: true, message: `请输入${label}` }
+                    case 'Regexp':
+                        return { pattern: new RegExp(`${item.regex}`), message: `请按正确的规则输入` }
+                    case 'Length':
+                        return { min: item.min, max: item.max, message: `请输入正确的长度` }
+                    default:
+                        return undefined
+                }
+            }).filter((item: any) => !!item)
+
+            const list = createDyFormConfig((item.info || []), label_columns, description_columns)
+
+            const res: IDynamicFormConfigItem = {
+                label,
+                type,
+                rules,
+                list,
+                name: item.name,
+                disable: item.disable,
+                description: item.description || description_columns[item.name] || undefined,
+                required: item.required,
+                defaultValue: item.default === '' ? undefined : item.default,
+                multiple: item['ui-type'] && item['ui-type'] === 'select2',
+                options: (item.values || []).map((item: any) => ({ label: item.value, value: item.id })),
+                data: { ...item }
+            }
+            return res
+        })
+    }
 
     useEffect(() => {
         const targetId = getParam('targetId')
@@ -158,7 +195,8 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 primary_key,
                 label_title,
                 cols_width,
-                import_data
+                import_data,
+                download_data
             } = res.data
             const actionwidth = 80 || [props?.related, permissions.includes('can_show'), permissions.includes('can_edit'), permissions.includes('can_delete')].filter(item => !!item).length * 60
             const hasAction = props?.related || permissions.includes('can_show') || permissions.includes('can_edit') || permissions.includes('can_delete')
@@ -212,48 +250,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
             const multipleAction: IADUGTemplateActionItem[] = actionList.filter((item: any) => !!item.multiple)
             const singleAction: IADUGTemplateActionItem[] = actionList.filter((item: any) => !!item.single)
 
-            // 表单字段处理
-            const createDyFormConfig = (data: Record<string, any>[]): IDynamicFormConfigItem[] => {
-                return data.map((item, index) => {
-                    let type = item['ui-type'] || 'input'
-                    if (type === 'select2') {
-                        type = 'select'
-                    }
-                    const label = item.label || label_columns[item.name]
-
-                    // 校验规则
-                    const rules = (item.validators || []).map((item: any) => {
-                        switch (item.type) {
-                            case 'DataRequired':
-                                return { required: true, message: `请输入${label}` }
-                            case 'Regexp':
-                                return { pattern: new RegExp(`${item.regex}`), message: `请按正确的规则输入` }
-                            case 'Length':
-                                return { min: item.min, max: item.max, message: `请输入正确的长度` }
-                            default:
-                                return undefined
-                        }
-                    }).filter((item: any) => !!item)
-
-                    const list = createDyFormConfig((item.info || []))
-
-                    const res: IDynamicFormConfigItem = {
-                        label,
-                        type,
-                        rules,
-                        list,
-                        name: item.name,
-                        disable: item.disable,
-                        description: item.description || description_columns[item.name] || undefined,
-                        required: item.required,
-                        defaultValue: item.default === '' ? undefined : item.default,
-                        multiple: item['ui-type'] && item['ui-type'] === 'select2',
-                        options: (item.values || []).map((item: any) => ({ label: item.value, value: item.id })),
-                    }
-                    return res
-                })
-            }
-
             const tableAction: any = {
                 title: '操作',
                 width: actionwidth,
@@ -278,14 +274,14 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                         permissions.includes('can_edit') ? <Menu.Item><div className="link" onClick={() => {
                                             setVisableUpdate(true)
                                             getADUGTemplateApiInfo(route_base, record[primary_key]).then(res => {
-                                                const { edit_columns } = res.data
-                                                const formConfigUpdate: IDynamicFormConfigItem[] = createDyFormConfig(edit_columns)
+                                                const { edit_columns, label_columns, description_columns } = res.data
+                                                const formConfigUpdate: IDynamicFormConfigItem[] = createDyFormConfig(edit_columns, label_columns, description_columns)
                                                 const formGroupConfigUpdate: IDynamicFormGroupConfigItem[] = edit_fieldsets.map(group => {
                                                     const currentData = group.fields.map(field => updateColumnsMap[field]).filter(item => !!item)
                                                     return {
                                                         group: group.group,
                                                         expanded: group.expanded,
-                                                        config: createDyFormConfig(currentData)
+                                                        config: createDyFormConfig(currentData, label_columns, description_columns)
                                                     }
                                                 })
 
@@ -405,13 +401,13 @@ export default function TaskListManager(props?: IAppMenuItem) {
 
             const addColumnsMap = add_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
             const updateColumnsMap = edit_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
-            const formConfigAdd: IDynamicFormConfigItem[] = createDyFormConfig(add_columns)
+            const formConfigAdd: IDynamicFormConfigItem[] = createDyFormConfig(add_columns, label_columns, description_columns)
             const formGroupConfigAdd: IDynamicFormGroupConfigItem[] = add_fieldsets.map(group => {
                 const currentData = group.fields.map(field => addColumnsMap[field]).filter(item => !!item)
                 return {
                     group: group.group,
                     expanded: group.expanded,
-                    config: createDyFormConfig(currentData)
+                    config: createDyFormConfig(currentData, label_columns, description_columns)
                 }
             })
 
@@ -449,6 +445,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 currentFilterValues = localFilter
             }
 
+            setIsDownLoadData(download_data)
             setIsImportData(import_data)
             setLabelTitle(label_title)
             setPrimaryKey(primary_key)
@@ -474,8 +471,11 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 paramsMap: filters,
                 sorter: undefined
             });
+        }).catch(err => {
+            console.log(err);
+        }).finally(() => {
+            setLoading(false)
         })
-
     }, []);
 
     const fetchData = ({
@@ -502,22 +502,31 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     "value": +temlateId
                 } : undefined,
                 ...params.filter(param => param.value !== undefined).map((param: any) => {
-                    console.log(paramsMap[param.key]);
                     let opr = ''
-                    if (!isNaN(+param.value) && paramsMap[param.key] && !(paramsMap[param.key].type === 'Related' || paramsMap[param.key].type === 'QuerySelect')) {
-                        opr = 'eq'
-                    } else {
-                        const oprList = ['ct', 'lt', 'eq', 'rel_o_m']
-                        const sourceOprList: string[] = paramsMap[param.key].filter.map((item: any) => item.operator) || []
+                    const oprList = ['rel_o_m', 'ct', 'eq']
+                    const sourceOprList: string[] = paramsMap[param.key].filter.map((item: any) => item.operator) || []
 
-                        for (let i = 0; i < oprList.length; i++) {
-                            const currentOpr = oprList[i];
-                            if (sourceOprList.includes(currentOpr)) {
-                                opr = currentOpr
-                                break
-                            }
+                    for (let i = 0; i < oprList.length; i++) {
+                        const currentOpr = oprList[i];
+                        if (sourceOprList.includes(currentOpr)) {
+                            opr = currentOpr
+                            break
                         }
                     }
+                    // if (!isNaN(+param.value) && paramsMap[param.key] && !(paramsMap[param.key].type === 'Related' || paramsMap[param.key].type === 'QuerySelect')) {
+                    //     opr = 'eq'
+                    // } else {
+                    //     const oprList = ['rel_o_m', 'ct', 'eq']
+                    //     const sourceOprList: string[] = paramsMap[param.key].filter.map((item: any) => item.operator) || []
+
+                    //     for (let i = 0; i < oprList.length; i++) {
+                    //         const currentOpr = oprList[i];
+                    //         if (sourceOprList.includes(currentOpr)) {
+                    //             opr = currentOpr
+                    //             break
+                    //         }
+                    //     }
+                    // }
 
                     return {
                         "col": param.key,
@@ -651,18 +660,15 @@ export default function TaskListManager(props?: IAppMenuItem) {
 
     return (
         <div className="fade-in">
-            {/* 自定义弹窗 */}
-            <Drawer contentWrapperStyle={{ width: 'auto' }} title={customDialogTitle} placement="right" onClose={() => { setCustomDialogVisable(false) }} visible={customDialogVisable}>
-                <div dangerouslySetInnerHTML={{ __html: customDialogContent || '' }}></div>
-            </Drawer>
             {/* 添加 */}
             <ModalForm
                 title={`添加${labelTitle}`}
                 width={800}
+                // formData={dynamicFormDataAdd}
                 loading={loadingAdd}
                 visible={visableAdd}
                 onCancel={() => { setVisableAdd(false) }}
-                onCreate={(values) => {
+                onCreate={(values, form) => {
                     setLoadingAdd(true)
                     for (const key in values) {
                         if (Object.prototype.hasOwnProperty.call(values, key)) {
@@ -677,6 +683,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     }
                     actionADUGTemplateAdd(baseUrlRef.current, values).then((res: any) => {
                         message.success(`添加${labelTitle}成功`)
+                        form.resetFields()
                         setVisableAdd(false)
                         fetchData({
                             ...fetchDataParams,
@@ -693,7 +700,45 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 }}
             >
                 {
-                    (form: FormInstance, formChangeRes: any) => <DynamicForm form={form} formChangeRes={formChangeRes} linkageConfig={columnRelateFormat} config={dynamicFormConfigAdd} configGroup={dynamicFormGroupConfigAdd} />
+                    (form: FormInstance, formChangeRes: any) => <DynamicForm form={form} onRetryInfoChange={(value) => {
+                        setLoadingAdd(true)
+
+                        const formRes = form.getFieldsValue()
+                        for (const key in formRes) {
+                            if (Object.prototype.hasOwnProperty.call(formRes, key)) {
+                                const value = formRes[key];
+                                if (value === undefined) {
+                                    delete formRes[key]
+                                }
+                            }
+                        }
+                        const tar = JSON.stringify(formRes)
+                        form.resetFields()
+
+                        actionADUGTemplateRetryInfo(`${baseUrlRef.current}_info`, { exist_add_args: tar }).then(res => {
+                            const { add_columns, label_columns, description_columns, add_fieldsets } = res.data;
+                            const addColumnsMap = add_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
+                            const formConfigAdd: IDynamicFormConfigItem[] = createDyFormConfig(add_columns, label_columns, description_columns)
+                            const formGroupConfigAdd: IDynamicFormGroupConfigItem[] = add_fieldsets.map(group => {
+                                const currentData = group.fields.map(field => addColumnsMap[field]).filter(item => !!item)
+                                return {
+                                    group: group.group,
+                                    expanded: group.expanded,
+                                    config: createDyFormConfig(currentData, label_columns, description_columns)
+                                }
+                            })
+                            const formReset = add_columns.filter((item) => item.default !== '').map(column => ({ [column.name]: column.default })).reduce((pre, next) => ({ ...pre, ...next }), {})
+
+                            form.setFieldsValue(formReset)
+                            setDynamicFormConfigAdd(formConfigAdd)
+                            setDynamicFormGroupConfigAdd(formGroupConfigAdd)
+                        }).catch(err => {
+                            message.error('字段切换错误')
+                        }).finally(() => {
+                            setLoadingAdd(false)
+                        })
+
+                    }} formChangeRes={formChangeRes} linkageConfig={columnRelateFormat} config={dynamicFormConfigAdd} configGroup={dynamicFormGroupConfigAdd} />
                 }
             </ModalForm>
             {/* 修改 */}
@@ -768,7 +813,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             dataDetail.map((item, index) => {
                                 return <Row className="mb16" key={`dataDetail_${index}`}>
                                     <Col span={6}><div className="ta-r"><strong>{item.label}：</strong></div></Col>
-                                    <Col span={18}><span dangerouslySetInnerHTML={{ __html: item.value }}></span></Col>
+                                    <Col span={18}><pre dangerouslySetInnerHTML={{ __html: item.value }}></pre></Col>
                                 </Row>
                             })
                         }
@@ -818,6 +863,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 } */}
                 <div className="m16">
                     <TableBox
+                        cancelExportData={true}
                         tableKey={`tablebox_${location.pathname}`}
                         titleNode={<Col className="tablebox-title">{labelTitle}列表</Col>}
                         buttonNode={<div className="d-f ac">
@@ -835,19 +881,39 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                             </Menu.Item>
                                         })
                                     }
+
                                 </Menu>}>
                                     <Button>批量操作 <DownOutlined /></Button>
                                 </Dropdown>
                             </div>
                             {
                                 isImportData ? <div className="d-f ml16">
-                                    <Tooltip title={<span className="tips-content">注意：csv逗号分隔，第一行为列的英文名</span>} placement="topLeft">
+                                    <Tooltip color="#fff" title={<span className="tips-content-b">注意：csv逗号分隔，第一行为列的英文名 <span className="link" onClick={() => {
+                                        window.open(`${window.location.origin}${baseUrlRef.current}download_template`)
+                                    }}>下载导入模板</span></span>} placement="topLeft">
                                         <Upload {...uploadConfig}>
-                                            <Button className="" icon={<UploadOutlined />}>导入数据</Button>
+                                            <Button className="" icon={<UploadOutlined />}>批量导入数据</Button>
                                         </Upload>
                                     </Tooltip>
                                 </div> : null
                             }
+                            {
+                                isDownLoadData ? <Button className="ml16" onClick={() => {
+                                    Modal.confirm({
+                                        title: '导出数据',
+                                        icon: <ExclamationCircleOutlined />,
+                                        content: '',
+                                        okText: '确认导出数据',
+                                        cancelText: '取消',
+                                        onOk() {
+                                            window.open(`${window.location.origin}${baseUrlRef.current}download`)
+                                            message.success('导出成功');
+                                        },
+                                        onCancel() { },
+                                    });
+                                }}>批量导出  <ExportOutlined /></Button> : null
+                            }
+
                         </div>}
                         rowKey={(record: any) => {
                             return JSON.stringify(record)

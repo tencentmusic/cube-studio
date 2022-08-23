@@ -11,6 +11,8 @@ import {
 const editorToolStyle: Partial<IStackItemStyles> = {
   root: {
     display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     flexDirection: 'row',
     backgroundColor: '#fff',
     padding: '2px 0px',
@@ -34,6 +36,15 @@ const commandBarStyle: Partial<ICommandBarStyles> = {
     backgroundColor: '#fff',
   },
 };
+
+const commandBarStyleCustom = mergeStyles({
+  display: 'flex',
+  alignItems: 'center',
+  height: '40px',
+  padding: '0px 14px 0px 8px',
+  borderBottom: 'none',
+  backgroundColor: '#fff',
+});
 
 const commonButton: IButtonStyles = {
   root: {
@@ -93,7 +104,23 @@ const comboBoxStyle: Partial<IComboBoxStyles> = {
   },
 };
 
+const btnIcon = mergeStyles({
+  display: "flex !important",
+  alignItems: 'center',
+  'svg': {
+    width: 16,
+    height: 16,
+    marginTop: 0,
+    marginRight: 8
+  },
+  'span': {
+    display: 'inline-flex'
+  }
+});
+
 export default {
+  btnIcon,
+  commandBarStyleCustom,
   editorToolStyle,
   autoSavedTips,
   commandBarStyle,

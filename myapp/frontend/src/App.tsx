@@ -14,11 +14,10 @@ import { formatRoute, getDefaultOpenKeys, routerConfigPlus } from './routerConfi
 import SubMenu from 'antd/lib/menu/SubMenu';
 import { clearWaterNow, drawWater, drawWaterNow, getParam, obj2UrlParam, parseParam2Obj } from './util'
 import { getAppMenu } from './api/kubeflowApi';
-import { IAppMenuItem } from './api/interface/kubeflowInterface';
 import { GithubOutlined, LeftOutlined, QuestionCircleOutlined, RightOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie'
 import { changeTheme } from './theme';
-const userName = Cookies.get('myapp_username')
+import { handleTips } from './api';
 
 const RouterConfig = (config: IRouterConfigPlusItem[]) => {
   let element = useRoutes(config);
@@ -35,7 +34,6 @@ const AppWrapper = (props: IProps) => {
   const [currentAppIndex, setCurrentAppIndex] = useState<number>()
   const [currnetRouteConfig, setCurrnetRouteConfig] = useState(routerConfigPlus)
   const [currentAppList, setCurrentAppList] = useState(getAppList(routerConfigPlus))
-  // const [CurrentRouteComponent, setCurrentRouteComponent] = useState(() => () => RouterConfig(routerConfigPlus))
   const [CurrentRouteComponent, setCurrentRouteComponent] = useState<any>()
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false)
   const [imgUrlProtraits, setImgUrlProtraits] = useState('')
@@ -336,7 +334,7 @@ const AppWrapper = (props: IProps) => {
             }}>用户中心</Menu.Item>
             <Menu.Item onClick={() => {
               Cookies.remove('myapp_username');
-              window.location.reload()
+              handleTips.userlogout()
             }}>退出登录</Menu.Item>
           </Menu>
           }>

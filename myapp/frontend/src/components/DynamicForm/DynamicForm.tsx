@@ -13,6 +13,7 @@ interface IProps {
     configGroup?: IDynamicFormGroupConfigItem[]
     formChangeRes?: IFormChangeRes
     linkageConfig?: ILinkageConfig[]
+    onRetryInfoChange?: (value: string) => void
 }
 
 export interface ILinkageConfig {
@@ -44,6 +45,7 @@ export interface IDynamicFormConfigItem {
     description?: any
     multiple?: boolean,
     list?: IDynamicFormConfigItem[]
+    data: Record<string, any>
 }
 
 export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select'
@@ -268,8 +270,15 @@ export default function DynamicForm(props: IProps) {
             {...itemProps}
         >
             <Select
+                onClick={() => {
+                    console.log('click', props.form?.getFieldsValue())
+                    // props.form?.setFieldsValue({ app_group: "g_other_tme_infrastructure_tme_central_kuwo" })
+                }}
                 style={{ width: '100%' }}
                 mode={config.multiple ? 'multiple' : undefined}
+                onChange={(value) => {
+                    !!config.data.retry_info && props.onRetryInfoChange && props.onRetryInfoChange(value)
+                }}
                 showSearch
                 disabled={config.disable}
                 optionFilterProp="label"
@@ -326,7 +335,7 @@ export default function DynamicForm(props: IProps) {
                 return renderInput(item, itemProps)
             case 'match-input':
                 return renderInput(item, itemProps)
-                return renderMatchInput(item, itemProps)
+            // return renderMatchInput(item, itemProps)
             case 'input-select':
                 return renderInputSelect(item, itemProps)
             case 'textArea':

@@ -6,6 +6,8 @@ import AppRouter from './routes';
 import { store } from './models/store';
 import { Provider } from 'react-redux';
 import './app.less';
+import "antd/lib/button/style/index.css";
+import "antd/lib/message/style/index.css";
 
 // fluentui icon 资源初始化
 initializeIcons();

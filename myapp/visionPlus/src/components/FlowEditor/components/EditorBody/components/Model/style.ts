@@ -106,7 +106,21 @@ const borTitle = mergeStyles({
   marginTop: 8
 });
 
+const btnIcon = mergeStyles({
+  display: "flex",
+  alignItems: 'center',
+  'svg': {
+    width: 16,
+    height: 16,
+    marginRight: 8
+  },
+  'span': {
+    display: 'inline-flex'
+  }
+});
+
 export default {
+  btnIcon,
   borTitle,
   modelContainer,
   modelHeader,

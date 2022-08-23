@@ -10,6 +10,7 @@ export interface IAppMenuItem {
     url?: string,
     breadcrumbs?: string[],
     hidden?: boolean,
+    disable?: boolean
     isSubRoute?: boolean,
     children: IAppMenuItem[],
     related?: IAppMenuItem[],
@@ -53,6 +54,7 @@ export interface IADUGTemplateInfo {
     column_related: Record<string, IColumnRelateItem>
     cols_width: Record<string, IColumnConfigItem>
     import_data: boolean
+    download_data: boolean
 }
 
 export interface IColumnRelateItem {

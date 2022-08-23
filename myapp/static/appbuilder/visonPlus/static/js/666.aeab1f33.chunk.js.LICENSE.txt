@@ -4,6 +4,12 @@ object-assign
 @license MIT
 */
 
+/*!
+  Copyright (c) 2018 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/
+
 /** @license React v17.0.2
  * react-is.production.min.js
  *

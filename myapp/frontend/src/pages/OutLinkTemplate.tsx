@@ -9,7 +9,6 @@ export default function OutLinkTemplate(props?: IAppMenuItem) {
             <div>
                 <div>
                     <img className="pb32 w384" src={require('../images/findData.png')} alt="" />
-                    {/* <img className="pb32 w256" src={require('../images/star.svg').default} alt="" /> */}
                 </div>
                 <div className="ta-c"><Button type="primary" onClick={() => {
                     window.open(props?.url, 'blank')

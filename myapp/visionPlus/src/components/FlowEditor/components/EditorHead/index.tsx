@@ -16,9 +16,9 @@ const EditorHead: React.FC = () => {
   const info = useAppSelector(selectInfo);
   const userName = useAppSelector(selectUserName);
 
-  useEffect(() => {
-    console.log('info', info);
-  }, [info])
+  // useEffect(() => {
+  //   console.log('info', info);
+  // }, [info])
 
   // 新建流水线
   const handleNewPipeline = () => {
@@ -112,7 +112,7 @@ const EditorHead: React.FC = () => {
                 </Item>
               })
             }
-            {
+            {/* {
               (info?.pipeline_jump_button || []).map((item: any) => {
                 return <Item styles={style.buttonItemStyle} key={`runBtnList_${item.name}`}>
                   <DefaultButton onClick={async () => {
@@ -127,7 +127,9 @@ const EditorHead: React.FC = () => {
                   </DefaultButton>
                 </Item>
               })
-            }
+            } */}
+
+
             {/* <Item styles={style.buttonItemStyle}>
               <PrimaryButton onClick={handleSubmit}>{info.pipeline_run_button}</PrimaryButton>
             </Item> */}

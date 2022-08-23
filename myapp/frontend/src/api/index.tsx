@@ -1,10 +1,7 @@
 import Axios, { AxiosResponse } from 'axios';
 import { notification } from 'antd';
 import cookies from 'js-cookie';
-const baseApi = process.env.REACT_APP_BASE_URL || 'http://localhost/' || 'http://kubeflow.tke.woa.com'
-const baseApiAuth = ''
-
-// console.log(process.env, baseApi)
+const baseApi = process.env.REACT_APP_BASE_URL || 'http://localhost/'
 
 export type AxiosResFormat<T> = Promise<AxiosResponse<ResponseFormat<T>>>;
 export interface ResponseFormat<T = any> {
@@ -32,29 +29,11 @@ const codeMessage: Record<number, string> = {
     504: '网关超时。',
 };
 
-/** 异常处理程序 */
-const errorHandler = (error: { response: Response }): Response => {
-    const { response } = error;
-    if (response && response.status) {
-        const errorText = codeMessage[response.status] || response.statusText;
-        const { status, url } = response;
-
-        notification.error({
-            message: `请求错误 ${status}: ${url}`,
-            description: errorText,
-        });
-    } else if (!response) {
-        notification.error({
-            description: '您的网络发生异常，无法连接服务器',
-            message: '网络异常',
-        });
-    }
-    return response;
-};
-
 const axios = Axios.create({
     timeout: 600000,
     responseType: 'json',
+    // baseURL: baseApi,
+    // withCredentials: true,
 });
 
 
@@ -80,7 +59,7 @@ class HandleTips {
                     const contentMsg = this.errorQuene.shift();
                     notification[type || 'info']({
                         message: type,
-                        description: contentMsg,
+                        description: <div dangerouslySetInnerHTML={{ __html: contentMsg || '' }}></div>,
                     });
                 } else {
                     this.tipsTimer && clearInterval(this.tipsTimer);
@@ -93,13 +72,20 @@ class HandleTips {
     gotoLogin() {
         if (this.lock) {
             this.lock = false;
-            // const authUrl = `${baseApiAuth}/login?redirect=${window.location.href}`;
             const authUrl = `http://${window.location.host}/login/?login_url=${window.location.href}`
             setTimeout(() => {
                 window.location.href = authUrl;
             }, 800);
         }
     }
+
+    userlogout() {
+        const logoutUrl = `http://${window.location.host}/logout`
+        setTimeout(() => {
+            window.location.href = logoutUrl;
+        }, 800);
+    }
+
 }
 
 export const handleTips = new HandleTips();
@@ -123,7 +109,6 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     (response) => {
         const { data } = response;
-        // response.headers['api_flashes'] = '[["error", "test"]]'
         const tipMessage = JSON.parse(response.headers['api_flashes'] || '[]')
         if (tipMessage && Array.isArray(tipMessage) && tipMessage.length) {
             tipMessage.forEach((tip: any) => {
@@ -162,6 +147,9 @@ axios.interceptors.response.use(
                     if (Array.isArray(tip)) {
                         const [type, content] = tip
                         handleTips.trigger(content, type);
+                    }
+                    if (Object.prototype.toString.call(tip) === '[object Object]') {
+                        handleTips.trigger(tip.content, tip.type);
                     }
                 });
             }

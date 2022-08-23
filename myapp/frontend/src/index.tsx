@@ -15,7 +15,6 @@ import { handleTips } from './api';
 import { changeTheme } from './theme';
 import LoadingStar from './components/LoadingStar/LoadingStar';
 
-// Spin.setDefaultIndicator(<img style={{ width: 64, height: 32, left: 'calc(50% - 21px)' }} src={require('./images/loadingTme.gif')} />)
 Spin.setDefaultIndicator(<LoadingStar />)
 
 let isLogin = false

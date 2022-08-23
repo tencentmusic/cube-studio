@@ -7,6 +7,7 @@ import {
   IDropdownOption,
   ActionButton,
   Label,
+  DefaultButton,
 } from '@fluentui/react';
 import api from '@src/api';
 import { updateErrMsg } from '@src/models/app';
@@ -15,6 +16,7 @@ import { selectElements, updateElements } from '@src/models/element';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { updateTaskList, updateTaskId, selectTaskId } from '@src/models/task';
 import style from './style';
+import { selectInfo } from '@src/models/pipeline';
 
 interface ModelProps {
   model: any;
@@ -31,6 +33,7 @@ const Model: React.FC<ModelProps> = props => {
   const [jobTemplate, setJobTemplate] = useState<any>({});
   const [templateArgs, setTemplateArgs] = useState<any>({});
   const [taskArgs, setTaskArgs] = useState<any>({});
+  const info = useAppSelector(selectInfo);
   const _overflowItems: ICommandBarItemProps[] = [
     {
       key: 'debug',
@@ -322,6 +325,24 @@ const Model: React.FC<ModelProps> = props => {
             value={task?.retry || 0}
           />
           <div className={style.splitLine}></div> */}
+
+
+          <div style={{ paddingTop: 12 }}>
+            {
+              (props?.model?.data?.info?.task_jump_button || []).map((item: any, index: number) => {
+                return <DefaultButton style={{ marginRight: 16 }} key={`task_jump_button${index}`} onClick={async () => {
+                  window.open(`${window.location.origin}${item.action_url}`);
+                }}>
+                  <div className={style.btnIcon}>
+                    <span dangerouslySetInnerHTML={{ __html: item.icon_svg }}></span>
+                    <span>{item.name}</span>
+                  </div>
+                </DefaultButton>
+              })
+            }
+          </div>
+
+          <div className={style.splitLine}></div>
 
           <TextField
             label="别名"

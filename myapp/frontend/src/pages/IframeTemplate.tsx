@@ -7,7 +7,6 @@ export default function IframeTemplate(props?: IAppMenuItem) {
     return (
         <>
             <iframe id="_frontendAppCustomFrame_"
-                // src="http://kubeflow.tke.woa.com/static/appbuilder/vison/index.html#/HeterogeneousPlatform/Nationalkaraoke"
                 src={url}
                 allowFullScreen
                 allow="microphone;camera;midi;encrypted-media;"
