@@ -30,7 +30,7 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base -f in
 docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.08.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.08.22 -f install/docker/dockerFrontend/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.08.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 镜像拉取(如果你不参与开发可以直接使用线上镜像)
@@ -108,7 +108,11 @@ extra-index-url = https://pypi.tuna.tsinghua.edu.cn/simple/
 trusted-host=mirrors.aliyun.com pypi.tuna.tsinghua.edu.cn
 ```
 然后在cube-studio/install/docker/Dockerfile-base中增加:
+
+```
 COPY install/docker/pip.conf /root/.pip/pip.conf
+```
+
 
 
 
