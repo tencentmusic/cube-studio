@@ -323,7 +323,7 @@ class Docker_ModelView_Base():
             resource_gpu='0',
             image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
             image_pull_secrets=conf.get('HUBSECRET', []),
-            image='ccr.ccs.tencentyun.com/cube-studio/docker',
+            image=conf.get('DOCKER_IMAGE','ccr.ccs.tencentyun.com/cube-studio/docker'),
             hostAliases=hostAliases,
             env={
                 "USERNAME": docker.created_by.username

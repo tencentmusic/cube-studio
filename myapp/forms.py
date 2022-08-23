@@ -211,7 +211,7 @@ class MySelect2Widget(object):
 
     extra_classes = None
 
-    def __init__(self, extra_classes=None, style=None,multiple=False,new_web=True,value='',can_input=False,conten2choices=False):
+    def __init__(self, extra_classes=None, style=None,multiple=False,new_web=True,value='',can_input=False,conten2choices=False,retry_info=False):
         self.extra_classes = extra_classes
         self.style = style or u"width:350px"
         self.multiple = multiple
@@ -219,6 +219,7 @@ class MySelect2Widget(object):
         self.new_web=new_web
         self.can_input = can_input
         self.conten2choices=conten2choices
+        self.retry_info=retry_info
 
     # @pysnooper.snoop()
     def __call__(self, field, **kwargs):

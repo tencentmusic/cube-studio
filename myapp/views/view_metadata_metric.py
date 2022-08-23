@@ -90,7 +90,7 @@ class Metadata_metric_ModelView_base():
     # order_columns = ['id','changed_on']
     order_columns = ['id']
     search_columns=['metric_data_type','metric_responsible','app','name','label','describe','metric_type','metric_level','task_id','caliber']
-
+    show_columns=['id','app','metric_data_type','name','label','describe','metric_type','metric_level','metric_dim','metric_responsible','caliber','task_id','public']
     list_columns = ['app','metric_data_type','name','label','describe','metric_level','metric_responsible','public','metric_type','task_id']
     cols_width = {
         "name":{"type": "ellip2", "width": 200},
@@ -193,19 +193,6 @@ class Metadata_metric_ModelView_base():
     def pre_upload(self,data):
         data['public'] = bool(int(data.get('public', 1)))
         return data
-
-
-    # @action(
-    #     "mulcopy", __("Copy"), __("复制所有指标"), "fa-copy", single=False
-    # )
-    # def mulcopy(self, items):
-    #     if not items:
-    #         abort(404)
-    #     for item in items:
-    #         new_metric = item.clone()
-    #         new_metric.name = new_metric.name+"-copy"
-    #         db.session.commit()
-
 
     @action(
         "muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False

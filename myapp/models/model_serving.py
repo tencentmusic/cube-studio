@@ -202,14 +202,6 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
     @property
-    def expand_html(self):
-        return Markup('<pre><code>' + self.expand + '</code></pre>')
-
-    @property
-    def input_html(self):
-        return Markup('<pre><code>' + self.model_input + '</code></pre>')
-
-    @property
     def resource(self):
         return 'cpu:%s,memory:%s,gpu:%s'%(self.resource_cpu,self.resource_memory,self.resource_gpu)
 
@@ -235,14 +227,6 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         else:
             dom = f'帮助 | ' + dom
         return Markup(dom)
-
-    @property
-    def output_html(self):
-        return Markup('<pre><code>' + self.model_output + '</code></pre>')
-
-    @property
-    def metrics_html(self):
-        return Markup('<pre><code>' + self.model_output + '</code></pre>')
 
     @property
     def debug(self):

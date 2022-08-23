@@ -222,7 +222,7 @@ def init():
                 pipeline_model.created_by_fk = 1
                 pipeline_model.changed_by_fk = 1
                 pipeline_model.project_id = org_project.id
-                pipeline_model.parameter = json.dumps(pipeline.get('parameter',{}))
+                pipeline_model.parameter = json.dumps(pipeline.get('parameter',{}),indent=4,ensure_ascii=False)
                 db.session.add(pipeline_model)
                 db.session.commit()
                 print('add pipeline %s' % pipeline['name'])

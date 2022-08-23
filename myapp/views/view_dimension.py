@@ -806,6 +806,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     muldelete=muldelete,
                     dim_id=dim_id,
                     import_data=True,
+                    download_data=True,
                     cols_width=cols_width,
                     base_order=(get_primary_key(columns), "desc") if get_primary_key(columns) else None
                 )
@@ -855,6 +856,18 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
         view_instance = self.set_model(dim_id)
         return view_instance.upload()
 
+    @expose("/<dim_id>/api/download_template/", methods=["GET"])
+    # @pysnooper.snoop()
+    def dim_api_download_template(self,dim_id):
+        view_instance = self.set_model(dim_id)
+        return view_instance.download_template()
+
+
+    @expose("/<dim_id>/api/download/", methods=["GET"])
+    # @pysnooper.snoop()
+    def dim_api_download(self,dim_id):
+        view_instance = self.set_model(dim_id)
+        return view_instance.download()
 
     @expose("/<dim_id>/api/multi_action/<string:name>", methods=["POST"])
     def multi_action(self,dim_id,name):

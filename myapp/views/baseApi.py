@@ -1228,8 +1228,8 @@ class MyappModelRestApi(ModelRestApi):
 
 
 
-    @expose("/upload_demo/", methods=["GET"])
-    def upload_demo(self):
+    @expose("/download_template/", methods=["GET"])
+    def download_template(self):
 
         demostr=','.join(list(self.add_columns))+"\n"+','.join(['xx' for x in list(self.add_columns)])
 
