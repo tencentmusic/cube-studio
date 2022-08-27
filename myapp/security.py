@@ -229,7 +229,6 @@ class MyUserRemoteUserModelView(UserModelView):
     ]
 
 
-
     @expose("/userinfo/")
     @has_access
     def userinfo(self):
@@ -245,6 +244,71 @@ class MyUserRemoteUserModelView(UserModelView):
             appbuilder=self.appbuilder,
         )
 
+from flask_appbuilder.security.views import expose, ModelView, SimpleFormView
+from flask_appbuilder.security.forms import LoginForm_db, LoginForm_oid, ResetPasswordForm, UserInfoEdit
+from flask_appbuilder._compat import as_unicode
+from flask_babel import lazy_gettext
+from flask_wtf.recaptcha import RecaptchaField
+from wtforms import BooleanField, PasswordField, StringField
+from wtforms.validators import DataRequired, Email, EqualTo
+
+from flask_appbuilder.fieldwidgets import BS3PasswordFieldWidget, BS3TextFieldWidget
+from flask_appbuilder.forms import DynamicForm
+
+
+class UserInfoEditView(SimpleFormView):
+
+    class UserInfoEdit(DynamicForm):
+        first_name = StringField(
+            lazy_gettext("First Name"),
+            validators=[DataRequired()],
+            widget=BS3TextFieldWidget(),
+            description=lazy_gettext("Write the user first name or names"),
+        )
+        last_name = StringField(
+            lazy_gettext("Last Name"),
+            validators=[DataRequired()],
+            widget=BS3TextFieldWidget(),
+            description=lazy_gettext("Write the user last name"),
+        )
+        username = StringField(
+            lazy_gettext("User Name"),
+            validators=[DataRequired()],
+            widget=BS3TextFieldWidget(),
+            description=lazy_gettext("Write the Username"),
+        )
+        email = StringField(
+            lazy_gettext("Email"),
+            validators=[DataRequired()],
+            widget=BS3TextFieldWidget(),
+            description=lazy_gettext("Write the Email"),
+        )
+        org = StringField(
+            lazy_gettext("Org"),
+            widget=BS3TextFieldWidget(),
+            description=lazy_gettext("organization name"),
+        )
+
+    form = UserInfoEdit
+    form_title = lazy_gettext("Edit User Information")
+    redirect_url = "/"
+    message = lazy_gettext("User information changed")
+
+    def form_get(self, form):
+        item = self.appbuilder.sm.get_user_by_id(g.user.id)
+        # fills the form generic solution
+        for key, value in form.data.items():
+            if key == "csrf_token":
+                continue
+            form_field = getattr(form, key)
+            form_field.data = getattr(item, key)
+
+    def form_post(self, form):
+        form = self.form.refresh(request.form)
+        item = self.appbuilder.sm.get_user_by_id(g.user.id)
+        form.populate_obj(item)
+        self.appbuilder.sm.update_user(item)
+        flash(as_unicode(self.message), "info")
 
 
 
@@ -267,7 +331,8 @@ class MyappSecurityManager(SecurityManager):
     userdbmodelview = MyUserRemoteUserModelView
     authdbview = Myauthdbview
 
-
+    # userinfo edit view
+    userinfoeditview = UserInfoEditView
 
     # 构建启动前工作，认证
     @staticmethod
