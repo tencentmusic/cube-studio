@@ -78,10 +78,26 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def url_html(self):
-        url='<a target=_blank href="%s">%s</a>'%(self.url,self.url)
+        urls= self.url.split('\n')
+
+        html = ''
+        for url in urls:
+            if url.strip():
+                html+='<a target=_blank href="%s">%s</a><br>'%(url.strip(),url.strip())
+        return Markup('<div>%s</div>'%html)
+
+
+    @property
+    def icon_html(self):
+        img_url = self.icon if self.icon else "/static/assets/images/dataset.png"
+        url = '<a target=_blank href="%s"><img height="50px" width="50px" src="%s"></a>' % (img_url,img_url)
         return Markup(url)
 
     @property
     def download_url_html(self):
-        url='<a target=_blank href="%s">%s</a>'%(self.download_url,self.download_url)
-        return Markup(url)
+        urls= self.download_url.split('\n')
+        html = ''
+        for url in urls:
+            if url.strip():
+                html += '<a target=_blank href="%s">%s</a><br>' % (url.strip(), url.strip())
+        return Markup('<div>%s</div>'%html)

@@ -314,31 +314,38 @@ def init():
 
 
     # 添加 demo 推理 服务
-    def create_dataset(name,field,label,status,describe,url,industry,source,source_type,file_type,research,storage_class,storage_size,download_url):
-        dataset = db.session.query(Dataset).filter_by(name=name).first()
+    def create_dataset(**kwargs):
+        dataset = db.session.query(Dataset).filter_by(name=kwargs['name']).first()
         if not dataset:
             try:
                 dataset = Dataset()
-                dataset.name = name
-                dataset.field=field
-                dataset.label=label
-                dataset.status=status
-                dataset.describe=describe
-                dataset.url = url
-                dataset.source=source
-                dataset.industry=industry
-                dataset.source_type=source_type
-                dataset.file_type=file_type
-                dataset.research=research
-                dataset.storage_class=storage_class
-                dataset.storage_size = storage_size
-                dataset.download_url = download_url
-                dataset.owner = '*'
+                dataset.name = kwargs['name']
+                dataset.field=kwargs.get('field','')
+                dataset.label=kwargs.get('label','')
+                dataset.status=kwargs.get('status','')
+                dataset.describe=kwargs.get('describe','')
+                dataset.url = kwargs.get('url','')
+                dataset.source=kwargs.get('source','')
+                dataset.industry=kwargs.get('industry','')
+                dataset.source_type=kwargs.get('source_type','')
+                dataset.file_type=kwargs.get('file_type','')
+                dataset.research=kwargs.get('research','')
+                dataset.usage=kwargs.get('usage','')
+                dataset.years = kwargs.get('years', '')
+                dataset.path = kwargs.get('path', '')
+                dataset.duration = kwargs.get('duration', '')
+                dataset.entries_num = kwargs.get('entries_num', '')
+                dataset.price = kwargs.get('price', '')
+                dataset.icon = kwargs.get('icon', '')
+                dataset.storage_class=kwargs.get('storage_class','')
+                dataset.storage_size = kwargs.get('storage_size','')
+                dataset.download_url = kwargs.get('download_url','')
+                dataset.owner = 'admin'
                 dataset.created_by_fk=1
                 dataset.changed_by_fk=1
                 db.session.add(dataset)
                 db.session.commit()
-                print('add dataset %s' % name)
+                print('add dataset %s' % kwargs.get('name',''))
             except Exception as e:
                 print(e)
                 db.session.rollback()

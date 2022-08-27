@@ -1,4 +1,4 @@
-name,label,describe,source_type,source,industry,field,usage,research,storage_class,file_type,status,years,url,path,download_url,storage_size,entries_num,duration,price,status,icon,owner
+﻿name,label,describe,source_type,source,industry,field,usage,research,storage_class,file_type,status,years,url,path,download_url,storage_size,entries_num,duration,price,status,icon,owner
 MNIST,手写数字数据集,"包含一组60,000个示例的训练集和一组10,000个示例的测试集。数字已经过尺寸标准化，以适合 20x20 像素框，同时保持其纵横比，并在固定尺寸的图像中居中",开源,github,图像处理,视觉,传统机器学习和深度学习入门,svm、分类,压缩,gz,正常,,http://yann.lecun.com/exdb/mnist/,,"http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
 http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
 http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz

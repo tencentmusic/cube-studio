@@ -80,8 +80,8 @@ class Dataset_ModelView_base():
     base_order = ("id", "desc")
     order_columns=['id']
 
-    add_columns = ['name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','years','url','download_url','path','storage_size','entries_num','duration','price','status','icon']
-    show_columns = ['id','name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url','storage_size','entries_num','duration','price']
+    add_columns = ['name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','years','url','download_url','path','storage_size','entries_num','duration','price','status','icon','owner']
+    show_columns = ['id','name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url','storage_size','entries_num','duration','price','status','icon','owner']
     search_columns=['name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url']
     spec_label_columns = {
         "source_type":"来源类型",
@@ -99,22 +99,23 @@ class Dataset_ModelView_base():
         "entries_num":"条目数量",
         "duration":"文件时长",
         "price": "价格",
-        "icon": "示例图"
+        "icon": "示例图",
+        "icon_html":"示例图",
     }
 
     edit_columns = add_columns
-    list_columns = ['name','label','describe','source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path','storage_size','entries_num','duration','price','owner']
+    list_columns = ['icon_html','name','label','describe','source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path','storage_size','entries_num','duration','price','owner']
     cols_width = {
         "name": {"type": "ellip1", "width": 200},
-        "label": {"type": "ellip1", "width": 300},
-        "describe":{"type": "ellip1", "width": 300},
+        "label": {"type": "ellip2", "width": 250},
+        "describe":{"type": "ellip2", "width": 300},
         "field":{"type": "ellip1", "width": 100},
         "source_type":{"type": "ellip1", "width": 100},
         "source": {"type": "ellip1", "width": 100},
         "industry": {"type": "ellip1", "width": 100},
         "url_html": {"type": "ellip1", "width": 200},
         "download_url_html": {"type": "ellip1", "width": 200},
-        "path":{"type": "ellip1", "width": 200},
+        "path":{"type": "ellip2", "width": 200},
         "storage_class": {"type": "ellip1", "width": 100},
         "storage_size":{"type": "ellip1", "width": 100},
         "file_type":{"type": "ellip1", "width": 100},
@@ -124,8 +125,9 @@ class Dataset_ModelView_base():
         "duration": {"type": "ellip1", "width": 100},
         "price": {"type": "ellip1", "width": 100},
         "years": {"type": "ellip2", "width": 100},
-        "usage": {"type": "ellip1", "width": 100},
-        "research": {"type": "ellip1", "width": 100},
+        "usage": {"type": "ellip1", "width": 200},
+        "research": {"type": "ellip2", "width": 100},
+        "icon_html": {"type": "ellip1", "width": 100},
     }
 
     add_form_extra_fields = {
@@ -233,6 +235,10 @@ class Dataset_ModelView_base():
 
     import_data=True
     download_data=True
+
+    def pre_add(self,item):
+        if not item.owner:
+            item.owner=g.user.username
 
     # def post_list(self,items):
     #     flash(Markup('可批量删除不使用的数据集,可批量上传自产数据集'),category='info')
