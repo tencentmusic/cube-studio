@@ -349,7 +349,6 @@ def init():
             except Exception as e:
                 print(e)
                 db.session.rollback()
-
     try:
         print('begin init dataset')
         datasets = db.session.query(Dataset).all()  # 空白数据集才初始化
