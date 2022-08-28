@@ -261,7 +261,7 @@ class Workflow_ModelView(Workflow_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Workflow)
 
 
-appbuilder.add_view(Workflow_ModelView,"运行实例",href='/workflow_modelview/list/?_flt_2_name=&_flt_2_labels=',icon = 'fa-tasks',category = '训练')
+appbuilder.add_view_no_menu(Workflow_ModelView)
 
 # 添加api
 class Workflow_ModelView_Api(Workflow_ModelView_Base,MyappModelRestApi):
@@ -276,7 +276,6 @@ appbuilder.add_api(Workflow_ModelView_Api)
 
 
 
-# appbuilder.add_separator("训练")   # 在指定菜单栏下面的每个子菜单中间添加一个分割线的显示。
 #
 #
 # # list正在运行的tfjob

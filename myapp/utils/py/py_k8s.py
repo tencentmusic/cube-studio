@@ -593,7 +593,8 @@ class K8s():
 
 
     # @pysnooper.snoop()
-    def get_volume_mounts(self,volume_mount,username):
+    @staticmethod
+    def get_volume_mounts(volume_mount,username):
         k8s_volumes = []
         k8s_volume_mounts = []
         if volume_mount and ":" in volume_mount:

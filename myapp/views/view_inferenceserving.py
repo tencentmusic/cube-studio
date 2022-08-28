@@ -91,8 +91,8 @@ class InferenceService_ModelView_base():
 
     # add_columns = ['service_type','project','name', 'label','images','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host','hpa','metrics','health']
     add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path', 'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority', 'canary', 'shadow', 'host','inference_config',  'working_dir', 'command','volume_mount', 'env', 'ports', 'metrics', 'health','expand','sidecar']
-    show_columns = ['service_type','project', 'name', 'label','model_name', 'model_version', 'images', 'model_path', 'model_input', 'model_output', 'images', 'volume_mount','sidecar','working_dir', 'command', 'env', 'resource_memory',
-                    'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'host','hpa','priority', 'canary', 'shadow', 'health','model_status','expand','metrics','deploy_history','inference_config','metrics']
+    show_columns = ['service_type','project', 'name', 'label','model_name', 'model_version', 'images', 'model_path', 'images', 'volume_mount','sidecar','working_dir', 'command', 'env', 'resource_memory',
+                    'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'inference_host_url','hpa','priority', 'canary', 'shadow', 'health','model_status','expand','metrics','deploy_history','host','inference_config']
 
     edit_columns = add_columns
 
@@ -101,20 +101,19 @@ class InferenceService_ModelView_base():
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
 
-
-    list_columns = ['project','service_type','label','model_name_url','model_version','inference_host_url','ip','model_status','resource','creator','modified','operate_html']
+    list_columns = ['project','service_type','label','model_name_url','model_version','inference_host_url','ip','model_status','resource','replicas_html','creator','modified','operate_html']
     cols_width={
         "project":{"type": "ellip2", "width": 150},
-        "label": {"type": "ellip1", "width": 250},
+        "label": {"type": "ellip2", "width": 300},
         "service_type": {"type": "ellip2", "width": 100},
-        "model_name_url":{"type": "ellip2", "width": 300},
+        "model_name_url":{"type": "ellip2", "width": 250},
         "model_version": {"type": "ellip2", "width": 200},
         "inference_host_url": {"type": "ellip2", "width": 500},
         "ip": {"type": "ellip2", "width": 200},
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 350},
-        "resource": {"type": "ellip2", "width": 300},
+        "resource": {"type": "ellip2", "width": 250},
     }
     search_columns = ['name','created_by','project','service_type','label','model_name','model_version','model_path','host','model_status','resource_gpu']
 
@@ -128,9 +127,10 @@ class InferenceService_ModelView_base():
     for item in INFERNENCE_IMAGES:
         images += item
     service_type_choices= ['serving','tfserving','torch-server','onnxruntime','triton-server']
-    sepc_label_columns = {
+    spec_label_columns = {
         # "host": _("域名：测试环境test.xx，调试环境 debug.xx"),
-        "resource":"资源"
+        "resource":"资源",
+        "replicas_html":"副本数"
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
     add_form_extra_fields={
@@ -1063,7 +1063,7 @@ class InferenceService_ModelView(InferenceService_ModelView_base,MyappModelView)
     datamodel = SQLAInterface(InferenceService)
 
 
-appbuilder.add_view(InferenceService_ModelView,"推理服务",icon = 'fa-space-shuttle',category = '服务化')
+appbuilder.add_view_no_menu(InferenceService_ModelView)
 
 # 添加api
 class InferenceService_ModelView_Api(InferenceService_ModelView_base,MyappModelRestApi):

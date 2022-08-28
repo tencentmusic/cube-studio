@@ -689,33 +689,11 @@ class Myapp(BaseMyappView):
             return self.render_template('external_link.html', data=data)
 
 
-    # @expose('/schedule/node/<ip>')
-    # def schedule_node(self,ip):
-    #     all_node_json = resource_used['data']
-    #     for cluster_name in all_node_json:
-    #         nodes = all_node_json[cluster_name]
-    #         if ip in nodes:
-    #             clusters = conf.get('CLUSTERS', {})
-    #             cluster = clusters[cluster_name]
-    #             k8s_client = K8s(cluster.get('KUBECONFIG',''))
-    #             # 获取最新的节点信息
-    #             nodes = k8s_client.get_node(ip=ip)
-    #             if nodes:
-    #                 node = nodes[0]
-    #                 enable_train = node['labels'].get('train','true')
-    #                 k8s_client.label_node([ip],{"train":"false" if enable_train=='true' else "true"})
-    #                 break
-    #
-    #     return redirect('/myapp/home')
-
-
-    # from myapp import tracer
 
 
     # 机器学习首页资源弹窗
     def mlops_traffic(self,url):
-        if 1 or not node_resource_used['check_time'] or node_resource_used['check_time'] < (
-                datetime.datetime.now() - datetime.timedelta(minutes=10)):
+        if 1 or not node_resource_used['check_time'] or node_resource_used['check_time'] < (datetime.datetime.now() - datetime.timedelta(minutes=10)):
             clusters = conf.get('CLUSTERS', {})
             for cluster_name in clusters:
                 cluster = clusters[cluster_name]
@@ -960,7 +938,21 @@ class Myapp(BaseMyappView):
         url = request.values.get("url", type=str, default=None)
         print(url)
         if '/myapp/home' in url:
-            return self.mlops_traffic(url)
+            try:
+                return self.mlops_traffic(url)
+            except Exception as e:
+                print(e)
+                data = {
+                    'content': '未能成功获取负算力负载信息，请检查kubeconfig文件配置',
+                    'delay': 30000,
+                    'hit': True,
+                    'target': url,
+                    'title': '检查失败',
+                    'type': 'html',
+                }
+                flash('未能成功获取负算力负载信息', 'warning')
+                return jsonify(data)
+
 
         if url=='/train/total_resource':
             if g.user.username in conf.get('ADMIN_USER',''):

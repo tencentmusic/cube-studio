@@ -113,10 +113,12 @@ class MyCodeArea(object):
 
 from wtforms import widgets
 class MyBS3TextAreaFieldWidget(widgets.TextArea):
-    def __init__(self, rows=3,readonly=0):
+    def __init__(self, rows=3,readonly=0,expand_filed=None):  # 扩展成list类型字段
         self.rows=rows
         self.readonly = readonly
+        self.expand_filed=expand_filed
         return super(MyBS3TextAreaFieldWidget, self).__init__()
+
     def __call__(self, field, **kwargs):
         kwargs["class"] = u"form-control"
         kwargs["rows"] = self.rows
@@ -128,9 +130,11 @@ class MyBS3TextAreaFieldWidget(widgets.TextArea):
 
 
 class MyBS3TextFieldWidget(widgets.TextInput):
-    def __init__(self, value='',readonly=0):
+    def __init__(self, value='',readonly=0,is_date=False,is_date_range=False):
         self.value=value
         self.readonly = readonly
+        self.is_date=is_date
+        self.is_date_range=is_date_range
         return super(MyBS3TextFieldWidget, self).__init__()
 
     def __call__(self, field, **kwargs):

@@ -80,7 +80,7 @@ from flask_appbuilder.exceptions import FABException, InvalidOrderByColumnFABExc
 from flask_appbuilder.security.decorators import permission_name, protect,has_access
 from flask_appbuilder.api import BaseModelApi,BaseApi,ModelRestApi
 from sqlalchemy.sql import sqltypes
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db,event_logger,cache
 conf = app.config
 
 log = logging.getLogger(__name__)
@@ -501,10 +501,17 @@ class MyappModelRestApi(ModelRestApi):
             col_info['choices'] = column_field_kwargs.get('choices', [])
             if 'widget' in column_field_kwargs:
                 col_info['widget'] = column_field_kwargs['widget'].__class__.__name__.replace('Widget', '').replace('Field','').replace('My', '')
-                col_info['disable'] = column_field_kwargs['widget'].readonly if hasattr(column_field_kwargs['widget'],'readonly') else False
-                # if hasattr(column_field_kwargs['widget'],'can_input'):
-                #     print(field.name,column_field_kwargs['widget'].can_input)
-                col_info['ui-type'] = 'input-select' if hasattr(column_field_kwargs['widget'], 'can_input') and column_field_kwargs['widget'].can_input else False
+                if hasattr(column_field_kwargs['widget'],'readonly') and column_field_kwargs['widget'].readonly:
+                    col_info['disable'] = True
+                # 处理可选可填类型
+                if hasattr(column_field_kwargs['widget'], 'can_input') and column_field_kwargs['widget'].can_input:
+                    col_info['ui-type'] = 'input-select'
+                # 处理时间类型
+                if hasattr(column_field_kwargs['widget'], 'is_date') and column_field_kwargs['widget'].is_date:
+                    col_info['ui-type'] = 'datePicker'
+                # 处理时间类型
+                if hasattr(column_field_kwargs['widget'], 'is_date_range') and column_field_kwargs['widget'].is_date_range:
+                    col_info['ui-type'] = 'rangePicker'
 
             col_info = self.make_ui_info(col_info)
             ret.append(col_info)
@@ -654,7 +661,29 @@ class MyappModelRestApi(ModelRestApi):
                 search_filters[col]['type'] = column_field.field_class.__name__.replace('Field', '').replace('My','')
                 search_filters[col]['choices'] = column_field_kwargs.get('choices', [])
                 # 选-填 字段在搜索时为填写字段
-                search_filters[col]['ui-type'] = 'input' if hasattr(column_field_kwargs.get('widget',{}),'can_input') and column_field_kwargs['widget'].can_input else False
+                if hasattr(column_field_kwargs.get('widget', {}), 'can_input') and column_field_kwargs['widget'].can_input:
+                    search_filters[col]['ui-type'] = 'input'
+                # 对于那种配置使用过往记录作为可选值的参数进行处理
+                if hasattr(column_field_kwargs.get('widget', {}), 'conten2choices') and column_field_kwargs['widget'].conten2choices:
+                    # 先从缓存中拿结果
+                    field_contents = None
+                    try:
+                        field_contents = cache.get(self.datamodel.obj.__tablename__ + "_" + col)
+                    except Exception as e:
+                        print(e)
+                    # 缓存没有数据，再从数据库中读取
+                    if not field_contents:
+                        try:
+                            field_contents = db.session.query(getattr(self.datamodel.obj, col)).group_by(getattr(self.datamodel.obj, col)).all()
+                            field_contents = list(set([item[0] for item in field_contents]))
+                            cache.set(self.datamodel.obj.__tablename__ + "_" + col, field_contents,timeout=60 * 60)
+
+                        except Exception as e:
+                            print(e)
+
+                    if field_contents:
+                        search_filters[col]['ui-type'] = 'select'
+                        search_filters[col]['choices']= [[x, x] for x in list(set(field_contents))]
 
             search_filters[col] = self.make_ui_info(search_filters[col])
             # 多选字段在搜索时为单选字段
@@ -1530,7 +1559,7 @@ class MyappModelRestApi(ModelRestApi):
             if choices:
                 values=[]
                 for choice in choices:
-                    if len(choice)==2:
+                    if choice and len(choice)==2:
                         values.append({
                             "id":choice[0],
                             "value":choice[1]
@@ -1540,11 +1569,13 @@ class MyappModelRestApi(ModelRestApi):
                 ret['ui-type']='select2' if 'SelectMultiple' in ret['type'] else 'select'
 
         # 字符串
-        if ret.get('type','') in ['String',]:
-            if ret.get('widget','BS3Text')=='BS3Text':
-                ret['ui-type'] = 'input'
-            else:
-                ret['ui-type'] = 'textArea'
+        if ret.get('ui-type','') not in ['list','datePicker']:  # list,datePicker 类型，保持原样
+            if ret.get('type','') in ['String',]:
+                if ret.get('widget','BS3Text')=='BS3Text':
+                    ret['ui-type'] = 'input'
+                else:
+                    ret['ui-type'] = 'textArea'
+
         # 长文本输入
         if 'text' in ret.get('type','').lower():
             ret['ui-type'] = 'textArea'
@@ -1666,20 +1697,50 @@ class MyappModelRestApi(ModelRestApi):
                 ret['choices'] = column_field_kwargs.get('choices', [])
                 if 'widget' in column_field_kwargs:
                     ret['widget']=column_field_kwargs['widget'].__class__.__name__.replace('Widget','').replace('Field','').replace('My','')
-                    ret['disable']=column_field_kwargs['widget'].readonly if hasattr(column_field_kwargs['widget'],'readonly') else False
-                    ret['retry_info'] = column_field_kwargs['widget'].retry_info if hasattr(column_field_kwargs['widget'],'retry_info') else False
-                    # if hasattr(column_field_kwargs['widget'],'can_input'):
-                    #     print(field.name,column_field_kwargs['widget'].can_input)
-                    ret['ui-type'] = 'input-select' if hasattr(column_field_kwargs['widget'],'can_input') and column_field_kwargs['widget'].can_input else False
-                    # 对于那种配置使用过往记录作为可选值的参数进行处理
+                    # 处理禁止编辑
+                    if hasattr(column_field_kwargs['widget'], 'readonly') and column_field_kwargs['widget'].readonly:
+                        ret['disable']=True
+                    # 处理重新拉取info
+                    if hasattr(column_field_kwargs['widget'], 'retry_info') and column_field_kwargs['widget'].retry_info:
+                        ret['retry_info'] = True
+
+                    # 处理选填类型
+                    if hasattr(column_field_kwargs['widget'], 'can_input') and column_field_kwargs['widget'].can_input:
+                        ret['ui-type'] = 'input-select'
+
+                    # 处理时间类型
+                    if hasattr(column_field_kwargs['widget'], 'is_date') and column_field_kwargs['widget'].is_date:
+                        ret['ui-type'] = 'datePicker'
+                    # 处理时间类型
+                    if hasattr(column_field_kwargs['widget'], 'is_date_range') and column_field_kwargs['widget'].is_date_range:
+                        ret['ui-type'] = 'rangePicker'
+
+                    # 处理扩展字段，一个字段存储一个list的值
+                    if hasattr(column_field_kwargs['widget'], 'expand_filed') and column_field_kwargs['widget'].expand_filed:
+                        print(field.name)
+                        ret['ui-type'] = 'list'
+                        ret["info"]=self.columnsfield2info(column_field_kwargs['widget'].expand_filed)
+
+                    # 处理内容自动填充可取值，对于那种配置使用过往记录作为可选值的参数进行处理
                     if hasattr(column_field_kwargs['widget'], 'conten2choices') and column_field_kwargs['widget'].conten2choices:
+                        # 先从缓存中拿结果
+                        field_contents=None
                         try:
-                            field_contents = db.session.query(getattr(self.datamodel.obj,field.name)).group_by(getattr(self.datamodel.obj,field.name)).all()
-                            field_contents = [item[0] for item in field_contents]
-                            if field_contents:
-                                ret['choices']=[[x,x] for x in list(set(field_contents))]
+                            field_contents = cache.get(self.datamodel.obj.__tablename__+"_"+field.name)
                         except Exception as e:
                             print(e)
+                        # 缓存没有数据，再从数据库中读取
+                        if not field_contents:
+                            try:
+                                field_contents = db.session.query(getattr(self.datamodel.obj,field.name)).group_by(getattr(self.datamodel.obj,field.name)).all()
+                                field_contents = list(set([item[0] for item in field_contents]))
+                                cache.set(self.datamodel.obj.__tablename__+"_"+field.name, field_contents, timeout=60 * 60)
+
+                            except Exception as e:
+                                print(e)
+
+                        if field_contents:
+                            ret['choices'] = [[x, x] for x in list(set(field_contents))]
 
 
         # 补充数据库model中定义的是否必填

@@ -83,7 +83,7 @@ class RunHistory_ModelView_Base():
 class RunHistory_ModelView(RunHistory_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(RunHistory)
 
-appbuilder.add_view(RunHistory_ModelView,"定时调度记录",icon = 'fa-clock-o',category = '训练')
+appbuilder.add_view_no_menu(RunHistory_ModelView)
 
 
 

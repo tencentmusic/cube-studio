@@ -841,7 +841,7 @@ class Service_Pipeline_ModelView(Service_Pipeline_ModelView_Base,MyappModelView,
     # order_columns = ['changed_on']
 
 
-appbuilder.add_view(Service_Pipeline_ModelView,"推理pipeline",href="/service_pipeline_modelview/list/",icon = 'fa-sitemap',category = '服务化')
+appbuilder.add_view_no_menu(Service_Pipeline_ModelView)
 
 # 添加api
 class Service_Pipeline_ModelView_Api(Service_Pipeline_ModelView_Base,MyappModelRestApi):

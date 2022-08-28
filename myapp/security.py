@@ -338,8 +338,6 @@ class MyappSecurityManager(SecurityManager):
     @staticmethod
     def before_request():
         g.user = current_user
-        # if len(request.path)>7 and request.path[:7]!='/static' and g.user and hasattr(g.user, 'username'):
-        #     logging.info('------------%s(%s):%s'%(request.method,g.user.username,request.path))
 
     def __init__(self, appbuilder):
         super(MyappSecurityManager, self).__init__(appbuilder)
@@ -534,7 +532,7 @@ class MyappSecurityManager(SecurityManager):
 
     # 添加注册远程用户
     # @pysnooper.snoop()
-    def auth_user_remote_org_user(self, username,org_name='',password=''):
+    def auth_user_remote_org_user(self, username,org_name='',password='',email='',first_name='',last_name=''):
         if not username:
             return None
         # 查找用户
@@ -546,17 +544,22 @@ class MyappSecurityManager(SecurityManager):
         if user is None:
             user = self.add_org_user(
                 username=username,
-                first_name=username,
-                last_name=username,
+                first_name=first_name if first_name else username,
+                last_name=last_name if last_name else username,
                 password=password,
                 org=org_name,               # 添加组织架构
-                email=username + "@tencent.com",
+                email=username + "@tencent.com" if not email else email,
                 roles=[self.find_role(self.auth_user_registration_role),rtx_role] if self.find_role(self.auth_user_registration_role) else [rtx_role,]  #  org_role   添加gamma默认角色,    组织架构角色先不自动添加
             )
         elif not user.is_active:  # 如果用户未激活不允许接入
             print(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
             return None
         if user:
+            user.org = org_name if org_name else user.org
+            user.email = email if email else user.email
+            user.first_name = first_name if first_name else user.first_name
+            user.last_name = last_name if last_name else user.last_name
+
             gamma_role = self.find_role(self.auth_user_registration_role)
             if gamma_role and gamma_role not in user.roles:
                 user.roles.append(gamma_role)

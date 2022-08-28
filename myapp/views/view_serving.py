@@ -289,7 +289,7 @@ class Service_ModelView_base():
 class Service_ModelView(Service_ModelView_base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Service)
 
-appbuilder.add_view(Service_ModelView,"内部服务",icon = 'fa-internet-explorer',category = '服务化')
+appbuilder.add_view_no_menu(Service_ModelView)
 
 
 class Service_ModelView_Api(Service_ModelView_base,MyappModelRestApi):

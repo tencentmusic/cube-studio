@@ -235,7 +235,6 @@ class Project_ModelView_Base():
 #     datamodel = SQLAInterface(Project)
 #     label_title = '模板分类'
 #
-# appbuilder.add_view(Project_ModelView_job_template,"模板分类",icon = 'fa-tasks',category = '项目组',category_icon = 'fa-users')
 
 
 class Project_ModelView_job_template_Api(Project_ModelView_Base,MyappModelRestApi):
@@ -270,7 +269,6 @@ appbuilder.add_api(Project_ModelView_job_template_Api)
 #     datamodel = SQLAInterface(Project)
 #     label_title = '项目分组'
 #
-# appbuilder.add_view(Project_ModelView_org,"项目分组",icon = 'fa-sitemap',category = '项目组',category_icon = 'fa-users')
 #
 
 
@@ -308,7 +306,6 @@ appbuilder.add_api(Project_ModelView_org_Api)
 #     datamodel = SQLAInterface(Project)
 #     label_title = '模型分组'
 #
-# appbuilder.add_view(Project_ModelView_train_model,"模型分组",icon = 'fa-address-book-o',category = '项目组',category_icon = 'fa-users')
 #
 
 
