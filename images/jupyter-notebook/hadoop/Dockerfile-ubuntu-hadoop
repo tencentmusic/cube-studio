@@ -1,0 +1,28 @@
+FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base
+
+MAINTAINER hamawhite
+
+COPY hadoop/run-jupyter.sh /root/run-jupyter.sh
+# 拷贝examples
+COPY hadoop/examples/spark/* /examples/
+
+RUN apt install -y lsof
+
+# 修改python3的软链接
+RUN cd /usr/bin \
+    && rm -rf python3 \
+    && ln -s python3.8* python3
+
+# 下载apache spark安装包
+RUN mkdir -p /opt/third/hadoop/etc/hadoop \
+    && cd /opt/third \
+    && wget http://dlcdn.apache.org/spark/spark-3.1.3/spark-3.1.3-bin-hadoop3.2.tgz \
+    && tar -xvzf spark-3.1.3-bin-hadoop3.2.tgz \
+    && ln -s spark-3.1.3-bin-hadoop3.2 spark \
+    && rm -rf spark-3.1.3-bin-hadoop3.2.tgz
+
+# 创建spark-defaults.conf
+RUN cd /opt/third/spark/conf \
+    && mv spark-defaults.conf.template spark-defaults.conf
+
+ENTRYPOINT ["bash","/root/run-jupyter.sh"]
