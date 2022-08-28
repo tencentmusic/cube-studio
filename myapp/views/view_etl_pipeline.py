@@ -1742,7 +1742,6 @@ class ETL_Pipeline_ModelView(ETL_Pipeline_ModelView_Base,MyappModelView,DeleteMi
     # order_columns = ['changed_on']
 
 
-# appbuilder.add_view(ETL_Pipeline_ModelView,"数据计算",href="/etl_pipeline_modelview/list/",icon = 'fa-usb',category = 'data')
 appbuilder.add_view_no_menu(ETL_Pipeline_ModelView)
 
 

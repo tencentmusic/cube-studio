@@ -267,7 +267,7 @@ class Notebook_ModelView_Base():
         db.session.commit()
 
     def post_list(self,items):
-        flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。个人持久化目录在/mnt/%s/下'%g.user.username,category='warning')
+        flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/%s/下'%g.user.username,category='warning')
         # items.sort(key=lambda item:item.created_by.username==g.user.username,reverse=True)
         return items
 
@@ -549,7 +549,7 @@ class Notebook_ModelView_Base():
 class Notebook_ModelView(Notebook_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Notebook)
 # 添加视图和菜单
-appbuilder.add_view(Notebook_ModelView,"notebook",href="/notebook_modelview/list/?_flt_0_created_by=",icon = 'fa-file-code-o',category = '在线开发',category_icon = 'fa-code')
+appbuilder.add_view_no_menu(Notebook_ModelView)
 
 
 # 添加api

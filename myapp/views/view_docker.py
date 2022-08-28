@@ -348,7 +348,7 @@ class Docker_ModelView_Base():
 class Docker_ModelView(Docker_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Docker)
 
-appbuilder.add_view(Docker_ModelView,"镜像调试",href="/docker_modelview/list/",icon = 'fa-cubes',category = '在线开发',category_icon = 'fa-glass')
+appbuilder.add_view_no_menu(Docker_ModelView)
 
 # 添加api
 class Docker_ModelView_Api(Docker_ModelView_Base,MyappModelRestApi):

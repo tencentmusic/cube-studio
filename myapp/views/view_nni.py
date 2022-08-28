@@ -717,10 +717,9 @@ class NNI_ModelView(NNI_ModelView_Base,MyappModelView):
     conv = GeneralModelConverter(datamodel)
 
 
-appbuilder.add_separator("训练")   # 在指定菜单栏下面的每个子菜单中间添加一个分割线的显示。
 # 添加视图和菜单
 # appbuilder.add_view(NNI_ModelView,"nni超参搜索",icon = 'fa-shopping-basket',category = '超参搜索',category_icon = 'fa-share-alt')
-appbuilder.add_view(NNI_ModelView,"nni超参搜索",icon = 'fa-shopping-basket',category = '训练')
+appbuilder.add_view_no_menu(NNI_ModelView)
 # appbuilder.add_view_no_menu(NNI_ModelView)
 
 # 添加api

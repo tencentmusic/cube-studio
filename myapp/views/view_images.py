@@ -217,7 +217,7 @@ class Images_ModelView_Base():
 class Images_ModelView(Images_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Images)
 
-appbuilder.add_view(Images_ModelView,"模板镜像",href="/images_modelview/list/?_flt_2_name=",icon = 'fa-file-image-o',category = '训练')
+appbuilder.add_view_no_menu(Images_ModelView)
 
 
 class Images_ModelView_Api(Images_ModelView_Base,MyappModelRestApi):

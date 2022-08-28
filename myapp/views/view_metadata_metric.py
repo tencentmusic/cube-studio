@@ -86,8 +86,7 @@ class Metadata_metric_ModelView_base():
     label_title='指标'
     datamodel = SQLAInterface(Metadata_metric)
     base_permissions = ['can_add','can_show','can_edit','can_list','can_delete']
-    base_order = ("changed_on", "desc")
-    # order_columns = ['id','changed_on']
+    base_order = ("id", "desc")
     order_columns = ['id']
     search_columns=['metric_data_type','metric_responsible','app','name','label','describe','metric_type','metric_level','task_id','caliber']
     show_columns=['id','app','metric_data_type','name','label','describe','metric_type','metric_level','metric_dim','metric_responsible','caliber','task_id','public']
@@ -188,6 +187,7 @@ class Metadata_metric_ModelView_base():
 
     edit_form_extra_fields = add_form_extra_fields
     import_data=True
+    download_data=True
 
 
     def pre_upload(self,data):

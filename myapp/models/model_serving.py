@@ -202,6 +202,11 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
     @property
+    def replicas_html(self):
+        return "%s~%s"%(self.min_replicas,self.max_replicas)
+
+
+    @property
     def resource(self):
         return 'cpu:%s,memory:%s,gpu:%s'%(self.resource_cpu,self.resource_memory,self.resource_gpu)
 
