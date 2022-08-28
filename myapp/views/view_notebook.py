@@ -549,8 +549,7 @@ class Notebook_ModelView_Base():
 class Notebook_ModelView(Notebook_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Notebook)
 # 添加视图和菜单
-appbuilder.add_view(Notebook_ModelView,"notebook",href="/notebook_modelview/list/?_flt_0_created_by=",icon = 'fa-file-code-o',category = '在线开发',category_icon = 'fa-code')
-
+appbuilder.add_view_no_menu(Notebook_ModelView)
 
 # 添加api
 class Notebook_ModelView_Api(Notebook_ModelView_Base,MyappModelRestApi):
