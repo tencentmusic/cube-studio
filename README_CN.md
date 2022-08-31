@@ -47,7 +47,6 @@ https://github.com/tencentmusic/cube-studio/wiki
 | tfjob-train | tf分布式 | tf分布式训练，内部支持plain和runner两种方式  | 
 | tfjob-runner | tf分布式 | tf分布式-runner方式  | 
 | tfjob-plain | tf分布式 | tf分布式-plain方式  | 
-| kaldi-train | tf分布式 | kaldi音频分布式训练  | 
 | tf-model-evaluation | tf分布式 | tensorflow2.3分布式模型评估  | 
 | tf-offline-predict | tf分布式 | tf模型离线推理  | 
 | model-register | 模型服务化 | 注册模型 | 
