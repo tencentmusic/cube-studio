@@ -40,7 +40,6 @@ https://github.com/tencentmusic/cube-studio/wiki
 | xgb | 机器学习 | xgb模型训练 |
 | tfjob | 深度学习 | tf分布式训练，k8s云原生方式 | 
 | pytorchjob | 深度学习 | 	pytorch的多机多卡分布式训练  | 
-| horovod-train | 深度学习 | 	horovod的多机多卡分布式训练  | 
 | horovod | 深度学习 | horovod 的多机多卡分布式训练 | 
 | paddle | 深度学习 | 	paddle的多机多卡分布式训练  | 
 | mxnet | 深度学习 | mxnet的多机多卡分布式训练  | 
