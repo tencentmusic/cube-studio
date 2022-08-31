@@ -1,5 +1,6 @@
 
 bash init_node.sh
+mkdir -p ~/.kube/
 cp config ~/.kube/config
 mkdir kubeconfig && echo "" > kubeconfig/dev-kubeconfig
 curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && cp kubectl /usr/bin/ && mv kubectl /usr/local/bin/
