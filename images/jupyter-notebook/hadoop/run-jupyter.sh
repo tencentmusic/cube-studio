@@ -23,6 +23,13 @@ echo "spark.driver.bindAddress=0.0.0.0" >> ${SPARK_HOME}/conf/spark-defaults.con
 echo "spark.driver.host=${HOST_IP}" >>${SPARK_HOME}/conf/spark-defaults.conf
 
 
+# 设置环境变量到全局/etc/profile
+echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> /etc/profile
+echo 'export PATH=$PATH:$JAVA_HOME/bin' >> /etc/profile
+echo 'export M2_HOME=/opt/third/maven' >> /etc/profile
+echo 'export PATH=$PATH:$M2_HOME/bin' >> /etc/profile
+
+source /etc/profile
 source /opt/third/hadoop-env
 
 # 绑定到/data目录下

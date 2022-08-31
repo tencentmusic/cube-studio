@@ -6,7 +6,7 @@ docker push $hubhost/notebook:jupyter-ubuntu-cpu-base
 
 # 构建hadoop镜像
 docker build -t  $hubhost/notebook:jupyter-ubuntu-cpu-hadoop -f hadoop/Dockerfile-ubuntu-hadoop .
-docker push $hubhost/notebook:jupyter-ubuntu-cpu-base
+docker push $hubhost/notebook:jupyter-ubuntu-cpu-hadoop
 
 
 base_image=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
