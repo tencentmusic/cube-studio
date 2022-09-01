@@ -27,6 +27,7 @@ kubectl create -f kube-batch/deploy.yaml
 # 部署prometheus
 cd prometheus
 kubectl delete -f ./operator/operator-crd.yml
+sleep 5
 kubectl apply -f ./operator/operator-crd.yml
 kubectl apply -f ./operator/operator-rbac.yml
 kubectl wait crd/podmonitors.monitoring.coreos.com --for condition=established --timeout=60s
@@ -53,6 +54,7 @@ kubectl delete configmap grafana-config all-grafana-dashboards --namespace=monit
 kubectl create configmap grafana-config --from-file=./grafana/grafana.ini --namespace=monitoring
 kubectl create configmap all-grafana-dashboards --from-file=./grafana/dashboard --namespace=monitoring
 kubectl delete -f ./grafana/grafana-dp.yml
+sleep 5
 kubectl apply -f ./grafana/grafana-dp.yml
 kubectl apply -f ./service-discovery/kube-controller-manager-svc.yml
 kubectl apply -f ./service-discovery/kube-scheduler-svc.yml
@@ -62,6 +64,7 @@ kubectl apply -f ./prometheus/prometheus-rbac.yml
 kubectl apply -f ./prometheus/prometheus-svc.yml
 kubectl wait crd/prometheuses.monitoring.coreos.com --for condition=established --timeout=60s
 kubectl delete -f ./prometheus/prometheus-main.yml
+sleep 5
 kubectl apply -f ./prometheus/pv-pvc-hostpath.yaml
 kubectl apply -f ./prometheus/prometheus-main.yml
 kubectl apply -f ./servicemonitor/alertmanager-sm.yml
