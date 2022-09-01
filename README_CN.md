@@ -19,7 +19,7 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 # 开源共建
 
- 学习、部署、体验、开源建设 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>， [共建指南](https://github.com/tencentmusic/cube-studio/wiki/%E5%85%B1%E5%BB%BA%E6%8C%87%E5%8D%97)
+ 学习、部署、体验、开源建设 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>， [共建指南](https://github.com/tencentmusic/cube-studio/blob/master/CONTRIBUTING.md)
 
 <img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
  
@@ -40,7 +40,6 @@ https://github.com/tencentmusic/cube-studio/wiki
 | xgb | 机器学习 | xgb模型训练 |
 | tfjob | 深度学习 | tf分布式训练，k8s云原生方式 | 
 | pytorchjob | 深度学习 | 	pytorch的多机多卡分布式训练  | 
-| horovod-train | 深度学习 | 	horovod的多机多卡分布式训练  | 
 | horovod | 深度学习 | horovod 的多机多卡分布式训练 | 
 | paddle | 深度学习 | 	paddle的多机多卡分布式训练  | 
 | mxnet | 深度学习 | mxnet的多机多卡分布式训练  | 
@@ -48,7 +47,6 @@ https://github.com/tencentmusic/cube-studio/wiki
 | tfjob-train | tf分布式 | tf分布式训练，内部支持plain和runner两种方式  | 
 | tfjob-runner | tf分布式 | tf分布式-runner方式  | 
 | tfjob-plain | tf分布式 | tf分布式-plain方式  | 
-| kaldi-train | tf分布式 | kaldi音频分布式训练  | 
 | tf-model-evaluation | tf分布式 | tensorflow2.3分布式模型评估  | 
 | tf-offline-predict | tf分布式 | tf模型离线推理  | 
 | model-register | 模型服务化 | 注册模型 | 
