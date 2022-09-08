@@ -58,6 +58,7 @@ print(k8s_volume_mounts)
 GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
 GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
 print(GPU_TYPE,GPU_RESOURCE)
+schedulerName = os.getenv('SCHEDULER', 'default-scheduler')
 
 
 
@@ -130,7 +131,7 @@ def make_sparkjob(name,**kwargs):
             "nodeSelector":KFJ_TASK_NODE_SELECTOR,
             "sparkVersion": "3.1.1",
             "pythonVersion":"3",
-            "batchScheduler": "kube-batch",
+            # "batchScheduler": schedulerName,
             "restartPolicy": {
                 "type": "Never"
             },

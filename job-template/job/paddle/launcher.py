@@ -58,6 +58,7 @@ print(k8s_volume_mounts)
 GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
 GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
 print(GPU_TYPE,GPU_RESOURCE)
+schedulerName = os.getenv('SCHEDULER', 'default-scheduler')
 
 
 
@@ -158,7 +159,7 @@ def make_paddlejob(name,num_workers,num_ps,image,working_dir,command):
                 }
             },
             "spec": {
-                # "schedulerName": "kube-batch",
+                "schedulerName": schedulerName,
                 "restartPolicy": "Never",
                 "volumes": k8s_volumes,
                 "imagePullSecrets": [
