@@ -19,7 +19,7 @@ services:
 #      - ./data/mysql:/var/lib/mysql
 
   frontend:
-    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01
+    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2022.09.01
     restart: unless-stopped
     ports:
       - '80:80'
