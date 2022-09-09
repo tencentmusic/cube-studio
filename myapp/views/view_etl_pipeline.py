@@ -116,7 +116,7 @@ class ETL_Task_ModelView_Base():
             "created_by": g.user.id
         }
     def post_list(self, items):
-        flash('此部分仅提供任务流编排能力，管理员自行对接调度Azkaban/Oozie/Airflow/argo等调度平台能力','success')
+        flash('此部分仅提供任务流编排能力，管理员自行对接调度Azkaban/Oozie/Airflow/argo等调度平台能力','warning')
         return items
     show_columns = ['template','name','describe','etl_task_id','created_by','changed_by','created_on','changed_on','task_args']
 
@@ -258,7 +258,7 @@ class ETL_Pipeline_ModelView_Base():
     # 删除前先把下面的task删除了
     # @pysnooper.snoop()
     def pre_delete(self, pipeline):
-        flash('此处仅删除本地元数据，请及时删除远程任务','success')
+        flash('此处仅删除本地元数据，请及时删除远程任务','warning')
         # 删除本地
         exist_tasks = db.session.query(ETL_Task).filter_by(etl_pipeline_id=pipeline.id).all()
         for exist_task in exist_tasks:
@@ -1767,7 +1767,7 @@ class ETL_Pipeline_ModelView_Api(ETL_Pipeline_ModelView_Base,MyappModelRestApi):
         }
 
     def post_list(self, items):
-        flash('此部分仅提供任务流编排能力，管理员自行对接调度Azkaban/Oozie/Airflow/argo等调度平台能力','success')
+        flash('此部分仅提供任务流编排能力，管理员自行对接调度Azkaban/Oozie/Airflow/argo等调度平台能力','warning')
         return items
 
 appbuilder.add_api(ETL_Pipeline_ModelView_Api)

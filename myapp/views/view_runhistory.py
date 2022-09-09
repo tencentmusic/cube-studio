@@ -61,7 +61,7 @@ class RunHistory_ModelView_Base():
     datamodel = SQLAInterface(RunHistory)
     base_order = ('id', 'desc')
     order_columns = ['id']
-
+    base_permissions = ['can_show', 'can_list', 'can_delete']
     list_columns = ['pipeline_url','creator','created_on','execution_date','status_url','log','history']
     cols_width={
         "pipeline_url": {"type": "ellip2", "width": 400},

@@ -77,7 +77,7 @@ class Crd_ModelView_Base():
     list_columns = ['name','namespace_url','create_time','status','username','stop']
     show_columns = ['name','namespace','create_time','status','annotations_html','labels_html','spec_html','status_more_html','info_json_html']
     order_columns = ['id']
-
+    base_permissions = ['can_show', 'can_list', 'can_delete']
     # base_permissions = ['list','delete','show']
     # label_columns = {
     #     "annotations_html": _("Annotations"),
