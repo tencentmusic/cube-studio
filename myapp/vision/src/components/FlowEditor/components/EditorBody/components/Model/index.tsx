@@ -15,6 +15,7 @@ import { selectElements, updateElements } from '@src/models/element';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { updateTaskList, updateTaskId, selectTaskId } from '@src/models/task';
 import style from './style';
+import { Switch } from 'antd';
 
 interface ModelProps {
   model: any;
@@ -287,6 +288,13 @@ const Model: React.FC<ModelProps> = props => {
             value={task?.retry || 0}
           />
           <div className={style.splitLine}></div>
+
+          <div style={{ fontWeight: 600, padding: '5px 0px' }}>是否跳过</div>
+
+          <Switch checkedChildren="是" unCheckedChildren="否" checked={!!task?.skip} onChange={(checked) => {
+            handleOnChange('skip', checked);
+          }} />
+          <div className={style.splitLine}></div>
           {/* 模板的参数动态渲染 */}
           {Object.keys(templateArgs).reduce((acc, cur) => {
             const current = templateArgs[cur];
@@ -320,48 +328,48 @@ const Model: React.FC<ModelProps> = props => {
                       <div className={style.argsDescription} dangerouslySetInnerHTML={{ __html: args.describe }}></div>
                     </>
                   ) : (
-                    <TextField
-                      onRenderLabel={() => {
-                        return (
-                          <div className={style.textLabelStyle}>
-                            {`${key}`}
-                            {args.type === 'json' ? (
-                              <ActionButton
-                                iconProps={{ iconName: 'FullWidthEdit' }}
-                                onClick={() => {
-                                  dispatch(
-                                    updateKeyValue({
-                                      key,
-                                      value: keyValue,
-                                    }),
-                                  );
-                                  dispatch(updateShowEditor(true));
-                                }}
-                              >
-                                编辑
-                              </ActionButton>
-                            ) : null}
-                          </div>
-                        );
-                      }}
-                      onRenderDescription={() => {
-                        return (
-                          <div
-                            className={style.argsDescription}
-                            dangerouslySetInnerHTML={{ __html: args.describe }}
-                          ></div>
-                        );
-                      }}
-                      multiline={args.type !== 'str'}
-                      autoAdjustHeight={args.type !== 'str'}
-                      onChange={(event: FormEvent, value?: string) => {
-                        handleOnChange(key, value ? value : '', args.type);
-                      }}
-                      value={keyValue}
-                      required={args.require === 1}
-                      disabled={args.editable !== 1 || args.type === 'json'}
-                    />
-                  )}
+                      <TextField
+                        onRenderLabel={() => {
+                          return (
+                            <div className={style.textLabelStyle}>
+                              {`${key}`}
+                              {args.type === 'json' ? (
+                                <ActionButton
+                                  iconProps={{ iconName: 'FullWidthEdit' }}
+                                  onClick={() => {
+                                    dispatch(
+                                      updateKeyValue({
+                                        key,
+                                        value: keyValue,
+                                      }),
+                                    );
+                                    dispatch(updateShowEditor(true));
+                                  }}
+                                >
+                                  编辑
+                                </ActionButton>
+                              ) : null}
+                            </div>
+                          );
+                        }}
+                        onRenderDescription={() => {
+                          return (
+                            <div
+                              className={style.argsDescription}
+                              dangerouslySetInnerHTML={{ __html: args.describe }}
+                            ></div>
+                          );
+                        }}
+                        multiline={args.type !== 'str'}
+                        autoAdjustHeight={args.type !== 'str'}
+                        onChange={(event: FormEvent, value?: string) => {
+                          handleOnChange(key, value ? value : '', args.type);
+                        }}
+                        value={keyValue}
+                        required={args.require === 1}
+                        disabled={args.editable !== 1 || args.type === 'json'}
+                      />
+                    )}
                 </React.Fragment>
               );
             });

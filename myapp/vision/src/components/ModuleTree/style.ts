@@ -106,7 +106,7 @@ const itemFolderNode = mergeStyles({
   cursor: 'pointer',
   padding: '7px 15px',
   border: '1px solid transparent',
-  height: 16,
+  // height: 16,
   fontFamily: 'Segoe UI,sans-serif',
   fontSize: 12,
   lineHeight: 16,

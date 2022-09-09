@@ -104,8 +104,8 @@ class Task_ModelView_Base():
         "monitoring": {"type": "ellip2", "width": 300},
         "expand": {"type": "ellip2", "width": 300},
     }
-    show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','command','overwrite_entrypoint','working_dir', 'args_html','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_by','changed_by','created_on','changed_on','monitoring_html']
-    add_columns = ['job_template', 'name', 'label', 'pipeline', 'volume_mount','command','working_dir']
+    show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','command','overwrite_entrypoint','working_dir', 'args_html','resource_memory','resource_cpu','resource_gpu','timeout','retry','skip','created_by','changed_by','created_on','changed_on','monitoring_html']
+    add_columns = ['job_template', 'name', 'label', 'pipeline', 'volume_mount','command','working_dir','skip']
     edit_columns = add_columns
     base_order = ('id','desc')
     order_columns = ['id']
@@ -752,7 +752,6 @@ class Task_ModelView_Base():
 class Task_ModelView(Task_ModelView_Base,CompactCRUDMixin,MyappModelView):
     datamodel = SQLAInterface(Task)
 
-# appbuilder.add_view(Task_ModelView,"Task",icon = 'fa-address-book-o',category = 'job',category_icon = 'fa-envelope')
 appbuilder.add_view_no_menu(Task_ModelView)
 
 
@@ -762,9 +761,9 @@ class Task_ModelView_Api(Task_ModelView_Base,MyappModelRestApi):
     route_base = '/task_modelview/api'
     # list_columns = ['name','label','job_template_url','volume_mount','debug']
     list_columns =['name', 'label','pipeline', 'job_template','volume_mount','node_selector','command','overwrite_entrypoint','working_dir', 'args','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_by','changed_by','created_on','changed_on','monitoring','expand']
-    add_columns = ['name','label','job_template','pipeline','working_dir','command','args','volume_mount','node_selector','resource_memory','resource_cpu','resource_gpu','timeout','retry','expand']
+    add_columns = ['name','label','job_template','pipeline','working_dir','command','args','volume_mount','node_selector','resource_memory','resource_cpu','resource_gpu','timeout','retry','skip','expand']
     edit_columns = add_columns
-    show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','node_selector','command','overwrite_entrypoint','working_dir', 'args','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_by','changed_by','created_on','changed_on','monitoring','expand']
+    show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','node_selector','command','overwrite_entrypoint','working_dir', 'args','resource_memory','resource_cpu','resource_gpu','timeout','retry','skip','created_by','changed_by','created_on','changed_on','monitoring','expand']
 
 
 appbuilder.add_api(Task_ModelView_Api)

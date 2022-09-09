@@ -455,6 +455,10 @@ def dag_to_pipeline(pipeline,dbsession,**kwargs):
             if resource_gpu and core.get_gpu(resource_gpu)[0]>0:
                 ops.set_gpu_limit(core.get_gpu(resource_gpu)[0])
 
+        if task.skip:
+            ops.command = ["echo", "skip"]
+            ops.arguments=None
+            ops._container.resources=None
 
         all_ops[task_name]=ops
 
@@ -609,11 +613,11 @@ class Pipeline_ModelView_Base():
         "pipeline_url":{"type": "ellip2", "width": 500},
         "modified": {"type": "ellip2", "width": 150}
     }
-    add_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','alert_status','alert_user','parameter']
-    show_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','dag_json','pipeline_file','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand','parameter']
+    add_columns = ['project','name','describe']
+    edit_columns = ['project', 'name', 'describe', 'schedule_type', 'cron_time', 'depends_on_past', 'max_active_runs','expired_limit', 'parallelism', 'global_env', 'alert_status', 'alert_user', 'parameter','cronjob_start_time']
+    show_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','expired_limit','parallelism','global_env','dag_json','pipeline_file','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand','parameter','alert_status','alert_user','cronjob_start_time']
     # show_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','dag_json','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand']
     search_columns = ['id', 'created_by', 'name', 'describe', 'schedule_type', 'project']
-    edit_columns = add_columns
 
 
     base_filters = [["id", Pipeline_Filter, lambda: []]]
@@ -830,7 +834,8 @@ class Pipeline_ModelView_Base():
         self.pipeline_args_check(item)
         item.create_datetime=datetime.datetime.now()
         item.change_datetime = datetime.datetime.now()
-        item.parameter = json.dumps({"cronjob_start_time":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}, indent=4, ensure_ascii=False)
+        item.cronjob_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        item.parameter = json.dumps({}, indent=4, ensure_ascii=False)
 
 
 
@@ -853,9 +858,7 @@ class Pipeline_ModelView_Base():
             item.parameter = '{}'
 
         if (item.schedule_type=='crontab' and self.src_item_json.get("schedule_type")=='once') or (item.cron_time!=self.src_item_json.get("cron_time",'')):
-            parameter = json.loads(item.parameter if item.parameter else '{}')
-            parameter.update({"cronjob_start_time":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
-            item.parameter = json.dumps(parameter,indent=4,ensure_ascii=False)
+            item.cronjob_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # 限制提醒
         if item.schedule_type=='crontab':
@@ -1244,8 +1247,8 @@ class Pipeline_ModelView_Api(Pipeline_ModelView_Base,MyappModelRestApi):
     route_base = '/pipeline_modelview/api'
     # show_columns = ['project','name','describe','namespace','schedule_type','cron_time','node_selector','depends_on_past','max_active_runs','parallelism','global_env','dag_json','pipeline_file_html','pipeline_argo_id','version_id','run_id','created_by','changed_by','created_on','changed_on','expand']
     list_columns = ['id','project','pipeline_url','creator','modified']
-    add_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','global_env','alert_status','expand']
-    edit_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','dag_json','global_env','alert_status','expand','created_by','parameter']
+    add_columns = ['project','name','describe']
+    edit_columns = ['project','name','describe','schedule_type','cron_time','depends_on_past','max_active_runs','parallelism','dag_json','global_env','alert_status','alert_user','expand','parameter','cronjob_start_time']
 
     related_views = [Task_ModelView_Api,]
 

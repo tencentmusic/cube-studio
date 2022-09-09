@@ -556,7 +556,10 @@ def make_timerun_config(task):
 
             pipelines = dbsession.query(Pipeline).filter(Pipeline.schedule_type=='crontab').all()  # 获取model记录
             for pipeline in pipelines:  # 循环发起每一个调度
-                start_at = datetime.datetime.strptime(pipeline.cronjob_start_time,'%Y-%m-%d %H:%M:%S')
+                if pipeline.cronjob_start_time:
+                    start_at = datetime.datetime.strptime(pipeline.cronjob_start_time,'%Y-%m-%d %H:%M:%S')
+                else:
+                    start_at=datetime.datetime.now()
 
                 # 缩小指定范围，认为最后一个任务记录之前是调度记录都是已经产生的
                 last_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id==pipeline.id).order_by(RunHistory.id.desc()).first()

@@ -190,6 +190,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     global_env = Column(String(500),default='')
     schedule_type = Column(Enum('once', 'crontab'),nullable=False,default='once')
     cron_time = Column(String(100))        # 调度周期
+    cronjob_start_time = Column(String(300), default='')
     pipeline_file=Column(Text(65536),default='')
     pipeline_argo_id = Column(String(100))
     version_id = Column(String(100))
@@ -217,14 +218,6 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def run_pipeline(self):
         pipeline_run_url = "/pipeline_modelview/run_pipeline/" +str(self.id)
         return Markup(f'<a target=_blank href="{pipeline_run_url}">run</a>')
-
-
-    @property
-    def cronjob_start_time(self):
-        cronjob_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        if self.parameter:
-            return json.loads(self.parameter).get('cronjob_start_time',cronjob_start_time)
-        return cronjob_start_time
 
 
     @property
@@ -519,7 +512,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     outputs = Column(Text,default='{}')   # task的输出，会将输出复制到minio上   {'prediction': '/output.txt'}
     monitoring = Column(Text,default='{}')  # 该任务的监控信息
     expand = Column(Text(65536), default='')
-    # active = Column(Boolean,default=True)  # 是否激活，可以先配置再运行跑
+    skip = Column(Boolean,default=False)  # 是否跳过
     export_parent = "pipeline"
 
 

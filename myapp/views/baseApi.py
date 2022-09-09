@@ -387,9 +387,10 @@ class MyappModelRestApi(ModelRestApi):
 
     def _init_model_schemas(self):
         # Create Marshmalow schemas if one is not specified
-        for column_name in self.edit_columns:
-            if column_name not in self.add_columns:
-                self.add_columns.append(column_name)
+
+        # for column_name in self.edit_columns:
+        #     if column_name not in self.add_columns:
+        #         self.add_columns.append(column_name)
 
         if self.list_model_schema is None:
             self.list_model_schema = self.model2schemaconverter.convert(
