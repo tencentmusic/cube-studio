@@ -260,7 +260,7 @@ spec:
         emptyDir: {}
 ---
 # Source: prometheus-adapter/templates/custom-metrics-apiservice.yaml
-apiVersion: apiregistration.k8s.io/v1beta1
+apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
   labels:
