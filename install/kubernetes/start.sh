@@ -92,6 +92,7 @@ kubectl apply -f gpu/dcgm-exporter-sm.yaml
 kubectl create serviceaccount frameworkcontroller --namespace kubeflow
 kubectl create clusterrolebinding frameworkcontroller-kubeflow --clusterrole=cluster-admin --user=system:serviceaccount:kubeflow:frameworkcontroller
 kubectl create -f frameworkcontroller/frameworkcontroller-with-default-config.yaml
+sleep 5
 kubectl wait crd/frameworks.frameworkcontroller.microsoft.com --for condition=established --timeout=60s
 
 kubectl create serviceaccount frameworkbarrier --namespace pipeline
