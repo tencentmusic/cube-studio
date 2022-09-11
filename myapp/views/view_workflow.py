@@ -165,7 +165,7 @@ class Crd_ModelView_Base():
     def stop(self, crd_id):
         crd = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
         self.base_muldelete([crd])
-        flash('清理完成','warning')
+        flash('清理完成','success')
         self.update_redirect()
         return redirect(self.get_redirect())
 
@@ -240,7 +240,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         workflow = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
         self.delete_workflow(workflow)
 
-        flash('清理完成','warning')
+        flash('清理完成','success')
         url = conf.get('MODEL_URLS',{}).get('workflow','')
         return redirect(url)
 

@@ -1,7 +1,7 @@
 # 所需要的所有镜像
 kubeflow = [
     'mysql:5.7',
-    'bitnami/redis',
+    'bitnami/redis:4.0.14',
     'metacontroller/metacontroller:v0.3.0',
     'alpine:3.10',
     "busybox",

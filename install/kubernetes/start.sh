@@ -1,7 +1,7 @@
 
 bash init_node.sh
-mkdir ~/.kube && cp config ~/.kube/config && cp ~/.kube/config /etc/kubernetes/admin.conf
-mkdir kubeconfig && echo "" > kubeconfig/dev-kubeconfig
+mkdir -p ~/.kube && cp config ~/.kube/config && cp ~/.kube/config /etc/kubernetes/admin.conf
+mkdir -p kubeconfig && echo "" > kubeconfig/dev-kubeconfig
 curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && cp kubectl /usr/bin/ && mv kubectl /usr/local/bin/
 node=`kubectl  get node -o wide |grep $1 |awk '{print $1}'| head -n 1`
 kubectl label node $node train=true cpu=true notebook=true service=true org=public istio=true kubeflow=true kubeflow-dashboard=true mysql=true redis=true monitoring=true logging=true --overwrite

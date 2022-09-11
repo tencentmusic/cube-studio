@@ -172,7 +172,7 @@ class Service_ModelView_base():
 
     def pre_delete(self, item):
         self.delete_old_service(item.name,item.project.cluster)
-        flash('服务已清理完成', category='warning')
+        flash('服务已清理完成', category='success')
 
     @expose('/clear/<service_id>', methods=['POST', "GET"])
     def clear(self, service_id):

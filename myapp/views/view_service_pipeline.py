@@ -514,7 +514,7 @@ class Service_Pipeline_ModelView_Base():
         namespace = conf.get('SERVICE_PIPELINE_NAMESPACE')
         k8s_client.delete_deployment(namespace=namespace, name=service_pipeline.name)
 
-        flash('服务清理完成', category='warning')
+        flash('服务清理完成', category='success')
         return redirect('/service_pipeline_modelview/list/')
 
 
