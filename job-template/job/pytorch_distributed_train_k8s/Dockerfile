@@ -10,7 +10,6 @@ RUN apt install -y python3.6-dev python3-pip libsasl2-dev libpq-dev \
 
 RUN wget https://github.com/stern/stern/releases/download/v1.21.0/stern_1.21.0_linux_amd64.tar.gz && tar -zxvf stern_1.21.0_linux_amd64.tar.gz && rm stern_1.21.0_linux_amd64.tar.gz && chmod +x stern &&  mv stern /usr/bin/stern
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
-# kubectl logs -f --tail 10 -n pipeline --timestamps --log-flush-frequency=5s --ignore-errors=true --selector tf-job-name=tfjob-rectabdeepfm-gbdt-54bb36ca58cd428d9b0e97d7ba652e
 
 # 安装中文
 RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8

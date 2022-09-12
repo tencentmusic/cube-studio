@@ -22,7 +22,7 @@ kubectl create -f redis/service.yaml
 # 如果自己需要使用pv来保存redis队列数据，可以修改master.yaml
 kubectl create -f redis/master.yaml
 # 部署kube-batch
-kubectl create -f kube-batch/deploy.yaml
+#kubectl create -f kube-batch/deploy.yaml
 
 # 部署prometheus
 cd prometheus
