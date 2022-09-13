@@ -3,7 +3,9 @@
 
 # 第一阶段发展目标：
 
-1、算法：视觉、文本、语音、搜广推、金融 开源 算法的集成，能更方便的体验使用开源算法。包括算法任务模板(job-template)，算法全自动建模流程(pipeline)，算法推理服务(service)
+1、算法：传统机器学习、视觉、文本、语音、搜广推、金融 开源 算法的集成，能更方便的体验使用开源算法。包括算法任务模板(job-template)，算法全自动建模流程(pipeline)，算法推理服务(service)。  
+
+ - 1.1、notebook集成pandas、matplotlib、pyecharts、xx
 
 2、平台开发：数据管理的集成(数据标注/特征平台)，平台公有化/私有化saas版，数据闭环(离线/实时训练闭环)
 
@@ -36,7 +38,24 @@
 
 # 汇总社区需求
 
-算法：
+aihub：
+
+ - 大数据功能(jupyter形式):
+   - hadoop基础客户端能力环境，sqoop，hbase，hdfs
+   - 查询能力：sparksql查询 impala查询，presto查询，clickhouse查询，mysql查询，postgresql查询，
+   - 分析能力：flink实时，numpy、pandas、百G大数据单机数据分析能力Arrow、vaex、dask等
+   - 可视化的能力
+
+ - 传统机器学习（jupyter形式）：
+   -  基础技能：pandas，matplotlib，pyecharts，
+   - 关联挖掘：关联分析（Apriori、FP-growth）
+   - 分类：决策树（ID3、C4.5、CART）、K最近邻算法(KNN)、kd树、极大似然估计、EM算法、文档分类器，朴素贝叶斯分类器，费舍尔分类器、线性函数、线性回归、正则化、逻辑分类/逻辑回归/一般线性回归、支持向量机SVM、核方法、集成学习（Bagging、Boosting、RF、AdaBoost、GBDT、xgboost）、GBDT算法、XGBOOST算法、CTR/CVR中的FM、FFM算法、LightGBM算法
+   - 聚类：层次聚类、BIRCH聚类、k均值聚类、k中心点聚类、DBSCAN密度聚类
+   - 图论：最小生成树（MST）的Prim算法和Kruskal算法
+   - 搜索引擎：
+
+
+
 
  - 视觉：yolo相关模型、darknet相关模型、PaddleSeg 图像分割，orc相关模型，等训练和推理支持
 
