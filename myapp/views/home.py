@@ -750,8 +750,7 @@ class Myapp(BaseMyappView):
         message = ''
         td_html = '<td style="border: 1px solid black;padding: 10px">%s</th>'
         message += "<tr>%s %s %s %s %s %s %s<tr>" % (
-        td_html % "集群", td_html % "资源组(监控)", td_html % "机器", td_html % "机型", td_html % "cpu占用率", td_html % "内存占用率",
-        td_html % "gpu占用率")
+        td_html % "集群", td_html % "资源组(监控)", td_html % "机器", td_html % "机型", td_html % "cpu占用率", td_html % "内存占用率",td_html % "gpu占用率")
         global_cluster_load = {}
         for cluster_name in all_node_json:
             global_cluster_load[cluster_name] = {
@@ -805,8 +804,7 @@ class Myapp(BaseMyappView):
                     td_html % cluster_name,
                     td_html % ('<a target="blank" href="%s">%s</a>' % (grafana_url + org, org)),
                     td_html % ip_html,
-                    td_html % (
-                        'gpu/' + nodes[ip]['labels'].get('gpu-type', '') if 'gpu' in nodes[ip]['labels'] else 'cpu'),
+                    td_html % ('gpu/' + nodes[ip]['labels'].get('gpu-type', '') if 'gpu' in nodes[ip]['labels'] else 'cpu'),
                     td_html % ("cpu:%s/%s" % (nodes[ip]['used_cpu'], nodes[ip]['cpu'])),
                     td_html % ("mem:%s/%s" % (nodes[ip]['used_memory'], nodes[ip]['memory'])),
                     td_html % ("gpu:%s/%s" % (nodes[ip]['used_gpu'], nodes[ip]['gpu'])),
@@ -860,23 +858,32 @@ class Myapp(BaseMyappView):
                         all_tasks_json[cluster_name][namespace]={}
                         all_pods = k8s_client.get_pods(namespace=namespace)
                         for pod in all_pods:
+                            org = pod['node_selector'].get("org", 'public')
+                            if org not in all_tasks_json[cluster_name][namespace]:
+                                all_tasks_json[cluster_name][namespace][org]={}
                             if pod['status'] == 'Running':
                                 user = pod['labels'].get('user',pod['labels'].get('username',pod['labels'].get('run-rtx',pod['labels'].get('rtx-user',''))))
                                 if user:
-                                    all_tasks_json[cluster_name][namespace][pod['name']] = {}
-                                    all_tasks_json[cluster_name][namespace][pod['name']]['username'] = user
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']] = {}
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['username'] = user
                                     # print(namespace,pod)
-                                    all_tasks_json[cluster_name][namespace][pod['name']]['request_memory']=pod['memory']
-                                    all_tasks_json[cluster_name][namespace][pod['name']]['request_cpu']=pod['cpu']
-                                    all_tasks_json[cluster_name][namespace][pod['name']]['request_gpu']=pod['gpu']
-                                    all_tasks_json[cluster_name][namespace][pod['name']]['namespace']=namespace
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['request_memory']=pod['memory']
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['request_cpu']=pod['cpu']
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['request_gpu']=pod['gpu']
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_memory'] = '0'
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_cpu'] = '0'
+                                    # print(namespace,org,pod['name'])
 
                         # 获取pod的资源使用
                         all_pods_metrics=k8s_client.get_pod_metrics(namespace=namespace)
                         for pod in all_pods_metrics:
-                            if pod['name'] in all_tasks_json[cluster_name][namespace]:
-                                all_tasks_json[cluster_name][namespace][pod['name']]['used_memory']=pod['memory']
-                                all_tasks_json[cluster_name][namespace][pod['name']]['used_cpu']=pod['cpu']
+                            for org in all_tasks_json[cluster_name][namespace]:
+                                if pod['name'] in all_tasks_json[cluster_name][namespace][org]:
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_memory']=pod['memory']
+                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_cpu']=pod['cpu']
+                                    # print(namespace,org,pod['name'])
+                                    break
+                        # print(all_tasks_json)
                 except Exception as e:
                     print(e)
             pipeline_resource_used['data'] = all_tasks_json
@@ -893,26 +900,29 @@ class Myapp(BaseMyappView):
         all_tasks_json = pipeline_resource_used['data']
         message = ''
         td_html = '<td class="ellip1" style="border: 1px solid black;padding: 10px">%s</th>'
-        message += "<tr>%s %s %s %s %s %s %s<tr>" % (
-        td_html % "集群", td_html % "空间",td_html % "容器", td_html % "用户", td_html % "cpu", td_html % "内存",td_html % "gpu")
+        message += "<tr>%s %s %s %s %s %s %s %s<tr>" % (
+        td_html % "集群", td_html % "项目组",td_html % "空间",td_html % "容器", td_html % "用户", td_html % "cpu", td_html % "内存",td_html % "gpu")
         exist_pod = False
         for cluster_name in all_tasks_json:
             cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
             for namespace in all_tasks_json[cluster_name]:
-                for pod_name in all_tasks_json[cluster_name][namespace]:
-                    exist_pod=True
-                    pod = all_tasks_json[cluster_name][namespace][pod_name]
-                    dashboard_url = cluster_config.get('K8S_DASHBOARD_CLUSTER', '').strip('/') + '/#/search?namespace=%s&q=%s'%(namespace,pod_name)
-                    grafana_url = cluster_config.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_TASK_PATH')
-                    message += '<tr>%s %s %s %s %s %s %s<tr>' % (
-                        td_html % cluster_name,
-                        td_html % ('<a target="blank" href="%s">%s</a>' % (dashboard_url, namespace)),
-                        '<td class="ellip1" style="border: 1px solid black;padding: 10px">%s</th>' % ('<a target="blank" href="%s">%s</a>' % (grafana_url+pod_name, pod_name)),
-                        td_html % pod['username'],
-                        td_html % ("cpu:%s/%s" % (int(int(pod.get('used_cpu','0'))/1000), int(pod.get('request_cpu','0')))),
-                        td_html % ("mem:%s/%s" % (int(pod.get('used_memory','0')), int(pod.get('request_memory','0')))),
-                        td_html % ("gpu:%s" % (pod.get('request_gpu','')),),
-                    )
+                for org in all_tasks_json[cluster_name][namespace]:
+                    for pod_name in all_tasks_json[cluster_name][namespace][org]:
+                        exist_pod=True
+                        pod = all_tasks_json[cluster_name][namespace][org][pod_name]
+                        # print(pod)
+                        dashboard_url = "/"+cluster_config.get('K8S_DASHBOARD_CLUSTER', '').strip('/') + '/#/search?namespace=%s&q=%s'%(namespace,pod_name)
+                        grafana_url = "/"+cluster_config.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_TASK_PATH')
+                        message += '<tr>%s %s %s %s %s %s %s %s<tr>' % (
+                            td_html % cluster_name,
+                            td_html % org,
+                            td_html % ('<a target="blank" href="%s">%s</a>' % (dashboard_url, namespace)),
+                            '<td class="ellip1" style="border: 1px solid black;padding: 10px">%s</th>' % ('<a target="blank" href="%s">%s</a>' % (grafana_url+pod_name, pod_name)),
+                            td_html % pod['username'],
+                            td_html % ("cpu:%s/%s" % (int(int(pod.get('used_cpu','0'))/1000), int(pod.get('request_cpu','0')))),
+                            td_html % ("mem:%s/%s" % (int(pod.get('used_memory','0')), int(pod.get('request_memory','0')))),
+                            td_html % ("gpu:%s" % (pod.get('request_gpu','')),),
+                        )
 
 
         message = Markup(f'<table>%s</table>' % message)
@@ -954,7 +964,7 @@ class Myapp(BaseMyappView):
                 return jsonify(data)
 
 
-        if url=='/train/total_resource':
+        if url=='/group/security/security-user':
             if g.user.username in conf.get('ADMIN_USER',''):
                 return self.pipeline_task_resource(url)
 

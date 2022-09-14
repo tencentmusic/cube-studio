@@ -717,7 +717,8 @@ class Pipeline_ModelView_Base():
             widget=Select2ManyWidget(),
             choices=[[x, x] for x in
                      ['Created', 'Pending', 'Running', 'Succeeded', 'Failed', 'Unknown', 'Waiting', 'Terminated']],
-            description="选择通知状态"
+            description="选择通知状态",
+            validators=[Length(0,400),]
         ),
         "alert_user": StringField(
             label=_(datamodel.obj.lab('alert_user')),

@@ -1564,14 +1564,17 @@ class K8s():
         items=metrics.get('items',[])
         # print(items)
         for item in items:
-            back_metrics.append({
-                "name":item['metadata']['name'],
-                "time":item['timestamp'],
-                "namespace":item['metadata']['namespace'],
-                "cpu": sum(int(container['usage']['cpu'].replace('n',''))/1000000 for container in item['containers']),
-                "memory": sum(self.to_memory_GB(container['usage']['memory']) for container in item['containers']),
-                "window": item['window']
-            })
+            try:
+                back_metrics.append({
+                    "name":item['metadata']['name'],
+                    "time":item['timestamp'],
+                    "namespace":item['metadata']['namespace'],
+                    "cpu": sum(int(container['usage']['cpu'].replace('n',''))/1000000 for container in item['containers']),
+                    "memory": sum(self.to_memory_GB(container['usage']['memory']) for container in item['containers']),
+                    "window": item['window']
+                })
+            except Exception as e:
+                print(e)
         # print(back_metrics)
         return back_metrics
 
