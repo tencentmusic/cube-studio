@@ -1,10 +1,102 @@
 
 此目录包含大量开源机器学习算法，包括但不限于
 
-基础技能：pandas，matplotlib，pyecharts
-关联挖掘：关联分析（Apriori、FP-growth）
-分类：决策树（ID3、C4.5、CART）、K最近邻算法(KNN)、kd树、极大似然估计、EM算法、文档分类器，朴素贝叶斯分类器，费舍尔分类器、线性函数、线性回归、正则化、逻辑分类/逻辑回归/一般线性回归、支持向量机SVM、核方法、集成学习（Bagging、Boosting、RF、AdaBoost、GBDT、xgboost）、GBDT算法、XGBOOST算法、CTR/CVR中的FM、FFM算法、LightGBM算法
-聚类：层次聚类、BIRCH聚类、k均值聚类、k中心点聚类、DBSCAN密度聚类
-图论：最小生成树（MST）的Prim算法和Kruskal算法
-搜索引擎：单词频度算法、单词距离算法、外部回值算法、链接文本算法、pagerank算法
+## 数据分析
 
+ - EDA
+
+ - 统计分析
+
+ - 统计绘图与数据可视化
+
+ - sql
+
+## 基础算法
+
+ - 二分查找
+
+ - 排序
+
+ - 递归
+
+ - 回溯
+
+ - 分治
+
+ - 双指针
+
+ - 深度优先搜索
+
+ - 广度优先搜索
+
+ - 动态规划
+
+## 机器学习
+
+单模型
+
+ - 线性回归
+
+ - 逻辑回归
+
+ - Lasso
+
+ - Ridge
+
+ - knn
+
+ - ID3
+
+ - C4.5
+
+ - CART
+
+ - 感知机
+
+ - 神经网络
+
+ - SVM
+
+集成学习
+
+ - GBDT
+
+ - AdaBoost
+
+ - XGBoost
+
+ - LightGBM
+
+ - CatBoost
+
+ - Random Forest
+
+无监督模型
+
+ - kmeans
+
+ - 层次聚类
+
+ - 谱聚类
+
+ - PCA
+
+ - SVD
+
+ - LDA
+
+概率模型
+
+ - 朴素贝叶斯
+
+ - 贝叶斯网络
+
+ - EM
+
+ - MCMC
+
+ - 最大熵
+
+ - CRF
+
+ - HMM
