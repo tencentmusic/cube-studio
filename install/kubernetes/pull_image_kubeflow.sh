@@ -36,7 +36,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-prometheus:v2.
 docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-prometheus:v2.3.1 && docker tag ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-prometheus:v2.3.1 quay.io/prometheus/prometheus:v2.3.1 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/kubesigs-kube-batch:v0.5 && docker tag ccr.ccs.tencentyun.com/cube-studio/kubesigs-kube-batch:v0.5 kubesigs/kube-batch:v0.5 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-node-exporter:v0.15.2 && docker tag ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-node-exporter:v0.15.2 quay.io/prometheus/node-exporter:v0.15.2 &
-docker pull ccr.ccs.tencentyun.com/cube-studio/grafana-grafana:7.5.2 && docker tag ccr.ccs.tencentyun.com/cube-studio/grafana-grafana:7.5.2 grafana/grafana:7.5.2 &
+docker pull ccr.ccs.tencentyun.com/cube-studio/grafana-grafana:9.1.5 && docker tag ccr.ccs.tencentyun.com/cube-studio/grafana-grafana:9.1.5 grafana/grafana:9.1.5 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow:training-operator && docker tag ccr.ccs.tencentyun.com/cube-studio/kubeflow:training-operator ccr.ccs.tencentyun.com/cube-studio/kubeflow:training-operator &
 docker pull ccr.ccs.tencentyun.com/cube-studio/metacontroller-metacontroller:v0.3.0 && docker tag ccr.ccs.tencentyun.com/cube-studio/metacontroller-metacontroller:v0.3.0 metacontroller/metacontroller:v0.3.0 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/gcr.io-ml-pipeline-workflow-controller:v2.12.9-license-compliance && docker tag ccr.ccs.tencentyun.com/cube-studio/gcr.io-ml-pipeline-workflow-controller:v2.12.9-license-compliance gcr.io/ml-pipeline/workflow-controller:v2.12.9-license-compliance &
