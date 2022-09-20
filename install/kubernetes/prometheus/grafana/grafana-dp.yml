@@ -26,7 +26,7 @@ spec:
                 - "true"
       containers:
       - name: grafana
-        image:  grafana/grafana:7.5.2
+        image:  grafana/grafana:9.1.5
         env:
         - name: GRAFANA_PORT
           value: "3000"

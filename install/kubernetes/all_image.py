@@ -45,7 +45,7 @@ new_prometheus = [
     "quay.io/prometheus-operator/prometheus-operator:v0.46.0",
     'quay.io/prometheus-operator/prometheus-operator:v0.56.1',
     "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",
-    'grafana/grafana:7.5.2'
+    'grafana/grafana:9.1.5'
 ]
 
 istio=[
