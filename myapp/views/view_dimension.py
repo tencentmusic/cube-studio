@@ -110,7 +110,7 @@ Metadata_column_fields = {
         description='列类型',
         widget=Select2Widget(),
         default='text',
-        choices=[['int', 'int'], ['text', 'text'],['date', 'date']],
+        choices=[['int', 'int'], ['text', 'text'],['date', 'date'],['double','double']],
         validators=[DataRequired()]
     ),
     "unique": BooleanField(
@@ -333,51 +333,10 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         import sqlalchemy.engine.url as url
         uri = url.make_url(dim.sqllchemy_uri)
         sql_engine = create_engine(uri)
-        columns = list(json.loads(dim.columns).values())
-        cols = [col['name'] for col in columns if not col.get('primary_key',False)]
-        sql = 'select %s from %s' % (','.join(cols), dim.table_name)
+        sql = 'select * from %s' % (dim.table_name,)
         results = pandas.read_sql_query(sql, sql_engine)
         return results.to_dict()
 
-
-    @expose("/csv/<dim_id>", methods=["GET"])
-    # @pysnooper.snoop()
-    def csv(self,dim_id):
-        dim = db.session.query(Dimension_table).filter_by(id=int(dim_id)).first()
-        cols = json.loads(dim.columns)
-        for col_name in copy.deepcopy(cols):
-            if cols[col_name].get('primary_key',False):
-                del cols[col_name]
-        demostr=','.join(list(cols.keys()))+"\n"+','.join(['xx' for x in list(cols.keys())])
-
-        csv_file='%s.csv'%dim_id
-        file = open(csv_file,mode='w',encoding='utf-8-sig')
-        file.writelines(demostr)
-        file.close()
-        csv_file = os.path.abspath(csv_file)
-        response = self.csv_response(csv_file,file_name=dim.table_name)
-        return response
-        # return ','.join(list(cols.keys()))+"<br>"+','.join(['xx' for x in list(cols.keys())])
-
-    @expose("/download/<dim_id>", methods=["GET"])
-    # @pysnooper.snoop()
-    def download(self,dim_id):
-        import pandas
-        dim = db.session.query(Dimension_table).filter_by(id=int(dim_id)).first()
-        import sqlalchemy.engine.url as url
-        uri = url.make_url(dim.sqllchemy_uri)
-        sql_engine = create_engine(uri)
-        columns = list(json.loads(dim.columns).values())
-        cols = [col['name'] for col in columns if not col.get('primary_key', False)]
-        sql = 'select %s from %s' % (','.join(cols), dim.table_name)
-        results = pandas.read_sql_query(sql, sql_engine)
-        file_path = '%s.csv' % dim.table_name
-        csv_file = os.path.abspath(file_path)
-        if os.path.exists(csv_file):
-            os.remove(csv_file)
-        results.to_csv(csv_file, index=False, sep=",")  # index 是第几行的表示
-        response = self.csv_response(csv_file, file_name=dim.table_name)
-        return response
 
     @expose("/external/<dim_id>", methods=["GET"])
     def external(self,dim_id):
@@ -412,9 +371,9 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         item = db.session.query(Dimension_table).filter_by(id=int(dim_id)).first()
         sqllchemy_uri = item.sqllchemy_uri
         if sqllchemy_uri:
-
             # 创建数据库的sql(如果数据库存在就不创建，防止异常)
             if 'postgresql' in item.sqllchemy_uri:
+
                 # 创建pg表
                 import sqlalchemy.engine.url as url
                 uri = url.make_url(sqllchemy_uri)
@@ -496,7 +455,11 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                     if exist_columns:
                         col = json.loads(item.columns)
                         for column_name in col:
-                            col_type = 'INT' if col[column_name].get('column_type','text').upper() == 'INT' else 'varchar(2000)'
+                            col_type = 'varchar(2000)'
+                            if col[column_name].get('column_type', 'text').upper() == 'INT':
+                                col_type = 'INT'
+                            if col[column_name].get('column_type', 'text').upper() in ['DOUBLE','FLOAT']:
+                                col_type = 'DOUBLE'
                             if column_name not in exist_columns:
                                 try:
                                     sql = 'ALTER TABLE %s ADD %s %s;'%(item.table_name,column_name,col_type)
@@ -523,7 +486,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                                     '''.format(
                         table_name=item.table_name,
                         columns_sql='\n'.join(
-                            ["    %s %s %s %s," % (col_name, 'BIGINT' if cols[col_name].get('column_type','text').upper() == 'INT' else 'varchar(2000)',
+                            ["    %s %s %s %s," % (col_name, 'BIGINT' if cols[col_name].get('column_type','text').upper() == 'INT' else 'DOUBLE' if cols[col_name].get('column_type','text').upper() in ['DOUBLE','FLOAT'] else 'varchar(2000)',
                                                    '' if int(cols[col_name].get('nullable', True)) else 'NOT NULL',
                                                    '' if not int(cols[col_name].get('unique', False)) else 'UNIQUE') for
                              col_name in cols if col_name not in ['id',]]
@@ -614,6 +577,11 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         "type": "ellip1",
                         "width": 100
                     }
+                if column_type == 'double':
+                    cols_width[column_type] ={
+                        "type": "ellip1",
+                        "width": 100
+                    }
                 if column_type == 'date':
                     cols_width[column_type] ={
                         "type": "ellip1",
@@ -688,6 +656,30 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
             url = '/dimension_remote_table_modelview/%s/api/' % dim_id
             print(url)
 
+            # 预处理一下
+            # @pysnooper.snoop(watch_explode=('item'))
+            def pre_add(self,item):
+
+                # 浮点转型
+                for key in self.cols:
+                    if key in ['id','rowid']:
+                        continue
+                    if self.cols[key].get('column_type', 'text') == 'int':
+                        setattr(item,key,int(getattr(item,key)) if getattr(item,key) else None)
+                    if self.cols[key].get('column_type', 'text') == 'double':
+                        setattr(item,key,float(getattr(item,key)) if getattr(item,key) else None)
+
+            def pre_update(self,item):
+
+                # 浮点转型
+                for key in self.cols:
+                    if key in ['id','rowid']:
+                        continue
+                    if self.cols[key].get('column_type', 'text') == 'int':
+                        setattr(item,key,int(getattr(item,key)) if getattr(item,key) else None)
+                    if self.cols[key].get('column_type', 'text') == 'double':
+                        setattr(item,key,float(getattr(item,key)) if getattr(item,key) else None)
+						
             def get_primary_key(cols):
                 for name in cols:
                     if cols[name].get('primary_key',False):
@@ -711,6 +703,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                 header = None
                 result = []
                 cols = json.loads(dim.columns)
+                error_message = []
                 for line in csv_reader:
                     if not header:
                         header = line
@@ -737,12 +730,17 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
                     data = dict(zip(header, line))
 
+
                     try:
                         # 把整型做一下转换，因为文件离线全部识别为字符串
-
-                        for key in data:
+                        for key in copy.deepcopy(data):
                             try:
-                                data[key]=int(data[key]) if cols.get(key,{}).get('column_type','text')=='int' else str(data[key])
+                                if cols.get(key,{}).get('column_type','text')=='int':
+                                    data[key]=int(data[key])
+                                elif cols.get(key,{}).get('column_type','text')=='double':
+                                    data[key]=float(data[key]) if data[key] else None
+                                else:
+                                    data[key]=str(data[key])
                             except Exception as e:
                                 data[key] = None
 
@@ -757,9 +755,12 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     except Exception as e:
                         db.session.rollback()
                         print(e)
+                        error_message.append(str(e))
                         result.append('fail')
 
                 flash('成功导入%s行，失败导入%s行' % (len([x for x in result if x == 'success']), len([x for x in result if x == 'fail'])), 'success')
+                error_message='<br>'.join(error_message)
+                flash('上传失败%s'%error_message,'error')
                 back = {
                     "status": 0,
                     "result": result,
@@ -802,13 +803,17 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     search_columns=search_columns,
                     order_columns=order_columns,
                     label_title = dim.label,
+                    base_permissions = ['can_list','can_add','can_delete','can_edit','can_show'],
+                    pre_add=pre_add,
+                    pre_update=pre_update,
                     upload=upload,
                     muldelete=muldelete,
                     dim_id=dim_id,
                     import_data=True,
                     download_data=True,
                     cols_width=cols_width,
-                    base_order=(get_primary_key(columns), "desc") if get_primary_key(columns) else None
+                    base_order=(get_primary_key(columns), "desc") if get_primary_key(columns) else None,
+                    cols = columns
                 )
             )
             view_instance = view_class()

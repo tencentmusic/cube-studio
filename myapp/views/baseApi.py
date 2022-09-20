@@ -1352,15 +1352,16 @@ class MyappModelRestApi(ModelRestApi):
         uri = url.make_url(sqllchemy_uri)
         sql_engine = create_engine(uri)
         table_name = self.datamodel.obj.__tablename__
-        sql = 'select `%s` from %s' % ('`,`'.join(self.show_columns), table_name)
-        # print(sql)
+        # sql = 'select `%s` from %s' % ('`,`'.join(self.show_columns), table_name)
+        sql = 'select * from %s' % (table_name)
+        print(sql)
         results = pandas.read_sql_query(sql, sql_engine)
 
         file_path = '%s.csv' % table_name
         csv_file = os.path.abspath(file_path)
         if os.path.exists(csv_file):
             os.remove(csv_file)
-        results.to_csv(csv_file, index=False, sep=",")  # index 是第几行的表示
+        results.to_csv(csv_file, index=False, sep=",",encoding='utf-8-sig')  # index 是第几行的表示
         response = self.csv_response(csv_file, file_name=table_name)
         return response
 
