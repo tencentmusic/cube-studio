@@ -75,6 +75,8 @@
 
 ## ocr
 
+<img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="300px">
+
 [ddddocr](../ddddocr/README.md)
 
 ## 图像检索
