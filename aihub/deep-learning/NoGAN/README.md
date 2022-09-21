@@ -15,6 +15,7 @@ pip3 install -r requirements.txt
 
 编写代码运行项目之前，需要下载预训练好的模型。项目提供了三个模型
 
+<img width="300" alt="640" src="https://user-images.githubusercontent.com/20157705/191455074-f6aed7b8-da6f-4659-91ee-f1768d12b95d.png">
 
 区别如下：
 
