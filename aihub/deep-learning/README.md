@@ -75,6 +75,8 @@
 
 ## ocr
 
+[ddddocr](../ddddocr/README.md)
+
 ## 图像检索
 
 ## 图像识别
