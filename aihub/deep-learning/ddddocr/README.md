@@ -8,9 +8,11 @@
 
 OCR的核心技术包含两方面，一是目标检测模型检测图片中的文字，二是文字识别模型，将图片中的文字转成文本文字。
 
+# 第一类：验证码文字识别
+
 第一类验证码最简单，它们没有复杂的背景图片，所以目标检测模型可以省略，直接将图片送入文字识别模型即可。
 
-<img src="https://user-images.githubusercontent.com/20157705/191401415-90e25e7e-07c6-49b2-9dae-57a476357c84.png" width="50%" height="50%">
+<img src="https://user-images.githubusercontent.com/20157705/191401415-90e25e7e-07c6-49b2-9dae-57a476357c84.png" width="400px">
 
 识别代码如下：
 
@@ -30,10 +32,12 @@ res = ocr.classification(image)
 print(res)
 
 ```
+# 第二类 验证码目标检测
 
-第二类验证码有复杂的背景，需要先用目标检测模型框出文字，在进行识别
+第二类验证码有复杂的背景，需要先用目标检测模型框出文字，再进行识别
 
-<img src="https://user-images.githubusercontent.com/20157705/191401494-aa46d882-6be9-4499-b95b-667c7ce92385.png" width="30%" height="30%">
+<img src="https://user-images.githubusercontent.com/20157705/191401494-aa46d882-6be9-4499-b95b-667c7ce92385.png" width="200px">
+
 
 
 代码如下：
@@ -64,9 +68,9 @@ cv2.imwrite("result.jpg", im)
 
 输出结果如下：
 
-<img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="30%" height="30%">
+<img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="300px">
 
-<img src="https://user-images.githubusercontent.com/20157705/191405904-82c00b1e-9e70-433f-bbc0-ca8bb48d7bf1.png" width="30%" height="30%">
+<img src="https://user-images.githubusercontent.com/20157705/191405904-82c00b1e-9e70-433f-bbc0-ca8bb48d7bf1.png" width="300px">
 
 
 
@@ -74,7 +78,7 @@ cv2.imwrite("result.jpg", im)
 
 `ddddocr`还能识别下面这种带滑块的验证码
 
-<img src="https://user-images.githubusercontent.com/20157705/191401644-10dd8c3a-5475-40fe-ab5c-87137b1ffcf7.png" width="30%" height="30%">
+<img src="https://user-images.githubusercontent.com/20157705/191401644-10dd8c3a-5475-40fe-ab5c-87137b1ffcf7.png" width="300px">
 
 
 这种虽然不属于OCR的业务范畴，但作为一个通用的验证码识别工具，作者还是支持了，必须给作者点个赞。
