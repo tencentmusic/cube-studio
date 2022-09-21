@@ -75,6 +75,10 @@
 
 ## ocr
 
+<img width="740" alt="640" src="https://user-images.githubusercontent.com/20157705/191438938-59b84670-24eb-47b5-b791-d8ad053a26a9.png">
+
+[paddleocr](../paddleocr/README.md)
+
 <img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="300px">
 
 [ddddocr](../ddddocr/README.md)
