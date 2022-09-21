@@ -15,6 +15,9 @@ pip install "paddleocr>=2.0.1"
 ```
 安装完成后，编码调用ocr函数，提取下图中的文字
 
+<img width="540" alt="640" src="https://user-images.githubusercontent.com/20157705/191437863-3b7c651c-3c59-4538-bbe5-2424e465f002.png">
+
+
 ```bash
 from paddleocr import PaddleOCR, draw_ocr
 
@@ -26,6 +29,9 @@ for line in result:
 ```
 首次运行可以看到以下输出
 
+<img width="540" alt="640" src="https://user-images.githubusercontent.com/20157705/191438569-18a19532-29f6-4dcf-b65d-ded73bd02e00.png">
+
+
 程序会自动下载三个模型文件，分别是ch_PP-OCRv3_det_infer.tar、ch_PP-OCRv3_rec_infer.tar和ch_ppocr_mobile_v2.0_cls_infer.tar。
 
 前两个是我们刚刚提到的文字检测模型和文字识别模型。
@@ -35,6 +41,9 @@ for line in result:
 这三个模型都是PaddleOCR在自己的数据集上预训练好了的，对于常规的图片都可以直接用，如果大家有比较特殊的数据集需要识别，如：车牌，只能按照PaddleOCR提供的方法，自己训练模型。
 
 程序最后一行print(line)输出的内容如下：
+
+<img width="540" alt="640" src="https://user-images.githubusercontent.com/20157705/191438736-d0353a3c-39a1-4ec6-9b5d-44704de5a382.png">
+
 
 可以看到，成功能够提取出图片中的文本了，并且准确度没问题。
 
@@ -55,5 +64,8 @@ im_show.save('result.jpg')
 ```
 
 result.jpg如下：
+
+<img width="740" alt="640" src="https://user-images.githubusercontent.com/20157705/191438938-59b84670-24eb-47b5-b791-d8ad053a26a9.png">
+
 
 左侧的红框是文字检测模型检测出来的文字，右侧是文字识别模型识别出来的文字以及对应的分数。
