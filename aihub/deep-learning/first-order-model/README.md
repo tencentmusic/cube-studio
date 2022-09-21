@@ -7,15 +7,18 @@
 
 VoxCeleb 数据集
 
-[vox](https://github.com/AliaksandrSiarohin/first-order-model/blob/master/sup-mat/vox-teaser.gif)
+<img width="400" alt="640" src="https://github.com/AliaksandrSiarohin/first-order-model/blob/master/sup-mat/vox-teaser.gif">
+
 
 时尚数据集
 
-[fashion](https://github.com/AliaksandrSiarohin/first-order-model/raw/master/sup-mat/fashion-teaser.gif)
+<img width="400" alt="640" src="https://github.com/AliaksandrSiarohin/first-order-model/raw/master/sup-mat/fashion-teaser.gif">
+
 
 MGIF 数据集
 
-[mgif](https://github.com/AliaksandrSiarohin/first-order-model/raw/master/sup-mat/mgif-teaser.gif)
+<img width="400" alt="640" src="https://github.com/AliaksandrSiarohin/first-order-model/raw/master/sup-mat/mgif-teaser.gif">
+
 
 # 安装
 
