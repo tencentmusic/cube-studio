@@ -66,25 +66,6 @@ tips:
 ![cube](https://user-images.githubusercontent.com/20157705/174762561-29b18237-7d45-417e-b7c0-14f5ef96a0e6.gif)
 
 
-# Contributor
-
-algorithm: 
-@hujunaifuture <img width="5%" src="https://avatars.githubusercontent.com/u/19547589?v=4" />
-@jaffe-fly <img width="5%" src="https://avatars.githubusercontent.com/u/49515380?s=96&v=4" />
-@JLWLL  <img width="5%" src="https://avatars.githubusercontent.com/u/86763551?s=96&v=4" />
-@ma-chengcheng<img width="5%" src="https://avatars.githubusercontent.com/u/15444349?s=96&v=4" />
-@chendile <img width="5%" src="https://avatars.githubusercontent.com/u/42484658?s=96&v=4" />
-
-platform: 
-@xiaoyangmai <img width="5%" src="https://avatars.githubusercontent.com/u/10969390?s=96&v=4" />
-@VincentWei2021 <img width="5%" src="https://avatars.githubusercontent.com/u/77832074?v=4" />
-@SeibertronSS <img width="5%" src="https://avatars.githubusercontent.com/u/69496864?v=4" />
-@cyxnzb <img width="5%" src="https://avatars.githubusercontent.com/u/51886383?s=88&v=4" /> 
-@gilearn <img width="5%" src="https://avatars.githubusercontent.com/u/107160156?s=88&v=4" />
-@wulingling0108 <img width="5%" src="https://avatars.githubusercontent.com/u/45533757?v=4" />
-<br>
-<br>
-
 # Company
 
 ![image](https://user-images.githubusercontent.com/20157705/185567563-b44c467a-a440-4e4a-9ae1-3a5cc7ca5fe8.png)
