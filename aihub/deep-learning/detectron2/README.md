@@ -28,6 +28,7 @@
 
 ![image](https://user-images.githubusercontent.com/114121827/191642382-34b57aba-f07b-4930-b605-71eeaf30bdf0.png)
 
+官方地址：https://github.com/facebookresearch/detectron2
 
 # 1. 安装
 
