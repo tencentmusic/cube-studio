@@ -30,7 +30,7 @@ RUN apt install -y libgl1-mesa-glx
 RUN pip install flask werkzeug requests tornado
 RUN pip install Pillow pysnooper opencv-python
 
-RUN pip3 install https://github.com/danielgatis/darknetpy/raw/master/dist/darknetpy-4.1-cp36-cp36m-linux_x86_64.whl
+RUN pip install pyyaml==5.1 visualdl==2.2.0 opencv-python tqdm filelock scipy prettytable sklearn torch torchvision
 WORKDIR /app
 #RUN wget https://pengluan-76009.sz.gfp.tencent-cloud.com/github/yolov3.zip && apt install unzip && unzip yolov3.zip && rm yolov3.zip
 COPY . /app/

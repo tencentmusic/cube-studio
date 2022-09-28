@@ -100,7 +100,7 @@
         .row > .img-block > .thumbnail{
             padding:10px 0;
             width:92%;
-            height:430px;
+            height:320px;
             -webkit-box-shadow:0 0 10px #ddd;
             -moz-box-shadow:0 0 10px #ddd;
             box-shadow:0 0 10px #ddd;
@@ -108,20 +108,22 @@
             border-top-width: 2px;
             border-bottom-width: 2px;
 
-            line-height:350px;
+            line-height:320px;
             overflow:hidden;
             position:relative;
             text-align: center;
         }
         .row > .img-block > .thumbnail > img{
             /*max-width:100%;*/
-            max-height:350px;
+            max-height:400px;
             margin:0 auto;
             border-radius: 8px;
 
             position:relative;
             vertical-align: middle;
             text-align: center;
+            width: 300px;
+            height: 300px;
 
         }
         .row > .img-block > .thumbnail > p {
@@ -148,20 +150,36 @@
         <form id="file_upload_form" action="" method="post"  enctype="multipart/form-data">
             <input id="file_pic" multiple="multiple" type="file" name="image" onchange="open_img(this)">
             <input id="image_id" type="number" name="image_id" value="2">
-            <input type="submit" id="safety_submiit">
+            <input type="submit" id="safety_submit">
         </form>
     </div>
 
     <div class="menu">
         <div id="search">
             <!--style="display:none;"-->
-        <input type="text" id="key" placeholder="输入网址"  value="">
+        <input type="text" id="key" placeholder="输入姓氏"  value="">
         <input class="button" type="button" id="btn-load" value="本地上传" onclick="javascript:document.getElementById('file_pic').click();">
-        <input class="button ml100 pass-btn" type="button" id="btn-pass" value="检测">
+        <input class="button ml100 pass-btn" type="button" id="btn-pass" value="合成">
         </div>
     </div>
 
-    <div class="row" id="container"></div>
+    <div class="row" id="container">
+        <div class="img-block">
+            <div class="thumbnail" dataid="1">
+                <img src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/aihub/ai-photo/ad11.jpg" alt="...">
+            </div>
+        </div>
+        <div class="img-block">
+            <div class="thumbnail" dataid="2">
+                <img src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/aihub/ai-photo/ad12.png" alt="...">
+            </div>
+        </div>
+        <div class="img-block">
+            <div class="thumbnail" dataid="3">
+                <img src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/aihub/ai-photo/ad13.png" alt="...">
+            </div>
+        </div>
+    </div>
 
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="nprogress.js"></script>
@@ -182,7 +200,6 @@
                 html += '<div class="img-block">'+
                         '    <div class="thumbnail" dataid="'+data[i].id+'">'+
                         '        <img src="'+data[i].img+'" alt="...">'+
-                        '        <p font-size="9">检测结果: ***</p>'+
                         '    </div>'+
                         '</div>';
             };
@@ -255,15 +272,11 @@
         // }
     ];
 
-    function open_img(dom){
-        local_path= $(dom).val();
-        console.log(local_path)
-    }
-
     image_load_type=0;     //默认爬虫获取图片
 
     //选择图片，马上预览
     function open_img(obj) {
+
         alllocalimg=[];    //清空之前的数据
         image_load_type=1;
         document.getElementById("container").innerHTML="";
@@ -293,7 +306,7 @@
                 html = '<div class="img-block">'+
                         '    <div class="thumbnail" dataid="'+i+'">'+
                         '        <img src="'+e.target.result+'" alt="...">'+
-                        '        <p font-size="9" style="height: 50px">检测结果:**</p>'+
+                        //'        <p font-size="9" style="height: 50px">原图</p>'+
                         '    </div>'+
                         '</div>';
                 base64_str=String(e.target.result).replace(/data:.*;base64,/,'') //replace('data:image/jpeg;base64,','').replace('data:image/png;base64,','').replace('data:;base64,','');
@@ -364,9 +377,8 @@
 
             // formdata['models']=JSON.stringify(models);
             formdata['models']=models;
+            formdata['txt']=$('#key').val();
             console.log(formdata);
-
-
 
             $.ajax({
                 type: "POST",     //post方式
@@ -386,7 +398,6 @@
                         div_dom=$("div[dataid='"+image_id+"']");
                         img_dom=div_dom.children('img')[0];
                         img_dom.setAttribute('src','data:.*;base64,'+result[image_id]);
-                        div_dom.children('p').html('检测成功')
 
                     }else {
                         div_dom=$("div[dataid='"+image_id+"']");

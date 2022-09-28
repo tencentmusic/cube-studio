@@ -24,7 +24,7 @@ from flask import jsonify,request
 from PIL import Image,ImageFont
 from PIL import ImageDraw
 import urllib
-import torch
+# import torch
 from PIL import Image
 
 import pysnooper
@@ -37,45 +37,14 @@ app = Flask(__name__,
 
 UPLOAD_FOLDER = "UPLOAD_FOLDER"
 # myfont = ImageFont.truetype('/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc', 20)
-# YOLO_DATA_PATH = os.getenv('YOLO_DATA_PATH','yolo/coco.data')
-# YOLO_CFG_PATH = os.getenv('YOLO_CFG_PATH','yolo/yolov3.cfg')
-# YOLO_WEIGHTS_PATH = os.getenv('YOLO_WEIGHTS_PATH','yolo/yolov3.weights')
-#
-# class ImageDetector(object):
-#     def __init__(self):
-#         self.detector = Detector(YOLO_DATA_PATH,YOLO_CFG_PATH,YOLO_WEIGHTS_PATH)
-#
-#     # @pysnooper.snoop()
-#     def classify_image(self, image_path):
-#         print("Classfy : ", image_path)
-#         res = self.detector.detect(image_path)
-#         print(res)
-#
-#         img = Image.open(image_path)
-#         dr = ImageDraw.Draw(img)
-#         for data in res:
-#             class_name = data['class']
-#             x, y, w, h = data['left'],data['top'],data['right'] - data['left'],data['bottom'] - data['top']
-#             # 画矩形框
-#             dr.rectangle((x, y, x + w, y + h), outline=(46, 254, 46),width=3)
-#
-#             # 写文字
-#             # 设置字体和大小
-#             # myfont = ImageFont.truetype("static/glyphicons-halflings-regular.ttf", 100)
-#
-#             dr.text((data['left'],data['top']),class_name, font=myfont, fill = 'red')
-#         out_image_path = image_path[:image_path.rfind('.')] + '_deect' + image_path[image_path.rfind('.'):]
-#         img.save(out_image_path)
-#         return out_image_path
-#
-# image_detector = ImageDetector()
 
 
 @app.route('/api/v1.0/model',methods=['GET','POST'])
-# @pysnooper.snoop()
+@pysnooper.snoop()
 def classify_rest():
     try:
         data = request.json
+        txt = data.get('txt','')
         image_decode = base64.b64decode(data['image_data'])
         image_path = os.path.join(UPLOAD_FOLDER, str(datetime.datetime.now()) + ".jpg")
         nparr = np.fromstring(image_decode, np.uint8)
