@@ -17,18 +17,18 @@ spec:
   resources:
     requests:
       memory: 400Mi
-  storage:
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 10Gi
-        selector:
-          matchLabels:
-            monitoring-pvname: monitoring-prometheus-pv
-      status: {}
+#  storage:
+#    volumeClaimTemplate:
+#      spec:
+#        accessModes:
+#        - ReadWriteOnce
+#        resources:
+#          requests:
+#            storage: 10Gi
+#        selector:
+#          matchLabels:
+#            monitoring-pvname: monitoring-prometheus-pv
+#      status: {}
   ruleSelector:
     matchLabels:
       prometheus: k8s
