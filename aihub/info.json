@@ -1,0 +1,122 @@
+{
+  "doc": "README.md",
+  "fileld": "机器视觉",
+  "scenes":"图像分类",
+  "type": "dataset,notebook,job-template,pre-train-model,pipeline,inference",
+  "name": "mnist",
+  "status": "online",
+  "version": "v20221001",
+  "uuid": "20220928101455",
+  "label": "手写体识别",
+  "describe": "手写体识别的示例应用，包含notebook开发，训练模板和推理服务",
+  "pic": "http://5b0988e595225.cdn.sohucs.com/images/20180404/9f62a1eea7054f8eaf4bc1c87168238b.png",
+  "dataset": {
+    "name": "MNIST",
+    "label": "手写数字数据集",
+    "describe": "包含一组60,000个示例的训练集和一组10,000个示例的测试集。数字已经过尺寸标准化，以适合 20x20 像素框，同时保持其纵横比，并在固定尺寸的图像中居中",
+    "source_type": "开源",
+    "source": "github",
+    "industry": "图像处理",
+    "field": "视觉",
+    "usage": "传统机器学习和深度学习入门",
+    "research": "svm、分类",
+    "storage_class": "压缩",
+    "file_type": "gz",
+    "status": "正常",
+    "years": "",
+    "url": "http://yann.lecun.com/exdb/mnist/",
+    "path": "",
+    "download_url": "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz\nhttp://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz\nhttp://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz\nhttp://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz",
+    "storage_size": "11M",
+    "entries_num": " 60,000 个示例的训练集和 10,000 个示例的测试集",
+    "duration": "",
+    "price": "0",
+    "icon": "/static/assets/images/dataset/mnist.png",
+    "owner": "admin"
+  },
+  "notebook": {
+    "jupyter": [
+      "demo.ipynb"
+    ],
+    "appendix": []
+  },
+  "job-template": {
+    "project_name": "多媒体类模板",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/mnist:20220814",
+    "gitpath": "https://github.com/zhuyaguang/cube-studio/tree/dev-mnist/job-template/job/mnist",
+    "image_describe": "mnist手写体识别",
+    "job_template_name": "mnist",
+    "job_template_describe": "mnist手写体识别",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 5,
+      "help_url": "https://github.com/zhuyaguang/cube-studio/tree/dev-mnist/job-template/job/mnist"
+    },
+    "job_template_args": {
+        "参数分组1": {
+            "--modelpath": {
+                "type": "str",
+                "item_type": "str",
+                "label": "参数1",
+                "require": 1,
+                "choice": [],
+                "range": "",
+                "default": "/mnt/admin/pytorch/model",
+                "placeholder": "",
+                "describe": "模型保存路径",
+                "editable": 1,
+                "condition": "",
+                "sub_args": {}
+            },
+            "--datapath": {
+                "type": "str",
+                "item_type": "str",
+                "label": "参数1",
+                "require": 1,
+                "choice": [],
+                "range": "",
+                "default": "/mnt/admin/mnist",
+                "placeholder": "",
+                "describe": "数据读取路径",
+                "editable": 1,
+                "condition": "",
+                "sub_args": {}
+            }
+        }
+    }
+  },
+  "pre-train-model": {
+    "project_name": "public",
+    "name": "mnist",
+    "version": "v2022.08.01.1",
+    "describe": "tf mnist 图像分类 tfserving推理",
+    "path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/tf-mnist.tar.gz",
+    "framework": "tf",
+    "api_type": "tfserving"
+  },
+  "inference": {
+    "project_name": "public",
+    "service_name": "tfserving-mnist-202208011",
+    "model_name": "mnist",
+    "service_describe": "tf 图像分类",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4",
+    "model_version": "v2022.08.01.1",
+    "model_path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/tf-mnist.tar.gz",
+    "service_type": "tfserving",
+    "env": "TF_CPP_VMODULE=http_server=1\nTZ=Asia/Shanghai",
+    "ports": "8501",
+    "metrics": "8501:/metrics",
+    "command": "wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/tf-mnist.tar.gz && tar -zxvf tf-mnist.tar.gz && mkdir -p /models/mnist/202207281/ && cp -r tf-mnist/* /models/mnist/202207281/ && /usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
+    "health": "8501:/v1/models/mnist/versions/202207281/metadata",
+    "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+    "resource_memory": "2G",
+    "resource_cpu": "2",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/tfserving/example"
+    }
+  }
+
+}
