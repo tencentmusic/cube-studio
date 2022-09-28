@@ -24,6 +24,8 @@ from flask import jsonify,request
 from PIL import Image,ImageFont
 from PIL import ImageDraw
 import urllib
+import torch
+from PIL import Image
 
 import pysnooper
 from flask import Flask
