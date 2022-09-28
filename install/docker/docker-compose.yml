@@ -31,13 +31,13 @@ services:
   myapp:
     image:  ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01
     restart: always
-    command: ['bash','-c','sleep 1000000 && /entrypoint.sh']
+    command: ['bash','-c','/entrypoint.sh']
     environment:
       STAGE: 'dev'
       REDIS_HOST: 'host.docker.internal'
       REDIS_PORT: '6379'
       REDIS_PASSWORD: admin
-      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow1?charset=utf8'
+      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
       ENVIRONMENT: DEV
       GPU_TYPE: NVIDIA
 #    ports:
