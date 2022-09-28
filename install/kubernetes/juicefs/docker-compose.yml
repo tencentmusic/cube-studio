@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  minio-juicefs:
+    container_name: minio-juicefs
+    restart: always
+    image: bitnami/minio:2022.9.17
+    #ports:            #使用host模式时不需要
+    #  - '9010:9000'   
+    #  - '9011:9001'
+    volumes:
+      - /data/allvolumes/minio/minio_data:/data
+      #- /data/allvolumes/minio/minio_config:/root/.minio
+    command: minio server --address ${JUICEFS_HOST_IP}:9010 --console-address ${JUICEFS_HOST_IP}:9011 /data
+    environment:
+        MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}      #用于外部接口调用
+        MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD} 
+        MINIO_ROOT_USER: ${MINIO_ROOT_USER}       #用于登录管理页面
+        MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+        MINIO_DEFAULT_BUCKETS: "juicefs:policy" #默认得bucket
+    network_mode: host
+
+  redis-juicefs:
+    image: redis:7.0.4-alpine3.16
+    container_name:  redis-juicefs
+    restart: always
+    #expose:
+    #  - 6379
+    ports:            #使用host模式时不需要
+      - 6382:6379
+    restart: always
+    #network_mode: host
+    volumes:
+      - /data/allvolumes/redis-juicefs:/data
+    command: redis-server --port 6379 --requirepass ${REDIS_PASSWORD}  --appendonly yes

@@ -1,0 +1,88 @@
+# 平台上传需要
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: infra-kubeflow-global-pv
+  labels:
+    infra-pvname: infra-kubeflow-global-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: csi.juicefs.com
+    volumeHandle: infra-kubeflow-global-pv
+    fsType: juicefs
+    nodePublishSecretRef:
+      name: juicefs-sc-secret
+      namespace: kube-system
+    volumeAttributes:
+      juicefs/mount-cpu-limit: 5000m
+      juicefs/mount-memory-limit: 5Gi
+      juicefs/mount-cpu-request: 1m
+      juicefs/mount-memory-request: 1Mi
+  mountOptions:
+    - subdir=kubeflow/global
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-global-pvc
+  namespace: infra
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      infra-pvname: infra-kubeflow-global-pv
+
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: infra-kubeflow
+  labels:
+    infra-pvname: infra-kubeflow
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: csi.juicefs.com
+    volumeHandle: infra-kubeflow
+    fsType: juicefs
+    nodePublishSecretRef:
+      name: juicefs-sc-secret
+      namespace: kube-system
+    volumeAttributes:
+      juicefs/mount-cpu-limit: 5000m
+      juicefs/mount-memory-limit: 5Gi
+      juicefs/mount-cpu-request: 1m
+      juicefs/mount-memory-request: 1Mi
+  mountOptions:
+    - subdir=kubeflow
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: infra-kubeflow
+  namespace: infra
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      infra-pvname: infra-kubeflow
+
