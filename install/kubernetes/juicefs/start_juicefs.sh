@@ -2,6 +2,8 @@
 source .env
 #通过docker-compose启动用于元数据存储、块对象存储的redis和minio；
 docker-compose up -d
+#安装juicefs
+cp -r juicefs /usr/local/bin && chmod 777 -R /usr/local/bin/juicefs
 #格式化文件系统,juicesfs支持将不同的redis database以及minio bucket格式化成不同的文件系统
 juicefs format \
     --storage minio \
