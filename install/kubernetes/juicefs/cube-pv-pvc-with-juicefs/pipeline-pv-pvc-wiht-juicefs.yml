@@ -1,0 +1,136 @@
+# 训练调用需要
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pipeline-kubeflow-global-pv
+  labels:
+    pipeline-pvname: pipeline-kubeflow-global-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: csi.juicefs.com
+    volumeHandle: pipeline-kubeflow-global-pv
+    fsType: juicefs
+    nodePublishSecretRef:
+      name: juicefs-sc-secret
+      namespace: kube-system
+    volumeAttributes:
+      juicefs/mount-cpu-limit: 5000m
+      juicefs/mount-memory-limit: 5Gi
+      juicefs/mount-cpu-request: 1m
+      juicefs/mount-memory-request: 1Mi
+  mountOptions:
+    - subdir=kubeflow/global
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-global-pvc
+  namespace: pipeline
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      pipeline-pvname: pipeline-kubeflow-global-pv
+
+
+# 模型训练
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pipeline-kubeflow-user-workspace
+  labels:
+    pipeline-pvname: pipeline-kubeflow-user-workspace
+spec:
+  capacity:
+    storage: 500Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: csi.juicefs.com
+    volumeHandle: pipeline-kubeflow-user-workspace
+    fsType: juicefs
+    nodePublishSecretRef:
+      name: juicefs-sc-secret
+      namespace: kube-system
+    volumeAttributes:
+      juicefs/mount-cpu-limit: 5000m
+      juicefs/mount-memory-limit: 5Gi
+      juicefs/mount-cpu-request: 1m
+      juicefs/mount-memory-request: 1Mi
+  mountOptions:
+    - subdir=kubeflow/pipeline/workspace
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-user-workspace
+  namespace: pipeline
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  selector:
+    matchLabels:
+      pipeline-pvname: pipeline-kubeflow-user-workspace
+
+# 模型归档
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pipeline-kubeflow-archives
+  labels:
+    pipeline-pvname: pipeline-kubeflow-archives
+spec:
+  capacity:
+    storage: 500Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: csi.juicefs.com
+    volumeHandle: pipeline-kubeflow-archives
+    fsType: juicefs
+    nodePublishSecretRef:
+      name: juicefs-sc-secret
+      namespace: kube-system
+    volumeAttributes:
+      juicefs/mount-cpu-limit: 5000m
+      juicefs/mount-memory-limit: 5Gi
+      juicefs/mount-cpu-request: 1m
+      juicefs/mount-memory-request: 1Mi
+  mountOptions:
+    - subdir=kubeflow/pipeline/archives
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-archives
+  namespace: pipeline
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  selector:
+    matchLabels:
+      pipeline-pvname: pipeline-kubeflow-archives
