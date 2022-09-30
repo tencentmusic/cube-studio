@@ -197,6 +197,19 @@
     "label": "3D人体关键点",
     "describe": "谷歌 实时3D人体关键点检测&姿态估计，已加入mediapipe!",
     "pic": "https://img-blog.csdnimg.cn/20200224230848466.jpg"
+  },
+  {
+    "doc": "http://139.199.89.101/",
+    "field": "国庆个性头像生成",
+    "scenes": "图像合成",
+    "type": "",
+    "name": "cartoonizer",
+    "status": "online",
+    "version": "v20221003",
+    "uuid": "20220928101461",
+    "label": "国庆卡通头像生成",
+    "describe": "个人性国庆卡通头像生成，每个人的头像都是自己独一无二的",
+    "pic": "https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/aihub/ai-photo/ad1.png"
   }
 ]
 

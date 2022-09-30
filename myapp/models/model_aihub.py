@@ -67,15 +67,15 @@ class Aihub(Model,ImportMixin,MyappModelBase):
     @property
     def card(self):
         return Markup(f'''
-<div style="border: 1px solid rgba(0,0,0,.1);border-radius: 3px;">
-    <a href="{self.doc}">
-        <img src="{self.pic}" style="height:220px;width:100%" alt="{self.describe}"/>
+<div style="border: 3px solid rgba({'29,152,29,.9' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
+    <a href="{self.doc if self.status=='online' else ''}">
+        <img src="{self.pic}" style="height:200px;width:100%" alt="{self.describe}"/>
     </a>
     <br>
     <div>
         <div class="p16" alt="{self.describe}">
             <div class="p-r card-popup ellip1">
-                {self.describe}
+                {("在线:" if self.status=='online' else '待上线:')+self.describe}
                 <div class="p-a card-popup-target d-n" style="top:100%;left:0;background:rgba(0,0,0,0.5);color:#fff;border-radius:3px;">{self.describe}</div>
             </div>
         </div>

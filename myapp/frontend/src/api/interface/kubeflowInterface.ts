@@ -17,6 +17,13 @@ export interface IAppMenuItem {
     isExpand?: boolean
     path?: string
 }
+
+export interface IAppHeaderItem {
+    text: string
+    icon?: string
+    link: string
+    pic_url?: string
+}
 export interface IADUGTemplateInfo {
     action?: Record<string, IADUGTemplateActionItem>
     add_columns: Array<Record<string, any>>
@@ -55,6 +62,11 @@ export interface IADUGTemplateInfo {
     cols_width: Record<string, IColumnConfigItem>
     import_data: boolean
     download_data: boolean
+    list_ui_type?: 'card' | 'table'
+    list_ui_args?: {
+        card_width: string
+        card_height: string
+    }
 }
 
 export interface IColumnRelateItem {

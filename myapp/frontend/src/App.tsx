@@ -13,11 +13,12 @@ import { Dropdown, Menu, Select, Spin } from 'antd';
 import { formatRoute, getDefaultOpenKeys, routerConfigPlus } from './routerConfig';
 import SubMenu from 'antd/lib/menu/SubMenu';
 import { clearWaterNow, drawWater, drawWaterNow, getParam, obj2UrlParam, parseParam2Obj } from './util'
-import { getAppMenu } from './api/kubeflowApi';
+import { getAppHeaderConfig, getAppMenu } from './api/kubeflowApi';
 import { GithubOutlined, LeftOutlined, QuestionCircleOutlined, RightOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie'
 import { changeTheme } from './theme';
 import { handleTips } from './api';
+import { IAppHeaderItem } from './api/interface/kubeflowInterface';
 
 const RouterConfig = (config: IRouterConfigPlusItem[]) => {
   let element = useRoutes(config);
@@ -37,6 +38,7 @@ const AppWrapper = (props: IProps) => {
   const [CurrentRouteComponent, setCurrentRouteComponent] = useState<any>()
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false)
   const [imgUrlProtraits, setImgUrlProtraits] = useState('')
+  const [headerConfig, setHeaderConfig] = useState<IAppHeaderItem[]>([])
 
   const navigate = useNavigate();
   const location = useLocation()
@@ -74,6 +76,11 @@ const AppWrapper = (props: IProps) => {
       setCurrentRouteComponent(() => () => RouterConfig(tarRoute))
       setCurrentAppList(appList)
       handleAppIndex(appList)
+    }).catch(err => { })
+
+    getAppHeaderConfig().then(res => {
+      const config = res.data
+      setHeaderConfig(config)
     }).catch(err => { })
   }, [])
 
@@ -314,18 +321,27 @@ const AppWrapper = (props: IProps) => {
             />
           </div> */}
 
-          <a
-            href="https://github.com/tencentmusic/cube-studio/wiki"
-            target="_blank"
-            className="mr12 d-f ac"
-          >
-            <span className="pr4">平台文档</span><QuestionCircleOutlined className="c-theme" style={{ fontSize: 20 }} />
-          </a>
-
-
-          <GithubOutlined className="mr24 c-theme" style={{ fontSize: 20 }} onClick={() => {
-            window.open('https://github.com/tencentmusic/cube-studio', '_bank')
-          }} />
+          {
+            headerConfig.map(config => {
+              if (config.icon) {
+                return <a
+                  href={config.link}
+                  target="_blank"
+                  className="mr12 d-f ac"
+                >
+                  <span className="pr4">{config.text}</span><span className="icon-custom" dangerouslySetInnerHTML={{ __html: config.icon }}></span>
+                </a>
+              } else if (config.pic_url) {
+                return <a
+                  href={config.link}
+                  target="_blank"
+                  className="mr12 d-f ac"
+                >
+                  <span className="pr4">{config.text}</span><img style={{ height: 30 }} src={config.pic_url} alt="" />
+                </a>
+              }
+            })
+          }
 
           <Dropdown overlay={<Menu>
             <Menu.Item onClick={() => {

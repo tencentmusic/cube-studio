@@ -1,5 +1,5 @@
 import React, { ReactText, useEffect, useRef, useState } from 'react';
-import { Button, Col, Input, DatePicker, TablePaginationConfig, Row, message, Space, Menu, Dropdown, Modal, Spin, Form, Tag, Popover, Tooltip, Select, FormInstance, Upload, UploadProps, Drawer, notification } from 'antd';
+import { Button, Col, Input, DatePicker, TablePaginationConfig, Row, message, Space, Menu, Dropdown, Modal, Spin, Form, Tag, Popover, Tooltip, Select, FormInstance, Upload, UploadProps, Drawer, notification, Pagination } from 'antd';
 import { Content } from 'antd/lib/layout/layout';
 import TitleHeader from '../components/TitleHeader/TitleHeader';
 import TableBox from '../components/TableBox/TableBox';
@@ -36,7 +36,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
     const [dataList, setDataList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingAdd, setLoadingAdd] = useState(false)
-    const [visableAdd, setVisableAdd] = useState(false)
+    const [visableAdd, setVisableAdd] = useState((getParam('isVisableAdd') === 'true') || false)
     const [loadingUpdate, setLoadingUpdate] = useState(false)
     const [visableUpdate, setVisableUpdate] = useState(false)
     const [loadingDetail, setLoadingDetail] = useState(false)
@@ -77,7 +77,12 @@ export default function TaskListManager(props?: IAppMenuItem) {
     const [dynamicFormConfigUpdate, setDynamicFormConfigUpdate] = useState<IDynamicFormConfigItem[]>([])
     const [dynamicFormGroupConfigAdd, setDynamicFormGroupConfigAdd] = useState<IDynamicFormGroupConfigItem[]>([])
     const [dynamicFormGroupConfigUpdate, setDynamicFormGroupConfigUpdate] = useState<IDynamicFormGroupConfigItem[]>([])
-    const [dynamicFormDataAdd, setDynamicFormDataAdd] = useState({})
+
+    let customFormData: Record<string, string> = {}
+    try {
+        customFormData = JSON.parse(getParam('formData') || "{}")
+    } catch (err) { }
+    const [dynamicFormDataAdd, setDynamicFormDataAdd] = useState(customFormData)
     const [updateColumnsMap, setUpdateColumnsMap] = useState<Record<string, any>>({})
     const [labelMap, _setLabelMap] = useState<Record<string, string>>({})
     const labelMapRef = useRef(labelMap);
@@ -108,7 +113,13 @@ export default function TaskListManager(props?: IAppMenuItem) {
     }>()
     const [primaryKey, setPrimaryKey] = useState('')
     const [labelTitle, setLabelTitle] = useState('')
-
+    const [list_ui_type, setList_ui_type] = useState<'card' | 'table'>()
+    const [list_ui_args, setList_ui_args] = useState<{
+        card_width: string
+        card_height: string
+    }>()
+    const [isTqAuth, setIsTqAuth] = useState(false)
+    const [listColumns, setListColumns] = useState<string[]>([])
 
     const [scrollY, setScrollY] = useState("")
 
@@ -140,13 +151,17 @@ export default function TaskListManager(props?: IAppMenuItem) {
 
             // 校验规则
             const rules = (item.validators || []).map((item: any) => {
+                if (type === 'select') {
+                    return item.type === 'DataRequired' ? { required: true, message: `请选择${label}` } : undefined
+                }
+
                 switch (item.type) {
                     case 'DataRequired':
                         return { required: true, message: `请输入${label}` }
                     case 'Regexp':
                         return { pattern: new RegExp(`${item.regex}`), message: `请按正确的规则输入` }
                     case 'Length':
-                        return { min: item.min, max: item.max, message: `请输入正确的长度` }
+                        return { min: item.min || 0, max: item.max, message: `请输入正确的长度` }
                     default:
                         return undefined
                 }
@@ -175,6 +190,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
     useEffect(() => {
         const targetId = getParam('targetId')
         const url = targetId ? `/dimension_remote_table_modelview/${targetId}/api/` : props?.url
+        setLoadingAdd(true)
 
         getADUGTemplateApiInfo(url).then(res => {
             const {
@@ -196,7 +212,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 label_title,
                 cols_width,
                 import_data,
-                download_data
+                download_data,
+                list_ui_type,
+                list_ui_args,
             } = res.data
             const actionwidth = 80 || [props?.related, permissions.includes('can_show'), permissions.includes('can_edit'), permissions.includes('can_delete')].filter(item => !!item).length * 60
             const hasAction = props?.related || permissions.includes('can_show') || permissions.includes('can_edit') || permissions.includes('can_delete')
@@ -285,7 +303,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                                     }
                                                 })
 
-                                                console.log(formConfigUpdate);
                                                 setDynamicFormConfigUpdate(formConfigUpdate)
                                                 setDynamicFormGroupConfigUpdate(formGroupConfigUpdate)
 
@@ -318,7 +335,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                                     })
                                                         .then((res) => {
                                                             message.success('删除成功');
-                                                            console.log(filterValuesRef.current);
                                                             fetchData({
                                                                 ...fetchDataParams,
                                                                 pageConf: pageInfo,
@@ -360,14 +376,18 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                                         return new Promise((resolve, reject) => {
                                                             actionADUGTemplateSingle(`${route_base}action/${action.name}/${record[primary_key]}`)
                                                                 .then((res) => {
-                                                                    resolve('');
+                                                                    resolve(res);
                                                                 })
                                                                 .catch((err) => {
-                                                                    reject();
+                                                                    reject(err);
                                                                 });
                                                         })
-                                                            .then((res) => {
+                                                            .then((res: any) => {
                                                                 message.success('操作成功');
+
+                                                                if (res.data.result.link) {
+                                                                    window.open(res.data.result.link, 'bank')
+                                                                }
                                                                 fetchData({
                                                                     ...fetchDataParams,
                                                                     pageConf: pageInfo,
@@ -400,7 +420,67 @@ export default function TaskListManager(props?: IAppMenuItem) {
             }
 
             const addColumnsMap = add_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
+            // 联动字段处理
+            if (customFormData && Object.keys(customFormData).length) {
+                const reTryInfoQuene = (Object.keys(customFormData) || []).filter(key => customFormData[key] && addColumnsMap[key] && addColumnsMap[key].retry_info)
+                let reTryInfoFlag = reTryInfoQuene.length
+
+                const handleReTryInfo = (tar: string) => {
+                    reTryInfoFlag = reTryInfoFlag - 1;
+
+                    actionADUGTemplateRetryInfo(`${route_base}_info`, { exist_add_args: tar }).then(res => {
+                        const { add_columns, label_columns, description_columns, add_fieldsets } = res.data;
+                        const addColumnsMap = add_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
+                        const formConfigAdd: IDynamicFormConfigItem[] = createDyFormConfig(add_columns, label_columns, description_columns)
+                        const formGroupConfigAdd: IDynamicFormGroupConfigItem[] = add_fieldsets.map(group => {
+                            const currentData = group.fields.map(field => addColumnsMap[field]).filter(item => !!item)
+                            return {
+                                group: group.group,
+                                expanded: group.expanded,
+                                config: createDyFormConfig(currentData, label_columns, description_columns)
+                            }
+                        })
+                        const formReset = add_columns.filter((item) => item.default !== '').map(column => ({ [column.name]: column.default })).reduce((pre, next) => ({ ...pre, ...next }), {})
+
+                        setDynamicFormDataAdd(formReset)
+                        setDynamicFormConfigAdd(formConfigAdd)
+                        setDynamicFormGroupConfigAdd(formGroupConfigAdd)
+
+                        if (reTryInfoFlag) {
+                            const resTar = JSON.stringify(formReset)
+                            handleReTryInfo(resTar)
+                        }
+                    }).catch(err => {
+                        message.error('字段切换错误')
+                    }).finally(() => {
+                        setLoadingAdd(false)
+                    })
+                }
+
+                if (reTryInfoQuene.length) {
+                    const formRes = customFormData
+                    for (const key in formRes) {
+                        if (Object.prototype.hasOwnProperty.call(formRes, key)) {
+                            const value = formRes[key];
+                            if (value === undefined) {
+                                delete formRes[key]
+                            }
+                        }
+                    }
+                    const tar = JSON.stringify(formRes)
+
+                    handleReTryInfo(tar)
+                }
+            }
+
             const updateColumnsMap = edit_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
+            edit_columns.forEach((item) => {
+                if (item['ui-type'] === 'list') {
+                    item.info.forEach((itemInfo: any) => {
+                        updateColumnsMap[itemInfo.name] = itemInfo
+                    })
+                }
+            })
             const formConfigAdd: IDynamicFormConfigItem[] = createDyFormConfig(add_columns, label_columns, description_columns)
             const formGroupConfigAdd: IDynamicFormGroupConfigItem[] = add_fieldsets.map(group => {
                 const currentData = group.fields.map(field => addColumnsMap[field]).filter(item => !!item)
@@ -445,6 +525,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 currentFilterValues = localFilter
             }
 
+            setListColumns(list_columns)
+            setList_ui_type(list_ui_type)
+            setList_ui_args(list_ui_args)
             setIsDownLoadData(download_data)
             setIsImportData(import_data)
             setLabelTitle(label_title)
@@ -471,10 +554,12 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 paramsMap: filters,
                 sorter: undefined
             });
+
         }).catch(err => {
             console.log(err);
         }).finally(() => {
             setLoading(false)
+            setLoadingAdd(false)
         })
     }, []);
 
@@ -584,7 +669,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
 
     const handleMultiRecord = (action: IADUGTemplateActionItem) => {
         if (selectedRowKeys.length) {
-            // console.log(selectedRowKeys.map((item: any) => JSON.parse(item || '{}')[primaryKey]));
             Modal.confirm({
                 title: action.confirmation,
                 icon: <ExclamationCircleOutlined />,
@@ -663,8 +747,8 @@ export default function TaskListManager(props?: IAppMenuItem) {
             {/* 添加 */}
             <ModalForm
                 title={`添加${labelTitle}`}
-                width={800}
-                // formData={dynamicFormDataAdd}
+                width={1500}
+                formData={dynamicFormDataAdd}
                 loading={loadingAdd}
                 visible={visableAdd}
                 onCancel={() => { setVisableAdd(false) }}
@@ -744,7 +828,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
             {/* 修改 */}
             <ModalForm
                 title={`修改${labelTitle}`}
-                width={800}
+                width={1500}
                 formData={dataDetail.reduce((pre, next) => {
                     if ((updateColumnsMap[next.key] || {})['ui-type'] === 'select') {
                         let value = next.value
@@ -758,6 +842,28 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     if ((updateColumnsMap[next.key] || {})['ui-type'] === 'select2') {
                         return { ...pre, [next.key]: (next.value || '').split(',') }
                     }
+
+                    if ((updateColumnsMap[next.key] || {})['ui-type'] === 'datePicker') {
+                        let value = next.value;
+                        value = moment(value)
+                        return { ...pre, [next.key]: value }
+                    }
+
+                    if ((updateColumnsMap[next.key] || {})['ui-type'] === 'list') {
+                        const value = (next.value || []).map((item: any) => {
+                            for (const listItemKey in item) {
+                                if (Object.prototype.hasOwnProperty.call(item, listItemKey)) {
+                                    const listItemValue = item[listItemKey];
+                                    if ((updateColumnsMap[listItemKey] || {})['ui-type'] === 'datePicker') {
+                                        item[listItemKey] = moment(listItemValue)
+                                    }
+                                }
+                            }
+                            return item
+                        })
+                        return { ...pre, [next.key]: value }
+                    }
+
                     return { ...pre, [next.key]: next.value }
                 }, {})}
                 loading={loadingUpdate || loadingDetail}
@@ -813,7 +919,17 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             dataDetail.map((item, index) => {
                                 return <Row className="mb16" key={`dataDetail_${index}`}>
                                     <Col span={6}><div className="ta-r"><strong>{item.label}：</strong></div></Col>
-                                    <Col span={18}><pre dangerouslySetInnerHTML={{ __html: item.value }}></pre></Col>
+                                    <Col span={18}><pre style={{ whiteSpace: 'break-spaces' }} dangerouslySetInnerHTML={{
+                                        __html: (() => {
+                                            let content = item.value
+                                            if (Object.prototype.toString.call(item.value) === '[object Object]' || Object.prototype.toString.call(item.value) === '[object Array]') {
+                                                try {
+                                                    content = JSON.stringify(item.value)
+                                                } catch (error) { }
+                                            }
+                                            return content
+                                        })()
+                                    }}></pre></Col>
                                 </Row>
                             })
                         }
@@ -862,92 +978,127 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     </div> : null
                 } */}
                 <div className="m16">
-                    <TableBox
-                        cancelExportData={true}
-                        tableKey={`tablebox_${location.pathname}`}
-                        titleNode={<Col className="tablebox-title">{labelTitle}列表</Col>}
-                        buttonNode={<div className="d-f ac">
-                            {
-                                permissions.includes('can_add') ? <Button className="mr16" type="primary" onClick={() => setVisableAdd(true)}>添加{labelTitle}<PlusOutlined /></Button> : null
-                            }
-                            <div>
-                                <Dropdown overlay={<Menu>
+                    {
+                        list_ui_type !== 'card' ? <TableBox
+                            cancelExportData={true}
+                            tableKey={`tablebox_${location.pathname}`}
+                            titleNode={<Col className="tablebox-title">{labelTitle}列表</Col>}
+                            buttonNode={<div className="d-f ac">
+
+                                {
+                                    permissions.includes('can_add') ? <Button className="mr16" type="primary" onClick={() => setVisableAdd(true)}>添加{labelTitle}<PlusOutlined /></Button> : null
+                                }
+                                <div>
+                                    <Dropdown overlay={<Menu>
+                                        {
+                                            multipleAction.map((action, index) => {
+                                                return <Menu.Item key={`table_muliple_${index}`}>
+                                                    <span className="link" onClick={() => handleMultiRecord(action)}>
+                                                        {`批量${action.text}`}
+                                                    </span>
+                                                </Menu.Item>
+                                            })
+                                        }
+
+                                    </Menu>}>
+                                        <Button>批量操作 <DownOutlined /></Button>
+                                    </Dropdown>
+                                </div>
+                                {
+                                    isImportData ? <div className="d-f ml16">
+                                        <Tooltip color="#fff" title={<span className="tips-content-b">注意：csv逗号分隔，第一行为列的英文名 <span className="link" onClick={() => {
+                                            window.open(`${window.location.origin}${baseUrlRef.current}download_template`)
+                                        }}>下载导入模板</span></span>} placement="topLeft">
+                                            <Upload {...uploadConfig}>
+                                                <Button className="" icon={<UploadOutlined />}>批量导入数据</Button>
+                                            </Upload>
+                                        </Tooltip>
+                                    </div> : null
+                                }
+                                {
+                                    isDownLoadData ? <Button className="ml16" onClick={() => {
+                                        Modal.confirm({
+                                            title: '导出数据',
+                                            icon: <ExclamationCircleOutlined />,
+                                            content: '',
+                                            okText: '确认导出数据',
+                                            cancelText: '取消',
+                                            onOk() {
+                                                window.open(`${window.location.origin}${baseUrlRef.current}download`)
+                                                message.success('导出成功');
+                                            },
+                                            onCancel() { },
+                                        });
+                                    }}>批量导出  <ExportOutlined /></Button> : null
+                                }
+
+                            </div>}
+                            rowKey={(record: any) => {
+                                return JSON.stringify(record)
+                            }}
+                            columns={currentColumns}
+                            loading={loading}
+                            pagination={pageInfo}
+                            dataSource={dataList}
+                            onChange={(pageInfo: any, filters, sorter: any) => {
+                                const tarSorter = sorter.order ? {
+                                    order_column: sorter.columnKey,
+                                    order_direction: sorter.order === "ascend" ? 'asc' : 'desc'
+                                } as ISorterParam : undefined
+
+                                fetchData({
+                                    ...fetchDataParams,
+                                    pageConf: pageInfo,
+                                    params: filterValues,
+                                    paramsMap: filterParamsMap,
+                                    sorter: tarSorter
+                                });
+                                // setPageInfo(pageInfo)
+                            }}
+                            rowSelection={{
+                                type: 'checkbox',
+                                fixed: 'left',
+                                columnWidth: 80,
+                                selectedRowKeys,
+                                onChange: (selectedRowKeys) => {
+                                    setSelectedRowKeys(selectedRowKeys)
+                                }
+                            }}
+                            scroll={{ x: tableWidth, y: scrollY }}
+                        /> : <div className="bg-w p16">
+                                <div className="d-f fw">
                                     {
-                                        multipleAction.map((action, index) => {
-                                            return <Menu.Item key={`table_muliple_${index}`}>
-                                                <span className="link" onClick={() => handleMultiRecord(action)}>
-                                                    {`批量${action.text}`}
-                                                </span>
-                                            </Menu.Item>
+                                        dataList.map((row, rowIndex) => {
+                                            return <div style={{ overflowY: 'auto', width: list_ui_args?.card_width, height: list_ui_args?.card_height }} key={`card${rowIndex}`} className="card-row mr16 mb16" >
+                                                {
+                                                    Object.keys(row).map((key, itemIndex) => {
+                                                        if (listColumns.includes(key)) {
+                                                            return <div style={{ wordBreak: 'break-all' }} key={`row${rowIndex}${itemIndex}`} dangerouslySetInnerHTML={{ __html: row[key] }}></div>
+                                                        }
+                                                        return null
+                                                    })
+                                                }
+                                            </div>
                                         })
                                     }
-
-                                </Menu>}>
-                                    <Button>批量操作 <DownOutlined /></Button>
-                                </Dropdown>
+                                </div>
+                                <div className="ta-r">
+                                    <Pagination {...pageInfo} onChange={(page, pageSize) => {
+                                        fetchData({
+                                            ...fetchDataParams,
+                                            pageConf: {
+                                                ...pageInfo,
+                                                current: page,
+                                                pageSize
+                                            },
+                                            params: filterValues,
+                                            paramsMap: filterParamsMap,
+                                        });
+                                    }} />
+                                </div>
                             </div>
-                            {
-                                isImportData ? <div className="d-f ml16">
-                                    <Tooltip color="#fff" title={<span className="tips-content-b">注意：csv逗号分隔，第一行为列的英文名 <span className="link" onClick={() => {
-                                        window.open(`${window.location.origin}${baseUrlRef.current}download_template`)
-                                    }}>下载导入模板</span></span>} placement="topLeft">
-                                        <Upload {...uploadConfig}>
-                                            <Button className="" icon={<UploadOutlined />}>批量导入数据</Button>
-                                        </Upload>
-                                    </Tooltip>
-                                </div> : null
-                            }
-                            {
-                                isDownLoadData ? <Button className="ml16" onClick={() => {
-                                    Modal.confirm({
-                                        title: '导出数据',
-                                        icon: <ExclamationCircleOutlined />,
-                                        content: '',
-                                        okText: '确认导出数据',
-                                        cancelText: '取消',
-                                        onOk() {
-                                            window.open(`${window.location.origin}${baseUrlRef.current}download`)
-                                            message.success('导出成功');
-                                        },
-                                        onCancel() { },
-                                    });
-                                }}>批量导出  <ExportOutlined /></Button> : null
-                            }
+                    }
 
-                        </div>}
-                        rowKey={(record: any) => {
-                            return JSON.stringify(record)
-                        }}
-                        columns={currentColumns}
-                        loading={loading}
-                        pagination={pageInfo}
-                        dataSource={dataList}
-                        onChange={(pageInfo: any, filters, sorter: any) => {
-                            const tarSorter = sorter.order ? {
-                                order_column: sorter.columnKey,
-                                order_direction: sorter.order === "ascend" ? 'asc' : 'desc'
-                            } as ISorterParam : undefined
-
-                            fetchData({
-                                ...fetchDataParams,
-                                pageConf: pageInfo,
-                                params: filterValues,
-                                paramsMap: filterParamsMap,
-                                sorter: tarSorter
-                            });
-                            // setPageInfo(pageInfo)
-                        }}
-                        rowSelection={{
-                            type: 'checkbox',
-                            fixed: 'left',
-                            columnWidth: 80,
-                            selectedRowKeys,
-                            onChange: (selectedRowKeys) => {
-                                setSelectedRowKeys(selectedRowKeys)
-                            }
-                        }}
-                        scroll={{ x: tableWidth, y: scrollY }}
-                    />
                 </div>
             </Content>
         </div >

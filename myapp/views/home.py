@@ -61,11 +61,21 @@ class Myapp(BaseMyappView):
 
     @expose('/navbar_right')
     def navbar_right(self):
-        return [
+        data = [
+            # {
+            #     "text": "",
+            #     "icon": '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">   <metadata><?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?> <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c140 79.160451, 2017/05/06-01:08:21        ">    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">       <rdf:Description rdf:about=""/>    </rdf:RDF> </x:xmpmeta>                 <?xpacket end="w"?></metadata> <image id="图层_0" data-name="图层 0" x="6" width="52" height="64" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAABACAMAAABiFaQOAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABXFBMVEUAAADXHgXXHgXXHgXYHgXYHgXYHgbZHgbYHgbYHgXWHQbPIADXHgfYHgbYHgbWHQbYHgaqAADXHwTYHgbYHwjbHQfYHwfZHgbYHgbXHwfXHQfeIQvZHgXYHwXXHgfXHgbYHwbZHgjbHwXZHgbbHgbXHgbYHgbZHwfYHgbYHwbYHQXYHgbXHwbYHgfYHgbXHQfYHgbXHgbZHgbYHQXMMwDQHAnYHgbXIAjWHAfVIAXXHwTWHgfYHQbZHQXXHwbYHgbXHgXWHgfYHgbXHQbXHwfXHwbYHwXZHQbXHgfYHQfXHQbYHwbYHgTXHgXYIQfYHgbcGgnXHgbZGgDYHgbMGgDYHgbXHgbYHgbXHgbYHwbXHQbZHgbYHgbZHgbYHwfXHQXYHQbYHgbXHwXZHgXYHgfYHwbYHwbYHgbYHgbXHQbYHgbYHgXYHwfXHgbTIQvYHgbYHwbcIwzYHgYAAACjlaAKAAAAcnRSTlMAM2aSvenz3MWPUBCZ3VYsigM52kJG6veidEYXumNN+9lDMX8qubJrsFthxqfE+EftgNS/BRvfICUwOkWdk1qJZXB2emyFYliaTqWvO7onzx3aFOQK7/ru29HHs6mfloyCiI2SmH2do6iuuL51zhes4RYaP3bpAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB+YJGhAsAvVkLkcAAAJjSURBVEjHlZbnVxNREMUfJgpJbBRLAEUDShHQJfTee0+oIRB6F3z//wfvvE1c3JNy33zY+5i9vxPO7uROlMpXZc8CwecvyitC4Ygiq+yl/levXlPImyeI1NvK0kxVtfZXTSnm3XuxffgYra2rq43Wu9Sn4sznBjF9+Zr7O9ZoqKai0DexfH/aaZZOSzGmVRzB/3tt0iv2DH/gfrW/2Y5mR2EmgNudP/3dml9oB3xNp0tbVJdjoLgNo3VcmG47RutuQBFbSGa4B9rbJ5/ZVOA9ev2+Xpx6cOiH1rt35Wa+p+r1Za76oQPeGy8NteA0AB2EtrOQvOhB6BB0mIWGcRqChqEjLDSCUxg6Ch1joTGcRqHjUIeFHJzGoRPQSZUbqHg+yOtPwjwBnYJO50Y3O46+8vrTME9BZ6CziqxZmGegIegcC83BHILOQxdYaAHmeehi9n1RJZOwCF2CLrPQMsxL0BVojIViMK9AO6CrLLSaTaY16DoLrcO8Bt2AbrLQJswb0AQ0yUJJmBPQrQJTmr9g3oJsI1V5qFPrbTf2dnhoxwRfJPtfkpUwwSext8tDuyb4JPb2eGjPBJ/E3j4P7Zvgk9gL8lDQBJ8Me4qHUuaLJLF3wEMHJvgk9tI8lDbBJ7F3yEOHJvgk9o546MgEn8RehocyJvgytttTPuPYHjpWJ/bQiTq1h07VGa7n/IM4h/1MXeAa5aEo7BfqEtdmHpKff5fqymbTuLvmSl3bbBp311ybWac3jbtrUurGZtO4u+ZG3eJ6x0N3sN+aL4hlpVWjPeSo5L0tc4918fvh0QZ5fPij/gJTBPTTrMeWfgAAAABJRU5ErkJggg=="/> </svg> ',
+            #     "link": "%s/frontend/aihub/model_market/model_all"%request.host_url.strip('/')
+            # },
+            {
+                "text": "",
+                "pic_url": '%s/static/assets/images/tip.gif'%request.host_url.strip('/'),
+                "link": "%s/frontend/aihub/model_market/model_all"%request.host_url.strip('/')
+            },
             {
                 "text":"帮助文档",
                 "icon":'<svg t="1663658395713" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4531" width="64" height="64"><path d="M808.35715 213.332736c-164.707272-164.709319-432.683537-164.709319-597.333504 0-164.709319 164.649967-164.709319 432.624185 0 597.333504 164.649967 164.709319 432.626231 164.709319 597.333504 0C973.067492 645.956921 973.067492 377.982704 808.35715 213.332736zM765.48983 767.767198c-141.075039 141.077086-370.609783 141.077086-511.627517 0-141.078109-141.017734-141.078109-370.520755 0-511.596817 141.017734-141.017734 370.552477-141.077086 511.627517 0C906.506541 397.188114 906.506541 626.750487 765.48983 767.767198z" p-id="4532" fill="#3273f1"></path><path d="M500.686838 686.040848c-20.432355 0.061398-37.063127 16.692171-37.063127 37.095873 0 20.458961 16.630772 37.090756 37.092803 37.090756 20.432355 0 37.066197-16.631796 37.066197-37.151132C537.781688 702.672644 521.147846 686.040848 500.686838 686.040848z" p-id="4533" fill="#3273f1"></path><path d="M505.832022 265.144776c-72.362075 0-136.290059 41.640376-158.933779 103.683431-5.26491 14.508435-9.813506 38.620599-5.26491 58.753125 3.048429 13.81975 17.709337 22.974247 31.320333 19.863397 14.117532-3.171226 23.0029-17.23043 19.832697-31.290657-1.556449-7.210215-0.060375-20.132526 3.350304-29.435403 12.533454-34.342156 51.27378-69.043493 109.60735-69.043493 68.681242 0 116.635417 35.091216 116.635417 85.375459 0 37.572734-23.302729 51.1561-64.525596 72.034617-37.303604 18.847254-83.761706 42.241057-83.761706 101.289917L474.092134 629.981065c0 14.478759 11.784394 26.2652 26.204825 26.2652 14.449084 0 26.235524-11.786441 26.235524-26.2652l0-53.606919c0.060375-25.605168 18.936281-36.317137 55.042617-54.504358 41.6107-20.968567 93.421716-47.025013 93.421716-118.820176C674.997839 321.862545 605.418135 265.144776 505.832022 265.144776z" p-id="4534" fill="#3273f1"></path></svg>',
-                "link":"https://github.com/tencentmusic/cube-studio/wiki"
+                "link":conf.get('DOCUMENTATION_URL','https://github.com/tencentmusic/cube-studio/wiki')
             },
             {
                 "text":'',
@@ -74,6 +84,7 @@ class Myapp(BaseMyappView):
             }
         ]
         # 返回模板
+        return jsonify(data)
 
     @expose('/menu')
     def menu(self):
