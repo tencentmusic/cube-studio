@@ -22,8 +22,6 @@ from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatFie
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from myapp.utils.security_api_impl import grant_hive_access_user
-from myapp.views.view_dimension import Dimension_table_ModelView_Api
 
 
 from .baseApi import (
