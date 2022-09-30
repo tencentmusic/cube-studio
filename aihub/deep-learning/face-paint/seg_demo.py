@@ -272,6 +272,8 @@ def start(
         base64_ = seg_image(args)
         all_list.append({f'{i}': base64_})
 
+    return all_list
+
 
 if __name__ == "__main__":
     image_path = r'/home/JLWL/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/human.jpg'

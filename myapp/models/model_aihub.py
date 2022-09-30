@@ -67,14 +67,24 @@ class Aihub(Model,ImportMixin,MyappModelBase):
     @property
     def card(self):
         return Markup(f'''
-<div>
-<a href="{self.doc}"> <img src="{self.pic}" style="border: black;border-radius: 5px; border-width: 2px;padding: 10px" height=220px width=360px border=5px alt="{self.describe}"/></a><br>
-<div style="padding-top:3px;">
-<p class="ellip1">{self.describe}</p>
-<a style="padding-left:1px;padding-right:6px;" href='https://www.baidu.com'><button> 调试 </button></a>
-<a style="padding-left:6px;padding-right:6px;" href='https://www.baidu.com'><button> 训练 </button></a>
-<a style="padding-left:6px;padding-right:1px;" href='https://www.baidu.com'><button> 服务 </button></a>
-</div>
+<div style="border: 1px solid rgba(0,0,0,.1);border-radius: 3px;">
+    <a href="{self.doc}">
+        <img src="{self.pic}" style="height:220px;width:100%" alt="{self.describe}"/>
+    </a>
+    <br>
+    <div>
+        <div class="p16" alt="{self.describe}">
+            <div class="p-r card-popup ellip1">
+                {self.describe}
+                <div class="p-a card-popup-target d-n" style="top:100%;left:0;background:rgba(0,0,0,0.5);color:#fff;border-radius:3px;">{self.describe}</div>
+            </div>
+        </div>
+        <div style="border-top: 1px solid rgba(0,0,0,.06);" class="ptb8 d-f ac jc-b">
+            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='https://www.baidu.com'>调试</a>
+            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='https://www.baidu.com'>训练</a>
+            <a class="flex1 ta-c" style="" href='https://www.baidu.com'>服务</a>
+        </div>
+    </div>
 </div>
 ''')
 
