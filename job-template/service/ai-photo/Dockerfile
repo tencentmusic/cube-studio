@@ -1,6 +1,6 @@
 # docker build -t ccr.ccs.tencentyun.com/cube-studio/ai-photo  .
 
-FROM ubuntu:20.04
+FROM ubuntu:18.04
 
 RUN apt update
 ENV TZ Asia/Shanghai
