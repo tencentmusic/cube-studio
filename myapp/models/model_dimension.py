@@ -41,7 +41,7 @@ import pysnooper
 
 class Dimension_table(Model,ImportMixin,MyappModelBase):
     __tablename__ = 'dimension'
-
+    __table_args__ = (UniqueConstraint('sqllchemy_uri', 'table_name'),)
     id = Column(Integer, primary_key=True)
     sqllchemy_uri = Column(String(255),nullable=True)
     table_name = Column(String(255),nullable=True,unique=True)

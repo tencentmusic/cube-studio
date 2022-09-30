@@ -298,6 +298,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         if not item.owner or g.user.username not in item.owner:
             item.owner = g.user.username if not item.owner else item.owner + "," + g.user.username
 
+        flash('添加或修改字段类型，需要点击创建远程表，已实现在远程数据库上建表','warning')
     def pre_update(self, item):
         if not item.sqllchemy_uri:
             item.sqllchemy_uri=self.src_item_json.get('sqllchemy_uri','')
@@ -665,9 +666,16 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     if key in ['id','rowid']:
                         continue
                     if self.cols[key].get('column_type', 'text') == 'int':
-                        setattr(item,key,int(getattr(item,key)) if getattr(item,key) else None)
+                        try:
+                            setattr(item,key,int(getattr(item,key)))
+                        except Exception as e:
+                            setattr(item,key,None)
+
                     if self.cols[key].get('column_type', 'text') == 'double':
-                        setattr(item,key,float(getattr(item,key)) if getattr(item,key) else None)
+                        try:
+                            setattr(item,key,float(getattr(item,key)))
+                        except Exception as e:
+                            setattr(item, key, None)
 
             def pre_update(self,item):
 
@@ -676,10 +684,17 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     if key in ['id','rowid']:
                         continue
                     if self.cols[key].get('column_type', 'text') == 'int':
-                        setattr(item,key,int(getattr(item,key)) if getattr(item,key) else None)
+                        try:
+                            setattr(item,key,int(getattr(item,key)))
+                        except Exception as e:
+                            setattr(item,key,None)
+
                     if self.cols[key].get('column_type', 'text') == 'double':
-                        setattr(item,key,float(getattr(item,key)) if getattr(item,key) else None)
-						
+                        try:
+                            setattr(item,key,float(getattr(item,key)))
+                        except Exception as e:
+                            setattr(item, key, None)
+
             def get_primary_key(cols):
                 for name in cols:
                     if cols[name].get('primary_key',False):
@@ -742,6 +757,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                                 else:
                                     data[key]=str(data[key])
                             except Exception as e:
+                                print(e)
                                 data[key] = None
 
                         model = self.datamodel.obj(**data)

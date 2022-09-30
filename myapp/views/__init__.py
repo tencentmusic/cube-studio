@@ -24,4 +24,6 @@ from . import view_dataset
 from .log import views
 from .log import api as log_api 
 
+from . import view_aihub
+
 

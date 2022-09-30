@@ -96,6 +96,10 @@ class Project(Model,AuditMixinNullable,MyappModelBase):
         except Exception as e:
             print(e)
             return default
+    @property
+    def org(self):
+        expand = json.loads(self.expand) if self.expand else {}
+        return expand.get('org','public')
 
 class Project_User(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = "project_user"

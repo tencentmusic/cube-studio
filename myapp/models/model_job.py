@@ -191,7 +191,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     schedule_type = Column(Enum('once', 'crontab'),nullable=False,default='once')
     cron_time = Column(String(100))        # 调度周期
     cronjob_start_time = Column(String(300), default='')
-    pipeline_file=Column(Text(65536),default='')
+    pipeline_file=Column(Text(655360),default='')
     pipeline_argo_id = Column(String(100))
     version_id = Column(String(100))
     run_id = Column(String(100))
@@ -502,7 +502,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     command = Column(String(1000),default='')
     overwrite_entrypoint = Column(Boolean,default=False)   # 是否覆盖入口
     args = Column(Text)
-    volume_mount = Column(String(400),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')   # 挂载
+    volume_mount = Column(String(2000),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')   # 挂载
     node_selector = Column(String(100),default='cpu=true,train=true')   # 挂载
     resource_memory = Column(String(100),default='2G')
     resource_cpu = Column(String(100), default='2')

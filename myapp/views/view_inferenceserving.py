@@ -133,6 +133,7 @@ class InferenceService_ModelView_base():
         "replicas_html":"副本数"
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
+    host_rule=",".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",'') for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",'')])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
@@ -147,7 +148,7 @@ class InferenceService_ModelView_base():
         "max_replicas": StringField(_(datamodel.obj.lab('max_replicas')), default=InferenceService.max_replicas.default.arg,
                                     description='最大副本数，用来配置高可用，流量变动自动伸缩', widget=BS3TextFieldWidget(),
                                     validators=[DataRequired()]),
-        "host": StringField(_(datamodel.obj.lab('host')), default=InferenceService.host.default.arg,description='访问域名，xx.%s'%conf.get('SERVICE_DOMAIN',''),widget=BS3TextFieldWidget()),
+        "host": StringField(_(datamodel.obj.lab('host')), default=InferenceService.host.default.arg,description='访问域名，'+host_rule,widget=BS3TextFieldWidget()),
         "transformer":StringField(_(datamodel.obj.lab('transformer')), default=InferenceService.transformer.default.arg,description='前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架',widget=BS3TextFieldWidget()),
         'resource_gpu':StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
                                                         description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
@@ -987,6 +988,8 @@ output %s
                     )
                 except Exception as e:
                     flash('hpa:'+str(e),'warning')
+            else:
+                k8s_client.delete_hpa(namespace=namespace,name=name)
 
         # # 使用激活器
         # if int(service.min_replicas)==0:
