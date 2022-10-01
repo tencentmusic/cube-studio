@@ -431,10 +431,17 @@
                     if(back['status']==0)    //每张图片的处理状态值
                     {
                         result = back['result'];  //当前图片的处理结果。
-                        console.log(JSON.stringify(back));
-                        div_dom=$("div[dataid='"+image_id+"']");
-                        img_dom=div_dom.children('img')[0];
-                        img_dom.setAttribute('src','data:.*;base64,'+result[image_id]);
+                        console.log(JSON.stringify(result));
+                        //document.getElementById("container").innerHTML=""
+                        for(i=0;i<result.length;i++){
+
+                          html = '<div class="img-block">'+
+                                    '    <div class="thumbnail" dataid="'+i+'">'+
+                                    '        <img src="data:.*;base64,'+result[i]+'" alt="...">'+
+                                    '    </div>'+
+                                    '</div>';
+                            document.getElementById("container").innerHTML =document.getElementById("container").innerHTML+ html;
+                        }
 
                     }else {
                         div_dom=$("div[dataid='"+image_id+"']");

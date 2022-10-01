@@ -1,12 +1,21 @@
+import argparse
+import base64
+import datetime
+import os
+import sys
 
-import torch
+import cv2
+import numpy as np
+from tqdm import tqdm
+import pysnooper
+from PIL import ImageFont
 from PIL import Image
+from PIL import ImageDraw
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model = torch.hub.load("bryandlee/animegan2-pytorch:main", "generator", device=device).eval()
-# face2paint = torch.hub.load("bryandlee/animegan2-pytorch:main", "face2paint", device=device, side_by_side=True)
 
-# @title 加载所需方法
+from paddleseg.utils import get_sys_env, logger, get_image_list
+
+from infer import Predictor
 
 import os
 import dlib
@@ -15,6 +24,54 @@ from typing import Union, List
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import torch
+
+
+def get_bg_img(bg_img_path, img_shape):
+    if bg_img_path is None:
+        bg = 255 * np.ones(img_shape)
+    elif not os.path.exists(bg_img_path):
+        raise Exception('The --bg_img_path is not existed: {}'.format(
+            bg_img_path))
+    else:
+        bg = cv2.imread(bg_img_path)
+    return bg
+
+
+def makedirs(save_dir):
+    dirname = save_dir if os.path.isdir(save_dir) else \
+        os.path.dirname(save_dir)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+
+@pysnooper.snoop()
+def seg_image(args):
+    assert os.path.exists(args['img_path']), \
+        "The --img_path is not existed: {}.".format(args['img_path'])
+
+    logger.info("Input: image")
+    logger.info("Create predictor...")
+    predictor = Predictor(args)
+
+    logger.info("Start predicting...")
+    img = cv2.imread(args['re_save_path'])
+    bg_img = get_bg_img(args['bg_img_path'], img.shape)
+    out_img = predictor.run(img, bg_img)
+    # print(type(out_img))
+    cv2.imwrite(args['save_path'], out_img)
+    img_draw_text = Image.open(args['save_path'])
+    draw = ImageDraw.Draw(img_draw_text)
+    x,y = img_draw_text.size
+    ft = ImageFont.truetype("/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/1.ttf", args['text_height'])
+    draw.text(args['text_position'], args['text'], font=ft, fill=args['text_color'])
+    file = open(args['save_path'], 'rb')
+    base64_str = base64.b64encode(file.read()).decode('utf-8')
+    print(len(base64_str))
+    return base64_str
+    # img_ = Image.open(out_img)
+    # print(img_)
+
 
 
 def get_dlib_face_detector(predictor_path: str = "shape_predictor_68_face_landmarks.dat"):
@@ -24,7 +81,7 @@ def get_dlib_face_detector(predictor_path: str = "shape_predictor_68_face_landma
         os.system(f"bzip2 -dk {model_file}")
 
     detector = dlib.get_frontal_face_detector()
-    shape_predictor = dlib.shape_predictor(predictor_path)
+    shape_predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 
     def detect_face_landmarks(img: Union[Image.Image, np.ndarray]):
         if isinstance(img, Image.Image):
@@ -82,7 +139,6 @@ import PIL.Image
 import PIL.ImageFile
 import numpy as np
 import scipy.ndimage
-
 
 def align_and_crop_face(
         img: Image.Image,
@@ -168,24 +224,188 @@ def align_and_crop_face(
 
     return img
 
+import pysnooper
+@pysnooper.snoop()
+def start(
+        config=r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/inference_models/portrait_pp_humansegv2_lite_256x144_inference_model_with_softmax/deploy.yaml',
+        img_path=r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/1.jpg',
+        re_save_path=r'temp/1_.jpg',
+        save_path=r'temp/1.jpg',
+        text='陈',
+        use_gpu=False,
+        test_speed=False, use_optic_flow=False, use_post_process=False):
+    args = {
+        'config': config,
+        'img_path': img_path,
+        're_save_path': re_save_path,
+        'save_path': save_path,
+        'use_gpu': use_gpu,
+        'test_speed': test_speed,
+        "text":text,
+        'use_optic_flow': use_optic_flow,
+        'use_post_process': use_post_process
+    }
+    print(type(args))
 
-if __name__ == '__main__':
+    # 先动漫化后增加背景效果更佳
 
-    img_path='test.jpg'
     # 加载网络或本地文件
-    img = Image.open(img_path).convert("RGB")
+    save_ = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    os.mkdir(save_)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = torch.hub.load("bryandlee/animegan2-pytorch:main", "generator", device=device).eval()
+    face2paint = torch.hub.load("bryandlee/animegan2-pytorch:main", "face2paint", device=device, side_by_side=True)
+    img = Image.open(args['img_path']).convert("RGB")
     # img = Image.open("/content/sample.jpg").convert("RGB")
 
     face_detector = get_dlib_face_detector()
     landmarks = face_detector(img)
+    out = ''
     for landmark in landmarks:
         face = align_and_crop_face(img, landmark, expand=1.3)
         p_face = face2paint(model=model, img=face, size=512)
         # display(p_face)
-        # p_face.save('1.png') # 此输出为对比图片
+        p_face.save('temp/input_cartoon.jpg') # 此输出为对比图片
         # 裁剪为需要的部分输出
         x_, y_ = p_face.size
-        out = p_face.crop((int(x_ / 2), 0, x_, y_))
-        # display(out)
-        out.save("new_"+img_path)
+        out = p_face.crop((int(x_/2), 0, x_, y_))  # 后面一半是卡通效果图
+    img_ = out
+    x, y = img_.size
+    print(x, y)
+    all_list = []
+    all_backgroud=[
+        {
+            "path":"icon/1.jpg",
+            "position":[410,260],
+            "height":340,
+            "text_position":(260,200),
+            "text_height":200,
+            "color":(149,6,2),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/2.jpg",
+            "position": [70, 200],
+            "height": 380,
+            "text_position": (450, 300),
+            "text_height": 180,
+            "color": (182,28,30),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/3.jpg",
+            "position": [330, 150],
+            "height": 370,
+            "text_position": (150, 350),
+            "text_height": 150,
+            "color": (114,10,11),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/4.jpg",
+            "position": [350, 270],
+            "height": 340,
+            "text_position": (140, 400),
+            "text_height": 150,
+            "color": (152, 16, 0),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/5.jpg",
+            "position": [260, 230],
+            "height": 570,
+            "text_position": (80, 430),
+            "text_height": 180,
+            "color": (240, 105, 116),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/6.jpg",
+            "position": [100, 230],
+            "height": 320,
+            "text_position": (460, 310),
+            "text_height": 170,
+            "color": (194, 0, 8),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/7.jpg",
+            "position": [240, 210],
+            "height": 400,
+            "text_position": (130, 290),
+            "text_height": 140,
+            "color": (244, 214, 190),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/8.jpg",
+            "position": [120, 190],
+            "height": 330,
+            "text_position": (460, 325),
+            "text_height": 150,
+            "color": (216, 18, 19),
+            "text_color": "white"
+        },
+        {
+            "path": "icon/9.jpg",
+            "position": [380, 260],
+            "height": 400,
+            "text_position": (90, 330),
+            "text_height": 185,
+            "color": (250, 250, 250),
+            "text_color": "red"
+        },
+        {
+            "path": "icon/10.jpg",
+            "position": [100, 200],
+            "height": 320,
+            "text_position": (410, 290),
+            "text_height": 180,
+            "color": (250, 250, 250),
+            "text_color": "red"
+        }
+    ]
 
+    for pic in all_backgroud:
+        img_=img_.resize((int((pic['height']/y)*x),pic['height']),Image.ANTIALIAS)
+        newIm = Image.new('RGB', (800, 800), pic['color'])
+
+        newIm.paste(img_, pic['position'])  # 把人体复制进去
+        newIm.save(args['re_save_path'])
+        args['bg_img_path']=pic['path']
+        args['position']=pic['position']
+        args['height']=pic['height']
+        args['text_position']=pic['text_position']
+        args['text_height']=pic['text_height']
+        args['text_color'] = pic['text_color']
+        base64_ = seg_image(args)
+        all_list.append(base64_)
+
+    return all_list
+
+
+if __name__ == "__main__":
+    image_path = r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/human.jpg'
+    file_after = open(image_path, 'rb')
+    base64_after_str = base64.b64encode(file_after.read()).decode('utf-8')
+    print(len(base64_after_str))
+    imgdata = base64.b64decode(base64_after_str)
+    # 将图片保存为文件
+    if os.path.exists('temp'):
+        pass
+    else:
+        os.mkdir('temp')
+    name_ = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    new_image_path = f'temp/{name_}.jpg'
+    with open(new_image_path, 'wb') as f:
+        f.write(imgdata)
+
+    start(
+        # config=r'E:\PaddleSeg-release-2.6\contrib\PP-HumanSeg\src\inference_models\portrait_pp_humansegv2_lite_256x144_inference_model_with_softmax\deploy.yaml',
+        img_path=new_image_path,
+        # bg_img_path=r'E:\PaddleSeg-release-2.6\contrib\PP-HumanSeg\src\data\images\bg_1.jpg',
+        # re_save_path=r'E:\PaddleSeg-release-2.6\contrib\PP-HumanSeg\src\data\images\_1.jpg',
+        # save_path=r'E:\PaddleSeg-release-2.6\contrib\PP-HumanSeg\src\data\images_result\1.jpg',
+        # use_gpu=True,
+        # test_speed=False, use_optic_flow=False, use_post_process=False)
+        )

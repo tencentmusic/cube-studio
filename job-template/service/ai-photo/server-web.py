@@ -24,7 +24,6 @@ from flask import jsonify,request
 from PIL import Image,ImageFont
 from PIL import ImageDraw
 import urllib
-# import torch
 from PIL import Image
 
 import pysnooper
@@ -39,10 +38,10 @@ UPLOAD_FOLDER = "UPLOAD_FOLDER"
 # myfont = ImageFont.truetype('/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc', 20)
 
 
-# from aihub import get_dlib_face_detector,align_and_crop_face,face2paint
+from aihub import start
 
 @app.route('/api/v1.0/model',methods=['GET','POST'])
-@pysnooper.snoop()
+# @pysnooper.snoop(watch_explode=('all_back_image',))
 def classify_rest():
     try:
         data = request.json
@@ -55,30 +54,16 @@ def classify_rest():
         cv2.imwrite(image_path, img_np)
 
         logging.info('Saving to %s.', image_path)
-        out_image_path = "new_"+image_path
-        # 加载网络或本地文件
-        img = Image.open(image_path).convert("RGB")
-        # img = Image.open("/content/sample.jpg").convert("RGB")
 
-        face_detector = get_dlib_face_detector()
-        landmarks = face_detector(img)
-        for landmark in landmarks:
-            face = align_and_crop_face(img, landmark, expand=1.3)
-            p_face = face2paint(model=model, img=face, size=512)
-            # display(p_face)
-            # p_face.save('1.png') # 此输出为对比图片
-            # 裁剪为需要的部分输出
-            x_, y_ = p_face.size
-            out = p_face.crop((int(x_ / 2), 0, x_, y_))
-            # display(out)
-            out.save(out_image_path)
+        all_back_image = start(
+            img_path=image_path,
+            text=txt
+        )
 
         os.remove(image_path)
         return jsonify({
             "status": 0,
-            "result": {
-                data.get('image_id','image_id'):base64_str
-            },
+            "result": all_back_image,
             "message":""
         })
 

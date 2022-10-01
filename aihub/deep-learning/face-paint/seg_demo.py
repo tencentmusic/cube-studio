@@ -8,6 +8,10 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
+from PIL import ImageFont
+from PIL import Image
+from PIL import ImageDraw
+
 
 from paddleseg.utils import get_sys_env, logger, get_image_list
 
@@ -21,7 +25,6 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import torch
-from PIL import Image
 
 
 def get_bg_img(bg_img_path, img_shape):
@@ -56,6 +59,11 @@ def seg_image(args):
     out_img = predictor.run(img, bg_img)
     # print(type(out_img))
     cv2.imwrite(args['save_dir'], out_img)
+    img_draw_text = Image.open(args['save_dir'])
+    draw = ImageDraw.Draw(img_draw_text)
+    x,y = img_draw_text.size
+    ft = ImageFont.truetype("/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/1.ttf", 40)
+    draw.text((int(x*0.4), int(y*0.6)), u"蒋", font=ft, fill='green')
     file = open(args['save_dir'], 'rb')
     base64_str = base64.b64encode(file.read()).decode('utf-8')
     print(len(base64_str))
@@ -218,9 +226,9 @@ def align_and_crop_face(
 
 
 def start(
-        config=r'/home/JLWL/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/inference_models/portrait_pp_humansegv2_lite_256x144_inference_model_with_softmax/deploy.yaml',
-        img_path=r'/home/JLWL/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/1.jpg',
-        bg_img_path=r'/home/JLWL/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/2.jpg',
+        config=r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/inference_models/portrait_pp_humansegv2_lite_256x144_inference_model_with_softmax/deploy.yaml',
+        img_path=r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/1.jpg',
+        bg_img_path=r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/2bg.png',
         re_save_path=r'temp/1_.jpg',
         save_dir=r'temp/1.jpg',
         use_gpu=True,
@@ -265,8 +273,9 @@ def start(
     print(x, y)
     all_list = []
     for i in range(5):
-        newIm = Image.new('RGB', (int(x * 1.5), int(y * 1.5)), 'white')
-        newIm.paste(img_, (int(x * 0.5), int(y * 0.45)))
+        newIm = Image.new('RGB', (int(x * 2), int(y * 2)), 'white')
+        newIm.paste(img_, (int(x*0.25), int(y*0.55)))
+        print(0.1,0.8)
         # args['re_save_path'] = newIm
         newIm.save(args['re_save_path'])
         base64_ = seg_image(args)
@@ -276,7 +285,7 @@ def start(
 
 
 if __name__ == "__main__":
-    image_path = r'/home/JLWL/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/human.jpg'
+    image_path = r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/human.jpg'
     file_after = open(image_path, 'rb')
     base64_after_str = base64.b64encode(file_after.read()).decode('utf-8')
     print(len(base64_after_str))
