@@ -64,7 +64,8 @@ def seg_image(args):
     draw = ImageDraw.Draw(img_draw_text)
     x,y = img_draw_text.size
     ft = ImageFont.truetype("/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/1.ttf", args['text_height'])
-    draw.text(args['text_position'], args['text'], font=ft, fill=args['text_color'])
+    draw.text(args['text_position'], args['text'], font=ft, fill=args['text_color'],align ="left")
+    img_draw_text.save(args['save_path'])
     file = open(args['save_path'], 'rb')
     base64_str = base64.b64encode(file.read()).decode('utf-8')
     print(len(base64_str))
@@ -278,7 +279,7 @@ def start(
             "path":"icon/1.jpg",
             "position":[410,260],
             "height":340,
-            "text_position":(260,200),
+            "text_position":(190,250),
             "text_height":200,
             "color":(149,6,2),
             "text_color": "white"
@@ -288,7 +289,7 @@ def start(
             "position": [70, 200],
             "height": 380,
             "text_position": (450, 300),
-            "text_height": 180,
+            "text_height": 200,
             "color": (182,28,30),
             "text_color": "white"
         },
@@ -305,8 +306,8 @@ def start(
             "path": "icon/4.jpg",
             "position": [350, 270],
             "height": 340,
-            "text_position": (140, 400),
-            "text_height": 150,
+            "text_position": (140, 380),
+            "text_height": 180,
             "color": (152, 16, 0),
             "text_color": "white"
         },
@@ -335,7 +336,7 @@ def start(
             "text_position": (130, 290),
             "text_height": 140,
             "color": (244, 214, 190),
-            "text_color": "white"
+            "text_color": "red"
         },
         {
             "path": "icon/8.jpg",
@@ -368,7 +369,7 @@ def start(
 
     for pic in all_backgroud:
         img_=img_.resize((int((pic['height']/y)*x),pic['height']),Image.ANTIALIAS)
-        newIm = Image.new('RGB', (800, 800), pic['color'])
+        newIm = Image.new('RGB', (800, 800), 'white')
 
         newIm.paste(img_, pic['position'])  # 把人体复制进去
         newIm.save(args['re_save_path'])
