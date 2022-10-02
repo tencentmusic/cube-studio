@@ -59,6 +59,8 @@ def seg_image(args):
     bg_img = get_bg_img(args['bg_img_path'], img.shape)
     out_img = predictor.run(img, bg_img)
     # print(type(out_img))
+    for i in range(2):
+        out_img=predictor.run(out_img,bg_img)
     cv2.imwrite(args['save_path'], out_img)
     img_draw_text = Image.open(args['save_path'])
     draw = ImageDraw.Draw(img_draw_text)
@@ -366,21 +368,21 @@ def start(
             "text_color": "red"
         }
     ]
+    for color in ['white','red']:
+        for pic in all_backgroud:
+            img_=img_.resize((int((pic['height']/y)*x),pic['height']),Image.ANTIALIAS)
+            newIm = Image.new('RGB', (800, 800), color)
 
-    for pic in all_backgroud:
-        img_=img_.resize((int((pic['height']/y)*x),pic['height']),Image.ANTIALIAS)
-        newIm = Image.new('RGB', (800, 800), 'white')
-
-        newIm.paste(img_, pic['position'])  # 把人体复制进去
-        newIm.save(args['re_save_path'])
-        args['bg_img_path']=pic['path']
-        args['position']=pic['position']
-        args['height']=pic['height']
-        args['text_position']=pic['text_position']
-        args['text_height']=pic['text_height']
-        args['text_color'] = pic['text_color']
-        base64_ = seg_image(args)
-        all_list.append(base64_)
+            newIm.paste(img_, pic['position'])  # 把人体复制进去
+            newIm.save(args['re_save_path'])
+            args['bg_img_path']=pic['path']
+            args['position']=pic['position']
+            args['height']=pic['height']
+            args['text_position']=pic['text_position']
+            args['text_height']=pic['text_height']
+            args['text_color'] = pic['text_color']
+            base64_ = seg_image(args)
+            all_list.append(base64_)
 
     return all_list
 
