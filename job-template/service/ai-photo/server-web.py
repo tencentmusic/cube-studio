@@ -46,6 +46,8 @@ def classify_rest():
     try:
         data = request.json
         txt = data.get('txt','姓')
+        if not txt:
+            txt='姓'
         image_decode = base64.b64decode(data['image_data'])
         image_path = os.path.join(UPLOAD_FOLDER, str(datetime.datetime.now()) + ".jpg")
         nparr = np.fromstring(image_decode, np.uint8)
