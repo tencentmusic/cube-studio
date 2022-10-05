@@ -368,8 +368,9 @@ def start(
             "text_color": "red"
         }
     ]
-    for color in ['white','red']:
-        for pic in all_backgroud:
+
+    for pic in all_backgroud:
+        for color in ['white']:
             img_=img_.resize((int((pic['height']/y)*x),pic['height']),Image.ANTIALIAS)
             newIm = Image.new('RGB', (800, 800), color)
 
