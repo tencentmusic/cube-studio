@@ -59,8 +59,8 @@ def seg_image(args):
     bg_img = get_bg_img(args['bg_img_path'], img.shape)
     out_img = predictor.run(img, bg_img)
     # print(type(out_img))
-    for i in range(2):
-        out_img=predictor.run(out_img,bg_img)
+    # for i in range(4):
+    #     out_img=predictor.run(out_img,bg_img)
     cv2.imwrite(args['save_path'], out_img)
     img_draw_text = Image.open(args['save_path'])
     draw = ImageDraw.Draw(img_draw_text)
