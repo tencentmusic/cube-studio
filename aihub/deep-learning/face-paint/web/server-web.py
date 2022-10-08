@@ -34,7 +34,10 @@ app = Flask(__name__,
             static_folder='static',
             template_folder='templates')
 
+
 UPLOAD_FOLDER = "UPLOAD_FOLDER"
+os.makedirs('UPLOAD_FOLDER',exist_ok=True)
+os.makedirs('temp',exist_ok=True)
 # myfont = ImageFont.truetype('/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc', 20)
 
 

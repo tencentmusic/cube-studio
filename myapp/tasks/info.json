@@ -7,10 +7,12 @@
     "name": "mnist",
     "status": "online",
     "version": "v20221001",
-    "uuid": "20220928101455",
+    "uuid": "2022100101",
     "label": "手写体识别",
     "describe": "手写体识别的示例应用，包含notebook开发，训练模板和推理服务",
     "pic": "http://5b0988e595225.cdn.sohucs.com/images/20180404/9f62a1eea7054f8eaf4bc1c87168238b.png",
+    "hot": "1",
+    "price": "0",
     "dataset": {
       "name": "MNIST",
       "label": "手写数字数据集",
@@ -128,10 +130,12 @@
     "name": "UniColor",
     "status": "offline",
     "version": "v20221001",
-    "uuid": "20220928101456",
+    "uuid": "2022100102",
     "label": "图片上色",
     "describe": "上色算法！UniColor - 使用 Transformer 进行多模态着色的统一框架",
-    "pic": "https://picx.zhimg.com/v2-e96dd757c96464427560a9b5e5b07bc3_720w.jpg?source=172ae18b"
+    "pic": "https://picx.zhimg.com/v2-e96dd757c96464427560a9b5e5b07bc3_720w.jpg?source=172ae18b",
+    "hot": "93",
+    "price": "0"
   },
   {
     "doc": "README.md",
@@ -141,10 +145,12 @@
     "name": "VToonify",
     "status": "offline",
     "version": "v20221001",
-    "uuid": "20220928101457",
+    "uuid": "2022100103",
     "label": "卡通化",
     "describe": "全新卡通化算法！SIGGRAPH Asia 2022|VToonify 可控的高分辨率人像视频风格转换",
-    "pic": "https://agirls.aotter.net/media/2e3b9417-e579-4c2d-8ed1-bbac183a0a78.jpg"
+    "pic": "https://agirls.aotter.net/media/2e3b9417-e579-4c2d-8ed1-bbac183a0a78.jpg",
+    "hot": "100",
+    "price": "0"
   },
   {
     "doc": "README.md",
@@ -154,10 +160,12 @@
     "name": "caotu",
     "status": "offline",
     "version": "v20221001",
-    "uuid": "20220928101457",
+    "uuid": "2022100104",
     "label": "草图生成动漫",
     "describe": "草图生成动漫角色！ 又升级了！“手残党”或许也能魔改",
-    "pic": "https://img-blog.csdnimg.cn/img_convert/15f4418d8874e8de6b627aa9c0a2cd6d.png"
+    "pic": "https://img-blog.csdnimg.cn/img_convert/15f4418d8874e8de6b627aa9c0a2cd6d.png",
+    "hot": "91",
+    "price": "0"
   },
   {
     "doc": "README.md",
@@ -167,10 +175,12 @@
     "name": "StyleGAN2",
     "status": "offline",
     "version": "v20221003",
-    "uuid": "20220928101458",
+    "uuid": "2022100105",
     "label": "换脸",
     "describe": "基于StyleGAN2的高保真换脸",
-    "pic": "https://i.ytimg.com/vi/gJkEC9pg_x0/maxresdefault.jpg"
+    "pic": "https://i.ytimg.com/vi/gJkEC9pg_x0/maxresdefault.jpg",
+    "hot": "92",
+    "price": "0"
   },
   {
     "doc": "README.md",
@@ -180,10 +190,12 @@
     "name": "prompt",
     "status": "offline",
     "version": "v20221003",
-    "uuid": "20220928101459",
+    "uuid": "2022100106",
     "label": "编辑自然图片",
     "describe": "Blended Diffusion，mask+prompt编辑自然图像，这背景很真实",
-    "pic": "https://img-blog.csdnimg.cn/6052843154fc48a09b5a8e2d223ef2b1.png"
+    "pic": "https://img-blog.csdnimg.cn/6052843154fc48a09b5a8e2d223ef2b1.png",
+    "hot": "90",
+    "price": "0"
   },
   {
     "doc": "README.md",
@@ -193,23 +205,117 @@
     "name": "GHUM",
     "status": "offline",
     "version": "v20221003",
-    "uuid": "20220928101460",
+    "uuid": "2022100107",
     "label": "3D人体关键点",
     "describe": "谷歌 实时3D人体关键点检测&姿态估计，已加入mediapipe!",
-    "pic": "https://img-blog.csdnimg.cn/20200224230848466.jpg"
+    "pic": "https://img-blog.csdnimg.cn/20200224230848466.jpg",
+    "hot": "96",
+    "price": "0"
   },
   {
     "doc": "http://139.199.89.101/",
-    "field": "国庆个性头像生成",
-    "scenes": "图像合成",
+    "field": "机器视觉",
+    "scenes": "综合应用",
     "type": "",
     "name": "cartoonizer",
     "status": "online",
     "version": "v20221003",
-    "uuid": "20220928101461",
+    "uuid": "2022100108",
     "label": "国庆卡通头像生成",
     "describe": "个人性国庆卡通头像生成，每个人的头像都是自己独一无二的",
-    "pic": "https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/aihub/ai-photo/ad1.png"
+    "pic": "https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/aihub/ai-photo/ad1.png",
+    "hot": "89",
+    "price": "0"
+  },
+  {
+    "doc": "",
+    "field": "机器视觉",
+    "scenes": "风格迁移",
+    "type": "",
+    "name": "neural style",
+    "status": "offline",
+    "version": "v20221004",
+    "uuid": "2022100109",
+    "label": "图像风格迁移",
+    "describe": "将你的图片变成大师级作品",
+    "pic": "https://bbs-img.huaweicloud.com/blogs/img/1618802539113053650.png",
+    "hot": "97",
+    "price": "0"
+  },
+  {
+    "doc": "",
+    "field": "机器视觉",
+    "scenes": "图像生成",
+    "type": "",
+    "name": "Midjourney",
+    "status": "offline",
+    "version": "v20221004",
+    "uuid": "2022100110",
+    "label": "AI艺术图生成",
+    "describe": "仅仅通过文本，AI图片生成器就能创建艺术品",
+    "pic": "https://images.nightcafe.studio//assets/stable-tile.jpg",
+    "hot": "98",
+    "price": "0"
+  },
+  {
+    "doc": "",
+    "field": "机器视觉",
+    "scenes": "图像生成",
+    "type": "",
+    "name": "Bringing-Old-Photo-Back-to-life",
+    "status": "offline",
+    "version": "v20221004",
+    "uuid": "2022100111",
+    "label": "老照片修复",
+    "describe": "基于领先的AI图像生成技术，实现老照片、模糊照片、低分辨率照片的画质增强。",
+    "pic": "https://n.sinaimg.cn/spider2020629/356/w640h516/20200629/c2d1-ivrxcex1264539.jpg",
+    "hot": "99",
+    "price": "0"
+  },
+  {
+    "doc": "",
+    "field": "机器视觉",
+    "scenes": "图像生成",
+    "type": "",
+    "name": "darknet-yolov5",
+    "status": "offline",
+    "version": "v20221004",
+    "uuid": "2022100112",
+    "label": "多目标跟踪",
+    "describe": "同时跟踪并识别多个目标对象",
+    "pic": "https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg",
+    "hot": "95",
+    "price": "0"
+  },
+  {
+    "doc": "",
+    "field": "机器视觉",
+    "scenes": "图像分割",
+    "type": "",
+    "name": "paddleseg",
+    "status": "offline",
+    "version": "v20221004",
+    "uuid": "2022100113",
+    "label": "图像分割",
+    "describe": "基于coco 数据集的instance segmentation",
+    "pic": "https://pica.zhimg.com/v2-b62fe66f77297fde0be09fcc0a94ec59_1440w.jpg",
+    "hot": "94",
+    "price": "0"
+  },
+    {
+    "doc": "",
+    "field": "机器视觉",
+    "scenes": "图像分割",
+    "type": "",
+    "name": "paddleseg-human",
+    "status": "offline",
+    "version": "v20221004",
+    "uuid": "2022100114",
+    "label": "人体分割",
+    "describe": "飞浆hubman-seg人体分割，视频背景虚化",
+    "pic": "https://github.com/juncaipeng/raw_data/blob/master/images/portrait_bg_replace_1.gif?raw=true",
+    "hot": "94",
+    "price": "0"
   }
 ]
 

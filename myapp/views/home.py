@@ -963,8 +963,8 @@ class Myapp(BaseMyappView):
                         exist_pod=True
                         pod = all_tasks_json[cluster_name][namespace][org][pod_name]
                         # print(pod)
-                        dashboard_url = cluster_config.get('K8S_DASHBOARD_CLUSTER', request.host_url).strip('/') + '/#/search?namespace=%s&q=%s'%(namespace,pod_name)
-                        grafana_url = cluster_config.get('GRAFANA_HOST', request.host_url).strip('/') + conf.get('GRAFANA_TASK_PATH')
+                        dashboard_url = cluster_config.get('K8S_DASHBOARD_CLUSTER', request.host_url).rstrip('/') + '/#/search?namespace=%s&q=%s'%(namespace,pod_name)
+                        grafana_url = cluster_config.get('GRAFANA_HOST', request.host_url).rstrip('/') + conf.get('GRAFANA_TASK_PATH')
                         message += '<tr>%s %s %s %s %s %s %s %s<tr>' % (
                             td_html % cluster_name,
                             td_html % org,

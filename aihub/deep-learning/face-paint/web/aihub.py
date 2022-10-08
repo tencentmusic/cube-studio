@@ -15,7 +15,7 @@ from PIL import ImageDraw
 
 from paddleseg.utils import get_sys_env, logger, get_image_list
 
-from infer import Predictor
+from util.infer import Predictor
 
 import os
 import dlib
@@ -65,7 +65,7 @@ def seg_image(args):
     img_draw_text = Image.open(args['save_path'])
     draw = ImageDraw.Draw(img_draw_text)
     x,y = img_draw_text.size
-    ft = ImageFont.truetype("/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/1.ttf", args['text_height'])
+    ft = ImageFont.truetype("/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc", args['text_height'])
     draw.text(args['text_position'], args['text'], font=ft, fill=args['text_color'],align ="left")
     img_draw_text.save(args['save_path'])
     file = open(args['save_path'], 'rb')
@@ -230,10 +230,10 @@ def align_and_crop_face(
 import pysnooper
 @pysnooper.snoop()
 def start(
-        config=r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/inference_models/portrait_pp_humansegv2_lite_256x144_inference_model_with_softmax/deploy.yaml',
-        img_path=r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/1.jpg',
-        re_save_path=r'temp/1_.jpg',
-        save_path=r'temp/1.jpg',
+        config=r'inference_models/portrait_pp_humansegv2_lite_256x144_inference_model_with_softmax/deploy.yaml',
+        img_path=r'test.jpg',
+        re_save_path=r'temp/test_.jpg',
+        save_path=r'temp/test.jpg',
         text='陈',
         use_gpu=False,
         test_speed=False, use_optic_flow=False, use_post_process=False):
@@ -278,7 +278,7 @@ def start(
     all_list = []
     all_backgroud=[
         {
-            "path":"icon/1.jpg",
+            "path":"static/bg/1.jpg",
             "position":[410,260],
             "height":340,
             "text_position":(190,250),
@@ -287,7 +287,7 @@ def start(
             "text_color": "white"
         },
         {
-            "path": "icon/2.jpg",
+            "path": "static/bg/2.jpg",
             "position": [70, 200],
             "height": 380,
             "text_position": (450, 300),
@@ -296,7 +296,7 @@ def start(
             "text_color": "white"
         },
         {
-            "path": "icon/3.jpg",
+            "path": "static/bg/3.jpg",
             "position": [330, 150],
             "height": 370,
             "text_position": (150, 350),
@@ -305,7 +305,7 @@ def start(
             "text_color": "white"
         },
         {
-            "path": "icon/4.jpg",
+            "path": "static/bg/4.jpg",
             "position": [350, 270],
             "height": 340,
             "text_position": (140, 380),
@@ -314,7 +314,7 @@ def start(
             "text_color": "white"
         },
         {
-            "path": "icon/5.jpg",
+            "path": "static/bg/5.jpg",
             "position": [260, 230],
             "height": 570,
             "text_position": (80, 430),
@@ -323,7 +323,7 @@ def start(
             "text_color": "white"
         },
         {
-            "path": "icon/6.jpg",
+            "path": "static/bg/6.jpg",
             "position": [100, 230],
             "height": 320,
             "text_position": (460, 310),
@@ -332,7 +332,7 @@ def start(
             "text_color": "white"
         },
         {
-            "path": "icon/7.jpg",
+            "path": "static/bg/7.jpg",
             "position": [240, 210],
             "height": 400,
             "text_position": (130, 290),
@@ -341,7 +341,7 @@ def start(
             "text_color": "red"
         },
         {
-            "path": "icon/8.jpg",
+            "path": "static/bg/8.jpg",
             "position": [120, 190],
             "height": 330,
             "text_position": (460, 325),
@@ -350,7 +350,7 @@ def start(
             "text_color": "white"
         },
         {
-            "path": "icon/9.jpg",
+            "path": "static/bg/9.jpg",
             "position": [380, 260],
             "height": 400,
             "text_position": (90, 330),
@@ -359,7 +359,7 @@ def start(
             "text_color": "red"
         },
         {
-            "path": "icon/10.jpg",
+            "path": "static/bg/10.jpg",
             "position": [100, 200],
             "height": 320,
             "text_position": (410, 290),
@@ -389,7 +389,7 @@ def start(
 
 
 if __name__ == "__main__":
-    image_path = r'/home/ubuntu/PaddleSeg-release-2.6/contrib/PP-HumanSeg/src/data/images/human.jpg'
+    image_path = r'data/images/human.jpg'
     file_after = open(image_path, 'rb')
     base64_after_str = base64.b64encode(file_after.read()).decode('utf-8')
     print(len(base64_after_str))
@@ -405,7 +405,6 @@ if __name__ == "__main__":
         f.write(imgdata)
 
     start(
-        # config=r'E:\PaddleSeg-release-2.6\contrib\PP-HumanSeg\src\inference_models\portrait_pp_humansegv2_lite_256x144_inference_model_with_softmax\deploy.yaml',
         img_path=new_image_path,
         # bg_img_path=r'E:\PaddleSeg-release-2.6\contrib\PP-HumanSeg\src\data\images\bg_1.jpg',
         # re_save_path=r'E:\PaddleSeg-release-2.6\contrib\PP-HumanSeg\src\data\images\_1.jpg',
