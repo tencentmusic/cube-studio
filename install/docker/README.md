@@ -41,27 +41,33 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.
 
 ## deploy myapp (docker-compose)
 
-#### 本地docker开发使用
+注意：前后端代码生产环境均在容器中运行。
+
+后端开发调试：代码通过挂载，在本机ide中修改，在docker-compose中运行调试，debug模式自动热更新。
+前端调试：本机ide开发调试，最后编译为静态文件，也可以在docker中编译成静态文件，最后统一打包成docker镜像
+
+#### 本地后端python代码开发
+
+需要安装下面的环境包
+
+```bash
+pip3 install --upgrade setuptools pip 
+pip3 install -r requirements.txt -r requirements-dev.txt 
+```
+本地安装python包，避免本地打开代码时大量包缺失报错
+
+#### 本地后端代码调试
+
+需要在docker-compose运行调试，通过日志进行debug，建议学习下pysnooper包的使用
 
 docker-compose.yaml文件在install/docker目录下，这里提供了mac和linux版本的docker-compose.yaml。
 
-可自行修改
-
-image：刚才构建的镜像
-
-MYSQL_SERVICE：mysql的地址
-
-1) build frontend
-```
-STAGE: 'build'
-docker-compose -f docker-compose.yml  up
-```
-2) debug backend
+1) debug backend
 ```
 STAGE: 'dev'
 docker-compose -f docker-compose.yml  up
 ```
-3) Production
+2) Production
 ```
 STAGE: 'prod'
 docker-compose -f docker-compose.yml  up
@@ -71,14 +77,9 @@ docker-compose -f docker-compose.yml  up
 
 可根据自己的需求为角色授权。
 
-#### 本地后端python包
+#### 前端页面本机开发和构建
 
-```bash
-pip install --upgrade setuptools pip 
-pip install -r requirements.txt -r requirements-dev.txt 
-```
-
-## 可视化页面构建
+前端代码可以在本机上开发调试  也 可以在容器内编译。如果你不是前端开发人员，建议使用容器内编译，这样你的电脑就不需要配置前端环境。
 
 项目资源打包：
 ```
@@ -95,6 +96,15 @@ cd myapp/vision && yarn && yarn build
 ```
 
 输出路径：`/myapp/static/appbuilder`
+
+
+#### 前端页面容器内编译
+
+1) build frontend
+```
+STAGE: 'build'
+docker-compose -f docker-compose.yml  up
+```
 
 ## Q&A
 如果构建镜像过程中因为网络问题失败，可以通过新增pip国内镜像地址来解决。
