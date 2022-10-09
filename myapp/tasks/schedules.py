@@ -21,6 +21,7 @@ import subprocess
 import os
 import sys
 import time
+import random
 import datetime
 from myapp.utils.py.py_k8s import K8s
 from myapp.utils.celery import session_scope
@@ -1337,49 +1338,68 @@ def adjust_service_resource(task):
 
 
 from myapp.models.model_aihub import Aihub
-@pysnooper.snoop()
-def update_aihub():
-    aihubs=json.load(open('info.json',mode='r'))
-    for data in aihubs:
-        print(data)
-        name = data.get('name','')
-        label = data.get('label','')
-        describe = data.get('describe','')
-        uuid = data.get('uuid', '')
-        if name and label and describe and uuid:
-            with session_scope(nullpool=True) as dbsession:
-                try:
-                    aihub = dbsession.query(Aihub).filter_by(uuid=uuid).first()
-                    if not aihub:
-                        aihub=Aihub()
-                    aihub.doc=data.get('doc','')
-                    aihub.name=name
-                    aihub.label=label
-                    aihub.describe=describe
-                    aihub.field=data.get('field','')
-                    aihub.scenes=data.get('scenes','')
-                    aihub.type=data.get('type','')
-                    aihub.pic=data.get('pic','')
-                    aihub.status=data.get('status', '')
-                    aihub.uuid=uuid
-                    aihub.version=data.get('version', '')
-                    aihub.dataset=json.dumps(data.get('dataset', {}))
-                    aihub.notebook=json.dumps(data.get('notebook', {}))
-                    aihub.job_template=json.dumps(data.get('job_template', {}))
-                    aihub.pre_train_model=json.dumps(data.get('pre_train_model', {}))
-                    aihub.inference=json.dumps(data.get('inference', {}))
-                    aihub.service=json.dumps(data.get('service', {}))
-                    aihub.hot=int(data.get('hot', '0'))
-                    aihub.price=int(data.get('price', '0'))
-                    aihub.source=data.get('source', '')
-                    if not aihub.id:
-                        dbsession.add(aihub)
-                    dbsession.commit()
-                except Exception as e:
-                    print(e)
 
-# if __name__=="__main__":
-#     update_aihub()
+
+@celery_app.task(name="task.update_aihub", bind=True)
+@pysnooper.snoop()
+def update_aihub(task):
+    # time.sleep(random.randint(10,600))
+    from myapp.utils.core import run_shell
+
+    # 更新git
+    info_path='info.json'
+    status = run_shell('rm -rf /cube-studio && cd / && git clone https://github.com/tencentmusic/cube-studio.git')
+    if status:
+        print('clone fail')
+        return
+    else:
+        if os.path.exists(info_path):
+            info_path = '/cube-studio/aihub/info.json'
+
+    aihubs = json.load(open(info_path, mode='r'))
+    with session_scope(nullpool=True) as dbsession:
+        try:
+            if len(aihubs)>0:
+                allaihubs = dbsession.query(Aihub).delete()
+                dbsession.commit()
+                for data in aihubs:
+                    print(data)
+                    name = data.get('name','')
+                    label = data.get('label','')
+                    describe = data.get('describe','')
+                    uuid = data.get('uuid', '')
+                    if name and label and describe and uuid:
+                        aihub = dbsession.query(Aihub).filter_by(uuid=uuid).first()
+                        if not aihub:
+                            aihub=Aihub()
+                        aihub.doc=data.get('doc','')
+                        aihub.name=name
+                        aihub.label=label
+                        aihub.describe=describe
+                        aihub.field=data.get('field','')
+                        aihub.scenes=data.get('scenes','')
+                        aihub.type=data.get('type','')
+                        aihub.pic=data.get('pic','')
+                        aihub.status=data.get('status', '')
+                        aihub.uuid=uuid
+                        aihub.version=data.get('version', '')
+                        aihub.dataset=json.dumps(data.get('dataset', {}))
+                        aihub.notebook=json.dumps(data.get('notebook', {}))
+                        aihub.job_template=json.dumps(data.get('job_template', {}))
+                        aihub.pre_train_model=json.dumps(data.get('pre_train_model', {}))
+                        aihub.inference=json.dumps(data.get('inference', {}))
+                        aihub.service=json.dumps(data.get('service', {}))
+                        aihub.hot=int(data.get('hot', '0'))
+                        aihub.price=int(data.get('price', '0'))
+                        aihub.source=data.get('source', '')
+                        if not aihub.id:
+                            dbsession.add(aihub)
+                        dbsession.commit()
+        except Exception as e:
+            print(e)
+
+if __name__=="__main__":
+    update_aihub(task=None)
 
 
 

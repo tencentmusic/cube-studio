@@ -567,7 +567,12 @@ class CeleryConfig(object):
             'task': 'task.adjust_node_resource',  # 定时在多项目组间进行资源均衡
             # 'schedule': 10.0,
             'schedule': crontab(minute='*/10'),
-        }
+        },
+        'task_update_aihub': {
+            'task': 'task.update_aihub',  # 更新aihub
+            # 'schedule': 10.0,
+            'schedule': crontab(minute='30', hour='4'),
+        },
     }
 
  # 帮助文档地址，显示在web导航栏

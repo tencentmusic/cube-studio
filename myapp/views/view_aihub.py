@@ -80,7 +80,7 @@ class Aihub_base():
     label_title='模型市场'
     datamodel = SQLAInterface(Aihub)
     base_permissions = ['can_show','can_list']
-    base_order = ("id", "desc")
+    base_order = ("hot", "desc")
     order_columns = ['id']
     search_columns=['describe','label','name','field','scenes']
     list_columns = ['card']

@@ -2,7 +2,7 @@
 
 FROM ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base
 
-RUN apt-get update && apt-get install -y mysql-client zip
+RUN apt-get update && apt-get install -y -f mysql-client zip git
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash
 RUN apt-get -y install nodejs && npm install yarn -g
