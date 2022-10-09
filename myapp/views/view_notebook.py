@@ -364,7 +364,8 @@ class Notebook_ModelView_Base():
             "NO_AUTH": "true",
             "USERNAME": notebook.created_by.username,
             "NODE_OPTIONS": "--max-old-space-size=%s" % str(int(notebook.resource_memory.replace("G", '')) * 1024),
-            "PORT_RANGE":"%s-%s"%(10000 + 10 * notebook.id+1,10000 + 10 * notebook.id+9)
+            "PORT1":str(10000 + 10 * notebook.id+1),
+            "PORT2":str(10000 + 10 * notebook.id+2)
         }
         if SERVICE_EXTERNAL_IP:
             env["SERVICE_EXTERNAL_IP"]=SERVICE_EXTERNAL_IP[0]
@@ -461,7 +462,7 @@ class Notebook_ModelView_Base():
         if SERVICE_EXTERNAL_IP:
             ports=[port]
             if notebook.ide_type=='bigdata':
-                for index in range(9):
+                for index in range(3):
                     ports.append(10000 + 10 * notebook.id + index)
 
             ports=list(set(ports))

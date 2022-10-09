@@ -2,17 +2,6 @@ FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base
 
 MAINTAINER hamawhite
 
-COPY hadoop/run-jupyter.sh /root/run-jupyter.sh
-# 拷贝examples
-COPY hadoop/examples/spark/* /examples/spark/
-COPY hadoop/examples/flink/* /examples/flink/
-
-# 拷贝示例的hadoop和hive配置文件
-COPY hadoop/conf/hive/* /opt/third/hive/conf/
-COPY hadoop/conf/hadoop/* /opt/third/hadoop/etc/hadoop/
-
-# 新增flink-dep.xml
-COPY hadoop/conf/flink/flink-dep.xml /opt/third/flink/
 
 RUN apt-get update && apt install -y lsof
 
@@ -22,7 +11,7 @@ RUN cd /usr/bin \
     && ln -s python3.8* python3
 
 # 下载apache spark安装包
-RUN cd /opt/third \
+RUN mkdir -p /opt/third && cd /opt/third \
     && wget http://dlcdn.apache.org/spark/spark-3.1.3/spark-3.1.3-bin-hadoop3.2.tgz \
     && tar -xvzf spark-3.1.3-bin-hadoop3.2.tgz \
     && ln -s spark-3.1.3-bin-hadoop3.2 spark \
@@ -32,6 +21,7 @@ RUN cd /opt/third \
     && mv spark-defaults.conf.template spark-defaults.conf \
 #   安装pyflink
     && pip install apache-flink==1.15.1 \
+    && pip install pyspark==3.1.3 \
 #   安装JDK8
     && rm -rf /usr/lib/jvm/ \
     && apt-get install -y openjdk-8-jdk \
@@ -42,8 +32,20 @@ RUN cd /opt/third \
     && ln -s apache-maven-3.8.6 maven \
     && rm -rf apache-maven-3.8.6-bin.tar.gz
 
+
+# 拷贝examples
+COPY examples/spark/* /examples/spark/
+COPY examples/flink/* /examples/flink/
+
+# 拷贝示例的hadoop和hive配置文件
+COPY conf/hive/* /opt/third/hive/conf/
+COPY conf/hadoop/* /opt/third/hadoop/etc/hadoop/
+
+# 新增flink-dep.xml
+COPY conf/flink/flink-dep.xml /opt/third/flink/
+
 # 修改maven镜像
-COPY hadoop/maven/conf/settings.xml /opt/third/maven/conf/settings.xml
+COPY maven/conf/settings.xml /opt/third/maven/conf/settings.xml
 
 ENV M2_HOME /opt/third/maven
 ENV PATH $M2_HOME/bin:$PATH
@@ -53,4 +55,5 @@ RUN cd /opt/third/flink \
     && mkdir lib \
     && mvn -f flink-dep.xml dependency:copy-dependencies -DoutputDirectory=lib
 
-ENTRYPOINT ["bash","/root/run-jupyter.sh"]
+# 环境初始化配置
+COPY init.sh /init.sh
