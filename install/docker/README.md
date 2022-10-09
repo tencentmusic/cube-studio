@@ -81,6 +81,12 @@ docker-compose -f docker-compose.yml  up
 
 前端代码可以在本机上开发调试  也 可以在容器内编译。如果你不是前端开发人员，建议使用容器内编译，这样你的电脑就不需要配置前端环境。
 
+#### 前端代码目录
+
+- `/myapp/frontend` 主要前端项目文件
+- `/myapp/vision` 流程图（旧版）
+- `/myapp/visionPlus` 流程图（新版）
+
 项目资源打包：
 ```
 开发环境要求：
@@ -89,16 +95,29 @@ npm: 6.14.8+
 
 包管理（建议使用yarn）：
 yarn: npm install yarn -g
+
 ```
 ```sh
 # 初始化安装可能会遇到依赖包的版本选择，直接回车默认即可
 cd myapp/vision && yarn && yarn build
 ```
-
 输出路径：`/myapp/static/appbuilder`
+#### 环境准备
 
+- https://nodejs.org/en/download/ 进入nodejs官网，选择下载LTS长期支持版本
+- 然后在官网下载安装好LTS版本之后，输入`npm install -g n`安装node版本管理器（ https://www.npmjs.com/package/n ），最后输入`n 14.15.0`将node版本切换至14.x
+- https://github.com/nodejs/Release 这里可以找到14.x等往期版本
 
-#### 前端页面容器内编译
+#### 纯前端开发（本地）
+以主要前端项目`/myapp/frontend`为例，到这里前端开发环境已经准备好了
+
+1. `cd /myapp/frontend` 进入目录
+2. `npm run start` 进入调试模式
+3. `npm run build` 打包编译静态资源
+#### 前端配置代理
+
+在前端目录下的`src`里都有一个`setupProxy.js`文件，这个就是用来配置代理转发的，将`target`字段的内容改成已有服务的地址，改完之后重新启动一下前端项目即可生效
+#### 前端容器内编译
 
 1) build frontend
 ```
