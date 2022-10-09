@@ -28,14 +28,16 @@ PORT2=暴露端口2
 可以使用这些环境变量来实现对driver的访问和用户的认证
 
 ### 2.2 添加测试示例
-在example下面添加pyspark  pyflink  clickhouse  impala presto mysql postgresql等数据查询分析示例，或大内容数据分析工具Arrow 以及jupyter中可视化分析方法，供其他数据同学参考使用
+在example下面添加pyspark  pyflink  clickhouse  impala presto mysql postgresql等数据查询分析示例，或大内存数据分析工具Arrow 以及jupyter中可视化分析方法，供其他数据同学参考使用
 
 平台会自动将example软链到用户个人目录下
 
 ### 2.3 通过Dockerfile构建镜像
-
+```bash
 docker build -t  $hubhost/notebook:jupyter-ubuntu-cpu-bigdata -f Dockerfile .
 docker push $hubhost/notebook:jupyter-ubuntu-cpu-bigdata
+```
+
 
 ### 2.4 上线自己的notebook镜像到cube-studio
 
