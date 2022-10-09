@@ -20,7 +20,7 @@ mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'admin' WITH GRAN
 mysql> flush privileges;
 ```
 
-镜像构建
+镜像构建（可忽略）
 
 ```
 构建基础镜像（包含基础环境）
@@ -36,6 +36,7 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2
 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
 docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -50,23 +51,17 @@ image：刚才构建的镜像
 
 MYSQL_SERVICE：mysql的地址
 
-
-1) init database
-```
-STAGE: 'init'
-docker-compose -f docker-compose.yml  up
-```
-2) build fore
+1) build fore
 ```
 STAGE: 'build'
 docker-compose -f docker-compose.yml  up
 ```
-3) debug backend
+2) debug backend
 ```
 STAGE: 'dev'
 docker-compose -f docker-compose.yml  up
 ```
-4) Production
+3) Production
 ```
 STAGE: 'prod'
 docker-compose -f docker-compose.yml  up
