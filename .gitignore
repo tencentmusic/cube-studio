@@ -9,3 +9,7 @@ myapp/test
 /myapp/static/appbuilder/assets/
 /images/web/target-detection/yolo/
 /install/docker/data/mysql/
+/myapp/visionPlus/node_modules
+/myapp/frontend/node_modules
+/myapp/frontendSrc/node_modules
+/myapp/music/node_modules
