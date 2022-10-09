@@ -389,7 +389,7 @@ def start(
 
 
 if __name__ == "__main__":
-    image_path = r'data/images/human.jpg'
+    image_path = r'static/human.jpg'
     file_after = open(image_path, 'rb')
     base64_after_str = base64.b64encode(file_after.read()).decode('utf-8')
     print(len(base64_after_str))
