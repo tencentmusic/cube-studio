@@ -41,7 +41,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.
 
 ## deploy myapp (docker-compose)
 
-本地开发使用
+#### 本地docker开发使用
 
 docker-compose.yaml文件在install/docker目录下，这里提供了mac和linux版本的docker-compose.yaml。
 
@@ -71,8 +71,14 @@ docker-compose -f docker-compose.yml  up
 
 可根据自己的需求为角色授权。
 
+#### 本地后端python包
 
-## 可视化页面
+```bash
+pip install --upgrade setuptools pip 
+pip install -r requirements.txt -r requirements-dev.txt 
+```
+
+## 可视化页面构建
 
 项目资源打包：
 ```
