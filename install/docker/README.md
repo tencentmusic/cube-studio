@@ -102,13 +102,15 @@ yarn: npm install yarn -g
 cd myapp/vision && yarn && yarn build
 ```
 输出路径：`/myapp/static/appbuilder`
-#### 环境准备
+#### 纯前端开发（本地）
+
+##### 环境准备
 
 - https://nodejs.org/en/download/ 进入nodejs官网，选择下载LTS长期支持版本
 - 然后在官网下载安装好LTS版本之后，输入`npm install -g n`安装node版本管理器（ https://www.npmjs.com/package/n ），最后输入`n 14.15.0`将node版本切换至14.x
 - https://github.com/nodejs/Release 这里可以找到14.x等往期版本
 
-#### 纯前端开发（本地）
+
 以主要前端项目`/myapp/frontend`为例，到这里前端开发环境已经准备好了
 
 1. `cd /myapp/frontend` 进入目录
