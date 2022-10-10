@@ -14,13 +14,7 @@ from flask_babel import lazy_gettext,gettext
 import re
 import copy
 from sqlalchemy.exc import InvalidRequestError
-import uuid
-import requests
-from myapp.exceptions import MyappException
-from flask_appbuilder.security.decorators import has_access
 from myapp.models.model_job import Repository
-from flask_wtf.file import FileAllowed, FileField, FileRequired
-from werkzeug.datastructures import FileStorage
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from myapp import security_manager
 import os,sys
@@ -28,9 +22,6 @@ from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regex
 from wtforms import BooleanField, IntegerField, SelectField, StringField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
-from myapp.utils.py import py_k8s
-import os, zipfile
-import shutil
 from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
 from myapp.views.view_team import filter_join_org_project
 from flask import (
@@ -42,24 +33,9 @@ from flask import (
     make_response,
     redirect,
     render_template,
-    request,
-    send_from_directory,
-    Response,
-    url_for,
+    request
 )
 from .base import (
-    DeleteMixin,
-    api,
-    BaseMyappView,
-    check_ownership,
-    data_payload_response,
-    DeleteMixin,
-    generate_download_headers,
-    get_error_msg,
-    get_user_roles,
-    handle_api_exception,
-    json_error_response,
-    json_success,
     MyappFilter,
     MyappModelView,
 

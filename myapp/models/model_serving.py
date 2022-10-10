@@ -18,16 +18,16 @@ from sqlalchemy import (
 import pysnooper
 from myapp.utils import core
 import re
-from myapp.utils.py.py_k8s import K8s
+
 from myapp.models.helpers import AuditMixinNullable, ImportMixin
 from flask import escape, g, Markup, request
 from .model_team import Project
-from .model_job import Pipeline
+
 from myapp import app,db
 from myapp.models.base import MyappModelBase
 from myapp.models.helpers import ImportMixin
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
-from flask_appbuilder.models.decorators import renders
+
 from flask import Markup
 import datetime
 metadata = Model.metadata

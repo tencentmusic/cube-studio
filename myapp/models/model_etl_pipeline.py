@@ -15,13 +15,9 @@ from sqlalchemy import (
     Text,
     Enum,
 )
-import numpy
-import random
-import copy
-import logging
+
 from myapp.models.helpers import AuditMixinNullable, ImportMixin
-from flask import escape, g, Markup, request
-from .model_team import Project
+
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 # from myapp.models.base import MyappModel
@@ -33,10 +29,7 @@ from myapp.models.base import MyappModelBase
 import datetime
 metadata = Model.metadata
 conf = app.config
-from myapp.utils import core
-import re
-from myapp.utils.py import py_k8s
-import pysnooper
+
 
 
 class ETL_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):

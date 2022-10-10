@@ -1,11 +1,5 @@
 
 
-from urllib.parse import urlparse
-
-import prometheus_client
-from prometheus_client.core import CollectorRegistry
-from prometheus_client import CollectorRegistry, Gauge
-import base64
 import json,datetime,time
 import logging
 import os

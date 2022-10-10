@@ -4,25 +4,7 @@ from flask_babel import lazy_gettext as _
 
 from myapp import app, appbuilder,db,event_logger
 
-from flask import (
-    current_app,
-    abort,
-    flash,
-    g,
-    Markup,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    send_from_directory,
-    Response,
-    url_for,
-)
-from types import FunctionType
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
 conf = app.config
-from myapp.views.base import BaseMyappView
 
 
 all_links = conf.get('ALL_LINKS',{})

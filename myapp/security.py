@@ -2,12 +2,9 @@ from flask_login import current_user, LoginManager
 import logging
 import json
 import jwt
-from sqlalchemy.ext.declarative import declared_attr
+
 from flask_babel import lazy_gettext
-import time
-import hashlib
-from typing import List
-import requests
+
 from flask import current_app,redirect, g, flash, request, session, abort, make_response
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
@@ -27,38 +24,17 @@ from flask_appbuilder.security.sqla.models import (
     assoc_user_role,
 )
 
-from flask import g
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    Sequence,
-    String,
-    Table,
-    UniqueConstraint,
-)
 from sqlalchemy.orm import backref, relationship
 from flask_appbuilder.security.decorators import has_access, has_access_api, permission_name
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.widgets import ListWidget
 from flask_appbuilder.const import LOGMSG_WAR_SEC_LOGIN_FAILED
 from sqlalchemy import or_
-import xml.etree.ElementTree as ET
-from myapp.exceptions import MyappSecurityException
-from flask_appbuilder.security.views import AuthDBView, AuthRemoteUserView
+
 from flask_appbuilder.security.views import expose
-from flask_appbuilder import base
-from flask_login import login_user, logout_user,login_manager
-from flask_appbuilder.security.views import AuthDBView, AuthRemoteUserView
-from flask_appbuilder.security.registerviews import RegisterUserDBView
-from flask_appbuilder.security.forms import RegisterUserDBForm
-from flask_appbuilder.security.views import expose
-import xml.etree.ElementTree as ET
-from functools import update_wrapper
+
 from flask import redirect, g, flash, request, session, abort
-from celery.schedules import crontab
+
 from flask_appbuilder.security.sqla.models import assoc_permissionview_role
 from sqlalchemy import select, Table
 from flask_appbuilder.const import (
@@ -74,10 +50,7 @@ from flask_appbuilder.const import (
     LOGMSG_WAR_SEC_NOLDAP_OBJ,
     PERMISSION_PREFIX
 )
-from flask_appbuilder.models.sqla import Model
-from flask_appbuilder.actions import action
-import pysnooper
-import json
+
 
 
 

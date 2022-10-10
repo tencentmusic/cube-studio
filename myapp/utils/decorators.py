@@ -1,12 +1,9 @@
 
-from datetime import datetime, timedelta
 from functools import wraps
-import logging
 
 from contextlib2 import contextmanager
 from flask import request
 
-from myapp import app
 from myapp.utils.dates import now_as_float
 
 

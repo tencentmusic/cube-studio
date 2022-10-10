@@ -20,11 +20,10 @@ import random
 import copy
 import logging
 from myapp.models.helpers import AuditMixinNullable, ImportMixin
-from flask import escape, g, Markup, request
-from .model_team import Project
+
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
-# from myapp.models.base import MyappModel
+
 
 from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
 from flask_appbuilder.models.decorators import renders

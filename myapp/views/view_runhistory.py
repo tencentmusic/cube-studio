@@ -2,12 +2,11 @@ from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 
 
-from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
+from myapp.models.model_job import RunHistory
 
 from myapp import app, appbuilder,db,event_logger
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget,BS3TextAreaFieldWidget
-from flask_babel import gettext as __
+from wtforms import SelectField
+from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_babel import lazy_gettext as _
 from sqlalchemy import and_, or_, select
 
@@ -16,25 +15,11 @@ from .baseApi import (
 )
 
 from myapp import security_manager
-import kfp    # 使用自定义的就要把pip安装的删除了
-from werkzeug.datastructures import FileStorage
 from .base import (
-    api,
-    BaseMyappView,
-    check_ownership,
-    data_payload_response,
     DeleteMixin,
-    generate_download_headers,
-    get_error_msg,
-    get_user_roles,
-    handle_api_exception,
-    json_error_response,
-    json_success,
     MyappFilter,
     MyappModelView,
 )
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
 conf = app.config
 logging = app.logger
 

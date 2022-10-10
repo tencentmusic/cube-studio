@@ -1,6 +1,5 @@
 """A collection of ORM sqlalchemy models for Myapp"""
-from contextlib import closing
-from copy import copy, deepcopy
+
 from datetime import datetime
 from flask_appbuilder import Model
 from sqlalchemy import (
@@ -15,8 +14,7 @@ from sqlalchemy import (
     Table,
     Text,
 )
-from sqlalchemy.engine import url
-from sqlalchemy.engine.url import make_url
+
 from sqlalchemy.orm import relationship, sessionmaker, subqueryload
 from myapp import (
     app,
