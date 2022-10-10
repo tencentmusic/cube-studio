@@ -1,4 +1,4 @@
-## 通过vs代理访问其他的服务，包括katib、pipline,argp,minio,grafana等
+## 通过vs代理访问其他的服务，包括pipline,argp,minio,grafana等
 #apiVersion: networking.istio.io/v1alpha3
 #kind: VirtualService
 #metadata:
@@ -16,7 +16,7 @@
 #        port:
 #          number: 80
 #---
-# 通过vs代理访问其他的服务，包括katib、pipline,argp,minio,grafana等
+# 通过vs代理访问其他的服务，包括pipline,argp,minio,grafana等
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -47,24 +47,6 @@ spec:
       allowHeaders:
       - "*"
 
-  - match:
-    - uri:
-        prefix: /katib/
-    rewrite:
-      uri: /katib/
-    route:
-    - destination:
-        host: katib-ui.kubeflow.svc.cluster.local
-        port:
-          number: 80
-    corsPolicy:
-      allowOrigin:
-      - "*"
-      allowMethods:
-      - POST
-      - GET
-      allowHeaders:
-      - "*"
   - match:
     - uri:
         prefix: /pipeline/

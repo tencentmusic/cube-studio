@@ -41,7 +41,7 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
         "Project", foreign_keys=[project_id]
     )
     name = Column(String(200), unique = True, nullable=False)
-    namespace = Column(String(200), nullable=True,default='katib')
+    namespace = Column(String(200), nullable=True,default='automl')
     describe = Column(Text)
     parallel_trial_count = Column(Integer,default=3)
     maxExecDuration =  Column(Integer,default=3600)

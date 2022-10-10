@@ -1048,7 +1048,7 @@ def watch_gpu(task):
         cluster = clusters[cluster_name]
         k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
-        all_gpu_pods=k8s_client.get_uesd_gpu(namespaces=['pipeline','katib','jupyter','service'])
+        all_gpu_pods=k8s_client.get_uesd_gpu(namespaces=['pipeline','automl','jupyter','service'])
 
         print(all_gpu_pods)
         message = ''
@@ -1089,7 +1089,7 @@ def adjust_node_resource(task):
                     all_node_json[ip]['used_gpu'] = []
 
         # print(all_node_json)
-        for namespace in ['jupyter', 'pipeline', 'katib', 'service']:
+        for namespace in ['jupyter', 'pipeline', 'automl', 'service']:
             all_pods = k8s_client.get_pods(namespace=namespace)
             for pod in all_pods:
                 if pod['host_ip'] not in all_node_json:

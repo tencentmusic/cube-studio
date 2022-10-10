@@ -6,7 +6,7 @@
 完整的平台包含
  - 1、机器的标准化
  - 2、分布式存储(单机可忽略)、k8s集群、监控体系(prometheus/efk/zipkin)
- - 3、基础能力(tf/pytorch/mxnet/valcano/ray等分布式，nni/katib超参搜索)
+ - 3、基础能力(tf/pytorch/mxnet/valcano/ray等分布式，nni/ray超参搜索)
  - 4、平台web部分(oa/权限/项目组、在线构建镜像、在线开发、pipeline拖拉拽、超参搜索、推理服务管理等)
 
 # 组件说明

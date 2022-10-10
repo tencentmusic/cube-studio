@@ -20,7 +20,6 @@ from myapp.models.model_job import (
 from myapp.utils.celery import session_scope
 from myapp.project import push_admin,push_message
 from myapp.models.model_job import Pipeline,Workflow
-from myapp.models.model_katib import Hyperparameter_Tuning,Experiments
 import pymysql
 conf=app.config
 

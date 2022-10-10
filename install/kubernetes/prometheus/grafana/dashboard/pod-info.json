@@ -84,7 +84,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "container_spec_memory_limit_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|katib\"}/1000/1000/1000",
+          "expr": "container_spec_memory_limit_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}/1000/1000/1000",
           "format": "table",
           "hide": false,
           "interval": "",
@@ -94,7 +94,7 @@
         },
         {
           "exemplar": true,
-          "expr": "container_memory_working_set_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|katib\"}/1000/1000/1000",
+          "expr": "container_memory_working_set_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}/1000/1000/1000",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -105,7 +105,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum by (node,namespace,pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|katib\"}[2m]))",
+          "expr": "sum by (node,namespace,pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}[2m]))",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -115,7 +115,7 @@
         },
         {
           "exemplar": true,
-          "expr": "container_spec_cpu_quota{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|katib\"}/100000",
+          "expr": "container_spec_cpu_quota{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}/100000",
           "format": "table",
           "hide": false,
           "instant": true,

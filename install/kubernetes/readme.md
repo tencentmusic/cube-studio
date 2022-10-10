@@ -134,8 +134,8 @@ kubectl create configmap kubernetes-config --from-file=kubeconfig -n infra
 kubectl delete configmap kubernetes-config -n pipeline
 kubectl create configmap kubernetes-config --from-file=kubeconfig -n pipeline
 
-kubectl delete configmap kubernetes-config -n katib
-kubectl create configmap kubernetes-config --from-file=kubeconfig -n katib
+kubectl delete configmap kubernetes-config -n automl
+kubectl create configmap kubernetes-config --from-file=kubeconfig -n automl
 ```
 
   
@@ -165,7 +165,7 @@ kubectl apply -k cube/overlays
 ```bash  
 kubectl create -f pv-pvc-infra.yaml  
 kubectl create -f pv-pvc-jupyter.yaml  
-kubectl create -f pv-pvc-katib.yaml  
+kubectl create -f pv-pvc-automl.yaml  
 # kubectl create -f pv-pvc-kubeflow.yaml  
 kubectl create -f pv-pvc-pipeline.yaml  
 kubectl create -f pv-pvc-service.yaml  

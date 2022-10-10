@@ -5,9 +5,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: katib-kubeflow-user-workspace
+  name: automl-kubeflow-user-workspace
   labels:
-    katib-pvname: katib-kubeflow-user-workspace
+    automl-pvname: automl-kubeflow-user-workspace
 spec:
   capacity:
     storage: 500Gi
@@ -16,7 +16,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   csi:
     driver: csi.juicefs.com
-    volumeHandle: katib-kubeflow-user-workspace
+    volumeHandle: automl-kubeflow-user-workspace
     fsType: juicefs
     nodePublishSecretRef:
       name: juicefs-sc-secret
@@ -33,7 +33,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: kubeflow-user-workspace
-  namespace: katib
+  namespace: automl
 spec:
   accessModes:
     - ReadWriteMany
@@ -42,4 +42,4 @@ spec:
       storage: 500Gi
   selector:
     matchLabels:
-      katib-pvname: katib-kubeflow-user-workspace
+      automl-pvname: automl-kubeflow-user-workspace

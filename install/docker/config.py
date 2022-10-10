@@ -744,8 +744,8 @@ ADMIN_USER='admin'
 PIPELINE_NAMESPACE = 'pipeline'
 # 服务pipeline运行的空间，必填service
 SERVICE_PIPELINE_NAMESPACE='service'
-# 超参搜索命名空间，必填katib
-AUTOML_NAMESPACE = 'katib'
+# 超参搜索命名空间，必填automl
+AUTOML_NAMESPACE = 'automl'
 # notebook必填空间，必填jupyter
 NOTEBOOK_NAMESPACE = 'jupyter'
 # 内部服务命名空间，必填service
@@ -753,12 +753,12 @@ SERVICE_NAMESPACE = 'service'
 # 服务链路追踪地址
 SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
-# katib任务默认镜像
-KATIB_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/katib'
-# katib的tfjob任务默认镜像
-KATIB_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
-# katib的pytorchjob任务默认镜像
-KATIB_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
+# automl任务默认镜像
+AUTOML_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/automl'
+# automl的tfjob任务默认镜像
+AUTOML_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
+# automl的pytorchjob任务默认镜像
+AUTOML_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
 # 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
@@ -805,7 +805,6 @@ K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
 K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
 
 PIPELINE_URL = '/pipeline/#/'
-KATIB_URL = '/katib/#'
 
 # 这两部分功能需要泛化域名。没有泛化域名此部分功能受限。ISTIO_INGRESS_DOMAIN为泛域名后缀
 ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用

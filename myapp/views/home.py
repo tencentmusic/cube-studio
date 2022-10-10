@@ -763,7 +763,7 @@ class Myapp(BaseMyappView):
                         all_node_json[ip]['user'] = []
 
                 # print(all_node_json)
-                for namespace in ['jupyter', 'pipeline', 'katib', 'service']:
+                for namespace in ['jupyter', 'pipeline', 'automl', 'service']:
                     all_pods = k8s_client.get_pods(namespace=namespace)
                     for pod in all_pods:
                         if pod['status'] == 'Running' and pod['host_ip'] in all_node_json:
@@ -906,7 +906,7 @@ class Myapp(BaseMyappView):
                     # 获取pod的资源占用
                     all_tasks_json[cluster_name]={}
                     # print(all_node_json)
-                    for namespace in ['pipeline', 'katib', 'service']:
+                    for namespace in ['pipeline', 'automl', 'service']:
                         all_tasks_json[cluster_name][namespace]={}
                         all_pods = k8s_client.get_pods(namespace=namespace)
                         for pod in all_pods:

@@ -59,10 +59,6 @@ spec:
   rules:
     - http:
         paths:
-          - path: /katib/
-            backend:
-              serviceName: katib-ui
-              servicePort: 80
           - path: /minio/
             backend:
               serviceName: minio-service

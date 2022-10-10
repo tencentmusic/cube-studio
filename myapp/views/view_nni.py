@@ -351,7 +351,7 @@ class NNI_ModelView_Base():
 
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(nni.project.cluster.get('KUBECONFIG',''))
-        namespace = conf.get('AUTOML_NAMESPACE','katib')
+        namespace = conf.get('AUTOML_NAMESPACE','automl')
         run_id='nni-'+nni.name
 
         try:
@@ -546,7 +546,7 @@ tuner:
 trial:
   codeDir: {nni.working_dir}  
 frameworkcontrollerConfig:
-  namespace: {conf.get('AUTOML_NAMESPACE','katib')}
+  namespace: {conf.get('AUTOML_NAMESPACE','automl')}
   storage: pvc
   configPath: /mnt/{nni.created_by.username}/nni/{nni.name}/trial_template.yaml  
   pvc: 

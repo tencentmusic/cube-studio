@@ -10,7 +10,7 @@ cube-studio is a one-stop cloud-native machine learning platform open sourced by
  - 1、data management: feature store, online and offline features; dataset management, structure data and media data, data label platform
  - 2、develop: notebook(vscode/jupyter); docker image management; image build online
  - 3、train: pipeline drag and drop online; open template market; distributed computing/training tasks, example tf/pytorch/mxnet/spark/ray/horovod/kaldi/volcano; batch priority scheduling; resource monitoring/alarm/balancing; cron scheduling
- - 4、automl: nni, katib, ray
+ - 4、automl: nni, ray
  - 5、inference: model manager; serverless traffic control; tf/pytorch/onnx/tensorrt model deploy, tfserving/torchserver/onnxruntime/triton inference; VGPU; load balancing、high availability、elastic scaling
  - 6、infra: multi-user; multi-project; multi-cluster; edge cluster mode; blockchain sharing;
 

@@ -11,7 +11,7 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: katib
+  name: automl
 
 ---
 apiVersion: v1
