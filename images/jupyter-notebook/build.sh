@@ -4,11 +4,6 @@ base_image=ubuntu:18.04
 docker build -t $hubhost/notebook:jupyter-ubuntu-cpu-base --build-arg FROM_IMAGES=$base_image -f Dockerfile-ubuntu-base .
 docker push $hubhost/notebook:jupyter-ubuntu-cpu-base
 
-# 构建bigdata镜像
-docker build -t  $hubhost/notebook:jupyter-ubuntu-cpu-bigdata -f bigdata/Dockerfile ./bigdata/
-docker push $hubhost/notebook:jupyter-ubuntu-cpu-bigdata
-
-
 base_image=nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 docker build -t $hubhost/notebook:jupyter-ubuntu-gpu-base --build-arg FROM_IMAGES=$base_image -f Dockerfile-ubuntu-base .
 docker push $hubhost/notebook:jupyter-ubuntu-gpu-base
