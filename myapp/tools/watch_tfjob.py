@@ -86,13 +86,6 @@ def check_has_push(crd,dbsession):
             alert_status = pipeline.alert_status
         print("tf %s from workflow_name %s,user %s,status %s" % (crd['name'],workflow_name,crd['username'],crd['status']))
 
-    if hp_name:
-        hp = dbsession.query(Hyperparameter_Tuning).filter_by(name=hp_name).first()
-        if hp and hp.alert_status:
-            alert_status = hp.alert_status
-
-        print("tf %s from hp %s,user %s,status %s" % (crd['name'], workflow_name, crd['username'], crd['status']))
-
     # print("%s status %s"%(crd['name'], crd['status']))
     alert_status='Pending'   # 这里写死，就是相当于必须且仅Pending告警
 
