@@ -1,9 +1,9 @@
 [
   {
-    "doc": "README.md",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/mnist",
     "field": "机器视觉",
     "scenes": "图像分类",
-    "type": "dataset,notebook,job-template,pre-train-model,pipeline,inference",
+    "type": "notebook,job_template,inference",
     "name": "mnist",
     "status": "online",
     "version": "v20221001",
@@ -13,40 +13,16 @@
     "pic": "http://5b0988e595225.cdn.sohucs.com/images/20180404/9f62a1eea7054f8eaf4bc1c87168238b.png",
     "hot": "1",
     "price": "0",
-    "dataset": {
-      "name": "MNIST",
-      "label": "手写数字数据集",
-      "describe": "包含一组60,000个示例的训练集和一组10,000个示例的测试集。数字已经过尺寸标准化，以适合 20x20 像素框，同时保持其纵横比，并在固定尺寸的图像中居中",
-      "source_type": "开源",
-      "source": "github",
-      "industry": "图像处理",
-      "field": "视觉",
-      "usage": "传统机器学习和深度学习入门",
-      "research": "svm、分类",
-      "storage_class": "压缩",
-      "file_type": "gz",
-      "status": "正常",
-      "years": "",
-      "url": "http://yann.lecun.com/exdb/mnist/",
-      "path": "",
-      "download_url": "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz\nhttp://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz\nhttp://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz\nhttp://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz",
-      "storage_size": "11M",
-      "entries_num": " 60,000 个示例的训练集和 10,000 个示例的测试集",
-      "duration": "",
-      "price": "0",
-      "icon": "/static/assets/images/dataset/mnist.png",
-      "owner": "admin"
-    },
     "notebook": {
       "jupyter": [
-        "demo.ipynb"
+        "https://github.com/tencentmusic/cube-studio/blob/master/aihub/deep-learning/mnist/service/demo.ipynb"
       ],
       "appendix": []
     },
-    "job-template": {
+    "job_template": {
       "project_name": "多媒体类模板",
       "image_name": "ccr.ccs.tencentyun.com/cube-studio/mnist:20220814",
-      "gitpath": "https://github.com/zhuyaguang/cube-studio/tree/dev-mnist/job-template/job/mnist",
+      "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/mnist",
       "image_describe": "mnist手写体识别",
       "job_template_name": "mnist",
       "job_template_describe": "mnist手写体识别",
@@ -56,7 +32,7 @@
       "job_template_env": "",
       "job_template_expand": {
         "index": 5,
-        "help_url": "https://github.com/zhuyaguang/cube-studio/tree/dev-mnist/job-template/job/mnist"
+        "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/mnist"
       },
       "job_template_args": {
         "参数分组1": {
@@ -90,15 +66,6 @@
           }
         }
       }
-    },
-    "pre-train-model": {
-      "project_name": "public",
-      "name": "mnist",
-      "version": "v2022.08.01.1",
-      "describe": "tf mnist 图像分类 tfserving推理",
-      "path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/tf-mnist.tar.gz",
-      "framework": "tf",
-      "api_type": "tfserving"
     },
     "inference": {
       "project_name": "public",
@@ -213,10 +180,10 @@
     "price": "0"
   },
   {
-    "doc": "http://139.199.89.101/",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/face-paint",
     "field": "机器视觉",
     "scenes": "综合应用",
-    "type": "",
+    "type": "inference",
     "name": "cartoonizer",
     "status": "online",
     "version": "v20221003",
@@ -225,7 +192,28 @@
     "describe": "个人性国庆卡通头像生成，每个人的头像都是自己独一无二的",
     "pic": "https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/aihub/ai-photo/ad1.png",
     "hot": "89",
-    "price": "0"
+    "price": "0",
+    "inference": {
+      "project_name": "public",
+      "service_name": "face-paint-202208011",
+      "model_name": "face-paint",
+      "service_describe": "ai头像生成",
+      "image_name": "ccr.ccs.tencentyun.com/cube-studio/ai-photo",
+      "model_version": "v2022.08.01.1",
+      "model_path": "",
+      "service_type": "serving",
+      "env": "",
+      "ports": "8080",
+      "metrics": "",
+      "command": "",
+      "health": "",
+      "volume_mount": "",
+      "resource_memory": "2G",
+      "resource_cpu": "2",
+      "expand": {
+        "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/face-paint"
+      }
+    }
   },
   {
     "doc": "",

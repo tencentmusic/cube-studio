@@ -56,6 +56,7 @@ class Aihub(Model,ImportMixin,MyappModelBase):
     dataset = Column(Text, nullable=True, default='')
     notebook = Column(String(2000), nullable=True, default='')
     job_template = Column(Text, nullable=True, default='')
+    pipeline = Column(Text, nullable=True, default='')
     pre_train_model = Column(String(2000), nullable=True, default='')
     inference = Column(Text, nullable=True, default='')
     service = Column(Text, nullable=True, default='')
@@ -66,6 +67,10 @@ class Aihub(Model,ImportMixin,MyappModelBase):
 
     @property
     def card(self):
+        notebook_url = "/aihub/api/notebook/"+self.uuid if self.status=='online' and self.notebook else ""
+        train_url = "/aihub/api/train/" + self.uuid if self.status == 'online' and (self.job_template or self.pipeline) else ""
+        service_url = "/aihub/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
+
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.9' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
     <a href="{self.doc if self.status=='online' else ''}">
@@ -80,25 +85,13 @@ class Aihub(Model,ImportMixin,MyappModelBase):
             </div>
         </div>
         <div style="border-top: 1px solid rgba(0,0,0,.06);" class="ptb8 d-f ac jc-b">
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='https://www.baidu.com'>调试</a>
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='https://www.baidu.com'>训练</a>
-            <a class="flex1 ta-c" style="" href='https://www.baidu.com'>服务</a>
+            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>notebook</a>
+            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{train_url}'>训练</a>
+            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{service_url}'>服务</a>
         </div>
     </div>
 </div>
 ''')
-
-    @property
-    def train_html(self):
-        return '训练'
-
-    @property
-    def notebook_html(self):
-        return 'notebook打开'
-
-    @property
-    def service_html(self):
-        return '打开web体验'
 
 
 

@@ -612,7 +612,6 @@ output %s
             item.volume_mount=item.project.volume_mount
         self.use_expand(item)
 
-
         if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
             try:
                 flash('检测到模型地址为网络压缩文件，需压缩文件名和解压后文件夹名相同','warning')
