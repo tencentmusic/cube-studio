@@ -1,0 +1,61 @@
+# wide&deep dataparallel mode with scheduler and workers
+# network : https://gitee.com/mindspore/models/tree/master/official/recommend/wide_and_deep
+apiVersion: mindspore.gitee.com/v1
+kind: MSJob
+metadata:
+  name: ms-widedeep-dataparallel
+  namespace: pipeline
+spec:
+  runPolicy:
+    cleanPodPolicy: None
+  successPolicy: AllWorkers
+  msReplicaSpecs:
+    Scheduler:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        spec:
+          volumes:
+            - name: script-data
+              hostPath:
+                path: /home/fzh/wide_and_deep/
+          containers:
+            - name: mindspore
+              image: swr.cn-south-1.myhuaweicloud.com/mindspore-ci/mindspore-gpu:1.7.0-20220327121541
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - python -s /home/fzh/wide_and_deep/train_and_eval_distribute.py --device_target="GPU" --epochs=1 --data_path=/home/fzh/wide_and_deep/criteo_mindrecord  --batch_size=16000
+              volumeMounts:
+                - mountPath: /home/fzh/wide_and_deep/
+                  name: script-data
+              env:
+                - name: GLOG_v
+                  value: "1"
+    Worker:
+      replicas: 4
+      restartPolicy: Never
+      template:
+        spec:
+          volumes:
+            - name: script-data
+              hostPath:
+                path: /home/fzh/wide_and_deep/
+          containers:
+            - name: mindspore
+              image: swr.cn-south-1.myhuaweicloud.com/mindspore-ci/mindspore-gpu:1.7.0-20220327121541
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - python -s /home/fzh/wide_and_deep/train_and_eval_distribute.py --device_target="GPU" --epochs=1 --data_path=/home/fzh/wide_and_deep/criteo_mindrecord --batch_size=16000
+              volumeMounts:
+                - mountPath: /home/fzh/wide_and_deep/
+                  name: script-data
+              env:
+                - name: GLOG_v
+                  value: "1"
+#              resources:
+#                limits:
+#                  nvidia.com/gpu: 1

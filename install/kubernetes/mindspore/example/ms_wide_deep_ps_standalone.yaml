@@ -1,0 +1,74 @@
+# wide&deep for ps mode which only has one worker training.
+# network : https://gitee.com/mindspore/models/tree/master/official/recommend/wide_and_deep
+apiVersion: mindspore.gitee.com/v1
+kind: MSJob
+metadata:
+  name: ms-widedeep-ps-standalone
+spec:
+  runPolicy:
+    cleanPodPolicy: None
+  successPolicy: AllWorkers
+  msReplicaSpecs:
+    Scheduler:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        spec:
+          volumes:
+            - name: script-data
+              hostPath:
+                path: /home/fzh/wide_and_deep/
+          containers:
+            - name: mindspore
+              image: swr.cn-south-1.myhuaweicloud.com/mindspore-ci/mindspore-gpu:1.7.0-20220327121541
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - python -s /home/fzh/wide_and_deep/train_and_eval_parameter_server_standalone.py --device_target="GPU" --epochs=1 --data_path=/home/fzh/wide_and_deep/criteo_mindrecord --parameter_server=1 --vocab_cache_size=200000
+              volumeMounts:
+                - mountPath: /home/fzh/wide_and_deep/
+                  name: script-data
+              env:
+                - name: GLOG_v
+                  value: "1"
+    PS:
+      replicas: 2
+      restartPolicy: Never
+      template:
+        spec:
+          volumes:
+            - name: script-data
+              hostPath:
+                path: /home/fzh/wide_and_deep/
+          containers:
+            - name: mindspore
+              image: swr.cn-south-1.myhuaweicloud.com/mindspore-ci/mindspore-gpu:1.7.0-20220327121541
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - python -s /home/fzh/wide_and_deep/train_and_eval_parameter_server_standalone.py --device_target="GPU" --epochs=1 --data_path=/home/fzh/wide_and_deep/criteo_mindrecord --parameter_server=1 --vocab_cache_size=200000
+              volumeMounts:
+                - mountPath: /home/fzh/wide_and_deep/
+                  name: script-data
+    Worker:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        spec:
+          volumes:
+            - name: script-data
+              hostPath:
+                path: /home/fzh/wide_and_deep/
+          containers:
+            - name: mindspore
+              image: swr.cn-south-1.myhuaweicloud.com/mindspore-ci/mindspore-gpu:1.7.0-20220327121541
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - python -s /home/fzh/wide_and_deep/train_and_eval_parameter_server_standalone.py --device_target="GPU" --epochs=1 --data_path=/home/fzh/wide_and_deep/criteo_mindrecord --parameter_server=1  --vocab_cache_size=200000
+              volumeMounts:
+                - mountPath: /home/fzh/wide_and_deep/
+                  name: script-data

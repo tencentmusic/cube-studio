@@ -15,6 +15,11 @@ RUN pip install numpy pandas StatsModels Matplotlib Seaborn  sklearn wheel SciPy
 RUN pip install tensorflow keras torch torchvision keras nltk spacy gensim \
     && rm -rf /tmp/* /var/tmp/* /root/.cache
 
+# 安装插件
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+RUN pip install --upgrade jupyterlab-git && jupyter lab build && \
+     pip uninstall -y tensorboard && pip install tensorboard==2.10 jupyterlab-tensorboard-pro && jupyter labextension install jupyterlab_tensorboard_pro ; jupyter serverextension enable jupyterlab_tensorboard_pro --sys-prefix
+
 # 拷贝examples
 COPY examples/* /examples/
 
