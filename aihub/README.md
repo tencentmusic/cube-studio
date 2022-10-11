@@ -27,135 +27,45 @@
 
 ## 数据分析
 
- - EDA
-
- - 统计分析
-
- - 统计绘图与数据可视化
-
- - sql
+ - EDA、统计分析、统计绘图与数据可视化、sql
 
 ## 基础算法
 
- - 二分查找
-
- - 排序
-
- - 递归
-
- - 回溯
-
- - 分治
-
- - 双指针
-
- - 深度优先搜索
-
- - 广度优先搜索
-
- - 动态规划
+ - 二分查找、排序、递归、回溯、分治、双指针、深度优先搜索、广度优先搜索、动态规划
 
 ## 机器学习
 
 单模型
 
- - 线性回归
-
- - 逻辑回归
-
- - Lasso
-
- - Ridge
-
- - knn
-
- - ID3
-
- - C4.5
-
- - CART
-
- - 感知机
-
- - 神经网络
-
- - SVM
+ - 线性回归、逻辑回归、Lasso、Ridge、knn、ID3、C4.5、CART、感知机、神经网络、SVM
 
 集成学习
 
- - GBDT
-
- - AdaBoost
-
- - XGBoost
-
- - LightGBM
-
- - CatBoost
-
- - Random Forest
+ - GBDT、AdaBoost、XGBoost、LightGBM、CatBoost、Random Forest
 
 无监督模型
 
- - kmeans
-
- - 层次聚类
-
- - 谱聚类
-
- - PCA
-
- - SVD
-
- - LDA
+ - kmeans、层次聚类、谱聚类、PCA、SVD、LDA
 
 概率模型
 
- - 朴素贝叶斯
-
- - 贝叶斯网络
-
- - EM
-
- - MCMC
-
- - 最大熵
-
- - CRF
-
- - HMM
+ - 朴素贝叶斯、贝叶斯网络、EM、MCMC、最大熵、CRF、HMM
 
 ## 深度学习
 
 DNN
 
- - MLP
-
- - BP
+ - MLP、BP
 
 CNN
 
- - 分类
-
- - 检测
-
- - 分割
-
-AlexNet/VGG/GoogleNet/ResNet/DenseNet
+ - 分类、检测、分割
 
 ...
 
 RNN
 
- - LSTM
-
- - Transformer
-
- - Attention
-
- - Bert
-
- - XLNet
+ - LSTM、Transformer、Attention、Bert、XLNet
 
 ...
 
@@ -167,17 +77,8 @@ GNN
 
 ## 图像分类
 
-二分类
-- SVM
-
 多类别分类：
- - LetNet
- - AlexNet
- - VGGNet系列
- - GoogLeNet
- - ResNet系列
- - Inception系列
- - DenseNet系列
+ - LetNet、AlexNet、VGGNet系列、GoogLeNet、ResNet系列、Inception系列、DenseNet系列
 
 多标签分类：
 - R-CNN&LSTM
@@ -214,14 +115,7 @@ GNN
 
 ## 图像重构（图像修复）
 
-- Context Encoder
-- MSNPS
-- GLCIC
-- Shift-Net
-- DeepFill
-- GMCNN
-- PartialConv
-- EdgeConnect
+- Context Encoder、MSNPS、GLCIC、Shift-Net、DeepFill、GMCNN、PartialConv、EdgeConnect
 
 ## 超分辨率
 
