@@ -34,8 +34,7 @@ RUN mkdir -p /opt/third && cd /opt/third \
 
 
 # 拷贝examples
-COPY examples/spark/* /examples/spark/
-COPY examples/flink/* /examples/flink/
+COPY examples/* /examples/
 
 # 拷贝示例的hadoop和hive配置文件
 COPY conf/hive/* /opt/third/hive/conf/
