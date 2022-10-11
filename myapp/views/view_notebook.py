@@ -64,8 +64,6 @@ class Notebook_ModelView_Base():
     label_title='notebook'
     check_redirect_list_url = conf.get('MODEL_URLS',{}).get('notebook','')
     crd_name = 'notebook'
-
-    datamodel = SQLAInterface(Notebook)
     conv = GeneralModelConverter(datamodel)
     base_permissions = ['can_add', 'can_delete','can_edit', 'can_list', 'can_show']
     base_order = ('changed_on', 'desc')
@@ -75,12 +73,13 @@ class Notebook_ModelView_Base():
     add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
     list_columns = ['project','ide_type','name_url','describe','resource','status','renew','reset']
     cols_width={
-        "project":{"type": "ellip2", "width": 200},
+        "project":{"type": "ellip2", "width": 150},
+        "ide_type": {"type": "ellip2", "width": 150},
         "name_url":{"type": "ellip2", "width": 300},
         "describe":{"type": "ellip2", "width": 300},
         "resource":{"type": "ellip2", "width": 300},
         "status":{"type": "ellip2", "width": 100},
-        "renew": {"type": "ellip2", "width": 200},
+        "renew": {"type": "ellip2", "width": 200}
     }
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -203,6 +202,10 @@ class Notebook_ModelView_Base():
             item.ide_type = 'theia'
         elif 'bigdata' in item.images:
             item.ide_type = 'bigdata'
+        elif 'machinelearning' in item.images:
+            item.ide_type = 'machinelearning'
+        elif 'deeplearning' in item.images:
+            item.ide_type = 'deeplearning'
         else:
             item.ide_type = 'jupyter'
 
@@ -304,7 +307,7 @@ class Notebook_ModelView_Base():
         volume_mount = notebook.volume_mount
         rewrite_url = '/'
         pre_command = '(nohup sh /init.sh > /notebook_init.log 2>&1 &) ; (nohup sh /mnt/%s/init.sh > /init.log 2>&1 &) ; '%notebook.created_by.username
-        if notebook.ide_type=='jupyter' or notebook.ide_type=='bigdata':
+        if notebook.ide_type=='jupyter' or notebook.ide_type=='bigdata' or notebook.ide_type=='machinelearning' or notebook.ide_type=='deeplearning':
             rewrite_url = '/notebook/jupyter/%s/' % notebook.name
             workingDir = '/mnt/%s' % notebook.created_by.username
             command = ["sh", "-c", "%s jupyter lab --notebook-dir=%s --ip=0.0.0.0 "
@@ -554,5 +557,3 @@ class Notebook_ModelView_Api(Notebook_ModelView_Base,MyappModelRestApi):
 
 
 appbuilder.add_api(Notebook_ModelView_Api)
-
-
