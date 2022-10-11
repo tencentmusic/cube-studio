@@ -5,11 +5,6 @@ MAINTAINER hamawhite
 
 RUN apt-get update && apt install -y lsof
 
-# 修改python3的软链接
-RUN cd /usr/bin \
-    && rm -rf python3 \
-    && ln -s python3.8* python3
-
 # 下载apache spark安装包
 RUN mkdir -p /opt/third && cd /opt/third \
     && wget http://dlcdn.apache.org/spark/spark-3.1.3/spark-3.1.3-bin-hadoop3.2.tgz \

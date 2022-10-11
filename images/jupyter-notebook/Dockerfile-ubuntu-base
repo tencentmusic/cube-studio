@@ -21,14 +21,13 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
 RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip
 
 RUN apt install -y python3.8 python3.8-dev && rm -rf /usr/bin/python &&  ln -s /usr/bin/python3.8 /usr/bin/python \
-    && rm -rf /usr/bin/python3 && ln -s python3.8* python3
+    && rm -rf /usr/bin/python3 && ln -s /usr/bin/python3.8* /usr/bin/python3
 
 RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ignore-installed --force-reinstall" \
     && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
 
-RUN pip install --upgrade pip && pip install gsutil pysnooper psycopg2-binary jupyter-tensorboard kubernetes simplejson sqlalchemy redis pandas joblib numpy xgboost scikit-learn seldon-core tornado sklearn  kazoo jinja2 requests numpy pandas flask pymysql Flask-APScheduler pysnooper pyyaml kubernetes jupyterlab voila notebook && \
+RUN pip install --upgrade pip && pip install gsutil pysnooper psycopg2-binary jupyter-tensorboard kubernetes simplejson sqlalchemy redis pandas joblib numpy xgboost scikit-learn tornado sklearn  kazoo jinja2 requests numpy pandas flask pymysql Flask-APScheduler pysnooper pyyaml kubernetes jupyterlab voila notebook && \
     rm -rf /tmp/* /var/tmp/* /root/.cache
-
 
 # 安装最新版的nodejs
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
