@@ -1297,7 +1297,7 @@ def adjust_service_resource(task):
                                 target_node_selector = get_deployment_node_selector(name=inferenceserving.name,namespace=namespace)
 
                                 # 获取同项目组，低优先级的推理
-                                low_inferenceservings =dbsession.query(InferenceService).filter_by(priority=0).filter_by(project_id=service.project_id).all()
+                                low_inferenceservings =dbsession.query(InferenceService).filter_by(priority=0).filter_by(project_id=inferenceserving.project_id).all()
                                 low_inferenceservings.sort(key=lambda item:item.max_replicas-item.min_replicas)  # 从大到小排序
                                 for service in low_inferenceservings:
                                     if service.resource_gpu and service.resource_gpu!='0':  #

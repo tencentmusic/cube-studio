@@ -20,7 +20,8 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
 # 安装python
 RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip
 
-RUN apt install -y python3.8 && rm -rf /usr/bin/python &&  ln -s /usr/bin/python3.8 /usr/bin/python
+RUN apt install -y python3.8 && rm -rf /usr/bin/python &&  ln -s /usr/bin/python3.8 /usr/bin/python \
+    && rm -rf /usr/bin/python3 && ln -s python3.8* python3
 
 RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ignore-installed --force-reinstall" \
     && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
