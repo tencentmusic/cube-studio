@@ -1,0 +1,28 @@
+# wide&deep for only one worker training, just like in one machine which has 1 gpu.
+# network : https://gitee.com/mindspore/models/tree/master/official/recommend/wide_and_deep
+apiVersion: mindspore.gitee.com/v1
+kind: MSJob
+metadata:
+  name: ms-widedeep-standalone
+spec:
+  msReplicaSpecs:
+    Worker:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        spec:
+          volumes:
+            - name: script-data
+              hostPath:
+                path: /home/fzh/wide_and_deep/
+          containers:
+            - name: mindspore
+              image: swr.cn-south-1.myhuaweicloud.com/mindspore-ci/mindspore-gpu:1.7.0-20220327121541
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - python -s /home/fzh/wide_and_deep/train_and_eval.py --device_target="GPU" --data_path=/home/fzh/wide_and_deep/criteo_mindrecord --batch_size=16000 --epochs=1
+              volumeMounts:
+                - mountPath: /home/fzh/wide_and_deep/
+                  name: script-data
