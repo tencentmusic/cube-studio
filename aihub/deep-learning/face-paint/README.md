@@ -4,5 +4,10 @@
 
 # 2. 想在本地运行它？
 
-执行以下命令，安装animegan2
+执行以下命令，安装pytorch
 
+
+
+```bash
+pip install torch >= 1.7.1 torchvision
+```
