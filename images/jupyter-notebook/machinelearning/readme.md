@@ -8,8 +8,8 @@
 
 ### 1.2 通过Dockerfile构建镜像
 ```bash
-docker build -t  $hubhost/notebook:jupyter-ubuntu-cpu-machinelearning -f Dockerfile .
-docker push $hubhost/notebook:jupyter-ubuntu-cpu-machinelearning
+docker build -t  $hubhost/notebook:jupyter-ubuntu-machinelearning -f Dockerfile .
+docker push $hubhost/notebook:jupyter-ubuntu-machinelearning
 ```
 
 ### 1.3 上线自己的notebook镜像到cube-studio
