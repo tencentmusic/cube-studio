@@ -13,7 +13,7 @@ RUN pip install pymysql pika presto-python-client neo4j elasticsearch psycopg2-b
     && rm -rf /tmp/* /var/tmp/* /root/.cache
 
 # 数据挖掘包
-RUN pip install numpy pandas sklearn wheel SciPy pyarrow Pillow PyML MDP Theano opencv-python plotly tqdm optimization gbdt xgboost lightgbm \
+RUN pip install numpy pandas sklearn wheel SciPy pyarrow Pillow PyML MDP Theano opencv-python plotly tqdm gbdt xgboost lightgbm \
     && rm -rf /tmp/* /var/tmp/* /root/.cache
 
 # 可视化包
