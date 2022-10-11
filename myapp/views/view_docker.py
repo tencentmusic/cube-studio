@@ -1,28 +1,20 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 from flask_appbuilder.forms import GeneralModelConverter
-import uuid
-import re
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from myapp.models.model_job import Repository,Images
-from myapp import app, appbuilder,db,event_logger
+from wtforms.validators import DataRequired
+from myapp.models.model_job import Repository
+from myapp import app, appbuilder,db
 
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
+from wtforms import StringField
+from myapp.views.view_team import Project_Join_Filter
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
+from myapp.forms import MyBS3TextAreaFieldWidget
 
-from .baseApi import (
-    MyappModelRestApi
-)
+from .baseApi import MyappModelRestApi
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
     Markup,
-    make_response,
     redirect
 )
 from .base import (
@@ -30,8 +22,8 @@ from .base import (
     MyappFilter,
     MyappModelView,
 )
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from flask_appbuilder import expose
+import datetime,time,json
 conf = app.config
 logging = app.logger
 
@@ -92,14 +84,14 @@ class Docker_ModelView_Base():
         "base_image":StringField(
             _(datamodel.obj.lab('base_image')),
             default='',
-            description=Markup(f'基础镜像和构建方法可参考：<a href="%s">点击打开</a>'%(conf.get('HELP_URL').get('docker',''))),
+            description=Markup('基础镜像和构建方法可参考：<a href="%s">点击打开</a>'%(conf.get('HELP_URL').get('docker',''))),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(),]
         ),
         "expand":StringField(
             _(datamodel.obj.lab('expand')),
             default=json.dumps(expand,ensure_ascii=False,indent=4),
-            description=Markup(f'扩展字段'),
+            description=Markup('扩展字段'),
             widget=MyBS3TextAreaFieldWidget(rows=3)
         )
 

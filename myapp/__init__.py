@@ -1,14 +1,12 @@
 # 避免多进程同时启动对系统cpu负载过高
-import time,random
 # time.sleep(random.randint(1,10))
-from flask import g
 from copy import deepcopy
 import json
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from flask import redirect, g, flash, request, session, abort
+from flask import g, abort
 import os
-from flask import render_template,redirect
+from flask import render_template
 from flask import Flask, redirect
 from flask_appbuilder import AppBuilder, IndexView, SQLA
 from flask_appbuilder.baseviews import expose
@@ -19,11 +17,9 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 import wtforms_json
 
-from myapp import config
 from myapp.security import MyappSecurityManager
 from myapp.utils.core import pessimistic_connection_handling, setup_cache
 from myapp.utils.log import DBEventLogger
-import pysnooper
 wtforms_json.init()
 
 # 在这个文件里面只创建app，不要做view层面的事情。
@@ -273,7 +269,7 @@ def check_login():
         return
 
     if not g.user or not g.user.get_id():
-        redirect_url = appbuilder.get_url_for_login  # +"?login_url="+request.url
+        appbuilder.get_url_for_login  # +"?login_url="+request.url
         # return redirect(redirect_url)
         abort(401)
 
@@ -292,7 +288,7 @@ def myapp_after_request(resp):
 
 
 
-    except Exception as e:
+    except Exception:
         # print(e)
         resp.set_cookie('myapp_username', 'myapp')
         # resp.delete_cookie('id')
@@ -326,9 +322,6 @@ if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
-
-# 引入视图
-from myapp import views
 
 
 # def can_access(menuitem):

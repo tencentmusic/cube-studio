@@ -3,27 +3,17 @@
 from datetime import datetime
 from flask_appbuilder import Model
 from sqlalchemy import (
-    Boolean,
     Column,
-    create_engine,
     DateTime,
     ForeignKey,
     Integer,
-    MetaData,
     String,
-    Table,
     Text,
 )
 
-from sqlalchemy.orm import relationship, sessionmaker, subqueryload
-from myapp import (
-    app,
-    appbuilder,
-    conf,
-    db
-)
+from sqlalchemy.orm import relationship
 from myapp.models.base import MyappModelBase
-from myapp import app, db, is_feature_enabled, security_manager
+from myapp import app
 from myapp.security import MyUser
 
 

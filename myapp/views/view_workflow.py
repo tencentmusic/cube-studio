@@ -1,15 +1,14 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 
 from flask_babel import gettext as __
 
 
-from myapp.models.model_job import Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
+from myapp.models.model_job import Pipeline,Workflow
 from flask_appbuilder.actions import action
-from myapp.project import push_message,push_admin
-from myapp import app, appbuilder,db,event_logger
+from myapp.project import push_message
+from myapp import app, appbuilder,db
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import or_
 
 from myapp.utils.py import py_k8s
 
@@ -17,12 +16,9 @@ from .baseApi import (
     MyappModelRestApi
 )
 from flask import (
-    current_app,
     abort,
     flash,
     g,
-    Markup,
-    make_response,
     redirect
 )
 
@@ -31,8 +27,8 @@ from .base import (
     MyappFilter,
     MyappModelView,
 )
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from flask_appbuilder import expose
+import datetime, json
 conf = app.config
 logging = app.logger
 
@@ -126,7 +122,7 @@ class Crd_ModelView_Base():
                     k8s_client = py_k8s.K8s(kubeconfig)
                     crd_info = conf.get("CRD_INFO", {}).get(self.crd_name, {})
                     if crd_info:
-                        crd_names = k8s_client.delete_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=item.namespace,name=item.name)
+                        k8s_client.delete_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=item.namespace,name=item.name)
                         # db_crds = db.session.query(self.datamodel.obj).filter(self.datamodel.obj.name.in_(crd_names)).all()
                         # for db_crd in db_crds:
                         #     db_crd.status = 'Deleted'

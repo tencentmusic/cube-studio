@@ -1,31 +1,21 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
 from sqlalchemy.orm import relationship
-import datetime,time,json
+import json
 from sqlalchemy import (
     Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
     Text,
     Enum,
 )
 import numpy
 import random
 import copy
-import logging
-from myapp.models.helpers import AuditMixinNullable, ImportMixin
+from myapp.models.helpers import AuditMixinNullable
 
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 
 
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
 from myapp.models.base import MyappModelBase
@@ -33,10 +23,7 @@ import datetime
 metadata = Model.metadata
 conf = app.config
 from myapp.utils import core
-import re
 from myapp.utils.py import py_k8s
-import pysnooper
-
 
 class Repository(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'repository'
@@ -225,7 +212,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             pipeline_url = "/pipeline_modelview/web/log/%s"%self.id
             return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
         else:
-            return Markup(f'日志')
+            return Markup('日志')
 
 
     @property
@@ -556,7 +543,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             monitoring = json.loads(self.monitoring)
             monitoring['link']=self.pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
-        except Exception as e:
+        except Exception:
             return Markup('<pre><code> 暂无 </code></pre>')
 
     @property
@@ -635,9 +622,8 @@ class RunHistory(Model,MyappModelBase):
             pipeline_url = self.pipeline.project.cluster.get('PIPELINE_URL')+ "runs/details/" +str(self.run_id)
             return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
         else:
-            return Markup(f'日志')
+            return Markup('日志')
 
-import sqlalchemy as sa
 class Crd:
     # __tablename__ = "crd"
     id = Column(Integer, primary_key=True)
@@ -808,7 +794,7 @@ class Workflow(Model,Crd,MyappModelBase):
 
             except Exception as e:
                 print(e)
-        return Markup(f'未知')
+        return Markup('未知')
 
     @property
     def pipeline(self):
@@ -850,7 +836,7 @@ class Workflow(Model,Crd,MyappModelBase):
             except Exception as e:
                 print(e)
 
-        return Markup(f'日志')
+        return Markup('日志')
 
     @property
     def stop(self):
@@ -871,7 +857,7 @@ class Tfjob(Model,Crd,MyappModelBase):
                     return Markup(f'<a href="/pipeline_modelview/list/?_flt_2_name={pipeline.name}">{pipeline.describe}</a>')
             except Exception as e:
                 print(e)
-        return Markup(f'未知')
+        return Markup('未知')
 
     @property
     def run_instance(self):
@@ -883,7 +869,7 @@ class Tfjob(Model,Crd,MyappModelBase):
                     return Markup(f'<a href="/workflow_modelview/list/?_flt_2_labels={run_id}">运行实例</a>')
             except Exception as e:
                 print(e)
-        return Markup(f'未知')
+        return Markup('未知')
 
 
 

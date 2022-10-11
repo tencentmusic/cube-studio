@@ -1,4 +1,3 @@
-from flask_appbuilder import Model
 from flask_babel import lazy_gettext as _
 import re
 from myapp.utils import core

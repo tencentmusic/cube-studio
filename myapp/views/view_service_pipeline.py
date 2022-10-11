@@ -1,31 +1,26 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 
 from myapp.models.model_service_pipeline import Service_Pipeline
 from myapp.models.model_job import Repository
-from flask import current_app, flash, jsonify
+from flask import jsonify
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from sqlalchemy import and_, or_, select
+from wtforms.validators import DataRequired, Length, Regexp
+from sqlalchemy import or_
 from myapp.exceptions import MyappException
-from wtforms import BooleanField, IntegerField,StringField, SelectField
-from myapp.project import push_message,push_admin
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,Select2ManyWidget,Select2Widget,BS3TextAreaFieldWidget
+from wtforms import StringField, SelectField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelectMultipleField
-import re,copy
+import copy
 from .baseApi import (
     MyappModelRestApi
 )
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
-    Markup,
     make_response,
     redirect,
     request,
@@ -40,8 +35,8 @@ from .base import (
     json_response
 )
 
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from flask_appbuilder import expose
+import pysnooper,datetime, json
 conf = app.config
 logging = app.logger
 
@@ -318,7 +313,7 @@ class Service_Pipeline_ModelView_Base():
     def build_mq_consumer(self,service_pipeline):
         namespace = conf.get('SERVICE_PIPELINE_NAMESPACE')
         name = service_pipeline.name
-        command = service_pipeline.command
+        service_pipeline.command
         image_secrets = conf.get('HUBSECRET', [])
         user_hubsecrets = db.session.query(Repository.hubsecret).filter(Repository.created_by_fk == g.user.id).all()
         if user_hubsecrets:
@@ -398,7 +393,7 @@ class Service_Pipeline_ModelView_Base():
     # # @event_logger.log_this
     @expose("/web/<service_pipeline_id>", methods=["GET"])
     def web(self,service_pipeline_id):
-        service_pipeline = db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
+        db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
 
         # service_pipeline.dag_json = service_pipeline.fix_dag_json()
         # service_pipeline.expand = json.dumps(service_pipeline.fix_position(), indent=4, ensure_ascii=False)

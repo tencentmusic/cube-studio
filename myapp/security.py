@@ -1,54 +1,39 @@
-from flask_login import current_user, LoginManager
+from flask_login import current_user
 import logging
-import json
 import jwt
 
 from flask_babel import lazy_gettext
 
-from flask import current_app,redirect, g, flash, request, session, abort, make_response
+from flask import current_app
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
-from werkzeug.security import generate_password_hash
 from flask_babel import lazy_gettext as _
 from flask_appbuilder.security.views import (
     PermissionModelView,
     PermissionViewModelView,
     RoleModelView,
-    UserModelView,
-    RoleListWidget,
-    RoleShowWidget,
+    UserModelView
 )
-from werkzeug.security import check_password_hash
-from flask_appbuilder.security.sqla.models import (
-    assoc_permissionview_role,
-    assoc_user_role,
-)
+from flask_appbuilder.security.sqla.models import assoc_user_role
 
-from sqlalchemy.orm import backref, relationship
-from flask_appbuilder.security.decorators import has_access, has_access_api, permission_name
+from flask_appbuilder.security.decorators import has_access
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.widgets import ListWidget
-from flask_appbuilder.const import LOGMSG_WAR_SEC_LOGIN_FAILED
 from sqlalchemy import or_
 
 from flask_appbuilder.security.views import expose
 
-from flask import redirect, g, flash, request, session, abort
+from flask import g, flash, request
 
 from flask_appbuilder.security.sqla.models import assoc_permissionview_role
-from sqlalchemy import select, Table
+from sqlalchemy import select
 from flask_appbuilder.const import (
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OAUTH,
     AUTH_OID,
     AUTH_REMOTE_USER,
-    LOGMSG_ERR_SEC_AUTH_LDAP,
-    LOGMSG_ERR_SEC_AUTH_LDAP_TLS,
-    LOGMSG_WAR_SEC_LOGIN_FAILED,
-    LOGMSG_WAR_SEC_NO_USER,
-    LOGMSG_WAR_SEC_NOLDAP_OBJ,
-    PERMISSION_PREFIX
+    LOGMSG_WAR_SEC_LOGIN_FAILED
 )
 
 
@@ -90,7 +75,7 @@ PermissionModelView.list_widget = MyappSecurityListWidget
 
 # expand user
 from flask_appbuilder.security.sqla.models import User,Role
-from sqlalchemy import Column, Integer, ForeignKey, String, Sequence, Table
+from sqlalchemy import Column, String
 
 
 
@@ -115,7 +100,7 @@ class MyUser(User):
             pass
             # help(self.changed_on)
             # timestamp = int(func.date_format(self.changed_on))
-            timestamp = int(self.changed_on.timestamp())
+            int(self.changed_on.timestamp())
             payload = {
                 "iss": self.username
                 # "iat": timestamp,  # Issue period
@@ -217,15 +202,13 @@ class MyUserRemoteUserModelView(UserModelView):
             appbuilder=self.appbuilder,
         )
 
-from flask_appbuilder.security.views import expose, ModelView, SimpleFormView
-from flask_appbuilder.security.forms import LoginForm_db, LoginForm_oid, ResetPasswordForm, UserInfoEdit
+from flask_appbuilder.security.views import SimpleFormView
 from flask_appbuilder._compat import as_unicode
 from flask_babel import lazy_gettext
-from flask_wtf.recaptcha import RecaptchaField
-from wtforms import BooleanField, PasswordField, StringField
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms import StringField
+from wtforms.validators import DataRequired
 
-from flask_appbuilder.fieldwidgets import BS3PasswordFieldWidget, BS3TextFieldWidget
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from flask_appbuilder.forms import DynamicForm
 
 
@@ -491,11 +474,11 @@ class MyappSecurityManager(SecurityManager):
                     project_user.user_id = user.id
                     self.get_session.add(project_user)
                     self.get_session.commit()
-            except Exception as e1:
+            except Exception:
                 self.get_session.rollback()
 
             return user
-        except Exception as e:
+        except Exception:
             self.get_session.rollback()
             return False
 
@@ -668,7 +651,6 @@ class MyappSecurityManager(SecurityManager):
     # @pysnooper.snoop()
     def sync_role_definitions(self):
         """Inits the Myapp application with security roles and such"""
-        from myapp import conf
 
         logging.info("Syncing role definition")
 

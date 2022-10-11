@@ -1,34 +1,27 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-import uuid
 from myapp.models.model_nni import NNI
 from myapp.models.model_job import Repository
 from flask_appbuilder.actions import action
 
-from flask_babel import lazy_gettext,gettext
+from flask_babel import lazy_gettext
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
-from myapp import app, appbuilder,db,event_logger
-import os,sys
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from sqlalchemy import and_, or_, select
-from myapp.exceptions import MyappException
-from wtforms import BooleanField, IntegerField, SelectField, StringField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MyCommaSeparatedListField,MySelectMultipleField
-from myapp.views.view_team import Project_Filter,Project_Join_Filter
-import re,copy
+from myapp import app, appbuilder,db
+import os
+from wtforms.validators import DataRequired, Length, Regexp
+from sqlalchemy import or_
+from wtforms import IntegerField, SelectField, StringField,FloatField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget,Select2Widget
+from myapp.forms import MyBS3TextAreaFieldWidget, MyCodeArea, MySelectMultipleField
+from myapp.views.view_team import Project_Join_Filter
+import copy
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
     Markup,
-    make_response,
     redirect,
-    render_template,
     request
 )
 from .baseApi import (
@@ -40,8 +33,8 @@ from .base import (
     MyappFilter,
     MyappModelView,
 )
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from flask_appbuilder import expose
+import datetime, json
 
 
 

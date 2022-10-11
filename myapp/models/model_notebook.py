@@ -1,29 +1,16 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
 from sqlalchemy.orm import relationship
-import datetime,time,json
+import json
 from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
     Text,
     Enum,
 )
-import pysnooper
 from myapp.models.base import MyappModelBase
-from myapp.models.helpers import AuditMixinNullable, ImportMixin
-from flask import escape, g, Markup, request
-from myapp import app,db
-from myapp.models.helpers import ImportMixin
+from myapp.models.helpers import AuditMixinNullable
+from flask import g, request
+from myapp import app
 
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
-from flask_appbuilder.models.decorators import renders
+from sqlalchemy import Column, Integer, String, ForeignKey
 from flask import Markup
 import datetime
 metadata = Model.metadata
@@ -115,7 +102,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
                 return url
             return status
 
-        except Exception as e:
+        except Exception:
             # print(e)
             return "unknown"
 

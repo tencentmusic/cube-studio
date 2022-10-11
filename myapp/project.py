@@ -1,32 +1,8 @@
 
 from werkzeug.security import check_password_hash
-from flask_appbuilder.security.sqla.models import (
-    assoc_permissionview_role,
-    assoc_user_role,
-)
-
-from flask import g
-
 from flask_appbuilder.security.views import AuthDBView
 from flask_appbuilder.security.views import expose
-from flask_appbuilder.const import (
-    AUTH_DB,
-    AUTH_LDAP,
-    AUTH_OAUTH,
-    AUTH_OID,
-    AUTH_REMOTE_USER,
-    LOGMSG_ERR_SEC_AUTH_LDAP,
-    LOGMSG_ERR_SEC_AUTH_LDAP_TLS,
-    LOGMSG_WAR_SEC_LOGIN_FAILED,
-    LOGMSG_WAR_SEC_NO_USER,
-    LOGMSG_WAR_SEC_NOLDAP_OBJ,
-    PERMISSION_PREFIX
-)
-import pysnooper
-import json
-
-
-
+from flask_appbuilder.const import LOGMSG_WAR_SEC_LOGIN_FAILED
 
 # 推送给管理员消息的函数
 def push_admin(message):
@@ -39,18 +15,9 @@ def push_message(receivers,message,link=None):
 
 
 import logging as log
-import datetime
-import logging
-import re
-
-from flask import abort, current_app, flash, g, redirect, request, session, url_for
-from flask_babel import lazy_gettext
+from flask import flash, g, redirect, request, session
 from flask_login import login_user, logout_user
-import jwt
-from werkzeug.security import generate_password_hash
-from flask_appbuilder.security.forms import LoginForm_db, LoginForm_oid, ResetPasswordForm, UserInfoEdit
-from flask_appbuilder._compat import as_unicode
-import pysnooper
+from flask_appbuilder.security.forms import LoginForm_db
 
 
 class MyCustomRemoteUserView():
@@ -76,7 +43,7 @@ class Myauthdbview(AuthDBView):
             return redirect(self.appbuilder.get_url_for_index)
 
         form = LoginForm_db()
-        method = request.method
+        request.method
         # 如果提交请求。就是认证
         if form.validate_on_submit():
             username = form.username.data

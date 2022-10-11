@@ -1,8 +1,6 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-import random
 
 import uuid
 from myapp.models.model_notebook import Notebook
@@ -13,25 +11,17 @@ from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
 from myapp import app, appbuilder,db,event_logger
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-import os,sys
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from wtforms import BooleanField, IntegerField, SelectField, StringField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MyCommaSeparatedListField,MySelectMultipleField
+from wtforms.validators import DataRequired, Length, Regexp
+from wtforms import SelectField, StringField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
+from myapp.forms import MySelect2Widget, MyBS3TextFieldWidget
 from myapp.utils.py import py_k8s
 from flask import (
-    current_app,
     abort,
     flash,
     g,
-    Markup,
-    make_response,
     redirect,
-    render_template,
     request,
-    send_from_directory,
-    Response,
-    url_for,
 )
 from .baseApi import (
     MyappModelRestApi
@@ -41,9 +31,9 @@ from .base import (
     MyappFilter,
     MyappModelView,
 )
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
-from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
+from flask_appbuilder import expose
+import datetime,time,json
+from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
 
 conf = app.config
 
@@ -461,7 +451,7 @@ class Notebook_ModelView_Base():
 
         notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
         try:
-            notebook_crd = self.reset_notebook(notebook)
+            self.reset_notebook(notebook)
             flash('已重置，Running状态后可进入。注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。','info')
         except Exception as e:
             message = '重置失败，稍后重试。%s'%str(e)

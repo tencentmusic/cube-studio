@@ -1,31 +1,19 @@
 
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
     Markup,
-    make_response,
     redirect,
-    render_template,
-    request,
-    send_from_directory,
     Response,
-    url_for,
 )
 from myapp.utils.py.py_k8s import K8s
-import datetime,json
-from flask import Flask, jsonify
-import pysnooper
-from apispec import yaml_utils
-from flask import Blueprint, current_app, jsonify, make_response, request
-from flask_babel import lazy_gettext as _
-from myapp import conf, db, get_feature_flags, security_manager,event_logger
-import yaml
+import datetime
+from flask import jsonify
+from myapp import conf
 from myapp.views.base import BaseMyappView
 
-from flask_appbuilder import ModelView,AppBuilder,expose,BaseView,has_access
-from myapp import app, appbuilder
+from flask_appbuilder import expose
+from myapp import appbuilder
 from flask import stream_with_context, request
 
 node_resource_used = {
@@ -870,7 +858,7 @@ class Myapp(BaseMyappView):
                 global_cluster_load[cluster_name]['gpu_req'] += int(nodes[ip]['used_gpu'])
                 global_cluster_load[cluster_name]['gpu_all'] += int(nodes[ip]['gpu'])
 
-        message = Markup(f'<table>%s</table>' % message)
+        message = Markup('<table>%s</table>' % message)
         # print(message)
         cluster_global_info = ''
         # for cluster_name in global_cluster_load:
@@ -977,7 +965,7 @@ class Myapp(BaseMyappView):
                         )
 
 
-        message = Markup(f'<table>%s</table>' % message)
+        message = Markup('<table>%s</table>' % message)
         # print(message)
         data = {
             'content': message,

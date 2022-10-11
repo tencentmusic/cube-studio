@@ -14,7 +14,6 @@ from sqlalchemy import and_, or_, UniqueConstraint
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm.exc import MultipleResultsFound
 import yaml
-import pysnooper
 
 from myapp.utils.core import QueryStatus
 

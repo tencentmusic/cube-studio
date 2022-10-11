@@ -1,24 +1,14 @@
 #!/usr/bin/env python
 from datetime import datetime
-import logging
-from subprocess import Popen
-from sys import stdout
-
-import click
-from colorama import Fore, Style
-from flask import g
 import json
 from myapp import app, appbuilder, db, security_manager
-from myapp.models.model_notebook import Notebook
 from myapp.models.model_team import Project,Project_User
 from myapp.models.model_job import Repository,Images,Job_Template,Pipeline,Task
 from myapp.models.model_dataset import Dataset
 from myapp.models.model_serving import Service,InferenceService
 from myapp.models.model_train_model import Training_Model
-import csv
 import uuid
 conf = app.config
-import requests
 
 def create_app(script_info=None):
     return app
@@ -26,8 +16,6 @@ def create_app(script_info=None):
 @app.shell_context_processor
 def make_shell_context():
     return dict(app=app, db=db)
-
-import pysnooper
 
 # https://dormousehole.readthedocs.io/en/latest/cli.html
 @app.cli.command('init')

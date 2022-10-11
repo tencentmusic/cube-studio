@@ -1,9 +1,9 @@
 
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 import urllib.parse
-from myapp import app, appbuilder,db,event_logger
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
+from myapp import app, appbuilder,db
+from wtforms import SelectField
+from flask_appbuilder.fieldwidgets import Select2Widget
 from myapp.models.model_job import Images,Job_Template,Repository
 from myapp.models.model_team import Project,Project_User
 from myapp.models.model_serving import InferenceService
@@ -13,22 +13,15 @@ from .baseApi import (
     MyappModelRestApi
 )
 from flask import (
-    current_app,
-    abort,
     flash,
-    g,
-    Markup,
-    make_response,
     redirect
 )
 from .base import (
     MyappFilter,
-    MyappModelView,
 )
 from myapp.models.model_aihub import Aihub
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
-from myapp.security import MyUser
+from flask_appbuilder import expose
+import datetime,json
 conf = app.config
 logging = app.logger
 

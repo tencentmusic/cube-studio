@@ -5,8 +5,6 @@ import json
 
 from flask import current_app, g, request
 
-import pysnooper
-
 # @pysnooper.snoop(depth=2)
 class AbstractEventLogger(ABC):
     @abstractmethod

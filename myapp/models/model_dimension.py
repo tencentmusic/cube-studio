@@ -1,32 +1,13 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
-from sqlalchemy.orm import relationship
-import datetime,time,json
-from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    Enum,
-)
-from sqlalchemy import String,Column,Integer,ForeignKey,UniqueConstraint,BigInteger,TIMESTAMP
+from sqlalchemy import Text
+from sqlalchemy import UniqueConstraint
 
-from flask import escape, g, Markup, request
-from .model_team import Project
-from myapp import app,db
+from flask import g
+from myapp import app
 from myapp.models.helpers import ImportMixin
-# from myapp.models.base import MyappModel
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
-from flask_appbuilder.models.decorators import renders
+from sqlalchemy import Column, Integer, String
 from flask import Markup
 from myapp.models.base import MyappModelBase
-import datetime
 metadata = Model.metadata
 conf = app.config
 
@@ -60,7 +41,7 @@ class Dimension_table(Model,ImportMixin,MyappModelBase):
 
     @property
     def operate_html(self):
-        url=f'''
+        url='''
         <a target=_blank href="/dimension_table_modelview/api/create_external_table/%s">创建远程表</a>  | <a target=_blank href="/dimension_table_modelview/api/external/%s">建外表示例</a> | <a href="/dimension_table_modelview/api/clear/%s">清空表记录</a>
         '''%(self.id,self.id,self.id)
         return Markup(url)

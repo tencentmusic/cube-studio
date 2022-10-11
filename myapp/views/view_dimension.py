@@ -2,47 +2,31 @@
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-from flask_babel import lazy_gettext,gettext
+from flask_babel import lazy_gettext
 import copy
-import random
-from sqlalchemy.exc import SQLAlchemyError,InvalidRequestError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from flask import Blueprint, current_app, jsonify, make_response, request
 from flask_appbuilder.actions import action
-import re,os
-from sqlalchemy import and_, or_, select
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from myapp import app, appbuilder,db,event_logger
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField,MySelect2ManyWidget
-from .baseApi import (
-    MyappModelRestApi,
-    json_response
-)
+import os
+from sqlalchemy import or_
+from wtforms.validators import DataRequired, Length, Regexp
+from myapp import app, appbuilder,db
+from wtforms import BooleanField, StringField, SelectField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
+from myapp.forms import MySelect2Widget
+from .baseApi import MyappModelRestApi
 from flask import (
-    current_app,
     abort,
     flash,
     g,
     Markup,
-    make_response,
     redirect,
-    render_template,
-    request,
-    send_from_directory,
-    Response,
-    url_for,
+    request
 )
-from .base import (
-    MyappFilter,
-    MyappModelView,
-)
+from .base import MyappFilter
 from myapp.models.model_dimension import Dimension_table
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
-from myapp.security import MyUser
+from flask_appbuilder import expose
+import pysnooper,datetime, json
 conf = app.config
 logging = app.logger
 
@@ -105,13 +89,8 @@ Metadata_column_fields = {
     )
 }
 
-from myapp.project import push_message, push_admin
-
-
 @pysnooper.snoop()
 def ddl_hive_external_table(table_id):
-    username = g.user.username
-
     try:
         item = db.session.query(Dimension_table).filter_by(id=int(table_id)).first()
         if not item:
@@ -446,7 +425,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                                     flash('增加新字段失败：'+str(e), 'error')
 
 
-                except sqlalchemy.exc.NoSuchTableError as e:
+                except sqlalchemy.exc.NoSuchTableError:
                     print('表不存在')
                     # 如果表不存在
 
@@ -480,7 +459,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
 
 
     def add_more_info(self,response,**kwargs):
-        from myapp.views.baseApi import API_RELATED_RIS_KEY, API_ADD_COLUMNS_RES_KEY, API_EDIT_COLUMNS_RES_KEY
+        from myapp.views.baseApi import API_ADD_COLUMNS_RES_KEY, API_EDIT_COLUMNS_RES_KEY
         for col in response[API_ADD_COLUMNS_RES_KEY]:
             if col['name']=='columns':
                 response[API_EDIT_COLUMNS_RES_KEY].remove(col)
@@ -508,8 +487,7 @@ appbuilder.add_api(Dimension_table_ModelView_Api)
 
 from flask_appbuilder import Model
 from myapp.models.base import MyappModelBase
-from sqlalchemy import Column, Integer, String, ForeignKey, Float,BigInteger,Date
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, BigInteger
 
 
 class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
@@ -533,13 +511,10 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
             search_columns = []
             label_columns={}
             add_columns=[]
-            edit_columns=[]
             show_columns=[]
             list_columns=[]
             description_columns={}
             add_form_extra_fields={}
-            add_form_query_rel_fields={}
-            validators_columns={}
             order_columns=[]
             cols_width = {
             }
@@ -640,13 +615,13 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     if self.cols[key].get('column_type', 'text') == 'int':
                         try:
                             setattr(item,key,int(getattr(item,key)))
-                        except Exception as e:
+                        except Exception:
                             setattr(item,key,None)
 
                     if self.cols[key].get('column_type', 'text') == 'double':
                         try:
                             setattr(item,key,float(getattr(item,key)))
-                        except Exception as e:
+                        except Exception:
                             setattr(item, key, None)
 
             def pre_update(self,item):
@@ -658,13 +633,13 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     if self.cols[key].get('column_type', 'text') == 'int':
                         try:
                             setattr(item,key,int(getattr(item,key)))
-                        except Exception as e:
+                        except Exception:
                             setattr(item,key,None)
 
                     if self.cols[key].get('column_type', 'text') == 'double':
                         try:
                             setattr(item,key,float(getattr(item,key)))
-                        except Exception as e:
+                        except Exception:
                             setattr(item, key, None)
 
             def get_primary_key(cols):

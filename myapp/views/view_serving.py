@@ -1,24 +1,19 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from myapp.models.model_serving import Service
 from myapp.utils import core
 from flask_babel import lazy_gettext as _
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db
 from myapp.models.model_job import Repository
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from myapp import security_manager
-import os,sys
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
+from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import  StringField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
     redirect,
-    render_template,
     request
 )
 from .base import (
@@ -30,9 +25,9 @@ from .base import (
 from .baseApi import (
     MyappModelRestApi
 )
-from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
+from flask_appbuilder import expose
+import json
 conf = app.config
 
 
