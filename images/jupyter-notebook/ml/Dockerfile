@@ -22,7 +22,7 @@ RUN pip install matplotlib pyecharts \
 
 # 数据服务包
 RUN pip install gevent flask asyncio uvloop aiohttp grpcio protobuf grpcio-tools pysnooper \
-    && rm -rf /tmp/* /var/tmp/* /root/.cache \
+    && rm -rf /tmp/* /var/tmp/* /root/.cache
 
 # 拷贝examples
 COPY examples/* /examples/
