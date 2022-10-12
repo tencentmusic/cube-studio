@@ -12,13 +12,11 @@ RUN apt install -y -f python3-opencv ffmpeg gcc automake autoconf libtool make f
 RUN pip install numpy pandas StatsModels Matplotlib Seaborn  sklearn wheel SciPy pyarrow Pillow PyML MDP Theano opencv-python plotly Bokeh Pydot tqdm gbdt xgboost lightgbm Eli5 \
     && rm -rf /tmp/* /var/tmp/* /root/.cache
 # 深度学习包
-RUN pip install tensorflow keras torch torchvision keras nltk spacy gensim \
+RUN pip install tensorflow keras torch torchvision keras nltk spacy gensim fastai pytorch-lightning jax mxnet pytorch-ignite fasttext spacy tensorboard textblob \
     && rm -rf /tmp/* /var/tmp/* /root/.cache
 
 # 安装插件
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
-RUN pip install --upgrade jupyterlab-git && jupyter lab build && \
-     pip uninstall -y tensorboard && pip install tensorboard==2.10 jupyterlab-tensorboard-pro && jupyter labextension install jupyterlab_tensorboard_pro ; jupyter serverextension enable jupyterlab_tensorboard_pro --sys-prefix
+# RUN pip uninstall -y tensorboard && pip install tensorboard==2.10 jupyterlab-tensorboard-pro && jupyter labextension install jupyterlab_tensorboard_pro ; jupyter serverextension enable jupyterlab_tensorboard_pro --sys-prefix
 
 # 拷贝examples
 COPY examples/* /examples/
