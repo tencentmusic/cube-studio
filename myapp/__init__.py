@@ -269,8 +269,6 @@ def check_login():
         return
 
     if not g.user or not g.user.get_id():
-        appbuilder.get_url_for_login  # +"?login_url="+request.url
-        # return redirect(redirect_url)
         abort(401)
 
 
@@ -288,8 +286,8 @@ def myapp_after_request(resp):
 
 
 
-    except Exception:
-        # print(e)
+    except Exception as e:
+        print(e)
         resp.set_cookie('myapp_username', 'myapp')
         # resp.delete_cookie('id')
     return resp
@@ -322,6 +320,9 @@ if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
+
+# 引入视图
+from myapp import views
 
 
 # def can_access(menuitem):

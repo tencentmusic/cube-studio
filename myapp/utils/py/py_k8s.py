@@ -83,9 +83,9 @@ class K8s():
                         if match_expression.operator == 'Equal':
                             node_selector[match_expression.key]=match_expression.values
 
-                except Exception:
+                except Exception as e:
                     pass
-                    # print(e)
+                    print(e)
                 if pod.spec.node_selector:
                     node_selector.update(pod.spec.node_selector)
 
@@ -730,7 +730,8 @@ class K8s():
         env_list.append(client.V1EnvVar(name='K8S_POD_NAME', value_from=client.V1EnvVarSource(field_ref=client.V1ObjectFieldSelector(field_path='metadata.name'))))
 
         security_context = client.V1SecurityContext(privileged=privileged) if privileged else None
-        os.environ.get("GPU_TYPE", "NVIDIA")
+        gpu_type = os.environ.get("GPU_TYPE", "NVIDIA")
+        print(gpu_type)
 
         def get_gpu(resource_gpu):
             try:
@@ -895,7 +896,8 @@ class K8s():
         try:
             self.v1.delete_namespaced_pod(name=name, namespace=namespace,grace_period_seconds=0)
             # time.sleep(1)
-        except Exception:
+        except Exception as e:
+            print(e)
             pass
             # print(e)
         pod,pod_spec = self.make_pod(
@@ -1133,9 +1135,9 @@ class K8s():
         # print(dp.to_str())
         try:
             client.AppsV1Api().delete_namespaced_stateful_set(name, namespace)
-        except Exception:
+        except Exception as e:
             pass
-            # print(e)
+            print(e)
 
         try:
             sts = client.AppsV1Api().create_namespaced_stateful_set(namespace, sts)
@@ -1177,9 +1179,9 @@ class K8s():
         print(service.to_dict())
         try:
             self.v1.delete_namespaced_service(name, namespace)
-        except Exception:
+        except Exception as e:
             pass
-            # print(e)
+            print(e)
         try:
             service = self.v1.create_namespaced_service(namespace, service)
         except Exception as e:

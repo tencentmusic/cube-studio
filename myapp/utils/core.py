@@ -2077,7 +2077,6 @@ def fix_task_position(pipeline,tasks,expand_tasks):
 
     # @pysnooper.snoop()
     def set_downstream_position(task_name):
-        str(tasks[task_name]['id'])
         downstream_tasks = [x for x in dag_json[task_name]['downstream'] if dag_json[x]['index']==dag_json[task_name]['index']]  # 获取相同树的下游节点
         downstream_tasks = sorted(downstream_tasks, key=lambda temp: dag_json[temp]['total_down_num'],reverse=True)  # 按子孙数目排序
         for i in range(len(downstream_tasks)):

@@ -582,9 +582,9 @@ output %s
         if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
             try:
                 flash('检测到模型地址为网络压缩文件，需压缩文件名和解压后文件夹名相同','warning')
-            except Exception:
+            except Exception as e:
                 pass
-                # print(e)
+                print(e)
 
     def delete_old_service(self,service_name,cluster):
         try:
@@ -671,8 +671,6 @@ output %s
         service_name = args.get('service_name', '')
         model_name = args.get('model_name', '')
         model_version = args.get('model_version', '')
-        args.get('env', '')   #  所处环境
-        args.get('area','')
         service=None
 
         if service_id:

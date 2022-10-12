@@ -86,7 +86,6 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def operate_html(self):
-        self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         dom=f'''
         <a target=_blank href="/service_pipeline_modelview/run_service_pipeline/{self.id}">部署</a> | 
         <a target=_blank href="/service_pipeline_modelview/web/pod/{self.id}">pod</a> | 

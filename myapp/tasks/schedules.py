@@ -897,18 +897,18 @@ def check_pipeline_resource():
                     tasks = dbsession.query(Task).filter(Task.pipeline_id == int(pipeline_id)).all()  # 获取model记录
                     for task in tasks:
                         try:
-                            json.loads(task.monitoring).get('task',[])
+                            task_resources= json.loads(task.monitoring).get('task',[])
                             tfjob_resources = json.loads(task.monitoring).get('tfjob',[])
                             monitoring_workflow[pipeline_id]['task'][task.label]={}
-                            # if task_resources:
-                            #     monitoring_workflow[pipeline_id]['task'][task.label].update(
-                            #         {
-                            #             'cpu': [task_resource['cpu'] for task_resource in task_resources],
-                            #             'memory': [task_resource['memory'] for task_resource in task_resources],
-                            #             "cpu限制": task.resource_cpu,
-                            #             "memory限制" : task.resource_memory
-                            #         }
-                            #     )
+                            if task_resources:
+                                monitoring_workflow[pipeline_id]['task'][task.label].update(
+                                    {
+                                        'cpu': [task_resource['cpu'] for task_resource in task_resources],
+                                        'memory': [task_resource['memory'] for task_resource in task_resources],
+                                        "cpu限制": task.resource_cpu,
+                                        "memory限制" : task.resource_memory
+                                    }
+                                )
                             if tfjob_resources:
                                 monitoring_workflow[pipeline_id]['task'][task.label].update(
                                     {
@@ -1233,7 +1233,8 @@ def get_deployment_node_selector(name,namespace):
                 if match_expression.operator == 'Equal':
                     node_selector[match_expression.key] = match_expression.values
 
-    except Exception:
+    except Exception as e:
+        print(e)
         pass
 
         # print(e)
@@ -1265,9 +1266,6 @@ def adjust_service_resource(task):
                     continue
                 else:
                     if inferenceserving.resource_gpu and inferenceserving.resource_gpu!='0' and inferenceserving.priority==1:
-                        # print(hpa)
-                        hpa.spec.metrics
-                        hpa.status.current_metrics
                         current_replicas = hpa.status.current_replicas
                         desired_replicas = hpa.status.desired_replicas
                         if desired_replicas>current_replicas:  # 期望扩容

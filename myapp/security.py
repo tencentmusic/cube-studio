@@ -100,7 +100,7 @@ class MyUser(User):
             pass
             # help(self.changed_on)
             # timestamp = int(func.date_format(self.changed_on))
-            int(self.changed_on.timestamp())
+            timestamp = int(self.changed_on.timestamp())
             payload = {
                 "iss": self.username
                 # "iat": timestamp,  # Issue period

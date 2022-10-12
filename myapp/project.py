@@ -43,7 +43,6 @@ class Myauthdbview(AuthDBView):
             return redirect(self.appbuilder.get_url_for_index)
 
         form = LoginForm_db()
-        request.method
         # 如果提交请求。就是认证
         if form.validate_on_submit():
             username = form.username.data

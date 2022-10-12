@@ -1580,7 +1580,7 @@ class ETL_Pipeline_ModelView_Base():
         print(etl_pipeline_id)
         url = '/etl_pipeline_modelview/web/' + etl_pipeline_id
         try:
-            db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
+            pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
             # run_pipeline(pipeline)
             db.session.commit()
             url = conf.get('MODEL_URLS',{}).get('etl_task')
@@ -1593,7 +1593,7 @@ class ETL_Pipeline_ModelView_Base():
 
     @expose("/web/<etl_pipeline_id>", methods=["GET"])
     def web(self,etl_pipeline_id):
-        db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
+        etl_pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
 
         # pipeline.dag_json = pipeline.fix_dag_json()
         # pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)

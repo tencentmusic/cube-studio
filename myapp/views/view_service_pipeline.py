@@ -313,7 +313,7 @@ class Service_Pipeline_ModelView_Base():
     def build_mq_consumer(self,service_pipeline):
         namespace = conf.get('SERVICE_PIPELINE_NAMESPACE')
         name = service_pipeline.name
-        service_pipeline.command
+        command = service_pipeline.command
         image_secrets = conf.get('HUBSECRET', [])
         user_hubsecrets = db.session.query(Repository.hubsecret).filter(Repository.created_by_fk == g.user.id).all()
         if user_hubsecrets:
@@ -393,7 +393,7 @@ class Service_Pipeline_ModelView_Base():
     # # @event_logger.log_this
     @expose("/web/<service_pipeline_id>", methods=["GET"])
     def web(self,service_pipeline_id):
-        db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
+        service_pipeline = db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
 
         # service_pipeline.dag_json = service_pipeline.fix_dag_json()
         # service_pipeline.expand = json.dumps(service_pipeline.fix_position(), indent=4, ensure_ascii=False)

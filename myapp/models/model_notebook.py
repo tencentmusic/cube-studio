@@ -102,8 +102,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
                 return url
             return status
 
-        except Exception:
-            # print(e)
+        except Exception as e:
+            print(e)
             return "unknown"
 
     @property
