@@ -1,18 +1,16 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 from myapp.models.model_team import Project,Project_User
-from wtforms import BooleanField, IntegerField, SelectField, StringField
+from wtforms import SelectField, StringField
 from myapp.utils import core
-from myapp import app, appbuilder,db
+from myapp import appbuilder
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from myapp.exceptions import MyappException
-from myapp import conf, db, get_feature_flags, security_manager,event_logger
+from myapp import db, security_manager
 from myapp.forms import MyBS3TextFieldWidget,MyBS3TextAreaFieldWidget
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
+from wtforms.validators import DataRequired
 from flask import (
-    abort,
     flash,
     g
 )
@@ -24,8 +22,8 @@ from .base import (
 from .baseApi import (
     MyappModelRestApi
 )
-import pysnooper,datetime,time,json
-from flask_appbuilder import CompactCRUDMixin, expose
+import json
+from flask_appbuilder import CompactCRUDMixin
 
 # table show界面下的
 class Project_User_ModelView_Base():

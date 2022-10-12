@@ -1,32 +1,16 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
 from sqlalchemy.orm import relationship
-import datetime,time,json
-from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    Enum,
-)
-import pysnooper
+import json
+from sqlalchemy import Text
 from myapp.utils import core
-import re
 
-from myapp.models.helpers import AuditMixinNullable, ImportMixin
-from flask import escape, g, Markup, request
+from myapp.models.helpers import AuditMixinNullable
+from flask import request
 from .model_team import Project
 
-from myapp import app,db
+from myapp import app
 from myapp.models.base import MyappModelBase
-from myapp.models.helpers import ImportMixin
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey
 
 from flask import Markup
 import datetime
@@ -230,7 +214,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         if help_url:
             dom=f'<a target=_blank href="{help_url}">帮助</a> | '+dom
         else:
-            dom = f'帮助 | ' + dom
+            dom = '帮助 | ' + dom
         return Markup(dom)
 
     @property

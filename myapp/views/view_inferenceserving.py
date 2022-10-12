@@ -1,38 +1,30 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask import Blueprint, current_app, jsonify, make_response, request
+from flask import jsonify
 
 from myapp.models.model_serving import InferenceService
-from myapp.models.model_team import Project,Project_User
 from myapp.utils import core
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from flask_appbuilder.actions import action
-from myapp import app, appbuilder,db,event_logger
-import logging
-from flask_babel import lazy_gettext,gettext
+from myapp import app, appbuilder,db
+from flask_babel import lazy_gettext
 import re
 import copy
 from sqlalchemy.exc import InvalidRequestError
 from myapp.models.model_job import Repository
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from myapp import security_manager
-import os,sys
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from wtforms import BooleanField, IntegerField, SelectField, StringField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
-from myapp.views.view_team import Project_Filter,Project_Join_Filter,filter_join_org_project
+from wtforms.validators import DataRequired, Length, Regexp
+from wtforms import SelectField, StringField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget,Select2Widget
+from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget, MyBS3TextFieldWidget,MySelectMultipleField
+from myapp.views.view_team import Project_Join_Filter
 from myapp.views.view_team import filter_join_org_project
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
     Markup,
-    make_response,
     redirect,
-    render_template,
     request
 )
 from .base import (
@@ -40,13 +32,12 @@ from .base import (
     MyappModelView,
 
 )
-from sqlalchemy import and_, or_, select
 from .baseApi import (
     MyappModelRestApi
 )
 
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from flask_appbuilder import expose
+import datetime,time,json
 conf = app.config
 
 
@@ -591,7 +582,7 @@ output %s
         if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
             try:
                 flash('检测到模型地址为网络压缩文件，需压缩文件名和解压后文件夹名相同','warning')
-            except Exception as e:
+            except Exception:
                 pass
                 # print(e)
 
@@ -680,8 +671,8 @@ output %s
         service_name = args.get('service_name', '')
         model_name = args.get('model_name', '')
         model_version = args.get('model_version', '')
-        env = args.get('env', '')   #  所处环境
-        area = args.get('area','')
+        args.get('env', '')   #  所处环境
+        args.get('area','')
         service=None
 
         if service_id:

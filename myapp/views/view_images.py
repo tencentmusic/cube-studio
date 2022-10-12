@@ -1,31 +1,20 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 from myapp.models.model_job import Repository,Images
-from myapp.views.view_team import Project_Filter
-from myapp import app, appbuilder,db,event_logger
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
+from myapp import app, appbuilder
+from wtforms.validators import DataRequired, Length, Regexp
+from wtforms import StringField
 
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
+from myapp.forms import MyBS3TextAreaFieldWidget
 
-from .baseApi import (
-    MyappModelRestApi
-)
-from flask import (
-    current_app,
-    abort,
-    flash,
-    g
-)
+from .baseApi import MyappModelRestApi
+from flask import g
 from .base import (
     DeleteMixin,
     MyappFilter,
     MyappModelView,
 )
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
 conf = app.config
 logging = app.logger
 

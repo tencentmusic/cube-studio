@@ -1,52 +1,16 @@
 
 """Utility functions used across Myapp"""
-import sys,os
-import numpy as np
-from bs4 import BeautifulSoup
-import requests,base64,hashlib
-from collections import namedtuple
-import datetime
-from email.utils import make_msgid, parseaddr
-import logging
-import time,json
-from urllib.error import URLError
-import urllib.request
 import pysnooper
-import re
-import croniter
-from dateutil.tz import tzlocal
-import shutil
-import os,sys,io,json,datetime,time
-import subprocess
-from datetime import datetime, timedelta
-import os
-import sys
+from datetime import datetime
 import time
-import datetime
 from myapp.utils.py.py_k8s import K8s
 from myapp.utils.celery import session_scope
 from myapp.project import push_message,push_admin
 from myapp.tasks.celery_app import celery_app
 # Myapp framework imports
-from myapp import app, db, security_manager
-from myapp.models.model_job import (
-    Pipeline,
-    RunHistory,
-    Workflow,
-    Tfjob,
-    Pytorchjob,
-    Xgbjob,
-    Task
-)
-from myapp.models.model_notebook import Notebook
+from myapp import app
 from myapp.models.model_serving import InferenceService
 from myapp.views.view_inferenceserving import InferenceService_ModelView_base
-from myapp.security import (
-    MyUser
-)
-from myapp.views.view_pipeline import run_pipeline,dag_to_pipeline
-from sqlalchemy.exc import InvalidRequestError,OperationalError
-from sqlalchemy import or_
 from myapp.models.model_docker import Docker
 conf = app.config
 

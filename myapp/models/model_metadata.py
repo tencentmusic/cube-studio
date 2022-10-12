@@ -1,31 +1,13 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
-from sqlalchemy.orm import relationship
-import datetime,time,json
-from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    Enum,
-)
-from sqlalchemy import String,Column,Integer,ForeignKey,UniqueConstraint,BigInteger,TIMESTAMP
+from sqlalchemy import Float
+from sqlalchemy import Text
+from sqlalchemy import BigInteger
 
-from myapp import app,db
+from myapp import app
 from myapp.models.helpers import ImportMixin
-# from myapp.models.base import MyappModel
 
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
-from flask_appbuilder.models.decorators import renders
-from flask import Markup
+from sqlalchemy import Column, Integer, String, Date
 from myapp.models.base import MyappModelBase
-import datetime
 metadata = Model.metadata
 conf = app.config
 

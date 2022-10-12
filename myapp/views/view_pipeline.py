@@ -1,26 +1,23 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import uuid
-import re
 import urllib.parse
-from kfp import compiler
 
-from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
-from myapp.models.model_team import Project,Project_User
+from myapp.models.model_job import Task,Pipeline,Workflow, RunHistory
+from myapp.models.model_team import Project
 from myapp.views.view_team import Project_Join_Filter
 from flask_appbuilder.actions import action
-from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
+from flask import jsonify
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from jinja2 import Environment, BaseLoader, DebugUndefined, StrictUndefined
-import os,sys
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
+from jinja2 import Environment, BaseLoader, DebugUndefined
+import os
+from wtforms.validators import DataRequired, Length, Regexp
 from myapp.views.view_task import Task_ModelView,Task_ModelView_Api
-from sqlalchemy import and_, or_, select
+from sqlalchemy import or_
 from myapp.exceptions import MyappException
 from wtforms import BooleanField, IntegerField,StringField, SelectField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,Select2ManyWidget,Select2Widget,BS3TextAreaFieldWidget
@@ -34,11 +31,8 @@ from .baseApi import (
     MyappModelRestApi
 )
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
-    Markup,
     make_response,
     redirect,
     request
@@ -55,8 +49,8 @@ from .base import (
     json_response
 )
 
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from flask_appbuilder import expose
+import datetime,time,json
 conf = app.config
 logging = app.logger
 
@@ -81,7 +75,7 @@ class Pipeline_Filter(MyappFilter):
 
 
 
-from sqlalchemy.exc import InvalidRequestError,OperationalError
+from sqlalchemy.exc import InvalidRequestError
 
 # 将dag 转为argo pipeline yaml
 # @pysnooper.snoop(watch_explode=())
@@ -1050,9 +1044,6 @@ class Pipeline_ModelView_Base():
         db.session.commit()
         print(pipeline_id)
         url = '/static/appbuilder/vison/index.html?pipeline_id=%s'%pipeline_id  # 前后端集成完毕，这里需要修改掉
-        data = {
-            "url": url
-        }
         return redirect('/frontend/showOutLink?url=%s'%urllib.parse.quote(url, safe=""))
         # 返回模板
         # return self.render_template('link.html', data=data)

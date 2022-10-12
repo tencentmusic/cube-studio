@@ -1,34 +1,20 @@
 
 """Utility functions used across Myapp"""
-import sys,os
-import numpy as np
-from bs4 import BeautifulSoup
-import requests,base64,hashlib
-from collections import namedtuple
-import datetime
-from email.utils import make_msgid, parseaddr
 import logging
-import time,json
-from urllib.error import URLError
-import urllib.request
 import pysnooper
 import re
 import croniter
-from dateutil.tz import tzlocal
-import shutil
-import os,sys,io,json,datetime,time
+import json
 import subprocess
 import os
-import sys
 import time
-import random
 import datetime
 from myapp.utils.py.py_k8s import K8s
 from myapp.utils.celery import session_scope
 from myapp.project import push_message,push_admin
 from myapp.tasks.celery_app import celery_app
 # Myapp framework imports
-from myapp import app, db, security_manager
+from myapp import app
 from myapp.models.model_job import (
     Pipeline,
     RunHistory,
@@ -40,11 +26,7 @@ from myapp.models.model_job import (
 )
 from myapp.models.model_notebook import Notebook
 from myapp.models.model_serving import InferenceService
-from myapp.security import (
-    MyUser
-)
 from myapp.views.view_pipeline import run_pipeline,dag_to_pipeline
-from sqlalchemy.exc import InvalidRequestError,OperationalError
 from sqlalchemy import or_
 
 class Pusherror(Exception):
@@ -915,7 +897,7 @@ def check_pipeline_resource():
                     tasks = dbsession.query(Task).filter(Task.pipeline_id == int(pipeline_id)).all()  # 获取model记录
                     for task in tasks:
                         try:
-                            task_resources= json.loads(task.monitoring).get('task',[])
+                            json.loads(task.monitoring).get('task',[])
                             tfjob_resources = json.loads(task.monitoring).get('tfjob',[])
                             monitoring_workflow[pipeline_id]['task'][task.label]={}
                             # if task_resources:
@@ -1235,8 +1217,7 @@ def adjust_node_resource(task):
 # get_dir_size('/data/k8s/kubeflow/pipeline/workspace')
 @pysnooper.snoop()
 def get_deployment_node_selector(name,namespace):
-    from kubernetes import client, config, watch
-    from kubernetes.client.models import v1_pod, v1_object_meta, v1_pod_spec, v1_deployment, v1_deployment_spec
+    from kubernetes import client
     exist_dp = client.AppsV1Api().read_namespaced_deployment(name=name, namespace=namespace)
 
     node_selector = {}
@@ -1252,7 +1233,7 @@ def get_deployment_node_selector(name,namespace):
                 if match_expression.operator == 'Equal':
                     node_selector[match_expression.key] = match_expression.values
 
-    except Exception as e:
+    except Exception:
         pass
 
         # print(e)
@@ -1268,7 +1249,7 @@ def get_deployment_node_selector(name,namespace):
 @celery_app.task(name="task.adjust_service_resource", bind=True)
 @pysnooper.snoop(watch_explode=())
 def adjust_service_resource(task):
-    from kubernetes import client, config, watch
+    from kubernetes import client
     cluster_name='tke'
     namespace = conf.get('SERVICE_NAMESPACE')
     cluster = conf.get('CLUSTERS', {})[cluster_name]
@@ -1285,8 +1266,8 @@ def adjust_service_resource(task):
                 else:
                     if inferenceserving.resource_gpu and inferenceserving.resource_gpu!='0' and inferenceserving.priority==1:
                         # print(hpa)
-                        target_utilizations = hpa.spec.metrics
-                        current_utilization = hpa.status.current_metrics
+                        hpa.spec.metrics
+                        hpa.status.current_metrics
                         current_replicas = hpa.status.current_replicas
                         desired_replicas = hpa.status.desired_replicas
                         if desired_replicas>current_replicas:  # 期望扩容
@@ -1306,7 +1287,7 @@ def adjust_service_resource(task):
                                         if current_replicas > service.min_replicas:
                                             # 随意缩放一个pod
                                             if not target_node_selector.get('gpu-type',''):
-                                                api_response = client.AppsV1Api().patch_namespaced_deployment_scale(service.name, namespace,[{'op': 'replace', 'path': '/spec/replicas', 'value': current_replicas-1}])
+                                                client.AppsV1Api().patch_namespaced_deployment_scale(service.name, namespace,[{'op': 'replace', 'path': '/spec/replicas', 'value': current_replicas-1}])
                                                 push_message([service.created_by.username,inferenceserving.created_by.username]+conf.get('ADMIN_USER').split(','),'缩服务%s一卡，扩服务%s一卡'%(service.name,inferenceserving.name))
                                                 return
                                             # 缩放指定pod
@@ -1360,7 +1341,7 @@ def update_aihub(task):
     with session_scope(nullpool=True) as dbsession:
         try:
             if len(aihubs)>0:
-                allaihubs = dbsession.query(Aihub).delete()
+                dbsession.query(Aihub).delete()
                 dbsession.commit()
                 for data in aihubs:
                     print(data)

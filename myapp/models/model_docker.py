@@ -1,29 +1,15 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
 from sqlalchemy.orm import relationship
-import datetime,time,json
 from sqlalchemy import (
     Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    Enum,
+    Text
 )
-import pysnooper
 from myapp.models.base import MyappModelBase
-from myapp.models.helpers import AuditMixinNullable, ImportMixin
-from flask import escape, g, Markup, request
-from myapp import app,db
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
+from myapp.models.helpers import AuditMixinNullable
+from myapp import app
+from sqlalchemy import Column, Integer, String, ForeignKey
 
 from flask import Markup
-import datetime
 metadata = Model.metadata
 conf = app.config
 # from myapp.utils.py.py_k8s import K8s

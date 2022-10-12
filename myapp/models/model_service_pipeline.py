@@ -1,34 +1,22 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
 from sqlalchemy.orm import relationship
-import datetime,time,json
+import json
 from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
     Text,
     Enum,
 )
 import numpy
 import random
 import copy
-import logging
-from myapp.models.helpers import AuditMixinNullable, ImportMixin
+from myapp.models.helpers import AuditMixinNullable
 
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
 from myapp.models.base import MyappModelBase
-import datetime
 metadata = Model.metadata
 conf = app.config
 
@@ -87,7 +75,7 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             service_pipeline_url = "/service_pipeline_modelview/web/log/%s"%self.id
             return Markup(f'<a target=_blank href="{service_pipeline_url}">日志</a>')
         else:
-            return Markup(f'日志')
+            return Markup('日志')
 
 
     @property
@@ -98,7 +86,7 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def operate_html(self):
-        url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         dom=f'''
         <a target=_blank href="/service_pipeline_modelview/run_service_pipeline/{self.id}">部署</a> | 
         <a target=_blank href="/service_pipeline_modelview/web/pod/{self.id}">pod</a> | 

@@ -1,14 +1,11 @@
 
 import datetime
-import os
 import functools
 import logging
 import traceback
 from typing import Any, Dict
-import pysnooper
 from flask_appbuilder.forms import GeneralModelConverter
-from flask import abort, flash, g, get_flashed_messages, redirect, Response
-from flask_appbuilder import BaseView, ModelView,urltools
+from flask import get_flashed_messages
 from flask_appbuilder.actions import action
 from flask_appbuilder.forms import DynamicForm
 from flask_appbuilder.models.sqla.filters import BaseFilter
@@ -16,45 +13,26 @@ from flask_appbuilder.widgets import ListWidget
 from myapp.forms import MySearchWidget
 from flask_babel import get_locale
 from flask_babel import gettext as __
-from flask_babel import lazy_gettext as _
 from flask_wtf.form import FlaskForm
 import simplejson as json
 from werkzeug.exceptions import HTTPException
 from wtforms.fields.core import Field, UnboundField
-from flask_appbuilder import ModelView, ModelRestApi
-import yaml
-from flask_appbuilder.security.decorators import has_access, has_access_api, permission_name
-from flask_appbuilder.baseviews import BaseCRUDView, BaseFormView, BaseView, expose, expose_api
+from flask_appbuilder import ModelView
+from flask_appbuilder.baseviews import BaseCRUDView, BaseView, expose
 from myapp import conf, db, get_feature_flags, security_manager,event_logger
 from myapp.exceptions import MyappException, MyappSecurityException
 from myapp.translations.utils import get_language_pack
 from myapp.utils import core
-from sqlalchemy import or_
 from flask_appbuilder.urltools import (
     get_filter_args,
     get_order_args,
     get_page_args,
     get_page_size_args,
-    Stack,
 )
 from flask import (
-    current_app,
-    abort,
-    flash,
     g,
-    Markup,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    send_from_directory,
     Response,
-    url_for,
 )
-from flask import Flask, jsonify
-
-from apispec import yaml_utils
-from flask import Blueprint, current_app, jsonify, make_response, request
 from flask_babel import lazy_gettext as _
 
 import yaml
@@ -361,8 +339,8 @@ class MyappModelView(ModelView):
         _ret_json = jsonify(kwargs)
         resp = make_response(_ret_json, code)
         flash_json=[]
-        for flash in flashes:
-            flash_json.append([flash[0],flash[1]])
+        for f in flashes:
+            flash_json.append([f[0], f[1]])
         resp.headers["api_flashes"] = json.dumps(flash_json)
         resp.headers["Content-Type"] = "application/json; charset=utf-8"
         return resp
@@ -739,7 +717,7 @@ class MyappModelView(ModelView):
         return redirect(url)
         # return self.post_delete_redirect()
 
-from flask_appbuilder.widgets import GroupFormListWidget, ListMasterWidget
+from flask_appbuilder.widgets import GroupFormListWidget
 from flask import (
     abort,
     flash,
@@ -747,7 +725,6 @@ from flask import (
     make_response,
     redirect,
     request,
-    send_file,
     session,
     url_for,
 )

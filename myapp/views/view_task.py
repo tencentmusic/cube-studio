@@ -1,26 +1,24 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 import uuid
-from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline
+from myapp.models.model_job import Job_Template,Task,Pipeline
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from jinja2 import Environment, BaseLoader, DebugUndefined, StrictUndefined
-import os,sys
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
+from jinja2 import Environment, BaseLoader, DebugUndefined
+import os
+from wtforms.validators import DataRequired, Length, Regexp
 from myapp.exceptions import MyappException
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
+from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField
 
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
+from myapp.forms import MyBS3TextAreaFieldWidget, MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget
 from flask_wtf.file import FileField
 from .baseApi import (
     MyappModelRestApi
 )
 from flask import (
-    current_app,
     flash,
     g,
     redirect
@@ -31,7 +29,7 @@ from .base import (
 )
 from myapp.views.base import CompactCRUDMixin
 from flask_appbuilder import expose
-import pysnooper,datetime,time,json
+import datetime,time,json
 conf = app.config
 logging = app.logger
 

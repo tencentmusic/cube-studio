@@ -1,54 +1,44 @@
-
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import uuid
-import re
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
+from wtforms.validators import DataRequired, Length, Regexp
 
 from sqlalchemy.exc import InvalidRequestError
 
-from myapp.models.model_job import Repository,Images,Job_Template,Task,Pipeline,Workflow,Tfjob,Xgbjob,RunHistory,Pytorchjob
-from myapp.models.model_team import Project,Project_User
+from myapp.models.model_job import Job_Template
 from flask_appbuilder.actions import action
-from jinja2 import Environment, BaseLoader, DebugUndefined, StrictUndefined
+from jinja2 import Environment, BaseLoader, DebugUndefined
 from myapp.utils import core
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db
 
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
+from wtforms import BooleanField, StringField, SelectField
 
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
+from myapp.forms import MyBS3TextAreaFieldWidget, MyCodeArea
 
-import re,copy
+import re
 
 from .baseApi import (
     MyappModelRestApi
 )
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
     Markup,
     make_response,
     redirect,
-    render_template,
-    request,
-    send_from_directory,
-    Response,
-    url_for,
+    request
 )
 
 from .base import (
     get_user_roles,
     MyappFilter,
-    MyappModelView,
 )
-from flask_appbuilder import CompactCRUDMixin, expose
+from flask_appbuilder import expose
 from myapp.views.view_images import Images_Filter
 from myapp.views.view_team import Project_Filter
-import pysnooper,datetime,time,json
+import datetime,time,json
 conf = app.config
 logging = app.logger
 
@@ -149,7 +139,7 @@ class Job_Template_ModelView_Base():
                   }
                 }
             },indent=4,ensure_ascii=False),
-            description=Markup(f'json格式，此类task使用时需要填写的参数，示例：<br><pre><code>%s</code></pre>'%core.job_template_args_definition()),
+            description=Markup('json格式，此类task使用时需要填写的参数，示例：<br><pre><code>%s</code></pre>'%core.job_template_args_definition()),
             widget=MyBS3TextAreaFieldWidget(rows=10),  # 传给widget函数的是外层的field对象，以及widget函数的参数
             validators=[DataRequired()]
         ),

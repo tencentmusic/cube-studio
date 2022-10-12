@@ -1,30 +1,14 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
 from sqlalchemy.orm import relationship
-import datetime,time,json
-from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    Enum,
-)
+from sqlalchemy import Text
 
-from myapp.models.helpers import AuditMixinNullable, ImportMixin
+from myapp.models.helpers import AuditMixinNullable
 from .model_team import Project
 from .model_job import Pipeline
 from myapp import app,db
 from myapp.models.base import MyappModelBase
-from myapp.models.helpers import ImportMixin
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey
 from flask import Markup
-import datetime
 metadata = Model.metadata
 conf = app.config
 
@@ -59,7 +43,7 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
             if pipeline:
                 return Markup(f'<a target=_blank href="/frontend/showOutLink?url=%2Fstatic%2Fappbuilder%2Fvison%2Findex.html%3Fpipeline_id%3D{self.pipeline_id}">{pipeline.describe}</a>')
 
-        return Markup(f'未知')
+        return Markup('未知')
 
     @property
     def project_url(self):
@@ -68,7 +52,7 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
         elif self.pipeline and self.pipeline.project:
             return Markup(f'{self.pipeline.project.name}({self.pipeline.project.describe})')
         else:
-            return Markup(f'未知')
+            return Markup('未知')
 
     @property
     def deploy(self):

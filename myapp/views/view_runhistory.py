@@ -1,14 +1,13 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 
 
 from myapp.models.model_job import RunHistory
 
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db
 from wtforms import SelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_babel import lazy_gettext as _
-from sqlalchemy import and_, or_, select
+from sqlalchemy import or_
 
 from .baseApi import (
     MyappModelRestApi

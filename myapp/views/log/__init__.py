@@ -1,7 +1,4 @@
 
-from flask_babel import lazy_gettext as _
-
-
 class LogMixin:
     label_title='日志'
 

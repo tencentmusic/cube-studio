@@ -13,17 +13,14 @@ import json
 import logging
 import os
 import signal
-import smtplib
-import pysnooper
 import copy
 import sys
 from time import struct_time
 import traceback
-from typing import List, NamedTuple, Optional, Tuple
+from typing import List, Optional, Tuple
 from urllib.parse import unquote_plus
 import uuid
 import zlib
-import re
 import bleach
 import celery
 from dateutil.parser import parse
@@ -37,9 +34,7 @@ import markdown as md
 import numpy
 import pandas as pd
 import parsedatetime
-from jinja2 import Template
-from jinja2 import contextfilter
-from jinja2 import Environment, BaseLoader, DebugUndefined, StrictUndefined
+from jinja2 import Environment, BaseLoader, DebugUndefined
 try:
     from pydruid.utils.having import Having
 except ImportError:
@@ -53,7 +48,6 @@ from sqlalchemy.types import TEXT, TypeDecorator
 from myapp.exceptions import MyappException, MyappTimeoutException
 from myapp.utils.dates import datetime_to_epoch, EPOCH
 import re
-import random
 
 logging.getLogger("MARKDOWN").setLevel(logging.INFO)
 
@@ -1465,7 +1459,7 @@ def check_resource_cpu(resource_cpu,src_resource_cpu=None):
             raise MyappException('resource cpu input not valid')
         try:
             resource = "%.1f~%.1f"%(float(resource.split("~")[0]),float(resource.split("~")[1]))
-        except Exception as e:
+        except Exception:
             raise MyappException('resource cpu input not valid')
         if not g.user.is_admin():
             min = set_host_max(check_max_cpu(resource.split('~')[0]))
@@ -1613,7 +1607,6 @@ def merge_tfjob_experiment_template(worker_num,node_selector,volume_mount,image,
 
 
 
-import yaml
 # @pysnooper.snoop(watch_explode=())
 def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,command):
     nodeSelector=None
@@ -1743,7 +1736,6 @@ def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets
 
 
 
-import yaml
 # @pysnooper.snoop(watch_explode=())
 def merge_pytorchjob_experiment_template(worker_num,node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,master_command,worker_command):
     nodeSelector=None
@@ -2085,7 +2077,7 @@ def fix_task_position(pipeline,tasks,expand_tasks):
 
     # @pysnooper.snoop()
     def set_downstream_position(task_name):
-        task_id = str(tasks[task_name]['id'])
+        str(tasks[task_name]['id'])
         downstream_tasks = [x for x in dag_json[task_name]['downstream'] if dag_json[x]['index']==dag_json[task_name]['index']]  # 获取相同树的下游节点
         downstream_tasks = sorted(downstream_tasks, key=lambda temp: dag_json[temp]['total_down_num'],reverse=True)  # 按子孙数目排序
         for i in range(len(downstream_tasks)):
@@ -2137,7 +2129,7 @@ def hive_create_sql_demo():
     return sql
 
 
-import shlex, subprocess
+import subprocess
 def run_shell(shell):
     cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=sys.stderr, close_fds=True,
                            stdout=sys.stdout, universal_newlines=True, shell=True, bufsize=1)

@@ -1,17 +1,11 @@
-import time,datetime,logging,os,sys
+import time,datetime, os
 import re
-from kubernetes import client,config,watch
+from kubernetes import client
 from kubernetes.client.models import v1_pod,v1_object_meta,v1_pod_spec,v1_deployment,v1_deployment_spec
 import yaml
-from os import path
 import json
-# from common.config import *
-import pysnooper
 import multiprocessing
-import random
-from multiprocessing import Manager
 import base64
-import uuid
 from kubernetes import config
 from kubernetes.client.rest import ApiException
 
@@ -89,7 +83,7 @@ class K8s():
                         if match_expression.operator == 'Equal':
                             node_selector[match_expression.key]=match_expression.values
 
-                except Exception as e:
+                except Exception:
                     pass
                     # print(e)
                 if pod.spec.node_selector:
@@ -212,7 +206,7 @@ class K8s():
                             "labels": labels
                         }
                     }
-                    api_response = self.v1.patch_node(Hostname, body)
+                    self.v1.patch_node(Hostname, body)
 
             return all_node_ip
         except Exception as e:
@@ -416,7 +410,7 @@ class K8s():
             # 删除workflow
             crd_info = all_crd_info['workflow']
             try:
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'],
                     plural=crd_info['plural'], namespace=namespace, labels={'run-id': run_id}
                 )
@@ -428,7 +422,7 @@ class K8s():
             # 删除tfjob
             try:
                 crd_info = all_crd_info['tfjob']
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'],
                     namespace=namespace,labels={'run-id': run_id}
                 )
@@ -438,7 +432,7 @@ class K8s():
             # 删除framework
             try:
                 crd_info = all_crd_info['framework']
-                crd_names = self.delete_crd(group=crd_info['group'], version=crd_info['version'],
+                self.delete_crd(group=crd_info['group'], version=crd_info['version'],
                                                   plural=crd_info['plural'], namespace=namespace,
                                                   labels={"run-id": str(run_id)})
             except Exception as e:
@@ -447,7 +441,7 @@ class K8s():
             # 删除pytorchjob
             try:
                 crd_info = all_crd_info['pytorchjob']
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                     namespace=namespace, labels={'run-id': run_id}
                 )
@@ -457,7 +451,7 @@ class K8s():
             # 删除mpijob
             try:
                 crd_info = all_crd_info['mpijob']
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                     namespace=namespace, labels={'run-id': run_id}
                 )
@@ -467,7 +461,7 @@ class K8s():
             # 删除vcjob
             try:
                 crd_info = all_crd_info['vcjob']
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                     namespace=namespace, labels={'run-id': run_id}
                 )
@@ -477,7 +471,7 @@ class K8s():
             # 删除sparkjob
             try:
                 crd_info = all_crd_info['sparkjob']
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                     namespace=namespace, labels={'run-id': run_id}
                 )
@@ -487,7 +481,7 @@ class K8s():
             # 删除paddlejob
             try:
                 crd_info = all_crd_info['paddlejob']
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                     namespace=namespace, labels={'run-id': run_id}
                 )
@@ -498,7 +492,7 @@ class K8s():
             # 删除mxjob
             try:
                 crd_info = all_crd_info['mxjob']
-                crd_names = self.delete_crd(
+                self.delete_crd(
                     group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                     namespace=namespace, labels={'run-id': run_id}
                 )
@@ -736,7 +730,7 @@ class K8s():
         env_list.append(client.V1EnvVar(name='K8S_POD_NAME', value_from=client.V1EnvVarSource(field_ref=client.V1ObjectFieldSelector(field_path='metadata.name'))))
 
         security_context = client.V1SecurityContext(privileged=privileged) if privileged else None
-        gpu_type = os.environ.get("GPU_TYPE", "NVIDIA")
+        os.environ.get("GPU_TYPE", "NVIDIA")
 
         def get_gpu(resource_gpu):
             try:
@@ -901,7 +895,7 @@ class K8s():
         try:
             self.v1.delete_namespaced_pod(name=name, namespace=namespace,grace_period_seconds=0)
             # time.sleep(1)
-        except Exception as e:
+        except Exception:
             pass
             # print(e)
         pod,pod_spec = self.make_pod(
@@ -1063,7 +1057,7 @@ class K8s():
         #     print(e)
 
         try:
-            exist_dp = client.AppsV1Api().read_namespaced_deployment(name=name,namespace=namespace)
+            client.AppsV1Api().read_namespaced_deployment(name=name,namespace=namespace)
             client.AppsV1Api().patch_namespaced_deployment(name=name, namespace=namespace, body=dp)
         except ApiException as e:
             if e.status == 404:
@@ -1139,7 +1133,7 @@ class K8s():
         # print(dp.to_str())
         try:
             client.AppsV1Api().delete_namespaced_stateful_set(name, namespace)
-        except Exception as e:
+        except Exception:
             pass
             # print(e)
 
@@ -1183,7 +1177,7 @@ class K8s():
         print(service.to_dict())
         try:
             self.v1.delete_namespaced_service(name, namespace)
-        except Exception as e:
+        except Exception:
             pass
             # print(e)
         try:
@@ -1345,7 +1339,7 @@ class K8s():
 
 
             print(crd_json)
-            crd = self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+            self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
 
         if len(ports)>1:
             crd_json = {
@@ -1379,7 +1373,7 @@ class K8s():
                     ]
                 }
             }
-            crd = self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+            self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
 
 
 
@@ -1489,7 +1483,6 @@ class K8s():
                     }
                 )
 
-        my_conditions = []
         # my_conditions.append(client.V2beta1HorizontalPodAutoscalerCondition(status="True", type='AbleToScale'))
         #
         # status = client.V2beta1HorizontalPodAutoscalerStatus(conditions=my_conditions, current_replicas=max_replicas,
@@ -1510,7 +1503,7 @@ class K8s():
         # )
         print(json.dumps(hpa_json,indent=4,ensure_ascii=4))
         try:
-            ret = client.AutoscalingV2beta1Api().create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=hpa_json, pretty=True)
+            client.AutoscalingV2beta1Api().create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=hpa_json, pretty=True)
         except ValueError as e:
             if str(e) == 'Invalid value for `conditions`, must not be `None`':
                 print(e)
@@ -1583,7 +1576,7 @@ class K8s():
     # @pysnooper.snoop()
     def exec_command(self,name,namespace,command):
         try:
-            resp = self.v1.read_namespaced_pod(name=name,namespace=namespace)
+            self.v1.read_namespaced_pod(name=name,namespace=namespace)
         except ApiException as e:
             if e.status != 404:
                 print("Unknown error: %s" % e)

@@ -1,30 +1,12 @@
 from flask_appbuilder import Model
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    Enum,
-)
+from sqlalchemy import Text
 
-from myapp.models.helpers import AuditMixinNullable, ImportMixin
-from flask import escape, g, Markup, request
-from .model_team import Project
-from myapp import app,db
-from myapp.models.helpers import ImportMixin
-# from myapp.models.base import MyappModel
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
-from flask_appbuilder.models.decorators import renders
+from myapp.models.helpers import AuditMixinNullable
+from myapp import app
+from sqlalchemy import Column, Integer, String
 from flask import Markup
 from myapp.models.base import MyappModelBase
-import datetime
 metadata = Model.metadata
 conf = app.config
 

@@ -1,26 +1,19 @@
 
 
-import time,datetime,logging,os,sys
-import asyncio
+import time,datetime, os
 from kubernetes import client
 from kubernetes import watch
-from os import path
 import json
-import requests
 from myapp.utils.py.py_k8s import check_status_time,K8s
-from sqlalchemy.exc import InvalidRequestError,OperationalError
 import pysnooper
-import myapp
-import math
-from myapp import app, db, security_manager
+from myapp import app
 from myapp.models.model_job import (
     Tfjob,
     Task
 )
 from myapp.utils.celery import session_scope
 from myapp.project import push_admin,push_message
-from myapp.models.model_job import Pipeline,Workflow
-import pymysql
+from myapp.models.model_job import Pipeline
 conf=app.config
 
 from myapp.utils.py.py_prometheus import Prometheus

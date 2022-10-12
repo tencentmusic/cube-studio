@@ -8,15 +8,11 @@ import os
 from inspect import isfunction
 from sqlalchemy import create_engine
 from flask_appbuilder.actions import action
-from apispec import yaml_utils
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
-from wtforms import Field
 from flask_babel import gettext as __
-from flask_babel import lazy_gettext as _
 from flask_appbuilder.actions import ActionItem
-from flask import Blueprint, current_app, jsonify, make_response, request
+from flask import jsonify, request
 from flask import flash
-from flask import Flask, current_app, send_from_directory, make_response,send_file
+from flask import current_app, make_response,send_file
 from flask.globals import session
 from flask_babel import lazy_gettext as _
 import jsonschema
@@ -28,13 +24,8 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm.properties import ColumnProperty
 from sqlalchemy.orm.relationships import RelationshipProperty
 from werkzeug.exceptions import BadRequest
-from flask import render_template,redirect
-import yaml
-from wtforms import widgets
 from marshmallow import validate
 from wtforms import validators
-from flask_appbuilder.api.convert import Model2SchemaConverter
-from flask_appbuilder.api.schemas import get_info_schema, get_item_schema, get_list_schema
 from flask_appbuilder._compat import as_unicode
 from flask_appbuilder.const import (
     API_ADD_COLUMNS_RES_KEY,
@@ -61,26 +52,20 @@ from flask_appbuilder.const import (
     API_ORDER_DIRECTION_RIS_KEY,
     API_PAGE_INDEX_RIS_KEY,
     API_PAGE_SIZE_RIS_KEY,
-    API_PERMISSIONS_RES_KEY,
     API_PERMISSIONS_RIS_KEY,
-    API_RESULT_RES_KEY,
     API_SELECT_COLUMNS_RIS_KEY,
     API_SHOW_COLUMNS_RES_KEY,
     API_SHOW_COLUMNS_RIS_KEY,
     API_SHOW_TITLE_RES_KEY,
     API_SHOW_TITLE_RIS_KEY,
     API_URI_RIS_KEY,
-    PERMISSION_PREFIX,
 )
 from flask import (
     abort,
-    g
 )
 from flask_appbuilder.exceptions import FABException, InvalidOrderByColumnFABException
-from flask_appbuilder.security.decorators import permission_name, protect,has_access
-from flask_appbuilder.api import BaseModelApi,BaseApi,ModelRestApi
-from sqlalchemy.sql import sqltypes
-from myapp import app, appbuilder,db,event_logger,cache
+from flask_appbuilder.api import ModelRestApi
+from myapp import app, db,cache
 conf = app.config
 
 log = logging.getLogger(__name__)
@@ -92,7 +77,6 @@ API_HELP_URL_RIS_KEY = 'help_url'
 API_ACTION_RIS_KEY='action'
 API_ROUTE_RIS_KEY ='route_base'
 
-API_PERMISSIONS_RIS_KEY="permissions"
 API_USER_PERMISSIONS_RIS_KEY="user_permissions"
 API_RELATED_RIS_KEY="related"
 API_COLS_WIDTH_RIS_KEY='cols_width'
@@ -241,7 +225,6 @@ def json_response(message,status,result):
 
 
 
-import pysnooper
 # @pysnooper.snoop(depth=5)
 # 暴露url+视图函数。视图函数会被覆盖，暴露url也会被覆盖
 class MyappModelRestApi(ModelRestApi):
@@ -324,8 +307,8 @@ class MyappModelRestApi(ModelRestApi):
         _ret_json = jsonify(kwargs)
         resp = make_response(_ret_json, code)
         flash_json=[]
-        for flash in flashes:
-            flash_json.append([flash[0],flash[1]])
+        for f in flashes:
+            flash_json.append([f[0], f[1]])
         resp.headers["api_flashes"] = json.dumps(flash_json)
         resp.headers["Content-Type"] = "application/json; charset=utf-8"
         return resp
@@ -1001,8 +984,6 @@ class MyappModelRestApi(ModelRestApi):
         # handle filters
         try:
             # 参数缩写都在每个filter的arg_name
-            from flask_appbuilder.models.sqla.filters import FilterEqualFunction, FilterStartsWith
-
             joined_filters = self._handle_filters_args(_args)
         except FABException as e:
             return self.response_error(400,message=str(e))
@@ -1027,7 +1008,6 @@ class MyappModelRestApi(ModelRestApi):
             lst = self.post_list(lst)
         # pks = self.datamodel.get_keys(lst)
         # import marshmallow.schema
-        import marshmallow.marshalling
         # for item in lst:
         #     if self.datamodel.is_relation(item)
             # aa =
@@ -1211,7 +1191,7 @@ class MyappModelRestApi(ModelRestApi):
         pk = self._deserialize_pk_if_composite(pk)
         action = self.actions.get(name)
         try:
-            res = action.func(self.datamodel.get(pk))
+            action.func(self.datamodel.get(pk))
             back = {
                 "status": 0,
                 "result": {},
@@ -1641,7 +1621,6 @@ class MyappModelRestApi(ModelRestApi):
                 # print(column_type)
                 # if type(column_type)==
                 # print(column.__class__.__name__)
-                from sqlalchemy.sql.schema import Column
                 ret['type']=column_type_str
                 if default:
                     ret['default'] = default.arg

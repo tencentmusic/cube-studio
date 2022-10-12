@@ -1,14 +1,12 @@
 """Contains the logic to create cohesive forms on the explore view"""
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from wtforms import Field
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from wtforms import widgets
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from myapp import app
 
 conf = app.config
 
 
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp,ValidationError
+from wtforms.validators import ValidationError
 # from myapp.models.base import MyappModelBase
 # model_base=MyappModelBase()
 #
@@ -90,16 +88,9 @@ def filter_not_empty_values(value):
 
 
 
-import pysnooper,datetime,time,json
+import json
 from wtforms.widgets.core import HTMLString,html_params
-
-try:
-    from html import escape
-except ImportError:
-    from cgi import escape
-from wtforms.compat import text_type, iteritems
-
-
+from wtforms.compat import text_type
 
 class MyCodeArea(object):
     def __init__(self, code=''):

@@ -1,23 +1,14 @@
 
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from myapp import app, appbuilder,db,event_logger
-from myapp.utils import core
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField,MySelect2ManyWidget
+from wtforms.validators import DataRequired
+from myapp import app, appbuilder
+from wtforms import StringField, SelectField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
+from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget
 
-from .baseApi import (
-    MyappModelRestApi,
-    json_response
-)
-from flask import (
-    current_app,
-    abort,
-    flash,
-    g
-)
+from .baseApi import MyappModelRestApi
+from flask import g
 
 from myapp.models.model_dataset import Dataset
 conf = app.config

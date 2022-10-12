@@ -1,67 +1,44 @@
-from flask import render_template,redirect
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import uuid
-import re
 import urllib.parse
 from sqlalchemy.exc import InvalidRequestError
 
 from myapp.models.model_etl_pipeline import ETL_Pipeline,ETL_Task
 from myapp.views.view_team import Project_Join_Filter
 from flask_appbuilder.actions import action
-from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
+from flask import jsonify
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp
-from sqlalchemy import and_, or_, select
-from myapp.exceptions import MyappException
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from myapp.project import push_message,push_admin
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget,BS3TextAreaFieldWidget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
-import re,copy
-from .baseApi import (
-    MyappModelRestApi
-)
+from wtforms.validators import DataRequired, Length, Regexp
+from sqlalchemy import or_
+from wtforms import StringField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
+from myapp.forms import MyBS3TextAreaFieldWidget
+import copy
+from .baseApi import MyappModelRestApi
 from flask import (
-    current_app,
-    abort,
     flash,
     g,
-    Markup,
     make_response,
     redirect,
-    render_template,
     request,
-    send_from_directory,
-    Response,
-    url_for,
 )
 from myapp import security_manager
 from myapp.views.view_team import filter_join_org_project
 
 from .base import (
-    api,
-    BaseMyappView,
-    check_ownership,
-    data_payload_response,
     DeleteMixin,
-    generate_download_headers,
-    get_error_msg,
     get_user_roles,
-    handle_api_exception,
-    json_error_response,
-    json_success,
     MyappFilter,
     MyappModelView,
-    json_response
 )
 
-from flask_appbuilder import CompactCRUDMixin, expose
-import pysnooper,datetime,time,json
+from flask_appbuilder import expose
+import datetime,time,json
 conf = app.config
 logging = app.logger
 APPGROUP_INFO=['资源组1','资源组2','资源组3']
@@ -1603,7 +1580,7 @@ class ETL_Pipeline_ModelView_Base():
         print(etl_pipeline_id)
         url = '/etl_pipeline_modelview/web/' + etl_pipeline_id
         try:
-            pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
+            db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
             # run_pipeline(pipeline)
             db.session.commit()
             url = conf.get('MODEL_URLS',{}).get('etl_task')
@@ -1616,7 +1593,7 @@ class ETL_Pipeline_ModelView_Base():
 
     @expose("/web/<etl_pipeline_id>", methods=["GET"])
     def web(self,etl_pipeline_id):
-        etl_pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
+        db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
 
         # pipeline.dag_json = pipeline.fix_dag_json()
         # pipeline.expand = json.dumps(pipeline.fix_expand(), indent=4, ensure_ascii=False)
@@ -1636,9 +1613,6 @@ class ETL_Pipeline_ModelView_Base():
         # db.session.commit()
         print(etl_pipeline_id)
         url = '/static/appbuilder/visonPlus/index.html?pipeline_id=%s'%etl_pipeline_id  # 前后端集成完毕，这里需要修改掉
-        data = {
-            "url": url
-        }
         return redirect('/frontend/showOutLink?url=%s' % urllib.parse.quote(url, safe=""))
         # 返回模板
         # return self.render_template('link.html', data=data)

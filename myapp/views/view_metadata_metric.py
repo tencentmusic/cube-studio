@@ -1,22 +1,18 @@
-
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-from sqlalchemy import and_, or_, select
+from sqlalchemy import or_
 from flask_appbuilder.actions import action
-import re,os
 from wtforms.validators import DataRequired
-from myapp import app, appbuilder,db,event_logger
-from myapp.utils import core
-from wtforms import BooleanField, IntegerField,StringField, SelectField,FloatField,DateField,DateTimeField,SelectMultipleField,FormField,FieldList
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget,MyCodeArea,MyLineSeparatedListField,MyJSONField,MyBS3TextFieldWidget,MySelectMultipleField
+from myapp import app, appbuilder
+from wtforms import StringField, SelectField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
+from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget
 
 from .baseApi import (
     MyappModelRestApi
 )
 from flask import (
-    current_app,
     abort,
     flash,
     g
@@ -24,7 +20,6 @@ from flask import (
 
 from .base import (
     MyappFilter,
-    MyappModelView,
 )
 from myapp.models.model_metadata_metric import Metadata_metric
 conf = app.config

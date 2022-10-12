@@ -2,7 +2,7 @@
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder
 
 conf = app.config
 

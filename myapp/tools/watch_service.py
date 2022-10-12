@@ -1,26 +1,11 @@
 
 
-import time,logging,os,sys
-import asyncio
+import time, os
 from kubernetes import client
 from kubernetes import watch
-from os import path
-import json
-import requests
-import math
-from sqlalchemy.exc import InvalidRequestError,OperationalError
-import pysnooper
-import copy
-import myapp
-from myapp.utils.py.py_k8s import check_status_time,K8s
-from myapp.utils.py.py_prometheus import Prometheus
-from myapp.project import push_admin,push_message
-from myapp import app, db, security_manager
-from myapp.models.model_job import (
-    Pipeline,
-    Workflow,
-    Task
-)
+from myapp.utils.py.py_k8s import K8s
+from myapp.project import push_message
+from myapp import app
 from myapp.utils.celery import session_scope
 conf=app.config
 
@@ -54,8 +39,8 @@ def listen_service():
                             # terminated 终止，waiting 等待启动，running 运行中
                             container_statuse= event['object'].status.container_statuses[0].state
                             terminated = container_statuse.terminated
-                            waiting = container_statuse.waiting
-                            running = container_statuse.running
+                            container_statuse.waiting
+                            container_statuse.running
                             service_name=event['object'].metadata.labels.get('app','')
                             inferenceserving = dbsession.query(InferenceService).filter_by(name=service_name).first() if service_name else None
                             if service_name and inferenceserving:
