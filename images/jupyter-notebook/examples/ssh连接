@@ -1,4 +1,4 @@
-# 将此文件内容追加到~/.ssh/config
+# 将此文件内容追加到~/.ssh/config   ssh root登录密码 cube-studio
 
 Host cube-studio
   HostName localhost
