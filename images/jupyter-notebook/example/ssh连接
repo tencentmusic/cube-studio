@@ -1,0 +1,11 @@
+# 将此文件内容追加到~/.ssh/config
+
+Host cube-studio
+  HostName localhost
+  Port localport
+  User root
+  IdentityFile ~/.ssh/id_rsa
+  ServerAliveInterval 10
+  ControlMaster auto
+  ControlPath ~/.ssh/master-%r@%h:%p
+  ForwardAgent yes
