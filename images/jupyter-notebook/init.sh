@@ -6,7 +6,7 @@ sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/ssh
 echo root:cube-studio | chpasswd
 service ssh restart
 
-sed -i "s/localhost/${SERVICE_EXTERNAL_IP}/g" /example/ssh连接
-sed -i "s/localport/${SSH_PORT}/g" /example/ssh连接
+sed -i "s/localhost/${SERVICE_EXTERNAL_IP}/g" /examples/ssh连接
+sed -i "s/localport/${SSH_PORT}/g" /examples/ssh连接
 
 # 客户端连接命令，    ssh -p ${SSH_PORT} root@${SERVICE_EXTERNAL_IP}
