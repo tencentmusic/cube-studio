@@ -329,12 +329,15 @@ class Notebook_ModelView_Base():
                     image_secrets.append(hubsecret[0])
 
         labels = {"app":notebook.name,'user':notebook.created_by.username,'pod-type':"notebook"}
+        # 端口+0是jupyterlab  +1是sshd   +2 +3 是预留的用户自己启动应用占用的端口
         env={
             "NO_AUTH": "true",
             "USERNAME": notebook.created_by.username,
             "NODE_OPTIONS": "--max-old-space-size=%s" % str(int(notebook.resource_memory.replace("G", '')) * 1024),
-            "PORT1":str(10000 + 10 * notebook.id+1),
-            "PORT2":str(10000 + 10 * notebook.id+2)
+            "SSH_PORT":str(10000 + 10 * notebook.id+1),
+            "PORT1":str(10000 + 10 * notebook.id+2),
+            "PORT2":str(10000 + 10 * notebook.id+3),
+
         }
         if SERVICE_EXTERNAL_IP:
             env["SERVICE_EXTERNAL_IP"]=SERVICE_EXTERNAL_IP[0]
@@ -430,9 +433,9 @@ class Notebook_ModelView_Base():
 
         if SERVICE_EXTERNAL_IP:
             ports=[port]
-            if notebook.ide_type=='bigdata':
-                for index in range(3):
-                    ports.append(10000 + 10 * notebook.id + index)
+            # if notebook.ide_type=='bigdata':
+            for index in range(1,4):
+                ports.append(10000 + 10 * notebook.id + index)
 
             ports=list(set(ports))
             service_ports = [[10000 + 10 * notebook.id + index, port] for index, port in enumerate(ports)]

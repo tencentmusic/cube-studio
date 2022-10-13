@@ -14,5 +14,3 @@ sed -i "s/localport/${SSH_PORT}/g" /examples/ssh连接
 
 # 配置example
 ln -s /examples /mnt/${USERNAME}/
-
-

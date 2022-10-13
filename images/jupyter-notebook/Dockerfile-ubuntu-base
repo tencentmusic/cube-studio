@@ -38,11 +38,20 @@ RUN rm -rf /usr/bin/python;  ln -s /usr/bin/python3 /usr/bin/python
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 RUN pip install --upgrade jupyterlab-git && jupyter lab build
 
+# 安装启动sshd
+RUN apt install -y openssh-server openssh-client
+
 # 环境变量
 ENV NODE_HOME /usr/local
 ENV PATH $NODE_HOME/bin:$PATH
 ENV NODE_PATH $NODE_HOME/lib/node_modules:$PATH
 ENV SHELL /bin/bash
+
+# 拷贝examples
+COPY examples/* /examples/
+
+# 环境初始化配置
+COPY init.sh /init.sh
 
 
 # jupyter lab --notebook-dir=/home --ip=0.0.0.0 --no-browser --allow-root --port=8888 --NotebookApp.token='' --NotebookApp.password='' --NotebookApp.allow_origin='*'
