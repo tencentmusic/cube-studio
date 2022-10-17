@@ -13,3 +13,4 @@ myapp/test
 /myapp/frontend/node_modules
 /myapp/frontendSrc/node_modules
 /myapp/music/node_modules
+/sdk/dist/
