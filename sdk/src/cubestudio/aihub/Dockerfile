@@ -1,5 +1,5 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base  -f Dockerfile-base .
-# docker run --name ocr -it -p 8080:8080 -v $PWD:/app/ ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr  bash
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base  -f Dockerfile .
+
 #FROM nvidia/cuda:11.8.0-runtime-ubuntu20.04
 FROM ubuntu:20.04
 
@@ -32,8 +32,13 @@ RUN conda config --set auto_activate_base true
 
 # 安装
 RUN apt install -y -f python3-opencv ffmpeg
-RUN pip install flask werkzeug requests tornado Pillow pysnooper opencv-python numpy scipy matplotlib scikit-image ipython pyyaml visualdl filelock
+RUN pip3 install flask werkzeug requests tornado Pillow pysnooper opencv-python numpy scipy matplotlib scikit-image ipython pyyaml visualdl filelock \
+    && rm -rf ~/.cache
 
-#ENTRYPOINT ["python", "app.py"]
-# docker run --name photo --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/ai-photo  bash
+WORKDIR /app
+#COPY entrypoint.sh /entrypoint.sh
+
+#ENTRYPOINT ["bash", "entrypoint.sh"]
+
+# docker run --name aihub --privileged -it -v $PWD:/app --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base  bash
 

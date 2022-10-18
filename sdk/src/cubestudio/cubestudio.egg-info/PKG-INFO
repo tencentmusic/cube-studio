@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: cubestudio
+Version: 2022.10.1
+Home-page: https://github.com/tencentmusic/cube-studio
+Author: tencentmusic
+Author-email: pengluan@tencent.com
+Requires-Python: >=3.6

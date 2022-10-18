@@ -1,13 +1,36 @@
 
-import flask,os,sys,json,time,random,io,base64
+import os,sys,json,time,random,io,base64
 
 import base64
 import os
-import numpy as np
 import datetime
 import logging
-import cv2
-from flask import jsonify,request
+from ..util import py_shell
+import enum
+import os, sys
+Field_type = enum.Enum('Field_type', ('json','str','text', 'image', 'video', 'stream', 'text_select', 'image_select', 'text_multi', 'image_multi'))
+
+class Field():
+    def __init__(self,type:Field_type,name:str,label:str,describe='',choices=[],default='',validators=[]):
+        self.type=type
+        self.name=name
+        self.label=label
+        self.describe=describe
+        self.choices=choices
+        self.default=default
+        self.validators=validators
+
+    def to_json(self):
+        return {
+            "type":str(self.type),
+            "name":self.name,
+            "label":self.label,
+            "describe":self.describe,
+            "choices":self.choices,
+            "default":self.default,
+            "validators":self.validators
+        }
+
 
 class Model():
 
@@ -27,28 +50,56 @@ class Model():
     job_template_config={}
     inference_config={}
     automl_config={}
-
+    # 基础运行环境
     init_shell=''
+    base_images='ccr.ccs.tencentyun.com/cube-studio/aihub:base'
+
+    # 训练的输入
+    train_inputs=[]
+    inference_inputs=[]
 
     def __init__(self,init_shell=True):
+
+        print(f'开发者建议使用: \ndocker run --name {self.name} --rm --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base bash')
+
+        # 输出Dockerfile
+        dockerfile = f'''
+        # docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{self.name}  .
+        FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
+
+        # 安装基础依赖
+        WORKDIR /app
+        COPY * /app/
+        RUN bash /app/init.sh
+
+        ENTRYPOINT ["python", "app.py"]
+
+        # docker run --name paddleocr --rm --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:{self.name}
+        '''
+        dockerfile_path = os.path.join(os.getcwd(), 'Dockerfile')
+        if not os.path.exists(dockerfile_path):
+            file = open(dockerfile_path, mode='w')
+            file.write(dockerfile)
+            file.close()
+            print(f'集成构建使用: \ndocker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{self.name} .')
+
+        print(f'体验者建议使用: \ndocker run --name {self.name} --rm --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:{dir_name}')
+
+
         print('begin init shell')
         if init_shell and self.init_shell:
-            os.system('bash %s'%self.init_shell)
+            py_shell.exec('bash %s'%self.init_shell)
 
-        print('begin load model')
-        self.load_model()
-
-
-    # 加载模型
-    def load_model(self,**kwargs):
-        pass
-
-    # 配置数据集
+    # 配置数据集，在分布式训练时自动进行分配
     def set_dataset(self,**kwargs):
         pass
 
     # 训练函数
     def train(self,**kwargs):
+        pass
+
+    # 推理前加载模型
+    def load_model(self,**kwargs):
         pass
 
     # 同步推理函数
@@ -57,8 +108,4 @@ class Model():
 
     # 批推理
     def batch_inference(self,**kwargs):
-        pass
-
-    # 测试
-    def test(self,**kwargs):
         pass

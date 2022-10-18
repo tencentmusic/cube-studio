@@ -31,7 +31,7 @@ import urllib
 from PIL import Image
 
 import pysnooper
-from flask import Flask
+from ..model import Field,Field_type
 
 from flask import Flask
 
@@ -40,33 +40,8 @@ app = Flask(__name__,
             static_folder='static',
             template_folder='templates')
 
-Field_type = enum.Enum('Field_type', ('text', 'image', 'video', 'stream', 'text_select', 'image_select', 'text_multi', 'image_multi'))
-
-class Field():
-    def __init__(self,type:Field_type,name:str,label:str,describe='',choices=[],default='',validators=[]):
-        self.type=type
-        self.name=name
-        self.label=label
-        self.describe=describe
-        self.choices=choices
-        self.default=default
-        self.validators=validators
-
-    def to_json(self):
-        return {
-            "type":str(self.type),
-            "name":self.name,
-            "label":self.label,
-            "describe":self.describe,
-            "choices":self.choices,
-            "default":self.default,
-            "validators":self.validators
-        }
-
 class Server():
 
-    web_inputs=[]
-    web_outputs=[]
     web_examples=[]
 
     def __init__(self,model,docker=None):
@@ -74,20 +49,14 @@ class Server():
         self.docker=docker
 
     # 启动服务
-    def server(self,docker=''):
-        # 使用docker启动
-        if docker:
-            command='docker run --name photo --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/ai-photo bash init'
-
-
-
-
-        @app.route(f'/api/model/{self.model.name[0]}/version/{self.model.version[0]}/', methods=['GET', 'POST'])
+    def server(self,port=8080):
+        self.model.load_model()
+        @app.route(f'/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
         # @pysnooper.snoop(watch_explode=())
         def web_inference(self=self):
             try:
                 data = request.json
-                inputs=self.web_inputs
+                inputs=self.model.inference_inputs
                 inference_kargs={}
                 for input in inputs:
                     inference_kargs[input.name] = input.default
@@ -96,7 +65,7 @@ class Server():
 
                     if input.type==Field_type.image and data.get(input.name,''):
                         image_decode = base64.b64decode(data[input.name])
-                        image_path = os.path.join("upload",self.model.name[0],self.model.version[0], datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ".jpg")
+                        image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ".jpg")
                         if not os.path.exists(os.path.dirname(image_path)):
                             os.makedirs(os.path.dirname(image_path))
                         nparr = np.fromstring(image_decode, np.uint8)
@@ -132,13 +101,12 @@ class Server():
         @app.route('/')
         def home(self=self):
             data = {
-                "name": self.model.name[0],
-                "label": self.model.label[0],
-                "describe": self.model.describe[0],
-                "doc": self.model.doc[0],
-                "pic":self.model.pic[0],
-                "input":self.web_inputs,
-                "output":self.web_outputs,
+                "name": self.model.name,
+                "label": self.model.label,
+                "describe": self.model.describe,
+                "doc": self.model.doc,
+                "pic":self.model.pic,
+                "input":self.model.inference_inputs,
                 "example":self.web_examples
             }
             print(data)
@@ -148,20 +116,19 @@ class Server():
         # @pysnooper.snoop()
         def info(self=self):
             info = {
-                "name": self.model.name[0],
-                "label": self.model.label[0],
-                "describe": self.model.description[0],
-                "field": self.model.field[0],
-                "scenes": self.model.scenes[0],
-                "status": self.model.status[0],
-                "version": self.model.version[0],
-                "doc": self.model.doc[0],
-                "pic": self.model.pic[0],
+                "name": self.model.name,
+                "label": self.model.label,
+                "describe": self.model.description,
+                "field": self.model.field,
+                "scenes": self.model.scenes,
+                "status": self.model.status,
+                "version": self.model.version,
+                "doc": self.model.doc,
+                "pic": self.model.pic,
                 "web_example":self.web_examples,
-                "web_inputs": [web_input.to_json() for web_input in self.web_inputs]
+                "inference_inputs": [input.to_json() for input in self.model.inference_inputs]
             }
             return jsonify(info)
 
-
-        app.run(host='0.0.0.0', debug=True, port='8080')
+        app.run(host='0.0.0.0', debug=True, port=port)
 

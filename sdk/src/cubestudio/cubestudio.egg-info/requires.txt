@@ -1,0 +1,6 @@
+pysnooper
+pika
+requests
+flask
+podman
+kubernetes

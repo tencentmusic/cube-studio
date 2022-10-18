@@ -67,3 +67,4 @@ RUN cd /opt/third/flink \
 
 # 环境初始化配置
 COPY init.sh /init.sh
+
