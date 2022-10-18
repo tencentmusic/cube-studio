@@ -50,7 +50,7 @@ const model: React.FC<CollectionCreateFormProps> = ({
       return param_typeArray.map((item: any, index: number) => {
         if (item === '1') {
           return (
-            <Form.Item label={`参数${index + 1}`} name={`parameter${index + 1}`}>
+            <Form.Item label={`参数${index + 1}`} name={`parameter${index + 1}`} key={index}>
               <Select style={{ width: '100%' }}>
                 {Datalist.map((item: any) => {
                   return (
