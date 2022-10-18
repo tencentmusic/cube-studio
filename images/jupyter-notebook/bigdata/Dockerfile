@@ -16,7 +16,6 @@ RUN mkdir -p /opt/third && cd /opt/third \
     && mv spark-defaults.conf.template spark-defaults.conf \
 #   安装pyflink
     && pip install apache-flink==1.15.1 \
-    && pip install pyspark==3.1.3 \
 #   安装JDK8
     && rm -rf /usr/lib/jvm/ \
     && apt-get install -y openjdk-8-jdk \
@@ -65,6 +64,17 @@ RUN cd /opt/third/flink \
     && mkdir lib \
     && mvn -f flink-dep.xml dependency:copy-dependencies -DoutputDirectory=lib
 
+
+# 设置环境变量到全局/etc/profile
+ENV HADOOP_CONF_DIR /opt/third/hadoop/etc/hadoop
+ENV SPARK_HOME /opt/third/spark
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV M2_HOME /opt/third/maven
+ENV PATH $PATH:$JAVA_HOME/bin:$M2_HOME/bin:$SPARK_HOME/bin
+ENV PYTHONPATH ${SPARK_HOME}/python:${SPARK_HOME}/lib/py4j-0.10.9-src.zip:${SPARK_HOME}/lib/pyspark.zip:${SPARK_HOME}/lib/pyspark.zip:$PYTHONPATH
+
 # 环境初始化配置
 COPY init.sh /init.sh
+
+
 

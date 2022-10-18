@@ -12,19 +12,19 @@ import os
 class GFPGAN_Model(Model):
     # 模型基础信息定义
     name='gfpgan'
-    label='图片上色'
-    description="图片上色"
+    label='图片修复'
+    description="低分辨率照片修复，清晰度增强"
     field="机器视觉"
     scenes="图像合成"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/DeOldify'
-    pic='https://picx.zhimg.com/v2-e96dd757c96464427560a9b5e5b07bc3_720w.jpg'
+    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/face-repair'
+    pic='https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f'
     # 运行基础环境脚本
     init_shell='init.sh'
 
     inference_inputs = [
-        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于文本识别的原始图片')
+        Field(type=Field_type.image, name='img_file_path', label='待修复图片', describe='需要进行修复的低清晰图片')
     ]
 
     # 加载模型
