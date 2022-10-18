@@ -34,10 +34,10 @@ PORT2=暴露端口2
 
 ### 2.3 通过Dockerfile构建镜像
 ```bash
-docker build -t  $hubhost/notebook:jupyter-ubuntu-cpu-bigdata -f Dockerfile .
-docker push $hubhost/notebook:jupyter-ubuntu-cpu-bigdata
+docker build -t  $hubhost/notebook:jupyter-ubuntu-bigdata -f Dockerfile .
+docker push $hubhost/notebook:jupyter-ubuntu-bigdata
 ```
-
+注意：镜像名需要包含bigdata，这样才能会被识别为bigdata组件
 
 ### 2.4 上线自己的notebook镜像到cube-studio
 
