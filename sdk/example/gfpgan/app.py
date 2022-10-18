@@ -9,6 +9,19 @@ from cubestudio.aihub.web.app import Server,Field,Field_type
 import pysnooper
 import os
 
+
+import argparse
+import cv2
+import glob
+import numpy as np
+import os
+import torch
+from basicsr.utils import imwrite
+from basicsr.archs.rrdbnet_arch import RRDBNet
+from realesrgan import RealESRGANer
+
+from gfpgan import GFPGANer
+
 class GFPGAN_Model(Model):
     # 模型基础信息定义
     name='gfpgan'
@@ -28,42 +41,65 @@ class GFPGAN_Model(Model):
     ]
 
     # 加载模型
+    @pysnooper.snoop()
     def load_model(self):
-        learn = gen_inference_wide(root_folder=Path('./DeOldify'), weights_name='ColorizeVideo_gen')
-        self.deoldfly_model = MasterFilter([ColorizerFilter(learn=learn)], render_factor=10)
+        if not torch.cuda.is_available():  # CPU
+            import warnings
+            warnings.warn('The unoptimized RealESRGAN is slow on CPU. We do not use it. '
+                          'If you really want to use it, please modify the corresponding codes.')
+            bg_upsampler = None
+        else:
+            model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)
+            bg_upsampler = RealESRGANer(
+                scale=2,
+                model_path='https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth',
+                model=model,
+                tile=400,
+                tile_pad=10,
+                pre_pad=0,
+                half=True)  # need to set False in CPU mode
+        arch = 'clean'
+        channel_multiplier = 2
+
+        model_path = '/GFPGAN/experiments/pretrained_models/GFPGANv1.3.pth'
+
+        self.restorer = GFPGANer(
+            model_path=model_path,
+            upscale=2,
+            arch=arch,
+            channel_multiplier=channel_multiplier,
+            bg_upsampler=bg_upsampler)
 
     # 推理
     @pysnooper.snoop()
     def inference(self,img_file_path):
-        import cv2
-        import numpy as np
-        from PIL import Image
+        basename, ext = os.path.splitext(os.path.basename(img_file_path))
+        input_img = cv2.imread(img_file_path, cv2.IMREAD_COLOR)
+        cropped_faces, restored_faces, restored_img = self.restorer.enhance(
+            input_img,
+            has_aligned=False,
+            only_center_face=False,
+            paste_back=True,
+            weight=0.5)
 
-        img = cv2.imread(img_file_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(img)
-
-        filtered_image = self.deoldfly_model.filter(
-            pil_img, pil_img, render_factor=35, post_process=True
-        )
-
-        result_img = np.asarray(filtered_image)
-        result_img = cv2.cvtColor(result_img, cv2.COLOR_RGB2BGR)
-        save_path = img_file_path[0:img_file_path.rindex('.')] + "_target" + img_file_path[img_file_path.rindex('.'):]
-        cv2.imwrite(save_path, result_img)
+        # save restored img
+        save_restore_path=''
+        if restored_img is not None:
+            extension = ext[1:]
+            save_restore_path = os.path.join("result", f'{basename}.{extension}')
+            imwrite(restored_img, save_restore_path)
 
         back=[{
-            "image":save_path
+            "image":save_restore_path
         }]
         return back
-
 
 model=GFPGAN_Model(init_shell=False)
 model.load_model()
 result = model.inference(img_file_path='test.png')  # 测试
 print(result)
 
-# # 启动服务
-server = Server(model=model)
-server.server(port=8080)
+# # # 启动服务
+# server = Server(model=model)
+# server.server(port=8080)
 

@@ -1,5 +1,5 @@
 
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/gfpgan:gfpgan  .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:gfpgan  .
 FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
 
 # 安装基础环境
