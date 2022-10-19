@@ -59,33 +59,6 @@ class Model():
     inference_inputs=[]
 
     def __init__(self,init_shell=True):
-
-        print(f'开发者建议使用: \ndocker run --name {self.name} --rm --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base bash')
-
-        # 输出Dockerfile
-        dockerfile = f'''
-        # docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{self.name}  .
-        FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
-
-        # 安装基础依赖
-        WORKDIR /app
-        COPY * /app/
-        RUN bash /app/init.sh
-
-        ENTRYPOINT ["python", "app.py"]
-
-        # docker run --name paddleocr --rm --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:{self.name}
-        '''
-        dockerfile_path = os.path.join(os.getcwd(), 'Dockerfile')
-        if not os.path.exists(dockerfile_path):
-            file = open(dockerfile_path, mode='w')
-            file.write(dockerfile)
-            file.close()
-            print(f'集成构建使用: \ndocker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{self.name} .')
-
-        print(f'体验者建议使用: \ndocker run --name {self.name} --rm --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:{dir_name}')
-
-
         print('begin init shell')
         if init_shell and self.init_shell:
             py_shell.exec('bash %s'%self.init_shell)
