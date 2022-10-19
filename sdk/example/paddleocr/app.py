@@ -74,7 +74,7 @@ class Paddleocr_Model(Model):
 
 model=Paddleocr_Model(init_shell=False)
 model.load_model()
-result = model.inference(img_file_path='ocr.png')  # 测试
+result = model.inference(img_file_path='test.png')  # 测试
 print(result)
 
 # # # 启动服务

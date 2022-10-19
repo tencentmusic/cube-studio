@@ -51,7 +51,7 @@ rancher修改kubelet容器挂载目录(选中集群-升级-编辑yaml)
 ```
     kubelet:
       extra_binds:
-        - '/data/k8s:/data/k8s'
+        - '/data:/data'
 ```
   
 # gpu环境的准备  
