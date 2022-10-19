@@ -9,7 +9,7 @@ from PIL import ImageGrab, Image
 import numpy
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
-from cubestudio.aihub.web.app import Server,Field,Field_type
+from cubestudio.aihub.web.server import Server,Field,Field_type
 import os
 
 

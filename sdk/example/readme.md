@@ -12,7 +12,8 @@
 ```bash
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
-docker run --name ${aiapp} --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base bash
+cube_dir=($(dirname $(dirname "$PWD")))
+docker run --name ${aiapp} --privileged -it -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080  ccr.ccs.tencentyun.com/cube-studio/aihub:base bash
 ```
 补全init.sh环境脚本。
 ```bash
@@ -33,14 +34,19 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 ```bash
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
-docker run --name ${aiapp} --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} bash
+cube_dir=($(dirname $(dirname "$PWD")))
+docker run --name ${aiapp} --privileged --rm -it -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} bash
 ```
 如果应用代码不够完善，可以继续更新init.sh和app.py的代码
-
+生成aiapp的镜像
+```bash
+docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
+```
 # 用户：部署体验应用
 首先需要部署docker
 ```bash
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
-docker run --name ${aiapp} --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
+cube_dir=($(dirname $(dirname "$PWD")))
+docker run --name ${aiapp} --privileged --rm -it -v $cube_dir/src -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
 ```

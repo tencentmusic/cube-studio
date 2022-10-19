@@ -22,7 +22,7 @@ class Field():
 
     def to_json(self):
         return {
-            "type":str(self.type),
+            "type":str(self.type.name),
             "name":self.name,
             "label":self.label,
             "describe":self.describe,

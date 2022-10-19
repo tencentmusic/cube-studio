@@ -5,7 +5,7 @@ sys.path.append(root_dir)   # 将根目录添加到系统目录,才能正常引�
 
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
-from cubestudio.aihub.web.app import Server,Field,Field_type
+from cubestudio.aihub.web.server import Server,Field,Field_type
 from cubestudio.util.py_image import img_base64
 
 import pysnooper
@@ -38,7 +38,7 @@ class Paddleocr_Model(Model):
         self.ocr = PaddleOCR(use_angle_cls=True, lang="ch")
 
     # 推理
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def inference(self,img_file_path):
         np_img = numpy.array(Image.open(img_file_path))
 
@@ -62,8 +62,9 @@ class Paddleocr_Model(Model):
             im_show = Image.fromarray(im_show)
 
             base64_str,byte_data = img_base64(im_show)
-            save_path = img_file_path[0:img_file_path.rindex('.')]+"_target"+img_file_path[img_file_path.rindex('.'):]
-
+            base_dir,base_name = os.path.dirname(img_file_path),os.path.basename(img_file_path)
+            os.makedirs(os.path.join(base_dir,'result'),exist_ok=True)
+            save_path = os.path.join(base_dir,'result',base_name)
             with open(save_path, "wb") as imgFile:
                 imgFile.write(byte_data)
             back=[{
@@ -77,7 +78,10 @@ model.load_model()
 result = model.inference(img_file_path='test.png')  # 测试
 print(result)
 
-# # # 启动服务
-# server = Server(model=model)
-# server.server(port=8080)
+# # 启动服务
+server = Server(model=model)
+server.web_examples.append({
+    "img_file_path":"test.png"
+})
+server.server(port=8080)
 
