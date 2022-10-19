@@ -1,12 +1,8 @@
 import base64
 import io,sys,os
-root_dir = os.path.split(os.path.realpath(__file__))[0] + '/../../src/'
-sys.path.append(root_dir)   # 将根目录添加到系统目录,才能正常引用common文件夹
-
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server,Field,Field_type
-from cubestudio.util.py_image import img_base64
 
 import pysnooper
 import os
@@ -51,5 +47,8 @@ print(result)
 
 # # 启动服务
 server = Server(model=model)
+server.web_examples.append({
+    "img_file_path":"test.png"
+})
 server.server(port=8080)
 

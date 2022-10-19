@@ -1,7 +1,5 @@
 import base64
 import io,sys,os
-root_dir = os.path.split(os.path.realpath(__file__))[0] + '/../../src/'
-sys.path.append(root_dir)   # 将根目录添加到系统目录,才能正常引用common文件夹
 
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
