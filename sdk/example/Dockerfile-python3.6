@@ -1,4 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base  -f Dockerfile .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6  -f Dockerfile-python3.6 .
 
 #FROM nvidia/cuda:11.8.0-runtime-ubuntu20.04
 FROM ubuntu:20.04
@@ -27,21 +27,19 @@ RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-late
     mkdir /root/.conda && bash Miniconda3-latest-Linux-x86_64.sh -b && \
     rm -f Miniconda3-latest-Linux-x86_64.sh
 
-# 激活python3.9
+# 激活python3.6
 ENV PATH "/root/miniconda3/bin":$PATH
-RUN conda config --set auto_activate_base true
+RUN conda create -y -n py36 python=3.6
+ENV PATH /root/miniconda3/envs/py36/bin:$PATH
+ENV CONDA_DEFAULT_ENV py36
 
 # 安装
 RUN apt install -y -f python3-opencv ffmpeg
-RUN pip3 install flask werkzeug requests tornado Pillow pysnooper opencv-python numpy scipy matplotlib scikit-image ipython pyyaml visualdl filelock \
-    && rm -rf ~/.cache
+RUN pip3 install flask werkzeug requests Pillow pysnooper opencv-python numpy && rm -rf ~/.cache
 
+# cube-studio源码引入
 ENV PYTHONPATH /src/:$PYTHONPATH
 WORKDIR /app
 
-#COPY entrypoint.sh /entrypoint.sh
-
-#ENTRYPOINT ["bash", "entrypoint.sh"]
-
-# docker run --name aihub --privileged -it -v $PWD:/app --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base  bash
+# docker run --name aihub --privileged -it -v $PWD:/app --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6  bash
 

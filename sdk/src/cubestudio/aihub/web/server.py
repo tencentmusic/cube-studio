@@ -55,8 +55,6 @@ class Server():
 
     # 启动服务
     def server(self,port=8080):
-
-
         self.model.load_model()
         @app.route(f'/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
         # @pysnooper.snoop(watch_explode=())

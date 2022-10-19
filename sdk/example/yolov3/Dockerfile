@@ -1,6 +1,6 @@
 
 # docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:yolov3  .
-FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
+FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6
 
 # 安装基础环境
 WORKDIR /

@@ -7,9 +7,10 @@ aa5=['tifoit', 'cata-network', 'jollyshuai', 'XiumingLee', 'chengsky-NTU', 'kale
 aa6=['kenwoodjw', 'Dinosaur-X', 'yansuihehe', 'tgluon', '20130101', 'Kin-10', 'chaopengz', '1ess', 'lokiworks', 'lvying0019', 'goustzhu', 'pky-c', 'hotvscool', 'windblood', 'amojohn', 'chengleqi', 'lihao6666', 'wcode-wzx', 'peniridis', 'pineking', 'xieydd', 'DevenLu', 'shinytang6', 'arcosx', 'yaoqingyuan', 'Frozenmad', 'Azure99', 'claudehotline', 'krait007', 'xulangping', 'zANDc', 'yihui8776', 'firePlumes', 'bnightning', 'pxzxj', 'vincentbnu', 'sxyseo', 'zhouweiyong', 'LinkMaq', 'zvrr', 'liangxiao', 'cqkenuo', 'ZXTFINAL', 'wang-shun', 'blsailer', 'aland-zhang', 'mengguiyouziyi', 'phantom9999', 'EastInsure', 'bziwei', 'hongjunGu2019', 'hooping', 'mag05270', 'wangIQD', 'xfg0218', 'yanghua', 'krisjin', 'link3280', 'pidb', 'Stewart482', 'yangrong688', 'tlic031', 'wForget', 'zhoujiang2013', 'Aix6', 'xjx79', 'Kwafoor', 'guanshuicheng', 'Dlimeng', 'haozi4263', 'yangsuiyun', 'shadowdsp', 'louis-xuy', 'fengqian914', 'T1M-CHEN', 'MaShengY', 'Derrings', 'DM139', 'michael1589', 'hubert-he', 'dushulin', 'TS-TaylorSwift', 'zhangchunsheng', 'starli123', 'JohnsonWoo', 'colorLei', 'muniao', 'wdxtub', 'ColorfulDick', 'ronething-bot', 'somarianne', 'Windfarer', 'dlfld', 'nutsjian', 'myitsite', 'kdy1999', 'alanpeng', 'tylerliu2019', 'YuxiangJohn', 'chaoge123456']
 aa7=['felixjichao', 'pockyym', 'sunny121li', '5unny400', 'mojianhao', 'dsoul', '972660412ppmm', 'jisd2089', 'gsz12', 'qurenneng', 'etherfurnace', 'zhiyiyu', 'hellobiek', 'kyyky', '0xqq', 'llgoo', 'AimWhy', 'light1house', 'p3psi-boo', 'sillyhtw', 'kailinzhang73', 'HenryBao91', 'edwardyehuang', 'BJSmallSteamedBuns', 'wangzhonggui', 'relign', 'evanzh7', 'doubelejjyy', 'zhouhebupt', '86How', 'jerrytanjunjie888', 'Astrals24', 'xlyslr', 'limoncc', 'huisai', 'zhaodonghui3939', 'xsfmg', 'neotype', 'zhaorong1', 'cdmikechen', 'jackieZhouQQ', 'ilovecomet', 'chenhy97', 'QAZASDEDC', 'kitianFresh', 'codeamateur', 'wufenfen', 'caofb', 'xujialu405']
 
-print(len(aa1),len(aa2),len(aa3),len(aa4),len(aa5),len(aa6),len(aa7))
+
 all_users=list(set(aa1+aa2+aa3+aa4+aa5+aa6+aa7))
-print(len(all_users))
+# print(len(aa1),len(aa2),len(aa3),len(aa4),len(aa5),len(aa6),len(aa7))
+# print(len(all_users))
 
 import requests
 def get_repo_user(index):  # index 为0和为1 是相同的结果

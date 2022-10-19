@@ -1,10 +1,7 @@
 import base64
 import io,sys,os
-root_dir = os.path.split(os.path.realpath(__file__))[0] + '/../../src/'
-sys.path.append(root_dir)   # 将根目录添加到系统目录,才能正常引用common文件夹
 
 from cubestudio.aihub.model import Model
-from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server,Field,Field_type
 
 import pysnooper
@@ -26,21 +23,18 @@ class Yolov3_Model(Model):
     scenes="目标识别"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/paddleocr'
-    pic='https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png'
+    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/yolov3'
+    pic='https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg'
     # 运行基础环境脚本
     init_shell='init.sh'
 
     inference_inputs = [
-        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于文本识别的原始图片')
+        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于目标识别的原始图片')
     ]
 
     # 加载模型
     def load_model(self):
-        YOLO_DATA_PATH = os.getenv('YOLO_DATA_PATH', 'yolo/coco.data')
-        YOLO_CFG_PATH = os.getenv('YOLO_CFG_PATH', 'yolo/yolov3.cfg')
-        YOLO_WEIGHTS_PATH = os.getenv('YOLO_WEIGHTS_PATH', 'yolo/yolov3.weights')
-        self.detector = Detector(YOLO_DATA_PATH, YOLO_CFG_PATH, YOLO_WEIGHTS_PATH)
+        self.detector = Detector('/yolo/coco.data', '/yolo/yolov3.cfg', '/yolo/yolov3.weights')
 
     # 推理
     @pysnooper.snoop()
@@ -55,17 +49,19 @@ class Yolov3_Model(Model):
             # 画矩形框
             dr.rectangle((x, y, x + w, y + h), outline=(46, 254, 46), width=3)
             dr.text((data['left'], data['top']), class_name, font=myfont, fill='red')
+
         out_image_path = img_file_path[:img_file_path.rfind('.')] + '_target' + img_file_path[img_file_path.rfind('.'):]
         img.save(out_image_path)
-
+        print(res)
         back=[{
-            "image":out_image_path
+            "image":out_image_path,
+            "text":res
         }]
         return back
 
 model=Yolov3_Model(init_shell=False)
 model.load_model()
-result = model.inference(img_file_path='test.png')  # 测试
+result = model.inference(img_file_path='test.jpg')  # 测试
 print(result)
 
 # # 启动服务
