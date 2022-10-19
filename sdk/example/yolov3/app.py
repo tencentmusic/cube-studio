@@ -6,7 +6,6 @@ sys.path.append(root_dir)   # 将根目录添加到系统目录,才能正常引�
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.app import Server,Field,Field_type
-from cubestudio.util.py_image import img_base64
 
 import pysnooper
 from darknetpy.detector import Detector
