@@ -35,6 +35,9 @@ RUN apt install -y -f python3-opencv ffmpeg
 RUN pip3 install flask werkzeug requests tornado Pillow pysnooper opencv-python numpy scipy matplotlib scikit-image ipython pyyaml visualdl filelock \
     && rm -rf ~/.cache
 
+COPY cubestudio-2022.10.1-py3-none-any.whl /cubestudio-2022.10.1-py3-none-any.whl
+RUN pip install /cubestudio-py3-none-any.whl
+
 WORKDIR /app
 #COPY entrypoint.sh /entrypoint.sh
 
