@@ -100,6 +100,9 @@ result = model.inference(img_file_path='test.png')  # 测试
 print(result)
 
 # # # 启动服务
-# server = Server(model=model)
-# server.server(port=8080)
+server = Server(model=model)
+server.web_examples.append(
+    {"img_file_path":"test.png"}
+)
+server.server(port=8080)
 
