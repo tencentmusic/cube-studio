@@ -32,13 +32,13 @@ class APP1_Model(Model):
     # 推理
     @pysnooper.snoop()
     def inference(self,img_file_path):
-            result_img='test_target.jpg'
-            result_text='cat,dog'
-            back=[{
-                "image":result_img,
-                "text":result_text
-            }]
-            return back
+        result_img='test_target.jpg'
+        result_text='cat,dog'
+        back=[{
+            "image":result_img,
+            "text":result_text
+        }]
+        return back
 
 model=APP1_Model(init_shell=False)
 model.load_model()

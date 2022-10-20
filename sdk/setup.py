@@ -6,7 +6,7 @@ setup(
     name='cubestudio',  # 包名
     entry_points = {
         'console_scripts': [
-            'cube=cubestudio.tool:main'
+            'cube=cubestudio.cli.tool:main'
         ],
     },
     version='2022.10.1',  # 版本号

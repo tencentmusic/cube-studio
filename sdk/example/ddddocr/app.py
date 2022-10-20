@@ -60,9 +60,9 @@ class DDDDOCR_Model(Model):
             result_im = cv2.rectangle(result_im, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
         if os.path.exists('tem.jpg'):
             os.remove('temp.jpg')
-        base_dir, base_name = os.path.dirname(img_file_path), os.path.basename(img_file_path)
-        os.makedirs(os.path.join(base_dir, 'result'), exist_ok=True)
-        save_path = os.path.join(base_dir, 'result', base_name)
+
+        os.makedirs('result', exist_ok=True)
+        save_path = os.path.join('result', os.path.basename(img_file_path))
         cv2.imwrite(save_path, result_im)
         back=[{
             "image":save_path,

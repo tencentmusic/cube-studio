@@ -5,3 +5,4 @@ example/*/cubestudio-2022.10.1-py3-none-any.whl
 example/*/result
 
 /src/cubestudio/aihub/web/static/example/
+/example/test.py

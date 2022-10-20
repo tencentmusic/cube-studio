@@ -70,7 +70,6 @@ class GFPGAN_Model(Model):
     # 推理
     @pysnooper.snoop()
     def inference(self,img_file_path):
-        basename, ext = os.path.splitext(os.path.basename(img_file_path))
         input_img = cv2.imread(img_file_path, cv2.IMREAD_COLOR)
         cropped_faces, restored_faces, restored_img = self.restorer.enhance(
             input_img,
@@ -82,8 +81,8 @@ class GFPGAN_Model(Model):
         # save restored img
         save_restore_path=''
         if restored_img is not None:
-            extension = ext[1:]
-            save_restore_path = os.path.join("result", f'{basename}.{extension}')
+            os.makedirs('result', exist_ok=True)
+            save_restore_path = os.path.join('result', os.path.basename(img_file_path))
             imwrite(restored_img, save_restore_path)
 
         back=[{

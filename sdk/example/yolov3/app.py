@@ -50,7 +50,7 @@ class Yolov3_Model(Model):
             dr.rectangle((x, y, x + w, y + h), outline=(46, 254, 46), width=3)
             dr.text((data['left'], data['top']), class_name, font=myfont, fill='red')
 
-        out_image_path = img_file_path[:img_file_path.rfind('.')] + '_target' + img_file_path[img_file_path.rfind('.'):]
+        out_image_path = os.path.join('result',os.path.basename(img_file_path))
         img.save(out_image_path)
         print(res)
         back=[{

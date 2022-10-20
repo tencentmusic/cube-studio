@@ -29,19 +29,6 @@ python app.py
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 ```
 
-# 开发者：完善旧应用
-环境安装比较耗时，所以可以使用新应用创建者构建的镜像继续开发
-```bash
-# 获取当前项目名作为应用名
-aiapp=$(basename `pwd`)
-cube_dir=($(dirname $(dirname "$PWD")))
-docker run --name ${aiapp} --privileged --rm -it -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} bash
-```
-如果应用代码不够完善，可以继续更新init.sh和app.py的代码
-生成aiapp的镜像
-```bash
-docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
-```
 # 用户：部署体验应用
 首先需要部署docker
 ```bash

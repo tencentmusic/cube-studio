@@ -60,9 +60,8 @@ class Paddleocr_Model(Model):
             im_show = Image.fromarray(im_show)
 
             base64_str,byte_data = img_base64(im_show)
-            base_dir,base_name = os.path.dirname(img_file_path),os.path.basename(img_file_path)
-            os.makedirs(os.path.join(base_dir,'result'),exist_ok=True)
-            save_path = os.path.join(base_dir,'result',base_name)
+            os.makedirs('result',exist_ok=True)
+            save_path = os.path.join('result',os.path.basename(img_file_path))
             with open(save_path, "wb") as imgFile:
                 imgFile.write(byte_data)
             back=[{
