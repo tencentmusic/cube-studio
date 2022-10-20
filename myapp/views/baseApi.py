@@ -77,12 +77,14 @@ API_HELP_URL_RIS_KEY = 'help_url'
 API_ACTION_RIS_KEY='action'
 API_ROUTE_RIS_KEY ='route_base'
 
+API_PERMISSIONS_RIS_KEY="permissions"
 API_USER_PERMISSIONS_RIS_KEY="user_permissions"
 API_RELATED_RIS_KEY="related"
 API_COLS_WIDTH_RIS_KEY='cols_width'
 API_EXIST_ADD_ARGS_RIS_KEY='exist_add_args'
 API_IMPORT_DATA_RIS_KEY = 'import_data'
 API_DOWNLOAD_DATA_RIS_KEY = 'download_data'
+API_OPS_BUTTON_RIS_KEY = 'ops_link'
 
 def get_error_msg():
     if current_app.config.get("FAB_API_SHOW_STACKTRACE"):
@@ -248,6 +250,12 @@ class MyappModelRestApi(ModelRestApi):
     edit_fieldsets=[]
     show_fieldsets = []
     pre_add_get=None
+    ops_link=[
+        # {
+        #     "text": "git",
+        #     "url": "https://github.com/tencentmusic/cube-studio"
+        # }
+    ]
     pre_update_get=None
     help_url = None
     pre_show = None
@@ -341,6 +349,7 @@ class MyappModelRestApi(ModelRestApi):
             Init Properties
         """
         super(MyappModelRestApi, self)._init_properties()
+
         # 初始化action自耦段
         self.actions = {}
         for attr_name in dir(self):
@@ -367,6 +376,8 @@ class MyappModelRestApi(ModelRestApi):
         # 帮助地址
         self.help_url = conf.get('HELP_URL', {}).get(self.datamodel.obj.__tablename__, '') if self.datamodel else ''
 
+        # 配置搜索转换器
+        self._filters = self.datamodel.get_filters(self.search_columns)
 
     def _init_model_schemas(self):
         # Create Marshmalow schemas if one is not specified
@@ -441,6 +452,7 @@ class MyappModelRestApi(ModelRestApi):
     def merge_ops_data(self, response, **kwargs):
         response[API_IMPORT_DATA_RIS_KEY] = self.import_data
         response[API_DOWNLOAD_DATA_RIS_KEY] = self.download_data
+        response[API_OPS_BUTTON_RIS_KEY]=self.ops_link
 
     # 重新渲染add界面
     # @pysnooper.snoop()
@@ -825,8 +837,6 @@ class MyappModelRestApi(ModelRestApi):
             except Exception as e:
                 print(e)
 
-
-
     def response_error(self,code,message='error',status=1,result={}):
         back_data = {
             'result': result,
@@ -1191,7 +1201,7 @@ class MyappModelRestApi(ModelRestApi):
         pk = self._deserialize_pk_if_composite(pk)
         action = self.actions.get(name)
         try:
-            action.func(self.datamodel.get(pk))
+            res = action.func(self.datamodel.get(pk))
             back = {
                 "status": 0,
                 "result": {},

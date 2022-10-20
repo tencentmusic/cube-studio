@@ -287,15 +287,23 @@ class Task_ModelView_Base():
             item.resource_gpu=str(item.resource_gpu).upper()
         if item.job_template is None:
             raise MyappException("Job Template 为必选")
-        # if item.job_template.volume_mount and item.job_template.volume_mount not in item.volume_mount:
-        #     if item.volume_mount:
-        #         item.volume_mount += ","+item.job_template.volume_mount
-        #     else:
-        #         item.volume_mount = item.job_template.volume_mount
 
+        # # 切换了项目组，要把项目组的挂载加进去
+        all_project_volumes=[]
+        if item.volume_mount:
+            all_project_volumes = [x.strip() for x in item.volume_mount.split(',') if x.strip()]
+        if item.job_template.volume_mount:
+            all_project_volumes += [x.strip() for x in item.job_template.volume_mount.split(',') if x.strip()]
+        for volume_mount in all_project_volumes:
+            if ":" in volume_mount:
+                volume,mount = volume_mount.split(":")[0],volume_mount.split(":")[1]
+                if mount not in item.volume_mount:
+                    item.volume_mount=item.volume_mount.strip(',')+","+volume_mount
+
+        # 修改失败，直接换为原来的
         if item.volume_mount and ':' not in item.volume_mount:
             item.volume_mount = self.src_item_json.get('volume_mount','')
-
+        # 规范文本内容
         if item.volume_mount:
             item.volume_mount = ','.join([x.strip() for x in item.volume_mount.split(',') if x.strip()])
 

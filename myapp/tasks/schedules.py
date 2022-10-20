@@ -1322,7 +1322,8 @@ from myapp.models.model_aihub import Aihub
 @celery_app.task(name="task.update_aihub", bind=True)
 @pysnooper.snoop()
 def update_aihub(task):
-    # time.sleep(random.randint(10,600))
+    import random
+    time.sleep(random.randint(10,600))
     from myapp.utils.core import run_shell
 
     # 更新git

@@ -38,7 +38,9 @@ def listen_service():
                         if event['object'].status and event['object'].status.container_statuses and event["type"]=='MODIFIED':  # 容器重启会触发MODIFIED
                             # terminated 终止，waiting 等待启动，running 运行中
                             container_statuse= event['object'].status.container_statuses[0].state
-                            terminated = container_statuse.terminated  # waiting running
+                            terminated = container_statuse.terminated
+                            # waiting = container_statuse.waiting
+                            # running = container_statuse.running
                             service_name=event['object'].metadata.labels.get('app','')
                             inferenceserving = dbsession.query(InferenceService).filter_by(name=service_name).first() if service_name else None
                             if service_name and inferenceserving:

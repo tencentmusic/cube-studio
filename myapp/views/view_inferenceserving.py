@@ -901,8 +901,10 @@ output %s
         # 使用项目组ip
         if service.project.expand:
             ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
-            if ip and type(SERVICE_EXTERNAL_IP)==str:
+            if ip and type(ip) == str:
                 SERVICE_EXTERNAL_IP = [ip]
+            if ip and type(ip) == list:
+                SERVICE_EXTERNAL_IP = ip
 
         # 使用全局ip
         if not SERVICE_EXTERNAL_IP:
