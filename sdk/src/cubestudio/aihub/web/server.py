@@ -5,6 +5,7 @@ import flask,os,sys,json,time,random,io,base64
 from flask import redirect
 from flask import render_template
 import sys
+import uuid
 import os
 from flask import abort, current_app, flash, g, redirect, request, session, url_for
 from flask_babel import lazy_gettext
@@ -35,6 +36,7 @@ from PIL import Image
 import pysnooper
 from ..model import Field,Field_type
 from ...util.py_github import get_repo_user
+from ...util.log import AbstractEventLogger
 
 from flask import Flask
 
@@ -57,6 +59,8 @@ class Server():
                     static_url_path=f'/{self.pre_url}/static',
                     static_folder='static',
                     template_folder='templates')
+        app.config['SECRET_KEY'] = os.urandom(24)
+        app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=7)
 
         # 文件转url
         def file2url(file_path):
@@ -77,8 +81,8 @@ class Server():
 
 
         self.model.load_model()
+
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        # @pysnooper.snoop(watch_explode=())
         def web_inference(self=self):
             try:
                 data = request.json
@@ -146,9 +150,7 @@ class Server():
             return render_template('vision.html', data=data)
 
         @app.route(f'/{self.pre_url}/info')
-        # @pysnooper.snoop()
         def info(self=self):
-
             # example中图片转为在线地址
             for example in self.web_examples:
                 for arg_filed in self.model.inference_inputs:
@@ -173,8 +175,6 @@ class Server():
                         for i,choice in enumerate(input.choices):
                             if 'http' not in choice:
                                 input.choices[i]=file2url(choice)
-
-
 
             info = {
                 "name": self.model.name,
@@ -209,20 +209,23 @@ class Server():
             }
             return jsonify(info)
 
-        @app.route(f'/{self.pre_url}/login')
-        def login(self=self):
-            GITHUB_APPKEY = '24c051d2b3ec2def190b'  # ioa登录时申请的appkey
-            GITHUB_SECRET = 'ae6beda4731b5dfc8dd923502d8b55ac8bc6c3b8'
-            GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s'
-
-            request_data = request.args.to_dict()
-            comed_url = request_data.get('login_url', '')
-            login_url = '%s/login/' % request.host_url.strip('/')
-            if comed_url:
-                login_url += "?login_url=" + comed_url
+        # 此函数不在应用内，而在中心平台内，但是和应用使用同一个域名
+        @app.route(f'/aihub/login/<app_name>')
+        @pysnooper.snoop()
+        def app_login(app_name='',self=self):
+            GITHUB_APPKEY = '69ee1c07fb4764b7fd34'
+            GITHUB_SECRET = '795c023eb495317e86713fa5624ffcee3d00e585'
+            GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s'
+            # 应用内登录才设置跳转地址
+            if app_name:
+                session['login_url'] = request.host_url.strip('/')+f"/{app_name}/info"
             oa_auth_url = GITHUB_AUTH_URL
             appkey = GITHUB_APPKEY
-            g.user = session.get('user', '')
+            username = session.get('username', '')
+            g.username =''
+            if 'anonymous' not in username and username:
+                g.username=username
+
             if 'code' in request.args:
                 # user check first login
                 data = {
@@ -245,28 +248,58 @@ class Server():
                     user = res.json().get('login') or None  # name是中文名，login是英文名，不能if user
                     all_users = get_repo_user(7)
                     if user in all_users:
-                        g.user = user
+                        g.username = user
                     else:
                         return 'star cube-studio项目 <a href="https://github.com/tencentmusic/cube-studio">https://github.com/tencentmusic/cube-studio</a>  后重新登录，如果已经star请一分钟后重试'
-                    if g.user: g.user = g.user.replace('.', '')
 
                 else:
                     message = str(r.content, 'utf-8')
                     print(message)
-                    g.user = None
+                    g.username = None
 
             # remember user
-            if g.user and g.user != '':
-                session['user'] = g.user
+            if g.username and g.username != '':
+                session['username'] = g.username
+                login_url = session.get('login_url','https://github.com/tencentmusic/cube-studio')
+                return redirect(login_url)
             else:
-                return redirect(oa_auth_url % (str(appkey), login_url,))
-
+                return redirect(oa_auth_url % (str(appkey),))
+        #
         # @app.before_request
         # def check_login():
-        #     if '/static' in request.path or '/logout' in request.path or '/login' in request.path or '/health' in request.path:
-        #         return
-        #     if not g.user:
-        #         return redirect('/login')
+        #     req_url = request.path
+        #     # 只对后端接口
+        #     if '/static' not in req_url:
+        #         username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
+        #         session['username']=username
+        #
+        #         num = user_history.get(username, {}).get(req_url, 0)
+        #         # 匿名用户对后端的请求次数超过1次就需要登录
+        #         if num > 1 and 'anonymous-' in username:
+        #             return jsonify({
+        #                 "status": 1,
+        #                 "result": {},
+        #                 "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
+        #             })
+        #
+        #         if num > 10:
+        #             return jsonify({
+        #                 "status": 1,
+        #                 "result": {},
+        #                 "message": "登录用户尽可访问10次，获得更多访问次数，需要分享应用"
+        #             })
+        #
+        # # 配置影响后操作
+        # @app.after_request
+        # def apply_http_headers(response):
+        #     req_url = request.path
+        #     if '/static' not in req_url:
+        #         username = session['username']
+        #         user_history[username] = {
+        #             req_url: user_history.get(username, {}).get(req_url, 0) + 1
+        #         }
+        #         print(user_history)
+        #     return response
 
         app.run(host='0.0.0.0', debug=True, port=port)
 
