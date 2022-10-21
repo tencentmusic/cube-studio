@@ -10,45 +10,70 @@ import os
 class APP1_Model(Model):
     # 模型基础信息定义
     name='app1'
-    label='示例应用'
-    description="ai示例应用，详细描述，都会显示应用描述上"
+    label='示例应用中文名'
+    description="ai示例应用，详细描述，都会显示应用描述上，支持markdown"
     field="机器视觉"
     scenes="图像识别"
     status='online'
     version='v20221001'
-    doc='https://帮助文档的链接地址'
-    pic='https://应用描述的缩略图/可以直接使用应用内的图片文件地址'
+    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub' # 'https://帮助文档的链接地址'
+    pic='https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     # 运行基础环境脚本
     init_shell='init.sh'
 
     inference_inputs = [
-        Field(type=Field_type.image, name='img_file_path', label='推理函数的输入参数', describe='用于文本识别的原始图片')
+        Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',
+              describe='arg1的详细说明，用于在界面展示',default='这里是默认值'),
+        Field(type=Field_type.image, name='arg2', label='推理函数的输入参数arg2',
+              describe='arg2的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址'),
+        Field(type=Field_type.video, name='arg3', label='推理函数的输入参数arg3',
+              describe='arg3的详细说明，用于在界面展示,传递到推理函数中将是视频本地地址'),
+        Field(type=Field_type.text_select, name='arg4', label='推理函数的输入参数arg4',
+              describe='arg4的详细说明，用于在界面展示,单选组件',choices=['choice1','choice2','choice3'],default='choice2'),
+        Field(type=Field_type.image_select, name='arg5', label='推理函数的输入参数arg5',
+              describe='arg5的详细说明，用于在界面展示,多选组件', choices=['风格1.jpg', '风格2.jpg'], default='风格2.jpg'),
+        Field(type=Field_type.text_multi, name='arg6', label='推理函数的输入参数arg6',
+              describe='arg6的详细说明，用于在界面展示,多选组件', choices=['choice1', 'choice2', 'choice3'], default=['choice1']),
+        Field(type=Field_type.image_multi, name='arg7', label='推理函数的输入参数arg7',
+              describe='arg7的详细说明，用于在界面展示,多选组件', choices=['风格1.jpg', '风格2.jpg'], default=['风格2.jpg','风格2.jpg'])
     ]
 
     # 加载模型
     def load_model(self):
-        self.model = load("/xxx/xx/a.pth")
+        # self.model = load("/xxx/xx/a.pth")
+        pass
 
     # 推理
     @pysnooper.snoop()
-    def inference(self,img_file_path):
-        result_img='test_target.jpg'
+    def inference(self,arg1,arg2=None,arg3=None,arg4=None,arg5=None,arg6=None,arg7=None,**kwargs):
+
+        result_img='result_img.jpg'
         result_text='cat,dog'
+        result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
         back=[{
             "image":result_img,
-            "text":result_text
-        }]
+            "text":result_text,
+            "video":result_video
+        },
+            {
+                "image": result_img,
+                "text": result_text,
+                "video": result_video
+            }
+        ]
         return back
 
 model=APP1_Model(init_shell=False)
 model.load_model()
-result = model.inference(img_file_path='test.png')  # 测试
-print(result)
+# result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
+# print(result)
 
 # # 启动服务
 server = Server(model=model)
 server.web_examples.append({
-    "img_file_path":"test.png"
+    "arg1":'测试输入文本',
+    "arg2":'test.jpg',
+    "arg3": 'https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
 })
 server.server(port=8080)
 

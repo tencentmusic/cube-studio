@@ -38,25 +38,46 @@ from ...util.py_github import get_repo_user
 
 from flask import Flask
 
-app = Flask(__name__,
-            static_url_path='/static',
-            static_folder='static',
-            template_folder='templates')
 user_history={
 
 }
 class Server():
 
     web_examples=[]
-
+    pre_url=''
     def __init__(self,model,docker=None):
         self.model=model
         self.docker=docker
+        self.pre_url=self.model.name
 
     # 启动服务
     def server(self,port=8080):
+
+        app = Flask(__name__,
+                    static_url_path=f'/{self.pre_url}/static',
+                    static_folder='static',
+                    template_folder='templates')
+
+        # 文件转url
+        def file2url(file_path):
+            base_name = os.path.basename(file_path)
+            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + base_name
+            if not os.path.exists(save_path):
+                shutil.copy(file_path, save_path)
+            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/" + base_name
+
+        # 视频转流
+        def video_stram(self,video_path):
+            vid = cv2.VideoCapture(video_path)
+            while True:
+                return_value, frame = vid.read()
+                image = cv2.imencode('.jpg', frame)[1].tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+
+
         self.model.load_model()
-        @app.route(f'/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
+        @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
         # @pysnooper.snoop(watch_explode=())
         def web_inference(self=self):
             try:
@@ -85,6 +106,7 @@ class Server():
                 if type(all_back)!=list:
                     all_back=[all_back]
                 for back in all_back:
+                    # 如果是图片，写不是http
                     if back.get('image',''):
                         save_file_path = back['image']
                         if os.path.exists(save_file_path):
@@ -92,6 +114,12 @@ class Server():
                             image_data = f.read()
                             base64_data = base64.b64encode(image_data)  # base64编码
                             back['image'] = str(base64_data,encoding='utf-8')
+
+                    # 如果是视频，写不是http
+                    if back.get('video',''):
+                        save_file_path = back['video']
+                        if os.path.exists(save_file_path):
+                            back['video']=file2url(save_file_path)
 
                 return jsonify({
                     "status": 0,
@@ -103,7 +131,7 @@ class Server():
                 logging.info('Uploaded image open error: %s', err)
                 return jsonify(val='Cannot open uploaded image.')
 
-        @app.route('/')
+        @app.route(f'/{self.pre_url}')
         def home(self=self):
             data = {
                 "name": self.model.name,
@@ -117,19 +145,36 @@ class Server():
             print(data)
             return render_template('vision.html', data=data)
 
-        @app.route('/info')
-        @pysnooper.snoop()
+        @app.route(f'/{self.pre_url}/info')
+        # @pysnooper.snoop()
         def info(self=self):
+
+            # example中图片转为在线地址
             for example in self.web_examples:
-                for input in self.model.inference_inputs:
-                    if input.name in example:
-                        # 示例图片转为在线图片
-                        if input.type.name=='image' and 'http' not in example[input.name]:
-                            base_name = os.path.basename(example[input.name])
-                            save_path = os.path.dirname(os.path.abspath(__file__))+'/static/example/'+base_name
-                            if not os.path.exists(save_path):
-                                shutil.copy(os.path.join(os.getcwd(),example[input.name]),save_path)
-                            example[input.name]=request.host_url.strip('/')+"/static/example/"+base_name
+                for arg_filed in self.model.inference_inputs:
+                    if arg_filed.name in example:  # 这个示例提供了这个参数
+                        # 示例图片/视频转为在线地址
+                        if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name) and 'http' not in example[arg_filed.name]:
+                            example[arg_filed.name]=file2url(example[arg_filed.name])
+
+            # 将图片和视频的可选值和默认值，都转为在线网址
+            for input in self.model.inference_inputs:
+                if 'image' in input.type.name or 'video' in input.type.name:
+                    # 对于单选
+                    if '_multi' not in input.type.name and input.default and 'http' not in input.default:
+                        input.default = file2url(input.default)
+
+                    # 对于多选
+                    if '_multi' in input.type.name and input.default:
+                        for i,default in enumerate(input.default):
+                            if 'http' not in default:
+                                input.default[i] = file2url(default)
+                    if input.choices:
+                        for i,choice in enumerate(input.choices):
+                            if 'http' not in choice:
+                                input.choices[i]=file2url(choice)
+
+
 
             info = {
                 "name": self.model.name,
@@ -141,8 +186,9 @@ class Server():
                 "version": self.model.version,
                 "doc": self.model.doc,
                 "pic": self.model.pic,
-                "web_example":self.web_examples,
-                "inference_inputs": [input.to_json() for input in self.model.inference_inputs]
+                "web_examples":self.web_examples,
+                "inference_inputs": [input.to_json() for input in self.model.inference_inputs],
+                'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/'
             }
             return jsonify(info)
         #

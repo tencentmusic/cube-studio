@@ -9,7 +9,10 @@
  - 其他自行添加配套内容
 
 镜像调试，基础镜像为conda环境。先使用如下命令启动基础环境进入容器
+ccr.ccs.tencentyun.com/cube-studio/aihub:base 为conda，python3.9环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
 ```bash
+cd app1
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
