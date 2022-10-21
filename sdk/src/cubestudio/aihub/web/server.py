@@ -188,61 +188,78 @@ class Server():
                 "pic": self.model.pic,
                 "web_examples":self.web_examples,
                 "inference_inputs": [input.to_json() for input in self.model.inference_inputs],
-                'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/'
+                'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
+                "aihub_url":"http://www.data-master.net/frontend/aihub/model_market/model_all",
+                "github_url":"https://github.com/tencentmusic/cube-studio",
+                "user":f"/{self.pre_url}/login",
+                "rec_apps":[
+                    {
+                        "pic":"https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
+                        "label":"图片修复"
+                    },
+                    {
+                        "pic": "https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
+                        "label": "图片修复"
+                    },
+                    {
+                        "pic": "https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
+                        "label": "图片修复"
+                    }
+                ]
             }
             return jsonify(info)
-        #
-        # @app.route('/login')
-        # def login(self=self):
-        #     GITHUB_APPKEY = '24c051d2b3ec2def190b'  # ioa登录时申请的appkey
-        #     GITHUB_SECRET = 'ae6beda4731b5dfc8dd923502d8b55ac8bc6c3b8'
-        #     GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s'
-        # 
-        #     request_data = request.args.to_dict()
-        #     comed_url = request_data.get('login_url', '')
-        #     login_url = '%s/login/' % request.host_url.strip('/')
-        #     if comed_url:
-        #         login_url += "?login_url=" + comed_url
-        #     oa_auth_url = GITHUB_AUTH_URL
-        #     appkey = GITHUB_APPKEY
-        #     g.user = session.get('user', '')
-        #     if 'code' in request.args:
-        #         # user check first login
-        #         data = {
-        #             'code': request.args.get('code'),
-        #             'client_id': GITHUB_APPKEY,
-        #             'client_secret': GITHUB_SECRET
-        #         }
-        #         r = requests.post("https://github.com/login/oauth/access_token", data=data, timeout=2, headers={
-        #             'accept': 'application/json'
-        #         })
-        #         if r.status_code == 200:
-        #             json_data = r.json()
-        #             accessToken = json_data.get('access_token')
-        #             res = requests.get('https://api.github.com/user', headers={
-        #                 'accept': 'application/json',
-        #                 'Authorization': 'token ' + accessToken
-        #             })
-        #             print(res)
-        #             print(res.json())
-        #             user = res.json().get('login') or None  # name是中文名，login是英文名，不能if user
-        #             all_users = get_repo_user(7)
-        #             if user in all_users:
-        #                 g.user = user
-        #             else:
-        #                 return 'star cube-studio项目 <a href="https://github.com/tencentmusic/cube-studio">https://github.com/tencentmusic/cube-studio</a>  后重新登录，如果已经star请一分钟后重试'
-        #             if g.user: g.user = g.user.replace('.', '')
-        # 
-        #         else:
-        #             message = str(r.content, 'utf-8')
-        #             print(message)
-        #             g.user = None
-        # 
-        #     # remember user
-        #     if g.user and g.user != '':
-        #         session['user'] = g.user
-        #     else:
-        #         return redirect(oa_auth_url % (str(appkey), login_url,))
+
+        @app.route(f'/{self.pre_url}/login')
+        def login(self=self):
+            GITHUB_APPKEY = '24c051d2b3ec2def190b'  # ioa登录时申请的appkey
+            GITHUB_SECRET = 'ae6beda4731b5dfc8dd923502d8b55ac8bc6c3b8'
+            GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s'
+
+            request_data = request.args.to_dict()
+            comed_url = request_data.get('login_url', '')
+            login_url = '%s/login/' % request.host_url.strip('/')
+            if comed_url:
+                login_url += "?login_url=" + comed_url
+            oa_auth_url = GITHUB_AUTH_URL
+            appkey = GITHUB_APPKEY
+            g.user = session.get('user', '')
+            if 'code' in request.args:
+                # user check first login
+                data = {
+                    'code': request.args.get('code'),
+                    'client_id': GITHUB_APPKEY,
+                    'client_secret': GITHUB_SECRET
+                }
+                r = requests.post("https://github.com/login/oauth/access_token", data=data, timeout=2, headers={
+                    'accept': 'application/json'
+                })
+                if r.status_code == 200:
+                    json_data = r.json()
+                    accessToken = json_data.get('access_token')
+                    res = requests.get('https://api.github.com/user', headers={
+                        'accept': 'application/json',
+                        'Authorization': 'token ' + accessToken
+                    })
+                    print(res)
+                    print(res.json())
+                    user = res.json().get('login') or None  # name是中文名，login是英文名，不能if user
+                    all_users = get_repo_user(7)
+                    if user in all_users:
+                        g.user = user
+                    else:
+                        return 'star cube-studio项目 <a href="https://github.com/tencentmusic/cube-studio">https://github.com/tencentmusic/cube-studio</a>  后重新登录，如果已经star请一分钟后重试'
+                    if g.user: g.user = g.user.replace('.', '')
+
+                else:
+                    message = str(r.content, 'utf-8')
+                    print(message)
+                    g.user = None
+
+            # remember user
+            if g.user and g.user != '':
+                session['user'] = g.user
+            else:
+                return redirect(oa_auth_url % (str(appkey), login_url,))
 
         # @app.before_request
         # def check_login():
