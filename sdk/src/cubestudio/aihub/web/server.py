@@ -85,6 +85,7 @@ class Server():
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
         def web_inference():
             try:
+                # 从json里面读取信息
                 data = request.json
                 inputs=self.model.inference_inputs
                 inference_kargs={}
@@ -105,6 +106,18 @@ class Server():
 
                         logging.info('Saving to %s.', image_path)
                         inference_kargs[input.name] = image_path
+                # 从file里面读取文件
+                for input in inputs:
+                    if input.name in request.files:
+                        file = request.files.get(input.name)
+
+                        file_name = file.filename
+                        file_path = os.path.join("upload", self.model.name, self.model.version,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S-')+ file_name)
+                        if not os.path.exists(os.path.dirname(file_path)):
+                            os.makedirs(os.path.dirname(file_path))
+                        file.save(file_path)  # 保存文件
+                        inference_kargs[input.name] = file_path
+
 
                 all_back = self.model.inference(**inference_kargs)
                 if type(all_back)!=list:
@@ -264,42 +277,42 @@ class Server():
                 return redirect(login_url)
             else:
                 return redirect(oa_auth_url % (str(appkey),))
-
-        @app.before_request
-        def check_login():
-            req_url = request.path
-            # 只对后端接口
-            if '/static' not in req_url:
-                username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
-                session['username']=username
-
-                num = user_history.get(username, {}).get(req_url, 0)
-                # 匿名用户对后端的请求次数超过1次就需要登录
-                if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
-                    return jsonify({
-                        "status": 1,
-                        "result": {},
-                        "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
-                    })
-
-                if num > 10 and self.pre_url in req_url:
-                    return jsonify({
-                        "status": 2,
-                        "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
-                        "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
-                    })
-
-        # 配置影响后操作
-        @app.after_request
-        def apply_http_headers(response):
-            req_url = request.path
-            if '/static' not in req_url:
-                username = session['username']
-                user_history[username] = {
-                    req_url: user_history.get(username, {}).get(req_url, 0) + 1
-                }
-                print(user_history)
-            return response
+        #
+        # @app.before_request
+        # def check_login():
+        #     req_url = request.path
+        #     # 只对后端接口
+        #     if '/static' not in req_url:
+        #         username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
+        #         session['username']=username
+        #
+        #         num = user_history.get(username, {}).get(req_url, 0)
+        #         # 匿名用户对后端的请求次数超过1次就需要登录
+        #         if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
+        #             return jsonify({
+        #                 "status": 1,
+        #                 "result": {},
+        #                 "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
+        #             })
+        #
+        #         if num > 10 and self.pre_url in req_url:
+        #             return jsonify({
+        #                 "status": 2,
+        #                 "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
+        #                 "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
+        #             })
+        #
+        # # 配置影响后操作
+        # @app.after_request
+        # def apply_http_headers(response):
+        #     req_url = request.path
+        #     if '/static' not in req_url:
+        #         username = session['username']
+        #         user_history[username] = {
+        #             req_url: user_history.get(username, {}).get(req_url, 0) + 1
+        #         }
+        #         print(user_history)
+        #     return response
 
         app.run(host='0.0.0.0', debug=True, port=port)
 
