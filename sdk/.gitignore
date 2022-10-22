@@ -6,3 +6,4 @@ example/*/result
 
 /src/cubestudio/aihub/web/static/example/
 /example/test.py
+/example/*/deploy.py
