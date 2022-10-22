@@ -77,7 +77,7 @@ spec:
               memory: 0Gi
         '''
         save_path = app_name+"/deploy.yaml"
-        print(save_path)
+        # print(save_path)
         file = open(save_path,mode='w')
         file.write(deploy)
         file.close()
