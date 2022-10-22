@@ -26,7 +26,7 @@ from ldm.util import instantiate_from_config
 from Utils import split_weighted_subprompts
 
 
-class APP1_Model(Model):
+class Txt2Img_Model(Model):
     # 模型基础信息定义
     name = 'txt2img'
     label = '文字转图像'
@@ -218,7 +218,7 @@ class APP1_Model(Model):
             return back
 
 
-model = APP1_Model(init_shell=False)
+model = Txt2Img_Model(init_shell=False)
 model.load_model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
