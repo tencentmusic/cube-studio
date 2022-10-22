@@ -54,10 +54,7 @@ class APP1_Model(Model):
     # 加载模型
     def load_model(self):
         # self.model = load("/xxx/xx/a.pth")
-        print(f"Loading model from full-model.ckpt")
         pl_sd = torch.load('full-model.ckpt', map_location="cpu")
-        if "global_step" in pl_sd:
-            print(f"Global Step: {pl_sd['global_step']}")
         sd = pl_sd["state_dict"]
         return sd
 
@@ -70,14 +67,13 @@ class APP1_Model(Model):
         }]
         try:
             img = ''
-            tic = time.time()
             s_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             path_for_save = f'out_put/{s_time}'
             os.makedirs(path_for_save, exist_ok=True)  #
             outpath = path_for_save
             grid_count = len(os.listdir(outpath)) - 1
 
-            if seed == None:
+            if seed is None:
                 seed = randint(0, 1000000)
             seed_everything(seed)
 
@@ -211,19 +207,6 @@ class APP1_Model(Model):
                                     time.sleep(1)
                             del samples_ddim
                             print("memory_final = ", torch.cuda.memory_allocated() / 1e6)
-
-            toc = time.time()
-
-            time_taken = (toc - tic) / 60.0
-
-            print(
-                (
-                        "Samples finished in {0:.2f} minutes and exported to "
-                        + sample_path
-                        + "\n Seeds used = "
-                        + seeds[:-1]
-                ).format(time_taken)
-            )
             back = [{
                 "image": img,
                 "text": prompt,
