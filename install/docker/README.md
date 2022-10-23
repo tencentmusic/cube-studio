@@ -128,7 +128,7 @@ docker-compose -f docker-compose.yml  up
 ```
 
 ## Q&A
-如果构建镜像过程中因为网络问题失败，可以通过新增pip国内镜像地址来解决。
+1） 如果构建镜像过程中因为网络问题失败，可以通过新增pip国内镜像地址来解决。
 
 在cube-studio/install/docker中新建pip.conf，输入以下内容: 
 ```
@@ -145,6 +145,14 @@ trusted-host=mirrors.aliyun.com pypi.tuna.tsinghua.edu.cn
 COPY install/docker/pip.conf /root/.pip/pip.conf
 ```
 
+2） 如果前端安装依赖失败，可以通过新增npm国内镜像来解决
 
+npm配置镜像命令
+```
+npm config set registry https://registry.npmmirror.com
+```
 
-
+yarn配置镜像命令
+```
+yarn config set registry https://registry.npmmirror.com
+```
