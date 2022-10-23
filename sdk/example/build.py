@@ -8,7 +8,7 @@ print('docker push ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6')
 import os,sys,time,json,shutil
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
-        if app_name in ['__pycache__']:
+        if app_name in ['__pycache__','app1']:
             continue
 
         app_name=app_name.lower()

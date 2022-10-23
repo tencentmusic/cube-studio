@@ -8,8 +8,24 @@ import logging
 from ..util import py_shell
 import enum
 import os, sys
-Field_type = enum.Enum('Field_type', ('json','str','text', 'image', 'video', 'stream', 'text_select', 'image_select', 'text_multi', 'image_multi'))
+Field_type = enum.Enum('Field_type', ('int','double','json','str','text','text_multi', 'image','image_multi', 'video','video_multi', 'stream', 'text_select','text_select_multi', 'image_select',  'image_select_multi'))
 
+class Validator():
+    def __init__(self,type,regex='',min=-1,max=-1):
+        self.type=type   # Regexp Length  DataRequired
+        self.regex = regex
+        self.min=min
+        self.max=max
+
+    def to_json(self):
+        return {
+            "type": str(self.type),
+            "regex": self.regex,
+            "min": self.min,
+            "max": self.max
+        }
+
+        pass
 class Field():
     def __init__(self,type:Field_type,name:str,label:str,describe='',choices=[],default='',validators=[]):
         self.type=type
@@ -18,7 +34,11 @@ class Field():
         self.describe=describe
         self.choices=choices
         self.default=default
-        self.validators=validators
+        if validators is list:
+            self.validators=[validators]
+        else:
+            self.validators = validators
+
 
     def to_json(self):
         return {
@@ -28,7 +48,7 @@ class Field():
             "describe":self.describe,
             "choices":self.choices,
             "default":self.default,
-            "validators":self.validators
+            "validators":[validator.to_json() for validator in self.validators]
         }
 
 

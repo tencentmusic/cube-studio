@@ -2,7 +2,7 @@ import base64
 import io,sys,os
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
-from cubestudio.aihub.web.server import Server,Field,Field_type
+from cubestudio.aihub.web.server import Server,Field,Field_type,Validator
 
 import pysnooper
 import os
@@ -23,19 +23,25 @@ class APP1_Model(Model):
 
     inference_inputs = [
         Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',
-              describe='arg1的详细说明，用于在界面展示',default='这里是默认值'),
+              describe='arg1的详细说明，用于在界面展示',default='这里是默认值',validators=[Validator(type='Regexp',regex='[a-z]*')]),
         Field(type=Field_type.image, name='arg2', label='推理函数的输入参数arg2',
-              describe='arg2的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址'),
+              describe='arg2的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址',validators=[Validator(type='Length',max=2),Validator(type="DataRequired")]),
         Field(type=Field_type.video, name='arg3', label='推理函数的输入参数arg3',
               describe='arg3的详细说明，用于在界面展示,传递到推理函数中将是视频本地地址'),
-        Field(type=Field_type.text_select, name='arg4', label='推理函数的输入参数arg4',
-              describe='arg4的详细说明，用于在界面展示,单选组件',choices=['choice1','choice2','choice3'],default='choice2'),
-        Field(type=Field_type.image_select, name='arg5', label='推理函数的输入参数arg5',
-              describe='arg5的详细说明，用于在界面展示,多选组件', choices=['风格1.jpg', '风格2.jpg'], default='风格2.jpg'),
-        Field(type=Field_type.text_multi, name='arg6', label='推理函数的输入参数arg6',
-              describe='arg6的详细说明，用于在界面展示,多选组件', choices=['choice1', 'choice2', 'choice3'], default=['choice1']),
-        Field(type=Field_type.image_multi, name='arg7', label='推理函数的输入参数arg7',
-              describe='arg7的详细说明，用于在界面展示,多选组件', choices=['风格1.jpg', '风格2.jpg'], default=['风格2.jpg','风格2.jpg'])
+        Field(type=Field_type.image_multi, name='arg4', label='推理函数的输入参数arg4',
+              describe='arg4的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址'),
+        Field(type=Field_type.video_multi, name='arg5', label='推理函数的输入参数arg5',
+              describe='arg5的详细说明，用于在界面展示,传递到推理函数中将是视频本地地址'),
+
+        Field(type=Field_type.text_select, name='arg6', label='推理函数的输入参数arg6',
+              describe='arg6的详细说明，用于在界面展示,单选组件',choices=['choice1','choice2','choice3'],default='choice2'),
+        Field(type=Field_type.image_select, name='arg7', label='推理函数的输入参数arg7',
+              describe='arg7的详细说明，用于在界面展示,多选组件', choices=['风格1.jpg', '风格2.jpg'], default='风格2.jpg'),
+        Field(type=Field_type.text_select_multi, name='arg8', label='推理函数的输入参数arg8',
+              describe='arg8的详细说明，用于在界面展示,多选组件', choices=['choice1', 'choice2', 'choice3'], default=['choice1']),
+        Field(type=Field_type.image_select_multi, name='arg9', label='推理函数的输入参数arg9',
+              describe='arg9的详细说明，用于在界面展示,多选组件', choices=['风格1.jpg', '风格2.jpg'], default=['风格2.jpg','风格2.jpg'],
+              validators=[Validator(type='Length',max=2)])
     ]
 
     # 加载模型

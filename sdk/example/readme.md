@@ -12,7 +12,7 @@
 ccr.ccs.tencentyun.com/cube-studio/aihub:base 为conda，python3.9环境
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
 ```bash
-cd app1
+# 进入模型应用
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
