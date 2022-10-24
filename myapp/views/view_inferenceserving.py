@@ -741,7 +741,7 @@ output %s
     def deploy(self,service_id,env='prod'):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         namespace = conf.get('SERVICE_NAMESPACE','service')
-        name =  service.name
+        name = service.name
         command = service.command
         deployment_replicas = service.min_replicas
         if env=='debug':
@@ -901,8 +901,10 @@ output %s
         # 使用项目组ip
         if service.project.expand:
             ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
-            if ip and type(SERVICE_EXTERNAL_IP)==str:
+            if ip and type(ip) == str:
                 SERVICE_EXTERNAL_IP = [ip]
+            if ip and type(ip) == list:
+                SERVICE_EXTERNAL_IP = ip
 
         # 使用全局ip
         if not SERVICE_EXTERNAL_IP:
