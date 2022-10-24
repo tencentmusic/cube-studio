@@ -948,8 +948,11 @@ class Pipeline_ModelView_Base():
     def run_pipeline(self,pipeline_id):
         print(pipeline_id)
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
-
         pipeline.delete_old_task()
+        tasks = db.session.query(Task).filter_by(pipeline_id=pipeline_id).all()
+        if not tasks:
+            flash('no task', 'warning')
+            return redirect('/pipeline_modelview/web/%s' % pipeline.id)
 
         time.sleep(1)
         back_crds = pipeline.get_workflow()
