@@ -163,6 +163,16 @@ class Server():
             print(data)
             return render_template('vision.html', data=data)
 
+        # 监控度量
+        @app.route(f'/{self.pre_url}/metrics')
+        def metrics():
+            return jsonify(user_history)
+
+        # 健康检查
+        @app.route(f'/{self.pre_url}/health')
+        def health():
+            return 'ok'
+
         @app.route(f'/{self.pre_url}/info')
         def info():
             # example中图片转为在线地址

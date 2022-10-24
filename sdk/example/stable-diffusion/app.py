@@ -25,6 +25,12 @@ class SD_Model(Model):
     pic='https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     # 运行基础环境脚本
     init_shell='init.sh'
+    # 需要在资源环境
+    inference={
+        "resource_memory":"0",
+        "resource_cpu":"0",
+        "resource_gpu":"1"
+    }
 
     inference_inputs = [
         Field(type=Field_type.text, name='image_describe', label='文字描述',

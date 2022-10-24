@@ -74,9 +74,37 @@ class Model():
     init_shell=''
     base_images='ccr.ccs.tencentyun.com/cube-studio/aihub:base'
 
-    # 训练的输入
-    train_inputs=[]
-    inference_inputs=[]
+    # notebook相关信息
+    notebook={
+        "jupyter": [],
+        "appendix": []
+    }
+
+    # 训练相关
+    train_inputs=[
+        # Field
+    ]
+    train_resource={
+        "resource_memory":"0",
+        "resource_cpu":"0",
+        "resource_gpu":"0"
+    }
+    train_env={
+        "APP_NAME":name
+    }
+
+    # 推理相关
+    inference_inputs=[
+        # Field
+    ]
+    inference_resource={
+        "resource_memory":"0",
+        "resource_cpu":"0",
+        "resource_gpu":"0"
+    }
+    inference_env={
+        "APP_NAME":name
+    }
 
     def __init__(self,init_shell=True):
         print('begin init shell')

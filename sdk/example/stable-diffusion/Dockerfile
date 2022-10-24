@@ -1,6 +1,6 @@
 
 # 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion  .
-FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
+FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.8
 # 安装基础环境
 WORKDIR /
 COPY init.sh /init.sh

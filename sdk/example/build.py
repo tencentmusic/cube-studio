@@ -5,6 +5,8 @@ print('docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base  -f Dockerf
 print('docker push ccr.ccs.tencentyun.com/cube-studio/aihub:base')
 print('docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6  -f Dockerfile-python3.6 .')
 print('docker push ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6')
+print('docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.8  -f Dockerfile-cuda11.8 .')
+print('docker push ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.8')
 import os,sys,time,json,shutil
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
