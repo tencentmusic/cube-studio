@@ -2,30 +2,57 @@ FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base
 
 MAINTAINER hamawhite
 
+ARG SPARK_HADOOP_VERSION=3.2
+ARG SPARK_VERSION=3.1.3
+ARG FLINK_VERSION=1.15.1
+ARG MAVEN_VERSION=3.8.6
+ARG APACHE_MIRROR=http://dlcdn.apache.org
+ARG JDK_VERSION=8
+ARG PYPI_MIRROR=mirrors.aliyun.com
+ARG PIPI_MIRROR_ENABLE=false
+ARG UBUNTU_MIRROR=mirrors.ustc.edu.cn
+ARG UBUNTU_MIRROR_ENABLE=false
 
-RUN apt-get update && apt install -y lsof
+RUN if [ "${UBUNTU_MIRROR_ENABLE}" = "true" ]; then \
+        cp /etc/apt/sources.list /etc/apt/sources.list.ori && \
+        sed -i s@/archive.ubuntu.com/@/${UBUNTU_MIRROR}/@g /etc/apt/sources.list && \
+        sed -i s@/security.ubuntu.com/@/${UBUNTU_MIRROR}/@g /etc/apt/sources.list && \
+        apt clean && apt -y update; \
+    fi
+
+RUN apt install -y lsof
+
+# pip 镜像
+RUN mkdir ~/.pip
+RUN if [ "${PIPI_MIRROR_ENABLE}" = "true" ]; then \
+        echo "use pip mirror";\
+        pip config set global.index-url https://${PYPI_MIRROR}/pypi/simple/; \
+        pip config set install.trusted-host ${PYPI_MIRROR}; \
+    else \
+        echo "use default pip mirror";\
+    fi
 
 # 下载apache spark安装包
 RUN mkdir -p /opt/third && cd /opt/third \
-    && wget http://dlcdn.apache.org/spark/spark-3.1.3/spark-3.1.3-bin-hadoop3.2.tgz \
-    && tar -xvzf spark-3.1.3-bin-hadoop3.2.tgz \
-    && ln -s spark-3.1.3-bin-hadoop3.2 spark \
-    && rm -rf spark-3.1.3-bin-hadoop3.2.tgz \
+    && wget ${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}.tgz \
+    && tar -xvzf spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}.tgz \
+    && ln -s spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION} spark \
+    && rm -rf spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}.tgz \
 #   创建spark-defaults.conf
     && cd /opt/third/spark/conf \
     && mv spark-defaults.conf.template spark-defaults.conf \
 #   安装pyflink
-    && pip install apache-flink==1.15.1 \
-    && pip install pyspark==3.1.3 \
+    && pip install apache-flink==${FLINK_VERSION}\
+    && pip install pyspark==${SPARK_VERSION}\
 #   安装JDK8
     && rm -rf /usr/lib/jvm/ \
-    && apt-get install -y openjdk-8-jdk \
+    && apt-get install -y openjdk-${JDK_VERSION}-jdk \
 #   安装maven
     && cd /opt/third \
-    && wget http://dlcdn.apache.org/maven/maven-3/3.8.6/binaries/apache-maven-3.8.6-bin.tar.gz \
-    && tar -xvzf apache-maven-3.8.6-bin.tar.gz \
-    && ln -s apache-maven-3.8.6 maven \
-    && rm -rf apache-maven-3.8.6-bin.tar.gz
+    && wget ${APACHE_MIRROR}/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz\
+    && tar -xvzf apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+    && ln -s apache-maven-${MAVEN_VERSION} maven \
+    && rm -rf apache-maven-${MAVEN_VERSION}-bin.tar.gz
 
 # 安装大数据python包
 # 爬虫包
@@ -42,7 +69,10 @@ RUN pip install numpy pandas sklearn wheel SciPy pyarrow Pillow PyML MDP Theano 
 
 # 可视化包
 RUN pip install matplotlib pyecharts \
-    && rm -rf /tmp/* /var/tmp/* /root/.cache
+    && rm -rf /tmp/* /var/tmp/* /root/.cache \
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # 拷贝examples
 COPY examples/* /examples/
