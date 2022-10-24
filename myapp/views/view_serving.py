@@ -70,7 +70,7 @@ class Service_ModelView_base():
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
-
+    host_rule = ",".join([cluster + "集群:*." + conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", '') for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", '')])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
@@ -90,9 +90,7 @@ class Service_ModelView_base():
         "replicas": StringField(_(datamodel.obj.lab('replicas')), default=Service.replicas.default.arg,description='pod副本数，用来配置高可用',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "ports": StringField(_(datamodel.obj.lab('ports')), default=Service.ports.default.arg,description='进程端口号，逗号分隔',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "env": StringField(_(datamodel.obj.lab('env')), default=Service.env.default.arg, description='使用模板的task自动添加的环境变量，支持模板变量。书写格式:每行一个环境变量env_key=env_value',widget=MyBS3TextAreaFieldWidget()),
-        "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,
-                           description='访问域名，http://xx.service.%s'%conf.get('ISTIO_INGRESS_DOMAIN',''),
-                           widget=BS3TextFieldWidget()),
+        "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,description='访问域名，' + host_rule, widget=BS3TextFieldWidget()),
     }
 
     gpu_type = conf.get('GPU_TYPE')
