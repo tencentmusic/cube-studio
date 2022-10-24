@@ -121,7 +121,7 @@ class Server():
                 if type(all_back)!=list:
                     all_back=[all_back]
                 for back in all_back:
-                    # 如果是图片，写不是http
+                    # 如果是图片，写的不是http
                     if back.get('image',''):
                         save_file_path = back['image']
                         if os.path.exists(save_file_path):
@@ -130,11 +130,17 @@ class Server():
                             base64_data = base64.b64encode(image_data)  # base64编码
                             back['image'] = str(base64_data,encoding='utf-8')
 
-                    # 如果是视频，写不是http
+                    # 如果是视频，写的不是http
                     if back.get('video',''):
                         save_file_path = back['video']
                         if os.path.exists(save_file_path):
                             back['video']=file2url(save_file_path)
+
+                    # 如果是语音，写的不是http
+                    if back.get('audio',''):
+                        save_file_path = back['audio']
+                        if os.path.exists(save_file_path):
+                            back['audio']=file2url(save_file_path)
 
                 return jsonify({
                     "status": 0,
@@ -182,9 +188,9 @@ class Server():
                         if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name) and 'http' not in example[arg_filed.name]:
                             example[arg_filed.name]=file2url(example[arg_filed.name])
 
-            # 将图片和视频的可选值和默认值，都转为在线网址
+            # 将图片和语音/视频的可选值和默认值，都转为在线网址
             for input in self.model.inference_inputs:
-                if 'image' in input.type.name or 'video' in input.type.name:
+                if 'image' in input.type.name or 'video' in input.type.name or 'audio' in input.type.name:
                     # 对于单选
                     if '_select_multi' not in input.type.name and input.default and 'http' not in input.default:
                         input.default = file2url(input.default)

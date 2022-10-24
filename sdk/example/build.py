@@ -82,7 +82,7 @@ spec:
         '''
         save_path = app_name+"/deploy.yaml"
         # print(save_path)
-        file = open(save_path,mode='w')
-        file.write(deploy)
-        file.close()
+        # file = open(save_path,mode='w')
+        # file.write(deploy)
+        # file.close()
 

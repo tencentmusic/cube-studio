@@ -13,7 +13,7 @@ spec:
     port:
       name: http3
       number: 8080
-      protocol: HTTP
+      protocol: TCP
 ---
 # 添加代理8080端口的gateway，需要在istio-ingressgateway 的相关配置中打开8080端口
 apiVersion: networking.istio.io/v1alpha3
@@ -30,7 +30,7 @@ spec:
     port:
       name: http3
       number: 8080
-      protocol: HTTP
+      protocol: TCP
 
 
 

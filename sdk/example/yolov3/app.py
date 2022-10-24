@@ -59,7 +59,7 @@ class Yolov3_Model(Model):
         }]
         return back
 
-model=Yolov3_Model(init_shell=False)
+model=Yolov3_Model()
 model.load_model()
 result = model.inference(img_file_path='test.jpg')  # 测试
 print(result)

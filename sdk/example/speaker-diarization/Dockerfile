@@ -1,5 +1,5 @@
 
-# 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:app1  .
+# 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:speaker-diarization  .
 FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
 # 安装基础环境
 WORKDIR /

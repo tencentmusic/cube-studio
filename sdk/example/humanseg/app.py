@@ -69,7 +69,7 @@ class HumanSeg_Model(Model):
         ]
         return back
 
-model=HumanSeg_Model(init_shell=False)
+model=HumanSeg_Model()
 model.load_model()
 result = model.inference(background='/data/images/bg_2.jpg',human_video='/data/videos/video_heng.mp4')  # 测试
 print(result)

@@ -8,7 +8,7 @@ import logging
 from ..util import py_shell
 import enum
 import os, sys
-Field_type = enum.Enum('Field_type', ('int','double','json','str','text','text_multi', 'image','image_multi', 'video','video_multi', 'stream', 'text_select','text_select_multi', 'image_select',  'image_select_multi'))
+Field_type = enum.Enum('Field_type', ('int','double','json','str','text','text_multi', 'image','image_multi', 'audio','audio_multi', 'video','video_multi', 'stream', 'text_select','text_select_multi', 'image_select',  'image_select_multi'))
 
 class Validator():
     def __init__(self,type,regex='',min=-1,max=-1):
@@ -106,9 +106,9 @@ class Model():
         "APP_NAME":name
     }
 
-    def __init__(self,init_shell=True):
-        print('begin init shell')
+    def __init__(self,init_shell=False):
         if init_shell and self.init_shell:
+            print('begin init shell')
             py_shell.exec('bash %s'%self.init_shell)
 
     # 配置数据集，在分布式训练时自动进行分配

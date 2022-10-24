@@ -71,7 +71,7 @@ class Panoptic_Model(Model):
         }]
         return back
 
-model=Panoptic_Model(init_shell=False)
+model=Panoptic_Model()
 model.load_model()
 result = model.inference(img_file_path='test.jpg')  # 测试
 print(result)

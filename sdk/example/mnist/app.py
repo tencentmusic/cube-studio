@@ -89,7 +89,7 @@ class Mnist_Model(Model):
         return back
 
 # 训练
-model=Mnist_Model(init_shell=False)
+model=Mnist_Model()
 model.train(modelpath='/model/',datapath='')
 
 # 离线推理

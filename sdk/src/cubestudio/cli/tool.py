@@ -61,7 +61,7 @@ class {app_name}_Model(Model):
         }}]
         return back
 
-model={app_name}_Model(init_shell=False)
+model={app_name}_Model()
 model.load_model()
 result = model.inference(img_file_path='test.jpg')  # 测试
 print(result)

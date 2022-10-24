@@ -51,24 +51,29 @@ class APP1_Model(Model):
     # 推理
     @pysnooper.snoop()
     def inference(self,arg1,arg2=None,arg3=None,arg4=None,arg5=None,arg6=None,arg7=None,**kwargs):
-
+        # save_path = os.path.join('result', os.path.basename(arg1))
+        # os.makedirs(os.path.dirname(save_path), exist_ok=True)
         result_img='result_img.jpg'
         result_text='cat,dog'
         result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
-        back=[{
-            "image":result_img,
-            "text":result_text,
-            "video":result_video
-        },
+        result_audio = 'test.wav'
+        back=[
+            {
+                "image":result_img,
+                "text":result_text,
+                "video":result_video,
+                "audio":result_audio
+            },
             {
                 "image": result_img,
                 "text": result_text,
-                "video": result_video
+                "video": result_video,
+                "audio": result_audio
             }
         ]
         return back
 
-model=APP1_Model(init_shell=False)
+model=APP1_Model()
 model.load_model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)

@@ -70,7 +70,7 @@ class Paddleocr_Model(Model):
             }]
             return back
 
-model=Paddleocr_Model(init_shell=False)
+model=Paddleocr_Model()
 model.load_model()
 result = model.inference(img_file_path='test.png')  # 测试
 print(result)

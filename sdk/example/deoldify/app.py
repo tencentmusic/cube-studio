@@ -49,7 +49,7 @@ class DeOldify_Model(Model):
         return back
 
 
-model=DeOldify_Model(init_shell=False)
+model=DeOldify_Model()
 model.load_model()
 result = model.inference(img_file_path='test.png')  # 测试
 print(result)

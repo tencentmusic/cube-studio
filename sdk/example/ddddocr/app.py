@@ -70,7 +70,7 @@ class DDDDOCR_Model(Model):
         }]
         return back
 
-model=DDDDOCR_Model(init_shell=False)
+model=DDDDOCR_Model()
 model.load_model()
 result = model.inference(img_file_path='test.png')  # 测试
 print(result)

@@ -90,7 +90,7 @@ class GFPGAN_Model(Model):
         }]
         return back
 
-model=GFPGAN_Model(init_shell=False)
+model=GFPGAN_Model()
 model.load_model()
 result = model.inference(img_file_path='test.png')  # 测试
 print(result)
