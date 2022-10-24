@@ -6,7 +6,7 @@ from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server,Field,Field_type
 import cv2
 import pysnooper
-from detectron2.config import get_cfg
+from  .config import get_cfg
 from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
 
@@ -49,10 +49,20 @@ class Detectron2_Model(Model):
 
     # 推理
     @pysnooper.snoop()
-    def inference(self,img_file_path):
-        img = cv2.imread(img_file_path)
-        out = self.predictor(img)
-        res = self.detector.detect(img_file_path)
+    def inference(self,video_human_path,video_background_path):
+        cap_bg = cv2.VideoCapture(video_background_path)
+        cap = cv2.VideoCapture(video_human_path)
+        while (1):
+            ret, frame_src = cap.read()
+            # 读取新背景视频
+            ret, frame_bg = cap_bg.read()
+            # 调整背景尺寸跟原视频一样
+            frame_bg = cv2.resize(frame_bg, sz)
+            # 分割原视频人物
+            person_mask = self.instance_seg.predict(frame_src)
+            # 合成
+            frame_bg[person_mask, :] = frame_src[person_mask, :]
+
 
         back=[{
             "image":out_image_path,

@@ -32,7 +32,6 @@ class APP1_Model(Model):
               describe='arg4的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址'),
         Field(type=Field_type.video_multi, name='arg5', label='推理函数的输入参数arg5',
               describe='arg5的详细说明，用于在界面展示,传递到推理函数中将是视频本地地址'),
-
         Field(type=Field_type.text_select, name='arg6', label='推理函数的输入参数arg6',
               describe='arg6的详细说明，用于在界面展示,单选组件',choices=['choice1','choice2','choice3'],default='choice2'),
         Field(type=Field_type.image_select, name='arg7', label='推理函数的输入参数arg7',

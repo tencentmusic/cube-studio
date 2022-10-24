@@ -56,8 +56,8 @@ class Server():
     def server(self,port=8080):
 
         app = Flask(__name__,
-                    static_url_path=f'/{self.pre_url}/static',
-                    static_folder='static',
+                    static_url_path=f'/frontend',
+                    static_folder='frontend',
                     template_folder='templates')
         app.config['SECRET_KEY'] = os.urandom(24)
         app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=7)
@@ -67,6 +67,7 @@ class Server():
             base_name = os.path.basename(file_path)
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + base_name
             if not os.path.exists(save_path):
+                os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copy(file_path, save_path)
             return request.host_url.strip('/') + f"/{self.pre_url}/static/example/" + base_name
 
@@ -97,8 +98,7 @@ class Server():
                     if input.type==Field_type.image and data.get(input.name,''):
                         image_decode = base64.b64decode(data[input.name])
                         image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ".jpg")
-                        if not os.path.exists(os.path.dirname(image_path)):
-                            os.makedirs(os.path.dirname(image_path))
+                        os.makedirs(os.path.dirname(image_path),exist_ok=True)
                         nparr = np.fromstring(image_decode, np.uint8)
                         # 从nparr中读取数据，并把数据转换(解码)成图像格式
                         img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -113,8 +113,7 @@ class Server():
 
                         file_name = file.filename
                         file_path = os.path.join("upload", self.model.name, self.model.version,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S-')+ file_name)
-                        if not os.path.exists(os.path.dirname(file_path)):
-                            os.makedirs(os.path.dirname(file_path))
+                        os.makedirs(os.path.dirname(file_path),exist_ok=True)
                         file.save(file_path)  # 保存文件
                         inference_kargs[input.name] = file_path
 
@@ -148,8 +147,10 @@ class Server():
                 logging.info('Uploaded image open error: %s', err)
                 return jsonify(val='Cannot open uploaded image.')
 
+        @app.route('/')
         @app.route(f'/{self.pre_url}')
         def home():
+            return redirect('/frontend/index.html#/frontend')
             data = {
                 "name": self.model.name,
                 "label": self.model.label,
@@ -282,42 +283,43 @@ class Server():
                 return redirect(login_url)
             else:
                 return redirect(oa_auth_url % (str(appkey),))
-        #
-        # @app.before_request
-        # def check_login():
-        #     req_url = request.path
-        #     # 只对后端接口
-        #     if '/static' not in req_url:
-        #         username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
-        #         session['username']=username
-        #
-        #         num = user_history.get(username, {}).get(req_url, 0)
-        #         # 匿名用户对后端的请求次数超过1次就需要登录
-        #         if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
-        #             return jsonify({
-        #                 "status": 1,
-        #                 "result": {},
-        #                 "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
-        #             })
-        #
-        #         if num > 10 and self.pre_url in req_url:
-        #             return jsonify({
-        #                 "status": 2,
-        #                 "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
-        #                 "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
-        #             })
-        #
-        # # 配置影响后操作
-        # @app.after_request
-        # def apply_http_headers(response):
-        #     req_url = request.path
-        #     if '/static' not in req_url:
-        #         username = session['username']
-        #         user_history[username] = {
-        #             req_url: user_history.get(username, {}).get(req_url, 0) + 1
-        #         }
-        #         print(user_history)
-        #     return response
+
+        @app.before_request
+        def check_login():
+            req_url = request.path
+            print(req_url)
+            # 只对后端接口
+            if '/frontend' not in req_url:
+                username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
+                session['username']=username
+
+                num = user_history.get(username, {}).get(req_url, 0)
+                # 匿名用户对后端的请求次数超过1次就需要登录
+                # if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
+                #     return jsonify({
+                #         "status": 1,
+                #         "result": {},
+                #         "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
+                #     })
+                #
+                # if num > 10 and self.pre_url in req_url:
+                #     return jsonify({
+                #         "status": 2,
+                #         "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
+                #         "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
+                #     })
+
+        # 配置影响后操作
+        @app.after_request
+        def apply_http_headers(response):
+            req_url = request.path
+            if '/frontend' not in req_url:
+                username = session['username']
+                user_history[username] = {
+                    req_url: user_history.get(username, {}).get(req_url, 0) + 1
+                }
+                print(user_history)
+            return response
 
         app.run(host='0.0.0.0', debug=True, port=port)
 
