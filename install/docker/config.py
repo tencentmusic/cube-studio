@@ -806,9 +806,7 @@ K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
 
 PIPELINE_URL = '/pipeline/#/'
 
-# 这两部分功能需要泛化域名。没有泛化域名此部分功能受限。ISTIO_INGRESS_DOMAIN为泛域名后缀
-ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用
-SERVICE_DOMAIN = 'service.%s' % ISTIO_INGRESS_DOMAIN
+
 
 # 多行分割内网特定host
 HOSTALIASES='''
@@ -924,6 +922,8 @@ CLUSTERS={
         "PIPELINE_URL": '/pipeline/#/',
         # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
+        "SERVICE_DOMAIN": 'service.local.com',
+        "GRAFANA_HOST": ''
     }
 }
 

@@ -8,6 +8,7 @@ kubectl label node $node train=true cpu=true notebook=true service=true org=publ
 
 # 创建命名空间
 sh create_ns_secret.sh
+kubectl apply -f sa-rbac.yaml
 # 部署dashboard
 kubectl apply -f dashboard/v2.2.0-cluster.yaml
 # 部署mysql
@@ -113,6 +114,13 @@ kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 kubectl apply -f istio/install-crd.yaml
 kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --timeout=60s
 kubectl apply -f istio/install.yaml
+
+kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s
+kubectl wait crd/gateways.networking.istio.io --for condition=established --timeout=60s
+
+kubectl apply -f gateway.yaml
+kubectl apply -f virtual.yaml
+
 # k8s 1.21+
 # kubectl delete -f istio/install.yaml
 # kubectl apply -f istio/install-1.15.0.yaml
@@ -158,14 +166,6 @@ kubectl create -f pv-pvc-service.yaml
 
 kubectl delete -k cube/overlays
 kubectl apply -k cube/overlays
-
-kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s
-kubectl wait crd/gateways.networking.istio.io --for condition=established --timeout=60s
-
-kubectl apply -f gateway.yaml
-kubectl apply -f sa-rbac.yaml
-kubectl apply -f virtual.yaml
-
 
 # 配置入口
 #ip=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1`
