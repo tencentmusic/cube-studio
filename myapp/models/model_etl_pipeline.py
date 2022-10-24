@@ -6,7 +6,7 @@ from myapp.models.helpers import AuditMixinNullable
 
 from myapp import app
 from myapp.models.helpers import ImportMixin
-
+from myapp.models.model_team import Project
 from sqlalchemy import Column, Integer, String, ForeignKey
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
