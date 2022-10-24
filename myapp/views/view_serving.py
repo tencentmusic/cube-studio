@@ -190,7 +190,7 @@ class Service_ModelView_base():
             selector=labels
         )
         # 如果域名配置的gateway，就用这个
-        host = service.name+"."+conf.get('SERVICE_DOMAIN')
+        host = service.name+"."+service.project.cluster.get('SERVICE_DOMAIN','')
         if service.host:
             host=service.host.replace('http://','').replace('https://','').strip()
             if "/" in host:

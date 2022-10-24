@@ -80,7 +80,6 @@ class Server():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
-
         self.model.load_model()
 
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
@@ -147,21 +146,21 @@ class Server():
                 logging.info('Uploaded image open error: %s', err)
                 return jsonify(val='Cannot open uploaded image.')
 
-        @app.route('/')
-        @app.route(f'/{self.pre_url}')
-        def home():
-            return redirect('/frontend/index.html#/frontend')
-            data = {
-                "name": self.model.name,
-                "label": self.model.label,
-                "describe": self.model.describe,
-                "doc": self.model.doc,
-                "pic":self.model.pic,
-                "input":self.model.inference_inputs,
-                "example":self.web_examples
-            }
-            print(data)
-            return render_template('vision.html', data=data)
+        # @app.route('/')
+        # @app.route(f'/{self.pre_url}')
+        # def home():
+        #     return redirect('/frontend/index.html#/frontend')
+        #     data = {
+        #         "name": self.model.name,
+        #         "label": self.model.label,
+        #         "describe": self.model.describe,
+        #         "doc": self.model.doc,
+        #         "pic":self.model.pic,
+        #         "input":self.model.inference_inputs,
+        #         "example":self.web_examples
+        #     }
+        #     print(data)
+        #     return render_template('vision.html', data=data)
 
         # 监控度量
         @app.route(f'/{self.pre_url}/metrics')
