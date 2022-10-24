@@ -1,6 +1,6 @@
 # docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base  -f Dockerfile .
 
-#FROM nvidia/cuda:11.8.0-runtime-ubuntu20.04
+#FROM nvidia/cuda:11.4.0-runtime-ubuntu20.04
 FROM ubuntu:20.04
 
 RUN apt update
