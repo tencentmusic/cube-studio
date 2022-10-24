@@ -12,5 +12,3 @@ WORKDIR /app
 COPY * /app/
 
 ENTRYPOINT ["python", "app.py"]
-
-# docker run --name yolov3 --rm --privileged -it -v $PWD:/app -p 8080:8080 --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:yolov3

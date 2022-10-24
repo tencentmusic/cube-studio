@@ -5,6 +5,7 @@ from sqlalchemy import (
     Text
 )
 from myapp.models.base import MyappModelBase
+from myapp.models.model_team import Project
 from myapp.models.helpers import AuditMixinNullable
 from myapp import app
 from sqlalchemy import Column, Integer, String, ForeignKey

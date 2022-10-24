@@ -42,7 +42,7 @@ class SD_Model(Model):
         model_id = "CompVis/stable-diffusion-v1-4"
         self.device = 'cpu'  #cuda
 
-        self.pipe = StableDiffusionPipeline.from_pretrained(model_id, use_auth_token=True)
+        self.pipe = StableDiffusionPipeline.from_pretrained(model_id, use_auth_token=True,torch_dtype=torch.float16, revision="fp16")
         self.pipe = self.pipe.to(self.device)
 
     # 推理

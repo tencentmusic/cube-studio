@@ -13,7 +13,7 @@ from myapp.models.helpers import AuditMixinNullable
 
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
-
+from myapp.models.model_team import Project
 
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from flask_appbuilder.models.decorators import renders

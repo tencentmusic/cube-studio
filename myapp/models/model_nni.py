@@ -6,6 +6,7 @@ from sqlalchemy import (
     Enum,
 )
 from myapp.models.base import MyappModelBase
+from myapp.models.model_team import Project
 from myapp.models.helpers import AuditMixinNullable
 from flask import request
 from myapp import app
