@@ -51,29 +51,12 @@
 
  - 朴素贝叶斯、贝叶斯网络、EM、MCMC、最大熵、CRF、HMM
 
-## 深度学习
-
-DNN
-
- - MLP、BP
-
-CNN
-
- - 分类、检测、分割
-
-...
-
-RNN
-
- - LSTM、Transformer、Attention、Bert、XLNet
-
-...
-
-GNN
-
-...
 
 # 机器视觉
+
+<img width="1614" alt="image" src="https://user-images.githubusercontent.com/20157705/195548970-62222889-c4d5-44c7-9a76-18543d049b84.png">
+
+## 深度学习
 
 ## 图像分类
 

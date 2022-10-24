@@ -349,7 +349,6 @@ class MyappModelRestApi(ModelRestApi):
             Init Properties
         """
         super(MyappModelRestApi, self)._init_properties()
-
         # 初始化action自耦段
         self.actions = {}
         for attr_name in dir(self):
