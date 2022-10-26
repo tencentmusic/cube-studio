@@ -1,7 +1,7 @@
 
 """Utility functions used across Myapp"""
 import pysnooper
-from datetime import datetime
+import datetime
 import time
 from myapp.utils.py.py_k8s import K8s
 from myapp.utils.celery import session_scope
