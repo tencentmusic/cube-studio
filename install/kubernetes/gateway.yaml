@@ -11,9 +11,9 @@ spec:
   - hosts:
     - '*'
     port:
-      name: http2
-      number: 8080
-      protocol: HTTP   # HTTP协议在第一个创建时就有端口(80端口可能受限)开启，第二个会vs才启动，TCP 协议需要vs tcp match 端口后才会开启
+      name: http2     # 服务的端口
+      number: 8888
+      protocol: HTTP   # HTTP协议在第一个创建时就有端口(80端口可能受限)开启，第二个会vs才启动，
 ---
 # 添加代理8080端口的gateway，需要在istio-ingressgateway 的相关配置中打开8080端口
 apiVersion: networking.istio.io/v1alpha3
@@ -29,8 +29,8 @@ spec:
     - '*'
     port:
       name: http3
-      number: 8081
-      protocol: HTTP
+      number: 8889
+      protocol: HTTP   # TCP 协议需要vs tcp match 端口后才会开启
 
 
 
