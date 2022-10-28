@@ -114,6 +114,9 @@ kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 kubectl apply -f istio/install-crd.yaml
 kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --timeout=60s
 kubectl apply -f istio/install.yaml
+# k8s 1.21+
+# kubectl delete -f istio/install.yaml
+# kubectl apply -f istio/install-1.15.0.yaml
 
 kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s
 kubectl wait crd/gateways.networking.istio.io --for condition=established --timeout=60s
@@ -121,14 +124,13 @@ kubectl wait crd/gateways.networking.istio.io --for condition=established --time
 kubectl apply -f gateway.yaml
 kubectl apply -f virtual.yaml
 
-# k8s 1.21+
-# kubectl delete -f istio/install.yaml
-# kubectl apply -f istio/install-1.15.0.yaml
+
 
 # 部署kfp pipeline
 kubectl apply -f kubeflow/sa-rbac.yaml
 kubectl create -f kubeflow/pipeline/minio-pv-hostpath.yaml
 kubectl apply -f kubeflow/pipeline/minio-artifact-secret.yaml
+sleep 5
 kubectl apply -f kubeflow/pipeline/pipeline-runner-rolebinding.yaml
 
 cd kubeflow/pipeline/1.6.0/kustomize/

@@ -8,15 +8,15 @@ services:
     ports:
       - "6379:6379"
 
-#  mysql:
-#    image: mysql:5.7
-#    restart: always
-#    environment:
-#      MYSQL_ROOT_PASSWORD: admin
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - ./data/mysql:/var/lib/mysql
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
 
   frontend:
     image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2022.09.01
@@ -37,14 +37,14 @@ services:
       REDIS_HOST: 'host.docker.internal'
       REDIS_PORT: '6379'
       REDIS_PASSWORD: admin
-      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
+      MYSQL_SERVICE: 'mysql+pymysql://root:admin@mysql:3306/kubeflow?charset=utf8'
       ENVIRONMENT: DEV
       GPU_TYPE: NVIDIA
 #    ports:
 #      - "8080:80"
     depends_on:
       - redis
-#      - mysql
+      - mysql
     volumes:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../myapp/:/home/myapp/myapp/

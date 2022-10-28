@@ -6,14 +6,13 @@ metadata:
   namespace: kubeflow
 spec:
   selector:
-    istio: ingressgateway
+    istio: ingressgateway         # pod的label
   servers:
   - hosts:
     - '*'
     port:
-      name: http3
-      number: 8080
-      protocol: HTTP
+      number: 80        # svc服务的外部端口，会对应在ingressgateway的容器内启动svc的目标端口，但无法启动80和443内部端口，所以要先修改svc的目标端口，再创建gateway
+      protocol: HTTP   # HTTP协议在第一个创建时就有端口(80端口可能受限)开启，第二个会vs才启动，
 ---
 # 添加代理8080端口的gateway，需要在istio-ingressgateway 的相关配置中打开8080端口
 apiVersion: networking.istio.io/v1alpha3
@@ -28,9 +27,8 @@ spec:
   - hosts:
     - '*'
     port:
-      name: http3
       number: 8080
-      protocol: HTTP
+      protocol: HTTP       # TCP 协议需要vs tcp match 端口后才会开启
 
 
 

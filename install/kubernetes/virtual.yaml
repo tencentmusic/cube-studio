@@ -72,24 +72,7 @@ spec:
       - GET
       allowHeaders:
       - "*"
-  - match:
-    - uri:
-        prefix: /argo/
-    rewrite:
-      uri: /
-    route:
-    - destination:
-        host: argo-ui.kubeflow.svc.cluster.local
-        port:
-          number: 80
-    corsPolicy:
-      allowOrigin:
-      - "*"
-      allowMethods:
-      - POST
-      - GET
-      allowHeaders:
-      - "*"
+
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -112,28 +95,7 @@ spec:
         host: kubernetes-dashboard-cluster.kube-system.svc.cluster.local
         port:
           number: 9090
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: kube-system-k8s-dashboard-user1
-  namespace: kube-system
-spec:
-  gateways:
-  - kubeflow/kubeflow-gateway
-  hosts:
-  - "*"   # 配置自己管理的域名 kubeflow.local.com
-  http:
-  - match:
-    - uri:
-        prefix: /k8s/dashboard/pipeline/
-    rewrite:
-      uri: /
-    route:
-    - destination:
-        host: kubernetes-dashboard-user1.kube-system.svc.cluster.local
-        port:
-          number: 9090
+
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService

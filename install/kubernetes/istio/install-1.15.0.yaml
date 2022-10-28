@@ -9719,11 +9719,11 @@ spec:
     - name: http2
       port: 80
       protocol: TCP
-      targetPort: 8080
+      targetPort: 8888
     - name: http3
       port: 8080
       protocol: TCP
-      targetPort: 8080
+      targetPort: 8889
 #    - name: https
 #      port: 443
 #      protocol: TCP
