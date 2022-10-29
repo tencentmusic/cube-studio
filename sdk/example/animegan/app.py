@@ -6,12 +6,18 @@ from cubestudio.aihub.web.server import Server,Field,Field_type,Validator
 
 import pysnooper
 import os
+import os
+import cv2
+import gradio as gr
+import AnimeGANv3_src
 
-class AnimeGAN_Model(Model):
+
+
+class AnimeGANv3_Model(Model):
     # 模型基础信息定义
     name='animegan'
     label='动漫风格化'
-    description="图片的全新动漫风格化，宫崎骏"
+    description="图片的全新动漫风格化，宫崎骏或新海诚风格的动漫，以及4种关于人脸的风格转换。"
     field="机器视觉"
     scenes="图像合成"
     status='online'
@@ -22,51 +28,57 @@ class AnimeGAN_Model(Model):
     init_shell='init.sh'
 
     inference_inputs = [
-        Field(type=Field_type.image, name='img_path', label='源图片',
-              describe='待风格化的原始图片')
+        Field(type=Field_type.image, name='img_path', label='源图片',describe='待风格化的原始图片')
     ]
 
     # 加载模型
     def load_model(self):
-        # self.model = load("/xxx/xx/a.pth")
         pass
 
     # 推理
     @pysnooper.snoop()
-    def inference(self,arg1,arg2=None,arg3=None,arg4=None,arg5=None,arg6=None,arg7=None,**kwargs):
-        # save_path = os.path.join('result', os.path.basename(arg1))
-        # os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        result_img='result_img.jpg'
-        result_text='cat,dog'
-        result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
-        result_audio = 'test.wav'
+    def inference(self,img_path, Style='AnimeGANv3_Hayao', if_face=None):
+        print(img_path, Style, if_face)
+
+        img = cv2.imread(img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        if Style == "AnimeGANv3_Arcane":
+            f = "A"
+        elif Style == "AnimeGANv3_Trump":
+            f = "T"
+        elif Style == "AnimeGANv3_Shinkai":
+            f = "S"
+        elif Style == "AnimeGANv3_PortraitSketch":
+            f = "P"
+        elif Style == "AnimeGANv3_Hayao":
+            f = "H"
+        else:
+            f = "U"
+        os.makedirs('result',exist_ok=True)
+        save_path = os.path.join('result', os.path.basename(img_path))
+        try:
+            det_face = True if if_face == "Yes" else False
+            output = AnimeGANv3_src.Convert(img, f, det_face)
+            cv2.imwrite(save_path, output[:, :, ::-1])
+        except RuntimeError as error:
+            print('Error', error)
+
         back=[
             {
-                "image":result_img,
-                "text":result_text,
-                "video":result_video,
-                "audio":result_audio
-            },
-            {
-                "image": result_img,
-                "text": result_text,
-                "video": result_video,
-                "audio": result_audio
+                "image":save_path
             }
         ]
         return back
 
-model=AnimeGAN_Model()
+model=AnimeGANv3_Model()
 model.load_model()
-# result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
-# print(result)
-
-# # 启动服务
-server = Server(model=model)
-server.web_examples.append({
-    "arg1":'测试输入文本',
-    "arg2":'test.jpg',
-    "arg3": 'https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
-})
-server.server(port=8080)
-
+result = model.inference(img_path='jp_38.jpg')  # 测试
+result = model.inference(img_path='jp_13.jpg')  # 测试
+result = model.inference(img_path='jp_20.jpg')  # 测试
+# # # 启动服务
+# server = Server(model=model)
+# server.web_examples.append({
+#     "img_path":'jp_38.jpg'
+# })
+# server.server(port=8080)
+#
