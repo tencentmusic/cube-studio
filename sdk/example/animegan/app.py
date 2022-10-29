@@ -28,7 +28,8 @@ class AnimeGANv3_Model(Model):
     init_shell='init.sh'
 
     inference_inputs = [
-        Field(type=Field_type.image, name='img_path', label='源图片',describe='待风格化的原始图片')
+        Field(type=Field_type.image, name='img_path', label='源图片',describe='待风格化的原始图片'),
+        Field(type=Field_type.text_select, name='style', label='风格', choices=['宫崎骏 风格','Arcane 风格','新海诚 风格','肖像素描 风格','川普 风格'], describe='风格类型',validators=[Validator(type='Length',max=1)])
     ]
 
     # 加载模型
@@ -37,20 +38,20 @@ class AnimeGANv3_Model(Model):
 
     # 推理
     @pysnooper.snoop()
-    def inference(self,img_path, Style='AnimeGANv3_Hayao', if_face=None):
-        print(img_path, Style, if_face)
+    def inference(self,img_path, style='宫崎骏', if_face=None):
+        print(img_path, style, if_face)
 
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        if Style == "AnimeGANv3_Arcane":
+        if 'Arcane' in style:
             f = "A"
-        elif Style == "AnimeGANv3_Trump":
+        elif "川普" in style:
             f = "T"
-        elif Style == "AnimeGANv3_Shinkai":
+        elif "新海诚" in style:
             f = "S"
-        elif Style == "AnimeGANv3_PortraitSketch":
+        elif "肖像素描" in style:
             f = "P"
-        elif Style == "AnimeGANv3_Hayao":
+        elif "宫崎骏" in style:
             f = "H"
         else:
             f = "U"
@@ -71,14 +72,36 @@ class AnimeGANv3_Model(Model):
         return back
 
 model=AnimeGANv3_Model()
-model.load_model()
-result = model.inference(img_path='jp_38.jpg')  # 测试
-result = model.inference(img_path='jp_13.jpg')  # 测试
-result = model.inference(img_path='jp_20.jpg')  # 测试
-# # # 启动服务
-# server = Server(model=model)
-# server.web_examples.append({
-#     "img_path":'jp_38.jpg'
-# })
-# server.server(port=8080)
-#
+# model.load_model()
+# result = model.inference(img_path='jp_Hayao.jpg',style='宫崎骏')  # 测试
+# result = model.inference(img_path='jp_Arcane.jpg',style='Arcane')  # 测试
+# result = model.inference(img_path='jp_Shinkai.jpg',style='新海诚')  # 测试
+# result = model.inference(img_path='jp_PortraitSketch.jpg',style='肖像素描')  # 测试
+# result = model.inference(img_path='jp_Trump.jpg',style='川普')  # 测试
+
+# # 启动服务
+server = Server(model=model)
+server.web_examples=[
+    {
+        "img_path":'jp_Hayao.jpg',
+        "style":"宫崎骏 风格"
+    },
+    {
+        "img_path":'jp_Arcane.jpg',
+        "style":"Arcane 风格"
+    },
+    {
+        "img_path": 'jp_Shinkai.jpg',
+        "style": "新海诚 风格"
+    },
+    {
+        "img_path": 'jp_PortraitSketch.jpg',
+        "style": "肖像素描 风格"
+    },
+    {
+        "img_path": 'jp_Trump.jpg',
+        "style": "川普 风格"
+    }
+]
+server.server(port=8080)
+
