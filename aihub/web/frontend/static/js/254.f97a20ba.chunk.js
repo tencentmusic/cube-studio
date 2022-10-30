@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcbapp_frontend=self.webpackChunkcbapp_frontend||[]).push([[254],{47254:function(e,n,t){t.r(n),t.d(n,{default:function(){return a}});var u=t(29439),c=t(4519),f=t(2556);function a(){var e=(0,c.useState)(""),n=(0,u.Z)(e,2);n[0],n[1];return(0,c.useEffect)((function(){}),[]),(0,f.jsx)("div",{className:"fade-in",children:"test"})}}}]);
+//# sourceMappingURL=254.f97a20ba.chunk.js.map
