@@ -37,7 +37,7 @@ class HumanSeg_Model(Model):
 
     inference_inputs = [
         Field(type=Field_type.video, name='human_video', label='人体视频'),
-        Field(type=Field_type.image, name='background', label='要替换的背景图片',validators=[Validator(type="DataRequired")]),
+        Field(type=Field_type.image, name='background', label='要替换的背景图片',validators=Validator(required=True)),
 
     ]
 

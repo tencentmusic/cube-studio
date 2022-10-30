@@ -7,17 +7,17 @@ from cubestudio.aihub.web.server import Server,Field,Field_type,Validator
 import pysnooper
 import os
 
-class APP1_Model(Model):
+class PIX2PIX_Model(Model):
     # 模型基础信息定义
-    name='app1'
-    label='示例应用中文名'
-    description="ai示例应用，详细描述，都会显示应用描述上，支持markdown"
+    name='pix2pix'
+    label='图片转图像'
+    description="使用条件对抗网络进行图像到图像翻译"
     field="机器视觉"
-    scenes="图像识别"
+    scenes="图像对抗"
     status='online'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub' # 'https://帮助文档的链接地址'
-    pic='https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='https://github.com/phillipi/pix2pix/blob/master/imgs/examples.jpg?raw=true'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     # 运行基础环境脚本
     init_shell='init.sh'
 
@@ -25,7 +25,7 @@ class APP1_Model(Model):
         Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',
               describe='arg1的详细说明，用于在界面展示',default='这里是默认值',validators=Validator(regex='[a-z]*')),
         Field(type=Field_type.image, name='arg2', label='推理函数的输入参数arg2',
-              describe='arg2的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址',validators=Validator(max=2,required=False)),
+              describe='arg2的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址',validators=Validator(max=2,required=True)),
         Field(type=Field_type.video, name='arg3', label='推理函数的输入参数arg3',
               describe='arg3的详细说明，用于在界面展示,传递到推理函数中将是视频本地地址'),
         Field(type=Field_type.image_multi, name='arg4', label='推理函数的输入参数arg4',
@@ -76,7 +76,7 @@ class APP1_Model(Model):
         ]
         return back
 
-model=APP1_Model()
+model=PIX2PIX_Model()
 model.load_model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)

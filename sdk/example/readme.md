@@ -40,4 +40,5 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080 ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
+
 ```

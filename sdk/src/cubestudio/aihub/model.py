@@ -11,33 +11,31 @@ import os, sys
 Field_type = enum.Enum('Field_type', ('int','double','json','str','text','text_multi', 'image','image_multi', 'audio','audio_multi', 'video','video_multi', 'stream', 'text_select', 'image_select'))
 
 class Validator():
-    def __init__(self,type,regex='',min=-1,max=-1):
-        self.type=type   # Regexp Length  DataRequired
+    def __init__(self,regex='',min=1,max=1,required=True):
         self.regex = regex
         self.min=min
         self.max=max
+        self.regex = regex
+        self.required = required
 
     def to_json(self):
         return {
-            "type": str(self.type),
             "regex": self.regex,
             "min": self.min,
-            "max": self.max
+            "max": self.max,
+            "required":self.required
         }
 
         pass
 class Field():
-    def __init__(self,type:Field_type,name:str,label:str,describe='',choices=[],default='',validators=[]):
+    def __init__(self,type:Field_type,name:str,label:str,validators:Validator=None,describe='',choices=[],default=''):
         self.type=type
         self.name=name
         self.label=label
         self.describe=describe
         self.choices=choices
         self.default=default
-        if validators is list:
-            self.validators=[validators]
-        else:
-            self.validators = validators
+        self.validators = validators
 
 
     def to_json(self):
@@ -48,7 +46,7 @@ class Field():
             "describe":self.describe,
             "choices":self.choices,
             "default":self.default,
-            "validators":[validator.to_json() for validator in self.validators]
+            "validators":self.validators.to_json() if self.validators else ''
         }
 
 

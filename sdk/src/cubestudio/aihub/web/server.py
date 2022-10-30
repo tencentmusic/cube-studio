@@ -179,6 +179,7 @@ class Server():
             return 'ok'
 
         @app.route(f'/{self.pre_url}/info')
+        @pysnooper.snoop()
         def info():
             # example中图片转为在线地址
             for example in self.web_examples:
@@ -192,23 +193,24 @@ class Server():
             for input in self.model.inference_inputs:
                 if 'image' in input.type.name or 'video' in input.type.name or 'audio' in input.type.name:
                     # 对于单选
-                    if '_select_multi' not in input.type.name and input.default and 'http' not in input.default:
+                    if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
                         input.default = file2url(input.default)
 
                     # 对于多选
-                    if '_select_multi' in input.type.name and input.default:
+                    if '_select' in input.type.name and input.validators.max>1 and input.default:
                         for i,default in enumerate(input.default):
                             if 'http' not in default:
                                 input.default[i] = file2url(default)
+
                     if input.choices:
                         for i,choice in enumerate(input.choices):
                             if 'http' not in choice:
                                 input.choices[i]=file2url(choice)
                 # 对于输入类型做一些纠正
-                if input.type.name=='int':
-                    input.validators.append(Validator(type="Regexp",regex="[0-9]*"))
-                if input.type.name=='double':
-                    input.validators.append(Validator(type="Regexp",regex="[0-9/.]*"))
+                if input.type.name=='int' and not input.validators.regex:
+                    input.validators.regex = '[0-9]*'
+                if input.type.name=='double' and not input.validators.regex:
+                    input.validators.regex = '[0-9/.]*'
 
             info = {
                 "name": self.model.name,
