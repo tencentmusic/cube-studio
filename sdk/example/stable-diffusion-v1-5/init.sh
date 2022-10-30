@@ -1,4 +1,6 @@
 git clone https://github.com/runwayml/stable-diffusion.git
+cd stable-diffusion/
+conda env create -f environment.yaml
 
 conda install -y pytorch torchvision -c pytorch
 pip3 install pysnooper flask requests Pillow torch torchvision opencv-python
