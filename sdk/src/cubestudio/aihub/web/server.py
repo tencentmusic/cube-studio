@@ -56,8 +56,8 @@ class Server():
     def server(self,port=8080):
 
         app = Flask(__name__,
-                    static_url_path=f'/frontend',
-                    static_folder='frontend',
+                    static_url_path=f'/{self.pre_url}/static/',
+                    static_folder='static',
                     template_folder='templates')
         app.config['SECRET_KEY'] = os.urandom(24)
         app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=7)
@@ -201,11 +201,12 @@ class Server():
                         for i,default in enumerate(input.default):
                             if 'http' not in default:
                                 input.default[i] = file2url(default)
-
+                    # 对于可选值，也转为url
                     if input.choices:
                         for i,choice in enumerate(input.choices):
                             if 'http' not in choice:
                                 input.choices[i]=file2url(choice)
+
                 # 对于输入类型做一些纠正
                 if input.type.name=='int' and not input.validators.regex:
                     input.validators.regex = '[0-9]*'

@@ -16,7 +16,7 @@
 ```
 其中inputs 类型包含
 
-`('text', 'image', 'video', 'stream', 'text_select', 'image_select', 'text_multi', 'image_multi')`
+`('text', 'image', 'video', 'stream', 'text_select', 'image_select')`
 ```bash
 self.type=type
 self.name=name

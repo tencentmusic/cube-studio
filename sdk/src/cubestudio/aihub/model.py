@@ -8,7 +8,7 @@ import logging
 from ..util import py_shell
 import enum
 import os, sys
-Field_type = enum.Enum('Field_type', ('int','double','json','str','text','text_multi', 'image','image_multi', 'audio','audio_multi', 'video','video_multi', 'stream', 'text_select', 'image_select'))
+Field_type = enum.Enum('Field_type', ('int','double','json','str','text', 'image', 'audio', 'video','video_multi', 'stream', 'text_select', 'image_select'))
 
 class Validator():
     def __init__(self,regex='',min=1,max=1,required=True):
@@ -39,14 +39,41 @@ class Field():
 
 
     def to_json(self):
+        vals=[]
+        if self.validators:
+            if self.validators.regex:
+                vals.append(
+                    {
+                        "type":"Regexp",   # # Regexp Length  DataRequired,
+                        "regex":self.validators.regex
+                    }
+                )
+            if self.validators.max or self.validators.min:
+                vals.append(
+                    {
+                        "type": "Length",  # # Regexp Length  DataRequired,
+                        "min": self.validators.min,
+                        "max":self.validators.max
+                    }
+                )
+            if self.validators.required:
+                vals.append(
+                    {
+                        "type": "DataRequired"  # # Regexp Length  DataRequired,
+                    }
+                )
+
         return {
             "type":str(self.type.name),
             "name":self.name,
             "label":self.label,
             "describe":self.describe,
-            "choices":self.choices,
+            "values":[{"id":choice[choice.rindex('/')+1:] if 'http' in choice else choice,"value":choice} for choice in self.choices],
+            # "values": [{"value": choice[choice.rindex('/') + 1:] if 'http' in choice else choice, "id": choice} for choice in self.choices],
+
+            # "choices": [[choice,choice] for choice in self.choices],
             "default":self.default,
-            "validators":self.validators.to_json() if self.validators else ''
+            "validators":vals
         }
 
 
