@@ -116,7 +116,6 @@ class Server():
                         file.save(file_path)  # 保存文件
                         inference_kargs[input.name] = file_path
 
-
                 all_back = self.model.inference(**inference_kargs)
                 if type(all_back)!=list:
                     all_back=[all_back]
@@ -125,10 +124,11 @@ class Server():
                     if back.get('image',''):
                         save_file_path = back['image']
                         if os.path.exists(save_file_path):
-                            f = open(back['image'], 'rb')
-                            image_data = f.read()
-                            base64_data = base64.b64encode(image_data)  # base64编码
-                            back['image'] = str(base64_data,encoding='utf-8')
+                            # f = open(back['image'], 'rb')
+                            # image_data = f.read()
+                            # base64_data = base64.b64encode(image_data)  # base64编码
+                            # back['image'] = str(base64_data,encoding='utf-8')
+                            back['image'] = file2url(save_file_path)
 
                     # 如果是视频，写的不是http
                     if back.get('video',''):

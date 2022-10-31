@@ -52,7 +52,7 @@ class APP1_Model(Model):
     def inference(self,arg1,arg2=None,arg3=None,arg4=None,arg5=None,arg6=None,arg7=None,**kwargs):
         # save_path = os.path.join('result', os.path.basename(arg1))
         # os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        result_img='result_img.jpg'
+        result_img='result.jpg'
         result_text='cat,dog'
         result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
         result_audio = 'test.wav'
