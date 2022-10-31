@@ -10,8 +10,10 @@
 
 镜像调试，基础镜像为conda环境。先使用如下命令启动基础环境进入容器
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 为conda，python3.9环境
-ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8 为conda，python3.9环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8 为conda，python3.8环境
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base 无python环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4 无python环境
 ```bash
 # 进入模型应用
 # 获取当前项目名作为应用名

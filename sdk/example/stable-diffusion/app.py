@@ -36,7 +36,7 @@ class Txt2Img_Model(Model):
     status = 'online'
     version = 'v20221022'
     doc = 'https://github.com/tencentmusic/cube-studio/tree/master/aihub'  # 'https://帮助文档的链接地址'
-    pic = 'https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     # 运行基础环境脚本
     init_shell = 'init.sh'
 
@@ -53,18 +53,17 @@ class Txt2Img_Model(Model):
 
     # 加载模型
     def load_model(self):
-        # self.model = load("/xxx/xx/a.pth")
-        pl_sd = torch.load('full-model.ckpt', map_location="cpu")
-        sd = pl_sd["state_dict"]
-        return sd
+        pl_sd = torch.load('/full-model.ckpt', map_location="cpu")
+        self.sd = pl_sd["state_dict"]
 
     # 推理
     @pysnooper.snoop()
-    def inference(self, sd, prompt, n_samples, seed, ddim_steps=1, device='cuda', fixed_code=True, n_rows=0, **kwargs):
+    def inference(self, prompt, n_samples, seed, ddim_steps=1, device='cuda', fixed_code=True, n_rows=0, **kwargs):
         back = [{
             "image": None,
             "text": '',
         }]
+        sd = self.sd
         try:
             img = ''
             s_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -220,8 +219,8 @@ class Txt2Img_Model(Model):
 
 model = Txt2Img_Model()
 model.load_model()
-# result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
-# print(result)
+result = model.inference(prompt='a photograph of an astronaut riding a horse')  # 测试
+print(result)
 
 # 启动服务
 server = Server(model=model)

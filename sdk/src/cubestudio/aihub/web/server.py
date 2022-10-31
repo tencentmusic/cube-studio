@@ -8,7 +8,6 @@ import sys
 import uuid
 import os
 from flask import abort, current_app, flash, g, redirect, request, session, url_for
-from flask_babel import lazy_gettext
 import traceback
 import argparse
 import base64
