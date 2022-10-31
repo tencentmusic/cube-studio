@@ -79,7 +79,7 @@ server.server(port=8080)
 
     dockerfile = f'''
 # 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{app}  .
-FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
+FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9
 # 安装基础环境
 WORKDIR /
 COPY init.sh /init.sh
@@ -115,7 +115,7 @@ def main(ops,port,app):
     if ops=='debug':
         app = os.getcwd()[os.getcwd().rindex("/")+1:]
         cube_dir = os.path.dirname(os.path.dirname(os.getcwd()))+"/src"
-        command =f'docker run --name {app} --privileged -it -v {cube_dir}:/src -v $PWD:/app -p 8080:8080  ccr.ccs.tencentyun.com/cube-studio/aihub:base bash'
+        command =f'docker run --name {app} --privileged -it -v {cube_dir}:/src -v $PWD:/app -p 8080:8080  ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash'
 
         print('1、使用如下命令启动开发环境：\n',command)
         print('2、完善init.sh初始化环境脚本，和app.py应用脚本')

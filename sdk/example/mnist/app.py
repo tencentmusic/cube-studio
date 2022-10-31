@@ -33,7 +33,7 @@ class Mnist_Model(Model):
     pic='http://5b0988e595225.cdn.sohucs.com/images/20180404/9f62a1eea7054f8eaf4bc1c87168238b.png'
     # 运行基础环境脚本
     init_shell='init.sh'
-    base_images = 'ccr.ccs.tencentyun.com/cube-studio/aihub:base'
+    base_images = 'ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9'
 
     # 训练
     train_inputs = [

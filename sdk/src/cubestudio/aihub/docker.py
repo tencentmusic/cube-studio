@@ -2,7 +2,7 @@
 import os
 import pysnooper
 dockerfile='''
-FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base
+FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9
 WORKDIR /app
 # 拷贝文件
 {copy_command}

@@ -70,7 +70,7 @@ class Model():
     automl_config={}
     # 基础运行环境
     init_shell=''
-    base_images='ccr.ccs.tencentyun.com/cube-studio/aihub:base'
+    base_images='ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9'
 
     # notebook相关信息
     notebook={

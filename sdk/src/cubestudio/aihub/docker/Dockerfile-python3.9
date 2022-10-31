@@ -1,4 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base  -f Dockerfile-python3.9 .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9  -f Dockerfile-python3.9 .
 
 FROM ubuntu:20.04
 
@@ -48,5 +48,5 @@ ENV PYTHONPATH /src/:/github/:$PYTHONPATH
 WORKDIR /app
 ENTRYPOINT ["bash", "entrypoint.sh"]
 
-# docker run --name aihub --privileged -it -v $PWD:/app --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base  bash
+# docker run --name aihub --privileged -it -v $PWD:/app --entrypoint='' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9  bash
 
