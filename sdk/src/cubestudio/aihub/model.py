@@ -70,8 +70,8 @@ class Field():
             "describe":self.describe,
             "values":[{"id":choice[choice.rindex('/')+1:] if 'http' in choice else choice,"value":choice} for choice in self.choices],
             # "values": [{"value": choice[choice.rindex('/') + 1:] if 'http' in choice else choice, "id": choice} for choice in self.choices],
-
             # "choices": [[choice,choice] for choice in self.choices],
+            "maxCount":self.validators.max,
             "default":self.default,
             "validators":vals
         }
