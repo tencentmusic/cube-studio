@@ -35,7 +35,7 @@ class Txt2Img_Model(Model):
     scenes = "图像创作"
     status = 'online'
     version = 'v20221022'
-    doc = 'https://github.com/tencentmusic/cube-studio/tree/master/aihub'  # 'https://帮助文档的链接地址'
+    doc = 'https://github.com/CompVis/stable-diffusion'  # 'https://帮助文档的链接地址'
     pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     # 运行基础环境脚本
     init_shell = 'init.sh'
@@ -50,6 +50,7 @@ class Txt2Img_Model(Model):
     ]
 
     # 加载模型
+    # @pysnooper.snoop()
     def load_model(self):
         self.device = 'cpu'   # cuda
         pl_sd = torch.load('/model.ckpt', map_location="cpu")
@@ -104,7 +105,7 @@ class Txt2Img_Model(Model):
             self.modelCS.half()
 
     # 推理
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def inference(self, prompt, n_samples=1, ddim_steps=1, fixed_code=True, n_rows=0, **kwargs):
         back = [{
             "image": None,
