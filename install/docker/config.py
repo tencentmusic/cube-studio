@@ -576,6 +576,7 @@ class CeleryConfig(object):
     }
 
  # 帮助文档地址，显示在web导航栏
+BUG_REPORT_URL = 'https://github.com/tencentmusic/cube-studio/issues/new'
 DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/wiki'
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
