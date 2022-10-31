@@ -1,0 +1,470 @@
+
+.dna {
+    font-family: arial;
+    width: 360px;
+    margin: 0 auto;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    letter-spacing: -5px;
+}
+.dna:after {
+    letter-spacing: 5px;
+    display: block;
+    padding-top: 50px;
+    color: #1e1653;
+    text-align: center;
+    content: 'loading...';
+}
+.ele {
+    width: 6px;
+    height: 6px;
+    display: inline-block;
+    animation: rotate 5s linear infinite;
+    transform: rotateX(-360deg) translateZ(0);
+    transform-style: preserve-3d;
+    margin-left: 0px;
+}
+.ele:nth-of-type(2n) .dot:before {
+    background: #c72e4e;
+}
+.dot {
+    width: inherit;
+    height: inherit;
+    transform: translateZ(-20px);
+    transform-style: preserve-3d;
+}
+.dot:before {
+    content: '';
+    width: inherit;
+    height: inherit;
+    display: block;
+    background: #1e1653;
+    border-radius: 50%;
+    animation: rotate 5s linear infinite reverse;
+    transform: rotateX(-360deg) translateZ(0);
+}
+.ele:nth-of-type(1),
+.ele:nth-of-type(1) .dot:before {
+    animation-delay: -0.16667s;
+}
+.ele:nth-of-type(1):nth-of-type(odd) {
+    animation-delay: -2.66667s;
+}
+.ele:nth-of-type(2),
+.ele:nth-of-type(2) .dot:before {
+    animation-delay: -0.33333s;
+}
+.ele:nth-of-type(2):nth-of-type(odd) {
+    animation-delay: -2.83333s;
+}
+.ele:nth-of-type(3),
+.ele:nth-of-type(3) .dot:before {
+    animation-delay: -0.5s;
+}
+.ele:nth-of-type(3):nth-of-type(odd) {
+    animation-delay: -3s;
+}
+.ele:nth-of-type(4),
+.ele:nth-of-type(4) .dot:before {
+    animation-delay: -0.66667s;
+}
+.ele:nth-of-type(4):nth-of-type(odd) {
+    animation-delay: -3.16667s;
+}
+.ele:nth-of-type(5),
+.ele:nth-of-type(5) .dot:before {
+    animation-delay: -0.83333s;
+}
+.ele:nth-of-type(5):nth-of-type(odd) {
+    animation-delay: -3.33333s;
+}
+.ele:nth-of-type(6),
+.ele:nth-of-type(6) .dot:before {
+    animation-delay: -1s;
+}
+.ele:nth-of-type(6):nth-of-type(odd) {
+    animation-delay: -3.5s;
+}
+.ele:nth-of-type(7),
+.ele:nth-of-type(7) .dot:before {
+    animation-delay: -1.16667s;
+}
+.ele:nth-of-type(7):nth-of-type(odd) {
+    animation-delay: -3.66667s;
+}
+.ele:nth-of-type(8),
+.ele:nth-of-type(8) .dot:before {
+    animation-delay: -1.33333s;
+}
+.ele:nth-of-type(8):nth-of-type(odd) {
+    animation-delay: -3.83333s;
+}
+.ele:nth-of-type(9),
+.ele:nth-of-type(9) .dot:before {
+    animation-delay: -1.5s;
+}
+.ele:nth-of-type(9):nth-of-type(odd) {
+    animation-delay: -4s;
+}
+.ele:nth-of-type(10),
+.ele:nth-of-type(10) .dot:before {
+    animation-delay: -1.66667s;
+}
+.ele:nth-of-type(10):nth-of-type(odd) {
+    animation-delay: -4.16667s;
+}
+.ele:nth-of-type(11),
+.ele:nth-of-type(11) .dot:before {
+    animation-delay: -1.83333s;
+}
+.ele:nth-of-type(11):nth-of-type(odd) {
+    animation-delay: -4.33333s;
+}
+.ele:nth-of-type(12),
+.ele:nth-of-type(12) .dot:before {
+    animation-delay: -2s;
+}
+.ele:nth-of-type(12):nth-of-type(odd) {
+    animation-delay: -4.5s;
+}
+.ele:nth-of-type(13),
+.ele:nth-of-type(13) .dot:before {
+    animation-delay: -2.16667s;
+}
+.ele:nth-of-type(13):nth-of-type(odd) {
+    animation-delay: -4.66667s;
+}
+.ele:nth-of-type(14),
+.ele:nth-of-type(14) .dot:before {
+    animation-delay: -2.33333s;
+}
+.ele:nth-of-type(14):nth-of-type(odd) {
+    animation-delay: -4.83333s;
+}
+.ele:nth-of-type(15),
+.ele:nth-of-type(15) .dot:before {
+    animation-delay: -2.5s;
+}
+.ele:nth-of-type(15):nth-of-type(odd) {
+    animation-delay: -5s;
+}
+.ele:nth-of-type(16),
+.ele:nth-of-type(16) .dot:before {
+    animation-delay: -2.66667s;
+}
+.ele:nth-of-type(16):nth-of-type(odd) {
+    animation-delay: -5.16667s;
+}
+.ele:nth-of-type(17),
+.ele:nth-of-type(17) .dot:before {
+    animation-delay: -2.83333s;
+}
+.ele:nth-of-type(17):nth-of-type(odd) {
+    animation-delay: -5.33333s;
+}
+.ele:nth-of-type(18),
+.ele:nth-of-type(18) .dot:before {
+    animation-delay: -3s;
+}
+.ele:nth-of-type(18):nth-of-type(odd) {
+    animation-delay: -5.5s;
+}
+.ele:nth-of-type(19),
+.ele:nth-of-type(19) .dot:before {
+    animation-delay: -3.16667s;
+}
+.ele:nth-of-type(19):nth-of-type(odd) {
+    animation-delay: -5.66667s;
+}
+.ele:nth-of-type(20),
+.ele:nth-of-type(20) .dot:before {
+    animation-delay: -3.33333s;
+}
+.ele:nth-of-type(20):nth-of-type(odd) {
+    animation-delay: -5.83333s;
+}
+.ele:nth-of-type(21),
+.ele:nth-of-type(21) .dot:before {
+    animation-delay: -3.5s;
+}
+.ele:nth-of-type(21):nth-of-type(odd) {
+    animation-delay: -6s;
+}
+.ele:nth-of-type(22),
+.ele:nth-of-type(22) .dot:before {
+    animation-delay: -3.66667s;
+}
+.ele:nth-of-type(22):nth-of-type(odd) {
+    animation-delay: -6.16667s;
+}
+.ele:nth-of-type(23),
+.ele:nth-of-type(23) .dot:before {
+    animation-delay: -3.83333s;
+}
+.ele:nth-of-type(23):nth-of-type(odd) {
+    animation-delay: -6.33333s;
+}
+.ele:nth-of-type(24),
+.ele:nth-of-type(24) .dot:before {
+    animation-delay: -4s;
+}
+.ele:nth-of-type(24):nth-of-type(odd) {
+    animation-delay: -6.5s;
+}
+.ele:nth-of-type(25),
+.ele:nth-of-type(25) .dot:before {
+    animation-delay: -4.16667s;
+}
+.ele:nth-of-type(25):nth-of-type(odd) {
+    animation-delay: -6.66667s;
+}
+.ele:nth-of-type(26),
+.ele:nth-of-type(26) .dot:before {
+    animation-delay: -4.33333s;
+}
+.ele:nth-of-type(26):nth-of-type(odd) {
+    animation-delay: -6.83333s;
+}
+.ele:nth-of-type(27),
+.ele:nth-of-type(27) .dot:before {
+    animation-delay: -4.5s;
+}
+.ele:nth-of-type(27):nth-of-type(odd) {
+    animation-delay: -7s;
+}
+.ele:nth-of-type(28),
+.ele:nth-of-type(28) .dot:before {
+    animation-delay: -4.66667s;
+}
+.ele:nth-of-type(28):nth-of-type(odd) {
+    animation-delay: -7.16667s;
+}
+.ele:nth-of-type(29),
+.ele:nth-of-type(29) .dot:before {
+    animation-delay: -4.83333s;
+}
+.ele:nth-of-type(29):nth-of-type(odd) {
+    animation-delay: -7.33333s;
+}
+.ele:nth-of-type(30),
+.ele:nth-of-type(30) .dot:before {
+    animation-delay: -5s;
+}
+.ele:nth-of-type(30):nth-of-type(odd) {
+    animation-delay: -7.5s;
+}
+.ele:nth-of-type(31),
+.ele:nth-of-type(31) .dot:before {
+    animation-delay: -5.16667s;
+}
+.ele:nth-of-type(31):nth-of-type(odd) {
+    animation-delay: -7.66667s;
+}
+.ele:nth-of-type(32),
+.ele:nth-of-type(32) .dot:before {
+    animation-delay: -5.33333s;
+}
+.ele:nth-of-type(32):nth-of-type(odd) {
+    animation-delay: -7.83333s;
+}
+.ele:nth-of-type(33),
+.ele:nth-of-type(33) .dot:before {
+    animation-delay: -5.5s;
+}
+.ele:nth-of-type(33):nth-of-type(odd) {
+    animation-delay: -8s;
+}
+.ele:nth-of-type(34),
+.ele:nth-of-type(34) .dot:before {
+    animation-delay: -5.66667s;
+}
+.ele:nth-of-type(34):nth-of-type(odd) {
+    animation-delay: -8.16667s;
+}
+.ele:nth-of-type(35),
+.ele:nth-of-type(35) .dot:before {
+    animation-delay: -5.83333s;
+}
+.ele:nth-of-type(35):nth-of-type(odd) {
+    animation-delay: -8.33333s;
+}
+.ele:nth-of-type(36),
+.ele:nth-of-type(36) .dot:before {
+    animation-delay: -6s;
+}
+.ele:nth-of-type(36):nth-of-type(odd) {
+    animation-delay: -8.5s;
+}
+.ele:nth-of-type(37),
+.ele:nth-of-type(37) .dot:before {
+    animation-delay: -6.16667s;
+}
+.ele:nth-of-type(37):nth-of-type(odd) {
+    animation-delay: -8.66667s;
+}
+.ele:nth-of-type(38),
+.ele:nth-of-type(38) .dot:before {
+    animation-delay: -6.33333s;
+}
+.ele:nth-of-type(38):nth-of-type(odd) {
+    animation-delay: -8.83333s;
+}
+.ele:nth-of-type(39),
+.ele:nth-of-type(39) .dot:before {
+    animation-delay: -6.5s;
+}
+.ele:nth-of-type(39):nth-of-type(odd) {
+    animation-delay: -9s;
+}
+.ele:nth-of-type(40),
+.ele:nth-of-type(40) .dot:before {
+    animation-delay: -6.66667s;
+}
+.ele:nth-of-type(40):nth-of-type(odd) {
+    animation-delay: -9.16667s;
+}
+.ele:nth-of-type(41),
+.ele:nth-of-type(41) .dot:before {
+    animation-delay: -6.83333s;
+}
+.ele:nth-of-type(41):nth-of-type(odd) {
+    animation-delay: -9.33333s;
+}
+.ele:nth-of-type(42),
+.ele:nth-of-type(42) .dot:before {
+    animation-delay: -7s;
+}
+.ele:nth-of-type(42):nth-of-type(odd) {
+    animation-delay: -9.5s;
+}
+.ele:nth-of-type(43),
+.ele:nth-of-type(43) .dot:before {
+    animation-delay: -7.16667s;
+}
+.ele:nth-of-type(43):nth-of-type(odd) {
+    animation-delay: -9.66667s;
+}
+.ele:nth-of-type(44),
+.ele:nth-of-type(44) .dot:before {
+    animation-delay: -7.33333s;
+}
+.ele:nth-of-type(44):nth-of-type(odd) {
+    animation-delay: -9.83333s;
+}
+.ele:nth-of-type(45),
+.ele:nth-of-type(45) .dot:before {
+    animation-delay: -7.5s;
+}
+.ele:nth-of-type(45):nth-of-type(odd) {
+    animation-delay: -10s;
+}
+.ele:nth-of-type(46),
+.ele:nth-of-type(46) .dot:before {
+    animation-delay: -7.66667s;
+}
+.ele:nth-of-type(46):nth-of-type(odd) {
+    animation-delay: -10.16667s;
+}
+.ele:nth-of-type(47),
+.ele:nth-of-type(47) .dot:before {
+    animation-delay: -7.83333s;
+}
+.ele:nth-of-type(47):nth-of-type(odd) {
+    animation-delay: -10.33333s;
+}
+.ele:nth-of-type(48),
+.ele:nth-of-type(48) .dot:before {
+    animation-delay: -8s;
+}
+.ele:nth-of-type(48):nth-of-type(odd) {
+    animation-delay: -10.5s;
+}
+.ele:nth-of-type(49),
+.ele:nth-of-type(49) .dot:before {
+    animation-delay: -8.16667s;
+}
+.ele:nth-of-type(49):nth-of-type(odd) {
+    animation-delay: -10.66667s;
+}
+.ele:nth-of-type(50),
+.ele:nth-of-type(50) .dot:before {
+    animation-delay: -8.33333s;
+}
+.ele:nth-of-type(50):nth-of-type(odd) {
+    animation-delay: -10.83333s;
+}
+.ele:nth-of-type(51),
+.ele:nth-of-type(51) .dot:before {
+    animation-delay: -8.5s;
+}
+.ele:nth-of-type(51):nth-of-type(odd) {
+    animation-delay: -11s;
+}
+.ele:nth-of-type(52),
+.ele:nth-of-type(52) .dot:before {
+    animation-delay: -8.66667s;
+}
+.ele:nth-of-type(52):nth-of-type(odd) {
+    animation-delay: -11.16667s;
+}
+.ele:nth-of-type(53),
+.ele:nth-of-type(53) .dot:before {
+    animation-delay: -8.83333s;
+}
+.ele:nth-of-type(53):nth-of-type(odd) {
+    animation-delay: -11.33333s;
+}
+.ele:nth-of-type(54),
+.ele:nth-of-type(54) .dot:before {
+    animation-delay: -9s;
+}
+.ele:nth-of-type(54):nth-of-type(odd) {
+    animation-delay: -11.5s;
+}
+.ele:nth-of-type(55),
+.ele:nth-of-type(55) .dot:before {
+    animation-delay: -9.16667s;
+}
+.ele:nth-of-type(55):nth-of-type(odd) {
+    animation-delay: -11.66667s;
+}
+.ele:nth-of-type(56),
+.ele:nth-of-type(56) .dot:before {
+    animation-delay: -9.33333s;
+}
+.ele:nth-of-type(56):nth-of-type(odd) {
+    animation-delay: -11.83333s;
+}
+.ele:nth-of-type(57),
+.ele:nth-of-type(57) .dot:before {
+    animation-delay: -9.5s;
+}
+.ele:nth-of-type(57):nth-of-type(odd) {
+    animation-delay: -12s;
+}
+.ele:nth-of-type(58),
+.ele:nth-of-type(58) .dot:before {
+    animation-delay: -9.66667s;
+}
+.ele:nth-of-type(58):nth-of-type(odd) {
+    animation-delay: -12.16667s;
+}
+.ele:nth-of-type(59),
+.ele:nth-of-type(59) .dot:before {
+    animation-delay: -9.83333s;
+}
+.ele:nth-of-type(59):nth-of-type(odd) {
+    animation-delay: -12.33333s;
+}
+.ele:nth-of-type(60),
+.ele:nth-of-type(60) .dot:before {
+    animation-delay: -10s;
+}
+.ele:nth-of-type(60):nth-of-type(odd) {
+    animation-delay: -12.5s;
+}
+@keyframes rotate {
+    to {
+        transform: none;
+    }
+}
