@@ -4,6 +4,10 @@ from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server, Field, Field_type
 
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+print(__dir__)
+sys.path.append(os.path.abspath(os.path.join(__dir__, 'optimizedSD')))
+
 import pysnooper
 import os
 import argparse, os, re
@@ -87,7 +91,7 @@ class Txt2Img_Model(Model):
         _, _ = self.model.load_state_dict(sd, strict=False)
         self.model.eval()
         self.model.unet_bs = 1
-        self.model.cdevice = 'cuda'
+        self.model.cdevice =self.device
         self.model.turbo = True
 
         self.modelCS = instantiate_from_config(config.modelCondStage)
@@ -145,7 +149,7 @@ class Txt2Img_Model(Model):
                         os.makedirs(sample_path, exist_ok=True)
                         base_count = len(os.listdir(sample_path))
 
-                        with precision_scope("cuda"):
+                        with precision_scope(self.device):
                             self.modelCS.to(self.device)
                             uc = None
                             if 7.5 != 1.0:
@@ -220,8 +224,8 @@ class Txt2Img_Model(Model):
 
 model1 = Txt2Img_Model()
 model1.load_model()
-result = model1.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
-print(result)
+# result = model1.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
+# print(result)
 
 # # 启动服务
 # server = Server(model=model)
