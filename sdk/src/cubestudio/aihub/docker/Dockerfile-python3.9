@@ -42,7 +42,8 @@ RUN pip3 install flask werkzeug requests tornado Pillow pysnooper opencv-python 
     && rm -rf ~/.cache
 
 RUN mkdir -p /data/log/nginx/
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
 COPY entrypoint.sh /entrypoint.sh
 ENV PYTHONPATH /src/:/github/:$PYTHONPATH
 WORKDIR /app
