@@ -46,82 +46,82 @@ class Txt2Img_Model(Model):
         Field(type=Field_type.int, name='ddim_steps', label='推理的次数',
               describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default=50),
         Field(type=Field_type.int, name='n_samples', label='推理出的图像数量(不支持修改!)',
-              describe='结果中所展示的图片数量，数量越多则会导致性能下降', default=1),
-        Field(type=Field_type.int, name='seed', label='初始化的种子',
-              describe='不同的种子会得到不同的结果，理解为一种随机数吧~', default=None)
+              describe='结果中所展示的图片数量，数量越多则会导致性能下降', default=1)
     ]
 
     # 加载模型
     def load_model(self):
-        pl_sd = torch.load('/full-model.ckpt', map_location="cpu")
+        self.device = 'cpu'   # cuda
+        pl_sd = torch.load('/model.ckpt', map_location="cpu")
         self.sd = pl_sd["state_dict"]
+
+        sd = self.sd
+
+        seed = randint(0, 1000000)
+        seed_everything(seed)
+
+        # # Logging
+        # logger(vars(opt), log_csv="logs/txt2img_logs.csv")
+
+        li, lo = [], []
+        for key, value in sd.items():
+            sp = key.split(".")
+            if (sp[0]) == "model":
+                if "input_blocks" in sp:
+                    li.append(key)
+                elif "middle_block" in sp:
+                    li.append(key)
+                elif "time_embed" in sp:
+                    li.append(key)
+                else:
+                    lo.append(key)
+        for key in li:
+            sd["model1." + key[6:]] = sd.pop(key)
+        for key in lo:
+            sd["model2." + key[6:]] = sd.pop(key)
+
+        config = OmegaConf.load(f"v1-inference.yaml")
+
+        self.model = instantiate_from_config(config.modelUNet)
+        _, _ = self.model.load_state_dict(sd, strict=False)
+        self.model.eval()
+        self.model.unet_bs = 1
+        self.model.cdevice = 'cuda'
+        self.model.turbo = True
+
+        self.modelCS = instantiate_from_config(config.modelCondStage)
+        _, _ = self.modelCS.load_state_dict(sd, strict=False)
+        self.modelCS.eval()
+        self.modelCS.cond_stage_model.device = self.device
+
+        self.modelFS = instantiate_from_config(config.modelFirstStage)
+        _, _ = self.modelFS.load_state_dict(sd, strict=False)
+        self.modelFS.eval()
+        del sd
+
+        if self.device != "cpu":
+            self.model.half()
+            self.modelCS.half()
 
     # 推理
     @pysnooper.snoop()
-    def inference(self, prompt, n_samples, seed, ddim_steps=1, device='cuda', fixed_code=True, n_rows=0, **kwargs):
+    def inference(self, prompt, n_samples=1, ddim_steps=1, fixed_code=True, n_rows=0, **kwargs):
         back = [{
             "image": None,
             "text": '',
         }]
-        sd = self.sd
         try:
-            img = ''
-            s_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            path_for_save = f'out_put/{s_time}'
-            os.makedirs(path_for_save, exist_ok=True)  #
-            outpath = path_for_save
-            grid_count = len(os.listdir(outpath)) - 1
-
-            if seed is None:
-                seed = randint(0, 1000000)
+            seed = randint(0, 1000000)
             seed_everything(seed)
 
-            # # Logging
-            # logger(vars(opt), log_csv="logs/txt2img_logs.csv")
-
-            li, lo = [], []
-            for key, value in sd.items():
-                sp = key.split(".")
-                if (sp[0]) == "model":
-                    if "input_blocks" in sp:
-                        li.append(key)
-                    elif "middle_block" in sp:
-                        li.append(key)
-                    elif "time_embed" in sp:
-                        li.append(key)
-                    else:
-                        lo.append(key)
-            for key in li:
-                sd["model1." + key[6:]] = sd.pop(key)
-            for key in lo:
-                sd["model2." + key[6:]] = sd.pop(key)
-
-            config = OmegaConf.load(f"v1-inference.yaml")
-
-            model = instantiate_from_config(config.modelUNet)
-            _, _ = model.load_state_dict(sd, strict=False)
-            model.eval()
-            model.unet_bs = 1
-            model.cdevice = 'cuda'
-            model.turbo = True
-
-            modelCS = instantiate_from_config(config.modelCondStage)
-            _, _ = modelCS.load_state_dict(sd, strict=False)
-            modelCS.eval()
-            modelCS.cond_stage_model.device = device
-
-            modelFS = instantiate_from_config(config.modelFirstStage)
-            _, _ = modelFS.load_state_dict(sd, strict=False)
-            modelFS.eval()
-            del sd
-
-            if device != "cpu":
-                model.half()
-                modelCS.half()
+            img = ''
+            s_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            outpath = f'result/{s_time}'
+            os.makedirs(outpath, exist_ok=True)  #
 
             start_code = None
             if fixed_code:
-                start_code = torch.randn([n_samples, 4, 512 // 8, 512 // 8], device=device)
+                start_code = torch.randn([n_samples, 4, 512 // 8, 512 // 8], device=self.device)
 
             batch_size = n_samples
             n_rows = n_rows if n_rows > 0 else batch_size
@@ -129,7 +129,7 @@ class Txt2Img_Model(Model):
             print(f"Using prompt: {prompt}")
             data = [batch_size * [prompt]]
 
-            if device != "cpu":
+            if self.device != "cpu":
                 precision_scope = autocast
             else:
                 precision_scope = nullcontext
@@ -145,10 +145,10 @@ class Txt2Img_Model(Model):
                         base_count = len(os.listdir(sample_path))
 
                         with precision_scope("cuda"):
-                            modelCS.to(device)
+                            self.modelCS.to(self.device)
                             uc = None
                             if 7.5 != 1.0:
-                                uc = modelCS.get_learned_conditioning(batch_size * [""])
+                                uc = self.modelCS.get_learned_conditioning(batch_size * [""])
                             if isinstance(prompts, tuple):
                                 prompts = list(prompts)
 
@@ -161,19 +161,19 @@ class Txt2Img_Model(Model):
                                     weight = weights[i]
                                     # if not skip_normalize:
                                     weight = weight / totalWeight
-                                    c = torch.add(c, modelCS.get_learned_conditioning(subprompts[i]), alpha=weight)
+                                    c = torch.add(c, self.modelCS.get_learned_conditioning(subprompts[i]), alpha=weight)
                             else:
-                                c = modelCS.get_learned_conditioning(prompts)
+                                c = self.modelCS.get_learned_conditioning(prompts)
 
                             shape = [n_samples, 4, 512 // 8, 512 // 8]
 
-                            if device != "cpu":
+                            if self.device != "cpu":
                                 mem = torch.cuda.memory_allocated() / 1e6
-                                modelCS.to("cpu")
+                                self.modelCS.to("cpu")
                                 while torch.cuda.memory_allocated() / 1e6 >= mem:
                                     time.sleep(1)
 
-                            samples_ddim = model.sample(
+                            samples_ddim = self.model.sample(
                                 S=ddim_steps,
                                 conditioning=c,
                                 seed=seed,
@@ -186,12 +186,12 @@ class Txt2Img_Model(Model):
                                 sampler='plms',
                             )
 
-                            modelFS.to(device)
+                            self.modelFS.to(self.device)
 
                             print(samples_ddim.shape)
                             print("saving images")
                             for i in range(batch_size):
-                                x_samples_ddim = modelFS.decode_first_stage(samples_ddim[i].unsqueeze(0))
+                                x_samples_ddim = self.modelFS.decode_first_stage(samples_ddim[i].unsqueeze(0))
                                 x_sample = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
                                 x_sample = 255.0 * rearrange(x_sample[0].cpu().numpy(), "c h w -> h w c")
                                 img = Image.fromarray(x_sample.astype(np.uint8))
@@ -199,9 +199,9 @@ class Txt2Img_Model(Model):
                                 seed += 1
                                 base_count += 1
 
-                            if device != "cpu":
+                            if self.device != "cpu":
                                 mem = torch.cuda.memory_allocated() / 1e6
-                                modelFS.to("cpu")
+                                self.modelFS.to("cpu")
                                 while torch.cuda.memory_allocated() / 1e6 >= mem:
                                     time.sleep(1)
                             del samples_ddim
@@ -217,17 +217,16 @@ class Txt2Img_Model(Model):
             return back
 
 
-model = Txt2Img_Model()
-model.load_model()
-result = model.inference(prompt='a photograph of an astronaut riding a horse')  # 测试
+model1 = Txt2Img_Model()
+model1.load_model()
+result = model1.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
 print(result)
 
-# 启动服务
-server = Server(model=model)
-server.web_examples.append({
-    "prompt": 'a photograph of an astronaut riding a horse',
-    "ddim_steps": 50,
-    "n_samples": 1,
-    "seed": None
-})
-server.server(port=8080)
+# # 启动服务
+# server = Server(model=model)
+# server.web_examples.append({
+#     "prompt": 'a photograph of an astronaut riding a horse',
+#     "ddim_steps": 50,
+#     "n_samples": 1
+# })
+# server.server(port=8080)

@@ -2,4 +2,5 @@ pip3 install pysnooper flask requests Pillow torch==1.11.0 torchvision==0.12.0 a
 pip3 install -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers -e git+https://github.com/openai/CLIP.git@main#egg=clip
 
 # 下载模型
-wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/aihub/deeplearning/stable-diffusion/full-model.ckpt -P /full-model.ckpt
+wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/aihub/deeplearning/stable-diffusion/v1-5-pruned-emaonly.ckpt -P /model.ckpt
+
