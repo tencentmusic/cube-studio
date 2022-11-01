@@ -5,7 +5,6 @@ from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server, Field, Field_type
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
-print(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, 'optimizedSD')))
 
 import pysnooper
@@ -224,8 +223,8 @@ class Txt2Img_Model(Model):
 
 model1 = Txt2Img_Model()
 model1.load_model()
-# result = model1.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
-# print(result)
+result = model1.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
+print(result)
 
 # # 启动服务
 # server = Server(model=model)
