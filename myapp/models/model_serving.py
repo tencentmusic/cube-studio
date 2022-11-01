@@ -23,7 +23,7 @@ class service_common():
     @property
     def monitoring_url(self):
         # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
-        url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        url=self.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         return Markup(f'<a href="{url}">监控</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
 

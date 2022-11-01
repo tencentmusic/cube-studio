@@ -911,6 +911,9 @@ MODEL_URLS = {
     "dataset":"/frontend/dataleap/media_data/dataset"
 }
 
+JUPYTER_DOMAIN="kubeflow.local.com"
+NNI_DOMAIN='kubeflow.local.com'
+SERVICE_DOMAIN='service.local.com'
 
 # 所有训练集群的信息
 CLUSTERS={
