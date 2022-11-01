@@ -18,8 +18,7 @@ from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget, MyBS3TextFieldWidget,MySelectMultipleField
-from myapp.views.view_team import Project_Join_Filter
-from myapp.views.view_team import filter_join_org_project
+from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
 from flask import (
     flash,
     g,
