@@ -117,7 +117,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def host_url(self):
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN','')
+        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
                 url = self.host
@@ -263,7 +263,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def inference_host_url(self):
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN','')
+        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
                 url = self.host
