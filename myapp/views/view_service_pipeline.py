@@ -431,7 +431,7 @@ class Service_Pipeline_ModelView_Base():
     def web_monitoring(self,service_pipeline_id):
         service_pipeline = db.session.query(Service_Pipeline).filter_by(id=int(service_pipeline_id)).first()
         if service_pipeline.run_id:
-            url = service_pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH')+ service_pipeline.name
+            url = service_pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH')+ service_pipeline.name
             return redirect(url)
         else:
             flash('no running instance','warning')

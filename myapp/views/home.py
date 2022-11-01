@@ -825,7 +825,7 @@ class Myapp(BaseMyappView):
                     nodes.update(stored_nodes[org][device])
 
             cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
-            grafana_url = cluster_config.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_CLUSTER_PATH')
+            grafana_url = cluster_config.get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_CLUSTER_PATH')
             for ip in nodes:
                 org = nodes[ip]['labels'].get('org', 'public')
                 enable_train = nodes[ip]['labels'].get('train', 'true')
@@ -833,7 +833,7 @@ class Myapp(BaseMyappView):
                     # if enable_train == 'true':
                     #     ip_html = '<a href="%s">%s</a>' % ("/myapp/schedule/node/%s" % ip, ip)
                     # else:
-                    ip_html = '<a href="%s"><strike>%s</strike></a>' % (cluster_config.get('K8S_DASHBOARD_CLUSTER', '').strip('/')+'/#/node/%s?namespace=default' % ip, ip)
+                    ip_html = '<a target="_blank" href="%s"><strike>%s</strike></a>' % (cluster_config.get('K8S_DASHBOARD_CLUSTER', '').rstrip('/')+'/#/node/%s?namespace=default' % nodes[ip]['name'],ip)
                 else:
                     if enable_train == 'true':
                         ip_html = ip
