@@ -233,6 +233,12 @@ class UserInfoEditView(SimpleFormView):
             widget=BS3TextFieldWidget(),
             description=lazy_gettext("Write the Username"),
         )
+        password = StringField(
+            lazy_gettext("Password"),
+            validators=[DataRequired()],
+            widget=BS3TextFieldWidget(),
+            description=lazy_gettext("Password"),
+        )
         email = StringField(
             lazy_gettext("Email"),
             validators=[DataRequired()],
