@@ -1,8 +1,5 @@
 import base64
 import io,sys,os
-root_dir = os.path.split(os.path.realpath(__file__))[0] + '/../../src/'
-print(root_dir)
-sys.path.append(root_dir)   # 将根目录添加到系统目录,才能正常引用common文件夹
 
 import pysnooper
 from PIL import ImageGrab, Image
@@ -44,7 +41,6 @@ class Mnist_Model(Model):
     inference_inputs = [
         Field(type=Field_type.image,name='img_file_path',label='待识别图片',describe='用于文本识别的原始图片')
     ]
-
 
     # 训练的入口函数，将用户输入参数传递
     def train(self,**kwargs):

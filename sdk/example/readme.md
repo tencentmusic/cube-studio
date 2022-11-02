@@ -9,17 +9,23 @@
  - 其他自行添加配套内容
 
 镜像调试，基础镜像为conda环境。先使用如下命令启动基础环境进入容器
+
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 为conda，python3.9环境
+
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8 为conda，python3.8环境
+
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
+
 ccr.ccs.tencentyun.com/cube-studio/aihub:base 无python环境
+
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4 无python环境
+
 ```bash
 # 进入模型应用
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
-docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080  ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash
+docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080 --entrypoint=''  ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash
 
 ```
 补全init.sh环境脚本。
@@ -42,6 +48,6 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
-docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080 ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
+docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080 --entrypoint='/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
 
 ```

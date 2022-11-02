@@ -1,5 +1,5 @@
 
-# /info
+# /{app_name}/info
 获取基础元数据
 ```bash
 "name": self.model.name[0],
@@ -28,7 +28,7 @@ self.validators=validators
 ```
 
 # 推理接口
-`/api/model/{self.name}/version/{self.version}/`
+`/{app_name}/api/model/{self.name}/version/{self.version}/`
 
 文本直接传，图片传base64编码，视频文件直接传文件，摄像头传流，多选传数组
 
