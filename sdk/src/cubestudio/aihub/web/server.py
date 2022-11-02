@@ -177,11 +177,6 @@ class Server():
         def health():
             return 'ok'
 
-        # # 推理示例
-        # @app.route(f'/{self.pre_url}/info')
-        # def inference_example():
-        #     pass
-
         @app.route(f'/{self.pre_url}/info')
         @pysnooper.snoop()
         def info():
