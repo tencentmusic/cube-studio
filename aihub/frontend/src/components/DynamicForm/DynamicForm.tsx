@@ -206,7 +206,7 @@ export default function DynamicForm(props: IProps) {
             extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
             {...itemProps}
         >
-            <FileUploadPlus type="video" />
+            <FileUploadPlus type="video" maxSize={1024 * 1024 * 100} format={['video/mp4', 'video/aiv', 'video/3gp', 'video/3gpp', 'video/mov']} />
         </Form.Item>
     }
 
@@ -220,7 +220,7 @@ export default function DynamicForm(props: IProps) {
             extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
             {...itemProps}
         >
-            <FileUploadPlus type="audio" />
+            <FileUploadPlus type="audio" maxSize={1024 * 1024 * 10} format={['audio/mp3', 'audio/wav']} />
         </Form.Item>
     }
 
@@ -348,16 +348,14 @@ export default function DynamicForm(props: IProps) {
     }
 
     const renderImageSelect = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
-        // const rules = [
-        //     { required: config.required, message: `请选择${config.label}` },
-        // ]
         const options: LabeledValue[] = config.options || []
         return <Form.Item
             key={`dynamicForm_${config.name}`}
             label={config.label}
             name={config.name}
-            rules={config.rules}
+            // rules={config.rules}
             initialValue={config.defaultValue}
+            valuePropName="values"
             extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
             {...itemProps}
         >

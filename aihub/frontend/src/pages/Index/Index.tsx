@@ -124,7 +124,7 @@ export default function Index() {
                     onChange={(selected: any) => {
                         setSelected(selected)
                     }}
-                    option={[{ label: 'test', value: 'https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg' }]} /> */}
+                    option={[{ label: 'http://localhost:8080/app1/static/example/风格1.jpg', value: '风格1' }, { label: 'http://localhost:8080/app1/static/example/风格1.jpg', value: '风格2' }]} /> */}
                 <Form layout="horizontal" form={form} >
                     <DynamicForm form={form} primaryKey={'target'} config={dynamicFormConfig} />
                 </Form>
