@@ -82,6 +82,7 @@ class Server():
         self.model.load_model()
 
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
+        @pysnooper.snoop(watch_explode=('data'))
         def web_inference():
             try:
                 # 从json里面读取信息
@@ -94,6 +95,7 @@ class Server():
                         inference_kargs[input.name] = data.get(input.name, input.default)
 
                     if input.type==Field_type.image and data.get(input.name,''):
+                        # 对于图片base64编码
                         image_decode = base64.b64decode(data[input.name])
                         image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ".jpg")
                         os.makedirs(os.path.dirname(image_path),exist_ok=True)
