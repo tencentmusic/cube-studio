@@ -83,27 +83,27 @@ class Server():
         self.model.load_model()
 
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop(watch_explode=('data'))
+        # @pysnooper.snoop(watch_explode=('data'))
         def web_inference():
             try:
                 # 从json里面读取信息
                 data = request.json
                 inputs=self.model.inference_inputs
                 inference_kargs={}
-                for input in inputs:
-                    inference_kargs[input.name] = data.get(input.name,input.default)
+                for input_field in inputs:
+                    inference_kargs[input_field.name] = data.get(input_field.name,input_field.default)
 
-                    if input.type==Field_type.text and data.get(input.name,''):
-                        inference_kargs[input.name] = data.get(input.name, input.default)
+                    # if input_field.type==Field_type.text and data.get(input_field.name,''):
+                    #     inference_kargs[input_field.name] = data.get(input_field.name, input_field.default)
 
                     # 对上传图片进行处理，单上传和多上传
-                    if input.type==Field_type.image and data.get(input.name,''):
+                    if input_field.type==Field_type.image and data.get(input_field.name,''):
                         # 对于图片base64编码
                         input_data=[]
-                        if type(data[input.name])!=list:
-                            data[input.name] = [data[input.name]]
+                        if type(data[input_field.name])!=list:
+                            data[input_field.name] = [data[input_field.name]]
 
-                        for img_base64_str in data[input.name]:
+                        for img_base64_str in data[input_field.name]:
                             img_str = re.sub("^data:.*;base64,",'',img_base64_str)
                             image_decode = base64.b64decode(img_str)
 
@@ -117,17 +117,17 @@ class Server():
                             logging.info('Saving to %s.', image_path)
                             input_data.append(image_path)
 
-                        if input.validators.max==1:
-                            data[input.name] = input_data[0]
-                        if input.validators.max>1:
-                            data[input.name] = input_data
+                        if input_field.validators.max==1:
+                            inference_kargs[input_field.name] = input_data[0]
+                        if input_field.validators.max>1:
+                            inference_kargs[input_field.name] = input_data
 
-                    if input.type == Field_type.image_select and data.get(input.name, ''):
+                    if input_field.type == Field_type.image_select and data.get(input_field.name, ''):
                         # 将选中内容转为
                         input_data=[]
-                        if type(data[input.name])!=list:
-                            data[input.name] = [data[input.name]]
-                        for value in data[input.name]:
+                        if type(data[input_field.name])!=list:
+                            data[input_field.name] = [data[input_field.name]]
+                        for value in data[input_field.name]:
                             # 单个字符的不合法
                             if len(value)==1:
                                 continue
@@ -136,10 +136,10 @@ class Server():
                             else:
                                 input_data.append(value)
                         input_data=list(set(input_data))
-                        if input.validators.max==1:
-                            data[input.name] = input_data[0]
-                        if input.validators.max>1:
-                            data[input.name] = input_data
+                        if input_field.validators.max==1:
+                            inference_kargs[input_field.name] = input_data[0]
+                        if input_field.validators.max>1:
+                            inference_kargs[input_field.name] = input_data
 
 
                 # 从file里面读取文件
@@ -153,7 +153,7 @@ class Server():
                         file.save(file_path)  # 保存文件
                         inference_kargs[input.name] = file_path
 
-
+                print(inference_kargs)
                 # 修正处理结果
                 all_back = self.model.inference(**inference_kargs)
                 if type(all_back)!=list:
