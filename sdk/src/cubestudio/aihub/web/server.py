@@ -83,7 +83,7 @@ class Server():
         self.model.load_model()
 
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        # @pysnooper.snoop(watch_explode=('data'))
+        @pysnooper.snoop(watch_explode=('files'))
         def web_inference():
             try:
                 # 从json里面读取信息
@@ -143,6 +143,19 @@ class Server():
 
 
                 # 从file里面读取文件
+                # print(request.files)
+                files = request.files
+                for key in files:
+                    print(files[key])
+                files = request.form
+                for key in files:
+                    print(files[key])
+                files = request.args
+                for key in files:
+                    print(files[key])
+                files = request.values
+                for key in files:
+                    print(files[key])
                 for input in inputs:
                     if input.name in request.files:
                         file = request.files.get(input.name)

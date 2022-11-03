@@ -50,7 +50,7 @@ class APP1_Model(Model):
         pass
 
     # 推理
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def inference(self,arg1,arg2=None,arg3=None,arg4=None,arg5=None,arg6=None,arg7=None,**kwargs):
         # save_path = os.path.join('result', os.path.basename(arg1))
         # os.makedirs(os.path.dirname(save_path), exist_ok=True)
