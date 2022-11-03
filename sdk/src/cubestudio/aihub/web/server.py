@@ -141,24 +141,25 @@ class Server():
                         if input_field.validators.max>1:
                             inference_kargs[input_field.name] = input_data
 
-                    if (input_field.type == Field_type.video or input_field.type == Field_type.audio) and data.get(input_field.name, ''):
-                        input_data = []
-                        if type(data[input_field.name]) != list:
-                            data[input_field.name] = [data[input_field.name]]
+                    # if (input_field.type == Field_type.video or input_field.type == Field_type.audio) and data.get(input_field.name, ''):
+                    #     input_data = []
+                    #     if type(data[input_field.name]) != list:
+                    #         data[input_field.name] = [data[input_field.name]]
+                    #
+                    #     for file in data[input_field.name]:
+                    #         file = file['uid']
+                    #         print(type(file))
+                    #     pass
 
-                        for file in data[input_field.name]:
-                            print(type(file))
-                        pass
-
-                for input in inputs:
-                    if input.name in request.files:
-                        file = request.files.get(input.name)
-
-                        file_name = file.filename
-                        file_path = os.path.join("upload", self.model.name, self.model.version,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S-')+ file_name)
-                        os.makedirs(os.path.dirname(file_path),exist_ok=True)
-                        file.save(file_path)  # 保存文件
-                        inference_kargs[input.name] = file_path
+                # for input in inputs:
+                #     if input.name in request.files:
+                #         file = request.files.get(input.name)
+                #
+                #         file_name = file.filename
+                #         file_path = os.path.join("upload", self.model.name, self.model.version,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S-')+ file_name)
+                #         os.makedirs(os.path.dirname(file_path),exist_ok=True)
+                #         file.save(file_path)  # 保存文件
+                #         inference_kargs[input.name] = file_path
 
                 print(inference_kargs)
                 # 修正处理结果
@@ -238,15 +239,16 @@ class Server():
             # 将图片和语音/视频的可选值和默认值，都转为在线网址
             for input in self.model.inference_inputs:
                 if 'image' in input.type.name or 'video' in input.type.name or 'audio' in input.type.name:
-                    # 对于单选
-                    if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
-                        input.default = file2url(input.default)
 
-                    # 对于多选
-                    if '_select' in input.type.name and input.validators.max>1 and input.default:
-                        for i,default in enumerate(input.default):
-                            if 'http' not in default:
-                                input.default[i] = file2url(default)
+                    # # 对于单选
+                    # if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
+                    #     input.default = file2url(input.default)
+                    #
+                    # # 对于多选
+                    # if '_select' in input.type.name and input.validators.max>1 and input.default:
+                    #     for i,default in enumerate(input.default):
+                    #         if 'http' not in default:
+                    #             input.default[i] = file2url(default)
 
                     # 对于可选值，也转为url
                     if input.choices:
