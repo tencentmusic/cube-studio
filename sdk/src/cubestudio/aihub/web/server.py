@@ -83,7 +83,7 @@ class Server():
         self.model.load_model()
 
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop(watch_explode=('files'))
+        # @pysnooper.snoop(watch_explode=('files'))
         def web_inference():
             try:
                 # 从json里面读取信息
@@ -141,21 +141,15 @@ class Server():
                         if input_field.validators.max>1:
                             inference_kargs[input_field.name] = input_data
 
+                    if (input_field.type == Field_type.video or input_field.type == Field_type.audio) and data.get(input_field.name, ''):
+                        input_data = []
+                        if type(data[input_field.name]) != list:
+                            data[input_field.name] = [data[input_field.name]]
 
-                # 从file里面读取文件
-                # print(request.files)
-                files = request.files
-                for key in files:
-                    print(files[key])
-                files = request.form
-                for key in files:
-                    print(files[key])
-                files = request.args
-                for key in files:
-                    print(files[key])
-                files = request.values
-                for key in files:
-                    print(files[key])
+                        for file in data[input_field.name]:
+                            print(type(file))
+                        pass
+
                 for input in inputs:
                     if input.name in request.files:
                         file = request.files.get(input.name)
@@ -253,6 +247,7 @@ class Server():
                         for i,default in enumerate(input.default):
                             if 'http' not in default:
                                 input.default[i] = file2url(default)
+
                     # 对于可选值，也转为url
                     if input.choices:
                         for i,choice in enumerate(input.choices):
