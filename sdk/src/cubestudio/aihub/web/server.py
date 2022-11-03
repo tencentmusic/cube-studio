@@ -7,6 +7,7 @@ from flask import render_template
 import sys
 import uuid
 import os
+import re
 from flask import abort, current_app, flash, g, redirect, request, session, url_for
 import traceback
 import argparse
@@ -90,22 +91,57 @@ class Server():
                 inputs=self.model.inference_inputs
                 inference_kargs={}
                 for input in inputs:
-                    inference_kargs[input.name] = input.default
+                    inference_kargs[input.name] = data.get(input.name,input.default)
+
                     if input.type==Field_type.text and data.get(input.name,''):
                         inference_kargs[input.name] = data.get(input.name, input.default)
 
+                    # 对上传图片进行处理，单上传和多上传
                     if input.type==Field_type.image and data.get(input.name,''):
                         # 对于图片base64编码
-                        image_decode = base64.b64decode(data[input.name])
-                        image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ".jpg")
-                        os.makedirs(os.path.dirname(image_path),exist_ok=True)
-                        nparr = np.fromstring(image_decode, np.uint8)
-                        # 从nparr中读取数据，并把数据转换(解码)成图像格式
-                        img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                        cv2.imwrite(image_path, img_np)
+                        input_data=[]
+                        if type(data[input.name])!=list:
+                            data[input.name] = [data[input.name]]
 
-                        logging.info('Saving to %s.', image_path)
-                        inference_kargs[input.name] = image_path
+                        for img_base64_str in data[input.name]:
+                            img_str = re.sub("^data:.*;base64,",'',img_base64_str)
+                            image_decode = base64.b64decode(img_str)
+
+                            image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"-"+str(random.randint(0,100)) + ".jpg")
+                            os.makedirs(os.path.dirname(image_path),exist_ok=True)
+                            nparr = np.fromstring(image_decode, np.uint8)
+                            # 从nparr中读取数据，并把数据转换(解码)成图像格式
+                            img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                            cv2.imwrite(image_path, img_np)
+
+                            logging.info('Saving to %s.', image_path)
+                            input_data.append(image_path)
+
+                        if input.validators.max==1:
+                            data[input.name] = input_data[0]
+                        if input.validators.max>1:
+                            data[input.name] = input_data
+
+                    if input.type == Field_type.image_select and data.get(input.name, ''):
+                        # 将选中内容转为
+                        input_data=[]
+                        if type(data[input.name])!=list:
+                            data[input.name] = [data[input.name]]
+                        for value in data[input.name]:
+                            # 单个字符的不合法
+                            if len(value)==1:
+                                continue
+                            if 'http://' in value or "https://" in value:
+                                input_data.append(value[value.rindex("/")+1:])
+                            else:
+                                input_data.append(value)
+                        input_data=list(set(input_data))
+                        if input.validators.max==1:
+                            data[input.name] = input_data[0]
+                        if input.validators.max>1:
+                            data[input.name] = input_data
+
+
                 # 从file里面读取文件
                 for input in inputs:
                     if input.name in request.files:
@@ -117,6 +153,8 @@ class Server():
                         file.save(file_path)  # 保存文件
                         inference_kargs[input.name] = file_path
 
+
+                # 修正处理结果
                 all_back = self.model.inference(**inference_kargs)
                 if type(all_back)!=list:
                     all_back=[all_back]
@@ -341,4 +379,6 @@ class Server():
             return response
 
         app.run(host='0.0.0.0', debug=True, port=port)
+
+
 
