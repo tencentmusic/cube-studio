@@ -88,6 +88,8 @@ class Server():
             try:
                 # 从json里面读取信息
                 data = request.json
+                data.update(request.form.to_dict())
+
                 inputs=self.model.inference_inputs
                 inference_kargs={}
                 for input_field in inputs:
