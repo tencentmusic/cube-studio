@@ -56,7 +56,7 @@ export default function ImageUploadPlus(props: Iprops) {
             {
                 imageList.map((imageUrl, imageIndex) => {
                     const key = Math.random().toString(36).substring(2);
-                    return <div className="image-card s0 mr16 mb16" key={key}>
+                    return <div className="image-card s0 mr16 mb16 ov-h" key={key}>
                         <div className="image-close" onClick={() => {
                             const orginList = [...imageList]
                             orginList.splice(imageIndex, 1)
