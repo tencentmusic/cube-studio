@@ -31,7 +31,8 @@ export default function FileUploadPlus(props: Iprops) {
     }
 
     function beforeUpload(file: RcFile) {
-        console.log('file', file);
+        console.log('file', file, file.arrayBuffer());
+
         const maxCount = props.maxCount || 1
         if (fileList.length >= maxCount) {
             message.error('超出文件数量限制');
@@ -121,7 +122,7 @@ export default function FileUploadPlus(props: Iprops) {
             <div>
                 {
                     fileList.map((file, fileIndex) => {
-                        return createMediaPreview(file, fileIndex, 'video')
+                        return createMediaPreview(file, fileIndex, props.type || 'file')
                     })
                 }
             </div>
