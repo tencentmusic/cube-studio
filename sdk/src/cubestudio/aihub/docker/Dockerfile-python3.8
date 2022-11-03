@@ -7,7 +7,7 @@ ENV TZ Asia/Shanghai
 ENV DEBIAN_FRONTEND noninteractive
 
 # 安装运维工具
-RUN apt install -y -f --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip nginx
+RUN apt install -y -f --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip nginx lsof
 
 # 安装中文
 RUN apt install -y -f --no-install-recommends fontconfig locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8

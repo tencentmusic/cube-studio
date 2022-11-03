@@ -3,7 +3,7 @@
 import os,sys,time,json,shutil
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
-        if app_name in ['__pycache__','app1']:
+        if app_name in ['__pycache__']:
             continue
 
         app_name=app_name.lower()
@@ -11,9 +11,9 @@ for app_name in os.listdir("."):
         # 批量构建镜像
         dockerfile_path = os.path.join(app_name,'Dockerfile')
         if os.path.exists(dockerfile_path):
-            command = "cd %s && docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:%s . && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:%s && cd ../"%(app_name,app_name,app_name)
+            command = "docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:%s ./%s/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:%s &"%(app_name,app_name,app_name)
             print(command)
-
+        print('\n\n wait')
         # 生成部署的脚本
         deploy=f'''
 apiVersion: v1
