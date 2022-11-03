@@ -44,7 +44,7 @@ services:
 #      - "8080:80"
     depends_on:
       - redis
-      - mysql
+#      - mysql
     volumes:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../myapp/:/home/myapp/myapp/
