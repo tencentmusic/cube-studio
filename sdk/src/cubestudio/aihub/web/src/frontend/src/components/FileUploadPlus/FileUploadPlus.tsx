@@ -7,7 +7,7 @@ import './FileUploadPlus.less';
 
 interface Iprops {
     type?: TFileType
-    onChange?: (value: UploadFile[]) => void
+    onChange?: (value: any) => void
     value?: string[]
     maxCount?: number
     maxSize?: number
@@ -31,7 +31,7 @@ export default function FileUploadPlus(props: Iprops) {
     }
 
     function beforeUpload(file: RcFile) {
-        console.log('file', file, file.arrayBuffer());
+        console.log('file', file);
 
         const maxCount = props.maxCount || 1
         if (fileList.length >= maxCount) {
@@ -68,6 +68,23 @@ export default function FileUploadPlus(props: Iprops) {
             return;
         }
     };
+
+    const file2Bin = (file?: RcFile) => {
+        console.log('file2Bin', file);
+        return new Promise((resolve, reject) => {
+            if (file) {
+                let name = file.name.replace(/.+\./, '');
+                let filename = file.name;
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    resolve(reader.result)
+                }
+            } else {
+                reject(undefined)
+            }
+        })
+    }
 
     //建立一个可存取到该file的url
     function getObjectURL(file: any) {
@@ -134,7 +151,13 @@ export default function FileUploadPlus(props: Iprops) {
                     console.log(options.file);
                     const tarList = [...fileList, options.file as RcFile]
                     setFileList(tarList)
-                    props.onChange && props.onChange(tarList)
+
+                    Promise.all(tarList.map((item: any) => file2Bin(item))).then(res => {
+                        console.log(res)
+                        props.onChange && props.onChange(res)
+                    })
+
+
                     // getBase64(options.file, (imageUrl: string) => {
                     //     // setImgUrl(imageUrl);
                     //     const tarList = [...imageList, imageUrl]

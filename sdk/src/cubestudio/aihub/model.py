@@ -8,7 +8,7 @@ import logging
 from ..util import py_shell
 import enum
 import os, sys
-Field_type = enum.Enum('Field_type', ('int','double','json','str','text', 'image', 'audio', 'video','video_multi', 'stream', 'text_select', 'image_select'))
+Field_type = enum.Enum('Field_type', ('int','double','json','str','text', 'image', 'audio', 'video', 'stream', 'text_select', 'image_select','audio_select','video_select'))
 
 class Validator():
     def __init__(self,regex='',min=1,max=1,required=True):

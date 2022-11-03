@@ -83,7 +83,7 @@ class Server():
         self.model.load_model()
 
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        # @pysnooper.snoop(watch_explode=('files'))
+        @pysnooper.snoop(watch_explode=('files'))
         def web_inference():
             try:
                 # 从json里面读取信息
@@ -107,9 +107,11 @@ class Server():
 
                         for img_base64_str in data[input_field.name]:
                             img_str = re.sub("^data:.*;base64,",'',img_base64_str)
+                            ext = re.search("^data:(.*);base64,",img_base64_str).group(1)
+                            ext = ext[ext.rindex("/")+1:]
                             image_decode = base64.b64decode(img_str)
 
-                            image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"-"+str(random.randint(0,100)) + ".jpg")
+                            image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"-"+str(random.randint(0,100)) + "."+ext)
                             os.makedirs(os.path.dirname(image_path),exist_ok=True)
                             nparr = np.fromstring(image_decode, np.uint8)
                             # 从nparr中读取数据，并把数据转换(解码)成图像格式
@@ -124,6 +126,7 @@ class Server():
                         if input_field.validators.max>1:
                             inference_kargs[input_field.name] = input_data
 
+                    # 单选或者多选图片
                     if input_field.type == Field_type.image_select and data.get(input_field.name, ''):
                         # 将选中内容转为
                         input_data=[]
@@ -143,25 +146,53 @@ class Server():
                         if input_field.validators.max>1:
                             inference_kargs[input_field.name] = input_data
 
-                    # if (input_field.type == Field_type.video or input_field.type == Field_type.audio) and data.get(input_field.name, ''):
-                    #     input_data = []
-                    #     if type(data[input_field.name]) != list:
-                    #         data[input_field.name] = [data[input_field.name]]
-                    #
-                    #     for file in data[input_field.name]:
-                    #         file = file['uid']
-                    #         print(type(file))
-                    #     pass
+                    # 音视频文件上传
+                    if (input_field.type == Field_type.video or input_field.type == Field_type.audio) and data.get(input_field.name, ''):
+                        input_data = []
+                        if type(data[input_field.name]) != list:
+                            data[input_field.name] = [data[input_field.name]]
 
-                # for input in inputs:
-                #     if input.name in request.files:
-                #         file = request.files.get(input.name)
-                #
-                #         file_name = file.filename
-                #         file_path = os.path.join("upload", self.model.name, self.model.version,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S-')+ file_name)
-                #         os.makedirs(os.path.dirname(file_path),exist_ok=True)
-                #         file.save(file_path)  # 保存文件
-                #         inference_kargs[input.name] = file_path
+                        for file_base64_str in data[input_field.name]:
+                            file_str = re.sub("^data:.*;base64,", '', file_base64_str)
+                            ext = re.search("^data:(.*);base64,", file_base64_str).group(1)
+                            ext = ext[ext.rindex("/") + 1:]
+                            file_decode = base64.b64decode(file_str)
+
+                            file_path = os.path.join("upload", self.model.name, self.model.version,
+                                                      datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "-" + str(
+                                                          random.randint(0, 100)) + "." + ext)
+                            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                            f = open(file_path,mode='wb')
+                            f.write(file_decode)
+                            f.close()
+
+                            logging.info('Saving to %s.', file_path)
+                            input_data.append(file_path)
+
+                        if input_field.validators.max == 1:
+                            inference_kargs[input_field.name] = input_data[0]
+                        if input_field.validators.max > 1:
+                            inference_kargs[input_field.name] = input_data
+
+                    # 单选或者多选音视频
+                    if (input_field.type == Field_type.audio_select or input_field.type == Field_type.video_select) and data.get(input_field.name, ''):
+                        # 将选中内容转为
+                        input_data=[]
+                        if type(data[input_field.name])!=list:
+                            data[input_field.name] = [data[input_field.name]]
+                        for value in data[input_field.name]:
+                            # 单个字符的不合法
+                            if len(value)==1:
+                                continue
+                            if 'http://' in value or "https://" in value:
+                                input_data.append(value[value.rindex("/")+1:])
+                            else:
+                                input_data.append(value)
+                        input_data=list(set(input_data))
+                        if input_field.validators.max==1:
+                            inference_kargs[input_field.name] = input_data[0]
+                        if input_field.validators.max>1:
+                            inference_kargs[input_field.name] = input_data
 
                 print(inference_kargs)
                 # 修正处理结果

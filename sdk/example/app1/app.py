@@ -41,7 +41,7 @@ class APP1_Model(Model):
               default=['choice1'],validators=Validator(max=3)),
         Field(type=Field_type.image_select, name='arg8', label='推理函数的输入参数arg8',
               describe='arg8的详细说明，用于在界面展示,多选组件，最多可选2张', choices=['风格1.jpg', '风格2.jpg'],
-              default=['风格2.jpg','风格2.jpg'],validators=Validator(max=2))
+              default=['风格1.jpg','风格2.jpg'],validators=Validator(max=2))
     ]
 
     # 加载模型
