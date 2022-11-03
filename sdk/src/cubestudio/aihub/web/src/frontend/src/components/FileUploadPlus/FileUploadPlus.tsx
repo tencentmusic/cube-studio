@@ -11,6 +11,7 @@ interface Iprops {
     value?: string[]
     maxCount?: number
     maxSize?: number
+    format?: string[]
 }
 
 type TFileType = 'file' | 'video' | 'audio'
@@ -30,18 +31,20 @@ export default function FileUploadPlus(props: Iprops) {
     }
 
     function beforeUpload(file: RcFile) {
+        console.log('file', file);
         const maxCount = props.maxCount || 1
         if (fileList.length >= maxCount) {
             message.error('超出文件数量限制');
             return false
         }
-        const isFormatOk = true || file.type === 'image/jpeg';
+        // 'image/jpeg' || 'video/mp4' || 'audio/mpeg'
+        const isFormatOk = props.format?.includes(file.type);
         if (!isFormatOk) {
             message.error('文件格式错误');
         }
-        const isLt2M = file.size / 1024 / 1024 < 2;
+        const isLt2M = file.size < (props.maxSize || 2 * 1024 * 1024);
         if (!isLt2M) {
-            message.error('文件大小应小于 2MB');
+            message.error('文件大小限制');
         }
         return isFormatOk && isLt2M;
     }

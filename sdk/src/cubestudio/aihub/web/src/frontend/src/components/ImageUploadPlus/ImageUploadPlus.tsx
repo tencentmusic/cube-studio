@@ -24,15 +24,20 @@ export default function ImageUploadPlus(props: Iprops) {
     }
 
     function beforeUpload(file: RcFile) {
-        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-        if (!isJpgOrPng) {
+        const maxCount = props.maxCount || 1
+        if (imageList.length >= maxCount) {
+            message.error('超出文件数量限制');
+            return false
+        }
+        const isFormatOk = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/jpg';
+        if (!isFormatOk) {
             message.error('仅支持 JPG/PNG 格式图片');
         }
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if (!isLt2M) {
-            message.error('图片大小应小于 2MB');
+        const isLt10M = file.size / 1024 / 1024 < 10;
+        if (!isLt10M) {
+            message.error('图片大小应小于 10MB');
         }
-        return isJpgOrPng && isLt2M;
+        return isFormatOk && isLt10M;
     }
 
     const handleChange = (info: UploadChangeParam) => {

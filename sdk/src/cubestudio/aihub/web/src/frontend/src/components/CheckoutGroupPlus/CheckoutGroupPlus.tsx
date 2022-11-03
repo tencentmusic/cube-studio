@@ -153,8 +153,8 @@ export function CheckboxImageIn(props: CheckboxProps): JSX.Element {
             <label
                 htmlFor={id}
                 className="checkbox-imgstyle mb0">
-                <img src={`${props.value}`} alt="" />
-                <p className="m0">{props.label}</p>
+                <img src={`${props.label}`} alt="" />
+                <p className="m0">{props.value}</p>
                 <div className="checkbox-mark"><span>✓</span></div>
             </label>
         </div>
