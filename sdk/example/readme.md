@@ -49,7 +49,7 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
-sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
+sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8081:8080 --entrypoint='/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
 
 ```
 

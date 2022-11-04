@@ -51,6 +51,7 @@ class Yolov3_Model(Model):
             dr.text((data['left'], data['top']), class_name, font=myfont, fill='red')
 
         out_image_path = os.path.join('result',os.path.basename(img_file_path))
+        os.makedirs('result', exist_ok=True)
         img.save(out_image_path)
         print(res)
         back=[{

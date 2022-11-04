@@ -1,6 +1,6 @@
 
 # docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr  .
-FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9
+FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8
 
 # 安装基础环境
 WORKDIR /
