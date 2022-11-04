@@ -20,7 +20,9 @@ setup(
       'pysnooper',
       'requests',
       'flask',
-      'kubernetes'
+      'kubernetes',
+      'celery',
+      'redis'
     ],
     python_requires='>=3.6',
     keywords='',

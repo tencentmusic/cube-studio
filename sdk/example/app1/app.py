@@ -63,7 +63,8 @@ class APP1_Model(Model):
                 "image":result_img,
                 "text":result_text,
                 "video":result_video,
-                "audio":result_audio
+                "audio":result_audio,
+                "html":'<a href="http://www.data-master.net/frontend/aihub/model_market/model_all">查看全部</a>'
             },
             {
                 "image": result_img,

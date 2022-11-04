@@ -32,17 +32,23 @@ from PIL import Image,ImageFont
 from PIL import ImageDraw
 import urllib
 from PIL import Image
-
+from celery import Celery
+from celery.result import AsyncResult
 import pysnooper
 from ..model import Field,Field_type,Validator
 from ...util.py_github import get_repo_user
 from ...util.log import AbstractEventLogger
+from ...util.py_shell import exec
 
 from flask import Flask
 
 user_history={
 
 }
+
+
+
+
 class Server():
 
     web_examples=[]
@@ -53,6 +59,7 @@ class Server():
         self.pre_url=self.model.name
 
     # 启动服务
+    # @pysnooper.snoop()
     def server(self,port=8080):
 
         app = Flask(__name__,
@@ -61,6 +68,18 @@ class Server():
                     template_folder='templates')
         app.config['SECRET_KEY'] = os.urandom(24)
         app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=7)
+        redis_url_default = 'redis://:admin@127.0.0.1:6379/0'
+        CELERY_BROKER_URL = os.getenv('REDIS_URL', redis_url_default)
+        CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', redis_url_default)
+
+        celery_app = Celery(self.model.name, broker=CELERY_BROKER_URL,backend=CELERY_RESULT_BACKEND)
+        celery_app.conf.update(app.config)
+
+        # 如果是同步服务，并且是一个celery worker，就多进程启动消费推理
+        if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous' and '127.0.0.1' not in CELERY_BROKER_URL:
+            command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 10'%(self.model.name)
+            print(command)
+            exec(command)
 
         # 文件转url
         def file2url(file_path):
@@ -80,16 +99,12 @@ class Server():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
+        # 一次性加载模型
         self.model.load_model()
 
-        @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop(watch_explode=('files'))
-        def web_inference():
+        # 定义认为放在的队列
+        def api_inference(name,version,data):
             try:
-                # 从json里面读取信息
-                data = request.json
-                data.update(request.form.to_dict())
-
                 inputs=self.model.inference_inputs
                 inference_kargs={}
                 for input_field in inputs:
@@ -195,7 +210,7 @@ class Server():
                             inference_kargs[input_field.name] = input_data
 
                 print(inference_kargs)
-                # 修正处理结果
+
                 all_back = self.model.inference(**inference_kargs)
                 if type(all_back)!=list:
                     all_back=[all_back]
@@ -222,15 +237,60 @@ class Server():
                         if os.path.exists(save_file_path):
                             back['audio']=file2url(save_file_path)
 
-                return jsonify({
+                return {
                     "status": 0,
                     "result": all_back,
                     "message": ""
-                })
+                }
 
             except Exception as err:
                 logging.info('Uploaded image open error: %s', err)
-                return jsonify(val='Cannot open uploaded image.')
+                return {
+                    "status":1,
+                    "result":[],
+                    "message":"推理失败了"
+                }
+
+
+        # web请求后台
+        @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
+        @pysnooper.snoop()
+        def web_inference():
+            # 从json里面读取信息
+            data = request.json
+            data.update(request.form.to_dict())
+
+            # 异步推理，但都是web界面同步
+            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous':
+                kwargs = {
+                    "name": self.model.name,
+                    "version": self.model.version,
+                    "data":data
+                }
+                from .celery_app import inference
+                task = inference.apply_async(kwargs = kwargs, expires = 120, retry = False)
+                for i in range(20):
+                    time.sleep(1)
+                    async_task = AsyncResult(id=task.id, app=celery_app)
+                    print("async_task.id", async_task.id)
+                    # 判断异步任务是否执行成功
+                    if async_task.successful():
+                        # 获取异步任务的返回值
+                        result = async_task.get()
+                        print(result)
+                        print("执行成功")
+                        return jsonify(result)
+                    else:
+                        print("任务还未执行完成")
+                return jsonify([
+                    {"text": "耗时过久，未获取到推理结果"}
+                ])
+
+
+            # 同步推理
+            result = api_inference(name=self.model.name, version=self.model.version, data=data)
+            return jsonify(result)
+
 
         # @app.route('/')
         # @app.route(f'/{self.pre_url}')
@@ -259,7 +319,7 @@ class Server():
             return 'ok'
 
         @app.route(f'/{self.pre_url}/info')
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def info():
             # example中图片转为在线地址
             for example in self.web_examples:
@@ -330,7 +390,7 @@ class Server():
 
         # 此函数不在应用内，而在中心平台内，但是和应用使用同一个域名
         @app.route('/aihub/login/<app_name>')
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def app_login(app_name=''):
             GITHUB_APPKEY = '69ee1c07fb4764b7fd34'
             GITHUB_SECRET = '795c023eb495317e86713fa5624ffcee3d00e585'
