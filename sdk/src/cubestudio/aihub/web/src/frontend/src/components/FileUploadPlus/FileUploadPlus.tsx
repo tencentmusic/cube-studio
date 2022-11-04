@@ -1,4 +1,4 @@
-import { CloseOutlined, DeleteColumnOutlined, DeleteFilled, DeleteOutlined, InboxOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { AudioOutlined, CloseOutlined, DeleteColumnOutlined, DeleteFilled, DeleteOutlined, InboxOutlined, LoadingOutlined, PlusOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import Upload, { RcFile, UploadChangeParam } from 'antd/lib/upload';
 import { UploadFile } from 'antd/lib/upload/interface';
@@ -157,7 +157,6 @@ export default function FileUploadPlus(props: Iprops) {
                         props.onChange && props.onChange(res)
                     })
 
-
                     // getBase64(options.file, (imageUrl: string) => {
                     //     // setImgUrl(imageUrl);
                     //     const tarList = [...imageList, imageUrl]
@@ -170,7 +169,15 @@ export default function FileUploadPlus(props: Iprops) {
                 onChange={handleChange}
             >
                 <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
+                    {
+                        (props.type === 'file' || !props.type) ? <InboxOutlined /> : null
+                    }
+                    {
+                        props.type === 'video' ? <VideoCameraAddOutlined /> : null
+                    }
+                    {
+                        props.type === 'audio' ? <AudioOutlined /> : null
+                    }
                 </p>
                 <p className="ant-upload-text">点击或拖拽文件上传</p>
             </Upload.Dragger>

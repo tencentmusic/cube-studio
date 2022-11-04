@@ -1,5 +1,3 @@
-import { IColumnConfigItem } from "../../pages/columnConfig";
-
 export interface IAppMenuItem {
     icon: string,
     name: string,
@@ -23,50 +21,6 @@ export interface IAppHeaderItem {
     icon?: string
     link: string
     pic_url?: string
-}
-export interface IADUGTemplateInfo {
-    action?: Record<string, IADUGTemplateActionItem>
-    add_columns: Array<Record<string, any>>
-    add_title: string
-    description_columns: Record<string, any>
-    edit_columns: Array<Record<string, any>>
-    edit_title: string
-    filters: Record<string, {
-        filter: Array<{ name: string, operator: string }>
-        default: string
-        'ui-type': string
-        values: Array<{ id: number, value: string }>
-    }>
-    label_columns: Record<string, string>
-    list_columns: string[]
-    list_title: string
-    order_columns: string[]
-    permissions: string[]
-    show_columns: string[]
-    show_title: string
-    help_url: string | null
-    route_base: string
-    add_fieldsets: Array<{
-        expanded: boolean
-        group: string
-        fields: string[]
-    }>
-    edit_fieldsets: Array<{
-        expanded: boolean
-        group: string
-        fields: string[]
-    }>
-    primary_key: string
-    label_title: string
-    column_related: Record<string, IColumnRelateItem>
-    cols_width: Record<string, IColumnConfigItem>
-    import_data: boolean
-    download_data: boolean
-    list_ui_type?: 'card' | 'table'
-    list_ui_args?: {
-        card_width: string
-        card_height: string
-    }
 }
 
 export interface IColumnRelateItem {
