@@ -66,9 +66,11 @@ class Panoptic_Model(Model):
 
         cates = [seg['category_id'] for seg in result['segments_info']]
         class_type = [self.config['id2label'][str(cate_id)] for cate_id in cates]
-        back=[{
-            "text":class_type
-        }]
+        back = [
+            {
+                "text": text
+            } for text in class_type
+        ]
         return back
 
 model=Panoptic_Model()
