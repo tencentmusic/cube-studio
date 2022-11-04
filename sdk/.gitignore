@@ -8,3 +8,4 @@ example/*/result
 /example/test.py
 /example/*/deploy.yaml
 /example/*/upload
+/example/deploy/

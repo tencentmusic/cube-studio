@@ -246,9 +246,6 @@ MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")
 # not the production version of the site.
 WARNING_MSG = None
 
-from celery.schedules import crontab
-from werkzeug.contrib.cache import RedisCache
-
 # 自动添加到响应头的配置
 HTTP_HEADERS = {
     "Access-Control-Allow-Origin":"*",
