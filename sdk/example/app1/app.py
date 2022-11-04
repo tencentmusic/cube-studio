@@ -83,9 +83,13 @@ model.load_model()
 # # 启动服务
 server = Server(model=model)
 server.web_examples.append({
-    "arg1":'测试输入文本',
-    "arg2":'test.jpg',
-    "arg3": 'https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
-})
+    "lable": "示例一描述",
+    "input": {
+        "arg1": '测试输入文本',
+        "arg2": 'test.jpg',
+        "arg3": 'https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
+    }
+}
+)
 server.server(port=8080)
 

@@ -323,11 +323,12 @@ class Server():
         def info():
             # example中图片转为在线地址
             for example in self.web_examples:
+                example_input = example.get('input',{})
                 for arg_filed in self.model.inference_inputs:
-                    if arg_filed.name in example:  # 这个示例提供了这个参数
+                    if arg_filed.name in example_input:  # 这个示例提供了这个参数
                         # 示例图片/视频转为在线地址
-                        if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name) and 'http' not in example[arg_filed.name]:
-                            example[arg_filed.name]=file2url(example[arg_filed.name])
+                        if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name or 'audio' in arg_filed.type.name) and 'http' not in example_input[arg_filed.name]:
+                            example_input[arg_filed.name]=file2url(example_input[arg_filed.name])
 
             # 将图片和语音/视频的可选值和默认值，都转为在线网址
             for input in self.model.inference_inputs:
