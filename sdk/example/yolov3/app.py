@@ -3,7 +3,7 @@ import io,sys,os
 
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.web.server import Server,Field,Field_type
-
+import json
 import pysnooper
 from darknetpy.detector import Detector
 from PIL import ImageGrab, Image
@@ -56,7 +56,7 @@ class Yolov3_Model(Model):
         print(res)
         back=[{
             "image":out_image_path,
-            "text":res
+            # "text":json.dumps(res,indent=4,ensure_ascii=False)
         }]
         return back
 
