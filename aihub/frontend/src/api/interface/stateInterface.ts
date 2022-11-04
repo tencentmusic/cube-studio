@@ -37,4 +37,6 @@ export interface IResultItem {
     image: string;
     text: string;
     video: string
+    audio: string
+    html: string
 }

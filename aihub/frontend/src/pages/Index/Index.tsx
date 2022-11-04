@@ -1,5 +1,5 @@
 import { GithubOutlined } from '@ant-design/icons'
-import { Button, Form, message, Result, Tag } from 'antd'
+import { Button, Form, message, Result, Spin, Tag } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { IAppInfo, IResultItem } from '../../api/interface/stateInterface'
 import { getAppInfo, submitData } from '../../api/mobiApi'
@@ -10,6 +10,7 @@ import withAutoplay from 'react-awesome-slider/dist/autoplay';
 import 'react-awesome-slider/dist/styles.css';
 import DynamicForm, { IDynamicFormConfigItem } from '../../components/DynamicForm/DynamicForm'
 import Checkbox from '../../components/CheckoutGroupPlus/CheckoutGroupPlus'
+import { useLocation } from 'react-router-dom'
 
 const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -20,18 +21,19 @@ export default function Index() {
     const [dynamicFormConfig, setDynamicFormConfig] = useState<IDynamicFormConfigItem[]>([])
     const [reslutList, setReslutList] = useState<IResultItem[]>([])
     const [selected, setSelected] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
     const [form] = Form.useForm();
+    const location = useLocation()
 
     useEffect(() => {
-        getAppInfo().then(res => {
+        getAppInfo(location.pathname).then(res => {
             const data = res.data
-            console.log(data);
             setPageInfo(data)
             const tarConfig = createDyFormConfig(data.inference_inputs, {}, {})
             setDynamicFormConfig(tarConfig)
-
-            console.log(tarConfig);
-        }).catch(err => { })
+        }).catch(err => { }).finally(() => {
+            setLoading(false)
+        })
     }, [])
 
     // 表单字段处理
@@ -95,6 +97,10 @@ export default function Index() {
 
     return (
         <div>
+            {
+                loading ? <Spin spinning={loading} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100vh' }}></Spin> : null
+            }
+
             <div className="p16 bg-w">
                 <div>
                     <img className="w100 pb8" style={{ maxHeight: 600 }} src={pageInfo?.pic || ''} alt="" />
@@ -132,11 +138,13 @@ export default function Index() {
                     <Button type="primary" block onClick={() => {
                         form.validateFields().then(values => {
                             console.log(values)
+                            setLoading(true)
                             submitData(pageInfo?.inference_url || '', values).then(res => {
-                                console.log(res)
                                 setReslutList(res.data.result)
                             }).catch(err => {
                                 message.error('应用运行出问题了')
+                            }).finally(() => {
+                                setLoading(false)
                             })
                         }).catch(err => {
                             message.warn('请填写完整参数')
@@ -148,18 +156,31 @@ export default function Index() {
             <div className="mb16">
                 <div className="ta-c pb8">
                     <div className="title-mobi">
-                        结果输出
-                </div>
+                        输出
+                    </div>
                 </div>
 
                 {
                     reslutList.length ? <div className="p16">
                         {
                             reslutList.map((result, resultIndex) => {
-                                return <div key={resultIndex}>
-                                    <div>{result.text}</div>
-                                    <div><img src={result.image} alt="" /></div>
-                                    <div>{result.video}</div>
+                                return <div key={resultIndex} className="mb32">
+                                    <div className="ta-c fs20 pb8">结果{resultIndex + 1}</div>
+                                    {
+                                        result.text ? <div className="paper p16"><span>文本结果：</span>{result.text}</div> : null
+                                    }
+                                    {
+                                        result.image ? <div className="paper p16 mt16"><div className="pb8">图片结果：</div><img className="w100" src={result.image} alt="" /></div> : null
+                                    }
+                                    {
+                                        result.video ? <div className="paper p16 mt16"><div className="pb8">视频结果：</div><video className="w100" src={result.video} controls></video></div> : null
+                                    }
+                                    {
+                                        result.audio ? <div className="paper p16 mt16"><div className="pb8">音频结果：</div><audio className="w100" src={result.audio} controls></audio></div> : null
+                                    }
+                                    {
+                                        result.html ? <div className="paper p16 mt16"><div className="pb8">输出结果：</div><div dangerouslySetInnerHTML={{ __html: result.html }}></div></div> : null
+                                    }
                                 </div>
                             })
                         }

@@ -10,10 +10,9 @@ import {
 } from "react-router-dom";
 import { IRouterConfigPlusItem } from './api/interface/baseInterface';
 import { Dropdown, Menu, Select, Spin } from 'antd';
-import { createRoute, formatRoute, getDefaultOpenKeys, routerConfigPlus } from './routerConfig';
+import { createRoute, getDefaultOpenKeys, routerConfigPlus } from './routerConfig';
 import SubMenu from 'antd/lib/menu/SubMenu';
 import { clearWaterNow, drawWater, drawWaterNow, getParam, obj2UrlParam, parseParam2Obj } from './util'
-import { getAppHeaderConfig, getAppMenu } from './api/kubeflowApi';
 import { GithubOutlined, LeftOutlined, QuestionCircleOutlined, RightOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie'
 import { changeTheme } from './theme';
@@ -61,10 +60,11 @@ const AppWrapper = (props: IProps) => {
   }, [location])
 
   useEffect(() => {
-    const testRouter = createRoute('app1')
-    const tarRoute = [...routerConfigPlus, testRouter]
-    const appList = getAppList(tarRoute)
     const { pathname } = location
+    const currentPathname = pathname.replace('/', '')
+    const customRouter = createRoute(currentPathname)
+    const tarRoute = [...routerConfigPlus, customRouter]
+    const appList = getAppList(tarRoute)
     const defaultOpenKeys = getDefaultOpenKeys(tarRoute)
 
     handleChangePageTitle(pathname, tarRoute)
@@ -75,28 +75,6 @@ const AppWrapper = (props: IProps) => {
     setCurrentRouteComponent(() => () => RouterConfig(tarRoute))
     setCurrentAppList(appList)
     handleAppIndex(appList)
-
-    // getAppMenu().then(res => {
-    //   const dynamicRoute = formatRoute(res.data).map(item => ({ ...item }))
-    //   const tarRoute = [...routerConfigPlus, ...dynamicRoute]
-    //   const appList = getAppList(tarRoute)
-    //   const { pathname } = location
-    //   const defaultOpenKeys = getDefaultOpenKeys(tarRoute)
-
-    //   handleChangePageTitle(pathname, tarRoute)
-
-    //   setOpenKeys(defaultOpenKeys)
-
-    //   setCurrnetRouteConfig(tarRoute)
-    //   setCurrentRouteComponent(() => () => RouterConfig(tarRoute))
-    //   setCurrentAppList(appList)
-    //   handleAppIndex(appList)
-    // }).catch(err => { })
-
-    // getAppHeaderConfig().then(res => {
-    //   const config = res.data
-    //   setHeaderConfig(config)
-    // }).catch(err => { })
   }, [])
 
   const handleAppIndex = (appList: IRouterConfigPlusItem[]) => {
