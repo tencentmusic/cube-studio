@@ -115,26 +115,39 @@ class Server():
 
                     # 对上传图片进行处理，单上传和多上传
                     if input_field.type==Field_type.image and data.get(input_field.name,''):
+
                         # 对于图片base64编码
                         input_data=[]
                         if type(data[input_field.name])!=list:
                             data[input_field.name] = [data[input_field.name]]
 
                         for img_base64_str in data[input_field.name]:
-                            img_str = re.sub("^data:.*;base64,",'',img_base64_str)
-                            ext = re.search("^data:(.*);base64,",img_base64_str).group(1)
-                            ext = ext[ext.rindex("/")+1:]
-                            image_decode = base64.b64decode(img_str)
+                            if 'http://' in img_base64_str or "https://" in img_base64_str:
+                                req = requests.get(img_base64_str)
+                                ext = img_base64_str[img_base64_str.rindex(".") + 1:]
+                                ext = ext if len(ext) < 6 else 'jpg'
+                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"-"+str(random.randint(0,100)) + "."+ext)
+                                os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                                with open(image_path, "wb") as f:
+                                    f.write(req.content)
+                                    f.close()
+                                input_data.append(image_path)
 
-                            image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"-"+str(random.randint(0,100)) + "."+ext)
-                            os.makedirs(os.path.dirname(image_path),exist_ok=True)
-                            nparr = np.fromstring(image_decode, np.uint8)
-                            # 从nparr中读取数据，并把数据转换(解码)成图像格式
-                            img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                            cv2.imwrite(image_path, img_np)
+                            else:
+                                img_str = re.sub("^data:.*;base64,",'',img_base64_str)
+                                ext = re.search("^data:(.*);base64,",img_base64_str).group(1)
+                                ext = ext[ext.rindex("/")+1:]
+                                image_decode = base64.b64decode(img_str)
 
-                            logging.info('Saving to %s.', image_path)
-                            input_data.append(image_path)
+                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"-"+str(random.randint(0,100)) + "."+ext)
+                                os.makedirs(os.path.dirname(image_path),exist_ok=True)
+                                nparr = np.fromstring(image_decode, np.uint8)
+                                # 从nparr中读取数据，并把数据转换(解码)成图像格式
+                                img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                                cv2.imwrite(image_path, img_np)
+
+                                logging.info('Saving to %s.', image_path)
+                                input_data.append(image_path)
 
                         if input_field.validators.max==1:
                             inference_kargs[input_field.name] = input_data[0]
@@ -168,21 +181,33 @@ class Server():
                             data[input_field.name] = [data[input_field.name]]
 
                         for file_base64_str in data[input_field.name]:
-                            file_str = re.sub("^data:.*;base64,", '', file_base64_str)
-                            ext = re.search("^data:(.*);base64,", file_base64_str).group(1)
-                            ext = ext[ext.rindex("/") + 1:]
-                            file_decode = base64.b64decode(file_str)
+                            if 'http://' in file_base64_str or "https://" in file_base64_str:
+                                req = requests.get(file_base64_str)
+                                ext = file_base64_str[file_base64_str.rindex(".") + 1:]
+                                ext = ext if len(ext)<6 else 'mp4' if input_field.type == Field_type.video else 'mp3' if input_field.type == Field_type.audio else 'unknow'
+                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"-"+str(random.randint(0,100)) + "."+ext)
+                                os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                                with open(image_path, "wb") as f:
+                                    f.write(req.content)
+                                    f.close()
+                                input_data.append(image_path)
 
-                            file_path = os.path.join("upload", self.model.name, self.model.version,
-                                                      datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "-" + str(
-                                                          random.randint(0, 100)) + "." + ext)
-                            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                            f = open(file_path,mode='wb')
-                            f.write(file_decode)
-                            f.close()
+                            else:
+                                file_str = re.sub("^data:.*;base64,", '', file_base64_str)
+                                ext = re.search("^data:(.*);base64,", file_base64_str).group(1)
+                                ext = ext[ext.rindex("/") + 1:]
+                                file_decode = base64.b64decode(file_str)
 
-                            logging.info('Saving to %s.', file_path)
-                            input_data.append(file_path)
+                                file_path = os.path.join("upload", self.model.name, self.model.version,
+                                                          datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "-" + str(
+                                                              random.randint(0, 100)) + "." + ext)
+                                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                                f = open(file_path,mode='wb')
+                                f.write(file_decode)
+                                f.close()
+
+                                logging.info('Saving to %s.', file_path)
+                                input_data.append(file_path)
 
                         if input_field.validators.max == 1:
                             inference_kargs[input_field.name] = input_data[0]
