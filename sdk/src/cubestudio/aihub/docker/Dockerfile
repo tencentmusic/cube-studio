@@ -28,5 +28,5 @@ COPY default.conf /etc/nginx/conf.d/default.conf
 COPY entrypoint.sh /entrypoint.sh
 ENV PYTHONPATH /src/:/github/:$PYTHONPATH
 WORKDIR /app
-ENTRYPOINT ["bash", "entrypoint.sh"]
+#ENTRYPOINT ["bash", "entrypoint.sh"]
 
