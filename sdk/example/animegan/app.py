@@ -26,7 +26,7 @@ class AnimeGANv3_Model(Model):
     pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     inference_inputs = [
         Field(type=Field_type.image, name='img_path', label='源图片',describe='待风格化的原始图片'),
-        Field(type=Field_type.text_select, name='style', label='风格', choices=['宫崎骏 风格','Arcane 风格','新海诚 风格','肖像素描 风格','川普 风格'], describe='风格类型',validators=Validator(max=1))
+        Field(type=Field_type.text_select, name='style', label='风格',default='宫崎骏 风格', choices=['宫崎骏 风格','Arcane 风格','新海诚 风格','肖像素描 风格','川普 风格'], describe='风格类型',validators=Validator(max=1))
     ]
 
     # 加载模型
