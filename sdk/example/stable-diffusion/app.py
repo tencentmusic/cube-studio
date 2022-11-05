@@ -55,6 +55,16 @@ class SD_Model(Model):
         Field(type=Field_type.int, name='n_samples', label='推理出的图像数量(不支持修改!)',
               describe='结果中所展示的图片数量，数量越多则会导致性能下降', default=1)
     ]
+    web_examples = [
+        {
+            "label": "示例1",
+            "input": {
+                "prompt": 'a photograph of an astronaut riding a horse',
+                "ddim_steps": 50,
+                "n_samples": 1
+            }
+        }
+    ]
 
     # 加载模型
     # @pysnooper.snoop()
@@ -233,15 +243,10 @@ class SD_Model(Model):
 
 
 model = SD_Model()
-model.load_model()
-result = model.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
+# print(result)
 
 # 启动服务
 server = Server(model=model)
-server.web_examples.append({
-    "prompt": 'a photograph of an astronaut riding a horse',
-    "ddim_steps": 50,
-    "n_samples": 1
-})
 server.server(port=8080)

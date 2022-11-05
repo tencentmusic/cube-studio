@@ -36,7 +36,16 @@ class HumanSeg_Model(Model):
     inference_inputs = [
         Field(type=Field_type.video, name='human_video', label='人体视频'),
         Field(type=Field_type.image, name='background', label='要替换的背景图片',validators=Validator(required=True)),
+    ]
 
+    web_examples = [
+        {
+            "label": "示例1",
+            "input": {
+                "background":'/data/images/bg_2.jpg',
+                "human_video":'/data/videos/video_heng.mp4',
+            }
+        }
     ]
 
     # 加载模型
@@ -68,15 +77,11 @@ class HumanSeg_Model(Model):
         return back
 
 model=HumanSeg_Model()
-model.load_model()
-result = model.inference(background='/data/images/bg_2.jpg',human_video='/data/videos/video_heng.mp4')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(background='/data/images/bg_2.jpg',human_video='/data/videos/video_heng.mp4')  # 测试
+# print(result)
 
 # # 启动服务
 server = Server(model=model)
-server.web_examples.append({
-    "background":'/data/images/bg_2.jpg',
-    "human_video":'/data/videos/video_heng.mp4',
-})
 server.server(port=8080)
 

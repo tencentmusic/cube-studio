@@ -26,6 +26,14 @@ class DeOldify_Model(Model):
     inference_inputs = [
         Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于文本识别的原始图片')
     ]
+    web_examples = [
+        {
+            "label": "示例1",
+            "input": {
+                "img_file_path": "test.png"
+            }
+        }
+    ]
 
     # 加载模型
     def load_model(self):
@@ -47,14 +55,11 @@ class DeOldify_Model(Model):
 
 
 model=DeOldify_Model()
-model.load_model()
-result = model.inference(img_file_path='test.png')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(img_file_path='test.png')  # 测试
+# print(result)
 
 # 启动服务
 server = Server(model=model)
-server.web_examples.append(
-    {"img_file_path":"test.png"}
-)
 server.server(port=8080)
 

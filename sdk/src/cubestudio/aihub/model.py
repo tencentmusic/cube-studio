@@ -135,6 +135,29 @@ class Model():
     }
 
     def __init__(self):
+        # 生成info.json文件
+        info={
+            "doc": self.doc,
+            "field": self.field,
+            "scenes": self.scenes,
+            "type": "dateset,notebook,train,inference",
+            "name": self.name,
+            "status": self.status,
+            "version": self.version,
+            "uuid": self.name+"-"+self.version,
+            "label": self.label,
+            "describe": self.describe,
+            "pic": self.pic,
+            "hot": "1",
+            "price": "0",
+            "dataset":self.dataset_config,
+            "notebook":self.notebook_config,
+            "train": self.train_config,
+            "inference": self.inference_config
+          }
+        file=open('info.json',mode='w')
+        file.write(json.dumps(info,indent=4,ensure_ascii=False))
+        file.close()
         pass
 
     # 配置数据集，在分布式训练时自动进行分配

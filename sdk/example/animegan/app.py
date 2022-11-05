@@ -29,6 +29,44 @@ class AnimeGANv3_Model(Model):
         Field(type=Field_type.text_select, name='style', label='风格',default='宫崎骏 风格', choices=['宫崎骏 风格','Arcane 风格','新海诚 风格','肖像素描 风格','川普 风格'], describe='风格类型',validators=Validator(max=1))
     ]
 
+    web_examples = [
+        {
+            "lable": "宫崎骏 风格",
+            "input": {
+                "img_path": 'jp_Hayao.jpg',
+                "style": "宫崎骏 风格"
+            },
+        },
+        {
+            "lable": "Arcane 风格",
+            "input": {
+                "img_path": 'jp_Arcane.jpg',
+                "style": "Arcane 风格"
+            },
+        },
+        {
+            "lable": "新海诚 风格",
+            "input": {
+                "img_path": 'jp_Shinkai.jpg',
+                "style": "新海诚 风格"
+            },
+        },
+        {
+            "lable": "肖像素描 风格",
+            "input": {
+                "img_path": 'jp_PortraitSketch.jpg',
+                "style": "肖像素描 风格"
+            },
+        },
+        {
+            "lable": "川普 风格",
+            "input": {
+                "img_path": 'jp_Trump.jpg',
+                "style": "川普 风格"
+            },
+        }
+    ]
+
     # 加载模型
     def load_model(self):
         pass
@@ -78,27 +116,5 @@ model=AnimeGANv3_Model()
 
 # # 启动服务
 server = Server(model=model)
-server.web_examples=[
-    {
-        "img_path":'jp_Hayao.jpg',
-        "style":"宫崎骏 风格"
-    },
-    {
-        "img_path":'jp_Arcane.jpg',
-        "style":"Arcane 风格"
-    },
-    {
-        "img_path": 'jp_Shinkai.jpg',
-        "style": "新海诚 风格"
-    },
-    {
-        "img_path": 'jp_PortraitSketch.jpg',
-        "style": "肖像素描 风格"
-    },
-    {
-        "img_path": 'jp_Trump.jpg',
-        "style": "川普 风格"
-    }
-]
 server.server(port=8080)
 

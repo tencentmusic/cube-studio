@@ -22,7 +22,6 @@ for app_name in os.listdir("."):
         # if int(resource_gpu)>0:
         #     node_selector='gpu'
 
-
         app_name=app_name.lower().replace('_','-')
 
         # 批量构建镜像
@@ -107,7 +106,7 @@ spec:
             - name: cube-studio
               mountPath: /src
           resources:
-            limits:
+            requests:
               cpu: {resource_cpu}
               memory: {resource_memory}
               

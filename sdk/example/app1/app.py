@@ -42,6 +42,16 @@ class APP1_Model(Model):
               default=['风格1.jpg','风格2.jpg'],validators=Validator(max=2))
     ]
 
+    web_examples=[
+        {
+            "lable": "示例一描述",
+            "input": {
+                "arg1": '测试输入文本',
+                "arg2": 'test.jpg',
+                "arg3": 'https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
+            }
+        }
+    ]
     # 加载模型
     def load_model(self):
         # self.model = load("/xxx/xx/a.pth")
@@ -74,20 +84,11 @@ class APP1_Model(Model):
         return back
 
 model=APP1_Model()
-model.load_model()
+# model.load_model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
 
 # # 启动服务
 server = Server(model=model)
-server.web_examples.append({
-    "lable": "示例一描述",
-    "input": {
-        "arg1": '测试输入文本',
-        "arg2": 'test.jpg',
-        "arg3": 'https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
-    }
-}
-)
 server.server(port=8080)
 
