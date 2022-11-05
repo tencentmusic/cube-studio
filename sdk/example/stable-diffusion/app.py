@@ -29,9 +29,9 @@ from ldm.util import instantiate_from_config
 from Utils import split_weighted_subprompts
 
 
-class Txt2Img_Model(Model):
+class SD_Model(Model):
     # 模型基础信息定义
-    name = 'stable-diffusers'
+    name = 'stable-diffusion'
     label = '文字转图像'
     description = "输入一串文字描述，可生成相应的图片"
     field = "神经网络"
@@ -232,7 +232,7 @@ class Txt2Img_Model(Model):
             return back
 
 
-model = Txt2Img_Model()
+model = SD_Model()
 model.load_model()
 result = model.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
 print(result)
