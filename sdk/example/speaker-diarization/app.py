@@ -15,7 +15,7 @@ class Speaker_diarization_Model(Model):
     description="获取音频文件中语音的人生说话的位置"
     field="听觉"
     scenes="语音检测"
-    status='online'
+    status='offline'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub' # 'https://帮助文档的链接地址'
     pic='https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址

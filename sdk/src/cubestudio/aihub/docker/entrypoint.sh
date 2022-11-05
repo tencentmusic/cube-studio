@@ -1,3 +1,4 @@
+mkidr -p /data/log/nginx/
 
 nginx -g "daemon off;" &
 

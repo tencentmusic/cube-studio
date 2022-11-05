@@ -22,7 +22,7 @@ class AnimeGANv3_Model(Model):
     scenes="图像合成"
     status='online'
     version='v20221001'
-    doc='https://github.com/TachibanaYoshino/AnimeGANv2' # 'https://帮助文档的链接地址'
+    doc='https://github.com/TachibanaYoshino/AnimeGANv3' # 'https://帮助文档的链接地址'
     pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     inference_inputs = [
         Field(type=Field_type.image, name='img_path', label='源图片',describe='待风格化的原始图片'),

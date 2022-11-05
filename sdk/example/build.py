@@ -7,18 +7,20 @@ for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','app1','deploy']:
             continue
-        sys.path.append(os.path.join(path,app_name))
-        from app import model
-        status = model.status
-        if status!='online':
-            continue
-        resource_memory=model.inference_resource.get('resource_memory','0')
-        resource_cpu = model.inference_resource.get('resource_cpu', '0')
-        resource_gpu = model.inference_resource.get('resource_gpu', '0')
-        if int(resource_gpu)>0:
-            node_selector='gpu'
-        else:
-            node_selector = 'cpu'
+        node_selector = 'cpu'
+        resource_cpu='0'
+        resource_memory='0'
+        # sys.path.append(os.path.join(path,app_name))
+        # from app import model
+        # status = model.status
+        # if status!='online':
+        #     continue
+        # resource_memory=model.inference_resource.get('resource_memory','0')
+        # resource_cpu = model.inference_resource.get('resource_cpu', '0')
+        # resource_gpu = model.inference_resource.get('resource_gpu', '0')
+
+        # if int(resource_gpu)>0:
+        #     node_selector='gpu'
 
 
         app_name=app_name.lower().replace('_','-')
@@ -86,6 +88,8 @@ spec:
           image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
           imagePullPolicy: Always  # IfNotPresent
           command: ["bash","-c","pip install celery redis && bash /entrypoint.sh"]
+          securityContext:
+            privileged: true
           env:
           - name: APPNAME
             value: {app_name}
@@ -93,6 +97,8 @@ spec:
             value: redis://:admin@43.142.20.178:6379/0
           - name: REQ_TYPE
             value: synchronous
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: all
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
@@ -104,7 +110,6 @@ spec:
             limits:
               cpu: {resource_cpu}
               memory: {resource_memory}
-              nvidia.com/gpu: {resource_gpu}
               
 ---
 apiVersion: networking.istio.io/v1alpha3
