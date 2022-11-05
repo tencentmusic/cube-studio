@@ -84,11 +84,11 @@ class Server():
         # 文件转url
         def file2url(file_path):
             base_name = os.path.basename(file_path)
-            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + base_name
+            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + base_name
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copy(file_path, save_path)
-            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/" + base_name
+            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + base_name
 
         # 视频转流
         def video_stram(self,video_path):
@@ -391,7 +391,7 @@ class Server():
                 "status": self.model.status,
                 "version": self.model.version,
                 "doc": self.model.doc,
-                "pic": self.model.pic,
+                "pic": self.model.pic if 'http' in self.model.pic else file2url(self.model.pic),
                 "web_examples":self.web_examples,
                 "inference_inputs": [input.to_json() for input in self.model.inference_inputs],
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
