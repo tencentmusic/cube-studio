@@ -7,19 +7,17 @@ from cubestudio.aihub.web.server import Server,Field,Field_type,Validator
 import pysnooper
 import os
 
-class APP1_Model(Model):
+class ParlAI_Model(Model):
     # 模型基础信息定义
     name='app1'
     label='示例应用中文名'
     description="ai示例应用，详细描述，都会显示应用描述上，支持markdown"
     field="机器视觉"
     scenes="图像识别"
-    status='online'
+    status='offline'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub' # 'https://帮助文档的链接地址'
     pic='https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
-    # 运行基础环境脚本
-    init_shell='init.sh'
 
     inference_inputs = [
         Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',
@@ -72,7 +70,7 @@ class APP1_Model(Model):
         ]
         return back
 
-model=APP1_Model()
+model=ParlAI_Model()
 model.load_model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)

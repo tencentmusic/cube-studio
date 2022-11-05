@@ -14,12 +14,10 @@ class PIX2PIX_Model(Model):
     description="使用条件对抗网络进行图像到图像翻译"
     field="机器视觉"
     scenes="图像对抗"
-    status='online'
+    status='offline'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub' # 'https://帮助文档的链接地址'
     pic='https://github.com/phillipi/pix2pix/blob/master/imgs/examples.jpg?raw=true'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
-    # 运行基础环境脚本
-    init_shell='init.sh'
 
     inference_inputs = [
         Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',

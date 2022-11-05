@@ -29,8 +29,6 @@ class Panoptic_Model(Model):
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/DeOldify'
     pic='test.png'
-    # 运行基础环境脚本
-    init_shell='init.sh'
 
     inference_inputs = [
         Field(type=Field_type.image, name='img_file_path', label='待目标识别图片', describe='用于目标识别的原始图片')

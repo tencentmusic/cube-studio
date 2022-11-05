@@ -39,8 +39,6 @@ class {app_name}_Model(Model):
     version='v{version}'
     doc='https://帮助文档的链接地址'
     pic='https://应用描述的缩略图/可以直接使用应用内的图片文件地址'
-    # 运行基础环境脚本
-    init_shell='init.sh'
 
     inference_inputs = [
         Field(type=Field_type.image, name='img_file_path', label='推理函数的输入参数', describe='输入函数的详细描述')

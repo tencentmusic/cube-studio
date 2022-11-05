@@ -1,12 +1,27 @@
 
 #   生成构建镜像的脚本
+
 import os,sys,time,json,shutil
+path = os.path.dirname(os.path.abspath(__file__))
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','app1','deploy']:
             continue
+        sys.path.append(os.path.join(path,app_name))
+        from app import model
+        status = model.status
+        if status!='online':
+            continue
+        resource_memory=model.inference_resource.get('resource_memory','0')
+        resource_cpu = model.inference_resource.get('resource_cpu', '0')
+        resource_gpu = model.inference_resource.get('resource_gpu', '0')
+        if int(resource_gpu)>0:
+            node_selector='gpu'
+        else:
+            node_selector = 'cpu'
 
-        app_name=app_name.lower()
+
+        app_name=app_name.lower().replace('_','-')
 
         # 批量构建镜像
         dockerfile_path = os.path.join(app_name,'Dockerfile')
@@ -25,9 +40,13 @@ metadata:
     app: aihub-{app_name}
 spec:
   ports:
-    - name: http
+    - name: backend
       port: 8080
       targetPort: 8080
+      protocol: TCP
+    - name: frontend
+      port: 80
+      targetPort: 80
       protocol: TCP
   selector:
     app: aihub-{app_name}
@@ -54,26 +73,56 @@ spec:
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: app-data
+          hostPath:
+            path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/sdk/example/{app_name}
+        - name: cube-studio
+          hostPath:
+            path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/sdk/src
+      nodeSelector:
+        aihub: {node_selector}
       containers:
         - name: aihub-{app_name}
           image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
           imagePullPolicy: Always  # IfNotPresent
+          command: ["bash","-c","pip install celery redis && bash /entrypoint.sh"]
           env:
-          - name: APP_NAME
+          - name: APPNAME
             value: {app_name}
           - name: REDIS_URL
             value: redis://:admin@43.142.20.178:6379/0
+          - name: REQ_TYPE
+            value: synchronous
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
+            - name: app-data
+              mountPath: /app
+            - name: cube-studio
+              mountPath: /src
           resources:
-            requests:
-              cpu: 0
-              memory: 0Gi
+            limits:
+              cpu: {resource_cpu}
+              memory: {resource_memory}
+              nvidia.com/gpu: {resource_gpu}
+              
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: aihub-{app_name}
+  namespace: aihub
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - "{app_name}.aihub.cube.woa.com"  
+  http:
+  - route:
+    - destination:
+        host: aihub-{app_name}.aihub.svc.cluster.local
+        port:
+          number: 80
         '''
         save_path = f"deploy/{app_name}.yaml"
         # print(save_path)

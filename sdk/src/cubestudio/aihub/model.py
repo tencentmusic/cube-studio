@@ -92,24 +92,21 @@ class Model():
     describe="这里可以添加模型的详细描述，建议在10~100字内"
     pic="http://xx.xx.jpg"
     price="0"
-    notebook_config={}
-    job_template_config={}
-    inference_config={}
-    automl_config={}
-    # 基础运行环境
-    init_shell=''
-    base_images='ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9'
 
     # 训练数据集
-    dataset = {
-
-    }
-
+    dataset_config = {}
     # notebook相关信息
-    notebook={
+    notebook_config={
         "jupyter": [],
         "appendix": []
     }
+    train_config={}
+    automl_config={}
+    inference_config={}
+
+
+    # 开发notebook
+    notebook_jupyter=[]
 
     # 训练相关
     train_inputs=[
@@ -137,10 +134,8 @@ class Model():
         "APP_NAME":name
     }
 
-    def __init__(self,init_shell=False):
-        if init_shell and self.init_shell:
-            print('begin init shell')
-            py_shell.exec('bash %s'%self.init_shell)
+    def __init__(self):
+        pass
 
     # 配置数据集，在分布式训练时自动进行分配
     def set_dataset(self,**kwargs):

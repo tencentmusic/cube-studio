@@ -40,13 +40,12 @@ class Txt2Img_Model(Model):
     version = 'v20221022'
     doc = 'https://github.com/CompVis/stable-diffusion'  # 'https://帮助文档的链接地址'
     pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
-    inference={
+
+    inference_resource={
         "resource_memory":"0",
         "resource_cpu":"0",
         "resource_gpu":"1"
     }
-    # 运行基础环境脚本
-    init_shell = 'init.sh'
 
     inference_inputs = [
         Field(type=Field_type.text, name='prompt', label='输入的文字内容',

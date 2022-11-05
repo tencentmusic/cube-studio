@@ -24,8 +24,6 @@ class Paddleocr_Model(Model):
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/paddleocr'
     pic='https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png'
-    # 运行基础环境脚本
-    init_shell='init.sh'
 
     inference_inputs = [
         Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于文本识别的原始图片')

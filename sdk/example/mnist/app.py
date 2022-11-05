@@ -24,13 +24,10 @@ class Mnist_Model(Model):
     description="算法入门手写体识别示例"
     field="机器视觉"
     scenes="图像分类"
-    status='online'
+    status='offline'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/mnist'
     pic='http://5b0988e595225.cdn.sohucs.com/images/20180404/9f62a1eea7054f8eaf4bc1c87168238b.png'
-    # 运行基础环境脚本
-    init_shell='init.sh'
-    base_images = 'ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9'
 
     # 训练
     train_inputs = [

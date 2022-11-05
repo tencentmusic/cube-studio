@@ -14,12 +14,10 @@ class APP1_Model(Model):
     description="PP-Vehicle是一款针对车辆分析相关场景的开源工具"
     field="机器视觉"
     scenes="图像识别"
-    status='online'
+    status='offline'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub' # 'https://帮助文档的链接地址'
     pic='https://mmbiz.qpic.cn/mmbiz_gif/7jnsg27ZEVFF0zQibcgkfTuLovHerRMnYcUn3FGTEicWGNb6UcXglJHNW0dTSNfmo9UI3aJ4NJlkTeaYibnvwoiaZg/640?wx_fmt=gif&wxfrom=5&wx_lazy=1'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
-    # 运行基础环境脚本
-    init_shell='init.sh'
 
     inference_inputs = [
         Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',
