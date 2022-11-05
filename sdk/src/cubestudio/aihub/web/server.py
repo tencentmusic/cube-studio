@@ -404,7 +404,7 @@ class Server():
                         "label":"图片风格化"
                     },
                     {
-                        "pic": "https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
+                        "pic": "https://n.sinaimg.cn/spider2020629/356/w640h516/20200629/c2d1-ivrxcex1264539.jpg",
                         "label": "图片修复"
                     },
                     {
