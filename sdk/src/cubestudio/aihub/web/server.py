@@ -400,16 +400,16 @@ class Server():
                 "user":f"/{self.pre_url}/login",
                 "rec_apps":[
                     {
-                        "pic":"https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
-                        "label":"图片修复"
+                        "pic":"https://bbs-img.huaweicloud.com/blogs/img/1618802539113053650.png",
+                        "label":"图片风格化"
                     },
                     {
                         "pic": "https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
                         "label": "图片修复"
                     },
                     {
-                        "pic": "https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
-                        "label": "图片修复"
+                        "pic": "https://agirls.aotter.net/media/2e3b9417-e579-4c2d-8ed1-bbac183a0a78.jpg",
+                        "label": "图片卡通化"
                     }
                 ]
             }
