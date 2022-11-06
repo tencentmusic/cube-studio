@@ -67,8 +67,11 @@ class SD_Model(Model):
     # 加载模型
     # @pysnooper.snoop()
     def load_model(self):
-        self.device = 'cuda'   # cuda
-        pl_sd = torch.load('/model.ckpt', map_location="cuda:0")
+        self.device = 'cuda'  # cuda
+        if not torch.cuda.is_available():  # CPU
+            self.device='cpu'
+
+        pl_sd = torch.load('/model.ckpt', map_location="cuda:0" if self.device=='cuda' else "cpu")
         self.sd = pl_sd["state_dict"]
 
         sd = self.sd
