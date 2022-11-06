@@ -155,6 +155,14 @@ class Model():
             "train": self.train_config,
             "inference": self.inference_config
           }
+
+        if self.inference_resource.get('resource_memory',"0")!='0':
+            info["inference"]['resource_memory']=self.inference_resource.get('resource_memory',"0")
+        if self.inference_resource.get('resource_cpu',"0")!='0':
+            info["inference"]['resource_cpu']=self.inference_resource.get('resource_cpu',"0")
+        if self.inference_resource.get('resource_gpu',"0")!='0':
+            info["inference"]['resource_gpu']=self.inference_resource.get('resource_gpu',"0")
+
         file=open('info.json',mode='w')
         file.write(json.dumps(info,indent=4,ensure_ascii=False))
         file.close()

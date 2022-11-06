@@ -42,8 +42,6 @@ class SD_Model(Model):
     pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource={
-        "resource_memory":"0",
-        "resource_cpu":"0",
         "resource_gpu":"1"
     }
 
