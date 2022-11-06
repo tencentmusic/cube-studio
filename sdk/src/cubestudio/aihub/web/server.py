@@ -87,7 +87,7 @@ class Server():
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + file_path.strip('/')
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
-                shutil.copy(file_path, save_path)
+                shutil.copyfile(file_path, save_path)
             return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
         # 视频转流
