@@ -75,14 +75,14 @@ class Panoptic_Model(Model):
         back = [
             {
                 "text": text
-            } for text in class_type
+            } for text in class_type if 'LABEL_' not in text
         ]
         return back
 
 model=Panoptic_Model()
-# model.load_model()
-# result = model.inference(img_file_path='test.jpg')  # 测试
-# print(result)
+model.load_model()
+result = model.inference(img_file_path='test.jpg')  # 测试
+print(result)
 
 # # 启动服务
 server = Server(model=model)
