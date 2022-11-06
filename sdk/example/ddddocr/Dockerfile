@@ -11,4 +11,3 @@ RUN bash /init.sh
 WORKDIR /app
 COPY * /app/
 
-ENTRYPOINT ["python", "app.py"]

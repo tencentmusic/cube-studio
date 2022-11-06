@@ -10,5 +10,5 @@ ENV PYTHONPATH=/GFPGAN:$PYTHONPATH
 # 安装文件
 WORKDIR /app
 COPY * /app/
+COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["python", "app.py"]

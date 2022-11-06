@@ -11,5 +11,4 @@ ENV PYTHONPATH=/DeOldify:$PYTHONPATH
 WORKDIR /app
 COPY * /app/
 
-ENTRYPOINT ["python", "app.py"]
 

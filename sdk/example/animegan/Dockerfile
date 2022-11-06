@@ -9,4 +9,3 @@ ENV PYTHONPATH /github/:$PYTHONPATH
 # 安装文件
 WORKDIR /app
 COPY * /app/
-ENTRYPOINT ["python", "app.py"]

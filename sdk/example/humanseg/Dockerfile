@@ -8,4 +8,3 @@ RUN bash /init.sh
 # 安装文件
 WORKDIR /app
 COPY * /app/
-ENTRYPOINT ["python", "app.py"]
