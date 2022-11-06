@@ -22,7 +22,7 @@ class Panoptic_Model(Model):
     # 模型基础信息定义
     name='panoptic'
     label='图片识别'
-    description="resnet50 图像识别"
+    describe="resnet50 图像识别"
     field="机器视觉"
     scenes="目标识别"
     status='online'

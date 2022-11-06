@@ -11,7 +11,7 @@ class APP1_Model(Model):
     # 模型基础信息定义
     name='vehicle'
     label='车辆识别'
-    description="PP-Vehicle是一款针对车辆分析相关场景的开源工具"
+    describe="PP-Vehicle是一款针对车辆分析相关场景的开源工具"
     field="机器视觉"
     scenes="图像识别"
     status='offline'

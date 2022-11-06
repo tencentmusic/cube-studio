@@ -21,7 +21,7 @@ class Mnist_Model(Model):
     # 模型基础信息定义
     name='mnist'
     label='手写体识别'
-    description="算法入门手写体识别示例"
+    describe="算法入门手写体识别示例"
     field="机器视觉"
     scenes="图像分类"
     status='offline'

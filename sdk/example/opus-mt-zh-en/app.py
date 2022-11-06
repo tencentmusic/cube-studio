@@ -11,7 +11,7 @@ class APP1_Model(Model):
     # 模型基础信息定义
     name='app1'
     label='示例应用中文名'
-    description="ai示例应用，详细描述，都会显示应用描述上，支持markdown"
+    describe="ai示例应用，详细描述，都会显示应用描述上，支持markdown"
     field="机器视觉"
     scenes="图像识别"
     status='offline'

@@ -16,7 +16,7 @@ class DeOldify_Model(Model):
     # 模型基础信息定义
     name='deoldify'
     label='图片上色'
-    description="图片上色"
+    describe="图片上色"
     field="机器视觉"
     scenes="图像合成"
     status='online'

@@ -33,7 +33,7 @@ class SD_Model(Model):
     # 模型基础信息定义
     name = 'stable-diffusion'
     label = '文字转图像'
-    description = "输入一串文字描述，可生成相应的图片"
+    describe = "输入一串文字描述，可生成相应的图片"
     field = "神经网络"
     scenes = "图像创作"
     status = 'online'

@@ -14,7 +14,7 @@ class DDDDOCR_Model(Model):
     # 模型基础信息定义
     name='ddddocr'
     label='验证码识别'
-    description="ai识别验证码文字和验证码目标"
+    describe="ai识别验证码文字和验证码目标"
     field="机器视觉"
     scenes="图像识别"
     status='online'

@@ -12,7 +12,7 @@ class Speaker_diarization_Model(Model):
     # 模型基础信息定义
     name='speaker_diarization'
     label='语音片段识别'
-    description="获取音频文件中语音的人生说话的位置"
+    describe="获取音频文件中语音的人生说话的位置"
     field="听觉"
     scenes="语音检测"
     status='offline'

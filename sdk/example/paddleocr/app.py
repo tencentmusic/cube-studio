@@ -17,7 +17,7 @@ class Paddleocr_Model(Model):
     # 模型基础信息定义
     name='paddleocr'
     label='ocr识别'
-    description="paddleocr提供的ocr识别"
+    describe="paddleocr提供的ocr识别"
     field="机器视觉"
     scenes="图像识别"
     status='online'

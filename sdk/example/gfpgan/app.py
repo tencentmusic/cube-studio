@@ -23,7 +23,7 @@ class GFPGAN_Model(Model):
     # 模型基础信息定义
     name='gfpgan'
     label='图片修复'
-    description="低分辨率照片修复，清晰度增强"
+    describe="低分辨率照片修复，清晰度增强"
     field="机器视觉"
     scenes="图像合成"
     status='online'

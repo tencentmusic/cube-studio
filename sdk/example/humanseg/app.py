@@ -25,7 +25,7 @@ class HumanSeg_Model(Model):
     # 模型基础信息定义
     name='humanseg'
     label='人体分割背景替换'
-    description="人体分割背景替换，视频会议背景替换"
+    describe="人体分割背景替换，视频会议背景替换"
     field="机器视觉"
     scenes="图像合成"
     status='online'

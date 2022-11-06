@@ -1,0 +1,22 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub",
+    "field": "机器视觉",
+    "scenes": "图像合成",
+    "type": "dateset,notebook,train,inference",
+    "name": "humanseg",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "humanseg-v20221001",
+    "label": "人体分割背景替换",
+    "describe": "这里可以添加模型的详细描述，建议在10~100字内",
+    "pic": "https://github.com/juncaipeng/raw_data/blob/master/images/portrait_bg_replace_1.gif?raw=true",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {}
+}

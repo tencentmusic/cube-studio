@@ -3,21 +3,25 @@
 
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
+all_info=[]
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','app1','deploy']:
             continue
-        resource_gpu='0'
-        all_info=[]
+        if not os.path.exists(os.path.join(app_name,'info.json')):
+            continue
 
-        if os.path.exists(os.path.join(app_name,'info.json')):
-            info = json.load(open(os.path.join(app_name,'info.json')))
-            if info.get('status','offline')=='offline':
-                continue
-            all_info.append(info)
-            resource_gpu=info.get('inference',{}).get('resource_gpu','0')
-        json.dump(all_info,open("info.json"))
-        app_name=app_name.lower().replace('_','-')
+        info = json.load(open(os.path.join(app_name,'info.json')))
+        if info.get('status','offline')=='offline':
+            continue
+
+
+        app_name = app_name.lower().replace('_', '-')
+        info['doc']=f"http://{app_name}.aihub.cube.woa.com/frontend/{app_name}"
+        all_info.append(info)
+        resource_gpu=info.get('inference',{}).get('resource_gpu','0')
+
+
 
         # 批量构建镜像
         dockerfile_path = os.path.join(app_name,'Dockerfile')
@@ -126,3 +130,7 @@ spec:
         file.close()
 
 print('\n\nwait')
+
+file = open('info.json',mode='w')
+file.write(json.dumps(all_info,indent=2,ensure_ascii=False))
+file.close()

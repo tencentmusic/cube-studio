@@ -11,7 +11,7 @@ class PIX2PIX_Model(Model):
     # 模型基础信息定义
     name='pix2pix'
     label='图片转图像'
-    description="使用条件对抗网络进行图像到图像翻译"
+    describe="使用条件对抗网络进行图像到图像翻译"
     field="机器视觉"
     scenes="图像对抗"
     status='offline'

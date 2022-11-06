@@ -17,7 +17,7 @@ class AnimeGANv3_Model(Model):
     # 模型基础信息定义
     name='animegan'
     label='动漫风格化'
-    description="图片的全新动漫风格化，宫崎骏或新海诚风格的动漫，以及4种关于人脸的风格转换。"
+    describe="图片的全新动漫风格化，宫崎骏或新海诚风格的动漫，以及4种关于人脸的风格转换。"
     field="机器视觉"
     scenes="图像合成"
     status='online'

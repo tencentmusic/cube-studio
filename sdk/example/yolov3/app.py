@@ -18,7 +18,7 @@ class Yolov3_Model(Model):
     # 模型基础信息定义
     name='yolov3'
     label='目标识别'
-    description="darknet yolov3 目标识别"
+    describe="darknet yolov3 目标识别"
     field="机器视觉"
     scenes="目标识别"
     status='online'
