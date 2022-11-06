@@ -47,7 +47,7 @@ class SD_Model(Model):
 
     inference_inputs = [
         Field(type=Field_type.text, name='prompt', label='输入的文字内容',
-              describe='输入的文字内容，暂仅支持英文输入~', default='a photograph of an astronaut riding a horse'),
+              describe='输入的文字内容，支持中英文输入', default='a photograph of an astronaut riding a horse'),
         Field(type=Field_type.int, name='ddim_steps', label='推理的次数',
               describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default=50),
         Field(type=Field_type.int, name='n_samples', label='推理出的图像数量(不支持修改!)',
