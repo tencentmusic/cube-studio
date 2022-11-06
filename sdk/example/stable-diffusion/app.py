@@ -123,7 +123,7 @@ class SD_Model(Model):
             self.modelCS.half()
 
     # 推理
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def inference(self, prompt, n_samples=1, ddim_steps=50, fixed_code=True, n_rows=0, **kwargs):
         begin_time = datetime.datetime.now()
         back = [{

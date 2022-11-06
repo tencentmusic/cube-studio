@@ -83,12 +83,12 @@ class Server():
 
         # 文件转url
         def file2url(file_path):
-            base_name = os.path.basename(file_path)
-            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + base_name
+            # base_name = os.path.basename(file_path)
+            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + file_path.strip('/')
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copy(file_path, save_path)
-            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + base_name
+            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
         # 视频转流
         def video_stram(self,video_path):
@@ -237,6 +237,7 @@ class Server():
 
                 print(inference_kargs)
 
+                # 处理返回值
                 all_back = self.model.inference(**inference_kargs)
                 if type(all_back)!=list:
                     all_back=[all_back]
