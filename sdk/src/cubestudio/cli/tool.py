@@ -32,7 +32,7 @@ class {app_name}_Model(Model):
     # 模型基础信息定义
     name='{app}'
     label='{app}应用中文名'
-    description="{app}应用，详细描述，都会显示应用描述上，或者添加一些说明"
+    describe="{app}应用，详细描述，都会显示应用描述上，或者添加一些说明"
     field="机器视觉"
     scenes="图像识别"
     status='online'

@@ -8,7 +8,7 @@
     "version": "v20221001",
     "uuid": "panoptic-v20221001",
     "label": "图片识别",
-    "describe": "这里可以添加模型的详细描述，建议在10~100字内",
+    "describe": "resnet50 图像识别",
     "pic": "test.png",
     "hot": "1",
     "price": "0",

@@ -20,7 +20,8 @@ for app_name in os.listdir("."):
         info['doc']=f"http://{app_name}.aihub.cube.woa.com/frontend/{app_name}"
         all_info.append(info)
         resource_gpu=info.get('inference',{}).get('resource_gpu','0')
-
+        if 'http' not in info['pic']:
+            info['pic']=f"http://{app_name}.aihub.cube.woa.com/{app_name}/static/example/"+app_name+"/" + info['pic']
 
 
         # 批量构建镜像

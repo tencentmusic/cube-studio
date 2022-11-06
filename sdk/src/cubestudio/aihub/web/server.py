@@ -385,7 +385,7 @@ class Server():
             info = {
                 "name": self.model.name,
                 "label": self.model.label,
-                "describe": self.model.description,
+                "describe": self.model.describe,
                 "field": self.model.field,
                 "scenes": self.model.scenes,
                 "status": self.model.status,

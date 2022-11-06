@@ -8,7 +8,7 @@
     "version": "v20221001",
     "uuid": "ddddocr-v20221001",
     "label": "验证码识别",
-    "describe": "这里可以添加模型的详细描述，建议在10~100字内",
+    "describe": "ai识别验证码文字和验证码目标",
     "pic": "https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png",
     "hot": "1",
     "price": "0",

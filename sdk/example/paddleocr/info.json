@@ -8,7 +8,7 @@
     "version": "v20221001",
     "uuid": "paddleocr-v20221001",
     "label": "ocr识别",
-    "describe": "这里可以添加模型的详细描述，建议在10~100字内",
+    "describe": "paddleocr提供的ocr识别",
     "pic": "https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png",
     "hot": "1",
     "price": "0",

@@ -2,15 +2,15 @@
 # /{app_name}/info
 获取基础元数据
 ```bash
-"name": self.model.name[0],
-"label": self.model.label[0],
-"describe": self.model.description[0],
-"field": self.model.field[0],
-"scenes": self.model.scenes[0],
-"status": self.model.status[0],
-"version": self.model.version[0],
-"doc": self.model.doc[0],
-"pic": self.model.pic[0],
+"name": self.model.name
+"label": self.model.label
+"describe": self.model.describe
+"field": self.model.field
+"scenes": self.model.scenes
+"status": self.model.status
+"version": self.model.version
+"doc": self.model.doc
+"pic": self.model.pic
 "web_example":self.web_examples,
 "web_inputs": self.web_examples
 ```
