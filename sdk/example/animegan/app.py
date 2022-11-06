@@ -28,6 +28,9 @@ class AnimeGANv3_Model(Model):
         Field(type=Field_type.image, name='img_path', label='源图片',describe='待风格化的原始图片'),
         Field(type=Field_type.text_select, name='style', label='风格',default='宫崎骏 风格', choices=['宫崎骏 风格','Arcane 风格','新海诚 风格','肖像素描 风格','川普 风格'], describe='风格类型',validators=Validator(max=1))
     ]
+    inference_resource = {
+        "resource_gpu": "1"
+    }
 
     web_examples = [
         {

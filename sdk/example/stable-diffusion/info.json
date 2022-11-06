@@ -1,0 +1,24 @@
+{
+    "doc": "https://github.com/CompVis/stable-diffusion",
+    "field": "神经网络",
+    "scenes": "图像创作",
+    "type": "dateset,notebook,train,inference",
+    "name": "stable-diffusion",
+    "status": "online",
+    "version": "v20221022",
+    "uuid": "stable-diffusion-v20221022",
+    "label": "文字转图像",
+    "describe": "这里可以添加模型的详细描述，建议在10~100字内",
+    "pic": "https://images.nightcafe.studio//assets/stable-tile.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {
+        "resource_gpu": "1"
+    }
+}

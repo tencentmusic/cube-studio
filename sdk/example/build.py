@@ -7,21 +7,16 @@ for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','app1','deploy']:
             continue
-        node_selector = 'cpu'
-        resource_cpu='0'
-        resource_memory='0'
-        # sys.path.append(os.path.join(path,app_name))
-        # from app import model
-        # status = model.status
-        # if status!='online':
-        #     continue
-        # resource_memory=model.inference_resource.get('resource_memory','0')
-        # resource_cpu = model.inference_resource.get('resource_cpu', '0')
-        # resource_gpu = model.inference_resource.get('resource_gpu', '0')
+        resource_gpu='0'
+        all_info=[]
 
-        # if int(resource_gpu)>0:
-        #     node_selector='gpu'
-
+        if os.path.exists(os.path.join(app_name,'info.json')):
+            info = json.load(open(os.path.join(app_name,'info.json')))
+            if info.get('status','offline')=='offline':
+                continue
+            all_info.append(info)
+            resource_gpu=info.get('inference',{}).get('resource_gpu','0')
+        json.dump(all_info,open("info.json"))
         app_name=app_name.lower().replace('_','-')
 
         # 批量构建镜像
@@ -81,7 +76,7 @@ spec:
           hostPath:
             path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/sdk/src
       nodeSelector:
-        aihub: {node_selector}
+        aihub: {'cpu' if resource_gpu=='0' else 'gpu'}
       containers:
         - name: aihub-{app_name}
           image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
@@ -105,10 +100,6 @@ spec:
               mountPath: /app
             - name: cube-studio
               mountPath: /src
-          resources:
-            requests:
-              cpu: {resource_cpu}
-              memory: {resource_memory}
               
 ---
 apiVersion: networking.istio.io/v1alpha3
