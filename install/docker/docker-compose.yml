@@ -17,7 +17,7 @@ services:
 #      - "3306:3306"
 #    volumes:
 #      - ./data/mysql:/var/lib/mysql
-#
+
   frontend:
     image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2022.09.01
     restart: unless-stopped
@@ -37,7 +37,7 @@ services:
       REDIS_HOST: 'redis'
       REDIS_PORT: '6379'
       REDIS_PASSWORD: admin
-      MYSQL_SERVICE: 'mysql+pymysql://root:admin@mysql:3306/kubeflow?charset=utf8'
+      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
       ENVIRONMENT: DEV
       GPU_TYPE: NVIDIA
 #    ports:
@@ -73,10 +73,10 @@ services:
 #      - ./entrypoint.sh:/entrypoint.sh
 #      - ./config.py:/home/myapp/myapp/config.py
 #      - ./kubeconfig:/home/myapp/kubeconfig
-
-
+##
 #
-
+##
+#
 #  worker:
 #    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01
 #    restart: unless-stopped

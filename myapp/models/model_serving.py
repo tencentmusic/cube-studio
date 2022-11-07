@@ -62,7 +62,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def deploy(self):
-        monitoring_url = self.project.cluster.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
+        monitoring_url = self.project.cluster.get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
         help_url=''
         try:
             help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
@@ -117,7 +117,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def host_url(self):
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN','')
+        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
                 url = self.host
@@ -202,7 +202,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         except Exception as e:
             print(e)
 
-        monitoring_url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        monitoring_url=self.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
         dom = f'''
                 <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
@@ -263,7 +263,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def inference_host_url(self):
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN','')
+        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
                 url = self.host
