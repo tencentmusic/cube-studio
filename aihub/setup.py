@@ -26,7 +26,7 @@ setup(
     ],
     python_requires='>=3.6',
     keywords='',
-    packages=find_packages("src"),  # 必填 包含所有的py文件
-    package_dir={'': 'src'},  # 必填 包的地址
+    packages=find_packages("sdk"),  # 必填 包含所有的py文件
+    package_dir={'': 'sdk'},  # 必填 包的地址
     include_package_data=True,  # 将数据文件也打包
     )
