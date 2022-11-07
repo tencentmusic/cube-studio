@@ -1,0 +1,11 @@
+dist
+build
+src/cubestudio.egg-info
+deep-learning/*/cubestudio-2022.10.1-py3-none-any.whl
+deep-learning/*/result
+
+/src/cubestudio/aihub/web/static/example/
+/deep-learning/test.py
+/deep-learning/*/deploy.yaml
+/deep-learning/*/upload
+/deep-learning/deploy/

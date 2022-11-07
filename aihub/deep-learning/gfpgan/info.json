@@ -1,0 +1,22 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/face-repair",
+    "field": "机器视觉",
+    "scenes": "图像合成",
+    "type": "dateset,notebook,train,inference",
+    "name": "gfpgan",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "gfpgan-v20221001",
+    "label": "图片修复",
+    "describe": "低分辨率照片修复，清晰度增强",
+    "pic": "https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {}
+}

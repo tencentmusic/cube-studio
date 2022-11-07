@@ -60,7 +60,7 @@ services:
 #    command: ["bash","-c","celery beat --app=myapp.tasks.celery_app:celery_app --loglevel=info"]
 #    shm_size: '100gb'
 #    environment:
-#      REDIS_HOST: 'host.docker.internal'
+#      REDIS_HOST: 'redis'
 #      REDIS_PORT: '6379'
 #      REDIS_PASSWORD: admin
 #      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
@@ -82,7 +82,7 @@ services:
 #    restart: unless-stopped
 #    command: ["bash","-c","celery worker --app=myapp.tasks.celery_app:celery_app --loglevel=info --pool=prefork -Ofair -c 40"]
 #    environment:
-#      REDIS_HOST: 'host.docker.internal'
+#      REDIS_HOST: 'redis'
 #      REDIS_PORT: '6379'
 #      REDIS_PASSWORD: admin
 #      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'

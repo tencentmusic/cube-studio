@@ -200,7 +200,6 @@ def run(modelpath, gpu, datapath):
         logging.info("CPU training time= {}".format(  # pylint: disable = logging-format-interpolation
             str(datetime.datetime.now() - time_start)))  # pylint: disable = logging-format-interpolation
 
-
 if __name__ == "__main__":
     import argparse
 

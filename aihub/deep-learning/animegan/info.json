@@ -1,0 +1,24 @@
+{
+    "doc": "https://github.com/TachibanaYoshino/AnimeGANv3",
+    "field": "机器视觉",
+    "scenes": "图像合成",
+    "type": "dateset,notebook,train,inference",
+    "name": "animegan",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "animegan-v20221001",
+    "label": "动漫风格化",
+    "describe": "图片的全新动漫风格化，宫崎骏或新海诚风格的动漫，以及4种关于人脸的风格转换。",
+    "pic": "example.png",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {
+        "resource_gpu": "1"
+    }
+}
