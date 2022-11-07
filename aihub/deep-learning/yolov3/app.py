@@ -24,7 +24,7 @@ class Yolov3_Model(Model):
     status='online'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/yolov3'
-    pic='https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg'
+    pic='example.jpg'
 
     inference_inputs = [
         Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于目标识别的原始图片')

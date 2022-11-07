@@ -38,7 +38,7 @@ class GFPGAN_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "img_file_path": "test.png"
+                "img_file_path": "test.jpg"
             }
         }
     ]
@@ -98,7 +98,7 @@ class GFPGAN_Model(Model):
 
 model=GFPGAN_Model()
 # model.load_model()
-# result = model.inference(img_file_path='test.png')  # 测试
+# result = model.inference(img_file_path='test.jpg')  # 测试
 # print(result)
 
 # # # 启动服务

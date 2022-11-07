@@ -83,21 +83,39 @@ docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/
 
 - 实例分割：FCN、DeepLab、Pyramid Scene Parsing Network、Mask R-CNN、U-Net
 
+
+![humanseg](humanseg/example.jpg)
+
 ## 图像生成与转换
 
 - 变分自编码器（VAE）：FCN-U-NET
 
 - 生成对抗网络（GAN）：DCGAN
 
+animegan
+
+![animegan](animegan/example.jpg)
+
 - 有监督图像转换：CGAN、pix2pix
 
 - 无监督图像转换：cycleGAN
+
+![gfpgan](https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f)
+
+
+stable-diffusion
+
+![stable-diffusion](https://images.nightcafe.studio//assets/stable-tile.jpg)
 
 ## 目标检测
 
 - 基于区域提取两阶段: R-CNN、SPP-Net、FAST R-CNN、FASTER R-CNN
 
 - 基于回归单阶段: YOLO系列、SSD
+
+![yolov3](yolov3/example.jpg)
+
+![panoptic](panoptic/test.jpg)
 
 ## 目标跟踪
 
@@ -116,6 +134,9 @@ docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/
 - PartialConv
 - EdgeConnect
 
+![deoldify](https://picx.zhimg.com/v2-e96dd757c96464427560a9b5e5b07bc3_720w.jpg?source=172ae18b)
+
+
 ## 超分辨率
 
 - SRCNN
@@ -130,13 +151,15 @@ docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/
 
 ## ocr
 
-<img width="740" alt="640" src="https://user-images.githubusercontent.com/20157705/191438938-59b84670-24eb-47b5-b791-d8ad053a26a9.png">
-
 [paddleocr](../paddleocr/README.md)
+
+<img width="740" alt="640" src="https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png">
+
+[ddddocr](../ddddocr/README.md)
 
 <img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="300px">
 
-[ddddocr](../ddddocr/README.md)
+
 
 ## 图像检索
 
