@@ -1,6 +1,6 @@
 import { GithubOutlined } from '@ant-design/icons'
 import { Button, Form, message, Result, Spin, Tag } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { IAppInfo, IResultItem } from '../../api/interface/stateInterface'
 import { getAppInfo, submitData } from '../../api/mobiApi'
 
@@ -11,6 +11,7 @@ import 'react-awesome-slider/dist/styles.css';
 import DynamicForm, { IDynamicFormConfigItem } from '../../components/DynamicForm/DynamicForm'
 import Checkbox from '../../components/CheckoutGroupPlus/CheckoutGroupPlus'
 import { useLocation } from 'react-router-dom'
+import Loading from '../../components/Loading/Loading'
 
 const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -21,9 +22,27 @@ export default function Index() {
     const [dynamicFormConfig, setDynamicFormConfig] = useState<IDynamicFormConfigItem[]>([])
     const [reslutList, setReslutList] = useState<IResultItem[]>([])
     const [selected, setSelected] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [form] = Form.useForm();
     const location = useLocation()
+
+    const [activeKey, _setActiveKey] = useState<number>(0);
+    const activeKeyRef = useRef(activeKey);
+    const setActiveKey = (data: number): void => {
+        activeKeyRef.current = data;
+        _setActiveKey(data);
+    };
+
+    useEffect(() => {
+        const timerTagRecord = setInterval(() => {
+            if (activeKeyRef.current < 99) {
+                setActiveKey(activeKeyRef.current + 1);
+            }
+        }, 1000);
+        return () => {
+            clearInterval(timerTagRecord);
+        };
+    }, []);
 
     useEffect(() => {
         getAppInfo(location.pathname).then(res => {
@@ -32,7 +51,7 @@ export default function Index() {
             const tarConfig = createDyFormConfig(data.inference_inputs, {}, {})
             setDynamicFormConfig(tarConfig)
         }).catch(err => { }).finally(() => {
-            setLoading(false)
+            // setLoading(false)
         })
     }, [])
 
@@ -97,8 +116,18 @@ export default function Index() {
 
     return (
         <div>
-            {
+            {/* {
                 loading ? <Spin spinning={loading} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100vh' }}></Spin> : null
+            } */}
+            {
+                loading ? <Loading value={activeKey} content={
+                    <div className="ta-c">
+                        <div className="c-text-w fs18 pb8">结果生成中，稍等片刻</div>
+                        <Button onClick={() => {
+                            setLoading(false)
+                        }}>退出等待</Button>
+                    </div>
+                } /> : null
             }
 
             <div className="p16 bg-w">
@@ -139,6 +168,8 @@ export default function Index() {
                         form.validateFields().then(values => {
                             console.log(values)
                             setLoading(true)
+                            setActiveKey(0)
+
                             submitData(pageInfo?.inference_url || '', values).then(res => {
                                 setReslutList(res.data.result)
                             }).catch(err => {

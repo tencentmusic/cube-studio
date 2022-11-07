@@ -1,4 +1,3 @@
-dist
 build
 src/cubestudio.egg-info
 deep-learning/*/cubestudio-2022.10.1-py3-none-any.whl
