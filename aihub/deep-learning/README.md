@@ -40,6 +40,7 @@ python app.py
 ```
 生成aiapp的镜像
 ```bash
+aiapp=$(basename `pwd`)
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 ```
 
