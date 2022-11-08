@@ -17,7 +17,7 @@ for app_name in os.listdir("."):
 
 
         app_name = app_name.lower().replace('_', '-')
-        info['doc']=f"http://{app_name}.aihub.cube.woa.com/frontend/{app_name}"
+        info['doc']=f"http://{app_name}.aihub.cube.woa.com/aihub/{app_name}"
         all_info.append(info)
         resource_gpu=info.get('inference',{}).get('resource_gpu','0')
         if 'http' not in info['pic']:
