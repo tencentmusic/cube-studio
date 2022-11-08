@@ -86,8 +86,7 @@ spec:
         - name: aihub-{app_name}
           image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
           imagePullPolicy: Always  # IfNotPresent
-          command: ["bash", "-c", "/src/docker/entrypoint.sh"]
-          args: ["python", "app.py"]
+          command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
           securityContext:
             privileged: true
           env:
