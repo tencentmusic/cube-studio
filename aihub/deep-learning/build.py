@@ -76,17 +76,18 @@ spec:
             path: /usr/share/zoneinfo/Asia/Shanghai
         - name: app-data
           hostPath:
-            path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/sdk/example/{app_name}
+            path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/{app_name}
         - name: cube-studio
           hostPath:
-            path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/sdk/src
+            path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src
       nodeSelector:
         aihub: {'cpu' if resource_gpu=='0' else 'gpu'}
       containers:
         - name: aihub-{app_name}
           image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
           imagePullPolicy: Always  # IfNotPresent
-          command: ["bash","-c","pip install celery redis && bash /entrypoint.sh"]
+          command: ["bash", "-c", "/src/docker/entrypoint.sh"]
+          args: ["python", "app.py"]
           securityContext:
             privileged: true
           env:
@@ -124,6 +125,7 @@ spec:
         port:
           number: 80
         '''
+        os.makedirs('deploy',exist_ok=True)
         save_path = f"deploy/{app_name}.yaml"
         # print(save_path)
         file = open(save_path,mode='w')

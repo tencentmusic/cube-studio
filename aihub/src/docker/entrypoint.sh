@@ -2,7 +2,7 @@
 
 mkdir -p /data/log/nginx/
 pip install celery redis
-cp /src/cubestudio/aihub/docker/default.conf /etc/nginx/conf.d/default.conf
+cp /src/docker/default.conf /etc/nginx/conf.d/default.conf
 service nginx stop
 nginx -g "daemon off;" &
 echo "started nginx"
