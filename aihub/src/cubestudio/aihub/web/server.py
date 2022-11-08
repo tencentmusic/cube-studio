@@ -319,21 +319,10 @@ class Server():
             return jsonify(result)
 
 
-        # @app.route('/')
-        # @app.route(f'/{self.pre_url}')
-        # def home():
-        #     return redirect('/frontend/index.html#/frontend')
-        #     data = {
-        #         "name": self.model.name,
-        #         "label": self.model.label,
-        #         "describe": self.model.describe,
-        #         "doc": self.model.doc,
-        #         "pic":self.model.pic,
-        #         "input":self.model.inference_inputs,
-        #         "example":self.web_examples
-        #     }
-        #     print(data)
-        #     return render_template('vision.html', data=data)
+        @app.route('/')
+        @app.route(f'/{self.pre_url}')
+        def home():
+            return redirect(f'/aihub/{self.pre_url}')
 
         # 监控度量
         @app.route(f'/{self.pre_url}/metrics')
@@ -477,7 +466,7 @@ class Server():
             req_url = request.path
             print(req_url)
             # 只对后端接口
-            if '/frontend' not in req_url:
+            if '/aihub' not in req_url:
                 username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
                 session['username']=username
 
@@ -501,7 +490,7 @@ class Server():
         @app.after_request
         def apply_http_headers(response):
             req_url = request.path
-            if '/frontend' not in req_url:
+            if '/aihub' not in req_url:
                 username = session['username']
                 user_history[username] = {
                     req_url: user_history.get(username, {}).get(req_url, 0) + 1
