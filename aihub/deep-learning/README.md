@@ -26,7 +26,8 @@ ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4 无python环境
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
-docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080  ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash
+chmod +x $cube_dir/src/docker/entrypoint.sh
+sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
 
 ```
 补全init.sh环境脚本。
@@ -50,7 +51,9 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 # 获取当前项目名作为应用名
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
-docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 8080:8080 ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}
+chmod +x $cube_dir/src/docker/entrypoint.sh
+sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+
 
 ```
 
