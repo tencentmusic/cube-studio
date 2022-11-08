@@ -57,6 +57,7 @@ class Server():
         self.model=model
         self.docker=docker
         self.pre_url=self.model.name
+        self.has_load_model=False
 
     # 启动服务
     # @pysnooper.snoop()
@@ -99,8 +100,7 @@ class Server():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
-        # 一次性加载模型
-        self.model.load_model()
+
 
         # 定义认为放在的队列
         def api_inference(name,version,data):
@@ -315,6 +315,10 @@ class Server():
 
 
             # 同步推理
+            # 一次性加载模型
+            if not self.has_load_model:
+                self.model.load_model()
+                self.has_load_model=True
             result = api_inference(name=self.model.name, version=self.model.version, data=data)
             return jsonify(result)
 
