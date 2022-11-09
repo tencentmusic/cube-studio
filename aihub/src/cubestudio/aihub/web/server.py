@@ -96,7 +96,7 @@ class Server():
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copyfile(file_path, save_path)
-            return  f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
+            return f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
         # 视频转流
         def video_stram(self,video_path):
