@@ -1,6 +1,6 @@
 [
   {
-    "doc": "http://www.data-master.net:8888/aihub/deoldify",
+    "doc": "http://deoldify.aihub.cube.woa.com/aihub/deoldify",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -22,7 +22,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/paddleocr",
+    "doc": "http://paddleocr.aihub.cube.woa.com/aihub/paddleocr",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -44,7 +44,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/ddddocr",
+    "doc": "http://ddddocr.aihub.cube.woa.com/aihub/ddddocr",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -66,7 +66,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/gfpgan",
+    "doc": "http://gfpgan.aihub.cube.woa.com/aihub/gfpgan",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -88,7 +88,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/stable-diffusion",
+    "doc": "http://stable-diffusion.aihub.cube.woa.com/aihub/stable-diffusion",
     "field": "神经网络",
     "scenes": "图像创作",
     "type": "dateset,notebook,train,inference",
@@ -112,7 +112,7 @@
     }
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/yolov3",
+    "doc": "http://yolov3.aihub.cube.woa.com/aihub/yolov3",
     "field": "机器视觉",
     "scenes": "目标识别",
     "type": "dateset,notebook,train,inference",
@@ -134,7 +134,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/humanseg",
+    "doc": "http://humanseg.aihub.cube.woa.com/aihub/humanseg",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -156,7 +156,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/app1",
+    "doc": "http://app1.aihub.cube.woa.com/aihub/app1",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -178,7 +178,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/panoptic",
+    "doc": "http://panoptic.aihub.cube.woa.com/aihub/panoptic",
     "field": "机器视觉",
     "scenes": "目标识别",
     "type": "dateset,notebook,train,inference",
@@ -188,7 +188,7 @@
     "uuid": "panoptic-v20221001",
     "label": "图片识别",
     "describe": "resnet50 图像识别",
-    "pic": "http://www.data-master.net:8888/panoptic/static/example/panoptic/test.png",
+    "pic": "http://www.data-master.net:8888/panoptic/static/example/panoptic/test.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},
@@ -200,7 +200,7 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/animegan",
+    "doc": "http://animegan.aihub.cube.woa.com/aihub/animegan",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -210,7 +210,7 @@
     "uuid": "animegan-v20221001",
     "label": "动漫风格化",
     "describe": "图片的全新动漫风格化，宫崎骏或新海诚风格的动漫，以及4种关于人脸的风格转换。",
-    "pic": "http://www.data-master.net:8888/animegan/static/example/animegan/example.png",
+    "pic": "http://www.data-master.net:8888/animegan/static/example/animegan/example.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},

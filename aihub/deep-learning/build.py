@@ -20,6 +20,7 @@ for app_name in os.listdir("."):
 
         app_name = app_name.lower().replace('_', '-')
         info['doc']=f"http://{app_name}.aihub.cube.woa.com/aihub/{app_name}"
+        synchronous='synchronous'
         all_info.append(info)
         resource_gpu=info.get('inference',{}).get('resource_gpu','0')
         if 'http' not in info['pic']:
@@ -35,10 +36,10 @@ for app_name in os.listdir("."):
             # command = f"docker run --name ${app_name} --privileged --rm -it -e APPNAME={app_name} -v $cube_dir/src:/src -v $PWD:/app -p 80:80 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${app_name} python app.py"
             # build_file.write(command)
 
-        # 云上部署特别配置
-        resource_gpu='0'
-        synchronous='asynchronous'
-        info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}"
+        # # 云上部署特别配置
+        # resource_gpu='0'
+        # synchronous='asynchronous'
+        # info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}"
 
 
         # 生成k8s部署的脚本
@@ -91,6 +92,9 @@ spec:
         - name: cube-studio
           hostPath:
             path: /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src
+        - name: cos-data
+          hostPath:
+            path: /mnt/aihub
       nodeSelector:
         aihub: {'cpu' if resource_gpu=='0' else 'gpu'}
       containers:
@@ -116,24 +120,9 @@ spec:
               mountPath: /app
             - name: cube-studio
               mountPath: /src
+            - name: cos-data
+              mountPath: /src/cubestudio/aihub/web/static
               
-# ---
-# apiVersion: networking.istio.io/v1alpha3
-# kind: VirtualService
-# metadata:
-#   name: aihub-{app_name}
-#   namespace: aihub
-# spec:
-#   gateways:
-#   - kubeflow/kubeflow-gateway
-#   hosts:
-#   - "{app_name}.aihub.cube.woa.com"  
-#   http:
-#   - route:
-#     - destination:
-#         host: aihub-{app_name}.aihub.svc.cluster.local
-#         port:
-#           number: 80
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -142,18 +131,35 @@ metadata:
   namespace: aihub
 spec:
   gateways:
-  - kubeflow/kubeflow-gateway-8080
+  - kubeflow/kubeflow-gateway
   hosts:
-  - "*"  
+  - "{app_name}.aihub.cube.woa.com"  
   http:
-  - match:
-    - uri:
-        prefix: /{'aihub/' if app_name=='app1' else app_name+"/"}
-    route:
+  - route:
     - destination:
         host: aihub-{app_name}.aihub.svc.cluster.local
         port:
           number: 80
+---
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: aihub-{app_name}
+#   namespace: aihub
+# spec:
+#   gateways:
+#   - kubeflow/kubeflow-gateway-8080
+#   hosts:
+#   - "*"  
+#   http:
+#   - match:
+#     - uri:
+#         prefix: /{'aihub/' if app_name=='app1' else app_name+"/"}
+#     route:
+#     - destination:
+#         host: aihub-{app_name}.aihub.svc.cluster.local
+#         port:
+#           number: 80
         '''
         os.makedirs('deploy',exist_ok=True)
         save_path = f"deploy/{app_name}.yaml"

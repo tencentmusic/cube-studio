@@ -96,7 +96,7 @@ class Server():
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copyfile(file_path, save_path)
-            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
+            return  f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
         # 视频转流
         def video_stram(self,video_path):
@@ -396,7 +396,7 @@ class Server():
                 "web_examples":self.web_examples,
                 "inference_inputs": [input.to_json() for input in self.model.inference_inputs],
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
-                "aihub_url":"http://www.data-master.net/frontend/aihub/model_market/model_all",
+                "aihub_url":"http://www.data-master.net:8880/frontend/aihub/model_market/model_all",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
                 "user":f"/{self.pre_url}/login",
                 "rec_apps":[
