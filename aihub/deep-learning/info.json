@@ -1,6 +1,6 @@
 [
   {
-    "doc": "http://deoldify.aihub.cube.woa.com/aihub/deoldify",
+    "doc": "http://www.data-master.net:8888/aihub/deoldify",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -22,7 +22,7 @@
     "inference": {}
   },
   {
-    "doc": "http://paddleocr.aihub.cube.woa.com/aihub/paddleocr",
+    "doc": "http://www.data-master.net:8888/aihub/paddleocr",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -44,7 +44,7 @@
     "inference": {}
   },
   {
-    "doc": "http://ddddocr.aihub.cube.woa.com/aihub/ddddocr",
+    "doc": "http://www.data-master.net:8888/aihub/ddddocr",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -66,7 +66,7 @@
     "inference": {}
   },
   {
-    "doc": "http://gfpgan.aihub.cube.woa.com/aihub/gfpgan",
+    "doc": "http://www.data-master.net:8888/aihub/gfpgan",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -88,7 +88,7 @@
     "inference": {}
   },
   {
-    "doc": "http://stable-diffusion.aihub.cube.woa.com/aihub/stable-diffusion",
+    "doc": "http://www.data-master.net:8888/aihub/stable-diffusion",
     "field": "神经网络",
     "scenes": "图像创作",
     "type": "dateset,notebook,train,inference",
@@ -112,7 +112,7 @@
     }
   },
   {
-    "doc": "http://yolov3.aihub.cube.woa.com/aihub/yolov3",
+    "doc": "http://www.data-master.net:8888/aihub/yolov3",
     "field": "机器视觉",
     "scenes": "目标识别",
     "type": "dateset,notebook,train,inference",
@@ -134,7 +134,7 @@
     "inference": {}
   },
   {
-    "doc": "http://humanseg.aihub.cube.woa.com/aihub/humanseg",
+    "doc": "http://www.data-master.net:8888/aihub/humanseg",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -156,7 +156,7 @@
     "inference": {}
   },
   {
-    "doc": "http://app1.aihub.cube.woa.com/aihub/app1",
+    "doc": "http://www.data-master.net:8888/aihub/app1",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -178,7 +178,7 @@
     "inference": {}
   },
   {
-    "doc": "http://panoptic.aihub.cube.woa.com/aihub/panoptic",
+    "doc": "http://www.data-master.net:8888/aihub/panoptic",
     "field": "机器视觉",
     "scenes": "目标识别",
     "type": "dateset,notebook,train,inference",
@@ -200,7 +200,7 @@
     "inference": {}
   },
   {
-    "doc": "http://animegan.aihub.cube.woa.com/aihub/animegan",
+    "doc": "http://www.data-master.net:8888/aihub/animegan",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
