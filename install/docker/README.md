@@ -36,7 +36,10 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
 docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01
+# 08.01版本，标签不同请注意
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.08.01
+# 09.01及10.01版本
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2022.09.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -55,6 +58,19 @@ pip3 install --upgrade setuptools pip
 pip3 install -r requirements.txt -r requirements-dev.txt 
 ```
 本地安装python包，避免本地打开代码时大量包缺失报错
+
+
+或者可以直接进入dashborard镜像容器内，将python包导出，然后复制到宿主机
+```
+pip3 freeze > requirements-from-img.txt
+```
+
+注意：
+- 目前(2022.11.8)提供镜像中python版本为3.6.9, setuptools版本为53.0.0
+  - setuptools版本过新部分包安装会报错`use_2to3`
+- 通过导出镜像内包依赖来安装仍然会导出部分包依赖出问题
+  - 需手动修改部分包的版本
+- 若安装pydruid==0.5.6时报错可以尝试`pip install pytest-runner`解决
 
 #### 本地后端代码调试
 
