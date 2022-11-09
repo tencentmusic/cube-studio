@@ -5,8 +5,7 @@ import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
 all_info=[]
 build_file=open('build.sh',mode='w')
-start_file=open('start.sh',mode='w')
-start_file.write('chmod +x ../src/docker/entrypoint.sh')
+
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','deploy']:
@@ -25,7 +24,7 @@ for app_name in os.listdir("."):
         resource_gpu=info.get('inference',{}).get('resource_gpu','0')
         if 'http' not in info['pic']:
             # info['pic']=f"http://{app_name}.aihub.cube.woa.com/{app_name}/static/example/"+app_name+"/" + info['pic']
-            info['pic'] = f"http://www.data-master.net:8880/{app_name}/static/example/" + app_name + "/" + info['pic']
+            info['pic'] = f"http://www.data-master.net:8888/{app_name}/static/example/" + app_name + "/" + info['pic']
 
         # 批量构建镜像
         # 批量启动镜像
@@ -39,7 +38,7 @@ for app_name in os.listdir("."):
         # 云上部署特别配置
         resource_gpu='0'
         synchronous='asynchronous'
-        info['doc'] = f"http://www.data-master.net:8880/aihub/{app_name}"
+        info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}"
 
 
         # 生成k8s部署的脚本
@@ -143,7 +142,7 @@ metadata:
   namespace: aihub
 spec:
   gateways:
-  - kubeflow/kubeflow-gateway
+  - kubeflow/kubeflow-gateway-8080
   hosts:
   - "*"  
   http:
@@ -166,7 +165,6 @@ spec:
 build_file.write('\n\nwait')
 build_file.close()
 
-start_file.close()
 
 file = open('info.json',mode='w')
 file.write(json.dumps(all_info,indent=2,ensure_ascii=False))
