@@ -75,7 +75,7 @@ class InferenceService_ModelView_base():
         "model_name_url":{"type": "ellip2", "width": 300},
         "model_version": {"type": "ellip2", "width": 200},
         "inference_host_url": {"type": "ellip2", "width": 500},
-        "ip": {"type": "ellip2", "width": 200},
+        "ip": {"type": "ellip2", "width": 250},
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 350},

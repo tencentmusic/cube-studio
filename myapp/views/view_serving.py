@@ -55,7 +55,7 @@ class Service_ModelView_base():
     cols_width={
         "name_url":{"type": "ellip2", "width": 200},
         "host_url": {"type": "ellip2", "width": 400},
-        "ip": {"type": "ellip2", "width": 200},
+        "ip": {"type": "ellip2", "width": 250},
         "deploy": {"type": "ellip2", "width": 200},
         "modified": {"type": "ellip2", "width": 150}
     }
