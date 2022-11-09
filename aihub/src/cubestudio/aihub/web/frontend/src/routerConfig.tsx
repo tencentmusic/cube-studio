@@ -24,7 +24,7 @@ const lazy2Compont = (factory: () => Promise<{
     </React.Suspense>
 }
 
-export const innerDynamicRouterConfig: IRouterConfigPlusItem[] = [
+export const innerDynamicRouterConfig: any[] = [
     // {
     //     path: '/xxx',
     //     title: 'xxx',
@@ -41,7 +41,7 @@ const innerDynamicRouterConfigMap = innerDynamicRouterConfig.reduce((pre, next) 
     [next.key || '']: next
 }), {}) as Record<string, IRouterConfigPlusItem>;
 
-export const routerConfigPlus: IRouterConfigPlusItem[] = [
+export const routerConfigPlus: any[] = [
     {
         path: '/',
         index: true,
@@ -61,7 +61,7 @@ export const createRoute = (urlName: string) => {
     }
 }
 
-export const getDefaultOpenKeys = (data: IRouterConfigPlusItem[]) => {
+export const getDefaultOpenKeys = (data: any[]) => {
     const openKeys: string[] = []
     const quene = [...data]
     while (quene.length) {
