@@ -59,7 +59,7 @@ class Server():
         self.pre_url=self.model.name
         self.has_load_model=False
 
-        if self.model.pic:
+        if self.model.pic and 'http' not in self.model.pic:
             self.file2url(self.model.pic)
 
     # 文件转url
