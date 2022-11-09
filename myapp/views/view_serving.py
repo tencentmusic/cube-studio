@@ -226,7 +226,11 @@ class Service_ModelView_base():
                 SERVICE_EXTERNAL_IP=[ip]
 
 
+
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0] for ip in SERVICE_EXTERNAL_IP]
+
             service_ports = [[30000+10*service.id+index,port] for index,port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
