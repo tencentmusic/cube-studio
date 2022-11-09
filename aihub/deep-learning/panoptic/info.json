@@ -9,7 +9,7 @@
     "uuid": "panoptic-v20221001",
     "label": "图片识别",
     "describe": "resnet50 图像识别",
-    "pic": "test.png",
+    "pic": "test.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},

@@ -75,7 +75,7 @@ class InferenceService_ModelView_base():
         "model_name_url":{"type": "ellip2", "width": 300},
         "model_version": {"type": "ellip2", "width": 200},
         "inference_host_url": {"type": "ellip2", "width": 500},
-        "ip": {"type": "ellip2", "width": 200},
+        "ip": {"type": "ellip2", "width": 250},
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 350},
@@ -917,6 +917,9 @@ output %s
 
 
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
+
             service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             print('deploy proxy ip')

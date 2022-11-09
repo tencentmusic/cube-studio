@@ -110,6 +110,10 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
                 SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
+            if '|' in SERVICE_EXTERNAL_IP:
+                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
         else:
@@ -250,6 +254,10 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
                 SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
+            if '|' in SERVICE_EXTERNAL_IP:
+                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
         else:

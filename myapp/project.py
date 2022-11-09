@@ -29,6 +29,8 @@ class Myauthdbview(AuthDBView):
     @expose("/login/", methods=["GET", "POST"])
     # @pysnooper.snoop(watch_explode=('form',))
     def login(self):
+        request_data = request.args.to_dict()
+        comed_url = request_data.get('login_url', '')
 
         if 'rtx' in request.args:
             if request.args.get('rtx'):
@@ -37,7 +39,6 @@ class Myauthdbview(AuthDBView):
                 if user:
                     login_user(user, remember=True)
                     return redirect(self.appbuilder.get_url_for_index)
-
 
         if g.user is not None and g.user.is_authenticated:
             return redirect(self.appbuilder.get_url_for_index)
@@ -74,9 +75,8 @@ class Myauthdbview(AuthDBView):
                     user = self.appbuilder.sm.auth_user_remote_org_user(username=form.username.data, org_name='',
                                                                         password=form.password.data)
                     flash('发现用户%s不存在，已自动注册' % form.username.data, "warning")
-
             login_user(user, remember=True)
-            return redirect(self.appbuilder.get_url_for_index)
+            return redirect(comed_url if comed_url else self.appbuilder.get_url_for_index)
         return self.render_template(
             self.login_template, title=self.title, form=form, appbuilder=self.appbuilder
         )

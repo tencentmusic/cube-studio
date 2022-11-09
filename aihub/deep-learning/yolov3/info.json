@@ -9,7 +9,7 @@
     "uuid": "yolov3-v20221001",
     "label": "目标识别",
     "describe": "darknet yolov3 目标识别",
-    "pic": "https://user-images.githubusercontent.com/20157705/170216784-91ac86f7-d272-4940-a285-0c27d6f6cd96.jpg",
+    "pic": "example.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},

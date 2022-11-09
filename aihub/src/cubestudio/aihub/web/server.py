@@ -57,6 +57,14 @@ class Server():
         self.model=model
         self.docker=docker
         self.pre_url=self.model.name
+        self.has_load_model=False
+
+        if self.model.pic and 'http' not in self.model.pic:
+            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
+            if not os.path.exists(save_path):
+                os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                shutil.copyfile(self.model.pic, save_path)
+
 
     # 启动服务
     # @pysnooper.snoop()
@@ -88,7 +96,7 @@ class Server():
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copyfile(file_path, save_path)
-            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
+            return f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
         # 视频转流
         def video_stram(self,video_path):
@@ -99,8 +107,7 @@ class Server():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
-        # 一次性加载模型
-        self.model.load_model()
+
 
         # 定义认为放在的队列
         def api_inference(name,version,data):
@@ -315,6 +322,10 @@ class Server():
 
 
             # 同步推理
+            # 一次性加载模型
+            if not self.has_load_model:
+                self.model.load_model()
+                self.has_load_model=True
             result = api_inference(name=self.model.name, version=self.model.version, data=data)
             return jsonify(result)
 
@@ -385,7 +396,7 @@ class Server():
                 "web_examples":self.web_examples,
                 "inference_inputs": [input.to_json() for input in self.model.inference_inputs],
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
-                "aihub_url":"http://www.data-master.net/frontend/aihub/model_market/model_all",
+                "aihub_url":"http://www.data-master.net:8880/frontend/aihub/model_market/model_all",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
                 "user":f"/{self.pre_url}/login",
                 "rec_apps":[
