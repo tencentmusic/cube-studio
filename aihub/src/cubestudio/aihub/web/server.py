@@ -60,16 +60,11 @@ class Server():
         self.has_load_model=False
 
         if self.model.pic and 'http' not in self.model.pic:
-            self.file2url(self.model.pic)
+            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
+            if not os.path.exists(save_path):
+                os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                shutil.copyfile(self.model.pic, save_path)
 
-    # 文件转url
-    def file2url(self,file_path):
-        # base_name = os.path.basename(file_path)
-        save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + file_path.strip('/')
-        if not os.path.exists(save_path):
-            os.makedirs(os.path.dirname(save_path),exist_ok=True)
-            shutil.copyfile(file_path, save_path)
-        return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
     # 启动服务
     # @pysnooper.snoop()
@@ -94,6 +89,14 @@ class Server():
             print(command)
             exec(command)
 
+        # 文件转url
+        def file2url(file_path):
+            # base_name = os.path.basename(file_path)
+            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + file_path.strip('/')
+            if not os.path.exists(save_path):
+                os.makedirs(os.path.dirname(save_path),exist_ok=True)
+                shutil.copyfile(file_path, save_path)
+            return request.host_url.strip('/') + f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
         # 视频转流
         def video_stram(self,video_path):
@@ -254,19 +257,19 @@ class Server():
                             # image_data = f.read()
                             # base64_data = base64.b64encode(image_data)  # base64编码
                             # back['image'] = str(base64_data,encoding='utf-8')
-                            back['image'] = self.file2url(save_file_path)
+                            back['image'] = file2url(save_file_path)
 
                     # 如果是视频，写的不是http
                     if back.get('video',''):
                         save_file_path = back['video']
                         if os.path.exists(save_file_path):
-                            back['video']=self.file2url(save_file_path)
+                            back['video']=file2url(save_file_path)
 
                     # 如果是语音，写的不是http
                     if back.get('audio',''):
                         save_file_path = back['audio']
                         if os.path.exists(save_file_path):
-                            back['audio']=self.file2url(save_file_path)
+                            back['audio']=file2url(save_file_path)
 
                 return {
                     "status": 0,
@@ -352,7 +355,7 @@ class Server():
                     if arg_filed.name in example_input:  # 这个示例提供了这个参数
                         # 示例图片/视频转为在线地址
                         if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name or 'audio' in arg_filed.type.name) and 'http' not in example_input[arg_filed.name]:
-                            example_input[arg_filed.name]=self.file2url(example_input[arg_filed.name])
+                            example_input[arg_filed.name]=file2url(example_input[arg_filed.name])
 
             # 将图片和语音/视频的可选值和默认值，都转为在线网址
             for input in self.model.inference_inputs:
@@ -360,19 +363,19 @@ class Server():
 
                     # # 对于单选
                     # if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
-                    #     input.default = self.file2url(input.default)
+                    #     input.default = file2url(input.default)
                     #
                     # # 对于多选
                     # if '_select' in input.type.name and input.validators.max>1 and input.default:
                     #     for i,default in enumerate(input.default):
                     #         if 'http' not in default:
-                    #             input.default[i] = self.file2url(default)
+                    #             input.default[i] = file2url(default)
 
                     # 对于可选值，也转为url
                     if input.choices:
                         for i,choice in enumerate(input.choices):
                             if 'http' not in choice:
-                                input.choices[i]=self.file2url(choice)
+                                input.choices[i]=file2url(choice)
 
                 # 对于输入类型做一些纠正
                 if input.type.name=='int' and input.validators:
@@ -389,7 +392,7 @@ class Server():
                 "status": self.model.status,
                 "version": self.model.version,
                 "doc": self.model.doc,
-                "pic": self.model.pic if 'http' in self.model.pic else self.file2url(self.model.pic),
+                "pic": self.model.pic if 'http' in self.model.pic else file2url(self.model.pic),
                 "web_examples":self.web_examples,
                 "inference_inputs": [input.to_json() for input in self.model.inference_inputs],
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
