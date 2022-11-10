@@ -13,6 +13,8 @@ services:
 #    restart: always
 #    environment:
 #      MYSQL_ROOT_PASSWORD: admin
+#      MYSQL_DATABASE: kubeflow
+#      TZ: Asia/Shanghai
 #    ports:
 #      - "3306:3306"
 #    volumes:
@@ -31,7 +33,7 @@ services:
   myapp:
     image:  ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01
     restart: always
-    command: ['bash','-c','sleep 10000000 && /entrypoint.sh']
+    command: ['bash','-c','/entrypoint.sh']
     environment:
       STAGE: 'dev'
       REDIS_HOST: 'redis'
