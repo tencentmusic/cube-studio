@@ -48,7 +48,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.
 
 #### 本地后端python代码开发
 
-需要安装下面的环境包
+需要安装下面的环境包, python 3.6.9
 
 ```bash
 pip3 install --upgrade setuptools pip 
