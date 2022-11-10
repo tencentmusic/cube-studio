@@ -4,25 +4,26 @@ services:
     image: bitnami/redis:4.0.14
     restart: unless-stopped
     environment:
-      REDIS_PASSWORD: admin
+      REDIS_PASSWORD: root
     ports:
       - "6379:6379"
 
-#  mysql:
-#    image: mysql:5.7
-#    restart: always
-#    environment:
-#      MYSQL_ROOT_PASSWORD: admin
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - ./data/mysql:/var/lib/mysql
+  mysql:
+    image: mysql:5.7
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kubeflow
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
 
   frontend:
     image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2022.09.01
     restart: unless-stopped
     ports:
-      - '80:80'
+      - "80:80"
     volumes:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../install/docker/dockerFrontend/nginx.conf:/etc/nginx/nginx.conf
@@ -36,15 +37,10 @@ services:
       STAGE: 'dev'
       REDIS_HOST: 'redis'
       REDIS_PORT: '6379'
-      REDIS_PASSWORD: admin
-      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
+      REDIS_PASSWORD: root
+      MYSQL_SERVICE: 'mysql+pymysql://root:root@mysql:3306/kubeflow?charset=utf8'
       ENVIRONMENT: DEV
       GPU_TYPE: NVIDIA
-#    ports:
-#      - "8080:80"
-    depends_on:
-      - redis
-#      - mysql
     volumes:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../myapp/:/home/myapp/myapp/
@@ -52,7 +48,9 @@ services:
       - ./entrypoint.sh:/entrypoint.sh
       - ./config.py:/home/myapp/myapp/config.py
       - ./kubeconfig:/home/myapp/kubeconfig
-
+    depends_on:
+      - redis
+      - mysql
 
 #  beat:
 #    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01
