@@ -77,6 +77,7 @@ class Myauthdbview(AuthDBView):
                     flash('发现用户%s不存在，已自动注册' % form.username.data, "warning")
             login_user(user, remember=True)
             return redirect(comed_url if comed_url else self.appbuilder.get_url_for_index)
+        flash('star 项目 cube-studio，入群获取体验账户密码','warning')
         return self.render_template(
             self.login_template, title=self.title, form=form, appbuilder=self.appbuilder
         )
