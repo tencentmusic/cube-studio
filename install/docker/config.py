@@ -907,7 +907,8 @@ MODEL_URLS = {
     "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
     "dataset":"/frontend/dataleap/media_data/dataset"
 }
-
+ # 可以跨域分享cookie的子域名，例如.local.com
+COOKIE_DOMAIN = ''
 JUPYTER_DOMAIN="kubeflow.local.com"
 NNI_DOMAIN='kubeflow.local.com'
 SERVICE_DOMAIN='service.local.com'
