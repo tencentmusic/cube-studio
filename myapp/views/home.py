@@ -829,16 +829,7 @@ class Myapp(BaseMyappView):
             for ip in nodes:
                 org = nodes[ip]['labels'].get('org', 'public')
                 enable_train = nodes[ip]['labels'].get('train', 'true')
-                if g.user.is_admin():
-                    # if enable_train == 'true':
-                    #     ip_html = '<a href="%s">%s</a>' % ("/myapp/schedule/node/%s" % ip, ip)
-                    # else:
-                    ip_html = '<a target="_blank" href="%s">%s</a>' % (cluster_config.get('K8S_DASHBOARD_CLUSTER', '').rstrip('/')+'/#/node/%s?namespace=default' % nodes[ip]['name'],ip)
-                else:
-                    if enable_train == 'true':
-                        ip_html = ip
-                    else:
-                        ip_html = '<strike>%s</strike>' % (ip,)
+                ip_html = '<a target="_blank" href="%s">%s</a>' % (cluster_config.get('K8S_DASHBOARD_CLUSTER', '').rstrip('/')+'/#/node/%s?namespace=default' % nodes[ip]['name'],ip)
                 share = nodes[ip]['labels'].get('share', 'true')
                 clolr = "#FFFFFF" if share == 'true' else '#F0F0F0'
                 message += '<tr bgcolor="%s">%s %s %s %s %s %s %s<tr>' % (
