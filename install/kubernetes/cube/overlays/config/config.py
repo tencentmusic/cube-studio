@@ -246,9 +246,6 @@ MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")
 # not the production version of the site.
 WARNING_MSG = None
 
-from celery.schedules import crontab
-from werkzeug.contrib.cache import RedisCache
-
 # 自动添加到响应头的配置
 HTTP_HEADERS = {
     "Access-Control-Allow-Origin":"*",
@@ -910,7 +907,8 @@ MODEL_URLS = {
     "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
     "dataset":"/frontend/dataleap/media_data/dataset"
 }
-
+ # 可以跨域分享cookie的子域名，例如.local.com
+COOKIE_DOMAIN = ''
 JUPYTER_DOMAIN="kubeflow.local.com"
 NNI_DOMAIN="kubeflow.local.com"
 SERVICE_DOMAIN="service.local.com"
