@@ -42,7 +42,7 @@ class Paddleocr_Model(Model):
         self.ocr = PaddleOCR(use_angle_cls=True, lang="ch")
 
     # 推理
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def inference(self,img_file_path):
         np_img = numpy.array(Image.open(img_file_path))
 
