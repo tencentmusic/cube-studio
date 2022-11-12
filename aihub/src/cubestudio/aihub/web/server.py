@@ -303,7 +303,7 @@ class Server():
                 }
                 from .celery_app import inference
                 task = inference.apply_async(kwargs = kwargs, expires = 120, retry = False)
-                for i in range(20):
+                for i in range(60):
                     time.sleep(1)
                     async_task = AsyncResult(id=task.id, app=celery_app)
                     print("async_task.id", async_task.id)
