@@ -29,7 +29,7 @@ class GFPGAN_Model(Model):
     status='online'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/face-repair'
-    pic='https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f'
+    pic='example.jpg'
 
     inference_inputs = [
         Field(type=Field_type.image, name='img_file_path', label='待修复图片', describe='需要进行修复的低清晰图片')
