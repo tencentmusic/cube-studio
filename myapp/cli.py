@@ -489,7 +489,7 @@ def init():
     # 添加aihub
     try:
         print('begin add aihub')
-        info_path='/home/myapp/myapp/tasks'
+        info_path='/home/myapp/myapp/tasks/info.json'
         from myapp.tasks.schedules import add_aihub
         add_aihub(info_path)
     except Exception as e:

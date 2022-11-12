@@ -156,28 +156,6 @@
     "inference": {}
   },
   {
-    "doc": "http://www.data-master.net:8888/aihub/app1",
-    "field": "机器视觉",
-    "scenes": "图像识别",
-    "type": "dateset,notebook,train,inference",
-    "name": "app1",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "app1-v20221001",
-    "label": "示例应用中文名",
-    "describe": "ai示例应用，详细描述，都会显示应用描述上，支持markdown",
-    "pic": "http://www.data-master.net:8888/app1/static/example/app1/result.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
-    },
-    "train": {},
-    "inference": {}
-  },
-  {
     "doc": "http://www.data-master.net:8888/aihub/panoptic",
     "field": "机器视觉",
     "scenes": "目标识别",

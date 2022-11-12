@@ -21,7 +21,8 @@ for app_name in os.listdir("."):
         app_name = app_name.lower().replace('_', '-')
         info['doc']=f"http://{app_name}.aihub.cube.woa.com/aihub/{app_name}"
         synchronous='synchronous'
-        all_info.append(info)
+        if app_name!='app1':
+            all_info.append(info)
         resource_gpu=info.get('inference',{}).get('resource_gpu','0')
         if 'http' not in info['pic']:
             # info['pic']=f"http://{app_name}.aihub.cube.woa.com/{app_name}/static/example/"+app_name+"/" + info['pic']
