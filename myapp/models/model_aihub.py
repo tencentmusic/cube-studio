@@ -48,7 +48,7 @@ class Aihub(Model,ImportMixin,MyappModelBase):
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
     <a href="{self.doc if self.status=='online' else ''}">
-        <img src="{self.pic}" onerror="this.src='https://img.zcool.cn/community/0131565aeff3c5a801219b7f6906a7.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
+        <img src="{self.pic}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
     </a>
     <br>
     <div>
