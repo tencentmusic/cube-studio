@@ -38,7 +38,9 @@ self.validators=validators
     "status": 0,
     "result": [{
       "text":'',
-      "image":'base64编码'
+      "image":'base64编码',
+      "video":'http://xxx/x.mp4',
+      "audio":'http://xxx/x.mp3'
     }],
     "message": ""
 }
