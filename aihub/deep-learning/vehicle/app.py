@@ -71,7 +71,7 @@ class APP1_Model(Model):
         return back
 
 model=APP1_Model()
-model.load_model()
+# model.load_model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
 
