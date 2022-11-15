@@ -89,9 +89,14 @@ class Server():
             print(command)
             exec(command)
 
-        # 文件转url
+        # 文件转url。视频转码，音频转码等
         def file2url(file_path):
             # base_name = os.path.basename(file_path)
+            if '.avi' in file_path:
+                from cubestudio.util.py_video import Video2Mp4
+                Video2Mp4(file_path,file_path.replace('.avi','.mp4'))
+                file_path = file_path.replace('.avi','.mp4')
+
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + file_path.strip('/')
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
