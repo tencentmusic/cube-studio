@@ -406,17 +406,20 @@ class Server():
                 "user":f"/{self.pre_url}/login",
                 "rec_apps":[
                     {
-                        "pic":"https://bbs-img.huaweicloud.com/blogs/img/1618802539113053650.png",
-                        "label":"图片风格化"
+                        "pic": f"/{self.pre_url.strip('/')}/static/rec/rec1.jpg",
+                        "label": "图片卡通化",
+                        "url":"/aihub/gfpgan"
                     },
                     {
-                        "pic": "https://n.sinaimg.cn/spider2020629/356/w640h516/20200629/c2d1-ivrxcex1264539.jpg",
-                        "label": "图片修复"
+                        "pic":f"/{self.pre_url.strip('/')}/static/rec/rec2.jpg",
+                        "label":"文本生成图片",
+                        "url": "/aihub/stable-diffusion"
                     },
                     {
-                        "pic": "https://agirls.aotter.net/media/2e3b9417-e579-4c2d-8ed1-bbac183a0a78.jpg",
-                        "label": "图片卡通化"
-                    }
+                        "pic": f"/{self.pre_url.strip('/')}/static/rec/rec3.jpg",
+                        "label": "图片卡通化",
+                        "url": "/aihub/gfpgan"
+                    },
                 ]
             }
             return jsonify(info)
