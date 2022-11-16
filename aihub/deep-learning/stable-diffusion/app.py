@@ -28,6 +28,8 @@ from contextlib import contextmanager, nullcontext
 from ldm.util import instantiate_from_config
 from Utils import split_weighted_subprompts
 
+had_move_model_CS = False
+had_move_model_FS = False
 
 class SD_Model(Model):
     # 模型基础信息定义
@@ -41,8 +43,8 @@ class SD_Model(Model):
     doc = 'https://github.com/CompVis/stable-diffusion'  # 'https://帮助文档的链接地址'
     pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
-    inference_resource={
-        "resource_gpu":"1"
+    inference_resource = {
+        "resource_gpu": "1"
     }
 
     inference_inputs = [
@@ -69,9 +71,9 @@ class SD_Model(Model):
     def load_model(self):
         self.device = 'cuda'  # cuda
         if not torch.cuda.is_available():  # CPU
-            self.device='cpu'
+            self.device = 'cpu'
 
-        pl_sd = torch.load('/model.ckpt', map_location="cuda:0" if self.device=='cuda' else "cpu")
+        pl_sd = torch.load('/model.ckpt', map_location="cuda:0" if self.device == 'cuda' else "cpu")
         self.sd = pl_sd["state_dict"]
 
         sd = self.sd
@@ -105,7 +107,7 @@ class SD_Model(Model):
         _, _ = self.model.load_state_dict(sd, strict=False)
         self.model.eval()
         self.model.unet_bs = 1
-        self.model.cdevice =self.device
+        self.model.cdevice = self.device
         self.model.turbo = True
 
         self.modelCS = instantiate_from_config(config.modelCondStage)
@@ -125,6 +127,8 @@ class SD_Model(Model):
     # 推理
     @pysnooper.snoop()
     def inference(self, prompt, n_samples=1, ddim_steps=50, fixed_code=True, n_rows=0, **kwargs):
+        global had_move_model_CS
+        global had_move_model_FS
         begin_time = datetime.datetime.now()
         back = [{
             "image": None,
@@ -153,7 +157,7 @@ class SD_Model(Model):
                 precision_scope = autocast
             else:
                 precision_scope = nullcontext
-            image_paths=[]
+            image_paths = []
             seeds = ""
             with torch.no_grad():
                 all_samples = list()
@@ -187,7 +191,8 @@ class SD_Model(Model):
 
                             shape = [n_samples, 4, 512 // 8, 512 // 8]
 
-                            if self.device != "cpu":
+                            if self.device != "cpu" and not had_move_model_CS:
+                                had_move_model_CS = True
                                 mem = torch.cuda.memory_allocated() / 1e6
                                 self.modelCS.to("cpu")
                                 while torch.cuda.memory_allocated() / 1e6 >= mem:
@@ -215,14 +220,15 @@ class SD_Model(Model):
                                 x_sample = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
                                 x_sample = 255.0 * rearrange(x_sample[0].cpu().numpy(), "c h w -> h w c")
                                 img = Image.fromarray(x_sample.astype(np.uint8))
-                                save_path = os.path.join(sample_path,str(i)+".jpg")
+                                save_path = os.path.join(sample_path, str(i) + ".jpg")
                                 img.save(save_path)
                                 image_paths.append(save_path)
                                 seeds += str(seed) + ","
                                 seed += 1
                                 base_count += 1
 
-                            if self.device != "cpu":
+                            if self.device != "cpu" and not had_move_model_FS:
+                                had_move_model_FS = True
                                 mem = torch.cuda.memory_allocated() / 1e6
                                 self.modelFS.to("cpu")
                                 while torch.cuda.memory_allocated() / 1e6 >= mem:
@@ -235,7 +241,7 @@ class SD_Model(Model):
                     "image": img_path
                 } for img_path in image_paths
             ]
-            print('花费时长:',(datetime.datetime.now()-begin_time).seconds)
+            print('花费时长:', (datetime.datetime.now() - begin_time).seconds)
             return back
         except Exception as ex:
             print(ex)
