@@ -1,4 +1,4 @@
-apt install build-essential
+apt install -y build-essential
 
 conda install -y -c conda-forge sox libsndfile swig bzip2 libflac bc
 pip install pytest-runner -i https://pypi.tuna.tsinghua.edu.cn/simple

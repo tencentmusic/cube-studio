@@ -35,8 +35,7 @@ class Speech_Tts_Model(Model):
         # Field(type=Field_type.text, name='spk_id', label='说话人ID',
         #       describe='0-283可选，不一样的ID会带来不一样的声音', default=0),
         Field(type=Field_type.text_select, name='spk_id', label='说话人', default='1',
-              choices=['1', '2', '3', '4', '5'])
-
+              choices=[str(x) for x in range(1,281)])
     ]
     web_examples = [
         {
