@@ -48,9 +48,6 @@ class Speech_Tts_Model(Model):
         }
     ]
 
-    def __init__(self):
-        self.tts = None
-
     # 加载模型
     # @pysnooper.snoop()
     def load_model(self):

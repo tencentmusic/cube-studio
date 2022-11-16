@@ -31,13 +31,10 @@ class Speech_St_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "voice_file_path": "en.wav"
+                "voice_file_path": "/en.wav"
             }
         }
     ]
-
-    def __init__(self):
-        self.st = None
 
     # 加载模型
     # @pysnooper.snoop()
@@ -60,7 +57,7 @@ class Speech_St_Model(Model):
 
 model = Speech_St_Model()
 # model.load_model()
-# result = model.inference('en.wav')  # 测试
+# result = model.inference('/en.wav')  # 测试
 # print(result)
 
 # 启动服务

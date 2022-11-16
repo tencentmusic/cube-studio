@@ -31,13 +31,10 @@ class Speech_Cls_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "voice_file_path": "zh.wav"
+                "voice_file_path": "/zh.wav"
             }
         }
     ]
-
-    def __init__(self):
-        self.cls = None
 
     # 加载模型
     # @pysnooper.snoop()
@@ -61,7 +58,7 @@ class Speech_Cls_Model(Model):
 
 model = Speech_Cls_Model()
 # model.load_model()
-# result = model.inference('zh.wav')  # 测试
+# result = model.inference('/zh.wav')  # 测试
 # print(result)
 
 # 启动服务
