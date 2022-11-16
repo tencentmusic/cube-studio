@@ -31,7 +31,7 @@ class Speech_St_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "voice_file_path": "a.wav"
+                "voice_file_path": "en.wav"
             }
         }
     ]

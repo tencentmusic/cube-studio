@@ -32,15 +32,18 @@ class Speech_Tts_Model(Model):
     inference_inputs = [
         Field(type=Field_type.text, name='text', label='语音转文本',
               describe='输入文本', default='cube studio 是个云原生一站式机器学习平台，欢迎大家体验！'),
-        Field(type=Field_type.text, name='spk_id', label='说话人ID',
-              describe='0-283可选，不一样的ID会带来不一样的声音', default=0),
+        # Field(type=Field_type.text, name='spk_id', label='说话人ID',
+        #       describe='0-283可选，不一样的ID会带来不一样的声音', default=0),
+        Field(type=Field_type.text_select, name='spk_id', label='说话人', default='0',
+              choices=['1', '2', '3', '4', '5'])
+
     ]
     web_examples = [
         {
             "label": "示例1",
             "input": {
                 "text": "今天天气不错",
-                "spk_id": 0,
+                "spk_id": '0',
             }
         }
     ]
@@ -57,19 +60,12 @@ class Speech_Tts_Model(Model):
     @pysnooper.snoop()
     def inference(self, text, spk_id=0):
         tts = self.tts
-        file_name = f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-output.wav"
+        os.makedirs('result', exist_ok=True)
         if spk_id:
-            if str(spk_id).isdigit():
-                if 0 <= int(spk_id) <= 283:
-                    spk_id = int(spk_id)
-                else:
-                    back = [{'text': '警告：数字需要在0~283之间哦~'}]
-                    return back
-            else:
-                back = [{'text': '警告：说话人仅支持数字哦~'}]
-                return back
+            spk_id = int(spk_id) - 1 if int(spk_id) > 0 else int(spk_id)
         else:
             spk_id = 0
+        file_name = f"result/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-output.wav"
         tts(text=text, output=file_name, am='fastspeech2_mix', voc='hifigan_csmsc', lang='mix', spk_id=spk_id)
         back = [
             {

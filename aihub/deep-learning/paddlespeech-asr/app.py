@@ -25,13 +25,13 @@ class Speech_Asr_Model(Model):
 
     inference_inputs = [
         Field(type=Field_type.audio, name='voice_file_path', label='语音文件',
-              describe='可支持上传一个语音文件'),
+              describe='上传一个语音文件试试吧~'),
     ]
     web_examples = [
         {
             "label": "示例1",
             "input": {
-                "voice_file_path": "a.wav"
+                "voice_file_path": "zh.wav"
             }
         }
     ]

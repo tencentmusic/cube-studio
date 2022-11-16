@@ -1,5 +1,5 @@
 
-# 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech  .
+# 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-tts  .
 FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8
 # 安装基础环境
 WORKDIR /
