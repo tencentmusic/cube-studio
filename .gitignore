@@ -4,7 +4,7 @@ __pycache__
 install/docker/file
 myapp/static/file
 myapp/test
-#/myapp/static/appbuilder/vison/*
+#/myapp/static/appbuilder/vision/*
 /myapp/static/appbuilder/mnt
 /myapp/static/appbuilder/assets/
 /images/web/target-detection/yolo/

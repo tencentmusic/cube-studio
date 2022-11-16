@@ -5,7 +5,7 @@ const path = require('path');
 const paths = require('react-scripts/config/paths');
 const { override, fixBabelImports, addLessLoader } = require('customize-cra');
 // 合并项目，修改打包输出的路径
-paths.appBuild = path.join(path.dirname(paths.appBuild), '../static/appbuilder/vison');
+paths.appBuild = path.join(path.dirname(paths.appBuild), '../static/appbuilder/vision');
 // paths.appBuild = path.join(path.dirname(paths.appBuild), './build');
 
 function webpack(config){

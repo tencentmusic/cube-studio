@@ -41,7 +41,7 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
         if self.pipeline_id:
             pipeline = db.session.query(Pipeline).filter_by(id=self.pipeline_id).first()
             if pipeline:
-                return Markup(f'<a target=_blank href="/frontend/showOutLink?url=%2Fstatic%2Fappbuilder%2Fvison%2Findex.html%3Fpipeline_id%3D{self.pipeline_id}">{pipeline.describe}</a>')
+                return Markup(f'<a target=_blank href="/frontend/showOutLink?url=%2Fstatic%2Fappbuilder%2Fvision%2Findex.html%3Fpipeline_id%3D{self.pipeline_id}">{pipeline.describe}</a>')
 
         return Markup('未知')
 
