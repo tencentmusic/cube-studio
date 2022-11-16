@@ -34,7 +34,7 @@ class Speech_Tts_Model(Model):
               describe='输入文本', default='cube studio 是个云原生一站式机器学习平台，欢迎大家体验！'),
         # Field(type=Field_type.text, name='spk_id', label='说话人ID',
         #       describe='0-283可选，不一样的ID会带来不一样的声音', default=0),
-        Field(type=Field_type.text_select, name='spk_id', label='说话人', default='0',
+        Field(type=Field_type.text_select, name='spk_id', label='说话人', default='1',
               choices=['1', '2', '3', '4', '5'])
 
     ]
