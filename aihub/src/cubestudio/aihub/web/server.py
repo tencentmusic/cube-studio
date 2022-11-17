@@ -91,7 +91,7 @@ class Server():
             exec(command)
 
         # 文件转url。视频转码，音频转码等
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def file2url(file_path):
             # base_name = os.path.basename(file_path)
             if '.avi' in file_path:
@@ -392,6 +392,14 @@ class Server():
                 if input.type.name=='double' and input.validators:
                     input.validators.regex = '[0-9/.]*'
 
+            # web界面choice显示
+            inference_inputs = [input.to_json() for input in inference_inputs]
+            for input in inference_inputs:
+                choices = input['values']
+                for choice in choices:
+                    if '/' in choice['id']:
+                        choice['id']=choice['id'][choice['id'].rindex('/')+1:]
+
             info = {
                 "name": self.model.name,
                 "label": self.model.label,
@@ -403,7 +411,7 @@ class Server():
                 "doc": self.model.doc,
                 "pic": self.model.pic if 'http' in self.model.pic else file2url(self.model.pic),
                 "web_examples":web_examples,
-                "inference_inputs": [input.to_json() for input in inference_inputs],
+                "inference_inputs": inference_inputs,
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
                 "aihub_url":"http://www.data-master.net:8880/frontend/aihub/model_market/model_all",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
