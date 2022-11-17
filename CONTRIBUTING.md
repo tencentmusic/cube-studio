@@ -1,12 +1,13 @@
+
+
 ![image](https://user-images.githubusercontent.com/20157705/174476217-125e7fb8-0b4d-4921-91ed-38935b8013c7.png)
 
 
 # 第一阶段发展目标：
 
-1、算法：传统机器学习、视觉、文本、语音、搜广推、金融 开源 算法的集成，能更方便的体验使用开源算法。包括算法任务模板(job-template)，算法全自动建模流程(pipeline)，算法推理服务(service)。  
+1、mlops平台开发：数据管理的集成(数据标注/特征平台)，automl平台部分，平台公有化/私有化saas版，数据闭环(离线/实时训练闭环)
 
-
-2、平台开发：数据管理的集成(数据标注/特征平台)，平台公有化/私有化saas版，数据闭环(离线/实时训练闭环)
+2、aihub算法应用市场：传统机器学习、视觉、文本、语音、搜广推、金融 开源 算法的集成，能更方便的体验使用开源算法。包括算法任务模板(job-template)，算法全自动建模流程(pipeline)，算法推理服务(service)。  
 
 3、推广、答疑、运营，在相关知识平台发布文章/视频、交流群的答疑、专业社区的分享，git仓库的文案管理，wiki文档等
 
@@ -14,13 +15,16 @@
 
 1、平台本身，算法模板，pipeline等，商业化。通过边缘计算，区块链技术 将算法/数据 价值商业化。
 
+# 思维导图：
+
+[思维导图地址](https://gitmind.cn/app/docs/ma28m6np)
+
+![cube-studio共建领域](https://user-images.githubusercontent.com/20157705/201583343-ecde1998-8827-41ac-a4fd-b0ef5cb72491.jpg)
 
 
-# 算法贡献：
+# aihub算法贡献：
 
-技能要求：[了解模板开发流程，了解平台使用](https://github.com/tencentmusic/cube-studio/wiki/%E5%BC%80%E5%8F%91%E7%AE%97%E6%B3%95%E6%A8%A1%E6%9D%BF)
-
-视觉、文本、语音、搜广推、金融等开源算法的集成，能让使用者更方便的体验使用开源算法。包括算法任务模板(job-template)，算法全自动建模流程(pipeline)，算法推理服务(service)
+深度学习算法参与：[https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning](https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning)
 
 # 平台开发贡献：
 

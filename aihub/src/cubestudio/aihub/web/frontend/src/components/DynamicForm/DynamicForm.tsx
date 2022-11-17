@@ -388,9 +388,9 @@ export default function DynamicForm(props: IProps) {
             rules={[{ required: true, message: '请选择时间' }]}
             {...itemProps}
         >
-            <DatePicker showTime disabledDate={(current) => {
+            {/* <DatePicker showTime disabledDate={(current) => {
                 return current && current > moment().endOf('day');
-            }} />
+            }} /> */}
         </Form.Item>
     }
     const renderRangePicker = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
@@ -401,9 +401,9 @@ export default function DynamicForm(props: IProps) {
             rules={[{ required: true, message: '请选择时间' }]}
             {...itemProps}
         >
-            <DatePicker showTime disabledDate={(current) => {
+            {/* <DatePicker showTime disabledDate={(current) => {
                 return current && current > moment().endOf('day');
-            }} />
+            }} /> */}
         </Form.Item>
     }
 

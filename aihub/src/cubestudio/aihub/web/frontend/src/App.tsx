@@ -77,7 +77,7 @@ const AppWrapper = (props: IProps) => {
     handleAppIndex(appList)
   }, [])
 
-  const handleAppIndex = (appList: IRouterConfigPlusItem[]) => {
+  const handleAppIndex = (appList: any[]) => {
     const { pathname } = location
     const appPath = `/${pathname.split('/')[1]}`
     let appIndex = undefined
@@ -90,7 +90,7 @@ const AppWrapper = (props: IProps) => {
     setCurrentAppIndex(appIndex)
   }
 
-  const handleClickApp = (app: IRouterConfigPlusItem, index: number) => {
+  const handleClickApp = (app: any, index: number) => {
     if (app.path === '/') {
       commitUrlChange('/')
       setCurrentAppIndex(index)
@@ -118,7 +118,7 @@ const AppWrapper = (props: IProps) => {
 
   }
 
-  const handleChangePageTitle = (pathname: string, currnetRouteConfig: IRouterConfigPlusItem[]) => {
+  const handleChangePageTitle = (pathname: string, currnetRouteConfig: any[]) => {
     const currentAppName = '/' + pathname.substring(1).split('/')[0] || ''
     const routerMap: Record<string, IRouterConfigPlusItem> = currnetRouteConfig.reduce((pre: any, next) => ({ ...pre, [`${next.path || ''}`]: next }), {})
     const currentRoute = routerMap[currentAppName]
@@ -158,11 +158,11 @@ const AppWrapper = (props: IProps) => {
         if (menu.isMenu) {
           return <SubMenu key={menu.path} title={menu.title}>
             {
-              menu.children?.map(sub => {
+              menu.children?.map((sub:any) => {
                 if (sub.isMenu) {
                   return <Menu.ItemGroup key={sub.path} title={sub.title}>
                     {
-                      sub.children?.map(thr => {
+                      sub.children?.map((thr:any) => {
                         return <Menu.Item disabled={!!thr.disable} hidden={!!thr.hidden} key={thr.path} onClick={() => {
                           if (!menu.isCollapsed) {
                             setIsMenuCollapsed(false)

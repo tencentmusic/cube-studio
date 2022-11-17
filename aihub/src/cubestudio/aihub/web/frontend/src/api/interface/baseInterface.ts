@@ -1,6 +1,6 @@
 import { RouteObject } from "react-router-dom";
 
-export interface IRouterConfigPlusItem extends RouteObject {
+export interface IRouterConfigPlusItem {
     title?: string
     name?: string
     icon?: any
@@ -12,8 +12,8 @@ export interface IRouterConfigPlusItem extends RouteObject {
     baseApi?: string
     isSubRoute?: boolean
     hidden?: boolean
-    children?: IRouterConfigPlusItem[]
-    related?: IRouterConfigPlusItem[]
+    children?: any[]
+    related?: any[]
     appIndex?: number
     key?: string
     isLocalMenu?: boolean

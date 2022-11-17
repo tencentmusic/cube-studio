@@ -1,3 +1,4 @@
+import copy
 import enum
 import shutil
 
@@ -90,6 +91,7 @@ class Server():
             exec(command)
 
         # 文件转url。视频转码，音频转码等
+        # @pysnooper.snoop()
         def file2url(file_path):
             # base_name = os.path.basename(file_path)
             if '.avi' in file_path:
@@ -117,7 +119,7 @@ class Server():
         # 定义认为放在的队列
         def api_inference(name,version,data):
             try:
-                inputs=self.model.inference_inputs
+                inputs=copy.deepcopy(self.model.inference_inputs)
                 inference_kargs={}
                 for input_field in inputs:
                     inference_kargs[input_field.name] = data.get(input_field.name,input_field.default)
@@ -353,17 +355,19 @@ class Server():
         @app.route(f'/{self.pre_url}/info')
         # @pysnooper.snoop()
         def info():
+            inference_inputs = copy.deepcopy(self.model.inference_inputs)
+            web_examples = copy.deepcopy(self.web_examples)
             # example中图片转为在线地址
-            for example in self.web_examples:
+            for example in web_examples:
                 example_input = example.get('input',{})
-                for arg_filed in self.model.inference_inputs:
+                for arg_filed in inference_inputs:
                     if arg_filed.name in example_input:  # 这个示例提供了这个参数
                         # 示例图片/视频转为在线地址
                         if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name or 'audio' in arg_filed.type.name) and 'http' not in example_input[arg_filed.name]:
                             example_input[arg_filed.name]=file2url(example_input[arg_filed.name])
 
             # 将图片和语音/视频的可选值和默认值，都转为在线网址
-            for input in self.model.inference_inputs:
+            for input in inference_inputs:
                 if 'image' in input.type.name or 'video' in input.type.name or 'audio' in input.type.name:
 
                     # # 对于单选
@@ -388,6 +392,14 @@ class Server():
                 if input.type.name=='double' and input.validators:
                     input.validators.regex = '[0-9/.]*'
 
+            # web界面choice显示
+            inference_inputs = [input.to_json() for input in inference_inputs]
+            for input in inference_inputs:
+                choices = input['values']
+                for choice in choices:
+                    if '/' in choice['id']:
+                        choice['id']=choice['id'][choice['id'].rindex('/')+1:]
+
             info = {
                 "name": self.model.name,
                 "label": self.model.label,
@@ -398,8 +410,8 @@ class Server():
                 "version": self.model.version,
                 "doc": self.model.doc,
                 "pic": self.model.pic if 'http' in self.model.pic else file2url(self.model.pic),
-                "web_examples":self.web_examples,
-                "inference_inputs": [input.to_json() for input in self.model.inference_inputs],
+                "web_examples":web_examples,
+                "inference_inputs": inference_inputs,
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
                 "aihub_url":"http://www.data-master.net:8880/frontend/aihub/model_market/model_all",
                 "github_url":"https://github.com/tencentmusic/cube-studio",

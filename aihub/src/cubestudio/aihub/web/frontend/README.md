@@ -1,3 +1,12 @@
+### 编译
+yarn
+yarn start
+
+### 访问地址
+http://localhost:3001/aihub
+
+
+---
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
