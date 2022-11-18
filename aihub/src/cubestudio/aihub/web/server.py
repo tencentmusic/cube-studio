@@ -436,62 +436,6 @@ class Server():
             }
             return jsonify(info)
 
-        # 此函数不在应用内，而在中心平台内，但是和应用使用同一个域名
-        @app.route('/aihub/login/<app_name>')
-        # @pysnooper.snoop()
-        def app_login(app_name=''):
-            GITHUB_APPKEY = '69ee1c07fb4764b7fd34'
-            GITHUB_SECRET = '795c023eb495317e86713fa5624ffcee3d00e585'
-            GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s'
-            # 应用内登录才设置跳转地址
-            if app_name and app_name!="demo":
-                session['login_url'] = request.host_url.strip('/')+f"/{app_name}/info"
-            oa_auth_url = GITHUB_AUTH_URL
-            appkey = GITHUB_APPKEY
-            username = session.get('username', '')
-            g.username =''
-            if 'anonymous' not in username and username:
-                g.username=username
-
-            if 'code' in request.args:
-                # user check first login
-                data = {
-                    'code': request.args.get('code'),
-                    'client_id': GITHUB_APPKEY,
-                    'client_secret': GITHUB_SECRET
-                }
-                r = requests.post("https://github.com/login/oauth/access_token", data=data, timeout=2, headers={
-                    'accept': 'application/json'
-                })
-                if r.status_code == 200:
-                    json_data = r.json()
-                    accessToken = json_data.get('access_token')
-                    res = requests.get('https://api.github.com/user', headers={
-                        'accept': 'application/json',
-                        'Authorization': 'token ' + accessToken
-                    })
-                    print(res)
-                    print(res.json())
-                    user = res.json().get('login') or None  # name是中文名，login是英文名，不能if user
-                    all_users = get_repo_user(7)
-                    if user in all_users:
-                        g.username = user
-                    else:
-                        return 'star cube-studio项目 <a href="https://github.com/tencentmusic/cube-studio">https://github.com/tencentmusic/cube-studio</a>  后重新登录，如果已经star请一分钟后重试'
-
-                else:
-                    message = str(r.content, 'utf-8')
-                    print(message)
-                    g.username = None
-
-            # remember user
-            if g.username and g.username != '':
-                session['username'] = g.username
-                login_url = session.get('login_url','https://github.com/tencentmusic/cube-studio')
-                return redirect(login_url)
-            else:
-                return redirect(oa_auth_url % (str(appkey),))
-
         @app.before_request
         def check_login():
             req_url = request.path
@@ -500,6 +444,7 @@ class Server():
             if '/aihub' not in req_url:
                 username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
                 session['username']=username
+                g.username = username
 
                 num = user_history.get(username, {}).get(req_url, 0)
                 # 匿名用户对后端的请求次数超过1次就需要登录
@@ -517,15 +462,15 @@ class Server():
                 #         "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
                 #     })
 
-        # 配置影响后操作
+        # 配置响应后操作：统计
         @app.after_request
         def apply_http_headers(response):
             req_url = request.path
             if '/aihub' not in req_url:
                 username = session['username']
-                user_history[username] = {
-                    req_url: user_history.get(username, {}).get(req_url, 0) + 1
-                }
+                if username not in user_history:
+                    user_history[username] = {}
+                user_history[username][req_url]=user_history.get(username, {}).get(req_url, 0) + 1
                 print(user_history)
             return response
 
