@@ -167,9 +167,6 @@ class Model():
         file.write(json.dumps(info,indent=4,ensure_ascii=False))
         file.close()
 
-        if os.path.dirname(os.getcwd()) != self.name:
-            raise "当前目录名与应用name必须一致"
-
     # 配置数据集，在分布式训练时自动进行分配
     def set_dataset(self,**kwargs):
         pass
