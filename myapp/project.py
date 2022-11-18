@@ -129,9 +129,7 @@ class Myauthdbview(AuthDBView):
             r=None
             for i in range(5):
                 try:
-                    r = requests.post("https://github.com/login/oauth/access_token", data=data, timeout=2, headers={
-                        'accept': 'application/json'
-                    })
+                    r = requests.post("https://github.com/login/oauth/access_token", data=data, timeout=10, headers={'accept': 'application/json'})
                     break
                 except Exception as e:
                     print(e)
