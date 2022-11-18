@@ -65,8 +65,6 @@ class Server():
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 shutil.copyfile(self.model.pic, save_path)
 
-        if
-
     # 启动服务
     # @pysnooper.snoop()
     def server(self,port=8080):
