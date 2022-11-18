@@ -17,7 +17,7 @@ class Speech_Tts_Model(Model):
     # 模型基础信息定义
     name = 'paddle-speech-tts'
     label = '文字转语音'
-    describe = "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别"
+    describe = "文字转语音，支持280多种音色模型"
     field = "智能识别"
     scenes = "语音处理"
     status = 'online'

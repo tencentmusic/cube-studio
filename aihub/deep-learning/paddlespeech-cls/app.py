@@ -11,7 +11,7 @@ class Speech_Cls_Model(Model):
     # 模型基础信息定义
     name = 'paddle-speech-cls'
     label = '语音场景分类'
-    describe = "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别"
+    describe = "语音场景分类:语种识别等"
     field = "智能识别"
     scenes = "语音处理"
     status = 'online'

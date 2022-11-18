@@ -11,7 +11,7 @@ class Speech_Asr_Model(Model):
     # 模型基础信息定义
     name = 'paddle-speech-asr'
     label = '语音转文字'
-    describe = "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别"
+    describe = "语音转文字，支持中英文"
     field = "智能识别"
     scenes = "语音处理"
     status = 'online'
