@@ -62,7 +62,7 @@ class Speech_Tts_Model(Model):
         else:
             spk_id = 0
         file_name = f"result/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-output.wav"
-        tts(text=text, output=file_name, am='fastspeech2_mix', voc='hifigan_csmsc', lang='mix', spk_id=spk_id)
+        tts(text=text, output=file_name, am='fastspeech2_csmsc', voc='hifigan_csmsc', lang='mix', spk_id=spk_id)
         back = [
             {
                 'text': text,
