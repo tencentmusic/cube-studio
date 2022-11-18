@@ -54,7 +54,7 @@
     "uuid": "ddddocr-v20221001",
     "label": "验证码识别",
     "describe": "ai识别验证码文字和验证码目标",
-    "pic": "http://www.data-master.net:8888/ddddocr/static/example/ddddocr/example.png",
+    "pic": "http://www.data-master.net:8888/ddddocr/static/example/ddddocr/example.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},

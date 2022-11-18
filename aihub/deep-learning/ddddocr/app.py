@@ -20,7 +20,7 @@ class DDDDOCR_Model(Model):
     status='online'
     version='v20221001'
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/ddddocr'
-    pic='example.png'
+    pic='example.jpg'
 
     inference_inputs = [
         Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于验证码识别的图片')

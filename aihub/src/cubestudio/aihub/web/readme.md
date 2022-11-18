@@ -40,7 +40,8 @@ self.validators=validators
       "text":'',
       "image":'http://xxx/x.jpg',
       "video":'http://xxx/x.mp4',
-      "audio":'http://xxx/x.mp3'
+      "audio":'http://xxx/x.mp3',
+      "html": ""
     }],
     "message": ""
 }
