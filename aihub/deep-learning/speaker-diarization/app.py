@@ -46,9 +46,9 @@ class Speaker_diarization_Model(Model):
         return back
 
 model=Speaker_diarization_Model()
-model.load_model()
-result = model.inference(audio_path='test.wav')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(audio_path='test.wav')  # 测试
+# print(result)
 
 # # 启动服务
 server = Server(model=model)

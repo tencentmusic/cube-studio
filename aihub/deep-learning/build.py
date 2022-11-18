@@ -20,10 +20,9 @@ path = os.path.dirname(os.path.abspath(__file__))
 # build_file.write('\n\nwait')
 # build_file.close()
 
-
 # 生成部署脚本和info
 all_info=[]
-env='cloud'     # env='dev'
+env='dev'     # env='dev'    cloud
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','deploy']:

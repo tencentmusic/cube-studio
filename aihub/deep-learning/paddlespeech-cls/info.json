@@ -1,0 +1,24 @@
+{
+    "doc": "https://github.com/PaddlePaddle/PaddleSpeech",
+    "field": "智能识别",
+    "scenes": "语音处理",
+    "type": "dateset,notebook,train,inference",
+    "name": "paddle-speech-cls",
+    "status": "online",
+    "version": "v20221114",
+    "uuid": "paddle-speech-cls-v20221114",
+    "label": "语音场景分类",
+    "describe": "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别",
+    "pic": "http://xx.xx.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {
+        "resource_gpu": "1"
+    }
+}
