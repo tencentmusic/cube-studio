@@ -9,7 +9,7 @@
     "uuid": "paddle-speech-tts-v20221114",
     "label": "文字转语音",
     "describe": "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别",
-    "pic": "http://xx.xx.jpg",
+    "pic": "example.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},
@@ -19,6 +19,5 @@
     },
     "train": {},
     "inference": {
-        "resource_gpu": "1"
     }
 }
