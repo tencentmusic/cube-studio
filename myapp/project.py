@@ -188,7 +188,7 @@ class Myauthdbview(AuthDBView):
                 'client_id':self.GITHUB_APPKEY,
                 'client_secret':self.GITHUB_SECRET
             }
-            r = requests.post("https://github.com/login/oauth/access_token", data=data,timeout=2,headers={
+            r = requests.post("https://github.com/login/oauth/access_token", data=data,timeout=10,headers={
                 'accept': 'application/json'
             })
             if r.status_code == 200:
