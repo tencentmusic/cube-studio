@@ -20,41 +20,35 @@ path = os.path.dirname(os.path.abspath(__file__))
 # build_file.write('\n\nwait')
 # build_file.close()
 
-# 生成部署脚本和info
+# 生成部署脚本
+shutil.rmtree("deploy")
 all_info=[]
-env='dev'     # env='dev'    cloud
+env='cloud'     # env='dev'    cloud
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','deploy']:
             continue
         # 内网部署必须要info.json
-        info={
-            "name":app_name
-        }
+        info = json.load(open(os.path.join(app_name,'info.json'))) if os.path.exists(os.path.join(app_name,'info.json')) else {"name": app_name}
         dockerfile_path = os.path.join(app_name, 'Dockerfile')
+        # 没有Dockerfile肯定不部署
         if not os.path.exists(dockerfile_path):
             continue
 
+        # 内网可以没有info文件也不部署
         if env=='dev':
             if not os.path.exists(os.path.join(app_name,'info.json')):
                 continue
 
-            info = json.load(open(os.path.join(app_name,'info.json')))
-            if info.get('status','offline')=='offline':
-                continue
-
         app_name = app_name.lower().replace('_', '-')
-        if app_name != 'app1':
-            all_info.append(info)
+
         if env=='cloud':
             synchronous = 'asynchronous'
             resource_gpu = '0'
-            info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}"
             host='www.data-master.net'
         else:
             synchronous = 'synchronous'
             resource_gpu = info.get('resource_gpu','0')
-            info['doc'] = f"http://aihub.cube.woa.com/aihub/{app_name}"
             host='aihub.cube.woa.com'
 
         # 生成k8s部署的脚本
@@ -165,6 +159,27 @@ spec:
         file = open(save_path,mode='w')
         file.write(deploy)
         file.close()
+
+
+# 生成info文件
+
+
+all_info=[]
+
+for app_name in os.listdir("."):
+    if os.path.isdir(app_name):
+        if app_name in ['__pycache__','deploy','app1']:
+            continue
+
+        if not os.path.exists(os.path.join(app_name, 'info.json')):
+            continue
+
+        info = json.load(open(os.path.join(app_name,'info.json')))
+        if 'pic' in info and 'http' not in info['pic']:
+            info['pic']=f"http://www.data-master.net:8888/{app_name}/static/example/"+app_name+"/" + info['pic']
+        app_name = app_name.lower().replace('_', '-')
+        info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}" if env=='cloud' else f"http://aihub.cube.woa.com/aihub/{app_name}"
+        all_info.append(info)
 
 file = open('info.json',mode='w')
 file.write(json.dumps(all_info,indent=2,ensure_ascii=False))
