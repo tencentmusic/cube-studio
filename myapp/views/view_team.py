@@ -139,7 +139,7 @@ class Project_ModelView_Base():
 
 
     # @pysnooper.snoop()
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.edit_form_extra_fields['type'] = StringField(
             _(self.datamodel.obj.lab('type')),
             description="项目分组",
@@ -162,8 +162,8 @@ class Project_ModelView_Base():
             raise MyappException('just creator can add/edit')
 
     # before update, check permission
-    def pre_update_get(self, item):
-        self.pre_add_get()
+    def pre_update_web(self, item):
+        self.pre_add_web()
         self.check_item_permissions(item)
         if not self.user_permissions['edit']:
             flash('just creator can add/edit user','warning')

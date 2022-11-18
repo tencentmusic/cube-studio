@@ -323,8 +323,8 @@ class NNI_ModelView_Base():
 
 
 
-    pre_add_get=set_column
-    pre_update_get=set_column
+    pre_add_web=set_column
+    pre_update_web=set_column
 
     # 处理form请求
     def process_form(self, form, is_created):

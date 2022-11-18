@@ -98,7 +98,7 @@ class Docker_ModelView_Base():
     }
     edit_form_extra_fields=add_form_extra_fields
     # @pysnooper.snoop()
-    def pre_add_get(self,docker=None):
+    def pre_add_web(self,docker=None):
         self.add_form_extra_fields['target_image']=StringField(
             _(self.datamodel.obj.lab('target_image')),
             default=conf.get('REPOSITORY_ORG')+g.user.username+":"+datetime.datetime.now().strftime('%Y.%m.%d'+".1"),
@@ -111,7 +111,7 @@ class Docker_ModelView_Base():
         self.edit_form_extra_fields = self.add_form_extra_fields
 
 
-    pre_update_get=pre_add_get
+    pre_update_web=pre_add_web
 
     def pre_add(self,item):
         image_org=conf.get('REPOSITORY_ORG')+g.user.username+":"

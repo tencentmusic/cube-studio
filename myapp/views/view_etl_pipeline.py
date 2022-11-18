@@ -15,9 +15,9 @@ from myapp import app, appbuilder,db
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import DataRequired, Length, Regexp
 from sqlalchemy import or_
-from wtforms import StringField
+from wtforms import StringField, SelectField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget
+from myapp.forms import MyBS3TextAreaFieldWidget, MySelect2Widget
 import copy
 from .baseApi import MyappModelRestApi
 from flask import (
@@ -41,7 +41,7 @@ from flask_appbuilder import expose
 import datetime,time,json
 conf = app.config
 logging = app.logger
-APPGROUP_INFO=['资源组1','资源组2','资源组3']
+
 
 class ETL_Task_ModelView_Base():
     label_title="任务"
@@ -63,22 +63,17 @@ class ETL_Task_ModelView_Base():
     spec_lable_columns={
         "template":"功能类型"
     }
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.default_filter = {
             "created_by": g.user.id
         }
-    def post_list(self, items):
-        flash('此部分仅提供任务流编排能力，管理员自行对接调度Azkaban/Oozie/Airflow/argo等调度平台能力','warning')
-        return items
+
     show_columns = ['template','name','describe','etl_task_id','created_by','changed_by','created_on','changed_on','task_args']
 
 
-
-class ETL_Task_ModelView(ETL_Task_ModelView_Base,MyappModelView):
-    datamodel = SQLAInterface(ETL_Task)
-
-
-appbuilder.add_view_no_menu(ETL_Task_ModelView)
+# class ETL_Task_ModelView(ETL_Task_ModelView_Base,MyappModelView):
+#     datamodel = SQLAInterface(ETL_Task)
+# appbuilder.add_view_no_menu(ETL_Task_ModelView)
 
 # 添加api
 class ETL_Task_ModelView_Api(ETL_Task_ModelView_Base,MyappModelRestApi):
@@ -117,7 +112,7 @@ class ETL_Pipeline_ModelView_Base():
     # order_columns = ['id','changed_on']
     order_columns = ['id']
 
-    list_columns = ['project','etl_pipeline_url','creator','modified']
+    list_columns = ['project','etl_pipeline_url','workflow','creator','modified']
     cols_width = {
         "project":{"type": "ellip2", "width": 200},
         "etl_pipeline_url": {"type": "ellip2", "width": 400},
@@ -125,15 +120,14 @@ class ETL_Pipeline_ModelView_Base():
         "modified": {"type": "ellip2", "width": 100},
     }
 
-    add_columns = ['project','name','describe']
+
+    add_columns = ['project','name','describe','workflow']
     show_columns = ['project','name','describe','config_html','dag_json_html','created_by','changed_by','created_on','changed_on','expand_html']
     edit_columns = add_columns
 
 
     base_filters = [["id", ETL_Pipeline_Filter, lambda: []]]
     conv = GeneralModelConverter(datamodel)
-
-    # related_views = [ETL_Task_ModelView,]
 
     add_form_extra_fields = {
         "name": StringField(
@@ -159,6 +153,14 @@ class ETL_Pipeline_ModelView_Base():
             _(datamodel.obj.lab('dag_json')),
             default='{}',
             widget=MyBS3TextAreaFieldWidget(rows=10),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+        ),
+        "workflow": SelectField(
+            _('workflow'),
+            widget=MySelect2Widget(),
+            default='us',
+            description='调度集群选择',
+            choices=[['airflow', 'airflow']],
+            validators=[DataRequired()]
         )
     }
 
@@ -210,6 +212,14 @@ class ETL_Pipeline_ModelView_Base():
     # 删除前先把下面的task删除了
     # @pysnooper.snoop()
     def pre_delete(self, pipeline):
+        # todo 添加 新引擎的删除
+        if pipeline.workflow=='airflow':
+            # from view_etl_pipeline_airflow import AIRFLOW_ETL_PIPELINE
+            # cluster = AIRFLOW_ETL_PIPELINE(cluster='上海')
+            # cluster.delete_pipeline(pipeline)
+            pass
+
+
         flash('此处仅删除本地元数据，请及时删除远程任务','warning')
         # 删除本地
         exist_tasks = db.session.query(ETL_Task).filter_by(etl_pipeline_id=pipeline.id).all()
@@ -356,13 +366,13 @@ class ETL_Pipeline_ModelView_Base():
                     "alert_user":{
                         "type": "str",
                         "item_type": "str",
-                        "label": "报警用户",
+                        "label": "任务流负责人",
                         "require": 1,
                         "choice": [],
                         "range": "",
                         "default": "",
-                        "placeholder": "报警用户名，逗号分隔",
-                        "describe": "报警用户，逗号分隔",
+                        "placeholder": "任务流负责人，逗号分隔",
+                        "describe": "任务流负责人，逗号分隔。会添加到每个任务的负责人。",
                         "editable": 1,
                         "condition": "",
                         "sub_args": {}
@@ -459,9 +469,9 @@ class ETL_Pipeline_ModelView_Base():
                     "item_type": "str",
                     "label": "资源组",
                     "require": 1,
-                    "choice": [item for item in APPGROUP_INFO],
+                    "choice": [item for item in ['资源组1','资源组2','资源组3']],
                     "range": "",
-                    "default": [item for item in APPGROUP_INFO][0],
+                    "default": '资源组1',
                     "placeholder": "",
                     "describe": "资源组",
                     "editable": 1,
@@ -1664,10 +1674,10 @@ class ETL_Pipeline_ModelView_Base():
 
     # @event_logger.log_this
     @action(
-        "copy", __("复制任务流"), __("复制任务流"), "fa-copy", multiple=False, single=True
+        "copy_pipeline", __("复制任务流"), __("复制任务流"), "fa-copy", multiple=False, single=True
     )
     # @pysnooper.snoop()
-    def copy(self, pipelines):
+    def copy_pipeline(self, pipelines):
 
         if not isinstance(pipelines, list):
             pipelines = [pipelines]
@@ -1702,7 +1712,8 @@ class ETL_Pipeline_ModelView_Api(ETL_Pipeline_ModelView_Base,MyappModelRestApi):
     # related_views = [ETL_Task_ModelView_Api, ]
 
     spec_label_columns = {
-        "dag_json":"全部配置"
+        "dag_json":"全部配置",
+        "workflow": "调度引擎"
     }
 
     add_form_query_rel_fields = {
@@ -1710,7 +1721,7 @@ class ETL_Pipeline_ModelView_Api(ETL_Pipeline_ModelView_Base,MyappModelRestApi):
     }
     edit_form_query_rel_fields=add_form_query_rel_fields
 
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.default_filter = {
             "created_by": g.user.id
         }

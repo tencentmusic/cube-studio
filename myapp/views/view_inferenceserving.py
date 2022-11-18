@@ -316,7 +316,7 @@ class InferenceService_ModelView_base():
 
     edit_fieldsets = add_fieldsets
 
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.default_filter = {
             "created_by": g.user.id
         }
@@ -620,7 +620,7 @@ output %s
         # 修改了名称的话，要把之前的删掉
         self.use_expand(item)
 
-        # 如果模型版本和名称变了，需要把之前的服务删除掉
+        # 如果模型版本和模型名称变了，需要把之前的服务删除掉
         if self.src_item_json.get('name','') and item.name!=self.src_item_json.get('name',''):
             self.delete_old_service(self.src_item_json.get('name',''), item.project.cluster)
             flash('发现模型服务变更，启动清理服务%s:%s'%(self.src_item_json.get('model_name',''),self.src_item_json.get('model_version','')),'success')
@@ -782,14 +782,15 @@ output %s
 
 
         pod_env = service.env
-        pod_env+="\nKUBEFLOW_ENV="+env
-        pod_env+='\nKUBEFLOW_MODEL_PATH='+service.model_path if service.model_path else ''
-        pod_env+='\nKUBEFLOW_MODEL_VERSION='+service.model_version
-        pod_env+='\nKUBEFLOW_MODEL_IMAGES='+service.images
-        pod_env+='\nKUBEFLOW_MODEL_NAME='+service.model_name
-        pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area','guangzhou')
-        pod_env=pod_env.strip(',')
-
+        pod_env += "\nKUBEFLOW_ENV=" + env
+        pod_env += '\nKUBEFLOW_MODEL_PATH=' + service.model_path if service.model_path else ''
+        pod_env += '\nKUBEFLOW_MODEL_VERSION=' + service.model_version
+        pod_env += '\nKUBEFLOW_MODEL_IMAGES=' + service.images
+        pod_env += '\nKUBEFLOW_MODEL_NAME=' + service.model_name
+        pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area', 'guangzhou')
+        pod_env += "\nRESOURCE_CPU=" + service.resource_cpu
+        pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
+        pod_env = pod_env.strip(',')
 
         if env=='test' or env =='debug':
             try:

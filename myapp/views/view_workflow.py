@@ -103,6 +103,9 @@ class Crd_ModelView_Base():
 
             db.session.commit()
 
+    # 个性化删除操作
+    def delete_more(self,item):
+        pass
 
     # 基础批量删除
     # @pysnooper.snoop()
@@ -110,6 +113,7 @@ class Crd_ModelView_Base():
         if not items:
             abort(404)
         for item in items:
+            self.delete_more(item)
             if item:
                 try:
                     labels = json.loads(item.labels) if item.labels else {}
@@ -200,7 +204,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
     # 删除之前的 workflow和相关容器
     # @pysnooper.snoop()
-    def delete_workflow(self, workflow):
+    def delete_more(self, workflow):
         try:
             k8s_client = py_k8s.K8s(workflow.pipeline.project.cluster.get('KUBECONFIG',''))
             k8s_client.delete_workflow(
@@ -214,11 +218,10 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         except Exception as e:
             print(e)
 
-
     @expose("/stop/<crd_id>")
     def stop(self, crd_id):
         workflow = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
-        self.delete_workflow(workflow)
+        self.delete_more(workflow)
 
         flash('清理完成','success')
         url = conf.get('MODEL_URLS',{}).get('workflow','')

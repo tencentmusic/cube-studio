@@ -99,7 +99,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             status = pods[0]['status']
             if g.user.is_admin():
                 k8s_dash_url = self.cluster.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
-                url = Markup(f'<a target=_blank href="{k8s_dash_url}">{status}</a>')
+
+                url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
                 return url
             return status
 

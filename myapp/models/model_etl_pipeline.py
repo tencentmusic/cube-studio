@@ -25,6 +25,7 @@ class ETL_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
+    workflow = Column(String(200),nullable=True)   # 调度引擎
     dag_json = Column(Text(65536),nullable=True,default='{}')  # pipeline的上下游关系
     config = Column(Text(65536),default='{}')   # pipeline的全局配置
     expand = Column(Text(65536),default='[]')
@@ -36,7 +37,7 @@ class ETL_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def etl_pipeline_url(self):
-        pipeline_url="/etl_pipeline_modelview/web/" +str(self.id)
+        pipeline_url="/etl_pipeline_modelview/api/web/" +str(self.id)
         return Markup(f'<a target=_blank href="{pipeline_url}">{self.describe}</a>')
 
 
@@ -86,10 +87,11 @@ class ETL_Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(100),nullable=False,unique=True)
     describe = Column(String(200),nullable=False)
-    etl_pipeline_id = Column(Integer, ForeignKey('etl_pipeline.id'),nullable=False)  # 定义外键
-    etl_pipeline = relationship(
-        "ETL_Pipeline", foreign_keys=[etl_pipeline_id]
-    )
+    # etl_pipeline_id = Column(Integer, ForeignKey('etl_pipeline.id'),nullable=False)  # 定义外键
+    # etl_pipeline = relationship(
+    #     "ETL_Pipeline", foreign_keys=[etl_pipeline_id]
+    # )
+    etl_pipeline_id = Column(Integer)
     template = Column(String(100),nullable=False)
     task_args = Column(Text(65536),default='{}')
     etl_task_id = Column(String(100),nullable=False)
@@ -102,10 +104,6 @@ class ETL_Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def __repr__(self):
         return self.name
 
-    @property
-    def etl_pipeline_url(self):
-        pipeline_url="/etl_pipeline_modelview/web/" +str(self.etl_pipeline.id)
-        return Markup(f'<a target=_blank href="{pipeline_url}">{self.etl_pipeline.describe}</a>')
 
 
 

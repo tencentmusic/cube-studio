@@ -15,14 +15,14 @@ from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
 from myapp.forms import MySelect2Widget, MyBS3TextFieldWidget
-
+from flask import Markup
 from myapp.utils.py.py_k8s import K8s
 from flask import (
     abort,
     flash,
     g,
     redirect,
-    request,
+    request, make_response,
 )
 from .baseApi import (
     MyappModelRestApi
@@ -264,8 +264,8 @@ class Notebook_ModelView_Base():
     #             self.add_template, title=self.add_title, widgets=widget
     #         )
 
-    pre_update_get=set_column
-    pre_add_get=set_column
+    pre_update_web=set_column
+    pre_add_web=set_column
 
 
     # @pysnooper.snoop(watch_explode=('notebook'))

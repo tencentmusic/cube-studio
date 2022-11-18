@@ -79,7 +79,7 @@ class Repository_ModelView_Base():
             validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54),DataRequired()]
         )
 
-    pre_add_get = set_column
+    pre_add_web = set_column
 
     # create hubsecret
     # @pysnooper.snoop()

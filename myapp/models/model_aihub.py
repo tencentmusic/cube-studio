@@ -12,7 +12,7 @@ metadata = Model.metadata
 conf = app.config
 
 
-class Aihub(Model,ImportMixin,MyappModelBase):
+class Aihub(Model,MyappModelBase):
     __tablename__ = 'aihub'
 
     id = Column(Integer, primary_key=True)
