@@ -1,46 +1,62 @@
 
-#   生成构建镜像的脚本
 
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
-all_info=[]
-build_file=open('build.sh',mode='w')
 
+
+# 生成构建镜像的脚本
+# build_file=open('build.sh',mode='w')
+# for app_name in os.listdir("."):
+#     if os.path.isdir(app_name):
+#         if app_name in ['__pycache__','deploy','app1']:
+#             continue
+#         dockerfile_path = os.path.join(app_name,'Dockerfile')
+#         app_name = app_name.lower().replace('_', '-')
+#         if os.path.exists(dockerfile_path):
+#             command = f"docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} ./{app_name}/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} &"
+#             build_file.write(command)
+#             build_file.write('\n')
+#
+# build_file.write('\n\nwait')
+# build_file.close()
+
+
+# 生成部署脚本和info
+all_info=[]
+env='cloud'     # env='dev'
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','deploy']:
             continue
-        if not os.path.exists(os.path.join(app_name,'info.json')):
+        # 内网部署必须要info.json
+        info={
+            "name":app_name
+        }
+        dockerfile_path = os.path.join(app_name, 'Dockerfile')
+        if not os.path.exists(dockerfile_path):
             continue
 
-        info = json.load(open(os.path.join(app_name,'info.json')))
-        if info.get('status','offline')=='offline':
-            continue
+        if env=='dev':
+            if not os.path.exists(os.path.join(app_name,'info.json')):
+                continue
 
+            info = json.load(open(os.path.join(app_name,'info.json')))
+            if info.get('status','offline')=='offline':
+                continue
 
         app_name = app_name.lower().replace('_', '-')
-        info['doc']=f"http://{app_name}.aihub.cube.woa.com/aihub/{app_name}"
-        synchronous='synchronous'
-        if app_name!='app1':
+        if app_name != 'app1':
             all_info.append(info)
-        resource_gpu=info.get('inference',{}).get('resource_gpu','0')
-        if 'http' not in info['pic']:
-            # info['pic']=f"http://{app_name}.aihub.cube.woa.com/{app_name}/static/example/"+app_name+"/" + info['pic']
-            info['pic'] = f"http://www.data-master.net:8888/{app_name}/static/example/" + app_name + "/" + info['pic']
-
-        # 批量构建镜像
-        # 批量启动镜像
-        dockerfile_path = os.path.join(app_name,'Dockerfile')
-        if os.path.exists(dockerfile_path):
-            command = f"docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} ./{app_name}/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} &"
-            build_file.write(command)
-            # command = f"docker run --name ${app_name} --privileged --rm -it -e APPNAME={app_name} -v $cube_dir/src:/src -v $PWD:/app -p 80:80 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${app_name} python app.py"
-            # build_file.write(command)
-
-        # 云上部署特别配置
-        resource_gpu='0'
-        synchronous='asynchronous'
-        info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}"
+        if env=='cloud':
+            synchronous = 'asynchronous'
+            resource_gpu = '0'
+            info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}"
+            host='www.data-master.net'
+        else:
+            synchronous = 'synchronous'
+            resource_gpu = info.get('resource_gpu','0')
+            info['doc'] = f"http://aihub.cube.woa.com/aihub/{app_name}"
+            host='aihub.cube.woa.com'
 
         # 生成k8s部署的脚本
         deploy=f'''
@@ -122,24 +138,7 @@ spec:
               mountPath: /src
             - name: cos-data
               mountPath: /src/cubestudio/aihub/web/static
-              
----
-# apiVersion: networking.istio.io/v1alpha3
-# kind: VirtualService
-# metadata:
-#   name: aihub-{app_name}
-#   namespace: aihub
-# spec:
-#   gateways:
-#   - kubeflow/kubeflow-gateway
-#   hosts:
-#   - "{app_name}.aihub.cube.woa.com"  
-#   http:
-#   - route:
-#     - destination:
-#         host: aihub-{app_name}.aihub.svc.cluster.local
-#         port:
-#           number: 80
+
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -150,7 +149,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway-8080
   hosts:
-  - "*"  
+  - "{host}"
   http:
   - match:
     - uri:
@@ -167,10 +166,6 @@ spec:
         file = open(save_path,mode='w')
         file.write(deploy)
         file.close()
-
-build_file.write('\n\nwait')
-build_file.close()
-
 
 file = open('info.json',mode='w')
 file.write(json.dumps(all_info,indent=2,ensure_ascii=False))
