@@ -3,7 +3,7 @@
     "field": "智能识别",
     "scenes": "语音处理",
     "type": "dateset,notebook,train,inference",
-    "name": "paddle-speech-cls",
+    "name": "paddlespeech-cls",
     "status": "online",
     "version": "v20221114",
     "uuid": "paddle-speech-cls-v20221114",

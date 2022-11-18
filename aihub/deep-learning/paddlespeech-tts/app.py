@@ -15,7 +15,7 @@ from paddlespeech.cli.tts.infer import TTSExecutor
 
 class Speech_Tts_Model(Model):
     # 模型基础信息定义
-    name = 'paddle-speech-tts'
+    name = 'paddlespeech-tts'
     label = '文字转语音'
     describe = "文字转语音，支持280多种音色模型"
     field = "智能识别"

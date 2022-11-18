@@ -3,7 +3,7 @@
     "field": "智能识别",
     "scenes": "语音处理",
     "type": "dateset,notebook,train,inference",
-    "name": "paddle-speech-asr",
+    "name": "paddlespeech-asr",
     "status": "online",
     "version": "v20221116",
     "uuid": "paddle-speech-asr-v20221116",

@@ -9,7 +9,7 @@ from paddlespeech.cli.cls.infer import CLSExecutor
 
 class Speech_Cls_Model(Model):
     # 模型基础信息定义
-    name = 'paddle-speech-cls'
+    name = 'paddlespeech-cls'
     label = '语音场景分类'
     describe = "语音场景分类:语种识别等"
     field = "智能识别"

@@ -9,7 +9,7 @@ from paddlespeech.cli.asr.infer import ASRExecutor
 
 class Speech_Asr_Model(Model):
     # 模型基础信息定义
-    name = 'paddle-speech-asr'
+    name = 'paddlespeech-asr'
     label = '语音转文字'
     describe = "语音转文字，支持中英文"
     field = "智能识别"
