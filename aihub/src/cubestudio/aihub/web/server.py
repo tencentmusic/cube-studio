@@ -58,7 +58,6 @@ class Server():
         self.model=model
         self.docker=docker
         self.pre_url=self.model.name
-        self.has_load_model=False
 
         if self.model.pic and 'http' not in self.model.pic:
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
@@ -66,6 +65,7 @@ class Server():
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 shutil.copyfile(self.model.pic, save_path)
 
+        if
 
     # 启动服务
     # @pysnooper.snoop()
@@ -85,10 +85,14 @@ class Server():
         celery_app.conf.update(app.config)
 
         # 如果是同步服务，并且是一个celery worker，就多进程启动消费推理
-        if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous' and '127.0.0.1' not in CELERY_BROKER_URL:
-            command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 10'%(self.model.name)
-            print(command)
-            exec(command)
+        if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
+            # 如果同时消费其他异步任务，就启动celery
+            if '127.0.0.1' not in CELERY_BROKER_URL:
+                command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 10'%(self.model.name)
+                print(command)
+                exec(command)
+            # 同步任务要加载模型
+            self.model.load_model()
 
         # 文件转url。视频转码，音频转码等
         # @pysnooper.snoop()
@@ -329,10 +333,6 @@ class Server():
 
 
             # 同步推理
-            # 一次性加载模型
-            if not self.has_load_model:
-                self.model.load_model()
-                self.has_load_model=True
             result = api_inference(name=self.model.name, version=self.model.version, data=data)
             return jsonify(result)
 

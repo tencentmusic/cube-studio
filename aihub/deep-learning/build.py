@@ -23,7 +23,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 # 生成部署脚本
 shutil.rmtree("deploy")
 all_info=[]
-env='cloud'     # env='dev'    cloud
+env='dev'     # env='dev'    cloud
 for app_name in os.listdir("."):
     if os.path.isdir(app_name):
         if app_name in ['__pycache__','deploy']:
@@ -48,7 +48,7 @@ for app_name in os.listdir("."):
             host='www.data-master.net'
         else:
             synchronous = 'synchronous'
-            resource_gpu = info.get('resource_gpu','0')
+            resource_gpu = info.get('inference',{}).get('resource_gpu','0')
             host='aihub.cube.woa.com'
 
         # 生成k8s部署的脚本
@@ -140,7 +140,7 @@ metadata:
   namespace: aihub
 spec:
   gateways:
-  - kubeflow/kubeflow-gateway-8080
+  - {"kubeflow/kubeflow-gateway-8080" if env=='cloud' else 'kubeflow/kubeflow-gateway'}
   hosts:
   - "{host}"
   http:
