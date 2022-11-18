@@ -54,7 +54,7 @@ class Aihub(Model,MyappModelBase):
     <div>
         <div class="p16" alt="{self.describe}">
             <div class="p-r card-popup ellip1">
-                {("在线:" if self.status=='online' else '待上线:')+self.describe}
+                { self.name+": "+self.describe }
                 <div class="p-a card-popup-target d-n" style="top:100%;left:0;background:rgba(0,0,0,0.5);color:#fff;border-radius:3px;">{self.describe}</div>
             </div>
         </div>

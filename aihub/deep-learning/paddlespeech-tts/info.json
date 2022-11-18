@@ -8,7 +8,7 @@
     "version": "v20221114",
     "uuid": "paddle-speech-tts-v20221114",
     "label": "文字转语音",
-    "describe": "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别",
+    "describe": "文字转语音，支持280多种音色模型",
     "pic": "example.jpg",
     "hot": "1",
     "price": "0",

@@ -8,7 +8,7 @@
     "version": "v20221114",
     "uuid": "paddle-speech-cls-v20221114",
     "label": "语音场景分类",
-    "describe": "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别",
+    "describe": "语音场景分类:语种识别等",
     "pic": "http://xx.xx.jpg",
     "hot": "1",
     "price": "0",

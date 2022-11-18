@@ -8,7 +8,7 @@
     "version": "v20221116",
     "uuid": "paddle-speech-asr-v20221116",
     "label": "语音转文字",
-    "describe": "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别",
+    "describe": "语音转文字，支持中英文",
     "pic": "example.jpg",
     "hot": "1",
     "price": "0",
