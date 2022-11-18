@@ -98,45 +98,35 @@ def get_repo_user(index):  # index 为0和为1 是相同的结果
 class Myauthdbview(AuthDBView):
     login_template = "appbuilder/general/security/login_db.html"
 
-    GITHUB_APPKEY = '24c051d2b3ec2def190b'  # ioa登录时申请的appkey
-    GITHUB_SECRET='ae6beda4731b5dfc8dd923502d8b55ac8bc6c3b8'
-    GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s'
 
-    # 此函数不在应用内，而在中心平台内，但是和应用使用同一个域名
-    @expose('/aihub/login/<app_name>')
+    # github的登录
     @pysnooper.snoop()
-    def app_login(app_name=''):
-        GITHUB_APPKEY = '69ee1c07fb4764b7fd34'
-        GITHUB_SECRET = '795c023eb495317e86713fa5624ffcee3d00e585'
-        GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s'
-        # 应用内登录才设置跳转地址
-        if app_name and app_name != "demo":
-            session['login_url'] = request.host_url.strip('/') + f"/{app_name}/info"
-        oa_auth_url = GITHUB_AUTH_URL
-        appkey = GITHUB_APPKEY
-        username = session.get('username', '')
-        g.username = ''
-        if 'anonymous' not in username and username:
-            g.username = username
+    def github_login(self,github_appkey,github_secret):
+        username=''
+        message=''
+        # user check first login
+        data = {
+            'code': request.args.get('code'),
+            'client_id': github_appkey,
+            'client_secret': github_secret
+        }
+        r = None
+        for i in range(5):
+            try:
+                r = None
+                r = requests.post("https://github.com/login/oauth/access_token", data=data, timeout=10, headers={
+                    'accept': 'application/json'
+                })
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(2)
+                message=str(e)
 
-        if 'code' in request.args:
-            # user check first login
-            data = {
-                'code': request.args.get('code'),
-                'client_id': GITHUB_APPKEY,
-                'client_secret': GITHUB_SECRET
-            }
-            r=None
-            for i in range(5):
-                try:
-                    r = requests.post("https://github.com/login/oauth/access_token", data=data, timeout=10, headers={'accept': 'application/json'})
-                    break
-                except Exception as e:
-                    print(e)
-                    time.sleep(2)
-            if r and r.status_code == 200:
-                json_data = r.json()
-                accessToken = json_data.get('access_token')
+        if r and r.status_code == 200:
+            json_data = r.json()
+            accessToken = json_data.get('access_token')
+            if accessToken:
                 for i in range(5):
                     try:
                         res = requests.get('https://api.github.com/user', headers={
@@ -146,19 +136,48 @@ class Myauthdbview(AuthDBView):
                         print(res)
                         print(res.json())
                         user = res.json().get('login') or None  # name是中文名，login是英文名，不能if user
-                        all_users = get_repo_user(7)
+                        get_repo_user(8)  # 获取所有star的用户
                         if user in all_users:
-                            g.username = user
+                            # 只有这里是正常的结果
+                            username = user
+                            message=''
                         else:
-                            return 'star cube-studio项目 <a href="https://github.com/tencentmusic/cube-studio">https://github.com/tencentmusic/cube-studio</a>  后重新登录，如果已经star请一分钟后重试'
+                            message = 'star cube-studio项目 <a href="https://github.com/tencentmusic/cube-studio">https://github.com/tencentmusic/cube-studio</a>  后重新登录，如果已经star请一分钟后重试'
                         break
                     except Exception as e:
                         print(e)
                         time.sleep(2)
-            else:
-                message = str(r.content, 'utf-8')
-                print(message)
-                g.username = None
+                        message=str(e)
+        else:
+            message = str(r.content, 'utf-8')
+            print(message)
+            username = ''
+
+        return username,message
+
+
+    # 此函数不在应用内，而在中心平台内，但是和应用使用同一个域名
+    @expose('/aihub/login/<app_name>')
+    @pysnooper.snoop()
+    def aihub_login(self,app_name=''):
+        GITHUB_APPKEY = '69ee1c07fb4764b7fd34'
+        GITHUB_SECRET = '795c023eb495317e86713fa5624ffcee3d00e585'
+        GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s'
+        # 应用内登录才设置跳转地址
+        if app_name and app_name != "demo":
+            session['login_url'] = request.host_url.strip('/') + f"/{app_name}/info"
+        oa_auth_url = GITHUB_AUTH_URL
+
+        username = session.get('username', '')
+        g.username = ''
+        if 'anonymous' not in username and username:
+            g.username = username
+
+        if 'code' in request.args:
+            username,message = self.github_login(GITHUB_APPKEY,GITHUB_SECRET)
+
+            if username:
+                g.username=username
 
         # remember user
         if g.username and g.username != '':
@@ -166,55 +185,35 @@ class Myauthdbview(AuthDBView):
             login_url = session.get('login_url', 'https://github.com/tencentmusic/cube-studio')
             return redirect(login_url)
         else:
-            return redirect(oa_auth_url % (str(appkey),))
+            return redirect(oa_auth_url % (str(GITHUB_APPKEY),))
 
 
     @expose('/login/')
     @pysnooper.snoop()
     def login(self):
-        from myapp import conf  # 引入config配置项,放在函数里面是因为在config文件中也引用了该文件，而conf变量是引入该文件后产生的
+        GITHUB_APPKEY = '24c051d2b3ec2def190b'  # ioa登录时申请的appkey
+        GITHUB_SECRET = 'ae6beda4731b5dfc8dd923502d8b55ac8bc6c3b8'
+        GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s'
+
         request_data = request.args.to_dict()
         comed_url = request_data.get('login_url', '')
         login_url = '%s/login/'%request.host_url.strip('/')
         if comed_url:
             login_url += "?login_url="+comed_url
-        oa_auth_url= self.GITHUB_AUTH_URL
-        appkey = self.GITHUB_APPKEY
+        oa_auth_url= GITHUB_AUTH_URL
         g.user = session.get('user', '')
-        if 'code' in request.args:
-            # user check first login
-            data = {
-                'code': request.args.get('code'),
-                'client_id':self.GITHUB_APPKEY,
-                'client_secret':self.GITHUB_SECRET
-            }
-            r = requests.post("https://github.com/login/oauth/access_token", data=data,timeout=10,headers={
-                'accept': 'application/json'
-            })
-            if r.status_code == 200:
-                json_data = r.json()
-                accessToken = json_data.get('access_token')
-                res = requests.get('https://api.github.com/user',headers={
-                    'accept': 'application/json',
-                    'Authorization':'token '+accessToken
-                })
-                print(res)
-                print(res.json())
-                user = res.json().get('login') or None    # name是中文名，login是英文名，不能if user
-                get_repo_user(8)
-                if user in all_users:
-                    g.user=user
-                else:
-                    return 'star cube-studio项目 <a href="https://github.com/tencentmusic/cube-studio">https://github.com/tencentmusic/cube-studio</a>  后重新登录，如果已经star请一分钟后重试'
-                if g.user: g.user = g.user.replace('.', '')
 
-            else:
-                message = str(r.content, 'utf-8')
-                print(message)
-                g.user = None
+        # 获取github登录用户信息
+        if 'code' in request.args:
+            username,message = self.github_login(GITHUB_APPKEY,GITHUB_SECRET)
+            # 有用户，无报错
+            if username and not message:
+                g.user=username
+            elif message:
+                return message
 
         # remember user
-        if g.user and g.user != '':
+        if g.user:
             session['user'] = g.user
 
             # 根据用户org，创建同名角色。
@@ -232,9 +231,9 @@ class Myauthdbview(AuthDBView):
                 if exist_user and not exist_user.active:
                     return self.active_info(exist_user.username)
                 else:
-                    return redirect(oa_auth_url % (str(appkey), login_url,))
+                    return redirect(oa_auth_url % (str(GITHUB_APPKEY), login_url,))
         else:
-            return redirect(oa_auth_url % (str(appkey),login_url,))
+            return redirect(oa_auth_url % (str(GITHUB_APPKEY),login_url,))
 
 
 
