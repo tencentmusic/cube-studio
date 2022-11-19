@@ -50,10 +50,10 @@ class SD_Model(Model):
     inference_inputs = [
         Field(type=Field_type.text, name='prompt', label='输入的文字内容',
               describe='输入的文字内容，支持中英文输入，描述越详细越好', default='a photograph of an astronaut riding a horse'),
-        Field(type=Field_type.text, name='ddim_steps', label='推理的次数',
-              describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default="50"),
-        Field(type=Field_type.text, name='n_samples', label='推理出的图像数量(不支持修改!)',
-              describe='结果中所展示的图片数量，数量越多则会导致性能下降', default="1")
+        Field(type=Field_type.text_select, name='ddim_steps', label='推理的次数',
+              describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default="50",choices=["20","30","40","50","60","70"]),
+        Field(type=Field_type.text_select, name='n_samples', label='推理出的图像数量',
+              describe='结果中所展示的图片数量，数量越多则会导致性能下降', default="1",choices=[str(x) for x in range(20)])
     ]
     web_examples = [
         {
