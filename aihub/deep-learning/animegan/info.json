@@ -19,6 +19,5 @@
     },
     "train": {},
     "inference": {
-        "resource_gpu": "1"
     }
 }
