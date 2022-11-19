@@ -47,7 +47,7 @@ class Speech_Cls_Model(Model):
         cls = self.cls
         result = '语音分类结果： '
         an_result = cls(audio_file=voice_file_path)
-        result += an_result.split(' ')[0] + '  ' + '置信度：' + an_result.split(' ')[1]
+        result += an_result.split(' ')[0] + '  ' + '置信度：' + round(float(an_result.split(' ')[1]),3)
         back = [
             {
                 'text': result
