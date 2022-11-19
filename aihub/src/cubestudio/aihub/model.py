@@ -125,6 +125,7 @@ class Model():
     inference_inputs=[
         # Field
     ]
+    web_examples=[]
     inference_resource={
         "resource_memory":"0",
         "resource_cpu":"0",
