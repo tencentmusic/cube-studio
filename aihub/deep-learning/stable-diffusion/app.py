@@ -41,7 +41,7 @@ class SD_Model(Model):
     status = 'online'
     version = 'v20221022'
     doc = 'https://github.com/CompVis/stable-diffusion'  # 'https://帮助文档的链接地址'
-    pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource = {
         "resource_gpu": "1"
@@ -50,8 +50,8 @@ class SD_Model(Model):
     inference_inputs = [
         Field(type=Field_type.text, name='prompt', label='输入的文字内容',
               describe='输入的文字内容，支持中英文输入，描述越详细越好', default='a photograph of an astronaut riding a horse'),
-        Field(type=Field_type.text_select, name='ddim_steps', label='推理的次数',
-              describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default="50",choices=["20","30","40","50","60","70"]),
+        # Field(type=Field_type.text_select, name='ddim_steps', label='推理的次数',
+        #       describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default="50",choices=["20","30","40","50","60","70"]),
         Field(type=Field_type.text_select, name='n_samples', label='推理出的图像数量',
               describe='结果中所展示的图片数量，数量越多则会导致性能下降', default="1",choices=[str(x) for x in range(20)])
     ]
@@ -166,7 +166,7 @@ class SD_Model(Model):
                 for n in trange(1, desc="Sampling"):
                     for prompts in tqdm(data, desc="data"):
 
-                        sample_path = os.path.join(outpath, "_".join(re.split(":| ", prompts[0])))[:150]
+                        sample_path = os.path.join(outpath, "_".join(re.split(":| ", prompts[0])))[:50]
                         os.makedirs(sample_path, exist_ok=True)
                         base_count = len(os.listdir(sample_path))
 
