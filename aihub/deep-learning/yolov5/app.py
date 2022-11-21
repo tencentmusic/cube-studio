@@ -28,6 +28,7 @@ class Yolov5_Model(Model):
         Field(Field_type.int, name='epochs', label='共进行的循环次数', describe='循环次数'),
         Field(Field_type.int, name='workers', label='加载数据工作数量', describe='加载数据工作数量'),
     ]
+
     # 初始 已包含 可以直接使用 (注：范围值仅供参考，并非上限)
     # data='yolov5/data/voc_ball.yaml'
     # weights='yolov5/yolov5s.pt'

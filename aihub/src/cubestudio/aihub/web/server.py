@@ -323,7 +323,6 @@ class Server():
                     "message":"推理失败了"
                 }
 
-
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
         # @pysnooper.snoop()

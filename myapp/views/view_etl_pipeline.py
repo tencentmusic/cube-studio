@@ -83,7 +83,6 @@ class ETL_Task_ModelView_Api(ETL_Task_ModelView_Base,MyappModelRestApi):
 appbuilder.add_api(ETL_Task_ModelView_Api)
 
 
-
 class ETL_Pipeline_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
@@ -157,16 +156,14 @@ class ETL_Pipeline_ModelView_Base():
         "workflow": SelectField(
             _('workflow'),
             widget=MySelect2Widget(),
-            default='us',
+            default='airflow',
             description='调度集群选择',
-            choices=[['airflow', 'airflow']],
+            choices=[['airflow', 'airflow'],['dophinscheduler','dophinscheduler'],['azkaban','azkaban']],
             validators=[DataRequired()]
         )
     }
 
-
     edit_form_extra_fields = add_form_extra_fields
-
 
     # 检测是否具有编辑权限，只有creator和admin可以编辑
     def check_edit_permission(self, item):
@@ -527,7 +524,6 @@ class ETL_Pipeline_ModelView_Base():
                     "sub_args": {}
                 }
             },
-
         },
         "template_group_order": ["绑定任务", "出库入库", "数据计算", "其他"],
         "templte_list": {
@@ -1543,9 +1539,9 @@ class ETL_Pipeline_ModelView_Base():
         },
         "status": 0
     }
-    @expose("/template/list/")
-    def template_list(self):
 
+    @expose("/template/list/<etl_pipeline_id>")
+    def template_list(self,etl_pipeline_id):
         index=1
         for group in self.all_template['templte_list']:
             for template in self.all_template['templte_list'][group]:
