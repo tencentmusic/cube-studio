@@ -171,11 +171,11 @@ services:
     ports:
       - '8888:80'
     volumes:
-      - deploy:/etc/nginx/conf.d
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/deploy:/etc/nginx/conf.d
 
     '''
 
-compose_file = open('docker-compose-github.yml',mode='w')
+compose_file = open('docker-compose.yml',mode='w')
 compose_file.write(docker_compose_str)
 shutil.rmtree("deploy",ignore_errors=True)
 os.makedirs('deploy',exist_ok=True)
@@ -194,7 +194,8 @@ for app_name in os.listdir("."):
   {app_name}:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/{app_name}:/app
@@ -211,7 +212,7 @@ for app_name in os.listdir("."):
 
     nginx_config=f'''
 server {{
-    listen       8888;
+    listen       80;
     server_name  localhost;
 
     location /{"aihub" if app_name=='app1' else app_name}/ {{

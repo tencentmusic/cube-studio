@@ -7,13 +7,14 @@ services:
     ports:
       - '8888:80'
     volumes:
-      - deploy:/etc/nginx/conf.d
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/deploy:/etc/nginx/conf.d
 
     
   deoldify:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:deoldify
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/deoldify:/app
@@ -29,7 +30,8 @@ services:
   paddlespeech-tts:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-tts
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-tts:/app
@@ -45,7 +47,8 @@ services:
   paddlespeech-asr:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-asr
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-asr:/app
@@ -61,7 +64,8 @@ services:
   speaker-diarization:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:speaker-diarization
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/speaker-diarization:/app
@@ -77,7 +81,8 @@ services:
   paddleocr:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddleocr:/app
@@ -93,7 +98,8 @@ services:
   ddddocr:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:ddddocr
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/ddddocr:/app
@@ -109,7 +115,8 @@ services:
   gfpgan:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:gfpgan
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/gfpgan:/app
@@ -125,7 +132,8 @@ services:
   stable-diffusion:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/stable-diffusion:/app
@@ -136,28 +144,13 @@ services:
       REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  yolov5:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov5
-    restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/yolov5:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'yolov5'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
+
     
   yolov3:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov3
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/yolov3:/app
@@ -173,7 +166,8 @@ services:
   paddlespeech-cls:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-cls
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-cls:/app
@@ -189,7 +183,8 @@ services:
   humanseg:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:humanseg
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/humanseg:/app
@@ -205,7 +200,8 @@ services:
   app1:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:app1
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/app1:/app
@@ -221,7 +217,8 @@ services:
   panoptic:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:panoptic
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/panoptic:/app
@@ -237,7 +234,8 @@ services:
   animegan:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:animegan
     restart: unless-stopped
-    command: ["bash", "-c", "/src/docker/entrypoint.sh python app.py"]
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/animegan:/app
