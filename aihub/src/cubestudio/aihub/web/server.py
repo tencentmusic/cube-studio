@@ -115,6 +115,23 @@ class Server():
                 shutil.copyfile(file_path, save_path)
             return f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
+        # resize图片
+        # @pysnooper.snoop()
+        def resize_img(image_path):
+            image = cv2.imread(image_path)
+            fheight = min(image.shape[0], 1920) / image.shape[0]
+            fwidth = min(image.shape[1], 1920) / image.shape[1]
+            if fwidth==fwidth==1:
+                return
+            if fheight < fwidth:
+                # 缩放高度
+                dst = cv2.resize(image, None, fx=fheight, fy=fheight, interpolation=cv2.INTER_LINEAR)
+                cv2.imwrite(image_path, dst)
+            else:
+                dst = cv2.resize(image, None, fx=fwidth, fy=fwidth, interpolation=cv2.INTER_LINEAR)
+                cv2.imwrite(image_path, dst)
+
+
         # 视频转流
         def video_stram(self,video_path):
             vid = cv2.VideoCapture(video_path)
@@ -127,6 +144,7 @@ class Server():
 
 
         # 定义认为放在的队列
+        # @pysnooper.snoop()
         def api_inference(name,version,data):
             try:
                 inputs=copy.deepcopy(self.model.inference_inputs)
@@ -178,6 +196,11 @@ class Server():
                             inference_kargs[input_field.name] = input_data[0]
                         if input_field.validators.max>1:
                             inference_kargs[input_field.name] = input_data
+
+                        # 图片缩放
+                        for image_path in inference_kargs[input_field.name]:
+                            resize_img(image_path)
+
 
                     # 单选或者多选图片
                     if input_field.type == Field_type.image_select and data.get(input_field.name, ''):
@@ -270,11 +293,9 @@ class Server():
                     if back.get('image',''):
                         save_file_path = back['image']
                         if os.path.exists(save_file_path):
-                            # f = open(back['image'], 'rb')
-                            # image_data = f.read()
-                            # base64_data = base64.b64encode(image_data)  # base64编码
-                            # back['image'] = str(base64_data,encoding='utf-8')
+                            resize_img(save_file_path)
                             back['image'] = file2url(save_file_path)
+
 
                     # 如果是视频，写的不是http
                     if back.get('video',''):
@@ -305,7 +326,7 @@ class Server():
 
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def web_inference():
             # 从json里面读取信息
             data = request.json
