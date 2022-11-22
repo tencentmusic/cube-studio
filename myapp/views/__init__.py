@@ -1,5 +1,6 @@
 from . import base
 from . import home
+from . import wechat
 from . import route
 from . import view_team
 from . import view_notebook
