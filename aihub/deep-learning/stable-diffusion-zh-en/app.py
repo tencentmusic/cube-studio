@@ -10,7 +10,7 @@ from flagai.auto_model.auto_loader import AutoLoader
 from flagai.model.predictor.predictor import Predictor
 
 
-class SD_Model(Model):
+class SD_ZH_Model(Model):
     # 模型基础信息定义
     name = 'stable-diffusion-zh'
     label = '文字转图像-中英文混合9种语言'
@@ -58,8 +58,6 @@ class SD_Model(Model):
         model.to(device)
         self.predictor = Predictor(model)
 
-
-
     # 推理
     @pysnooper.snoop()
     def inference(self, prompt, n_samples=1, fixed_code=True, n_rows=0, **kwargs):
@@ -67,12 +65,13 @@ class SD_Model(Model):
             time_str = datetime.now().strftime('%Y%m%d%H%M%S')
             if n_samples:
                 n_samples = int(n_samples)
-            seed = random.randint(0,10000000)
-            re_list = self.predictor.predict_generate_images(prompt,ddim_steps=40,n_samples=n_samples,outpath='result',seed=seed,pic_name=time_str)
+            seed = random.randint(0, 10000000)
+            re_list = self.predictor.predict_generate_images(prompt, ddim_steps=40, n_samples=n_samples,
+                                                             outpath='result', seed=seed, pic_name=time_str)
             back = [
                 {
                     "image": img_path
-                }for img_path in re_list
+                } for img_path in re_list
             ]
             return back
         except Exception as ex:
@@ -83,7 +82,7 @@ class SD_Model(Model):
             return back
 
 
-model = SD_Model()
+model = SD_ZH_Model()
 # model.load_model()
 # result = model.inference(prompt='a photograph of an astronaut riding a horse')  # 测试
 # print(result)
