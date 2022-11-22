@@ -8,5 +8,5 @@ RUN bash /init.sh
 # 安装文件
 WORKDIR /app
 COPY * /app/
-COPY /app/predictor.py /root/miniconda3/envs/py38/lib/python3.8/site-packages/flagai/model/predictor/predictor.py /home/cube-studio/
+COPY /app/predictor.py /root/miniconda3/envs/py38/lib/python3.8/site-packages/flagai/model/predictor/predictor.py
 
