@@ -2,7 +2,7 @@
 
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
-
+app_names=[]
 # 生成构建镜像的脚本
 # build_file=open('build.sh',mode='w')
 # for app_name in os.listdir("."):
@@ -115,7 +115,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 #           - name: APPNAME
 #             value: {app_name}
 #           - name: REDIS_URL
-#             value: redis://:admin@43.142.20.178:6379/0
+#             value: redis://:admin@125.124.48.210:6379/0
 #           - name: REQ_TYPE
 #             value: {synchronous}
 #           - name: NVIDIA_VISIBLE_DEVICES
@@ -170,7 +170,7 @@ services:
     ports:
       - '8888:8888'
     volumes:
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/default.conf:/etc/nginx/conf.d/default.conf
 
     '''
 
@@ -212,7 +212,7 @@ for app_name in os.listdir("."):
       - /mnt/aihub:/src/cubestudio/aihub/web/static
     environment:
       APPNAME: '{app_name}'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
     
