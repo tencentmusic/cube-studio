@@ -84,10 +84,6 @@ class SD_ZH_Model(Model):
 
 
 model = SD_ZH_Model()
-# model.load_model()
-# result = model.inference(prompt='a photograph of an astronaut riding a horse')  # 测试
-# print(result)
-
-# 启动服务
-server = Server(model=model)
-server.server(port=8080)
+model.load_model()
+result = model.inference(prompt='a photograph of an astronaut riding a horse')  # 测试
+print(result)
