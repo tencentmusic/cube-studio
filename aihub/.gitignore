@@ -7,3 +7,4 @@ deep-learning/*/result
 /deep-learning/test.py
 /deep-learning/*/deploy.yaml
 /deep-learning/*/upload
+/deep-learning/deploy/
