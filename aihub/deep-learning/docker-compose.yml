@@ -7,212 +7,8 @@ services:
     ports:
       - '8888:8888'
     volumes:
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/default.conf:/etc/nginx/conf.d/default.conf
 
-    
-  deoldify:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:deoldify
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/deoldify:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'deoldify'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  paddlespeech-tts:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-tts
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-tts:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'paddlespeech-tts'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  paddlespeech-asr:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-asr
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-asr:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'paddlespeech-asr'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  speaker-diarization:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:speaker-diarization
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/speaker-diarization:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'speaker-diarization'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  paddleocr:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddleocr:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'paddleocr'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  ddddocr:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:ddddocr
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/ddddocr:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'ddddocr'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  gfpgan:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:gfpgan
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/gfpgan:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'gfpgan'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  stable-diffusion:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/stable-diffusion:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'stable-diffusion'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  yolov5:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov5
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/yolov5:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'yolov5'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  yolov3:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov3
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/yolov3:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'yolov3'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  paddlespeech-cls:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-cls
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-cls:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'paddlespeech-cls'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  humanseg:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:humanseg
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/humanseg:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'humanseg'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
     
   app1:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:app1
@@ -226,24 +22,7 @@ services:
       - /mnt/aihub:/src/cubestudio/aihub/web/static
     environment:
       APPNAME: 'app1'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-    
-    
-  panoptic:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:panoptic
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/panoptic:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'panoptic'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
     
@@ -260,7 +39,194 @@ services:
       - /mnt/aihub:/src/cubestudio/aihub/web/static
     environment:
       APPNAME: 'animegan'
-      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  stable-diffusion:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/stable-diffusion:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'stable-diffusion'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  paddleocr:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddleocr:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'paddleocr'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  gfpgan:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:gfpgan
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/gfpgan:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'gfpgan'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  paddlespeech-asr:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-asr
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-asr:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'paddlespeech-asr'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  humanseg:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:humanseg
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/humanseg:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'humanseg'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  paddlespeech-cls:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-cls
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-cls:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'paddlespeech-cls'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  ddddocr:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:ddddocr
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/ddddocr:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'ddddocr'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  paddlespeech-tts:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-tts
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/paddlespeech-tts:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'paddlespeech-tts'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  yolov3:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov3
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/yolov3:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'yolov3'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  deoldify:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:deoldify
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/deoldify:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'deoldify'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    
+  panoptic:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:panoptic
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/panoptic:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'panoptic'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
     
