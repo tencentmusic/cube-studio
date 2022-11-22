@@ -235,7 +235,7 @@ class Myauthdbview(AuthDBView):
             return redirect(oa_auth_url % (str(GITHUB_APPKEY),login_url,))
 
 
-    @expose('/wechat/')
+    @expose('/wechat')
     @pysnooper.snoop()
     def wechat(self):
         import hashlib
@@ -245,7 +245,7 @@ class Myauthdbview(AuthDBView):
         timestamp = data.get('timestamp','')
         nonce = data.get('nonce','')
         echostr = data.get('echostr','')
-        token = "tmedataleap"  # 请按照公众平台官网\基本配置中信息填写
+        token = "cubestudio"  # 请按照公众平台官网\基本配置中信息填写
         list = [token, timestamp, nonce]
         list.sort()
         sha1 = hashlib.sha1()
