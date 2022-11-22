@@ -17,7 +17,7 @@ class Speech_Cls_Model(Model):
     status = 'online'
     version = 'v20221114'
     doc = 'https://github.com/PaddlePaddle/PaddleSpeech'  # 'https://帮助文档的链接地址'
-    # pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     # inference_resource = {
     #     "resource_gpu": "1"
