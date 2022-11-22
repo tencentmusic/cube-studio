@@ -5,9 +5,9 @@ services:
     image: nginx
     restart: unless-stopped
     ports:
-      - '8888:80'
+      - '8888:8888'
     volumes:
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/deploy:/etc/nginx/conf.d
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/nginx.conf:/etc/nginx/conf.d/nginx.conf
 
     
   deoldify:
@@ -144,7 +144,24 @@ services:
       REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-
+    
+    
+  yolov5:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov5
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/yolov5:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'yolov5'
+      REDIS_URL: 'redis://:admin@43.142.20.178:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+    
     
   yolov3:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov3

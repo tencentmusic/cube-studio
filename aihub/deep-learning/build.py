@@ -3,7 +3,6 @@
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
 
-
 # 生成构建镜像的脚本
 # build_file=open('build.sh',mode='w')
 # for app_name in os.listdir("."):
@@ -169,12 +168,22 @@ services:
     image: nginx
     restart: unless-stopped
     ports:
-      - '8888:80'
+      - '8888:8888'
     volumes:
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/deploy:/etc/nginx/conf.d
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/nginx.conf:/etc/nginx/conf.d/nginx.conf
 
     '''
 
+nginx_str='''
+
+server {
+    listen       8888;
+    server_name  _;
+%s
+    
+}
+'''
+nginx_app_str=''
 compose_file = open('docker-compose.yml',mode='w')
 compose_file.write(docker_compose_str)
 shutil.rmtree("deploy",ignore_errors=True)
@@ -210,12 +219,9 @@ for app_name in os.listdir("."):
     '''
 
 
-    nginx_config=f'''
-server {{
-    listen       80;
-    server_name  localhost;
+    nginx_app_config=f'''
 
-    location /{"aihub" if app_name=='app1' else app_name}/ {{
+    location {"~* ^/(aihub|app1)" if app_name=='app1' else "/%s"%app_name}/ {{
         proxy_pass http://{app_name};
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Credentials: true;
@@ -226,13 +232,14 @@ server {{
         proxy_set_header        X-Real-IP $remote_addr;
         proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
     }}
-}}
+    
     '''
     compose_file.write(app_docker_compose_str)
-    ngxin_file=open(f'deploy/{app_name}.conf',mode='w')
-    ngxin_file.write(nginx_config)
-    ngxin_file.close()
+    nginx_app_str+=nginx_app_config
 
+file =open('default.conf',mode='w')
+file.write(nginx_str%nginx_app_str)
+file.close()
 compose_file.close()
 
 
