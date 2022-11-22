@@ -382,7 +382,7 @@ class Server():
         # @pysnooper.snoop()
         def info():
             inference_inputs = copy.deepcopy(self.model.inference_inputs)
-            web_examples = copy.deepcopy(self.web_examples)
+            web_examples = copy.deepcopy(self.model.web_examples)
             # example中图片转为在线地址
             for example in web_examples:
                 example_input = example.get('input',{})
