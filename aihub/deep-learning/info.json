@@ -188,7 +188,7 @@
     "uuid": "paddle-speech-cls-v20221114",
     "label": "语音场景分类",
     "describe": "语音场景分类:语种识别等",
-    "pic": "http://xx.xx.jpg",
+    "pic": "http://www.data-master.net:8888/paddlespeech-cls/static/example/paddlespeech-cls/example.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},
