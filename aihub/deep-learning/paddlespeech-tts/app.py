@@ -15,15 +15,15 @@ from paddlespeech.cli.tts.infer import TTSExecutor
 
 class Speech_Tts_Model(Model):
     # 模型基础信息定义
-    name = 'paddle-speech-tts'
+    name = 'paddlespeech-tts'
     label = '文字转语音'
-    describe = "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别"
+    describe = "文字转语音，支持280多种音色模型"
     field = "智能识别"
     scenes = "语音处理"
     status = 'online'
     version = 'v20221114'
     doc = 'https://github.com/PaddlePaddle/PaddleSpeech'  # 'https://帮助文档的链接地址'
-    # pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource = {
         "resource_gpu": "1"
@@ -62,7 +62,7 @@ class Speech_Tts_Model(Model):
         else:
             spk_id = 0
         file_name = f"result/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-output.wav"
-        tts(text=text, output=file_name, am='fastspeech2_csmsc', voc='hifigan_csmsc', lang='mix', spk_id=spk_id)
+        tts(text=text, output=file_name, am='fastspeech2_csmsc', voc='hifigan_csmsc', lang='zh', spk_id=spk_id)
         back = [
             {
                 'text': text,

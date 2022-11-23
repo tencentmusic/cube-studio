@@ -9,19 +9,19 @@ from paddlespeech.cli.asr.infer import ASRExecutor
 
 class Speech_Asr_Model(Model):
     # 模型基础信息定义
-    name = 'paddle-speech-asr'
+    name = 'paddlespeech-asr'
     label = '语音转文字'
-    describe = "涵盖功能有语音转文字，文字转语音，语音翻译，语音场景识别"
+    describe = "语音转文字，支持中英文"
     field = "智能识别"
     scenes = "语音处理"
     status = 'online'
     version = 'v20221116'
     doc = 'https://github.com/PaddlePaddle/PaddleSpeech'  # 'https://帮助文档的链接地址'
-    # pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
-    inference_resource = {
-        "resource_gpu": "1"
-    }
+    # inference_resource = {
+    #     "resource_gpu": "1"
+    # }
 
     inference_inputs = [
         Field(type=Field_type.audio, name='voice_file_path', label='语音文件',

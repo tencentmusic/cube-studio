@@ -77,6 +77,7 @@ class Paddleocr_Model(Model):
             return back
 
 model=Paddleocr_Model()
+# # 会预加载模型
 # model.load_model()
 # result = model.inference(img_file_path='test.png')  # 测试
 # print(result)

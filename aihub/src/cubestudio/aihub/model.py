@@ -125,6 +125,7 @@ class Model():
     inference_inputs=[
         # Field
     ]
+    web_examples=[]
     inference_resource={
         "resource_memory":"0",
         "resource_cpu":"0",
@@ -166,7 +167,6 @@ class Model():
         file=open('info.json',mode='w')
         file.write(json.dumps(info,indent=4,ensure_ascii=False))
         file.close()
-        pass
 
     # 配置数据集，在分布式训练时自动进行分配
     def set_dataset(self,**kwargs):

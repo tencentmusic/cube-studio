@@ -58,14 +58,12 @@ class Server():
         self.model=model
         self.docker=docker
         self.pre_url=self.model.name
-        self.has_load_model=False
 
         if self.model.pic and 'http' not in self.model.pic:
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 shutil.copyfile(self.model.pic, save_path)
-
 
     # 启动服务
     # @pysnooper.snoop()
@@ -85,10 +83,22 @@ class Server():
         celery_app.conf.update(app.config)
 
         # 如果是同步服务，并且是一个celery worker，就多进程启动消费推理
-        if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous' and '127.0.0.1' not in CELERY_BROKER_URL:
-            command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 10'%(self.model.name)
-            print(command)
-            exec(command)
+        if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
+            # 如果同时消费其他异步任务，就启动celery
+            if '127.0.0.1' not in CELERY_BROKER_URL:
+                command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 10'%(self.model.name)
+                print(command)
+                exec(command)
+            # 同步任务要加载模型
+            self.model.load_model()
+            # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
+            if self.model.web_examples and len(self.model.web_examples)>0:
+                input = self.model.web_examples[0].get("input",{})
+                try:
+                    if input:
+                        self.model.inference(**input)
+                except Exception as e:
+                    print(e)
 
         # 文件转url。视频转码，音频转码等
         # @pysnooper.snoop()
@@ -105,6 +115,23 @@ class Server():
                 shutil.copyfile(file_path, save_path)
             return f"/{self.pre_url}/static/example/"+self.model.name+"/" + file_path.strip('/')
 
+        # resize图片
+        # @pysnooper.snoop()
+        def resize_img(image_path):
+            image = cv2.imread(image_path)
+            fheight = min(image.shape[0], 1920) / image.shape[0]
+            fwidth = min(image.shape[1], 1920) / image.shape[1]
+            if fwidth==fwidth==1:
+                return
+            if fheight < fwidth:
+                # 缩放高度
+                dst = cv2.resize(image, None, fx=fheight, fy=fheight, interpolation=cv2.INTER_LINEAR)
+                cv2.imwrite(image_path, dst)
+            else:
+                dst = cv2.resize(image, None, fx=fwidth, fy=fwidth, interpolation=cv2.INTER_LINEAR)
+                cv2.imwrite(image_path, dst)
+
+
         # 视频转流
         def video_stram(self,video_path):
             vid = cv2.VideoCapture(video_path)
@@ -117,6 +144,7 @@ class Server():
 
 
         # 定义认为放在的队列
+        # @pysnooper.snoop()
         def api_inference(name,version,data):
             try:
                 inputs=copy.deepcopy(self.model.inference_inputs)
@@ -168,6 +196,11 @@ class Server():
                             inference_kargs[input_field.name] = input_data[0]
                         if input_field.validators.max>1:
                             inference_kargs[input_field.name] = input_data
+
+                        # 图片缩放
+                        for image_path in inference_kargs[input_field.name]:
+                            resize_img(image_path)
+
 
                     # 单选或者多选图片
                     if input_field.type == Field_type.image_select and data.get(input_field.name, ''):
@@ -260,11 +293,9 @@ class Server():
                     if back.get('image',''):
                         save_file_path = back['image']
                         if os.path.exists(save_file_path):
-                            # f = open(back['image'], 'rb')
-                            # image_data = f.read()
-                            # base64_data = base64.b64encode(image_data)  # base64编码
-                            # back['image'] = str(base64_data,encoding='utf-8')
+                            resize_img(save_file_path)
                             back['image'] = file2url(save_file_path)
+
 
                     # 如果是视频，写的不是http
                     if back.get('video',''):
@@ -292,10 +323,9 @@ class Server():
                     "message":"推理失败了"
                 }
 
-
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def web_inference():
             # 从json里面读取信息
             data = request.json
@@ -329,10 +359,6 @@ class Server():
 
 
             # 同步推理
-            # 一次性加载模型
-            if not self.has_load_model:
-                self.model.load_model()
-                self.has_load_model=True
             result = api_inference(name=self.model.name, version=self.model.version, data=data)
             return jsonify(result)
 
@@ -356,7 +382,7 @@ class Server():
         # @pysnooper.snoop()
         def info():
             inference_inputs = copy.deepcopy(self.model.inference_inputs)
-            web_examples = copy.deepcopy(self.web_examples)
+            web_examples = copy.deepcopy(self.model.web_examples)
             # example中图片转为在线地址
             for example in web_examples:
                 example_input = example.get('input',{})

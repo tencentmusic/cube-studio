@@ -29,8 +29,6 @@ class SD_ZH_Model(Model):
     inference_inputs = [
         Field(type=Field_type.text, name='prompt', label='输入的文字内容',
               describe='输入的文字内容，支持9种语言输入，描述越详细越好', default='a photograph of an astronaut riding a horse'),
-        # Field(type=Field_type.text_select, name='ddim_steps', label='推理的次数',
-        #       describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default="50",choices=["20","30","40","50","60","70"]),
         Field(type=Field_type.text_select, name='n_samples', label='推理出的图像数量',
               describe='结果中所展示的图片数量，数量越多则会导致性能下降', default="1", choices=[str(x + 1) for x in range(20)])
     ]
@@ -39,7 +37,6 @@ class SD_ZH_Model(Model):
             "label": "示例1",
             "input": {
                 "prompt": 'a photograph of an astronaut riding a horse',
-                "ddim_steps": 50,
                 "n_samples": 1
             }
         }
@@ -48,13 +45,13 @@ class SD_ZH_Model(Model):
     # 加载模型
     # @pysnooper.snoop()
     def load_model(self):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        os.makedirs('/modeldir',exist_ok=True)
         loader = AutoLoader(task_name="text2img",  # contrastive learning
                             model_name="AltDiffusion-m9",
-                            model_dir="modeldir")
-
+                            model_dir="/modeldir")
         model = loader.get_model()
         model.eval()
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model.to(device)
         self.predictor = Predictor(model)
 
@@ -66,8 +63,7 @@ class SD_ZH_Model(Model):
             if n_samples:
                 n_samples = int(n_samples)
             seed = random.randint(0, 10000000)
-            re_list = self.predictor.predict_generate_images(prompt, ddim_steps=40, n_samples=n_samples,
-                                                             outpath='result', seed=seed, pic_name=time_str)
+            re_list = self.predictor.predict_generate_images(prompt, ddim_steps=40, n_samples=n_samples,outpath='result', seed=seed, pic_name=time_str)
             back = [
                 {
                     "image": img_path

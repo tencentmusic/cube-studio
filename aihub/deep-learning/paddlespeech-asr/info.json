@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/PaddlePaddle/PaddleSpeech",
+    "field": "智能识别",
+    "scenes": "语音处理",
+    "type": "dateset,notebook,train,inference",
+    "name": "paddlespeech-asr",
+    "status": "online",
+    "version": "v20221116",
+    "uuid": "paddle-speech-asr-v20221116",
+    "label": "语音转文字",
+    "describe": "语音转文字，支持中英文",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {
+    }
+}
