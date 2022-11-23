@@ -301,8 +301,8 @@ class MyappModelView(ModelView):
     search_widget = MySearchWidget
     help_url=''
 
-    pre_add_get = None
-    pre_update_get = None
+    pre_add_web = None
+    pre_update_web = None
     post_list = None
     pre_show = None
     post_show = None
@@ -547,9 +547,9 @@ class MyappModelView(ModelView):
     @has_access
     def add(self):
         self.src_item_json = {}
-        if request.method=='GET' and self.pre_add_get:
+        if request.method=='GET' and self.pre_add_web:
             try:
-                self.pre_add_get()
+                self.pre_add_web()
                 self.conv = GeneralModelConverter(self.datamodel)
                 self.add_form = self.conv.create_form(
                     self.label_columns,
@@ -643,9 +643,9 @@ class MyappModelView(ModelView):
         pk = self._deserialize_pk_if_composite(pk)
         self.src_item_object = self.datamodel.get(pk, self._base_filters)
 
-        if request.method=='GET' and self.pre_update_get and self.src_item_object:
+        if request.method=='GET' and self.pre_update_web and self.src_item_object:
             try:
-                self.pre_update_get(self.src_item_object)
+                self.pre_update_web(self.src_item_object)
                 self.conv = GeneralModelConverter(self.datamodel)
                 # 重新更新，而不是只在初始化时更新
                 self.edit_form = self.conv.create_form(
