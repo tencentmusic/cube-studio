@@ -181,7 +181,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         "sqllchemy_uri":StringField(
             _(datamodel.obj.lab('sqllchemy_uri')),
             default="",
-            description='链接串地址： <br> mysql+pymysql://root:admin@host.docker.internal:3306/db_name?charset=utf8 <br> postgresql+psycopg2://root:admin@host.docker.internal:5432/db_name',
+            description='链接串地址： <br> 示例：mysql+pymysql://$账号:$密码@$ip:$端口/$库名?charset=utf8 <br> 示例：postgresql+psycopg2://$账号:$密码@$ip:$端口/$库名',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(),Regexp("^(mysql\+pymysql|postgresql\+psycopg2)")]
         ),
@@ -249,7 +249,8 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         if not item.owner or g.user.username not in item.owner:
             item.owner = g.user.username if not item.owner else item.owner + "," + g.user.username
 
-        flash('添加或修改字段类型，需要点击创建远程表，已实现在远程数据库上建表','warning')
+        flash('添加或修改字段类型，需要点击创建远程表，以实现在远程数据库上建表','warning')
+
     def pre_update(self, item):
         if not item.sqllchemy_uri:
             item.sqllchemy_uri=self.src_item_json.get('sqllchemy_uri','')
@@ -257,7 +258,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
 
 
     # 转换为前端list
-    def pre_get(self,_response):
+    def pre_show_res(self,_response):
         data = _response['data']
         columns=json.loads(data.get('columns','{}'))
         columns_list=[]
@@ -268,14 +269,16 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         data['columns']=columns_list
 
 
-    # 将前端columns list转化为字段存储
-    def pre_json_load(self, req_json=None):
+    # 添加或者更新前将前端columns list转化为字段存储
+    def pre_add_req(self, req_json=None):
         if req_json and 'columns' in req_json:
             columns={}
             for col in req_json.get('columns',[]):
                 columns[col['name']]=col
             req_json['columns'] = json.dumps(columns,indent=4,ensure_ascii=False)
         return req_json
+
+    pre_update_req=pre_add_req
 
     # 获取指定维表里面的数据
     @staticmethod
@@ -324,7 +327,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         sqllchemy_uri = item.sqllchemy_uri
         if sqllchemy_uri:
             # 创建数据库的sql(如果数据库存在就不创建，防止异常)
-            if 'postgresql' in item.sqllchemy_uri:
+            if 'postgresql' in sqllchemy_uri:
 
                 # 创建pg表
                 import sqlalchemy.engine.url as url
@@ -388,7 +391,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
 
 
             # 创建数据库的sql(如果数据库存在就不创建，防止异常)
-            if 'mysql' in item.sqllchemy_uri:
+            if 'mysql' in sqllchemy_uri:
                 # 创建mysql表
                 import sqlalchemy.engine.url as url
                 uri = url.make_url(sqllchemy_uri)
@@ -454,6 +457,10 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                 dbsession.close()
                 # 如果远程有表，就增加字段
 
+        all_dimension = conf.get('all_dimension_instance', {})
+        if "dimension_%s"%dim_id in all_dimension:
+            del all_dimension["dimension_%s"%dim_id]
+
         url_path = conf.get('MODEL_URLS', {}).get("dimension")+'?targetId='+dim_id
         return redirect(url_path)
 
@@ -511,10 +518,13 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
             search_columns = []
             label_columns={}
             add_columns=[]
+            edit_columns=[]
             show_columns=[]
             list_columns=[]
             description_columns={}
             add_form_extra_fields={}
+            add_form_query_rel_fields={}
+            validators_columns={}
             order_columns=[]
             cols_width = {
             }
@@ -573,14 +583,16 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
                 label_columns[column_name]=columns[column_name]['describe']
                 description_columns[column_name] = columns[column_name]['describe']
-                add_columns.append(column_name)
+                if not int(columns[column_name].get('primary_key',False)):
+                    add_columns.append(column_name)
                 show_columns.append(column_name)
-                list_columns.append(column_name)
+                if not int(columns[column_name].get('primary_key', False)):
+                    list_columns.append(column_name)
                 if column_type == 'string' or column_type=='text' or column_type=='int':
                     if not int(columns[column_name].get('primary_key',False)):
                         search_columns.append(column_name)
-                if column_type == 'int':
-                    order_columns.append(column_name)
+                # if column_type == 'int':
+                order_columns.append(column_name)
 
             bind_key = 'dimension_%s' % dim.id
             # SQLALCHEMY_BINDS = conf.get('SQLALCHEMY_BINDS', {})
@@ -702,7 +714,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                                 elif cols.get(key,{}).get('column_type','text')=='double':
                                     data[key]=float(data[key]) if data[key] else None
                                 else:
-                                    data[key]=str(data[key])
+                                    data[key]=str(data[key]).replace('\n',' ')
                             except Exception as e:
                                 print(e)
                                 data[key] = None
@@ -755,6 +767,36 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                 )
 
 
+            @action("copy_row", __("Copy"), __("复制所选记录 all Really?"), "fa-trash", single=False)
+            # @pysnooper.snoop(watch_explode=('items'))
+            def copy_row(self, items):
+                if not items:
+                    abort(404)
+                success = []
+                fail = []
+                for item in items:
+                    try:
+                        req_json = item.to_json()
+                        if 'id' in req_json:
+                            del req_json["id"]
+                        json_data = self.pre_add_req(req_json)
+                        new_item = self.add_model_schema.load(json_data)
+                        self.pre_add(new_item.data)
+                        self.datamodel.add(new_item.data, raise_exception=True)
+                        self.post_add(new_item.data)
+                        result_data = self.add_model_schema.dump(new_item.data, many=False).data
+                        success.append(item.to_json())
+                    except Exception as e:
+                        flash(str(e), "danger")
+                        fail.append(item.to_json())
+                db.session.commit()
+                return json.dumps(
+                    {
+                        "success": success,
+                        "fail": fail
+                    }, indent=4, ensure_ascii=False
+                )
+
             view_class = type(
                 "Dimension_%s_ModelView_Api"%dim.id, (MyappModelRestApi,),
                 dict(
@@ -765,12 +807,14 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     spec_label_columns=spec_label_columns,
                     search_columns=search_columns,
                     order_columns=order_columns,
+                    add_columns=add_columns,
                     label_title = dim.label,
                     base_permissions = ['can_list','can_add','can_delete','can_edit','can_show'],
                     pre_add=pre_add,
                     pre_update=pre_update,
                     upload=upload,
                     muldelete=muldelete,
+                    copy_row=copy_row,
                     dim_id=dim_id,
                     import_data=True,
                     download_data=True,
@@ -792,9 +836,9 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
 
     @expose("/<dim_id>/api/<int:pk>", methods=["GET"])
-    def dim_api_get(self, dim_id,pk, **kwargs):
+    def dim_api_show(self, dim_id,pk, **kwargs):
         view_instance = self.set_model(dim_id)
-        return view_instance.api_get(pk,**kwargs)
+        return view_instance.api_show(pk,**kwargs)
 
     @expose("/<dim_id>/api/", methods=["GET"])
     def dim_api_list(self,dim_id, **kwargs):

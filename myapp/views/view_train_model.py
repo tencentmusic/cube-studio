@@ -195,7 +195,7 @@ class Training_Model_ModelView_Base():
 class Training_Model_ModelView(Training_Model_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(Training_Model)
 
-appbuilder.add_view(Training_Model_ModelView,"模型管理",icon = 'fa-hdd-o',category = '服务化',category_icon = 'fa-tasks')
+appbuilder.add_view_no_menu(Training_Model_ModelView)
 
 
 

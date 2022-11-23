@@ -49,7 +49,7 @@ class Service_Filter(MyappFilter):
 class Service_ModelView_base():
     datamodel = SQLAInterface(Service)
 
-    show_columns = ['project','name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url']
+    show_columns = ['project','name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
     add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
     list_columns = ['project','name_url','host_url','ip','deploy','creator','modified']
     cols_width={
@@ -70,7 +70,7 @@ class Service_ModelView_base():
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
-    host_rule = ",".join([cluster + "集群:*." + conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN',''))])
+    host_rule = ", ".join([cluster + "集群:*." + conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN',''))])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
@@ -156,6 +156,10 @@ class Service_ModelView_base():
 
         volume_mount = service.volume_mount
         labels = {"app":service.name,"user":service.created_by.username,"pod-type":"service"}
+        env = service.env
+        env+="\nRESOURCE_CPU="+service.resource_cpu
+        env += "\nRESOURCE_MEMORY=" + service.resource_memory
+
         k8s_client.create_deployment(namespace=namespace,
                               name=service.name,
                               replicas=service.replicas,
@@ -172,7 +176,7 @@ class Service_ModelView_base():
                               image_pull_secrets=image_secrets,
                               image=service.images,
                               hostAliases=conf.get('HOSTALIASES',''),
-                              env=service.env,
+                              env=env,
                               privileged=False,
                               accounts=None,
                               username=service.created_by.username,

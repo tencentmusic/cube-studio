@@ -234,9 +234,7 @@ class Metadata_table_ModelView_base():
 
 
     # @event_logger.log_this
-    @action(
-        "ddl", __("创建远程hive表"), __("ddl 保存修改"), "fa-save", multiple=False, single=True
-    )
+    @action("ddl", __("更新到远程hive表"), __("ddl 保存修改"), "fa-save", multiple=False, single=True)
     def ddl(self, item):
         pass
         # 自己实现更新到hive表
@@ -249,18 +247,19 @@ class Metadata_table_ModelView_Api(Metadata_table_ModelView_base,MyappModelRestA
 
 
     # @pysnooper.snoop()
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.default_filter = {
             "owner": g.user.username
         }
 
     # @pysnooper.snoop()
-    def pre_get_list(self,result):
+    def pre_list_res(self,result):
         data = result['data']
         for item in data:
             storage_cost = item.get('storage_cost',0)
             if storage_cost:
                 item['storage_cost']=round(float(storage_cost), 6)
+        return result
 
     # # 在info信息中添加特定参数
     # @pysnooper.snoop()
