@@ -18,7 +18,8 @@
 
  - 数据接入模块：支持http/cos/..等离线接口，支持kafka/pulsar..等实时接口，支持源或者目的hive，ck，druid等（模块缺少）
  - 离线元数据：
-   - ~~支持仅管理离线元数据，~~定时脚本将远程数据库元数据同步到离线元数据内(比如离线同步hive元数据到元数据模块),支持离线元数据模块操作ddl远程数据库(比如增减hive列)
+   - ~~支持仅管理离线元数据~~
+   - 定时脚本将远程数据库元数据同步到离线元数据内(比如离线同步hive元数据到元数据模块),支持离线元数据模块操作ddl远程数据库(比如增减hive列)
    - 实时查询远程元数据，并支持实时ddl远程数据库。
    - 离线/实时管理，支持hive/clickhouse/mysql/pg/druid等数据库类型
  - 血缘关系：
@@ -39,7 +40,8 @@ AI平台：
 
  - notebook：
    - ~~支持基础vscode/jupyter开发环境，支持ssh等功能~~
-   - ~~大数据版本，数据挖掘版本，深度学习版本，~~添加使用示例，比如sparksql/impala/presto/clickhouse/mysql/postgresql等分析建模示例
+   - ~~大数据版本，数据挖掘版本，深度学习版本，~~
+   - 添加使用示例，比如sparksql/impala/presto/clickhouse/mysql/postgresql等分析建模示例
    - 添加flink实时分析示例
    - 添加百G大数据单机数据分析能力Arrow、vaex、duckdb等数据分析能力
  - 镜像仓库管理：
@@ -96,8 +98,6 @@ web框架：
 - 通用可视化模板
 
 # AIHub应用市场
-
-深度学习算法参与：[https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning](https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning)
 
 sdk
 
@@ -179,5 +179,4 @@ sdk
  - 知识社区的运营，比如知乎，csdn，B站等，发布帮助视频
  - 帮助新用户，群内答疑
  - 发展社区大使，推广社区
-
-
+ 
