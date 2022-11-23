@@ -583,9 +583,11 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
                 label_columns[column_name]=columns[column_name]['describe']
                 description_columns[column_name] = columns[column_name]['describe']
-                add_columns.append(column_name)
+                if not int(columns[column_name].get('primary_key',False)):
+                    add_columns.append(column_name)
                 show_columns.append(column_name)
-                list_columns.append(column_name)
+                if not int(columns[column_name].get('primary_key', False)):
+                    list_columns.append(column_name)
                 if column_type == 'string' or column_type=='text' or column_type=='int':
                     if not int(columns[column_name].get('primary_key',False)):
                         search_columns.append(column_name)
@@ -777,8 +779,6 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         req_json = item.to_json()
                         if 'id' in req_json:
                             del req_json["id"]
-                        if 'rowid' in req_json:
-                            del req_json['rowid']
                         json_data = self.pre_add_req(req_json)
                         new_item = self.add_model_schema.load(json_data)
                         self.pre_add(new_item.data)
@@ -807,6 +807,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     spec_label_columns=spec_label_columns,
                     search_columns=search_columns,
                     order_columns=order_columns,
+                    add_columns=add_columns,
                     label_title = dim.label,
                     base_permissions = ['can_list','can_add','can_delete','can_edit','can_show'],
                     pre_add=pre_add,

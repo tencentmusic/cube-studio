@@ -186,11 +186,13 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     parallelism = Column(Integer, nullable=False,default=1)  # 同一个pipeline，最大并行的task数目
     alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated')   # 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated
     alert_user = Column(String(300), default='')
+
     expand = Column(Text(65536),default='[]')
     depends_on_past = Column(Boolean, default=False)
     max_active_runs = Column(Integer, nullable=False,default=3)   # 最大同时运行的pipeline实例
     expired_limit = Column(Integer, nullable=False, default=1)  # 过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能
     parameter = Column(Text(65536), default='{}')
+
 
     def __repr__(self):
         return self.name

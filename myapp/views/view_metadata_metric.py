@@ -209,6 +209,21 @@ class Metadata_metric_ModelView_base():
         data['public'] = bool(int(data.get('public', 1)))
         return data
 
+    @action(
+        "muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False
+    )
+    def muldelete(self, items):
+        if not items:
+            abort(404)
+        for item in items:
+            try:
+                if item.created_by.username==g.user.username:
+                    self.pre_delete(item)
+                    self.datamodel.delete(item, raise_exception=True)
+                    self.post_delete(item)
+            except Exception as e:
+                flash(str(e), "danger")
+
 class Metadata_metric_ModelView_Api(Metadata_metric_ModelView_base,MyappModelRestApi):
     datamodel = SQLAInterface(Metadata_metric)
     route_base = '/metadata_metric_modelview/api'

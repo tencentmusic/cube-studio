@@ -233,6 +233,7 @@ def json_response(message,status,result):
 
 
 
+import pysnooper
 # @pysnooper.snoop(depth=5)
 # 暴露url+视图函数。视图函数会被覆盖，暴露url也会被覆盖
 class MyappModelRestApi(ModelRestApi):

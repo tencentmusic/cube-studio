@@ -1318,6 +1318,7 @@ def adjust_service_resource(task):
 
 from myapp.models.model_aihub import Aihub
 
+
 def add_aihub(info_path):
     if not os.path.exists(info_path):
         return

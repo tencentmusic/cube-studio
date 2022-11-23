@@ -70,7 +70,7 @@ class Service_ModelView_base():
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
-    host_rule = ",".join([cluster + "集群:*." + conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN',''))])
+    host_rule = ", ".join([cluster + "集群:*." + conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN',''))])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),

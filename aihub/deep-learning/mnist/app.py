@@ -31,20 +31,19 @@ class Mnist_Model(Model):
 
     # 训练
     train_inputs = [
-        Field(Field_type.str, name='datapath', label='数据地址', describe='训练数据地址'),
         Field(Field_type.str, name='modelpath', label='模型存储地址', describe='模型存储地址'),
+        Field(Field_type.str, name='datapath', label='数据地址', describe='训练数据地址')
     ]
-
-    # 训练的入口函数，将用户输入参数传递
-    def train(self,datapath,modelpath,**kwargs):
-        dist.init_process_group(backend='gloo')
-        run(datapath=datapath,modelpath=modelpath, gpu=False)
-        dist.destroy_process_group()
-
     # 推理输入
     inference_inputs = [
         Field(type=Field_type.image,name='img_file_path',label='待识别图片',describe='用于文本识别的原始图片')
     ]
+
+    # 训练的入口函数，将用户输入参数传递
+    def train(self,**kwargs):
+        dist.init_process_group(backend='gloo')
+        run(modelpath=kwargs['modelpath'], gpu=False, datapath=kwargs['datapath'])
+        dist.destroy_process_group()
 
     # 推理前load模型
     def load_model(self,**kwargs):
