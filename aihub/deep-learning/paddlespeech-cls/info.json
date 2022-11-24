@@ -1,6 +1,6 @@
 {
     "doc": "https://github.com/PaddlePaddle/PaddleSpeech",
-    "field": "智能识别",
+    "field": "听觉",
     "scenes": "语音处理",
     "type": "dateset,notebook,train,inference",
     "name": "paddlespeech-cls",

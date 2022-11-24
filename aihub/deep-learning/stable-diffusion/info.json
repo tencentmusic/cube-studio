@@ -1,6 +1,6 @@
 {
     "doc": "https://github.com/CompVis/stable-diffusion",
-    "field": "神经网络",
+    "field": "机器视觉",
     "scenes": "图像创作",
     "type": "dateset,notebook,train,inference",
     "name": "stable-diffusion",

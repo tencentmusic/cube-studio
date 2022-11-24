@@ -18,7 +18,7 @@ class Speech_Tts_Model(Model):
     name = 'paddlespeech-tts'
     label = '文字转语音'
     describe = "文字转语音，支持280多种音色模型"
-    field = "智能识别"
+    field = "听觉"
     scenes = "语音处理"
     status = 'online'
     version = 'v20221114'

@@ -1,270 +1,270 @@
-[
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/deoldify",
-    "field": "机器视觉",
-    "scenes": "图像合成",
-    "type": "dateset,notebook,train,inference",
-    "name": "deoldify",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "deoldify-v20221001",
-    "label": "图片上色",
-    "describe": "图片上色",
-    "pic": "http://www.data-master.net:8888/deoldify/static/example/deoldify/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
+  [
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/deoldify",
+      "field": "机器视觉",
+      "scenes": "图像合成",
+      "type": "dateset,notebook,train,inference",
+      "name": "deoldify",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "deoldify-v20221001",
+      "label": "图片上色",
+      "describe": "图片上色",
+      "pic": "http://www.data-master.net:8888/deoldify/static/example/deoldify/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
     },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/paddlespeech-tts",
-    "field": "智能识别",
-    "scenes": "语音处理",
-    "type": "dateset,notebook,train,inference",
-    "name": "paddlespeech-tts",
-    "status": "online",
-    "version": "v20221114",
-    "uuid": "paddle-speech-tts-v20221114",
-    "label": "文字转语音",
-    "describe": "文字转语音，支持280多种音色模型",
-    "pic": "http://www.data-master.net:8888/paddlespeech-tts/static/example/paddlespeech-tts/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/paddlespeech-tts",
+      "field": "听觉",
+      "scenes": "语音处理",
+      "type": "dateset,notebook,train,inference",
+      "name": "paddlespeech-tts",
+      "status": "online",
+      "version": "v20221114",
+      "uuid": "paddle-speech-tts-v20221114",
+      "label": "文字转语音",
+      "describe": "文字转语音，支持280多种音色模型",
+      "pic": "http://www.data-master.net:8888/paddlespeech-tts/static/example/paddlespeech-tts/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
     },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/paddlespeech-asr",
-    "field": "智能识别",
-    "scenes": "语音处理",
-    "type": "dateset,notebook,train,inference",
-    "name": "paddlespeech-asr",
-    "status": "online",
-    "version": "v20221116",
-    "uuid": "paddle-speech-asr-v20221116",
-    "label": "语音转文字",
-    "describe": "语音转文字，支持中英文",
-    "pic": "http://www.data-master.net:8888/paddlespeech-asr/static/example/paddlespeech-asr/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/paddlespeech-asr",
+      "field": "听觉",
+      "scenes": "语音处理",
+      "type": "dateset,notebook,train,inference",
+      "name": "paddlespeech-asr",
+      "status": "online",
+      "version": "v20221116",
+      "uuid": "paddle-speech-asr-v20221116",
+      "label": "语音转文字",
+      "describe": "语音转文字，支持中英文",
+      "pic": "http://www.data-master.net:8888/paddlespeech-asr/static/example/paddlespeech-asr/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
     },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/paddleocr",
-    "field": "机器视觉",
-    "scenes": "图像识别",
-    "type": "dateset,notebook,train,inference",
-    "name": "paddleocr",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "paddleocr-v20221001",
-    "label": "ocr识别",
-    "describe": "paddleocr提供的ocr识别",
-    "pic": "https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/paddleocr",
+      "field": "机器视觉",
+      "scenes": "图像识别",
+      "type": "dateset,notebook,train,inference",
+      "name": "paddleocr",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "paddleocr-v20221001",
+      "label": "ocr识别",
+      "describe": "paddleocr提供的ocr识别",
+      "pic": "http://www.data-master.net:8888/paddleocr/static/example/paddleocr/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
     },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/ddddocr",
-    "field": "机器视觉",
-    "scenes": "图像识别",
-    "type": "dateset,notebook,train,inference",
-    "name": "ddddocr",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "ddddocr-v20221001",
-    "label": "验证码识别",
-    "describe": "ai识别验证码文字和验证码目标",
-    "pic": "http://www.data-master.net:8888/ddddocr/static/example/ddddocr/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/ddddocr",
+      "field": "机器视觉",
+      "scenes": "图像识别",
+      "type": "dateset,notebook,train,inference",
+      "name": "ddddocr",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "ddddocr-v20221001",
+      "label": "验证码识别",
+      "describe": "ai识别验证码文字和验证码目标",
+      "pic": "http://www.data-master.net:8888/ddddocr/static/example/ddddocr/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
     },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/gfpgan",
-    "field": "机器视觉",
-    "scenes": "图像合成",
-    "type": "dateset,notebook,train,inference",
-    "name": "gfpgan",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "gfpgan-v20221001",
-    "label": "图片修复",
-    "describe": "低分辨率照片修复，清晰度增强",
-    "pic": "http://www.data-master.net:8888/gfpgan/static/example/gfpgan/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/gfpgan",
+      "field": "机器视觉",
+      "scenes": "图像合成",
+      "type": "dateset,notebook,train,inference",
+      "name": "gfpgan",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "gfpgan-v20221001",
+      "label": "图片修复",
+      "describe": "低分辨率照片修复，清晰度增强",
+      "pic": "http://www.data-master.net:8888/gfpgan/static/example/gfpgan/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
     },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/stable-diffusion",
-    "field": "神经网络",
-    "scenes": "图像创作",
-    "type": "dateset,notebook,train,inference",
-    "name": "stable-diffusion",
-    "status": "online",
-    "version": "v20221022",
-    "uuid": "stable-diffusion-v20221022",
-    "label": "文字转图像",
-    "describe": "输入一串文字描述，可生成相应的图片",
-    "pic": "https://images.nightcafe.studio//assets/stable-tile.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/stable-diffusion",
+      "field": "机器视觉",
+      "scenes": "图像创作",
+      "type": "dateset,notebook,train,inference",
+      "name": "stable-diffusion",
+      "status": "online",
+      "version": "v20221022",
+      "uuid": "stable-diffusion-v20221022",
+      "label": "文字转图像",
+      "describe": "输入一串文字描述，可生成相应的图片",
+      "pic": "http://www.data-master.net:8888/stable-diffusion/static/example/stable-diffusion/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {
+        "resource_gpu": "1"
+      }
     },
-    "train": {},
-    "inference": {
-      "resource_gpu": "1"
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/yolov3",
+      "field": "机器视觉",
+      "scenes": "目标识别",
+      "type": "dateset,notebook,train,inference",
+      "name": "yolov3",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "yolov3-v20221001",
+      "label": "目标识别",
+      "describe": "darknet yolov3 目标识别",
+      "pic": "http://www.data-master.net:8888/yolov3/static/example/yolov3/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
+    },
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/paddlespeech-cls",
+      "field": "听觉",
+      "scenes": "语音处理",
+      "type": "dateset,notebook,train,inference",
+      "name": "paddlespeech-cls",
+      "status": "online",
+      "version": "v20221114",
+      "uuid": "paddle-speech-cls-v20221114",
+      "label": "语音场景分类",
+      "describe": "语音场景分类:语种识别等",
+      "pic": "http://www.data-master.net:8888/paddlespeech-cls/static/example/paddlespeech-cls/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
+    },
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/humanseg",
+      "field": "机器视觉",
+      "scenes": "图像合成",
+      "type": "dateset,notebook,train,inference",
+      "name": "humanseg",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "humanseg-v20221001",
+      "label": "人体分割背景替换",
+      "describe": "人体分割背景替换，视频会议背景替换",
+      "pic": "http://www.data-master.net:8888/humanseg/static/example/humanseg/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
+    },
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/panoptic",
+      "field": "机器视觉",
+      "scenes": "目标识别",
+      "type": "dateset,notebook,train,inference",
+      "name": "panoptic",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "panoptic-v20221001",
+      "label": "图片识别",
+      "describe": "resnet50 图像识别",
+      "pic": "http://www.data-master.net:8888/panoptic/static/example/panoptic/test.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {}
+    },
+    {
+      "doc": "http://aihub.cube.woa.com/aihub/animegan",
+      "field": "机器视觉",
+      "scenes": "图像合成",
+      "type": "dateset,notebook,train,inference",
+      "name": "animegan",
+      "status": "online",
+      "version": "v20221001",
+      "uuid": "animegan-v20221001",
+      "label": "动漫风格化",
+      "describe": "图片的全新动漫风格化，宫崎骏或新海诚风格的动漫，以及4种关于人脸的风格转换。",
+      "pic": "http://www.data-master.net:8888/animegan/static/example/animegan/example.jpg",
+      "hot": "1",
+      "price": "0",
+      "dataset": {},
+      "notebook": {
+        "jupyter": [],
+        "appendix": []
+      },
+      "train": {},
+      "inference": {
+        "resource_gpu": "1"
+      }
     }
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/yolov3",
-    "field": "机器视觉",
-    "scenes": "目标识别",
-    "type": "dateset,notebook,train,inference",
-    "name": "yolov3",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "yolov3-v20221001",
-    "label": "目标识别",
-    "describe": "darknet yolov3 目标识别",
-    "pic": "http://www.data-master.net:8888/yolov3/static/example/yolov3/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
-    },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/paddlespeech-cls",
-    "field": "智能识别",
-    "scenes": "语音处理",
-    "type": "dateset,notebook,train,inference",
-    "name": "paddlespeech-cls",
-    "status": "online",
-    "version": "v20221114",
-    "uuid": "paddle-speech-cls-v20221114",
-    "label": "语音场景分类",
-    "describe": "语音场景分类:语种识别等",
-    "pic": "http://www.data-master.net:8888/paddlespeech-cls/static/example/paddlespeech-cls/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
-    },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/humanseg",
-    "field": "机器视觉",
-    "scenes": "图像合成",
-    "type": "dateset,notebook,train,inference",
-    "name": "humanseg",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "humanseg-v20221001",
-    "label": "人体分割背景替换",
-    "describe": "人体分割背景替换，视频会议背景替换",
-    "pic": "http://www.data-master.net:8888/humanseg/static/example/humanseg/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
-    },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/panoptic",
-    "field": "机器视觉",
-    "scenes": "目标识别",
-    "type": "dateset,notebook,train,inference",
-    "name": "panoptic",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "panoptic-v20221001",
-    "label": "图片识别",
-    "describe": "resnet50 图像识别",
-    "pic": "http://www.data-master.net:8888/panoptic/static/example/panoptic/test.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
-    },
-    "train": {},
-    "inference": {}
-  },
-  {
-    "doc": "http://aihub.cube.woa.com/aihub/animegan",
-    "field": "机器视觉",
-    "scenes": "图像合成",
-    "type": "dateset,notebook,train,inference",
-    "name": "animegan",
-    "status": "online",
-    "version": "v20221001",
-    "uuid": "animegan-v20221001",
-    "label": "动漫风格化",
-    "describe": "图片的全新动漫风格化，宫崎骏或新海诚风格的动漫，以及4种关于人脸的风格转换。",
-    "pic": "http://www.data-master.net:8888/animegan/static/example/animegan/example.jpg",
-    "hot": "1",
-    "price": "0",
-    "dataset": {},
-    "notebook": {
-      "jupyter": [],
-      "appendix": []
-    },
-    "train": {},
-    "inference": {
-      "resource_gpu": "1"
-    }
-  }
-]
+  ]

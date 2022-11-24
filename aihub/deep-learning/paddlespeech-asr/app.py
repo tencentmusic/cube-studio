@@ -12,7 +12,7 @@ class Speech_Asr_Model(Model):
     name = 'paddlespeech-asr'
     label = '语音转文字'
     describe = "语音转文字，支持中英文"
-    field = "智能识别"
+    field = "听觉"
     scenes = "语音处理"
     status = 'online'
     version = 'v20221116'
