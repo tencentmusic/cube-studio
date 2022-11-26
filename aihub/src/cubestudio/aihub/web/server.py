@@ -146,7 +146,7 @@ class Server():
 
 
         # 定义认为放在的队列
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def api_inference(name,version,data):
             try:
                 inputs=copy.deepcopy(self.model.inference_inputs)
@@ -330,7 +330,7 @@ class Server():
 
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def web_inference():
             # 从json里面读取信息
             data = request.json
@@ -501,7 +501,7 @@ class Server():
             print(req_url)
 
             # 只对后端接口
-            if '/aihub' not in req_url:
+            if '/api/model/' in req_url:
                 # 分享来自主主平台的cookie
                 username = request.cookies.get('myapp_username','')
                 if not username:
@@ -509,7 +509,6 @@ class Server():
 
                 # res传递给浏览器记录
                 session['username']=username
-
 
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
 
