@@ -327,7 +327,7 @@ class Server():
 
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        # @pysnooper.snoop()
+        @pysnooper.snoop()
         def web_inference():
             # 从json里面读取信息
             data = request.json
@@ -492,6 +492,7 @@ class Server():
             return jsonify(info)
 
         @app.before_request
+        @pysnooper.snoop()
         def check_login():
             req_url = request.path
             print(req_url)
@@ -523,6 +524,7 @@ class Server():
 
         # 配置响应后操作：统计
         @app.after_request
+        @pysnooper.snoop()
         def apply_http_headers(response):
             # 登记用户名
             response.set_cookie('myapp_username', session['username'])
@@ -550,7 +552,7 @@ class Server():
                     for username in user_history:
                         for path in user_history[username]:
                             if '/api/model/' in path:
-                                all_info[self.pre_url]["hot"] = int(all_info[self.pre_url].get("hot",'1'))+int(user_history[username][path])
+                                all_info[self.pre_url]["hot"] = int(all_info[self.pre_url].get("hot",'0'))+int(user_history[username][path].get('num',0))
 
                     json.dump(all_info,open(all_info_path,mode='w'))
 
