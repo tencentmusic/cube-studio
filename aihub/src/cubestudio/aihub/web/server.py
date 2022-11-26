@@ -59,6 +59,8 @@ class Server():
         self.docker=docker
         self.pre_url=self.model.name
 
+        self.save_time=datetime.datetime.now()
+
         if self.model.pic and 'http' not in self.model.pic:
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
             if not os.path.exists(save_path):
@@ -426,6 +428,44 @@ class Server():
                     if '/' in choice['id']:
                         choice['id']=choice['id'][choice['id'].rindex('/')+1:]
 
+            rec_apps = [
+                {
+                    "pic": f"/{self.pre_url.strip('/')}/static/rec/rec1.jpg",
+                    "label": "图片卡通化",
+                    "url": "/aihub/gfpgan"
+                },
+                {
+                    "pic": f"/{self.pre_url.strip('/')}/static/rec/rec2.jpg",
+                    "label": "文本生成图片",
+                    "url": "/aihub/stable-diffusion"
+                },
+                {
+                    "pic": f"/{self.pre_url.strip('/')}/static/rec/rec3.jpg",
+                    "label": "图片卡通化",
+                    "url": "/aihub/gfpgan"
+                },
+            ]
+            all_info_path = '/src/cubestudio/aihub/web/static/rec/all_info.json'
+            all_info=json.load(open(all_info_path,mode='r')) if os.path.exists(all_info_path) else {}
+            if all_info:
+                all_info = dict(sorted(all_info.items(), key = lambda item: int(item[1].get('hot',1)),reverse=True))
+                all_apps_name=list(all_info.keys())
+                i=ii=0
+                while i < len(all_apps_name):
+                    if ii < len(rec_apps):
+                        # 不推荐当前正在打开的应用，或者打开过的应用
+                        if all_apps_name[i]==self.pre_url:
+                            i=i+1
+                            continue
+                        info =all_info[all_apps_name[i]]
+                        rec_apps[i]={
+                            "pic": f"/%s/static/example/%s/%s"%(info['name'],info['name'],info['pic']),
+                            "label": info['label'],
+                            "url": "/aihub/"+info['name']
+                        }
+                        i=i+1
+                        ii=ii+1
+            print(rec_apps)
             info = {
                 "name": self.model.name,
                 "label": self.model.label,
@@ -442,23 +482,7 @@ class Server():
                 "aihub_url":"http://www.data-master.net:8880/frontend/aihub/model_market/model_all",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
                 "user":f"/{self.pre_url}/login",
-                "rec_apps":[
-                    {
-                        "pic": f"/{self.pre_url.strip('/')}/static/rec/rec1.jpg",
-                        "label": "图片卡通化",
-                        "url":"/aihub/gfpgan"
-                    },
-                    {
-                        "pic":f"/{self.pre_url.strip('/')}/static/rec/rec2.jpg",
-                        "label":"文本生成图片",
-                        "url": "/aihub/stable-diffusion"
-                    },
-                    {
-                        "pic": f"/{self.pre_url.strip('/')}/static/rec/rec3.jpg",
-                        "label": "图片卡通化",
-                        "url": "/aihub/gfpgan"
-                    },
-                ]
+                "rec_apps":rec_apps
             }
             return jsonify(info)
 
@@ -475,6 +499,7 @@ class Server():
                 num = user_history.get(username, {}).get(req_url, 0)
                 # 匿名用户对后端的请求次数超过1次就需要登录
                 # if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
+                #
                 #     return jsonify({
                 #         "status": 1,
                 #         "result": {},
@@ -498,6 +523,19 @@ class Server():
                     user_history[username] = {}
                 user_history[username][req_url]=user_history.get(username, {}).get(req_url, 0) + 1
                 print(user_history)
+                if (self.save_time-datetime.datetime.now()).total_seconds()>300:
+                    all_info_path = '/src/cubestudio/aihub/web/static/rec/all_info.json'
+                    os.makedirs(os.path.dirname(all_info_path), exist_ok=True)
+                    all_info=json.load(open(all_info_path,mode='r')) if os.path.exists(all_info_path) else {}
+                    if self.pre_url not in all_info:
+                        all_info[self.pre_url]=json.load(open("info.json",mode='r'))
+                    # 记录hot
+                    for username in user_history:
+                        for path in user_history[username]:
+                            if '/api/model/' in path:
+                                all_info[self.pre_url]["hot"] = int(all_info[self.pre_url].get("hot",'1'))+int(user_history[username][path])
+                    json.dump(all_info,open(all_info_path,mode='w'))
+
             return response
 
         app.run(host='0.0.0.0', debug=True, port=port)
