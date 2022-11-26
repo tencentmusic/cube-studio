@@ -513,16 +513,12 @@ class Server():
                 if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
 
                     return jsonify({
-                        "status": 1,
-                        "result": {},
-                        "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
+                        "text": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
                     })
 
                 if num > 10 and self.pre_url in req_url:
                     return jsonify({
-                        "status": 2,
-                        "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
-                        "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
+                        "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
                     })
 
         # 配置响应后操作：统计
