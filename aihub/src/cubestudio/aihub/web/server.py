@@ -349,7 +349,7 @@ class Server():
                 for i in range(100):
                     time.sleep(1)
                     async_task = AsyncResult(id=task.id, app=celery_app)
-                    print("async_task.id", async_task.id)
+                    print("async_task.id", async_task.id,flush=True)
                     # 判断异步任务是否执行成功
                     if async_task.successful():
                         # 获取异步任务的返回值
@@ -360,7 +360,7 @@ class Server():
                             g.second = (datetime.datetime.now() - begin_time).total_seconds()
                         return jsonify(result)
                     else:
-                        print("任务还未执行完成")
+                        print("任务还未执行完成",flush=True)
                 return jsonify([
                     {"text": "耗时过久，未获取到推理结果"}
                 ])
