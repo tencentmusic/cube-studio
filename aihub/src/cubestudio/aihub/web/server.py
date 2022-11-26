@@ -524,25 +524,26 @@ class Server():
                             "message": "",
                             "result": [
                                 {
-                                    "text": "匿名用户仅可访问一次，登录并激活用户，获得更多访问次数"
+                                    "text": "匿名用户仅可访问一次，扫码进群获取更多访问次数",
+                                    "image":"https://luanpeng.oss-cn-qingdao.aliyuncs.com/csdn/ad1.jpg"
                                 }
                             ],
                             "status": 0
                         }
                     )
 
-                if num > 10:
-                    return jsonify(
-                        {
-                            "message": "",
-                            "result": [
-                                {
-                                    "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
-                                }
-                            ],
-                            "status": 0
-                        }
-                    )
+                # if num > 10:
+                #     return jsonify(
+                #         {
+                #             "message": "",
+                #             "result": [
+                #                 {
+                #                     "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
+                #                 }
+                #             ],
+                #             "status": 0
+                #         }
+                #     )
 
 
         # 配置响应后操作：统计
