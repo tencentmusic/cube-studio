@@ -342,6 +342,7 @@ class Server():
                 }
                 from .celery_app import inference
                 task = inference.apply_async(kwargs = kwargs, expires = 120, retry = False)
+                begin_time = datetime.datetime.now()
                 for i in range(100):
                     time.sleep(1)
                     async_task = AsyncResult(id=task.id, app=celery_app)
@@ -351,7 +352,9 @@ class Server():
                         # 获取异步任务的返回值
                         result = async_task.get()
                         print(result)
-                        print("执行完成")
+                        if type(result)==list:
+                            print("执行完成")
+                            g.second = (datetime.datetime.now() - begin_time).total_seconds()
                         return jsonify(result)
                     else:
                         print("任务还未执行完成")
@@ -361,7 +364,9 @@ class Server():
 
 
             # 同步推理
+            begin_time = datetime.datetime.now()
             result = api_inference(name=self.model.name, version=self.model.version, data=data)
+            g.second =(datetime.datetime.now()-begin_time).total_seconds()
             return jsonify(result)
 
 
@@ -502,7 +507,7 @@ class Server():
                 session['username']=username
 
 
-                num = user_history.get(username, {}).get(req_url, 0)
+                num = user_history.get(username, {}).get(req_url, {}).get('num',0)
 
                 # 匿名用户对后端的请求次数超过1次就需要登录
                 if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
@@ -531,7 +536,13 @@ class Server():
                 username = session['username']
                 if username not in user_history:
                     user_history[username] = {}
-                user_history[username][req_url]=user_history.get(username, {}).get(req_url, 0) + 1
+                if req_url not in user_history[username]:
+                    user_history[username][req_url]={}
+                # 记录热度
+                user_history[username][req_url]["num"]=user_history.get(username, {}).get(req_url, {}).get('num',0) + 1
+                # 记录总耗时
+                if hasattr(g,'second'):
+                    user_history[username][req_url]["second"]=user_history.get(username, {}).get(req_url, {}).get('second',10) + g.second
                 print(user_history)
                 if (self.save_time-datetime.datetime.now()).total_seconds()>300:
                     all_info_path = '/src/cubestudio/aihub/web/static/rec/all_info.json'
@@ -544,6 +555,7 @@ class Server():
                         for path in user_history[username]:
                             if '/api/model/' in path:
                                 all_info[self.pre_url]["hot"] = int(all_info[self.pre_url].get("hot",'1'))+int(user_history[username][path])
+
                     json.dump(all_info,open(all_info_path,mode='w'))
 
             return response
