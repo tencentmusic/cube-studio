@@ -520,7 +520,7 @@ class Server():
                 if num > 1 and 'anonymous-' in username:
 
                     return jsonify([{
-                        "text": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
+                        "text": "匿名用户仅可访问一次，登录并激活用户，获得更多访问次数"
                     }])
 
                 if num > 10:
