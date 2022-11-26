@@ -342,7 +342,7 @@ class Server():
                 }
                 from .celery_app import inference
                 task = inference.apply_async(kwargs = kwargs, expires = 120, retry = False)
-                for i in range(60):
+                for i in range(100):
                     time.sleep(1)
                     async_task = AsyncResult(id=task.id, app=celery_app)
                     print("async_task.id", async_task.id)
@@ -351,7 +351,7 @@ class Server():
                         # 获取异步任务的返回值
                         result = async_task.get()
                         print(result)
-                        print("执行成功")
+                        print("执行完成")
                         return jsonify(result)
                     else:
                         print("任务还未执行完成")

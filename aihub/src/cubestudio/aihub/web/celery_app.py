@@ -19,5 +19,5 @@ def inference(name, version, data):
         return {
             "status": 1,
             "result": [],
-            "message": "推理失败了"
+            "message": "推理失败了："+str(e)
         }
