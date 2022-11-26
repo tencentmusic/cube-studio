@@ -501,6 +501,10 @@ class Server():
             print(req_url)
             # 分享来自主主平台的cookie
             username = request.cookies.get('myapp_username','')
+            # 获取来自上一次的记忆
+            if not username:
+                username = session.get('username','')
+            # 创建新匿名用户
             if not username:
                 username = "anonymous-" + uuid.uuid4().hex[:16]
 
@@ -513,13 +517,13 @@ class Server():
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
 
                 # 匿名用户对后端的请求次数超过1次就需要登录
-                if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
+                if num > 1 and 'anonymous-' in username:
 
                     return jsonify({
                         "text": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
                     })
 
-                if num > 10 and self.pre_url in req_url:
+                if num > 10:
                     return jsonify({
                         "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
                     })
@@ -528,8 +532,6 @@ class Server():
         @app.after_request
         @pysnooper.snoop()
         def apply_http_headers(response):
-            # 登记用户名
-            response.set_cookie('myapp_username', session['username'])
 
             req_url = request.path
             if '/api/model/' in req_url and type(response.get_json())==list:
@@ -543,6 +545,8 @@ class Server():
                 # 记录总耗时
                 if hasattr(g,'second'):
                     user_history[username][req_url]["second"]=user_history.get(username, {}).get(req_url, {}).get('second',10) + g.second
+
+                # 统计信息汇总到all_info_path
                 print(user_history)
                 if (self.save_time-datetime.datetime.now()).total_seconds()>300:
                     all_info_path = '/src/cubestudio/aihub/web/static/rec/all_info.json'
@@ -554,7 +558,7 @@ class Server():
                     for username in user_history:
                         for path in user_history[username]:
                             if '/api/model/' in path:
-                                all_info[self.pre_url]["hot"] = int(all_info[self.pre_url].get("hot",'0'))+int(user_history[username][path].get('num',0))
+                                all_info[self.pre_url]["hot"] = int(all_info[self.pre_url].get("hot",0))+int(user_history[username][path].get('num',0))
 
                     json.dump(all_info,open(all_info_path,mode='w'))
 
