@@ -336,22 +336,16 @@ const AppWrapper = (props: IProps) => {
           >
             <span className="mr4 c-text-b">AI-Hub</span>
           </a>
-
-          <Dropdown overlay={<Menu>
-            <Menu.Item onClick={() => {
-              setCurrentAppIndex(undefined)
-              navigate('/user')
-            }}>用户中心</Menu.Item>
-            <Menu.Item onClick={() => {
-              Cookies.remove('myapp_username');
-              handleTips.userlogout()
-            }}>退出登录</Menu.Item>
-          </Menu>
-          }>
+          <a
+            href='/login'
+            target="_blank"
+            className="mr12 d-f ac"
+          >
             <img className="mr8 cp" style={{ borderRadius: 200, height: 32 }} src={imgUrlProtraits} onError={() => {
               setImgUrlProtraits(require('./images/male.png'))
             }} alt="img" />
-          </Dropdown>
+          </a>
+
         </div>
       </div>
 

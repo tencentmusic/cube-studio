@@ -490,32 +490,42 @@ class Server():
         def check_login():
             req_url = request.path
             print(req_url)
+
             # 只对后端接口
             if '/aihub' not in req_url:
-                username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
+                # 分享来自主主平台的cookie
+                username = request.cookies.get('myapp_username','')
+                if not username:
+                    username = "anonymous-" + uuid.uuid4().hex[:16]
+
+                # res传递给浏览器记录
                 session['username']=username
-                g.username = username
+
 
                 num = user_history.get(username, {}).get(req_url, 0)
+
                 # 匿名用户对后端的请求次数超过1次就需要登录
-                # if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
-                #
-                #     return jsonify({
-                #         "status": 1,
-                #         "result": {},
-                #         "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
-                #     })
-                #
-                # if num > 10 and self.pre_url in req_url:
-                #     return jsonify({
-                #         "status": 2,
-                #         "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
-                #         "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
-                #     })
+                if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
+
+                    return jsonify({
+                        "status": 1,
+                        "result": {},
+                        "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
+                    })
+
+                if num > 10 and self.pre_url in req_url:
+                    return jsonify({
+                        "status": 2,
+                        "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
+                        "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
+                    })
 
         # 配置响应后操作：统计
         @app.after_request
         def apply_http_headers(response):
+            # 登记用户名
+            response.set_cookie('myapp_username', session['username'])
+
             req_url = request.path
             if '/aihub' not in req_url:
                 username = session['username']
