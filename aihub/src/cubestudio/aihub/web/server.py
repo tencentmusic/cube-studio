@@ -194,14 +194,17 @@ class Server():
                                 logging.info('Saving to %s.', image_path)
                                 input_data.append(image_path)
 
+
+                        # 图片缩放
+                        for image_path in input_data:
+                            resize_img(image_path)
+
                         if input_field.validators.max==1:
                             inference_kargs[input_field.name] = input_data[0]
                         if input_field.validators.max>1:
                             inference_kargs[input_field.name] = input_data
 
-                        # 图片缩放
-                        for image_path in inference_kargs[input_field.name]:
-                            resize_img(image_path)
+
 
 
                     # 单选或者多选图片
