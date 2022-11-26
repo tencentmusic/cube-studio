@@ -146,7 +146,7 @@ class Server():
 
 
         # 定义认为放在的队列
-        # @pysnooper.snoop()
+        @pysnooper.snoop()
         def api_inference(name,version,data):
             try:
                 inputs=copy.deepcopy(self.model.inference_inputs)
@@ -530,7 +530,7 @@ class Server():
             response.set_cookie('myapp_username', session['username'])
 
             req_url = request.path
-            if '/aihub' not in req_url and type(response.get_json())==list:
+            if '/api/model/' in req_url and type(response.get_json())==list:
                 username = session['username']
                 if username not in user_history:
                     user_history[username] = {}
