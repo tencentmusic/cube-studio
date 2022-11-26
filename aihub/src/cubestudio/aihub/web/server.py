@@ -519,14 +519,31 @@ class Server():
                 # 匿名用户对后端的请求次数超过1次就需要登录
                 if num > 1 and 'anonymous-' in username:
 
-                    return jsonify([{
-                        "text": "匿名用户仅可访问一次，登录并激活用户，获得更多访问次数"
-                    }])
+                    return jsonify(
+                        {
+                            "message": "",
+                            "result": [
+                                {
+                                    "text": "匿名用户仅可访问一次，登录并激活用户，获得更多访问次数"
+                                }
+                            ],
+                            "status": 0
+                        }
+                    )
 
                 if num > 10:
-                    return jsonify([{
-                        "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
-                    }])
+                    return jsonify(
+                        {
+                            "message": "",
+                            "result": [
+                                {
+                                    "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
+                                }
+                            ],
+                            "status": 0
+                        }
+                    )
+
 
         # 配置响应后操作：统计
         @app.after_request
