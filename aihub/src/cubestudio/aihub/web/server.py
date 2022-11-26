@@ -499,16 +499,16 @@ class Server():
         def check_login():
             req_url = request.path
             print(req_url)
+            # 分享来自主主平台的cookie
+            username = request.cookies.get('myapp_username','')
+            if not username:
+                username = "anonymous-" + uuid.uuid4().hex[:16]
+
+            # res传递给浏览器记录
+            session['username']=username
 
             # 只对后端接口
             if '/api/model/' in req_url:
-                # 分享来自主主平台的cookie
-                username = request.cookies.get('myapp_username','')
-                if not username:
-                    username = "anonymous-" + uuid.uuid4().hex[:16]
-
-                # res传递给浏览器记录
-                session['username']=username
 
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
 
