@@ -534,7 +534,7 @@ class Server():
         def apply_http_headers(response):
 
             req_url = request.path
-            if '/api/model/' in req_url and type(response.get_json())==list:
+            if '/api/model/' in req_url:  #  and type(response.get_json())==list
                 username = session['username']
                 if username not in user_history:
                     user_history[username] = {}
