@@ -528,7 +528,7 @@ class Server():
             response.set_cookie('myapp_username', session['username'])
 
             req_url = request.path
-            if '/aihub' not in req_url:
+            if '/aihub' not in req_url and type(response.get_json())==list:
                 username = session['username']
                 if username not in user_history:
                     user_history[username] = {}
