@@ -144,30 +144,36 @@ class Server():
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
         # 直接模型推理，并将结果转化为http链接
+        @pysnooper.snoop()
         def model_inference(inference_kargs):
             # 处理返回值
-            all_back = self.model.inference(**inference_kargs)
-            if type(all_back) != list:
-                all_back = [all_back]
-            for back in all_back:
-                # 如果是图片，写的不是http
-                if back.get('image', ''):
-                    save_file_path = back['image']
-                    if os.path.exists(save_file_path):
-                        resize_img(save_file_path)
-                        back['image'] = file2url(save_file_path)
+            try:
+                all_back = self.model.inference(**inference_kargs)
+                if type(all_back) != list:
+                    all_back = [all_back]
+                for back in all_back:
+                    # 如果是图片，写的不是http
+                    if back.get('image', ''):
+                        save_file_path = back['image']
+                        if os.path.exists(save_file_path):
+                            resize_img(save_file_path)
+                            back['image'] = file2url(save_file_path)
 
-                # 如果是视频，写的不是http
-                if back.get('video', ''):
-                    save_file_path = back['video']
-                    if os.path.exists(save_file_path):
-                        back['video'] = file2url(save_file_path)
+                    # 如果是视频，写的不是http
+                    if back.get('video', ''):
+                        save_file_path = back['video']
+                        if os.path.exists(save_file_path):
+                            back['video'] = file2url(save_file_path)
 
-                # 如果是语音，写的不是http
-                if back.get('audio', ''):
-                    save_file_path = back['audio']
-                    if os.path.exists(save_file_path):
-                        back['audio'] = file2url(save_file_path)
+                    # 如果是语音，写的不是http
+                    if back.get('audio', ''):
+                        save_file_path = back['audio']
+                        if os.path.exists(save_file_path):
+                            back['audio'] = file2url(save_file_path)
+            except Exception as e:
+                all_back=[
+                    {"text":str(e)}
+                ]
             return all_back
 
 
