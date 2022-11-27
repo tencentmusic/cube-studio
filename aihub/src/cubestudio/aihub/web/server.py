@@ -330,7 +330,7 @@ class Server():
 
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        # @pysnooper.snoop()
+        @pysnooper.snoop()
         def web_inference():
             # 从json里面读取信息
             data = request.json
@@ -495,7 +495,7 @@ class Server():
             return jsonify(info)
 
         @app.before_request
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def check_login():
             req_url = request.path
             print(req_url)
@@ -548,7 +548,7 @@ class Server():
 
         # 配置响应后操作：统计
         @app.after_request
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def apply_http_headers(response):
 
             req_url = request.path
