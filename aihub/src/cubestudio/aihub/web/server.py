@@ -144,7 +144,7 @@ class Server():
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
         # 直接模型推理，并将结果转化为http链接
-        def model_inference(**inference_kargs):
+        def model_inference(inference_kargs):
             # 处理返回值
             all_back = self.model.inference(**inference_kargs)
             if type(all_back) != list:
@@ -174,8 +174,10 @@ class Server():
         # 用来给本地celery请求使用
         @app.route(f'/{self.pre_url}/celery/inference',methods=['GET', 'POST'])
         @pysnooper.snoop()
-        def celery_inference(**inference_kargs):
-            return jsonify(model_inference(**inference_kargs))
+        def celery_inference():
+            data = request.json
+            data.update(request.form.to_dict())
+            return jsonify(model_inference(data))
 
 
         # web请求后台
@@ -335,7 +337,7 @@ class Server():
                 if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous':
                     # 大文件 放redis会比较耗时
                     kwargs = {
-                        "data": data
+                        "data": inference_kargs
                     }
 
                     from .celery_app import inference
@@ -360,7 +362,7 @@ class Server():
                         status=1
                         all_back=[{"text": "耗时过久，未获取到推理结果"}]
                 else:
-                    all_back = model_inference(**inference_kargs)
+                    all_back = model_inference(inference_kargs)
 
                 g.second = (datetime.datetime.now() - begin_time).total_seconds()
 
