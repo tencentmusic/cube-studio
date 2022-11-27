@@ -357,7 +357,7 @@ class Server():
                     # os.env['UPLOAD_DIR'] = f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/upload'
                     inference_data = req2inference_args(data)
                     for arg in inference_data:
-                        if inference_data[arg][:7]=='/upload':
+                        if inference_data[arg][:7]=='upload/':
                             if os.path.exists(inference_data[arg]):
                                 des_path = os.path.join(f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/',inference_data[arg])
                                 os.makedirs(os.path.dirname(des_path),exist_ok=True)
@@ -369,7 +369,7 @@ class Server():
                     from .celery_app import inference
                     task = inference.apply_async(kwargs=kwargs, expires=120, retry=False)
 
-                    # 大文件 放redis会比较耗时
+                    # 原始数据大文件 放redis会比较耗时
                     # kwargs = {
                     #     "data": data,
                     #     "name": self.model.name,
