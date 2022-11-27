@@ -156,7 +156,7 @@ class Server():
                     if back.get('image', ''):
                         save_file_path = back['image']
                         if os.path.exists(save_file_path):
-                            resize_img(save_file_path)
+                            # resize_img(save_file_path)
                             back['image'] = file2url(save_file_path)
 
                     # 如果是视频，写的不是http
@@ -239,9 +239,9 @@ class Server():
                             logging.info('Saving to %s.', image_path)
                             input_data.append(image_path)
 
-                    # 图片缩放
-                    for image_path in input_data:
-                        resize_img(image_path)
+                    # # 图片缩放
+                    # for image_path in input_data:
+                    #     resize_img(image_path)
 
                     if input_field.validators.max == 1:
                         inference_kargs[input_field.name] = input_data[0]
