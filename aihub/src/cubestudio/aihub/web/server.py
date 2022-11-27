@@ -212,7 +212,7 @@ class Server():
                                 req = requests.get(img_base64_str)
                                 ext = img_base64_str[img_base64_str.rindex(".") + 1:]
                                 ext = ext if len(ext) < 6 else 'jpg'
-                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
+                                image_path = os.path.join(os.getenv('UPLOAD_DIR','upload'),self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
                                 os.makedirs(os.path.dirname(image_path), exist_ok=True)
                                 with open(image_path, "wb") as f:
                                     f.write(req.content)
@@ -226,7 +226,7 @@ class Server():
 
                                 image_decode = base64.b64decode(img_str)
 
-                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
+                                image_path = os.path.join(os.getenv('UPLOAD_DIR','upload'),self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
                                 os.makedirs(os.path.dirname(image_path),exist_ok=True)
                                 nparr = np.fromstring(image_decode, np.uint8)
                                 # 从nparr中读取数据，并把数据转换(解码)成图像格式
@@ -280,7 +280,7 @@ class Server():
                                 req = requests.get(file_base64_str)
                                 ext = file_base64_str[file_base64_str.rindex(".") + 1:]
                                 ext = ext if len(ext)<6 else 'mp4' if input_field.type == Field_type.video else 'mp3' if input_field.type == Field_type.audio else 'unknow'
-                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
+                                image_path = os.path.join(os.getenv('UPLOAD_DIR','upload'),self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
                                 os.makedirs(os.path.dirname(image_path), exist_ok=True)
                                 with open(image_path, "wb") as f:
                                     f.write(req.content)
@@ -293,7 +293,7 @@ class Server():
                                 ext = ext[ext.rindex("/") + 1:]
                                 file_decode = base64.b64decode(file_str)
 
-                                file_path = os.path.join("upload", self.model.name, self.model.version,
+                                file_path = os.path.join(os.getenv('UPLOAD_DIR','upload'), self.model.name, self.model.version,
                                                           datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "-" + str(
                                                               random.randint(0, 100)) + "." + ext)
                                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -375,7 +375,7 @@ class Server():
             except Exception as err:
                 print(str(err))
                 return jsonify({
-                    "status":1,
+                    "status":0,
                     "result":[],
                     "message":"推理失败了"
                 })

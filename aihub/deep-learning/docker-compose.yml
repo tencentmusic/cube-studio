@@ -25,6 +25,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/app1/upload'
     
     
   animegan:
@@ -42,6 +43,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/animegan/upload'
     
     
   stable-diffusion:
@@ -59,6 +61,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/stable-diffusion/upload'
     
     
   paddleocr:
@@ -76,6 +79,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/paddleocr/upload'
     
     
   gfpgan:
@@ -93,6 +97,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/gfpgan/upload'
     
     
   paddlespeech-asr:
@@ -110,6 +115,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/paddlespeech-asr/upload'
     
     
   humanseg:
@@ -127,6 +133,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/humanseg/upload'
     
     
   paddlespeech-cls:
@@ -144,6 +151,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/paddlespeech-cls/upload'
     
     
   ddddocr:
@@ -161,6 +169,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/ddddocr/upload'
     
     
   paddlespeech-tts:
@@ -178,6 +187,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/paddlespeech-tts/upload'
     
     
   yolov3:
@@ -195,6 +205,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/yolov3/upload'
     
     
   deoldify:
@@ -212,6 +223,7 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/deoldify/upload'
     
     
   panoptic:
@@ -229,5 +241,6 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
+      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/panoptic/upload'
     
     
