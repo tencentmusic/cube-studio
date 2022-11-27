@@ -148,43 +148,14 @@ class Myauthdbview(AuthDBView):
                         print(e)
                         time.sleep(2)
                         message=str(e)
+            else:
+                message=json.dumps(json_data,ensure_ascii=False,indent=4)
         else:
             message = str(r.content, 'utf-8')
             print(message)
             username = ''
 
         return username,message
-
-    # 此函数不在应用内，而在中心平台内，但是和应用使用同一个域名
-    @expose('/aihub/login/<app_name>')
-    @pysnooper.snoop()
-    def aihub_login(self,app_name=''):
-        GITHUB_APPKEY = '69ee1c07fb4764b7fd34'
-        GITHUB_SECRET = '795c023eb495317e86713fa5624ffcee3d00e585'
-        GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s'
-        # 应用内登录才设置跳转地址
-        if app_name and app_name != "demo":
-            session['login_url'] = request.host_url.strip('/') + f"/{app_name}/info"
-        oa_auth_url = GITHUB_AUTH_URL
-
-        username = session.get('username', '')
-        g.username = ''
-        if 'anonymous' not in username and username:
-            g.username = username
-
-        if 'code' in request.args:
-            username,message = self.github_login(GITHUB_APPKEY,GITHUB_SECRET)
-
-            if username:
-                g.username=username
-
-        # remember user
-        if g.username and g.username != '':
-            session['username'] = g.username
-            login_url = session.get('login_url', 'https://github.com/tencentmusic/cube-studio')
-            return redirect(login_url)
-        else:
-            return redirect(oa_auth_url % (str(GITHUB_APPKEY),))
 
     @expose('/login/')
     @pysnooper.snoop()
