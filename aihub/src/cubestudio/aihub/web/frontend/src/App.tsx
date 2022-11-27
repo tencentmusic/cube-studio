@@ -18,6 +18,7 @@ import Cookies from 'js-cookie'
 import { changeTheme } from './theme';
 import { handleTips } from './api';
 import { IAppHeaderItem } from './api/interface/kubeflowInterface';
+import { isInWeixin, weixin, share } from './utils/weixin'
 
 const RouterConfig = (config: IRouterConfigPlusItem[]) => {
   let element = useRoutes(config);
@@ -75,6 +76,17 @@ const AppWrapper = (props: IProps) => {
     setCurrentRouteComponent(() => () => RouterConfig(tarRoute))
     setCurrentAppList(appList)
     handleAppIndex(appList)
+  }, [])
+
+  useEffect(() => {
+    if (isInWeixin()) {
+    //   share({
+    //     title: "你好aihub",
+    //     link: "https://github.com/tencentmusic/cube-studio",
+    //     desc: "aihub go",
+    //     imgUrl: "https://github.com/tencentmusic/cube-studio"
+    //   })
+    }
   }, [])
 
   const handleAppIndex = (appList: any[]) => {
@@ -350,7 +362,6 @@ const AppWrapper = (props: IProps) => {
       </div>
 
       <div className="main-content-container">
-
         {/* {renderMenu(currentAppIndex)} */}
 
         <div className="ov-a w100 bg-title">
