@@ -355,20 +355,28 @@ class Server():
 
                     # 直接写入和resize cos会非常耗时
                     # os.env['UPLOAD_DIR'] = f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/upload'
-                    # kwargs = {
-                    #     "data": req2inference_args(data),
-                    # }
-                    # from .celery_app import inference
-                    # task = inference.apply_async(kwargs=kwargs, expires=120, retry=False)
-
-                    # # 大文件 放redis会比较耗时
+                    inference_data = req2inference_args(data),
+                    for arg in inference_data:
+                        if inference_data[arg][:7]=='/upload':
+                            if os.path.exists(inference_data[arg]):
+                                des_path = os.path.join(f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/',inference_data[arg])
+                                os.makedirs(os.path.dirname(des_path),exist_ok=True)
+                                shutil.copyfile(inference_data[arg],des_path)
+                                inference_data[arg] = des_path
                     kwargs = {
-                        "data": data,
-                        "name": self.model.name,
-                        "version": self.model.version
+                        "data": inference_data
                     }
-                    from .celery_app import reqdata_inference
-                    task = reqdata_inference.apply_async(kwargs=kwargs,expires=120,retry=False)
+                    from .celery_app import inference
+                    task = inference.apply_async(kwargs=kwargs, expires=120, retry=False)
+
+                    # 大文件 放redis会比较耗时
+                    # kwargs = {
+                    #     "data": data,
+                    #     "name": self.model.name,
+                    #     "version": self.model.version
+                    # }
+                    # from .celery_app import reqdata_inference
+                    # task = reqdata_inference.apply_async(kwargs=kwargs,expires=120,retry=False)
 
                     begin_time = datetime.datetime.now()
                     for i in range(100):
