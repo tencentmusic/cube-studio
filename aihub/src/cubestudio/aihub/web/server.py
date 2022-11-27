@@ -146,7 +146,7 @@ class Server():
 
 
         # 定义认为放在的队列
-        # @pysnooper.snoop()
+        @pysnooper.snoop()
         def api_inference(name,version,data):
             try:
                 inputs=copy.deepcopy(self.model.inference_inputs)
