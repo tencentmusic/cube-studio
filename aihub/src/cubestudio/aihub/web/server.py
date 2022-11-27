@@ -512,7 +512,7 @@ class Server():
             session['username']=username
 
             # 只对后端接口
-            if '/api/model/' in req_url:
+            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:
 
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
 
@@ -552,7 +552,7 @@ class Server():
         def apply_http_headers(response):
 
             req_url = request.path
-            if '/api/model/' in req_url:  #  and type(response.get_json())==list
+            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:  #  and type(response.get_json())==list
                 username = session['username']
                 if username not in user_history:
                     user_history[username] = {}
