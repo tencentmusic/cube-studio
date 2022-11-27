@@ -355,7 +355,7 @@ class Server():
 
                     # 直接写入和resize cos会非常耗时
                     # os.env['UPLOAD_DIR'] = f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/upload'
-                    inference_data = req2inference_args(data),
+                    inference_data = req2inference_args(data)
                     for arg in inference_data:
                         if inference_data[arg][:7]=='/upload':
                             if os.path.exists(inference_data[arg]):
