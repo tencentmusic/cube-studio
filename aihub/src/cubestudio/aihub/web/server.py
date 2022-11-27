@@ -135,7 +135,7 @@ class Server():
 
 
         # 视频转流
-        def video_stram(self,video_path):
+        def video_stram(video_path):
             vid = cv2.VideoCapture(video_path)
             while True:
                 return_value, frame = vid.read()
@@ -143,11 +143,51 @@ class Server():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
+        # 直接模型推理，并将结果转化为http链接
+        def model_inference(**inference_kargs):
+            # 处理返回值
+            all_back = self.model.inference(**inference_kargs)
+            if type(all_back) != list:
+                all_back = [all_back]
+            for back in all_back:
+                # 如果是图片，写的不是http
+                if back.get('image', ''):
+                    save_file_path = back['image']
+                    if os.path.exists(save_file_path):
+                        resize_img(save_file_path)
+                        back['image'] = file2url(save_file_path)
+
+                # 如果是视频，写的不是http
+                if back.get('video', ''):
+                    save_file_path = back['video']
+                    if os.path.exists(save_file_path):
+                        back['video'] = file2url(save_file_path)
+
+                # 如果是语音，写的不是http
+                if back.get('audio', ''):
+                    save_file_path = back['audio']
+                    if os.path.exists(save_file_path):
+                        back['audio'] = file2url(save_file_path)
+            return all_back
 
 
-        # 定义认为放在的队列
+        # 用来给本地celery请求使用
+        @app.route(f'/{self.pre_url}/celery/inference',methods=['GET', 'POST'])
         @pysnooper.snoop()
-        def api_inference(name,version,data):
+        def celery_inference(**inference_kargs):
+            return jsonify(model_inference(**inference_kargs))
+
+
+        # web请求后台
+        @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
+        @pysnooper.snoop()
+        def web_inference():
+            # 从json里面读取信息
+            data = request.json
+            data.update(request.form.to_dict())
+            begin_time = datetime.datetime.now()
+
+            # 将输入进行转化为文件，或正确的格式
             try:
                 inputs=copy.deepcopy(self.model.inference_inputs)
                 inference_kargs={}
@@ -289,88 +329,54 @@ class Server():
 
                 print(inference_kargs)
 
-                # 处理返回值
-                all_back = self.model.inference(**inference_kargs)
-                if type(all_back)!=list:
-                    all_back=[all_back]
-                for back in all_back:
-                    # 如果是图片，写的不是http
-                    if back.get('image',''):
-                        save_file_path = back['image']
-                        if os.path.exists(save_file_path):
-                            resize_img(save_file_path)
-                            back['image'] = file2url(save_file_path)
+                # 异步推理，或者同步推理，有资源的机器启动同步，没有资源的启动异步
+                all_back=[]
+                status=0
+                if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous':
+                    # 大文件 放redis会比较耗时
+                    kwargs = {
+                        "data": data
+                    }
 
+                    from .celery_app import inference
+                    task = inference.apply_async(kwargs=kwargs, expires=120, retry=False)
+                    begin_time = datetime.datetime.now()
+                    for i in range(100):
+                        time.sleep(1)
+                        async_task = AsyncResult(id=task.id, app=celery_app)
+                        print("async_task.id", async_task.id, flush=True)
+                        # 判断异步任务是否执行成功
+                        if async_task.successful():
+                            # 获取异步任务的返回值
+                            result = async_task.get()
+                            print(result)
+                            if type(result) == list:
+                                print("执行完成")
+                            all_back = result
+                            break
+                        else:
+                            print("任务还未执行完成", flush=True)
+                    if not all_back:
+                        status=1
+                        all_back=[{"text": "耗时过久，未获取到推理结果"}]
+                else:
+                    all_back = model_inference(**inference_kargs)
 
-                    # 如果是视频，写的不是http
-                    if back.get('video',''):
-                        save_file_path = back['video']
-                        if os.path.exists(save_file_path):
-                            back['video']=file2url(save_file_path)
+                g.second = (datetime.datetime.now() - begin_time).total_seconds()
 
-                    # 如果是语音，写的不是http
-                    if back.get('audio',''):
-                        save_file_path = back['audio']
-                        if os.path.exists(save_file_path):
-                            back['audio']=file2url(save_file_path)
-
-                return {
-                    "status": 0,
+                return jsonify({
+                    "status": status,
                     "result": all_back,
                     "message": ""
-                }
+                })
 
             except Exception as err:
-                logging.info('Uploaded image open error: %s', err)
-                return {
+                print(str(err))
+                return jsonify({
                     "status":1,
                     "result":[],
                     "message":"推理失败了"
-                }
-
-        # web请求后台
-        @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop()
-        def web_inference():
-            # 从json里面读取信息
-            data = request.json
-            data.update(request.form.to_dict())
-
-            # 异步推理，但都是web界面同步
-            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous':
-                kwargs = {
-                    "name": self.model.name,
-                    "version": self.model.version,
-                    "data":data
-                }
-                from .celery_app import inference
-                task = inference.apply_async(kwargs = kwargs, expires = 120, retry = False)
-                begin_time = datetime.datetime.now()
-                for i in range(100):
-                    time.sleep(1)
-                    async_task = AsyncResult(id=task.id, app=celery_app)
-                    print("async_task.id", async_task.id,flush=True)
-                    # 判断异步任务是否执行成功
-                    if async_task.successful():
-                        # 获取异步任务的返回值
-                        result = async_task.get()
-                        print(result)
-                        if type(result)==list:
-                            print("执行完成")
-                            g.second = (datetime.datetime.now() - begin_time).total_seconds()
-                        return jsonify(result)
-                    else:
-                        print("任务还未执行完成",flush=True)
-                return jsonify([
-                    {"text": "耗时过久，未获取到推理结果"}
-                ])
-
-
-            # 同步推理
-            begin_time = datetime.datetime.now()
-            result = api_inference(name=self.model.name, version=self.model.version, data=data)
-            g.second =(datetime.datetime.now()-begin_time).total_seconds()
-            return jsonify(result)
+                })
 
 
         @app.route('/')
