@@ -196,7 +196,7 @@ for app_name in app_names:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      UPLOAD_DIR: '/src/cubestudio/aihub/web/static/example/{app_name}/upload'
+      
     
     '''
 

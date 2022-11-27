@@ -9,7 +9,7 @@ celery_app = Celery(broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND)
 
 # 定义认为放在的队列
 @celery_app.task(queue=APPNAME)
-def inference(data):
+def inference(data,**kwargs):
     try:
         res = requests.post(f'http://127.0.0.1:8080/{APPNAME}/celery/inference',json=data)
         result = res.json()
@@ -20,4 +20,19 @@ def inference(data):
             "status": 1,
             "result": [],
             "message": "推理失败了："+str(e)
+        }
+
+# 请求参数进行推理
+@celery_app.task(queue=APPNAME)
+def reqdata_inference(name, version, data,**kwargs):
+    try:
+        res = requests.post(f'http://127.0.0.1:8080/{name}/api/model/{name}/version/{version}/',json=data)
+        result = res.json()
+        return result
+    except Exception as e:
+        print(e)
+        return {
+            "status": 1,
+            "result": [],
+            "message": "推理失败了"+str(e)
         }
