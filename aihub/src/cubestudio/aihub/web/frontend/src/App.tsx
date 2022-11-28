@@ -9,7 +9,7 @@ import {
   useLocation
 } from "react-router-dom";
 import { IRouterConfigPlusItem } from './api/interface/baseInterface';
-import { Dropdown, Menu, Select, Spin } from 'antd';
+import { Button, Dropdown, Menu, Select, Spin } from 'antd';
 import { createRoute, getDefaultOpenKeys, routerConfigPlus } from './routerConfig';
 import SubMenu from 'antd/lib/menu/SubMenu';
 import { clearWaterNow, drawWater, drawWaterNow, getParam, obj2UrlParam, parseParam2Obj } from './util'
@@ -78,7 +78,18 @@ const AppWrapper = (props: IProps) => {
     handleAppIndex(appList)
   }, [])
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (isInWeixin()) {
+  //     share({
+  //       title: "你好aihub",
+  //       link: "https://github.com/tencentmusic/cube-studio",
+  //       desc: "aihub go",
+  //       imgUrl: "https://github.com/tencentmusic/cube-studio"
+  //     })
+  //   }
+  // }, [])
+
+  const shareInWeixin = () => {
     if (isInWeixin()) {
       share({
         title: "你好aihub",
@@ -87,7 +98,7 @@ const AppWrapper = (props: IProps) => {
         imgUrl: "https://github.com/tencentmusic/cube-studio"
       })
     }
-  }, [])
+  }
 
   const handleAppIndex = (appList: any[]) => {
     const { pathname } = location
@@ -170,11 +181,11 @@ const AppWrapper = (props: IProps) => {
         if (menu.isMenu) {
           return <SubMenu key={menu.path} title={menu.title}>
             {
-              menu.children?.map((sub:any) => {
+              menu.children?.map((sub: any) => {
                 if (sub.isMenu) {
                   return <Menu.ItemGroup key={sub.path} title={sub.title}>
                     {
-                      sub.children?.map((thr:any) => {
+                      sub.children?.map((thr: any) => {
                         return <Menu.Item disabled={!!thr.disable} hidden={!!thr.hidden} key={thr.path} onClick={() => {
                           if (!menu.isCollapsed) {
                             setIsMenuCollapsed(false)
@@ -282,29 +293,6 @@ const AppWrapper = (props: IProps) => {
           }}>
             <img style={{ height: 20 }} src={require("./images/cubeStudio.png")} alt="img" />
           </div>
-
-          {/* {
-            currentAppList.length ? <ul className="mainapp-topmenu">
-              {
-                currentAppList.map((app) => {
-                  const currentAppName = '/' + currentRoute.substring(1).split('/')[0] || ''
-                  return <li
-                    onClick={() => handleClickApp(app, app.appIndex || 0)}
-                    key={`appList${app.appIndex}`}
-                    className={[currentAppName === app.path ? 'mainapp-item-active' : ''].join(' ')}
-                  // style={
-                  //   currentAppName === app.path ? { color: '#1e1653', borderTop: '2px solid #1e1653' } : {}
-                  // }
-                  >
-                    {
-                      Object.prototype.toString.call(app.icon) === '[object String]' ? <div className="icon-custom" dangerouslySetInnerHTML={{ __html: app.icon }}></div> : app.icon
-                    }
-                    <div className="mainapp-topmenu-name">{app.title}</div>
-                  </li>
-                })
-              }
-            </ul> : null
-          } */}
         </div>
 
 
@@ -362,8 +350,11 @@ const AppWrapper = (props: IProps) => {
       </div>
 
       <div className="main-content-container">
-        {/* {renderMenu(currentAppIndex)} */}
-
+        <div>
+          <Button onClick={() => {
+            shareInWeixin()
+          }}>分享到微信</Button>
+        </div>
         <div className="ov-a w100 bg-title">
           {
             CurrentRouteComponent && <CurrentRouteComponent />
