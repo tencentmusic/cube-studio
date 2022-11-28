@@ -2,7 +2,7 @@ import axios from '../api/index'
 const wx = require('weixin-js-sdk')
 
 // TODO 
-const wxSignUrl = "";
+const wxSignUrl = 'http://www.data-master.net/wechat/jsapi';
 
 export interface ShareContext {
   title?: string
@@ -11,7 +11,7 @@ export interface ShareContext {
   imgUrl?: string
 }
 
-const isInWeixin = function(): boolean {
+const isInWeixin = function (): boolean {
   var ua = navigator.userAgent.toLowerCase()
   var isWeixin = ua.indexOf('micromessenger') != -1
   if (!isWeixin) {
@@ -22,12 +22,14 @@ const isInWeixin = function(): boolean {
   return true
 }
 
-const weixin = function(): Promise<any> {
+const weixin = function (): Promise<any> {
   return new Promise((resolve, reject) => {
     let url = window.location.href
-    
-    axios.post(wxSignUrl, {
-      url: url
+
+    axios.get(wxSignUrl, {
+      params: {
+        url: url
+      }
     }).then((ress: any) => {
       let res = ress.data
       if (res.code == 0) {
@@ -61,7 +63,7 @@ const weixin = function(): Promise<any> {
 }
 
 // 微信分享
-const share = function(share: ShareContext): void {
+const share = function (share: ShareContext): void {
   weixin().then((wx) => {
     wx.ready(() => {
       setTimeout(() => {
@@ -71,10 +73,10 @@ const share = function(share: ShareContext): void {
           desc: share.desc,
           imgUrl: share.imgUrl,
           type: 'link',
-          success: function() {
+          success: function () {
             alert('分享成功')
           },
-          cancel: function() {
+          cancel: function () {
             alert('分享失败')
           }
         })
