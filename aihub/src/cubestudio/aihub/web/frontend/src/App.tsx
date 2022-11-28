@@ -89,17 +89,6 @@ const AppWrapper = (props: IProps) => {
   //   }
   // }, [])
 
-  const shareInWeixin = () => {
-    if (isInWeixin()) {
-      share({
-        title: "你好aihub",
-        link: "https://github.com/tencentmusic/cube-studio",
-        desc: "aihub go",
-        imgUrl: "https://github.com/tencentmusic/cube-studio"
-      })
-    }
-  }
-
   const handleAppIndex = (appList: any[]) => {
     const { pathname } = location
     const appPath = `/${pathname.split('/')[1]}`
@@ -350,17 +339,11 @@ const AppWrapper = (props: IProps) => {
       </div>
 
       <div className="main-content-container">
-        <div>
-          <Button onClick={() => {
-            shareInWeixin()
-          }}>分享到微信</Button>
-        </div>
         <div className="ov-a w100 bg-title">
           {
             CurrentRouteComponent && <CurrentRouteComponent />
           }
         </div>
-
       </div >
     </div>
   );

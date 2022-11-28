@@ -12,6 +12,7 @@ import DynamicForm, { IDynamicFormConfigItem } from '../../components/DynamicFor
 import Checkbox from '../../components/CheckoutGroupPlus/CheckoutGroupPlus'
 import { useLocation } from 'react-router-dom'
 import Loading from '../../components/Loading/Loading'
+import { isInWeixin, share } from '../../utils/weixin'
 
 const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -114,6 +115,17 @@ export default function Index() {
         })
     }
 
+    const shareInWeixin = () => {
+        if (isInWeixin()) {
+            share({
+                title: "你好aihub",
+                link: "https://github.com/tencentmusic/cube-studio",
+                desc: "aihub go",
+                imgUrl: "https://github.com/tencentmusic/cube-studio"
+            })
+        }
+    }
+
     return (
         <div>
             {/* {
@@ -141,6 +153,11 @@ export default function Index() {
                 <div>
                     <Tag color="volcano">{pageInfo?.scenes}</Tag>
                     <Tag color="green">{pageInfo?.status}</Tag>
+                </div>
+                <div>
+                    <Button onClick={() => {
+                        shareInWeixin()
+                    }}>分享到微信</Button>
                 </div>
             </div>
             <div className="ta-r pr16 c-hint-b">
