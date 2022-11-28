@@ -359,6 +359,7 @@ class Server():
                     for arg in inference_data:
                         if inference_data[arg][:7]=='upload/':
                             if os.path.exists(inference_data[arg]):
+                                # 要求宽带比较大才行
                                 des_path = os.path.join(f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/',inference_data[arg])
                                 os.makedirs(os.path.dirname(des_path),exist_ok=True)
                                 shutil.copyfile(inference_data[arg],des_path)
