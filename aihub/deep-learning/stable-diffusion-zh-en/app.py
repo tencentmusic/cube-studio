@@ -15,7 +15,7 @@ class SD_ZH_Model(Model):
     name = 'stable-diffusion-zh-en'
     label = '文字转图像-中英文混合9种语言'
     describe = "输入一串文字描述，可生成相应的图片，暂已支持语言：英语(En)、中文(Zh)、西班牙语(Es)、法语(Fr)、俄语(Ru)、日语(Ja)、韩语(Ko)、阿拉伯语(Ar)和意大利语(It)"
-    field = "神经网络"
+    field = "机器视觉"
     scenes = "图像创作"
     status = 'online'
     version = 'v20221122'

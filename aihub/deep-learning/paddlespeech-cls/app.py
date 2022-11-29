@@ -12,7 +12,7 @@ class Speech_Cls_Model(Model):
     name = 'paddlespeech-cls'
     label = '语音场景分类'
     describe = "语音场景分类:语种识别等"
-    field = "智能识别"
+    field = "听觉"
     scenes = "语音处理"
     status = 'online'
     version = 'v20221114'
