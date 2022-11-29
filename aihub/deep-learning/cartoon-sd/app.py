@@ -152,58 +152,6 @@ class Cartoon_SD_Model(Model):
         hostname = socket.gethostname()
         sent_first_message = False
 
-        class Masker(TypedDict):
-            seed: int
-            mask: str
-
-        class Tags(TypedDict):
-            tag: str
-            count: int
-            confidence: float
-
-        class GenerationRequest(BaseModel):
-            prompt: str
-            image: str = None
-            n_samples: int = 1
-            steps: int = 50
-            sampler: str = "plms"
-            fixed_code: bool = False
-            ddim_eta: float = 0.0
-            height: int = 512
-            width: int = 512
-            latent_channels: int = 4
-            downsampling_factor: int = 8
-            scale: float = 7.0
-            dynamic_threshold: float = None
-            seed: int = None
-            temp: float = 1.0
-            top_k: int = 256
-            grid_size: int = 4
-            advanced: bool = False
-            stage_two_seed: int = None
-            strength: float = 0.69
-            noise: float = 0.667
-            mitigate: bool = False
-            module: str = None
-            masks: List[Masker] = None
-            uc: str = None
-
-        class TextRequest(BaseModel):
-            prompt: str
-
-        class TagOutput(BaseModel):
-            tags: List[Tags]
-
-        class TextOutput(BaseModel):
-            is_safe: str
-            corrected_text: str
-
-        class GenerationOutput(BaseModel):
-            output: List[str]
-
-        class ErrorOutput(BaseModel):
-            error: str
-
     # 推理
     @pysnooper.snoop()
     def inference(self, prompt, style, n_samples=1):
