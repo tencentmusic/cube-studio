@@ -81,21 +81,6 @@ def set_parameter(text='Pictures of astronauts on horseback', d_steps=30, sample
     return opt
 
 
-def do_job(optim):
-    global model
-    try:
-        if optim.seed is None:
-            optim.seed = random.randint(0, 100000000)
-        images = model.sample(optim)
-        ndarray_convert_img_list = []
-        for image in images:
-            ndarray_convert_img_list.append(Image.fromarray(image))
-        return True, optim.seed, ndarray_convert_img_list
-    except Exception as ex:
-        print(ex)
-        return False, 0, ''
-
-
 class Cartoon_SD_Model(Model):
     # 模型基础信息定义
     name = 'cartoon-sd'
@@ -150,7 +135,20 @@ class Cartoon_SD_Model(Model):
             config.mainpid = os.getpid()
         mainpid = config.mainpid
         hostname = socket.gethostname()
-        sent_first_message = False
+        sent_first_message = Falseself
+
+    def do_job(self, optim):
+        try:
+            if optim.seed is None:
+                optim.seed = random.randint(0, 100000000)
+            images = self.model.sample(optim)
+            ndarray_convert_img_list = []
+            for image in images:
+                ndarray_convert_img_list.append(Image.fromarray(image))
+            return True, optim.seed, ndarray_convert_img_list
+        except Exception as ex:
+            print(ex)
+            return False, 0, ''
 
     # 推理
     @pysnooper.snoop()
