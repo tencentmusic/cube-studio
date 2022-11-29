@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/aihub/static/css/main.31122a4c.css",
+    "main.js": "/aihub/static/js/main.f105af38.js",
+    "static/css/337.07dc45e1.chunk.css": "/aihub/static/css/337.07dc45e1.chunk.css",
+    "static/js/337.48fa85b6.chunk.js": "/aihub/static/js/337.48fa85b6.chunk.js",
+    "static/js/529.f5fb80d5.chunk.js": "/aihub/static/js/529.f5fb80d5.chunk.js",
+    "static/js/977.662c47c4.chunk.js": "/aihub/static/js/977.662c47c4.chunk.js",
+    "static/media/workData.png": "/aihub/static/media/workData.843bb6c11aef95dddbdb.png",
+    "index.html": "/aihub/index.html",
+    "static/media/cubeStudio.png": "/aihub/static/media/cubeStudio.6602b852ea75220d8bc9.png",
+    "static/media/male.png": "/aihub/static/media/male.2f17f063b1a6dbb35bc6.png",
+    "main.31122a4c.css.map": "/aihub/static/css/main.31122a4c.css.map",
+    "main.f105af38.js.map": "/aihub/static/js/main.f105af38.js.map",
+    "337.07dc45e1.chunk.css.map": "/aihub/static/css/337.07dc45e1.chunk.css.map",
+    "337.48fa85b6.chunk.js.map": "/aihub/static/js/337.48fa85b6.chunk.js.map",
+    "529.f5fb80d5.chunk.js.map": "/aihub/static/js/529.f5fb80d5.chunk.js.map",
+    "977.662c47c4.chunk.js.map": "/aihub/static/js/977.662c47c4.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.31122a4c.css",
+    "static/js/main.f105af38.js"
+  ]
+}
