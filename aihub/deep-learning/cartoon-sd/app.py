@@ -86,12 +86,12 @@ class Cartoon_SD_Model(Model):
     name = 'cartoon-sd'
     label = '文字转图像-动漫版'
     describe = "输入一串文字描述，可生成相应的动漫图片，描述越详细越好哦~"
-    field = "神经网络"
+    field = "机器视觉"
     scenes = "图像创作"
     status = 'online'
     version = 'v20221125'
     doc = 'https://github.com/tencentmusic/cube-studio'  # 'https://帮助文档的链接地址'
-    # pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource = {
         "resource_gpu": "1"
