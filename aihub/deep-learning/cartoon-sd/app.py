@@ -135,7 +135,7 @@ class Cartoon_SD_Model(Model):
             config.mainpid = os.getpid()
         mainpid = config.mainpid
         hostname = socket.gethostname()
-        sent_first_message = Falseself
+        sent_first_message = False
 
     def do_job(self, optim):
         try:
