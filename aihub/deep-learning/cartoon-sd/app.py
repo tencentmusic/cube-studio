@@ -162,7 +162,7 @@ class Cartoon_SD_Model(Model):
             opt.n_samples = n_samples
             opt.seed = random.randint(0, 100000000)
             opt.uc = uc_dic[style]
-            x, y, z = do_job(opt)
+            x, y, z = self.do_job(opt)
             os.makedirs('result', exist_ok=True)
             save_index = 0
             re_list = []
