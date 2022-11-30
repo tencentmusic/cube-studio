@@ -1,6 +1,4 @@
-
-
-<img width="1437" alt="image" src="https://user-images.githubusercontent.com/20157705/182564530-2c965f5f-407d-4baa-8772-73cb2645901b.png">
+![image](https://user-images.githubusercontent.com/20157705/204804498-57b85892-88db-4edb-b595-3655e462f042.png)
 
 
 # 思维导图：
