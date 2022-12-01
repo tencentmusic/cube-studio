@@ -116,6 +116,12 @@ export default function Index() {
     }
 
     const shareInWeixin = () => {
+        share({
+            title: "你好aihub",
+            link: "https://github.com/tencentmusic/cube-studio",
+            desc: "aihub go",
+            imgUrl: "https://github.com/tencentmusic/cube-studio"
+        })
         if (isInWeixin()) {
             share({
                 title: "你好aihub",

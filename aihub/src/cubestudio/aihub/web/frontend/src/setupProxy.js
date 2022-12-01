@@ -9,4 +9,12 @@ module.exports = function (app) {
             changeOrigin: true,
         })
     );
+
+    app.use(
+        ['/wechat/**'],
+        createProxyMiddleware({
+            target: 'http://www.data-master.net',
+            changeOrigin: true,
+        })
+    );
 };

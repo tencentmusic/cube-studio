@@ -2,7 +2,8 @@ import axios from '../api/index'
 const wx = require('weixin-js-sdk')
 
 // TODO 
-const wxSignUrl = 'http://www.data-master.net/wechat/jsapi';
+// const wxSignUrl = 'http://www.data-master.net/wechat/jsapi';
+const wxSignUrl = '/wechat/jsapi';
 
 export interface ShareContext {
   title?: string
@@ -32,6 +33,7 @@ const weixin = function (): Promise<any> {
       }
     }).then((ress: any) => {
       let res = ress.data
+      alert(JSON.stringify(res.data))
       if (res.code == 0) {
         wx.config({
           debug: true,
@@ -50,10 +52,12 @@ const weixin = function (): Promise<any> {
           ]
         })
         wx.ready((res: any) => {
+          alert('wxsdk初始化完成')
           // @ts-ignore
           resolve(wx, res)
         })
         wx.error((err: any) => {
+          alert('wxsdk初始化失败');
           // @ts-ignore
           reject(wx, err)
         })
@@ -65,7 +69,10 @@ const weixin = function (): Promise<any> {
 // 微信分享
 const share = function (share: ShareContext): void {
   weixin().then((wx) => {
+    alert(JSON.stringify(wx))
+    console.log(wx)
     wx.ready(() => {
+      alert('wxsdk初始化完成')
       setTimeout(() => {
         wx.updateAppMessageShareData({
           title: share.title,
