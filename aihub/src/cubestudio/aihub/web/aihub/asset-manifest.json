@@ -1,9 +1,9 @@
 {
   "files": {
     "main.css": "/aihub/static/css/main.31122a4c.css",
-    "main.js": "/aihub/static/js/main.b870629c.js",
+    "main.js": "/aihub/static/js/main.14e59e58.js",
     "static/css/337.07dc45e1.chunk.css": "/aihub/static/css/337.07dc45e1.chunk.css",
-    "static/js/337.9acc79f2.chunk.js": "/aihub/static/js/337.9acc79f2.chunk.js",
+    "static/js/337.1f539485.chunk.js": "/aihub/static/js/337.1f539485.chunk.js",
     "static/js/529.f5fb80d5.chunk.js": "/aihub/static/js/529.f5fb80d5.chunk.js",
     "static/js/977.662c47c4.chunk.js": "/aihub/static/js/977.662c47c4.chunk.js",
     "static/media/workData.png": "/aihub/static/media/workData.843bb6c11aef95dddbdb.png",
@@ -11,14 +11,14 @@
     "static/media/cubeStudio.png": "/aihub/static/media/cubeStudio.6602b852ea75220d8bc9.png",
     "static/media/male.png": "/aihub/static/media/male.2f17f063b1a6dbb35bc6.png",
     "main.31122a4c.css.map": "/aihub/static/css/main.31122a4c.css.map",
-    "main.b870629c.js.map": "/aihub/static/js/main.b870629c.js.map",
+    "main.14e59e58.js.map": "/aihub/static/js/main.14e59e58.js.map",
     "337.07dc45e1.chunk.css.map": "/aihub/static/css/337.07dc45e1.chunk.css.map",
-    "337.9acc79f2.chunk.js.map": "/aihub/static/js/337.9acc79f2.chunk.js.map",
+    "337.1f539485.chunk.js.map": "/aihub/static/js/337.1f539485.chunk.js.map",
     "529.f5fb80d5.chunk.js.map": "/aihub/static/js/529.f5fb80d5.chunk.js.map",
     "977.662c47c4.chunk.js.map": "/aihub/static/js/977.662c47c4.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.31122a4c.css",
-    "static/js/main.b870629c.js"
+    "static/js/main.14e59e58.js"
   ]
 }
