@@ -66,13 +66,15 @@ aa4=['dwSun', 'zengjunjie1026', 'liyuanhao6', 'lxk000000', 'bleachzk', 'csuszj',
 aa5=['tifoit', 'cata-network', 'jollyshuai', 'XiumingLee', 'chengsky-NTU', 'kalencaya', 'jenray', 'justinshaohi', 'Eadon999', 'huguanglong', 'tsinghuald', 'tangzhenyu', 'soar-zhengjian', 'fjibj', 'xing5', 'ostarsier', 'shuxnhs', 'ixiejun', 'sayhi-x', 'mlpao500', 'day253', 'fredchen-bj', 'shkey', 'Itswag', 'springning', 'kiwii139', 'javyxu', 'yuyu080', 'michealzh', 'wking1986', 'haozi4go', 'heibaidaolx123', 'Cong-Lee', 'jayhenry', 'jianjiangant', 'xlows-1227', 'exuan', 'bleach1231', 'hassyma', 'fendaq', 'LaoLiulaoliu', 'SpicygumL', 'longlimin', 'zaykl', 'zzy000', 'LucaQY', 'maikeerqiaodan', 'kangrunze', 'ABAPPLO', 'madingchen', 'brucewinger', 'shaxj', 'FerdinandWard', 'hongwang', 'kenchen1101', 'mnmhouse', 'andy0018', '631961895', 'fireae', 'yangxin1994', 'best-zao', 'void0720', 'muyiben', 'zuoxiaolei', 'wcp1230', 'ChloeZPan', 'ws2644', 'LarryZhangy', 'songdonghui', 'electryone', 'xunfeng1980', 'astrotzar', 'clementine124', 'Winifred43', 'touchwolf', 'bihuchao', 'deerandsea', 'banmeizhujia', 'jianlei0808', 'Ghostpanter', 'zhangluwen98', 'wanglg007', 'jasgok', 'overoptimus', 'a2525995', 'srillia', 'KennyLisc', 'sugar-hit', 'HamaWhiteGG', 'data-infra', 'Jingyi244', 'witnesslq', 'duanpu2017', 'tan-zhuo', 'dragon707', 'mayang1178', 'louieliue', 'slyfalcon', 'hyaihjq', 'huangwgang']
 aa6=['kenwoodjw', 'Dinosaur-X', 'yansuihehe', 'tgluon', '20130101', 'Kin-10', 'chaopengz', '1ess', 'lokiworks', 'lvying0019', 'goustzhu', 'pky-c', 'hotvscool', 'windblood', 'amojohn', 'chengleqi', 'lihao6666', 'wcode-wzx', 'peniridis', 'pineking', 'xieydd', 'DevenLu', 'shinytang6', 'arcosx', 'yaoqingyuan', 'Frozenmad', 'Azure99', 'claudehotline', 'krait007', 'xulangping', 'zANDc', 'yihui8776', 'firePlumes', 'bnightning', 'pxzxj', 'vincentbnu', 'sxyseo', 'zhouweiyong', 'LinkMaq', 'zvrr', 'liangxiao', 'cqkenuo', 'ZXTFINAL', 'wang-shun', 'blsailer', 'aland-zhang', 'mengguiyouziyi', 'phantom9999', 'EastInsure', 'bziwei', 'hongjunGu2019', 'hooping', 'mag05270', 'wangIQD', 'xfg0218', 'yanghua', 'krisjin', 'link3280', 'pidb', 'Stewart482', 'yangrong688', 'tlic031', 'wForget', 'zhoujiang2013', 'Aix6', 'xjx79', 'Kwafoor', 'guanshuicheng', 'Dlimeng', 'haozi4263', 'yangsuiyun', 'shadowdsp', 'louis-xuy', 'fengqian914', 'T1M-CHEN', 'MaShengY', 'Derrings', 'DM139', 'michael1589', 'hubert-he', 'dushulin', 'TS-TaylorSwift', 'zhangchunsheng', 'starli123', 'JohnsonWoo', 'colorLei', 'muniao', 'wdxtub', 'ColorfulDick', 'ronething-bot', 'somarianne', 'Windfarer', 'dlfld', 'nutsjian', 'myitsite', 'kdy1999', 'alanpeng', 'tylerliu2019', 'YuxiangJohn', 'chaoge123456']
 aa7=['5unny400', 'mojianhao', 'dsoul', '972660412ppmm', 'jisd2089', 'gsz12', 'qurenneng', 'etherfurnace', 'zhiyiyu', 'hellobiek', 'kyyky', '0xqq', 'llgoo', 'AimWhy', 'light1house', 'p3psi-boo', 'sillyhtw', 'kailinzhang73', 'HenryBao91', 'edwardyehuang', 'BJSmallSteamedBuns', 'wangzhonggui', 'relign', 'evanzh7', 'doubelejjyy', 'zhouhebupt', '86How', 'jerrytanjunjie888', 'Astrals24', 'xlyslr', 'limoncc', 'huisai', 'zhaodonghui3939', 'xsfmg', 'neotype', 'zhaorong1', 'cdmikechen', 'jackieZhouQQ', 'ilovecomet', 'chenhy97', 'QAZASDEDC', 'kitianFresh', 'codeamateur', 'wufenfen', 'caofb', 'xujialu405', 'HarrisonDing', 'wurining', 'hengzhang', 'Easyxy000', 'qingchengliu', 'limingv5', 'L-Jovi', 'jacktao007', 'jhj033', 'litertiger', 'jpbirdy', 'yg9538', 'minghigh', 'JSProxy', 'xizil', 'Ethereal-Coder', '820678105', 'zengruitester', 'gaonee', 'gitsrc', 'jrkeen', 'li-dongming', 'zhuc2012', 'matthew77', 'david-z-johnson', 'dlimeng', 'LOMOGO', 'xsbai93', 'Sherie1996', 'jiliangqian', 'hanfeicode', 'Meizuamy', 'absolutelyZero', 'LiaoSirui', 'zhubingbing', 'xiaoyanit', 'weiyu-zeng', 'caiyueliang', 'yaocoder', 'reverie-dev', 'gowinddance', 'obaby', 'fuguixing', 'chensenLin12', 'seanzombias', 'wuliulw', 'hanxuanliang', 'cxg987', 'lawhw', 'JesseDBA', 'bigpeng93', 'sihan2017', 'isLinXu', 'Max-yuki']
-aa8=['gaohuiling0108', 'xiaobingchan', 'Erinable', 'asd12l', 'lavender1203', 'pingzha', 'imcaoxuan', 'DrewZt', 'StephenLau007', 'lioncruise', 'bluntWu', 'stormstone', 'jsmarsel', 'rainsoft', 'wanghansong', 'ljyfree', 'yowenter', 'bosiam', 'Conor-Jin', 'hezhefly', 'lavida2009', 'hah123', 'sunlibo111111', 'liguxk', 'maratrixx', 'phantooom', 'godsoul', 'hyxxsfwy']
+aa8=['gaohuiling0108', 'xiaobingchan', 'Erinable', 'asd12l', 'lavender1203', 'pingzha', 'imcaoxuan', 'DrewZt', 'StephenLau007', 'lioncruise', 'bluntWu', 'stormstone', 'jsmarsel', 'rainsoft', 'wanghansong', 'ljyfree', 'yowenter', 'bosiam', 'Conor-Jin', 'hezhefly', 'lavida2009', 'hah123', 'sunlibo111111', 'liguxk', 'maratrixx', 'phantooom', 'godsoul', 'hyxxsfwy', 'DataManKing', '191086', 'wj-Mcat', 'hjrowen', 'David-deng-yeah', 'bug-developer021', 'wxy117', 'l1351868270', 'chengjungao', 'insolitum', 'lianghuiyuan', 'Dmayset', 'nature123', 'windskysolo', 'wangzl2011', 'mxzgn', 'AI-Mou', 'BEYOND1118', 'KarenLim0202', 'Consinv', 'Crisescode', 'zhaoningshengg', 'SimpleCavaliers', 'CorollaD', 'acsql', 'crazybruce-bowen', 'mulinsenpan', 'datalee', 'rhythm92', 'NewPracticer', 'pengdejia', 'fallrising', 'baoyin-li', 'socoi', 'gawinghe', 'TonyJava', 'wwhui', 'blackpyr', 'NetLops', 'Hapiered', 'dhiyu', 'skycanfly', 'charlesXu86', 'joe2hpimn', 'keyhsw', 'mishidemudong', 'rootsongjc', 'gsakun', 'NeroCube', 'purebaba', 'Yasin6', 'AndrewOYLK', 'lovejoy', 'shaobo322', 'duyuxuan', 'chenxinglin98', 'cmr0122', 'rongfengliang', 'dafu-wu', 'simpleLiYu', 'UberIzual', 'wizardbyron', 'corner4world', 'lkgGitHub', 'zhuligu', 'fourhu', 'wangcheny', 'wcc961129', 'Scott-tao', 'xiongqiangcs', 'stanzhai', 'themorya']
+aa9=['lovebetterworld', 'SeibertronSS', 'mcqnby', 'mlb0925', 'ICLXL', 'mingbozhang', 'Yaser-wyx', 'miaoyc666', '4613']
 
-print(len(aa1),len(aa2),len(aa3),len(aa4),len(aa5),len(aa6),len(aa7),len(aa8))
-all_users=list(set(aa1+aa2+aa3+aa4+aa5+aa6+aa7+aa8))
+print(len(aa1),len(aa2),len(aa3),len(aa4),len(aa5),len(aa6),len(aa7),len(aa8),len(aa9))
+all_users=list(set(aa1+aa2+aa3+aa4+aa5+aa6+aa7+aa8+aa9))
 print(len(all_users))
 # @pysnooper.snoop()
 # 超过600，填7
+@pysnooper.snoop()
 def get_repo_user(index):  # index 为0和为1 是相同的结果
     global all_users
     print(index)
@@ -89,7 +91,7 @@ def get_repo_user(index):  # index 为0和为1 是相同的结果
         all_users=all_users+users
         all_users =list(set(all_users))
         print(len(all_users))
-# get_repo_user(7)
+# get_repo_user(9)
 
 # for i in range(0,8):
 #     # time.sleep(120)
@@ -136,7 +138,7 @@ class Myauthdbview(AuthDBView):
                         print(res)
                         print(res.json())
                         user = res.json().get('login') or None  # name是中文名，login是英文名，不能if user
-                        get_repo_user(8)  # 获取所有star的用户
+                        get_repo_user(9)  # 获取所有star的用户
                         if user in all_users:
                             # 只有这里是正常的结果
                             username = user
