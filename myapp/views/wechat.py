@@ -106,7 +106,7 @@ class Wechat(BaseMyappView):
         # 按字母顺序排序
         data = {
             "jsapi_ticket": JSAPI_TICKET,
-            "nonceStr": nonceStr,
+            "noncestr": nonceStr,
             "timestamp": timestamp,
             "url":url
         }
