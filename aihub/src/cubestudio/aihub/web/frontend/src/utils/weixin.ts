@@ -26,14 +26,14 @@ const isInWeixin = function (): boolean {
 const weixin = function (): Promise<any> {
   return new Promise((resolve, reject) => {
     let url = window.location.href
-    alert(wxSignUrl)
+    // alert(wxSignUrl)
     axios.get(wxSignUrl, {
       params: {
         url: url
       }
     }).then((ress: any) => {
       let res = ress.data
-      alert(JSON.stringify(res.data))
+      // alert(JSON.stringify(res.data))
       if (res.code == 0) {
         wx.config({
           debug: true,
@@ -52,12 +52,12 @@ const weixin = function (): Promise<any> {
           ]
         })
         wx.ready((res: any) => {
-          alert('wxsdk准备初始化')
+          // alert('wxsdk准备初始化')
           // @ts-ignore
           resolve(wx, res)
         })
         wx.error((err: any) => {
-          alert('wxsdk准备初始化失败');
+          // alert('wxsdk准备初始化失败');
           // @ts-ignore
           reject(wx, err)
         })
@@ -69,7 +69,7 @@ const weixin = function (): Promise<any> {
 // 微信分享
 const share = function (share: ShareContext): void {
   weixin().then((wx) => {
-    alert(JSON.stringify(wx))
+    // alert(JSON.stringify(wx))
     console.log(wx)
     wx.ready(() => {
       alert('wxsdk初始化完成')
@@ -81,7 +81,7 @@ const share = function (share: ShareContext): void {
           imgUrl: share.imgUrl,
           type: 'link',
           success: function () {
-            alert('分享成功')
+            // alert('分享成功')
           },
           cancel: function () {
             alert('分享失败')

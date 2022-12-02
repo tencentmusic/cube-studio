@@ -35,6 +35,17 @@ export default function Index() {
     };
 
     useEffect(() => {
+        if (isInWeixin()) {
+            share({
+                title: pageInfo?.name,
+                link: window.location.href,
+                desc: pageInfo?.describe,
+                imgUrl: pageInfo?.pic
+            })
+        }
+    }, [])
+
+    useEffect(() => {
         const timerTagRecord = setInterval(() => {
             if (activeKeyRef.current < 99) {
                 setActiveKey(activeKeyRef.current + 1);
@@ -147,6 +158,10 @@ export default function Index() {
                     </div>
                 } /> : null
             }
+
+            <div style={{ display: 'none' }}>
+                <img style={{ width: 300, height: 300 }} src={pageInfo?.pic} alt="" />
+            </div>
 
             <div className="p16 bg-w">
                 <div>
