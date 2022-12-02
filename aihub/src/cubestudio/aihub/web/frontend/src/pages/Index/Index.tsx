@@ -35,17 +35,6 @@ export default function Index() {
     };
 
     useEffect(() => {
-        if (isInWeixin()) {
-            share({
-                title: pageInfo?.name,
-                link: window.location.href,
-                desc: pageInfo?.describe,
-                imgUrl: pageInfo?.pic
-            })
-        }
-    }, [])
-
-    useEffect(() => {
         const timerTagRecord = setInterval(() => {
             if (activeKeyRef.current < 99) {
                 setActiveKey(activeKeyRef.current + 1);
@@ -59,9 +48,18 @@ export default function Index() {
     useEffect(() => {
         getAppInfo(location.pathname).then(res => {
             const data = res.data
-            setPageInfo(data)
             const tarConfig = createDyFormConfig(data.inference_inputs, {}, {})
+            setPageInfo(data)
             setDynamicFormConfig(tarConfig)
+
+            if (isInWeixin()) {
+                share({
+                    title: data?.name,
+                    link: window.location.href,
+                    desc: data?.describe,
+                    imgUrl: data?.pic
+                })
+            }
         }).catch(err => { }).finally(() => {
             // setLoading(false)
         })
