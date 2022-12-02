@@ -78,17 +78,6 @@ const AppWrapper = (props: IProps) => {
     handleAppIndex(appList)
   }, [])
 
-  // useEffect(() => {
-  //   if (isInWeixin()) {
-  //     share({
-  //       title: "你好aihub",
-  //       link: "https://github.com/tencentmusic/cube-studio",
-  //       desc: "aihub go",
-  //       imgUrl: "https://github.com/tencentmusic/cube-studio"
-  //     })
-  //   }
-  // }, [])
-
   const handleAppIndex = (appList: any[]) => {
     const { pathname } = location
     const appPath = `/${pathname.split('/')[1]}`
@@ -100,34 +89,6 @@ const AppWrapper = (props: IProps) => {
       }
     }
     setCurrentAppIndex(appIndex)
-  }
-
-  const handleClickApp = (app: any, index: number) => {
-    if (app.path === '/') {
-      commitUrlChange('/')
-      setCurrentAppIndex(index)
-      navigate(app.path || '/')
-    } else if (app.menu_type === 'iframe' && app.path) {
-      commitUrlChange(app.path)
-      setcurrentRoute(app.path)
-      setCurrentAppIndex(index)
-      navigate(app.path)
-    } else if (app.menu_type === 'out_link' && app.path) {
-      window.open(app.url, 'blank')
-    } else {
-      let currentItem = app
-      while (currentItem && currentItem.children) {
-        currentItem = currentItem.children[0]
-      }
-      if (currentItem) {
-        let appMenuPath = currentItem.path || ''
-        commitUrlChange(appMenuPath)
-        setcurrentRoute(appMenuPath)
-        setCurrentAppIndex(index)
-        navigate(appMenuPath)
-      }
-    }
-
   }
 
   const handleChangePageTitle = (pathname: string, currnetRouteConfig: any[]) => {

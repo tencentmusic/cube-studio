@@ -26,7 +26,7 @@ const isInWeixin = function (): boolean {
 const weixin = function (): Promise<any> {
   return new Promise((resolve, reject) => {
     let url = window.location.href
-
+    alert(wxSignUrl)
     axios.get(wxSignUrl, {
       params: {
         url: url
@@ -52,12 +52,12 @@ const weixin = function (): Promise<any> {
           ]
         })
         wx.ready((res: any) => {
-          alert('wxsdk初始化完成')
+          alert('wxsdk准备初始化')
           // @ts-ignore
           resolve(wx, res)
         })
         wx.error((err: any) => {
-          alert('wxsdk初始化失败');
+          alert('wxsdk准备初始化失败');
           // @ts-ignore
           reject(wx, err)
         })
