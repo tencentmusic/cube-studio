@@ -2,7 +2,7 @@ import axios from '../api/index'
 const wx = require('weixin-js-sdk')
 
 // TODO 
-const wxSignUrl = 'http://www.data-master.net/wechat/jsapi';
+const wxSignUrl = 'http://www.data-master.net:8880/wechat/jsapi';
 // const wxSignUrl = '/wechat/jsapi';
 
 export interface ShareContext {
