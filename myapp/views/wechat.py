@@ -72,7 +72,7 @@ class Wechat(BaseMyappView):
         global ACCESS_TOKEN,ACCESS_TOKEN_TIME
 
         url=f'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={APPID}&secret={APPSECRET}'
-        if not ACCESS_TOKEN or (datetime.datetime.now()-ACCESS_TOKEN_TIME).seconds>7000:
+        if not ACCESS_TOKEN or (datetime.datetime.now()-ACCESS_TOKEN_TIME).total_seconds()>7000:
             res = requests.get(url)
             data = res.json() or {}
             access_token = data.get('access_token','')
@@ -92,7 +92,7 @@ class Wechat(BaseMyappView):
         timestamp = str(int(time.time()))
 
         global JSAPI_TICKET,JSAPI_TICKET_TIME
-        if not JSAPI_TICKET or (datetime.datetime.now()-JSAPI_TICKET_TIME).seconds>7000:
+        if not JSAPI_TICKET or (datetime.datetime.now()-JSAPI_TICKET_TIME).total_seconds()>7000:
             self.refresh_access_token()
             url=f"https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={ACCESS_TOKEN}&type=jsapi"
             res = requests.get(url)
@@ -110,12 +110,8 @@ class Wechat(BaseMyappView):
             "timestamp": timestamp,
             "url":url
         }
-        print(data)
-        str1 = urlencode(data)
-        print(str1)
-        sha1 = hashlib.sha1()
-        sha1.update(str1.encode('utf-8'))
-        hashcode = sha1.hexdigest()
+        str1 = "&".join(['%s=%s' % (key.lower(), data[key]) for key in sorted(data)])
+        hashcode = hashlib.sha1(str1.encode('utf8')).hexdigest()
 
         return jsonify({
             "code": 0,
