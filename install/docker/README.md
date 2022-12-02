@@ -5,9 +5,9 @@
 
 ```
 linux
-docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:5.7
+docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -d mysql:5.7
 mac
-docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:5.7
+docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -d mysql:5.7
 
 ```
 进入mysql，创建kubeflow数据库

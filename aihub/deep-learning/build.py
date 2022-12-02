@@ -205,9 +205,6 @@ for app_name in app_names:
 
     location {"~* ^/(aihub|app1)" if app_name=='app1' else "/%s"%app_name}/ {{
         proxy_pass http://{app_name};
-        add_header Access-Control-Allow-Origin *;
-        add_header Access-Control-Allow-Credentials: true;
-        add_header Access-Control-Allow-Methods GET,POST,OPTIONS,PUT,DELETE;
 
         proxy_http_version 1.1;
         proxy_set_header Host       $http_host;
