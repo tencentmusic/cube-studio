@@ -36,7 +36,7 @@ const weixin = function (): Promise<any> {
       // alert(JSON.stringify(res.data))
       if (res.code == 0) {
         wx.config({
-          debug: true,
+          debug: false,
           appId: res.data.appId,
           timestamp: res.data.timestamp,
           nonceStr: res.data.nonceStr,
