@@ -78,7 +78,7 @@ const share = function (share: ShareContext): void {
           title: share.title,
           link: share.link,
           desc: share.desc,
-          imgUrl: 'https://cdn.lifeat.cn/webappGroup/usedcar-shareIcon.png' || share.imgUrl,
+          imgUrl: share.imgUrl || 'https://cdn.lifeat.cn/webappGroup/usedcar-shareIcon.png',
           type: 'link',
           success: function () {
             // alert('分享成功')
@@ -92,7 +92,7 @@ const share = function (share: ShareContext): void {
           title: share.title,
           link: share.link,
           desc: share.desc,
-          imgUrl: 'https://cdn.lifeat.cn/webappGroup/usedcar-shareIcon.png' || share.imgUrl,
+          imgUrl: share.imgUrl || 'https://cdn.lifeat.cn/webappGroup/usedcar-shareIcon.png',
           type: 'link',
           success: function () {
             // alert('分享成功')

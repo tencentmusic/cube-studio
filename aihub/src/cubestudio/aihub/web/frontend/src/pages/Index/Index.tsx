@@ -54,10 +54,10 @@ export default function Index() {
 
             if (isInWeixin()) {
                 share({
-                    title: data?.name,
+                    title: data?.describe,
                     link: window.location.href,
-                    desc: data?.describe,
-                    imgUrl: data?.pic
+                    desc: 'cube-studio 开源社区',
+                    imgUrl: `https://cube-studio-1252405198.cos.ap-nanjing.myqcloud.com/example/${data.name}/example.jpg`
                 })
             }
         }).catch(err => { }).finally(() => {
@@ -124,23 +124,6 @@ export default function Index() {
         })
     }
 
-    const shareInWeixin = () => {
-        share({
-            title: pageInfo?.name,
-            link: window.location.href,
-            desc: pageInfo?.describe,
-            imgUrl: pageInfo?.pic
-        })
-        // if (isInWeixin()) {
-        //     share({
-        //         title: "你好aihub",
-        //         link: "https://github.com/tencentmusic/cube-studio",
-        //         desc: "aihub go",
-        //         imgUrl: "https://github.com/tencentmusic/cube-studio"
-        //     })
-        // }
-    }
-
     return (
         <div>
             {/* {
@@ -173,11 +156,6 @@ export default function Index() {
                     <Tag color="volcano">{pageInfo?.scenes}</Tag>
                     <Tag color="green">{pageInfo?.status}</Tag>
                 </div>
-                {/* <div>
-                    <Button onClick={() => {
-                        shareInWeixin()
-                    }}>分享到微信</Button>
-                </div> */}
             </div>
             <div className="ta-r pr16 c-hint-b">
                 {pageInfo?.version}
