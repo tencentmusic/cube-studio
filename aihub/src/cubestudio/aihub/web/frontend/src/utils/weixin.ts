@@ -72,19 +72,33 @@ const share = function (share: ShareContext): void {
     // alert(JSON.stringify(wx))
     console.log(wx)
     wx.ready(() => {
-      alert('wxsdk初始化完成')
+      // alert('wxsdk初始化完成')
       setTimeout(() => {
         wx.updateAppMessageShareData({
           title: share.title,
           link: share.link,
           desc: share.desc,
-          imgUrl: share.imgUrl,
+          imgUrl: 'https://cdn.lifeat.cn/webappGroup/usedcar-shareIcon.png' || share.imgUrl,
           type: 'link',
           success: function () {
             // alert('分享成功')
           },
           cancel: function () {
-            alert('分享失败')
+            alert('分享设置失败')
+          }
+        })
+
+        wx.updateTimelineShareData({
+          title: share.title,
+          link: share.link,
+          desc: share.desc,
+          imgUrl: 'https://cdn.lifeat.cn/webappGroup/usedcar-shareIcon.png' || share.imgUrl,
+          type: 'link',
+          success: function () {
+            // alert('分享成功')
+          },
+          cancel: function () {
+            alert('分享设置失败1')
           }
         })
       }, 500)

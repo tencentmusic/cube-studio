@@ -173,11 +173,11 @@ export default function Index() {
                     <Tag color="volcano">{pageInfo?.scenes}</Tag>
                     <Tag color="green">{pageInfo?.status}</Tag>
                 </div>
-                <div>
+                {/* <div>
                     <Button onClick={() => {
                         shareInWeixin()
                     }}>分享到微信</Button>
-                </div>
+                </div> */}
             </div>
             <div className="ta-r pr16 c-hint-b">
                 {pageInfo?.version}
