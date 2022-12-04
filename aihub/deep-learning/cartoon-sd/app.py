@@ -3,6 +3,11 @@ import io, sys, os
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '/naifu')))
 
+try:
+    os.system("ln -f -s /naifu/* /app/")
+except:
+    print("软连接出错，请重试！")
+
 import random
 from datetime import datetime
 from cubestudio.aihub.model import Model
@@ -86,12 +91,12 @@ class Cartoon_SD_Model(Model):
     name = 'cartoon-sd'
     label = '文字转图像-动漫版'
     describe = "输入一串文字描述，可生成相应的动漫图片，描述越详细越好哦~"
-    field = "神经网络"
+    field = "机器视觉"
     scenes = "图像创作"
     status = 'online'
     version = 'v20221125'
     doc = 'https://github.com/tencentmusic/cube-studio'  # 'https://帮助文档的链接地址'
-    # pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource = {
         "resource_gpu": "1"
@@ -141,6 +146,7 @@ class Cartoon_SD_Model(Model):
         try:
             if optim.seed is None:
                 optim.seed = random.randint(0, 100000000)
+            optim.mitigate = False
             images = self.model.sample(optim)
             ndarray_convert_img_list = []
             for image in images:
@@ -192,4 +198,4 @@ model = Cartoon_SD_Model()
 
 # 启动服务
 server = Server(model=model)
-server.server(port=8080)
+server.server(port=8080,debug=False)
