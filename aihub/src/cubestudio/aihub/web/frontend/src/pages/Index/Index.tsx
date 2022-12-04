@@ -48,9 +48,18 @@ export default function Index() {
     useEffect(() => {
         getAppInfo(location.pathname).then(res => {
             const data = res.data
-            setPageInfo(data)
             const tarConfig = createDyFormConfig(data.inference_inputs, {}, {})
+            setPageInfo(data)
             setDynamicFormConfig(tarConfig)
+
+            if (isInWeixin()) {
+                share({
+                    title: data?.describe,
+                    link: window.location.href,
+                    desc: 'cube-studio 开源社区',
+                    imgUrl: `https://cube-studio-1252405198.cos.ap-nanjing.myqcloud.com/example/${data.name}/example.jpg`
+                })
+            }
         }).catch(err => { }).finally(() => {
             // setLoading(false)
         })
@@ -115,23 +124,6 @@ export default function Index() {
         })
     }
 
-    const shareInWeixin = () => {
-        share({
-            title: pageInfo?.name,
-            link: window.location.href,
-            desc: pageInfo?.describe,
-            imgUrl: pageInfo?.pic
-        })
-        // if (isInWeixin()) {
-        //     share({
-        //         title: "你好aihub",
-        //         link: "https://github.com/tencentmusic/cube-studio",
-        //         desc: "aihub go",
-        //         imgUrl: "https://github.com/tencentmusic/cube-studio"
-        //     })
-        // }
-    }
-
     return (
         <div>
             {/* {
@@ -148,6 +140,10 @@ export default function Index() {
                 } /> : null
             }
 
+            <div style={{ display: 'none' }}>
+                <img style={{ width: 300, height: 300 }} src={pageInfo?.pic} alt="" />
+            </div>
+
             <div className="p16 bg-w">
                 <div>
                     <img className="w100 pb8" style={{ maxHeight: 600 }} src={pageInfo?.pic || ''} alt="" />
@@ -159,11 +155,6 @@ export default function Index() {
                 <div>
                     <Tag color="volcano">{pageInfo?.scenes}</Tag>
                     <Tag color="green">{pageInfo?.status}</Tag>
-                </div>
-                <div>
-                    <Button onClick={() => {
-                        shareInWeixin()
-                    }}>分享到微信</Button>
                 </div>
             </div>
             <div className="ta-r pr16 c-hint-b">
