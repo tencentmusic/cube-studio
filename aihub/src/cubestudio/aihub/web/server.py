@@ -598,7 +598,7 @@ class Server():
                             "result": [
                                 {
                                     "text": "匿名用户仅可访问一次，扫码进群获取更多访问次数",
-                                    "image":"https://luanpeng.oss-cn-qingdao.aliyuncs.com/csdn/ad1.jpg"
+                                    "image":"https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/ad1.jpg"
                                 }
                             ],
                             "status": 0
