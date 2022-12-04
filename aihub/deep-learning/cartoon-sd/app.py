@@ -3,6 +3,11 @@ import io, sys, os
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '/naifu')))
 
+try:
+    os.system("ln -f -s /naifu/* /app/")
+except:
+    print("软连接出错，请重试！")
+
 import random
 from datetime import datetime
 from cubestudio.aihub.model import Model
@@ -192,4 +197,4 @@ model = Cartoon_SD_Model()
 
 # 启动服务
 server = Server(model=model)
-server.server(port=8080)
+server.server(port=8080,debug=False)
