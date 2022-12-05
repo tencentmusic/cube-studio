@@ -178,7 +178,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod!=''}",
+          "expr": "DCGM_FI_DEV_GPU_UTIL{pod!=''}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -441,7 +441,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 - (avg by (instance) (irate(node_cpu{job=\"node-exporter\", mode=\"idle\"}[5m])) * 100)\n",
+          "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\"}[5m])) * 100)\n",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -540,7 +540,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "node_memory_MemTotal{job=\"node-exporter\"}\n- node_memory_MemFree{job=\"node-exporter\"}\n- node_memory_Buffers{job=\"node-exporter\"}\n- node_memory_Cached{job=\"node-exporter\"}\n",
+          "expr": "node_memory_MemTotal_bytes{job=\"node-exporter\"}\n- node_memory_MemFree_bytes{job=\"node-exporter\"}\n- node_memory_Buffers_bytes{job=\"node-exporter\"}\n- node_memory_Cached_bytes{job=\"node-exporter\"}\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -639,7 +639,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes{job=\"node-exporter\", device!~\"lo\"}[5m])",
+          "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\", device!~\"lo\"}[5m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}:{{device}}",
@@ -738,7 +738,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(node_network_transmit_bytes{job=\"node-exporter\", device!~\"lo\"}[5m])",
+          "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\", device!~\"lo\"}[5m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}:{{device}}",
@@ -848,21 +848,21 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (instance) (rate(node_disk_bytes_read{job=\"node-exporter\"}[2m]))",
+          "expr": "sum by (instance) (rate(node_disk_read_bytes_total{job=\"node-exporter\"}[2m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}} read",
           "refId": "A"
         },
         {
-          "expr": "sum by (instance) (rate(node_disk_bytes_written{job=\"node-exporter\"}[2m]))",
+          "expr": "sum by (instance) (rate(node_disk_written_bytes_total{job=\"node-exporter\"}[2m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}} written",
           "refId": "B"
         },
         {
-          "expr": "sum by (instance) (rate(node_disk_io_time_ms{job=\"node-exporter\"}[2m]))",
+          "expr": "sum by (instance) (rate(node_disk_io_time_seconds_total{job=\"node-exporter\"}[2m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}} io time",

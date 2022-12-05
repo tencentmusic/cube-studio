@@ -72,7 +72,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"})",
+          "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=~\"$namespace\",destination_workload=~\"($service)\"})",
           "format": "time_series",
           "hide": true,
           "interval": "",
@@ -82,7 +82,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum by (destination_workload,response_code) (irate(istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
+          "expr": "sum by (destination_workload,response_code) (irate(istio_requests_total{destination_service_namespace=~\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "hide": false,
           "interval": "",
           "legendFormat": "{{response_code}} , {{destination_workload}}",
@@ -183,7 +183,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (destination_workload) (irate(istio_request_bytes_sum{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
+          "expr": "sum by (destination_workload) (irate(istio_request_bytes_sum{destination_service_namespace=~\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -284,7 +284,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "avg by (destination_workload) (rate(istio_request_duration_milliseconds_sum{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m])/rate(istio_request_duration_milliseconds_count{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
+          "expr": "avg by (destination_workload) ((rate(istio_request_duration_milliseconds_sum{destination_service_namespace=~\"$namespace\",destination_workload=~\"($service)\"}[1m])/rate(istio_request_duration_milliseconds_count{destination_service_namespace=~\"$namespace\",destination_workload=~\"($service)\"}[1m]))>0)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -606,7 +606,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "DCGM_FI_DEV_MEM_COPY_UTIL{exported_pod=~\".*$service.*\"}",
+          "expr": "DCGM_FI_DEV_MEM_COPY_UTIL{pod=~\".*$service.*\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -808,7 +808,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\"})",
+          "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -904,7 +904,7 @@
           "value": "$__all"
         },
         "datasource": "prometheus",
-        "definition": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_service_name)",
+        "definition": "label_values(istio_requests_total{destination_service_namespace=~\"$namespace\"}, destination_service_name)",
         "description": null,
         "error": null,
         "hide": 0,
@@ -914,7 +914,7 @@
         "name": "service",
         "options": [],
         "query": {
-          "query": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_service_name)",
+          "query": "label_values(istio_requests_total{destination_service_namespace=~\"$namespace\"}, destination_service_name)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
