@@ -59,6 +59,8 @@ class Server():
         self.docker=docker
         self.pre_url=self.model.name
 
+        self.save_time=datetime.datetime.now()
+
         if self.model.pic and 'http' not in self.model.pic:
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
             if not os.path.exists(save_path):
@@ -133,7 +135,7 @@ class Server():
 
 
         # 视频转流
-        def video_stram(self,video_path):
+        def video_stram(video_path):
             vid = cv2.VideoCapture(video_path)
             while True:
                 return_value, frame = vid.read()
