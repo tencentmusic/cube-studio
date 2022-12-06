@@ -79,8 +79,8 @@ class AnimeGANv3_Model(Model):
     def inference(self,img_path, style='宫崎骏', if_face=None):
         print(img_path, style, if_face)
 
-        img = cv2.imread(img_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        src_img = cv2.imread(img_path)
+        src_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2RGB)
         if 'Arcane' in style:
             f = "A"
         elif "川普" in style:
@@ -97,8 +97,11 @@ class AnimeGANv3_Model(Model):
         save_path = os.path.join('result', os.path.basename(img_path))
         try:
             det_face = True if if_face == "Yes" else False
-            output = AnimeGANv3_src.Convert(img, f, det_face)
+            output = AnimeGANv3_src.Convert(src_img, f, det_face)
             cv2.imwrite(save_path, output[:, :, ::-1])
+            des_img = cv2.imread(save_path)
+            cv2.resize(des_img,None, fx=src_img.shape[0], fy=src_img.shape[1], interpolation=cv2.INTER_LINEAR)
+            cv2.imwrite(save_path, des_img)
         except RuntimeError as error:
             print('Error', error)
 
