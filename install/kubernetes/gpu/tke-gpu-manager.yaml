@@ -1,0 +1,151 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gpu-manager
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gpu-manager-role
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: gpu-manager
+  namespace: kube-system
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: gpu-manager-daemonset
+  namespace: kube-system
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      name: gpu-manager-ds
+  template:
+    metadata:
+      # This annotation is deprecated. Kept here for backward compatibility
+      # See https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        name: gpu-manager-ds
+    spec:
+      serviceAccount: gpu-manager
+      tolerations:
+        # This toleration is deprecated. Kept here for backward compatibility
+        # See https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - key: tencent.com/vcuda-core
+          operator: Exists
+          effect: NoSchedule
+      # Mark this pod as a critical add-on; when enabled, the critical add-on
+      # scheduler reserves resources for critical add-on pods so that they can
+      # be rescheduled after a failure.
+      # See https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/
+      priorityClassName: "system-node-critical"
+      # only run node has gpu device
+      nodeSelector:
+        vgpu: 'true'
+      hostPID: true
+      containers:
+        - image: tkestack/gpu-manager:1.0.3
+          imagePullPolicy: Always
+          name: gpu-manager
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 5678
+          volumeMounts:
+            - name: device-plugin
+              mountPath: /var/lib/kubelet/device-plugins
+            - name: vdriver
+              mountPath: /etc/gpu-manager/vdriver
+            - name: vmdata
+              mountPath: /etc/gpu-manager/vm
+            - name: log
+              mountPath: /var/log/gpu-manager
+            - name: checkpoint
+              mountPath: /etc/gpu-manager/checkpoint
+            - name: run-dir
+              mountPath: /var/run
+            - name: cgroup
+              mountPath: /sys/fs/cgroup
+              readOnly: true
+            - name: usr-directory
+              mountPath: /usr/local/host
+              readOnly: true
+          env:
+            - name: LOG_LEVEL
+              value: "4"
+            - name: EXTRA_FLAGS
+              value: "--logtostderr=false"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+      volumes:
+        - name: device-plugin
+          hostPath:
+            type: Directory
+            path: /var/lib/kubelet/device-plugins
+        - name: vmdata
+          hostPath:
+            type: DirectoryOrCreate
+            path: /etc/gpu-manager/vm
+        - name: vdriver
+          hostPath:
+            type: DirectoryOrCreate
+            path: /etc/gpu-manager/vdriver
+        - name: log
+          hostPath:
+            type: DirectoryOrCreate
+            path: /etc/gpu-manager/log
+        - name: checkpoint
+          hostPath:
+            type: DirectoryOrCreate
+            path: /etc/gpu-manager/checkpoint
+        # We have to mount the whole /var/run directory into container, because of bind mount docker.sock
+        # inode change after host docker is restarted
+        - name: run-dir
+          hostPath:
+            type: Directory
+            path: /var/run
+        - name: cgroup
+          hostPath:
+            type: Directory
+            path: /sys/fs/cgroup
+        # We have to mount /usr directory instead of specified library path, because of non-existing
+        # problem for different distro
+        - name: usr-directory
+          hostPath:
+            type: Directory
+            path: /usr
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpu-manager-metric
+  namespace: kube-system
+  annotations:
+    prometheus.io/scrape: "true"
+  labels:
+    kubernetes.io/cluster-service: "true"
+spec:
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: 5678
+      protocol: TCP
+      targetPort: 5678
+  selector:
+    name: gpu-manager-ds
