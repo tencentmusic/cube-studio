@@ -1,0 +1,22 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub",
+    "field": "自然语言",
+    "scenes": "聊天机器人",
+    "type": "dateset,notebook,train,inference",
+    "name": "chatgpt",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "chatgpt-v20221001",
+    "label": "全新的聊天机器人模型",
+    "describe": "ChatGPT是OpenAI发布的聊天机器人模型，它的交互界面简洁，只有一个输入框，AI将根据输入内容进行回复，并允许在一个语境下持续聊天。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {}
+}
