@@ -97,6 +97,9 @@ class AnimeGANv3_Model(Model):
             f = "U"
         os.makedirs('result',exist_ok=True)
         save_path = os.path.join('result', os.path.basename(img_path))
+        if os.path.exists(save_path):
+            os.remove(save_path)
+
         temp_path = os.path.join('result',str(random.randint(1,1000))+".jpg")
         try:
             det_face = True if if_face == "Yes" else False
