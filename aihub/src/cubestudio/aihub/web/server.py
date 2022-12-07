@@ -61,14 +61,8 @@ class Server():
 
         self.save_time=datetime.datetime.now()
 
-        if self.model.pic and 'http' not in self.model.pic:
-            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
-            if not os.path.exists(save_path):
-                os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                shutil.copyfile(self.model.pic, save_path)
-
     # 启动服务
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def server(self, port=8080, debug=True):
 
         app = Flask(__name__,
@@ -93,14 +87,15 @@ class Server():
                 exec(command)
             # 同步任务要加载模型
             self.model.load_model()
-            # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
-            if self.model.web_examples and len(self.model.web_examples)>0:
-                input = self.model.web_examples[0].get("input",{})
-                try:
-                    if input:
-                        self.model.inference(**input)
-                except Exception as e:
-                    print(e)
+
+            # # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
+            # if self.model.web_examples and len(self.model.web_examples)>0:
+            #     input = self.model.web_examples[0].get("input",{})
+            #     try:
+            #         if input:
+            #             self.model.inference(**input)
+            #     except Exception as e:
+            #         print(e)
 
         # 文件转url。视频转码，音频转码等
         # @pysnooper.snoop()
@@ -466,6 +461,7 @@ class Server():
         def info():
             inference_inputs = copy.deepcopy(self.model.inference_inputs)
             web_examples = copy.deepcopy(self.model.web_examples)
+
             # example中图片转为在线地址
             for example in web_examples:
                 example_input = example.get('input',{})
@@ -475,19 +471,24 @@ class Server():
                         if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name or 'audio' in arg_filed.type.name) and 'http' not in example_input[arg_filed.name]:
                             example_input[arg_filed.name]=file2url(example_input[arg_filed.name])
 
+
             # 将图片和语音/视频的可选值和默认值，都转为在线网址
             for input in inference_inputs:
                 if 'image' in input.type.name or 'video' in input.type.name or 'audio' in input.type.name:
 
-                    # # 对于单选
-                    # if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
-                    #     input.default = file2url(input.default)
-                    #
-                    # # 对于多选
-                    # if '_select' in input.type.name and input.validators.max>1 and input.default:
-                    #     for i,default in enumerate(input.default):
-                    #         if 'http' not in default:
-                    #             input.default[i] = file2url(default)
+                    # 对于单选的默认值
+                    if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
+                        input.default = file2url(input.default)
+
+                    # 对于多选的默认值
+                    if '_select' in input.type.name and input.validators.max>1 and input.default:
+                        for i,default in enumerate(input.default):
+                            if 'http' not in default:
+                                input.default[i] = file2url(default)
+
+                    # 对与文件上传的默认值
+                    if input.default and 'http' not in input.default and input.type.name in ['video', 'image', 'audio']:
+                        input.default = file2url(input.default)
 
                     # 对于可选值，也转为url
                     if input.choices:

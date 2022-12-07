@@ -57,7 +57,6 @@ sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube
 
 ```
 
-
 此目录包含大量开源深度学习算法，包括但不限于
 
 # 机器视觉
