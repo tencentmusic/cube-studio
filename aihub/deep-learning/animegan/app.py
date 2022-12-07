@@ -1,5 +1,7 @@
 import base64
 import io,sys,os
+import random
+
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server,Field,Field_type,Validator
@@ -95,11 +97,12 @@ class AnimeGANv3_Model(Model):
             f = "U"
         os.makedirs('result',exist_ok=True)
         save_path = os.path.join('result', os.path.basename(img_path))
+        temp_path = os.path.join('result',str(random.randint(1,1000))+".jpg")
         try:
             det_face = True if if_face == "Yes" else False
             output = AnimeGANv3_src.Convert(src_img, f, det_face)
-            cv2.imwrite(save_path, output[:, :, ::-1])
-            des_img = cv2.imread(save_path)
+            cv2.imwrite(temp_path, output[:, :, ::-1])
+            des_img = cv2.imread(temp_path)
             dim = (src_img.shape[1], src_img.shape[0])
             cv2.resize(des_img,dsize=dim, interpolation=cv2.INTER_LINEAR)
             cv2.imwrite(save_path, des_img)
