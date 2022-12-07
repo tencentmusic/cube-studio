@@ -2,7 +2,7 @@
 
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
-app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify", "panoptic"]
+app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify", "panoptic",'chatgpt']
 
 
 # # 生成构建镜像的脚本
@@ -255,7 +255,7 @@ for app_name in os.listdir("."):
             else:
                 info['pic'] = f"http://www.data-master.net:8888/{app_name}/static/example/" + app_name + "/" + info['pic']
         app_name = app_name.lower().replace('_', '-')
-        info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}" if env=='cloud' else f"http://aihub.cube.woa.com/aihub/{app_name}"
+        info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}" if env=='cloud' else f"http://star.tme.woa.com/aihub/{app_name}"
         all_info.append(info)
 
 file = open('info.json',mode='w')
