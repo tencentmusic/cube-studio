@@ -42,7 +42,7 @@ class Chatgpt_Model(Model):
         pass
 
     # 推理
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def inference(self,question,**kwargs):
         req_data={
             "msgType": "text",
