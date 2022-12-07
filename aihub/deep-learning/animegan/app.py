@@ -100,7 +100,8 @@ class AnimeGANv3_Model(Model):
             output = AnimeGANv3_src.Convert(src_img, f, det_face)
             cv2.imwrite(save_path, output[:, :, ::-1])
             des_img = cv2.imread(save_path)
-            cv2.resize(des_img,None, fx=src_img.shape[0], fy=src_img.shape[1], interpolation=cv2.INTER_LINEAR)
+            dim = (src_img.shape[1], src_img.shape[0])
+            cv2.resize(des_img,dsize=dim, interpolation=cv2.INTER_LINEAR)
             cv2.imwrite(save_path, des_img)
         except RuntimeError as error:
             print('Error', error)
