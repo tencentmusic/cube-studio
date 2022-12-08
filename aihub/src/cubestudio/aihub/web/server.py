@@ -62,7 +62,7 @@ class Server():
         self.save_time=datetime.datetime.now()
 
     # 启动服务
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def server(self, port=8080, debug=True):
 
         app = Flask(__name__,
@@ -174,7 +174,7 @@ class Server():
 
         # 用来给本地celery请求使用
         @app.route(f'/{self.pre_url}/celery/inference',methods=['GET', 'POST'])
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def celery_inference():
             data = request.json
             data.update(request.form.to_dict())
@@ -334,7 +334,7 @@ class Server():
 
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def web_inference():
             # 从json里面读取信息
             data = request.json
