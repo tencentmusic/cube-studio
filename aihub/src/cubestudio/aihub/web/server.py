@@ -88,14 +88,14 @@ class Server():
             # 同步任务要加载模型
             self.model.load_model()
 
-            # # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
-            # if self.model.web_examples and len(self.model.web_examples)>0:
-            #     input = self.model.web_examples[0].get("input",{})
-            #     try:
-            #         if input:
-            #             self.model.inference(**input)
-            #     except Exception as e:
-            #         print(e)
+            # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
+            if self.model.web_examples and len(self.model.web_examples)>0:
+                input = self.model.web_examples[0].get("input",{})
+                try:
+                    if input:
+                        self.model.inference(**input)
+                except Exception as e:
+                    print(e)
 
         # 文件转url。视频转码，音频转码等
         # @pysnooper.snoop()
