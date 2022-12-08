@@ -88,7 +88,8 @@ model=APP1_Model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
 
-# # 启动服务
-server = Server(model=model)
-server.server(port=8080)
+if __name__=='__main__':
+    # # 启动服务
+    server = Server(model=model)
+    server.server(port=8080)
 

@@ -59,7 +59,7 @@ model=DeOldify_Model()
 # result = model.inference(img_file_path='test.png')  # 测试
 # print(result)
 
-# 启动服务
-server = Server(model=model)
-server.server(port=8080)
-
+if __name__=='__main__':
+    # # 启动服务
+    server = Server(model=model)
+    server.server(port=8080)
