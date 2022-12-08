@@ -27,7 +27,7 @@ spec:
         key: node-role.kubernetes.io/master
       containers:
       - name: node-exporter
-        image: quay.io/prometheus/node-exporter:v0.15.2   # quay.io/prometheus/node-exporter:v0.15.2
+        image: prom/node-exporter:v1.3.1   # 原版本为 quay.io/prometheus/node-exporter:v0.15.2 ，若出现grafana报表不显示的情况，请退回旧版
         args:
         - --web.listen-address=127.0.0.1:9101
         - --path.procfs=/host/proc

@@ -39,7 +39,7 @@ new_prometheus = [
     'quay.io/prometheus/prometheus:v2.3.1',
     "quay.io/prometheus/prometheus:v2.27.1",
     'quay.io/coreos/kube-state-metrics:v1.3.1',
-    'quay.io/prometheus/node-exporter:v0.15.2',
+    'prom/node-exporter:v1.3.1',
     'quay.io/coreos/kube-rbac-proxy:v0.3.1',
     'quay.io/coreos/addon-resizer:1.0',
     "quay.io/prometheus-operator/prometheus-operator:v0.46.0",
