@@ -333,41 +333,6 @@ class Server():
                         inference_kargs[input_field.name] = input_data
             return inference_kargs
 
-        # @pysnooper.snoop()
-        @app.route(f'/{self.pre_url}/file/<file_name>',methods=['GET', 'POST'])
-        @pysnooper.snoop()
-        def file_response(file_name):
-            #
-            # range_header = request.headers.get('Range', None)
-            # if range_header:
-            #     match = re.search(r'bytes=(\d+)-\d*', range_header)
-            #     start = int(match.group(1))
-            # else:
-            #     start = 0
-            #
-            # file_path = os.path.join("/src/cubestudio/aihub/web/static/file", file_path)
-            # file_name = os.path.basename(file_path)
-            # fr = open(file_path, 'rb')
-            # fr.seek(0, 2)
-            # total = fr.tell()
-            # fr.seek(start)
-            # chunk = fr.read(1024 * 1024 * 2)
-            # end = start + len(chunk) - 1
-            # headers = {
-            #     'Accept-Range': 'bytes',
-            #     'Content-Length': len(chunk) - 1,
-            #     "Content-Type":"video/mp4",
-            #     "Content-Disposition":f"attachment; filename*=\"UTF-8''{file_name}",
-            #     'Content-Range': f'bytes {start}-{end}/{total}'
-            # }
-            # return Response(chunk, 206, headers)
-
-            response = make_response(send_from_directory("/src/cubestudio/aihub/web/static/file", file_name, conditional=False))
-
-            # response.headers["Content-Disposition"] = f"attachment; filename={file_name}".format(file_name=file_name)
-            return response
-
-
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
         # @pysnooper.snoop()
