@@ -62,7 +62,7 @@ class Server():
         self.save_time=datetime.datetime.now()
 
     # 启动服务
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def server(self, port=8080, debug=True):
 
         app = Flask(__name__,
@@ -547,7 +547,7 @@ class Server():
                         }
                         i=i+1
                         ii=ii+1
-            print(rec_apps)
+            # print(rec_apps)
             info = {
                 "name": self.model.name,
                 "label": self.model.label,
