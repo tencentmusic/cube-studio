@@ -82,7 +82,7 @@ class Server():
         if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
             # 如果同时消费其他异步任务，就启动celery
             if '127.0.0.1' not in CELERY_BROKER_URL:
-                command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 10'%(self.model.name)
+                command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 4'%(self.model.name)
                 print(command)
                 exec(command)
             # 同步任务要加载模型
