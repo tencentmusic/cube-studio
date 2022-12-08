@@ -1,7 +1,7 @@
 import copy
 import enum
 import shutil
-
+from flask import Response
 import flask,os,sys,json,time,random,io,base64
 from flask import redirect
 from flask import render_template
@@ -9,6 +9,7 @@ import sys
 import uuid
 import os
 import re
+from flask import current_app, make_response,send_file,send_from_directory
 from flask import abort, current_app, flash, g, redirect, request, session, url_for
 import traceback
 import argparse
@@ -62,7 +63,7 @@ class Server():
         self.save_time=datetime.datetime.now()
 
     # 启动服务
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def server(self, port=8080, debug=True):
 
         app = Flask(__name__,
@@ -83,7 +84,7 @@ class Server():
             # 如果同时消费其他异步任务，就启动celery
             if '127.0.0.1' not in CELERY_BROKER_URL:
                 command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 4'%(self.model.name)
-                print(command)
+                # print(command)
                 exec(command)
             # 同步任务要加载模型
             self.model.load_model()
@@ -139,7 +140,7 @@ class Server():
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
         # 直接模型推理，并将结果转化为http链接
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def model_inference(inference_kargs):
             # 处理返回值
             try:
@@ -332,6 +333,41 @@ class Server():
                         inference_kargs[input_field.name] = input_data
             return inference_kargs
 
+        # @pysnooper.snoop()
+        @app.route(f'/{self.pre_url}/file/<file_name>',methods=['GET', 'POST'])
+        @pysnooper.snoop()
+        def file_response(file_name):
+            #
+            # range_header = request.headers.get('Range', None)
+            # if range_header:
+            #     match = re.search(r'bytes=(\d+)-\d*', range_header)
+            #     start = int(match.group(1))
+            # else:
+            #     start = 0
+            #
+            # file_path = os.path.join("/src/cubestudio/aihub/web/static/file", file_path)
+            # file_name = os.path.basename(file_path)
+            # fr = open(file_path, 'rb')
+            # fr.seek(0, 2)
+            # total = fr.tell()
+            # fr.seek(start)
+            # chunk = fr.read(1024 * 1024 * 2)
+            # end = start + len(chunk) - 1
+            # headers = {
+            #     'Accept-Range': 'bytes',
+            #     'Content-Length': len(chunk) - 1,
+            #     "Content-Type":"video/mp4",
+            #     "Content-Disposition":f"attachment; filename*=\"UTF-8''{file_name}",
+            #     'Content-Range': f'bytes {start}-{end}/{total}'
+            # }
+            # return Response(chunk, 206, headers)
+
+            response = make_response(send_from_directory("/src/cubestudio/aihub/web/static/file", file_name, conditional=False))
+
+            # response.headers["Content-Disposition"] = f"attachment; filename={file_name}".format(file_name=file_name)
+            return response
+
+
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
         # @pysnooper.snoop()
@@ -378,7 +414,7 @@ class Server():
                     for i in range(100):
                         time.sleep(1)
                         async_task = AsyncResult(id=task.id, app=celery_app)
-                        print("async_task.id", async_task.id, flush=True)
+                        # print("async_task.id", async_task.id, flush=True)
                         # 判断异步任务是否执行成功
                         if async_task.successful():
                             # 获取异步任务的返回值
@@ -399,6 +435,25 @@ class Server():
                     all_back = model_inference(inference_kargs)
 
                 g.second = (datetime.datetime.now() - begin_time).total_seconds()
+
+                # 将文件响应转化为对象存储地址
+                cos_url = os.getenv('COS_URL','')
+                if cos_url:
+                    if 'status' in all_back:
+                        result = all_back.get("result",[])
+                    else:
+                        result = all_back
+                    if type(result)==list:
+                        for item in result:
+                            video = item.get("video","")
+                            if video and 'http' not in video:
+                                item['vide']=cos_url.strip('/')+video.replace(f'/{self.pre_url}/static','')
+                            image = item.get("image","")
+                            if image and 'http' not in image:
+                                item['image']=cos_url.strip('/')+image.replace(f'/{self.pre_url}/static','')
+                            audio = item.get("audio","")
+                            if audio and 'http' not in audio:
+                                item['audio']=cos_url.strip('/')+audio.replace(f'/{self.pre_url}/static','')
 
                 # 如果返回的就是最终的响应
                 if type(all_back)==dict and 'status' in all_back:
@@ -572,7 +627,7 @@ class Server():
         # @pysnooper.snoop()
         def check_login():
             req_url = request.path
-            print(req_url)
+            # print(req_url)
             # 分享来自主主平台的cookie
             username = request.cookies.get('myapp_username','')
             # 获取来自上一次的记忆
@@ -639,7 +694,7 @@ class Server():
                     user_history[username][req_url]["second"]=user_history.get(username, {}).get(req_url, {}).get('second',10) + g.second
 
                 # 统计信息汇总到all_info_path
-                print(user_history)
+                # print(user_history)
                 if (self.save_time-datetime.datetime.now()).total_seconds()>300:
                     all_info_path = '/src/cubestudio/aihub/web/static/rec/all_info.json'
                     os.makedirs(os.path.dirname(all_info_path), exist_ok=True)

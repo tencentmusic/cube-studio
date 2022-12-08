@@ -111,6 +111,8 @@ spec:
             value: {synchronous}
           - name: NVIDIA_VISIBLE_DEVICES
             value: all
+          - name: COS_URL
+            value: https://cube-studio-1252405198.cos.ap-nanjing.myqcloud.com
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime
@@ -118,8 +120,8 @@ spec:
               mountPath: /app
             - name: cube-studio
               mountPath: /src
-            # - name: cos-data
-            #   mountPath: /src/cubestudio/aihub/web/static
+            - name: cos-data
+              mountPath: /src/cubestudio/aihub/web/static
           
           readinessProbe:
             failureThreshold: 2
