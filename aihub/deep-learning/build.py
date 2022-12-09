@@ -79,6 +79,7 @@ spec:
       name: aihub-{app_name}
       labels:
         app: aihub-{app_name}
+        aihub: {'cpu' if resource_gpu=='0' else 'gpu'}
     spec:
       volumes:
         - name: tz-config
@@ -95,6 +96,19 @@ spec:
             path: /mnt/aihub
       nodeSelector:
         aihub: {'cpu' if resource_gpu=='0' else 'gpu'}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 10
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: aihub
+                      operator: In
+                      values:
+                        - {'cpu' if resource_gpu=='0' else 'gpu'}
+                topologyKey: kubernetes.io/hostname
+                
       containers:
         - name: aihub-{app_name}
           image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}

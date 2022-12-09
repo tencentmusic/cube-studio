@@ -280,14 +280,14 @@ const AppWrapper = (props: IProps) => {
           </a>
 
           <a
-            href='http://www.data-master.net:8880/frontend/aihub/model_market/model_all'
+            href='/frontend/aihub/model_market/model_all'
             target="_blank"
             className="mr12 d-f ac"
           >
             <span className="mr4 c-text-b">AIHub</span>
           </a>
           <a
-            href='http://www.data-master.net:8880/login'
+            href='/login'
             target="_blank"
             className="mr12 d-f ac"
           >
