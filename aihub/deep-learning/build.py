@@ -99,14 +99,11 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 10
+            - weight: 20
               podAffinityTerm:
                 labelSelector:
-                  matchExpressions:
-                    - key: aihub
-                      operator: In
-                      values:
-                        - {'cpu' if resource_gpu=='0' else 'gpu'}
+                  matchLabels:
+                    aihub: {'cpu' if resource_gpu=='0' else 'gpu'}
                 topologyKey: kubernetes.io/hostname
                 
       containers:
