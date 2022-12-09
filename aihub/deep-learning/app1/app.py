@@ -65,7 +65,6 @@ class APP1_Model(Model):
         result_img='result.jpg'
         result_text='cat,dog'
         result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
-        result_video = '/app1/file/test.mp4'
         result_audio = 'test.wav'
         back=[
             {
