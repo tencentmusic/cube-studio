@@ -250,8 +250,8 @@ export default function Index() {
                 >
                     {
                         (pageInfo?.rec_apps || []).map((item, recIndex) => {
-                            return <div key={`rec${recIndex}`}>
-                                <img className="w100" src={item.pic} alt="" />
+                            return <div style="height:100%" key={`rec${recIndex}`}>
+                                <img className="w100" style="height:100%" src={item.pic} alt="" />
                             </div>
                         })
                     }
