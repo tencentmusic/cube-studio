@@ -256,6 +256,7 @@ model = SD_Model()
 # result = model.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
 # print(result)
 
-# 启动服务
-server = Server(model=model)
-server.server(port=8080)
+if __name__=='__main__':
+    # # 启动服务
+    server = Server(model=model)
+    server.server(port=8080)
