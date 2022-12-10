@@ -11,7 +11,7 @@ class Speech_Cls_Model(Model):
     # 模型基础信息定义
     name = 'paddlespeech-cls'
     label = '语音场景分类'
-    describe = "语音场景分类:语种识别等"
+    describe = "语音场景分类，识别语言场景类型，例如演讲，唱歌"
     field = "听觉"
     scenes = "语音处理"
     status = 'online'
@@ -47,7 +47,7 @@ class Speech_Cls_Model(Model):
         cls = self.cls
         result = '语音分类结果： '
         an_result = cls(audio_file=voice_file_path)
-        result += an_result.split(' ')[0] + '  ' + '置信度：' + round(float(an_result.split(' ')[1]),3)
+        result += an_result.split(' ')[0] + '  ' + '置信度：' + str(round(float(an_result.split(' ')[1]),3))
         back = [
             {
                 'text': result
