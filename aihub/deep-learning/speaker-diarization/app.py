@@ -12,7 +12,7 @@ class Speaker_diarization_Model(Model):
     # 模型基础信息定义
     name='speaker-diarization'
     label='声纹识别'
-    describe="获取音频文件中语音的人声的位置"
+    describe="获取音频文件中多人的人声位置和时长"
     field="听觉"
     scenes="语音检测"
     status='online'
