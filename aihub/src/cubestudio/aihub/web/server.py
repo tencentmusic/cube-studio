@@ -64,7 +64,7 @@ class Server():
 
     # 启动服务
     # @pysnooper.snoop()
-    def server(self, port=8080, debug=True):
+    def server(self, port=8080, debug=False):
 
         app = Flask(__name__,
                     static_url_path=f'/{self.pre_url}/static/',
