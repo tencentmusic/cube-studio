@@ -2,7 +2,7 @@
 
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
-app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify",'chatgpt']
+app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify",'chatgpt','speaker-diarization']
 
 
 # # 生成构建镜像的脚本
@@ -124,6 +124,8 @@ spec:
             value: all
           - name: COS_URL
             value: https://cube-studio-1252405198.cos.ap-nanjing.myqcloud.com
+          - name: HUGGINGFACE_TOKEN
+            value: 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
           volumeMounts:
             - name: tz-config
               mountPath: /etc/localtime

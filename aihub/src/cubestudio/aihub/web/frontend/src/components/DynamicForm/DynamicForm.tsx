@@ -220,7 +220,7 @@ export default function DynamicForm(props: IProps) {
             extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
             {...itemProps}
         >
-            <FileUploadPlus type="audio" maxSize={1024 * 1024 * 10} format={['audio/mpeg', 'audio/wav']} />
+            <FileUploadPlus type="audio" maxSize={1024 * 1024 * 10} format={['audio/mpeg','audio/mp3', 'audio/wav']} />
         </Form.Item>
     }
 
