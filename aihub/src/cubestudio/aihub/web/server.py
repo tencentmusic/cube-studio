@@ -455,12 +455,12 @@ class Server():
                 {
                     "text": "AIHub",
                     "icon": '',
-                    "link": 'http://www.data-master.net:8880/frontend/aihub/model_market/model_all'
+                    "link": '/frontend/aihub/model_market/model_all'
                 },
                 {
                     "text": '',
                     "icon": '<svg t="1669560735821" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2687" width="64" height="64"><path d="M500 128.8c-95.2 5.6-173.6 83.2-180 178.4-7.2 112 80.8 205.6 191.2 205.6 106.4 0 192-86.4 192-192 0.8-110.4-92-198.4-203.2-192zM512 575.2c-128 0-383.2 64-383.2 192v96c0 17.6 14.4 32 32 32h702.4c17.6 0 32-14.4 32-32V766.4c0-127.2-255.2-191.2-383.2-191.2z" p-id="2688"></path></svg>',
-                    "link": "http://www.data-master.net:8880/login"
+                    "link": "/login"
                 }
             ]
             # 返回模板
@@ -581,9 +581,9 @@ class Server():
                 "web_examples":web_examples,
                 "inference_inputs": inference_inputs,
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
-                "aihub_url":"http://www.data-master.net:8880/frontend/aihub/model_market/model_all",
+                "aihub_url":"/frontend/aihub/model_market/model_all",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
-                "user":f"http://www.data-master.net:8880/login",
+                "user":f"/login",
                 "rec_apps":rec_apps
             }
             return jsonify(info)
