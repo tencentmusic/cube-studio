@@ -2,7 +2,7 @@
 
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
-app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify",'chatgpt','speaker-diarization']
+app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify",'chatgpt','speaker-diarization','voxlingua107-ecapa']
 
 
 # # 生成构建镜像的脚本
