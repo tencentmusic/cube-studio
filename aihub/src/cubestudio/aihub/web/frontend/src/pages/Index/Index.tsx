@@ -3,7 +3,7 @@ import { Button, Form, message, Result, Spin, Tag } from 'antd'
 import React, { useEffect, useState, useRef } from 'react'
 import { IAppInfo, IResultItem } from '../../api/interface/stateInterface'
 import { getAppInfo, submitData } from '../../api/mobiApi'
-
+import ReactMarkdown from 'react-markdown'
 import AwesomeSlider from 'react-awesome-slider';
 // @ts-ignore
 import withAutoplay from 'react-awesome-slider/dist/autoplay';
@@ -215,6 +215,9 @@ export default function Index() {
                                         result.text ? <div className="paper p16"><span>文本结果：</span>{result.text}</div> : null
                                     }
                                     {
+                                        result.markdown ? <div className="paper p16 mt16"><ReactMarkdown>{result.markdown}</ReactMarkdown></div> : null
+                                    }
+                                    {
                                         result.image ? <div className="paper p16 mt16"><div className="pb8">图片结果：</div><img className="w100" src={result.image} alt="" /></div> : null
                                     }
                                     {
@@ -250,8 +253,8 @@ export default function Index() {
                 >
                     {
                         (pageInfo?.rec_apps || []).map((item, recIndex) => {
-                            return <div style="height:100%" key={`rec${recIndex}`}>
-                                <img className="w100" style="height:100%" src={item.pic} alt="" />
+                            return <div style={{ height: '100%' }} key={`rec${recIndex}`}>
+                                <img className="w100" style={{ height: '100%' }} src={item.pic} alt="" />
                             </div>
                         })
                     }
