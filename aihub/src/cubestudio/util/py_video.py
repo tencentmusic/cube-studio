@@ -4,27 +4,31 @@
 # -*-coding:utf-8-*-
 import time
 import cv2
-
+import os
 
 def Video2Mp4(videoPath, outVideoPath):
-    capture = cv2.VideoCapture(videoPath)
-    fps = capture.get(cv2.CAP_PROP_FPS)  # 获取帧率
-    size = (int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    # fNUMS = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    suc = capture.isOpened()  # 是否成功打开
 
-    allFrame = []
-    while suc:
-        suc, frame = capture.read()
-        if suc:
-            allFrame.append(frame)
-    capture.release()
-
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    videoWriter = cv2.VideoWriter(outVideoPath, fourcc, fps, size)
-    for aFrame in allFrame:
-        videoWriter.write(aFrame)
-    videoWriter.release()
+    os.popen("ffmpeg -i '{input}' -ac 2 -b:v 2000k -c:a aac -c:v libx264 -b:a 160k -vprofile high -bf 0 -strict experimental -f mp4 '{output}.mp4'".format(input=videoPath, output=outVideoPath.replace(".mp4",'')))
+    return True
+    #
+    # capture = cv2.VideoCapture(videoPath)
+    # fps = capture.get(cv2.CAP_PROP_FPS)  # 获取帧率
+    # size = (int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    # # fNUMS = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    # suc = capture.isOpened()  # 是否成功打开
+    #
+    # allFrame = []
+    # while suc:
+    #     suc, frame = capture.read()
+    #     if suc:
+    #         allFrame.append(frame)
+    # capture.release()
+    #
+    # fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    # videoWriter = cv2.VideoWriter(outVideoPath, fourcc, fps, size)
+    # for aFrame in allFrame:
+    #     videoWriter.write(aFrame)
+    # videoWriter.release()
 
 
 import glob
