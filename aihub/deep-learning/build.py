@@ -34,11 +34,9 @@ for app_name in app_names:
     if env=='cloud':
         synchronous = 'asynchronous'
         resource_gpu = '0'
-        host='www.data-master.net'
     else:
         synchronous = 'synchronous'
         resource_gpu = info.get('inference',{}).get('resource_gpu','0')
-        host='star.tme.woa.com'
 
     # 生成k8s部署的脚本
     deploy=f'''
@@ -155,7 +153,10 @@ spec:
   gateways:
   - {"kubeflow/kubeflow-gateway-8080" if env=='cloud' else 'kubeflow/kubeflow-gateway'}
   hosts:
-  - "{host}"
+  - www.data-master.net
+  - star.tme.woa.com
+  - data.tme.woa.com
+  - star.tmeoa.com
   http:
   - match:
     - uri:

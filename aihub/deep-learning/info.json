@@ -246,6 +246,28 @@
     }
   },
   {
+    "doc": "http://star.tme.woa.com/aihub/whisper-large",
+    "field": "听觉",
+    "scenes": "语种识别",
+    "type": "dateset,notebook,train,inference",
+    "name": "voxlingua107-ecapa",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "voxlingua107-ecapa-v20221001",
+    "label": "语种识别",
+    "describe": "识别语音中的语种，包含107种不同的语种",
+    "pic": "http://star.tme.woa.com/whisper-large/static/example/whisper-large/example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+      "jupyter": [],
+      "appendix": []
+    },
+    "train": {},
+    "inference": {}
+  },
+  {
     "doc": "http://star.tme.woa.com/aihub/yolov3",
     "field": "机器视觉",
     "scenes": "目标识别",

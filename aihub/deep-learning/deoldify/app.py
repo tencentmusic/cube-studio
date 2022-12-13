@@ -24,7 +24,7 @@ class DeOldify_Model(Model):
     doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/DeOldify'
     pic='example.jpg'
     inference_inputs = [
-        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于文本识别的原始图片')
+        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于上色的黑白图片')
     ]
     web_examples = [
         {
