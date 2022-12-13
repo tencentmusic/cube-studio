@@ -1,7 +1,7 @@
 import copy
 import enum
 import shutil
-
+from flask import Response
 import flask,os,sys,json,time,random,io,base64
 from flask import redirect
 from flask import render_template
@@ -9,6 +9,7 @@ import sys
 import uuid
 import os
 import re
+from flask import current_app, make_response,send_file,send_from_directory
 from flask import abort, current_app, flash, g, redirect, request, session, url_for
 import traceback
 import argparse
@@ -61,15 +62,9 @@ class Server():
 
         self.save_time=datetime.datetime.now()
 
-        if self.model.pic and 'http' not in self.model.pic:
-            save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/' + self.model.name + "/" + self.model.pic.strip('/')
-            if not os.path.exists(save_path):
-                os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                shutil.copyfile(self.model.pic, save_path)
-
     # 启动服务
     # @pysnooper.snoop()
-    def server(self, port=8080, debug=True):
+    def server(self, port=8080, debug=False):
 
         app = Flask(__name__,
                     static_url_path=f'/{self.pre_url}/static/',
@@ -88,11 +83,12 @@ class Server():
         if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
             # 如果同时消费其他异步任务，就启动celery
             if '127.0.0.1' not in CELERY_BROKER_URL:
-                command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 10'%(self.model.name)
-                print(command)
+                command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 4'%(self.model.name)
+                # print(command)
                 exec(command)
             # 同步任务要加载模型
             self.model.load_model()
+
             # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
             if self.model.web_examples and len(self.model.web_examples)>0:
                 input = self.model.web_examples[0].get("input",{})
@@ -143,187 +139,199 @@ class Server():
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
-
-
-        # 定义认为放在的队列
+        # 直接模型推理，并将结果转化为http链接
         # @pysnooper.snoop()
-        def api_inference(name,version,data):
+        def model_inference(inference_kargs):
+            # 处理返回值
             try:
-                inputs=copy.deepcopy(self.model.inference_inputs)
-                inference_kargs={}
-                for input_field in inputs:
-                    inference_kargs[input_field.name] = data.get(input_field.name,input_field.default)
-
-                    # if input_field.type==Field_type.text and data.get(input_field.name,''):
-                    #     inference_kargs[input_field.name] = data.get(input_field.name, input_field.default)
-
-                    # 对上传图片进行处理，单上传和多上传
-                    if input_field.type==Field_type.image and data.get(input_field.name,''):
-
-                        # 对于图片base64编码
-                        input_data=[]
-                        if type(data[input_field.name])!=list:
-                            data[input_field.name] = [data[input_field.name]]
-
-                        for img_base64_str in data[input_field.name]:
-                            if 'http://' in img_base64_str or "https://" in img_base64_str:
-                                req = requests.get(img_base64_str)
-                                ext = img_base64_str[img_base64_str.rindex(".") + 1:]
-                                ext = ext if len(ext) < 6 else 'jpg'
-                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
-                                os.makedirs(os.path.dirname(image_path), exist_ok=True)
-                                with open(image_path, "wb") as f:
-                                    f.write(req.content)
-                                    f.close()
-                                input_data.append(image_path)
-
-                            else:
-                                img_str = re.sub("^data:.*;base64,",'',img_base64_str)
-                                ext = re.search("^data:(.*);base64,",img_base64_str).group(1)
-                                ext = ext[ext.rindex("/")+1:]
-
-                                image_decode = base64.b64decode(img_str)
-
-                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
-                                os.makedirs(os.path.dirname(image_path),exist_ok=True)
-                                nparr = np.fromstring(image_decode, np.uint8)
-                                # 从nparr中读取数据，并把数据转换(解码)成图像格式
-                                img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                                cv2.imwrite(image_path, img_np)
-
-                                logging.info('Saving to %s.', image_path)
-                                input_data.append(image_path)
-
-                        if input_field.validators.max==1:
-                            inference_kargs[input_field.name] = input_data[0]
-                        if input_field.validators.max>1:
-                            inference_kargs[input_field.name] = input_data
-
-                        # 图片缩放
-                        for image_path in inference_kargs[input_field.name]:
-                            resize_img(image_path)
-
-
-                    # 单选或者多选图片
-                    if input_field.type == Field_type.image_select and data.get(input_field.name, ''):
-                        # 将选中内容转为
-                        input_data=[]
-                        if type(data[input_field.name])!=list:
-                            data[input_field.name] = [data[input_field.name]]
-                        for value in data[input_field.name]:
-                            # 单个字符的不合法
-                            if len(value)==1:
-                                continue
-                            if 'http://' in value or "https://" in value:
-                                input_data.append(value[value.rindex("/")+1:])
-                            else:
-                                input_data.append(value)
-                        input_data=list(set(input_data))
-                        if input_field.validators.max==1:
-                            inference_kargs[input_field.name] = input_data[0]
-                        if input_field.validators.max>1:
-                            inference_kargs[input_field.name] = input_data
-
-                    # 音视频文件上传
-                    if (input_field.type == Field_type.video or input_field.type == Field_type.audio) and data.get(input_field.name, ''):
-                        input_data = []
-                        if type(data[input_field.name]) != list:
-                            data[input_field.name] = [data[input_field.name]]
-
-                        for file_base64_str in data[input_field.name]:
-                            if 'http://' in file_base64_str or "https://" in file_base64_str:
-                                req = requests.get(file_base64_str)
-                                ext = file_base64_str[file_base64_str.rindex(".") + 1:]
-                                ext = ext if len(ext)<6 else 'mp4' if input_field.type == Field_type.video else 'mp3' if input_field.type == Field_type.audio else 'unknow'
-                                image_path = os.path.join("upload",self.model.name,self.model.version, datetime.datetime.now().strftime('%Y%m%d%H%M%S')+"-"+str(random.randint(0,100)) + "."+ext)
-                                os.makedirs(os.path.dirname(image_path), exist_ok=True)
-                                with open(image_path, "wb") as f:
-                                    f.write(req.content)
-                                    f.close()
-                                input_data.append(image_path)
-
-                            else:
-                                file_str = re.sub("^data:.*;base64,", '', file_base64_str)
-                                ext = re.search("^data:(.*);base64,", file_base64_str).group(1)
-                                ext = ext[ext.rindex("/") + 1:]
-                                file_decode = base64.b64decode(file_str)
-
-                                file_path = os.path.join("upload", self.model.name, self.model.version,
-                                                          datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "-" + str(
-                                                              random.randint(0, 100)) + "." + ext)
-                                os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                                f = open(file_path,mode='wb')
-                                f.write(file_decode)
-                                f.close()
-
-                                logging.info('Saving to %s.', file_path)
-                                input_data.append(file_path)
-
-                        if input_field.validators.max == 1:
-                            inference_kargs[input_field.name] = input_data[0]
-                        if input_field.validators.max > 1:
-                            inference_kargs[input_field.name] = input_data
-
-                    # 单选或者多选音视频
-                    if (input_field.type == Field_type.audio_select or input_field.type == Field_type.video_select) and data.get(input_field.name, ''):
-                        # 将选中内容转为
-                        input_data=[]
-                        if type(data[input_field.name])!=list:
-                            data[input_field.name] = [data[input_field.name]]
-                        for value in data[input_field.name]:
-                            # 单个字符的不合法
-                            if len(value)==1:
-                                continue
-                            if 'http://' in value or "https://" in value:
-                                input_data.append(value[value.rindex("/")+1:])
-                            else:
-                                input_data.append(value)
-                        input_data=list(set(input_data))
-                        if input_field.validators.max==1:
-                            inference_kargs[input_field.name] = input_data[0]
-                        if input_field.validators.max>1:
-                            inference_kargs[input_field.name] = input_data
-
-                print(inference_kargs)
-
-                # 处理返回值
                 all_back = self.model.inference(**inference_kargs)
-                if type(all_back)!=list:
-                    all_back=[all_back]
+                if type(all_back) != list:
+                    all_back = [all_back]
                 for back in all_back:
                     # 如果是图片，写的不是http
-                    if back.get('image',''):
+                    if back.get('image', ''):
                         save_file_path = back['image']
                         if os.path.exists(save_file_path):
-                            resize_img(save_file_path)
+                            # resize_img(save_file_path)
                             back['image'] = file2url(save_file_path)
 
-
                     # 如果是视频，写的不是http
-                    if back.get('video',''):
+                    if back.get('video', ''):
                         save_file_path = back['video']
                         if os.path.exists(save_file_path):
-                            back['video']=file2url(save_file_path)
+                            back['video'] = file2url(save_file_path)
 
                     # 如果是语音，写的不是http
-                    if back.get('audio',''):
+                    if back.get('audio', ''):
                         save_file_path = back['audio']
                         if os.path.exists(save_file_path):
-                            back['audio']=file2url(save_file_path)
+                            back['audio'] = file2url(save_file_path)
+            except Exception as e:
+                all_back=[
+                    {"text":str(e)}
+                ]
+            return all_back
 
-                return {
-                    "status": 0,
-                    "result": all_back,
-                    "message": ""
-                }
 
-            except Exception as err:
-                logging.info('Uploaded image open error: %s', err)
-                return {
-                    "status":1,
-                    "result":[],
-                    "message":"推理失败了"
-                }
+        # 用来给本地celery请求使用
+        @app.route(f'/{self.pre_url}/celery/inference',methods=['GET', 'POST'])
+        # @pysnooper.snoop()
+        def celery_inference():
+            data = request.json
+            data.update(request.form.to_dict())
+            return jsonify(model_inference(data))
+
+
+        # 将请求data转化为推理函数参数
+        def req2inference_args(data):
+            inputs = copy.deepcopy(self.model.inference_inputs)
+            inference_kargs = {}
+            for input_field in inputs:
+                inference_kargs[input_field.name] = data.get(input_field.name, input_field.default)
+
+                # if input_field.type==Field_type.text and data.get(input_field.name,''):
+                #     inference_kargs[input_field.name] = data.get(input_field.name, input_field.default)
+
+                # 对上传图片进行处理，单上传和多上传
+                if input_field.type == Field_type.image and data.get(input_field.name, ''):
+
+                    # 对于图片base64编码
+                    input_data = []
+                    if type(data[input_field.name]) != list:
+                        data[input_field.name] = [data[input_field.name]]
+
+                    for img_base64_str in data[input_field.name]:
+                        if 'http://' in img_base64_str or "https://" in img_base64_str:
+                            req = requests.get(img_base64_str)
+                            ext = img_base64_str[img_base64_str.rindex(".") + 1:]
+                            ext = ext if len(ext) < 6 else 'jpg'
+                            image_path = os.path.join(os.getenv('UPLOAD_DIR', 'upload'), self.model.name,
+                                                      self.model.version,
+                                                      datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "-" + str(
+                                                          random.randint(0, 100)) + "." + ext)
+                            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                            with open(image_path, "wb") as f:
+                                f.write(req.content)
+                                f.close()
+                            input_data.append(image_path)
+
+                        else:
+                            img_str = re.sub("^data:.*;base64,", '', img_base64_str)
+                            ext = re.search("^data:(.*);base64,", img_base64_str).group(1)
+                            ext = ext[ext.rindex("/") + 1:]
+
+                            image_decode = base64.b64decode(img_str)
+
+                            image_path = os.path.join(os.getenv('UPLOAD_DIR', 'upload'), self.model.name,
+                                                      self.model.version,
+                                                      datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "-" + str(
+                                                          random.randint(0, 100)) + "." + ext)
+                            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                            nparr = np.fromstring(image_decode, np.uint8)
+                            # 从nparr中读取数据，并把数据转换(解码)成图像格式
+                            img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                            cv2.imwrite(image_path, img_np)
+
+                            logging.info('Saving to %s.', image_path)
+                            input_data.append(image_path)
+
+                    # # 图片缩放
+                    # for image_path in input_data:
+                    #     resize_img(image_path)
+
+                    if input_field.validators.max == 1:
+                        inference_kargs[input_field.name] = input_data[0]
+                    if input_field.validators.max > 1:
+                        inference_kargs[input_field.name] = input_data
+
+                # 单选或者多选图片
+                if input_field.type == Field_type.image_select and data.get(input_field.name, ''):
+                    # 将选中内容转为
+                    input_data = []
+                    if type(data[input_field.name]) != list:
+                        data[input_field.name] = [data[input_field.name]]
+                    for value in data[input_field.name]:
+                        # 单个字符的不合法
+                        if len(value) == 1:
+                            continue
+                        if 'http://' in value or "https://" in value:
+                            input_data.append(value[value.rindex("/") + 1:])
+                        else:
+                            input_data.append(value)
+                    input_data = list(set(input_data))
+                    if input_field.validators.max == 1:
+                        inference_kargs[input_field.name] = input_data[0]
+                    if input_field.validators.max > 1:
+                        inference_kargs[input_field.name] = input_data
+
+                # 音视频文件上传
+                if (input_field.type == Field_type.video or input_field.type == Field_type.audio) and data.get(
+                        input_field.name, ''):
+                    input_data = []
+                    if type(data[input_field.name]) != list:
+                        data[input_field.name] = [data[input_field.name]]
+
+                    for file_base64_str in data[input_field.name]:
+                        if 'http://' in file_base64_str or "https://" in file_base64_str:
+                            req = requests.get(file_base64_str)
+                            ext = file_base64_str[file_base64_str.rindex(".") + 1:]
+                            ext = ext if len(
+                                ext) < 6 else 'mp4' if input_field.type == Field_type.video else 'mp3' if input_field.type == Field_type.audio else 'unknow'
+                            image_path = os.path.join(os.getenv('UPLOAD_DIR', 'upload'), self.model.name,
+                                                      self.model.version,
+                                                      datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "-" + str(
+                                                          random.randint(0, 100)) + "." + ext)
+                            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                            with open(image_path, "wb") as f:
+                                f.write(req.content)
+                                f.close()
+                            input_data.append(image_path)
+
+                        else:
+                            file_str = re.sub("^data:.*;base64,", '', file_base64_str)
+                            ext = re.search("^data:(.*);base64,", file_base64_str).group(1)
+                            ext = ext[ext.rindex("/") + 1:]
+                            file_decode = base64.b64decode(file_str)
+
+                            file_path = os.path.join(os.getenv('UPLOAD_DIR', 'upload'), self.model.name,
+                                                     self.model.version,
+                                                     datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "-" + str(
+                                                         random.randint(0, 100)) + "." + ext)
+                            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                            f = open(file_path, mode='wb')
+                            f.write(file_decode)
+                            f.close()
+
+                            logging.info('Saving to %s.', file_path)
+                            input_data.append(file_path)
+
+                    if input_field.validators.max == 1:
+                        inference_kargs[input_field.name] = input_data[0]
+                    if input_field.validators.max > 1:
+                        inference_kargs[input_field.name] = input_data
+
+                # 单选或者多选音视频
+                if (
+                        input_field.type == Field_type.audio_select or input_field.type == Field_type.video_select) and data.get(
+                        input_field.name, ''):
+                    # 将选中内容转为
+                    input_data = []
+                    if type(data[input_field.name]) != list:
+                        data[input_field.name] = [data[input_field.name]]
+                    for value in data[input_field.name]:
+                        # 单个字符的不合法
+                        if len(value) == 1:
+                            continue
+                        if 'http://' in value or "https://" in value:
+                            input_data.append(value[value.rindex("/") + 1:])
+                        else:
+                            input_data.append(value)
+                    input_data = list(set(input_data))
+                    if input_field.validators.max == 1:
+                        inference_kargs[input_field.name] = input_data[0]
+                    if input_field.validators.max > 1:
+                        inference_kargs[input_field.name] = input_data
+            return inference_kargs
 
         # web请求后台
         @app.route(f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/', methods=['GET', 'POST'])
@@ -332,43 +340,131 @@ class Server():
             # 从json里面读取信息
             data = request.json
             data.update(request.form.to_dict())
+            begin_time = datetime.datetime.now()
 
-            # 异步推理，但都是web界面同步
-            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous':
-                kwargs = {
-                    "name": self.model.name,
-                    "version": self.model.version,
-                    "data":data
-                }
-                from .celery_app import inference
-                task = inference.apply_async(kwargs = kwargs, expires = 120, retry = False)
-                for i in range(60):
-                    time.sleep(1)
-                    async_task = AsyncResult(id=task.id, app=celery_app)
-                    print("async_task.id", async_task.id)
-                    # 判断异步任务是否执行成功
-                    if async_task.successful():
-                        # 获取异步任务的返回值
-                        result = async_task.get()
-                        print(result)
-                        print("执行成功")
-                        return jsonify(result)
+            # 将输入进行转化为文件，或正确的格式
+            try:
+                # 异步推理，或者同步推理，有资源的机器启动同步，没有资源的启动异步
+                all_back=[]
+                status=0
+                if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous':
+
+                    # 直接写入和resize cos会非常耗时
+                    # os.env['UPLOAD_DIR'] = f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/upload'
+                    inference_data = req2inference_args(data)
+                    for arg in inference_data:
+                        if inference_data[arg][:7]=='upload/':
+                            if os.path.exists(inference_data[arg]):
+                                # 要求宽带比较大才行
+                                des_path = os.path.join(f'/src/cubestudio/aihub/web/static/example/{self.pre_url}/',inference_data[arg])
+                                os.makedirs(os.path.dirname(des_path),exist_ok=True)
+                                shutil.copyfile(inference_data[arg],des_path)
+                                inference_data[arg] = des_path
+                    kwargs = {
+                        "data": inference_data
+                    }
+                    from .celery_app import inference
+                    task = inference.apply_async(kwargs=kwargs, expires=120, retry=False)
+
+                    # 原始数据大文件 放redis会比较耗时
+                    # kwargs = {
+                    #     "data": data,
+                    #     "name": self.model.name,
+                    #     "version": self.model.version
+                    # }
+                    # from .celery_app import reqdata_inference
+                    # task = reqdata_inference.apply_async(kwargs=kwargs,expires=120,retry=False)
+
+                    begin_time = datetime.datetime.now()
+                    for i in range(100):
+                        time.sleep(1)
+                        async_task = AsyncResult(id=task.id, app=celery_app)
+                        # print("async_task.id", async_task.id, flush=True)
+                        # 判断异步任务是否执行成功
+                        if async_task.successful():
+                            # 获取异步任务的返回值
+                            result = async_task.get()
+                            print(result)
+                            if type(result) == list:
+                                print("执行完成")
+                            all_back = result
+                            break
+                        else:
+                            print("任务还未执行完成", flush=True)
+                    if not all_back:
+                        status=1
+                        all_back=[{"text": "耗时过久，未获取到推理结果"}]
+
+                else:
+                    inference_kargs = req2inference_args(data)
+                    all_back = model_inference(inference_kargs)
+
+                g.second = (datetime.datetime.now() - begin_time).total_seconds()
+
+                # 将文件响应转化为对象存储地址
+                cos_url = os.getenv('COS_URL','')
+                if cos_url:
+                    if 'status' in all_back:
+                        result = all_back.get("result",[])
                     else:
-                        print("任务还未执行完成")
-                return jsonify([
-                    {"text": "耗时过久，未获取到推理结果"}
-                ])
+                        result = all_back
+                    if type(result)==list:
+                        for item in result:
+                            video = item.get("video","")
+                            if video and 'http' not in video:
+                                item['vide']=cos_url.strip('/')+video.replace(f'/{self.pre_url}/static','')
+                            image = item.get("image","")
+                            if image and 'http' not in image:
+                                item['image']=cos_url.strip('/')+image.replace(f'/{self.pre_url}/static','')
+                            audio = item.get("audio","")
+                            if audio and 'http' not in audio:
+                                item['audio']=cos_url.strip('/')+audio.replace(f'/{self.pre_url}/static','')
 
+                # 如果返回的就是最终的响应
+                if type(all_back)==dict and 'status' in all_back:
+                    return jsonify(all_back)
 
-            # 同步推理
-            result = api_inference(name=self.model.name, version=self.model.version, data=data)
-            return jsonify(result)
+                return jsonify({
+                    "status": status,
+                    "result": all_back,
+                    "message": ""
+                })
+
+            except Exception as err:
+                print(str(err))
+                return jsonify({
+                    "status":0,
+                    "result":[],
+                    "message":"推理失败了"
+                })
 
 
         @app.route('/')
         @app.route(f'/{self.pre_url}')
         def home():
             return redirect(f'/aihub/{self.pre_url}')
+
+        @app.route(f'/{self.pre_url}/navbar_right')
+        def navbar_right():
+            data = [
+                {
+                    "text": "开源社区",
+                    "icon": '',
+                    "link": 'https://github.com/tencentmusic/cube-studio'
+                },
+                {
+                    "text": "AIHub",
+                    "icon": '',
+                    "link": '/frontend/aihub/model_market/model_all'
+                },
+                {
+                    "text": '',
+                    "icon": '<svg t="1669560735821" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2687" width="64" height="64"><path d="M500 128.8c-95.2 5.6-173.6 83.2-180 178.4-7.2 112 80.8 205.6 191.2 205.6 106.4 0 192-86.4 192-192 0.8-110.4-92-198.4-203.2-192zM512 575.2c-128 0-383.2 64-383.2 192v96c0 17.6 14.4 32 32 32h702.4c17.6 0 32-14.4 32-32V766.4c0-127.2-255.2-191.2-383.2-191.2z" p-id="2688"></path></svg>',
+                    "link": "/login"
+                }
+            ]
+            # 返回模板
+            return jsonify(data)
 
         # 监控度量
         @app.route(f'/{self.pre_url}/metrics')
@@ -385,6 +481,7 @@ class Server():
         def info():
             inference_inputs = copy.deepcopy(self.model.inference_inputs)
             web_examples = copy.deepcopy(self.model.web_examples)
+
             # example中图片转为在线地址
             for example in web_examples:
                 example_input = example.get('input',{})
@@ -394,19 +491,24 @@ class Server():
                         if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name or 'audio' in arg_filed.type.name) and 'http' not in example_input[arg_filed.name]:
                             example_input[arg_filed.name]=file2url(example_input[arg_filed.name])
 
+
             # 将图片和语音/视频的可选值和默认值，都转为在线网址
             for input in inference_inputs:
                 if 'image' in input.type.name or 'video' in input.type.name or 'audio' in input.type.name:
 
-                    # # 对于单选
-                    # if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
-                    #     input.default = file2url(input.default)
-                    #
-                    # # 对于多选
-                    # if '_select' in input.type.name and input.validators.max>1 and input.default:
-                    #     for i,default in enumerate(input.default):
-                    #         if 'http' not in default:
-                    #             input.default[i] = file2url(default)
+                    # 对于单选的默认值
+                    if '_select' in input.type.name and input.validators.max==1 and input.default and 'http' not in input.default:
+                        input.default = file2url(input.default)
+
+                    # 对于多选的默认值
+                    if '_select' in input.type.name and input.validators.max>1 and input.default:
+                        for i,default in enumerate(input.default):
+                            if 'http' not in default:
+                                input.default[i] = file2url(default)
+
+                    # 对与文件上传的默认值
+                    if input.default and 'http' not in input.default and input.type.name in ['video', 'image', 'audio']:
+                        input.default = file2url(input.default)
 
                     # 对于可选值，也转为url
                     if input.choices:
@@ -428,6 +530,44 @@ class Server():
                     if '/' in choice['id']:
                         choice['id']=choice['id'][choice['id'].rindex('/')+1:]
 
+            rec_apps = [
+                {
+                    "pic": f"/{self.pre_url.strip('/')}/static/rec/rec1.jpg",
+                    "label": "图片卡通化",
+                    "url": "/aihub/gfpgan"
+                },
+                {
+                    "pic": f"/{self.pre_url.strip('/')}/static/rec/rec2.jpg",
+                    "label": "文本生成图片",
+                    "url": "/aihub/stable-diffusion"
+                },
+                {
+                    "pic": f"/{self.pre_url.strip('/')}/static/rec/rec3.jpg",
+                    "label": "图片卡通化",
+                    "url": "/aihub/gfpgan"
+                },
+            ]
+            all_info_path = '/src/cubestudio/aihub/web/static/rec/all_info.json'
+            all_info=json.load(open(all_info_path,mode='r')) if os.path.exists(all_info_path) else {}
+            if all_info:
+                all_info = dict(sorted(all_info.items(), key = lambda item: int(item[1].get('hot',1)),reverse=True))
+                all_apps_name=list(all_info.keys())
+                i=ii=0
+                while i < len(all_apps_name):
+                    if ii < len(rec_apps):
+                        # 不推荐当前正在打开的应用，或者打开过的应用
+                        if all_apps_name[i]==self.pre_url:
+                            i=i+1
+                            continue
+                        info =all_info[all_apps_name[i]]
+                        rec_apps[i]={
+                            "pic": f"/%s/static/example/%s/%s"%(info['name'],info['name'],info['pic']),
+                            "label": info['label'],
+                            "url": "/aihub/"+info['name']
+                        }
+                        i=i+1
+                        ii=ii+1
+            # print(rec_apps)
             info = {
                 "name": self.model.name,
                 "label": self.model.label,
@@ -441,65 +581,99 @@ class Server():
                 "web_examples":web_examples,
                 "inference_inputs": inference_inputs,
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
-                "aihub_url":"http://www.data-master.net:8880/frontend/aihub/model_market/model_all",
+                "aihub_url":"/frontend/aihub/model_market/model_all",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
-                "user":f"/{self.pre_url}/login",
-                "rec_apps":[
-                    {
-                        "pic": f"/{self.pre_url.strip('/')}/static/rec/rec1.jpg",
-                        "label": "图片卡通化",
-                        "url":"/aihub/gfpgan"
-                    },
-                    {
-                        "pic":f"/{self.pre_url.strip('/')}/static/rec/rec2.jpg",
-                        "label":"文本生成图片",
-                        "url": "/aihub/stable-diffusion"
-                    },
-                    {
-                        "pic": f"/{self.pre_url.strip('/')}/static/rec/rec3.jpg",
-                        "label": "图片卡通化",
-                        "url": "/aihub/gfpgan"
-                    },
-                ]
+                "user":f"/login",
+                "rec_apps":rec_apps
             }
             return jsonify(info)
 
         @app.before_request
+        # @pysnooper.snoop()
         def check_login():
             req_url = request.path
-            print(req_url)
-            # 只对后端接口
-            if '/aihub' not in req_url:
-                username = session.get('username', "anonymous-" + uuid.uuid4().hex[:16])
-                session['username']=username
-                g.username = username
+            # print(req_url)
+            # 分享来自主主平台的cookie
+            username = request.cookies.get('myapp_username','')
+            # 获取来自上一次的记忆
+            if not username:
+                username = session.get('username','')
+            # 创建新匿名用户
+            if not username:
+                username = "anonymous-" + uuid.uuid4().hex[:16]
 
-                num = user_history.get(username, {}).get(req_url, 0)
+            # res传递给浏览器记录
+            session['username']=username
+
+            # 只对后端接口
+            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:
+
+                num = user_history.get(username, {}).get(req_url, {}).get('num',0)
+
                 # 匿名用户对后端的请求次数超过1次就需要登录
-                # if num > 1 and self.pre_url in req_url and 'anonymous-' in username:
-                #     return jsonify({
-                #         "status": 1,
-                #         "result": {},
-                #         "message": "匿名用户尽可访问一次，获得更多访问次数，需登录并激活用户"
-                #     })
-                #
-                # if num > 10 and self.pre_url in req_url:
-                #     return jsonify({
-                #         "status": 2,
-                #         "result": "https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%E5%BC%80%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B9%B3%E5%8F%B0.mp4",
-                #         "message": "登录用户仅可访问10次，播放视频获得更多访问次数"
-                #     })
+                if num > 0 and 'anonymous-' in username:
+
+                    return jsonify(
+                        {
+                            "message": "",
+                            "result": [
+                                {
+                                    "text": "匿名用户仅可访问一次，扫码进群获取更多访问次数",
+                                    "image":"https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/ad1.jpg"
+                                }
+                            ],
+                            "status": 0
+                        }
+                    )
+
+                # if num > 10:
+                #     return jsonify(
+                #         {
+                #             "message": "",
+                #             "result": [
+                #                 {
+                #                     "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
+                #                 }
+                #             ],
+                #             "status": 0
+                #         }
+                #     )
+
 
         # 配置响应后操作：统计
         @app.after_request
+        # @pysnooper.snoop()
         def apply_http_headers(response):
+
             req_url = request.path
-            if '/aihub' not in req_url:
+            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:  #  and type(response.get_json())==list
                 username = session['username']
                 if username not in user_history:
                     user_history[username] = {}
-                user_history[username][req_url]=user_history.get(username, {}).get(req_url, 0) + 1
-                print(user_history)
+                if req_url not in user_history[username]:
+                    user_history[username][req_url]={}
+                # 记录热度
+                user_history[username][req_url]["num"]=user_history.get(username, {}).get(req_url, {}).get('num',0) + 1
+                # 记录总耗时
+                if hasattr(g,'second'):
+                    user_history[username][req_url]["second"]=user_history.get(username, {}).get(req_url, {}).get('second',10) + g.second
+
+                # 统计信息汇总到all_info_path
+                # print(user_history)
+                if (self.save_time-datetime.datetime.now()).total_seconds()>300:
+                    all_info_path = '/src/cubestudio/aihub/web/static/rec/all_info.json'
+                    os.makedirs(os.path.dirname(all_info_path), exist_ok=True)
+                    all_info=json.load(open(all_info_path,mode='r')) if os.path.exists(all_info_path) else {}
+                    if self.pre_url not in all_info:
+                        all_info[self.pre_url]=json.load(open("info.json",mode='r'))
+                    # 记录hot
+                    for username in user_history:
+                        for path in user_history[username]:
+                            if '/api/model/' in path:
+                                all_info[self.pre_url]["hot"] = int(all_info[self.pre_url].get("hot",0))+int(user_history[username][path].get('num',0))
+
+                    json.dump(all_info,open(all_info_path,mode='w'))
+
             return response
 
         app.run(host='0.0.0.0', debug=debug, port=port)
