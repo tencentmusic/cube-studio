@@ -3,7 +3,7 @@ import { Button, Form, message, Result, Spin, Tag } from 'antd'
 import React, { useEffect, useState, useRef } from 'react'
 import { IAppInfo, IResultItem } from '../../api/interface/stateInterface'
 import { getAppInfo, submitData } from '../../api/mobiApi'
-
+import ReactMarkdown from 'react-markdown'
 import AwesomeSlider from 'react-awesome-slider';
 // @ts-ignore
 import withAutoplay from 'react-awesome-slider/dist/autoplay';
@@ -12,6 +12,7 @@ import DynamicForm, { IDynamicFormConfigItem } from '../../components/DynamicFor
 import Checkbox from '../../components/CheckoutGroupPlus/CheckoutGroupPlus'
 import { useLocation } from 'react-router-dom'
 import Loading from '../../components/Loading/Loading'
+import { isInWeixin, share } from '../../utils/weixin'
 
 const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -47,9 +48,18 @@ export default function Index() {
     useEffect(() => {
         getAppInfo(location.pathname).then(res => {
             const data = res.data
-            setPageInfo(data)
             const tarConfig = createDyFormConfig(data.inference_inputs, {}, {})
+            setPageInfo(data)
             setDynamicFormConfig(tarConfig)
+
+            if (isInWeixin()) {
+                share({
+                    title: data?.describe,
+                    link: window.location.href,
+                    desc: 'cube-studio 开源社区',
+                    imgUrl: `https://cube-studio-1252405198.cos.ap-nanjing.myqcloud.com/example/${data.name}/example.jpg`
+                })
+            }
         }).catch(err => { }).finally(() => {
             // setLoading(false)
         })
@@ -130,6 +140,10 @@ export default function Index() {
                 } /> : null
             }
 
+            <div style={{ display: 'none' }}>
+                <img style={{ width: 300, height: 300 }} src={pageInfo?.pic} alt="" />
+            </div>
+
             <div className="p16 bg-w">
                 <div>
                     <img className="w100 pb8" style={{ maxHeight: 600 }} src={pageInfo?.pic || ''} alt="" />
@@ -201,6 +215,9 @@ export default function Index() {
                                         result.text ? <div className="paper p16"><span>文本结果：</span>{result.text}</div> : null
                                     }
                                     {
+                                        result.markdown ? <div className="paper p16 mt16"><ReactMarkdown>{result.markdown}</ReactMarkdown></div> : null
+                                    }
+                                    {
                                         result.image ? <div className="paper p16 mt16"><div className="pb8">图片结果：</div><img className="w100" src={result.image} alt="" /></div> : null
                                     }
                                     {
@@ -236,8 +253,8 @@ export default function Index() {
                 >
                     {
                         (pageInfo?.rec_apps || []).map((item, recIndex) => {
-                            return <div key={`rec${recIndex}`}>
-                                <img className="w100" src={item.pic} alt="" />
+                            return <div style={{ height: '100%' }} key={`rec${recIndex}`}>
+                                <img className="w100" style={{ height: '100%' }} src={item.pic} alt="" />
                             </div>
                         })
                     }

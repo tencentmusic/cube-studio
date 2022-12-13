@@ -9,7 +9,7 @@ import {
   useLocation
 } from "react-router-dom";
 import { IRouterConfigPlusItem } from './api/interface/baseInterface';
-import { Dropdown, Menu, Select, Spin } from 'antd';
+import { Button, Dropdown, Menu, Select, Spin } from 'antd';
 import { createRoute, getDefaultOpenKeys, routerConfigPlus } from './routerConfig';
 import SubMenu from 'antd/lib/menu/SubMenu';
 import { clearWaterNow, drawWater, drawWaterNow, getParam, obj2UrlParam, parseParam2Obj } from './util'
@@ -78,17 +78,6 @@ const AppWrapper = (props: IProps) => {
     handleAppIndex(appList)
   }, [])
 
-  useEffect(() => {
-    if (isInWeixin()) {
-    //   share({
-    //     title: "你好aihub",
-    //     link: "https://github.com/tencentmusic/cube-studio",
-    //     desc: "aihub go",
-    //     imgUrl: "https://github.com/tencentmusic/cube-studio"
-    //   })
-    }
-  }, [])
-
   const handleAppIndex = (appList: any[]) => {
     const { pathname } = location
     const appPath = `/${pathname.split('/')[1]}`
@@ -100,34 +89,6 @@ const AppWrapper = (props: IProps) => {
       }
     }
     setCurrentAppIndex(appIndex)
-  }
-
-  const handleClickApp = (app: any, index: number) => {
-    if (app.path === '/') {
-      commitUrlChange('/')
-      setCurrentAppIndex(index)
-      navigate(app.path || '/')
-    } else if (app.menu_type === 'iframe' && app.path) {
-      commitUrlChange(app.path)
-      setcurrentRoute(app.path)
-      setCurrentAppIndex(index)
-      navigate(app.path)
-    } else if (app.menu_type === 'out_link' && app.path) {
-      window.open(app.url, 'blank')
-    } else {
-      let currentItem = app
-      while (currentItem && currentItem.children) {
-        currentItem = currentItem.children[0]
-      }
-      if (currentItem) {
-        let appMenuPath = currentItem.path || ''
-        commitUrlChange(appMenuPath)
-        setcurrentRoute(appMenuPath)
-        setCurrentAppIndex(index)
-        navigate(appMenuPath)
-      }
-    }
-
   }
 
   const handleChangePageTitle = (pathname: string, currnetRouteConfig: any[]) => {
@@ -170,11 +131,11 @@ const AppWrapper = (props: IProps) => {
         if (menu.isMenu) {
           return <SubMenu key={menu.path} title={menu.title}>
             {
-              menu.children?.map((sub:any) => {
+              menu.children?.map((sub: any) => {
                 if (sub.isMenu) {
                   return <Menu.ItemGroup key={sub.path} title={sub.title}>
                     {
-                      sub.children?.map((thr:any) => {
+                      sub.children?.map((thr: any) => {
                         return <Menu.Item disabled={!!thr.disable} hidden={!!thr.hidden} key={thr.path} onClick={() => {
                           if (!menu.isCollapsed) {
                             setIsMenuCollapsed(false)
@@ -282,29 +243,6 @@ const AppWrapper = (props: IProps) => {
           }}>
             <img style={{ height: 20 }} src={require("./images/cubeStudio.png")} alt="img" />
           </div>
-
-          {/* {
-            currentAppList.length ? <ul className="mainapp-topmenu">
-              {
-                currentAppList.map((app) => {
-                  const currentAppName = '/' + currentRoute.substring(1).split('/')[0] || ''
-                  return <li
-                    onClick={() => handleClickApp(app, app.appIndex || 0)}
-                    key={`appList${app.appIndex}`}
-                    className={[currentAppName === app.path ? 'mainapp-item-active' : ''].join(' ')}
-                  // style={
-                  //   currentAppName === app.path ? { color: '#1e1653', borderTop: '2px solid #1e1653' } : {}
-                  // }
-                  >
-                    {
-                      Object.prototype.toString.call(app.icon) === '[object String]' ? <div className="icon-custom" dangerouslySetInnerHTML={{ __html: app.icon }}></div> : app.icon
-                    }
-                    <div className="mainapp-topmenu-name">{app.title}</div>
-                  </li>
-                })
-              }
-            </ul> : null
-          } */}
         </div>
 
 
@@ -342,40 +280,31 @@ const AppWrapper = (props: IProps) => {
           </a>
 
           <a
-            href='http://www.data-master.net/frontend/aihub/model_market/model_all'
+            href='/frontend/aihub/model_market/model_all'
             target="_blank"
             className="mr12 d-f ac"
           >
-            <span className="mr4 c-text-b">AI-Hub</span>
+            <span className="mr4 c-text-b">AIHub</span>
           </a>
-
-          <Dropdown overlay={<Menu>
-            <Menu.Item onClick={() => {
-              setCurrentAppIndex(undefined)
-              navigate('/user')
-            }}>用户中心</Menu.Item>
-            <Menu.Item onClick={() => {
-              Cookies.remove('myapp_username');
-              handleTips.userlogout()
-            }}>退出登录</Menu.Item>
-          </Menu>
-          }>
+          <a
+            href='/login'
+            target="_blank"
+            className="mr12 d-f ac"
+          >
             <img className="mr8 cp" style={{ borderRadius: 200, height: 32 }} src={imgUrlProtraits} onError={() => {
               setImgUrlProtraits(require('./images/male.png'))
             }} alt="img" />
-          </Dropdown>
+          </a>
+
         </div>
       </div>
 
       <div className="main-content-container">
-        {/* {renderMenu(currentAppIndex)} */}
-
         <div className="ov-a w100 bg-title">
           {
             CurrentRouteComponent && <CurrentRouteComponent />
           }
         </div>
-
       </div >
     </div>
   );

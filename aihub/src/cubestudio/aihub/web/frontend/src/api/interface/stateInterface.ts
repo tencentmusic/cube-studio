@@ -39,4 +39,5 @@ export interface IResultItem {
     video: string
     audio: string
     html: string
+    markdown: string
 }
