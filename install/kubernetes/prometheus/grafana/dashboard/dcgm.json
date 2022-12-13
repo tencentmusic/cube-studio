@@ -722,7 +722,7 @@
     ]
   },
   "timezone": "",
-  "title": "gpu监控",
+  "title": "gpu",
   "uid": "dcgm",
   "version": 26
 }
