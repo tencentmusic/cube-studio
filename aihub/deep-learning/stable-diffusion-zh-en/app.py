@@ -20,7 +20,7 @@ class SD_ZH_Model(Model):
     status = 'online'
     version = 'v20221122'
     doc = 'https://github.com/CompVis/stable-diffusion'  # 'https://帮助文档的链接地址'
-    pic = 'https://images.nightcafe.studio//assets/stable-tile.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource = {
         "resource_gpu": "1"
@@ -84,5 +84,7 @@ model = SD_ZH_Model()
 # print(result)
 
 # 启动服务
-server = Server(model=model)
-server.server(port=8080)
+if __name__=='__main__':
+    # # 启动服务
+    server = Server(model=model)
+    server.server(port=8080)

@@ -49,7 +49,7 @@ class SD_Model(Model):
 
     inference_inputs = [
         Field(type=Field_type.text, name='prompt', label='输入的文字内容',
-              describe='输入的文字内容，支持中英文输入，描述越详细越好', default='a photograph of an astronaut riding a horse'),
+              describe='输入的文字内容，该应用仅支持英文输入，描述越详细越好', default='a photograph of an astronaut riding a horse'),
         # Field(type=Field_type.text_select, name='ddim_steps', label='推理的次数',
         #       describe='推理进行的次数，推荐20-50次将会得到更接近真实的图片', default="50",choices=["20","30","40","50","60","70"]),
         Field(type=Field_type.text_select, name='n_samples', label='推理出的图像数量',
@@ -256,6 +256,7 @@ model = SD_Model()
 # result = model.inference(prompt='a photograph of an astronaut riding a horse',device='cpu')  # 测试
 # print(result)
 
-# 启动服务
-server = Server(model=model)
-server.server(port=8080)
+if __name__=='__main__':
+    # # 启动服务
+    server = Server(model=model)
+    server.server(port=8080)

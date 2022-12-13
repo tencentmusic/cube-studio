@@ -142,11 +142,11 @@ class Cartoon_SD_Model(Model):
         hostname = socket.gethostname()
         sent_first_message = False
 
+    @pysnooper.snoop()
     def do_job(self, optim):
         try:
             if optim.seed is None:
                 optim.seed = random.randint(0, 100000000)
-            optim.mitigate = False
             images = self.model.sample(optim)
             ndarray_convert_img_list = []
             for image in images:

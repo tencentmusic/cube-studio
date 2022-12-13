@@ -1,5 +1,5 @@
 
-# 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:speaker-diarization  .
+# 构建应用镜像 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:voxlingua107-ecapa  .
 FROM ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9
 # 需要配置hugging token
 ENV HUGGINGFACE_TOKEN=''

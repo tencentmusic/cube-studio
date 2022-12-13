@@ -66,19 +66,22 @@ class APP1_Model(Model):
         result_text='cat,dog'
         result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
         result_audio = 'test.wav'
+        result_markdown=open('test.md',mode='r').read()
         back=[
             {
                 "image":result_img,
                 "text":result_text,
                 "video":result_video,
                 "audio":result_audio,
-                "html":'<a href="http://www.data-master.net/frontend/aihub/model_market/model_all">查看全部</a>'
+                "html":'<a href="/frontend/aihub/model_market/model_all">查看全部</a>',
+                "markdown":result_markdown
             },
             {
                 "image": result_img,
                 "text": result_text,
                 "video": result_video,
-                "audio": result_audio
+                "audio": result_audio,
+                "markdown":result_markdown
             }
         ]
         return back
@@ -88,7 +91,8 @@ model=APP1_Model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
 
-# # 启动服务
-server = Server(model=model)
-server.server(port=8080)
+if __name__=='__main__':
+    # # 启动服务
+    server = Server(model=model)
+    server.server(port=8080)
 

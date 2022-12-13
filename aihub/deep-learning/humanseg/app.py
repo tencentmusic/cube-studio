@@ -34,8 +34,8 @@ class HumanSeg_Model(Model):
     pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_inputs = [
-        Field(type=Field_type.video, name='human_video', label='人体视频'),
-        Field(type=Field_type.image, name='background', label='要替换的背景图片',validators=Validator(required=True)),
+        Field(type=Field_type.video, name='human_video', label='人体视频',default='/data/videos/video_heng.mp4'),
+        Field(type=Field_type.image, name='background', label='要替换的背景图片',default='/data/images/bg_2.jpg', validators=Validator(required=True)),
     ]
 
     web_examples = [
