@@ -20,7 +20,7 @@
    - 支持http/cos/..等离线接口，
    - 支持kafka/pulsar..等实时接口，
    - 支持源或者目的hive，ck，druid等
- - 离线元数据：@xiaoyangmai （通过统一sql多模引擎实现，离线元数据同步，实时元数据查询，sql操作，ddl操作等）
+ - 离线元数据： （通过统一sql多模引擎实现，离线元数据同步，实时元数据查询，sql操作，ddl操作等）
    - ~~支持仅管理离线元数据~~
    - 定时脚本将远程数据库元数据同步到离线元数据内(比如离线同步hive元数据到元数据模块),支持离线元数据模块操作ddl远程数据库(比如增减hive列)
    - 实时查询远程元数据，并支持实时ddl远程数据库。
@@ -29,10 +29,10 @@
    - 支持表+任务+看板+字段+指标+特征，之间的血缘链路关联，支持离线导入血缘链路管理，前端进行可视化展示
  - ~~指标管理~~
  - ~~维表管理： 支持mysql/postgresql作为维表数据库~~
- - sql查询引擎：@xiaoyangmai （通过统一sql多模引擎实现，离线元数据同步，实时元数据查询，sql操作，ddl操作等）
+ - sql查询引擎： （通过统一sql多模引擎实现，离线元数据同步，实时元数据查询，sql操作，ddl操作等）
    - 支持ck hive，impala，presto，druid等统一查询引擎
    - ~~支持多任务，查询记录，统一sql解析拦截，异步查询，提供标准sql查询基础类~~
- - 数据ETL：@data-infra （通过pipeline编排能力统一对接）
+ - 数据ETL： （通过pipeline编排能力统一对接）
    - ~~提供标准 任务编排，任务管理模块，任务实例，任务成功率~~
    - 支持airflow，ds，az调度器
  - 推送：
@@ -41,7 +41,7 @@
 
 AI平台：
 
- - notebook：@HamaWhiteGG
+ - notebook：
    - ~~支持基础vscode/jupyter开发环境，支持ssh等功能~~
    - ~~大数据版本，数据挖掘版本，深度学习版本，~~
    - 添加使用示例，比如sparksql/impala/presto/clickhouse/mysql/postgresql等分析建模示例
@@ -94,8 +94,7 @@ AI平台：
    - docker-compose部署harbor方案
    - k8s部署harbor方案
    
-web框架： @
-
+web框架：
 - 支持通用pipeline编排，合并frontend/vison/visonPlus代码
 - 通用血缘，支持任务流调试界面，去除kfp依赖
 - 中英文支持
@@ -105,7 +104,7 @@ web框架： @
 
 sdk
 
-- 前后端：@Chin @data-infra （aihub前后端应用）
+- 前后端： （aihub前后端应用）
   - 适配pc端/手机端
   - 登录，
   - 微信打开限制，
@@ -125,7 +124,7 @@ sdk
   - 支持转推理api，批处理，弹性离线推理
   - 支持数据数据集上传和自动加载，与数据集平台对接，外部数据集转内部数据集
 
-算法模型： @JLWLL（自研模型+魔塔模型+hugging模型）
+算法模型： （自研模型+魔塔模型+hugging模型）
 
 - 传统机器学习（jupyter形式）：
   - ~~基础技能：pandas，matplotlib，pyecharts，~~
