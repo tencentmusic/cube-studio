@@ -92,6 +92,10 @@
     "react-resizable": "^3.0.4",
     "react-responsive-carousel": "^3.2.22",
     "react-router-dom": "^6.2.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "rehype-raw": "^6.1.1",
+    "rehype-react": "^7.1.1",
+    "remark-gfm": "^3.0.1",
     "resolve": "^1.20.0",
     "resolve-url-loader": "^4.0.0",
     "sass-loader": "^12.3.0",
@@ -192,6 +196,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-syntax-highlighter": "^15.5.5",
     "babel-plugin-import": "^1.13.3"
   }
 }
