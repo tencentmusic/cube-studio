@@ -103,6 +103,7 @@ class Cartoon_SD_Model(Model):
     }
 
     inference_inputs = [
+        Field(type=Field_type.image, name='img_file_path', label='预设图片', describe='预设的图片，画图会和这个图画风相同~'),
         Field(type=Field_type.text, name='prompt', label='输入的文字内容',
               describe='输入的文字内容，描述越详细越好', default='a photograph of an astronaut riding a horse'),
         Field(type=Field_type.text_select, name='style', label='图像效果参数', default='Low Quality + Bad Anatomy',
@@ -117,6 +118,7 @@ class Cartoon_SD_Model(Model):
         {
             "label": "示例1",
             "input": {
+                "img_file_path": None,
                 "prompt": 'a photograph of an astronaut riding a horse',
                 "n_samples": 1,
                 "style": 'None'
@@ -142,11 +144,11 @@ class Cartoon_SD_Model(Model):
         hostname = socket.gethostname()
         sent_first_message = False
 
-    @pysnooper.snoop()
     def do_job(self, optim):
         try:
             if optim.seed is None:
                 optim.seed = random.randint(0, 100000000)
+            optim.mitigate = False
             images = self.model.sample(optim)
             ndarray_convert_img_list = []
             for image in images:
@@ -158,12 +160,17 @@ class Cartoon_SD_Model(Model):
 
     # 推理
     @pysnooper.snoop()
-    def inference(self, prompt, style, n_samples=1):
+    def inference(self, prompt, style, img_file_path=None, n_samples=1):
         global uc_dic
         try:
+            if img_file_path:
+                img = Image.open(img_file_path)
+            else:
+                img = None
             n_samples = int(n_samples)
             time_str = datetime.now().strftime('%Y%m%d%H%M%S')
             opt = set_parameter()
+            opt.image = img
             opt.prompt = prompt
             opt.n_samples = n_samples
             opt.seed = random.randint(0, 100000000)
