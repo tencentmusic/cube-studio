@@ -589,7 +589,7 @@ class Server():
             return jsonify(info)
 
         @app.before_request
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def check_login():
             req_url = request.path
             # print(req_url)
