@@ -60,15 +60,15 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
 如果是gpu服务
 ```bash
 docker 1.19.3以前，需要安装NVIDIA-docker2
-sudo docker run --name ${aiapp} --privileged --rm -it --runtime=nvidia  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it --runtime=nvidia  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 docker 1.19.3以后，
-sudo docker run --name ${aiapp} --privileged --rm -it --gpu=0  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
 

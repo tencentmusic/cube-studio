@@ -589,7 +589,7 @@ class Server():
             return jsonify(info)
 
         @app.before_request
-        # @pysnooper.snoop()
+        @pysnooper.snoop()
         def check_login():
             req_url = request.path
             # print(req_url)
@@ -597,13 +597,13 @@ class Server():
             username = request.cookies.get('myapp_username','')
             # 获取来自上一次的记忆
             if not username:
-                username = session.get('username','')
+                username = request.cookies.get('aihub_username','')
             # 创建新匿名用户
             if not username:
                 username = "anonymous-" + uuid.uuid4().hex[:16]
 
             # res传递给浏览器记录
-            session['username']=username
+            g.username=username
 
             # 只对后端接口
             if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:
@@ -647,7 +647,8 @@ class Server():
 
             req_url = request.path
             if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:  #  and type(response.get_json())==list
-                username = session['username']
+                response.set_cookie('aihub_username', g.username)
+                username = g.username
                 if username not in user_history:
                     user_history[username] = {}
                 if req_url not in user_history[username]:
