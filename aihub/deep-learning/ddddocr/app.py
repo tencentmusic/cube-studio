@@ -19,7 +19,6 @@ class DDDDOCR_Model(Model):
     scenes="图像识别"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/ddddocr'
     pic='example.jpg'
 
     inference_inputs = [

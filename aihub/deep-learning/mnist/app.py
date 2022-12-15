@@ -26,7 +26,6 @@ class Mnist_Model(Model):
     scenes="图像分类"
     status='offline'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/mnist'
     pic='http://5b0988e595225.cdn.sohucs.com/images/20180404/9f62a1eea7054f8eaf4bc1c87168238b.png'
 
     # 训练

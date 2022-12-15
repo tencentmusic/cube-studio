@@ -18,7 +18,6 @@ class Yolov5_Model(Model):
     scenes = "目标识别"
     status = 'online'
     version = 'v20221118'
-    doc = 'https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/yolov5'
     pic = 'example.jpg'
 
     train_inputs = [

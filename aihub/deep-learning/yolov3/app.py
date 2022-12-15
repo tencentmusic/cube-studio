@@ -23,7 +23,6 @@ class Yolov3_Model(Model):
     scenes="目标识别"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/yolov3'
     pic='example.jpg'
 
     inference_inputs = [

@@ -22,7 +22,6 @@ class Paddleocr_Model(Model):
     scenes="图像识别"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/paddleocr'
     pic='example.jpg'
 
     inference_inputs = [

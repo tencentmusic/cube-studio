@@ -18,7 +18,6 @@ class Face_paint_Model(Model):
     scenes="图像合成"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub' # 'https://帮助文档的链接地址'
     pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_inputs = [

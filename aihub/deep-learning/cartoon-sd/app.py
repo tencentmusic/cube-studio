@@ -95,7 +95,6 @@ class Cartoon_SD_Model(Model):
     scenes = "图像创作"
     status = 'online'
     version = 'v20221125'
-    doc = 'https://github.com/tencentmusic/cube-studio'  # 'https://帮助文档的链接地址'
     pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource = {

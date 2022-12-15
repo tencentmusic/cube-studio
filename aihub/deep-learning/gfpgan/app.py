@@ -28,7 +28,6 @@ class GFPGAN_Model(Model):
     scenes="图像合成"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/face-repair'
     pic='example.jpg'
 
     inference_inputs = [
