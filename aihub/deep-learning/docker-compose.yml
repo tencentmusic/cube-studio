@@ -64,24 +64,6 @@ services:
 
 
     
-  stable-diffusion-zh-en:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion-zh-en
-    restart: unless-stopped
-    entrypoint: /src/docker/entrypoint.sh
-    command: ["python", "app.py"]
-    volumes:
-      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/stable-diffusion-zh-en:/app
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-      - /mnt/aihub:/src/cubestudio/aihub/web/static
-    environment:
-      APPNAME: 'stable-diffusion-zh-en'
-      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
-      REQ_TYPE: 'asynchronous'
-      NVIDIA_VISIBLE_DEVICES: all
-
-
-    
   cartoon-sd:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:cartoon-sd
     restart: unless-stopped

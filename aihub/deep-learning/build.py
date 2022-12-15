@@ -2,7 +2,7 @@
 
 import os,sys,time,json,shutil
 path = os.path.dirname(os.path.abspath(__file__))
-app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify",'chatgpt','speaker-diarization','voxlingua107-ecapa']
+app_names=["app1", "animegan", "stable-diffusion",'cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify",'chatgpt','speaker-diarization','voxlingua107-ecapa']
 
 
 # 生成构建镜像的脚本
@@ -256,23 +256,23 @@ compose_file.close()
 
 # 生成info文件
 all_info=[]
-for app_name in os.listdir("."):
-    if os.path.isdir(app_name):
-        if app_name in ['__pycache__','deploy','app1']:
-            continue
+for app_name in app_names:
 
-        if not os.path.exists(os.path.join(app_name, 'info.json')):
-            continue
+    if app_name in ['__pycache__','deploy','app1']:
+        continue
 
-        info = json.load(open(os.path.join(app_name,'info.json')))
-        if 'pic' in info and 'http' not in info['pic']:
-            if env=='dev':
-                info['pic']=f"http://star.tme.woa.com/{app_name}/static/example/"+app_name+"/" + info['pic']
-            else:
-                info['pic'] = f"http://www.data-master.net:8888/{app_name}/static/example/" + app_name + "/" + info['pic']
-        app_name = app_name.lower().replace('_', '-')
-        info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}" if env=='cloud' else f"http://star.tme.woa.com/aihub/{app_name}"
-        all_info.append(info)
+    if not os.path.exists(os.path.join(app_name, 'info.json')):
+        continue
+
+    info = json.load(open(os.path.join(app_name,'info.json')))
+    if 'pic' in info and 'http' not in info['pic']:
+        if env=='dev':
+            info['pic']=f"/{app_name}/static/example/"+app_name+"/" + info['pic']
+        else:
+            info['pic'] = f"http://www.data-master.net:8888/{app_name}/static/example/" + app_name + "/" + info['pic']
+    app_name = app_name.lower().replace('_', '-')
+    info['doc'] = f"http://www.data-master.net:8888/aihub/{app_name}" if env=='cloud' else f"/aihub/{app_name}"
+    all_info.append(info)
 
 file = open('info.json',mode='w')
 file.write(json.dumps(all_info,indent=2,ensure_ascii=False))

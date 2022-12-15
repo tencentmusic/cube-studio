@@ -59,7 +59,7 @@ class Chatgpt_Model(Model):
         res = requests.post('https://chatgpt.gometadata.xyz/api/v1/chat',timeout=120,headers={"accept": "application/json","Content-Type": "application/json","x-token":"4fc6b7d6-8c07-41db-8161-7c6365ce5214"},json=req_data)
         result='系统出现问题'
         if res.status_code==200:
-            result=res.json().get("msgContent",'')
+            result=res.json().get("msgContent",'').replace('degrade to GPT3 类型','')
             result_type = res.json().get("msgType",'')
 
 #         result='''

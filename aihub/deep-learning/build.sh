@@ -1,7 +1,6 @@
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:app1 ./app1/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:app1 &
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:animegan ./animegan/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:animegan &
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion ./stable-diffusion/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion &
-docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion-zh-en ./stable-diffusion-zh-en/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion-zh-en &
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:cartoon-sd ./cartoon-sd/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:cartoon-sd &
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr ./paddleocr/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr &
 docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:gfpgan ./gfpgan/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:gfpgan &
