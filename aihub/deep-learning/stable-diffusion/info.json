@@ -1,5 +1,5 @@
 {
-    "doc": "https://github.com/CompVis/stable-diffusion",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/stable-diffusion",
     "field": "机器视觉",
     "scenes": "图像创作",
     "type": "dateset,notebook,train,inference",

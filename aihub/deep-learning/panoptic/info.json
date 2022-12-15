@@ -1,5 +1,5 @@
 {
-    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/DeOldify",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/panoptic",
     "field": "机器视觉",
     "scenes": "目标识别",
     "type": "dateset,notebook,train,inference",

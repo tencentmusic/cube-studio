@@ -25,8 +25,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   animegan:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:animegan
@@ -43,8 +43,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   stable-diffusion:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion
@@ -61,8 +61,44 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
+
+
     
+  stable-diffusion-zh-en:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:stable-diffusion-zh-en
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/stable-diffusion-zh-en:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'stable-diffusion-zh-en'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+
+
+    
+  cartoon-sd:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:cartoon-sd
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/cartoon-sd:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'cartoon-sd'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+
+
     
   paddleocr:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddleocr
@@ -79,8 +115,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   gfpgan:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:gfpgan
@@ -97,8 +133,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   paddlespeech-asr:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-asr
@@ -115,8 +151,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   humanseg:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:humanseg
@@ -133,8 +169,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   paddlespeech-cls:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-cls
@@ -151,8 +187,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   ddddocr:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:ddddocr
@@ -169,8 +205,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   paddlespeech-tts:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:paddlespeech-tts
@@ -187,8 +223,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   yolov3:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:yolov3
@@ -205,8 +241,8 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
-    
+
+
     
   deoldify:
     image: ccr.ccs.tencentyun.com/cube-studio/aihub:deoldify
@@ -223,24 +259,60 @@ services:
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
+
+
     
-    
-  panoptic:
-    image: ccr.ccs.tencentyun.com/cube-studio/aihub:panoptic
+  chatgpt:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:chatgpt
     restart: unless-stopped
     entrypoint: /src/docker/entrypoint.sh
     command: ["python", "app.py"]
     volumes:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/panoptic:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/chatgpt:/app
       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
       - /mnt/aihub:/src/cubestudio/aihub/web/static
     environment:
-      APPNAME: 'panoptic'
+      APPNAME: 'chatgpt'
       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
       REQ_TYPE: 'asynchronous'
       NVIDIA_VISIBLE_DEVICES: all
-      
+
+
     
+  speaker-diarization:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:speaker-diarization
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/speaker-diarization:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'speaker-diarization'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+
+
+    
+  voxlingua107-ecapa:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:voxlingua107-ecapa
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/voxlingua107-ecapa:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: 'voxlingua107-ecapa'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+
+
     

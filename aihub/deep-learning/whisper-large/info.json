@@ -1,5 +1,5 @@
 {
-    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/whisper-large",
     "field": "听觉",
     "scenes": "语种识别",
     "type": "dateset,notebook,train,inference",

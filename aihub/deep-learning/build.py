@@ -5,18 +5,18 @@ path = os.path.dirname(os.path.abspath(__file__))
 app_names=["app1", "animegan", "stable-diffusion",'stable-diffusion-zh-en','cartoon-sd', "paddleocr", "gfpgan", "paddlespeech-asr", "humanseg", "paddlespeech-cls", "ddddocr", "paddlespeech-tts", "yolov3", "deoldify",'chatgpt','speaker-diarization','voxlingua107-ecapa']
 
 
-# # 生成构建镜像的脚本
-# build_file=open('build.sh',mode='w')
-# for app_name in app_names:
-#     dockerfile_path = os.path.join(app_name,'Dockerfile')
-#     app_name = app_name.lower().replace('_', '-')
-#     if os.path.exists(dockerfile_path):
-#         command = f"docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} ./{app_name}/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} &"
-#         build_file.write(command)
-#         build_file.write('\n')
-#
-# build_file.write('\n\nwait')
-# build_file.close()
+# 生成构建镜像的脚本
+build_file=open('build.sh',mode='w')
+for app_name in app_names:
+    dockerfile_path = os.path.join(app_name,'Dockerfile')
+    app_name = app_name.lower().replace('_', '-')
+    if os.path.exists(dockerfile_path):
+        command = f"docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} ./{app_name}/ && docker push ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name} &"
+        build_file.write(command)
+        build_file.write('\n')
+
+build_file.write('\n\nwait')
+build_file.close()
 
 
 # =====================#
@@ -174,84 +174,84 @@ spec:
     file.write(deploy)
     file.close()
 
-#
-#
-# # 生成docker-compose和nginx config
-# docker_compose_str = '''
-# version: '3'
-# services:
-#   aihub:
-#     image: nginx
-#     restart: unless-stopped
-#     ports:
-#       - '8888:8888'
-#     volumes:
-#       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/default.conf:/etc/nginx/conf.d/default.conf
-#
-#     '''
-#
-# nginx_str='''
-#
-# server {
-#     listen       8888;
-#     server_name  _;
-# %s
-#
-# }
-# '''
-# nginx_app_str=''
-# compose_file = open('docker-compose.yml',mode='w')
-# compose_file.write(docker_compose_str)
-#
-# for app_name in app_names:
-#
-#     app_docker_compose_str=f'''
-#   {app_name}:
-#     image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
-#     restart: unless-stopped
-#     entrypoint: /src/docker/entrypoint.sh
-#     command: ["python", "app.py"]
-#     volumes:
-#       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
-#       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/{app_name}:/app
-#       - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
-#       - /mnt/aihub:/src/cubestudio/aihub/web/static
-#     environment:
-#       APPNAME: '{app_name}'
-#       REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
-#       REQ_TYPE: 'asynchronous'
-#       NVIDIA_VISIBLE_DEVICES: all
-#
-#
-#     '''
-#
-#
-#     nginx_app_config=f'''
-#
-#     location {"~* ^/(aihub|app1)" if app_name=='app1' else "/%s"%app_name}/ {{
-#         proxy_pass http://{app_name};
-#
-#         proxy_http_version 1.1;
-#         proxy_set_header Host       $http_host;
-#         proxy_set_header        X-Real-IP $remote_addr;
-#         proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
-#
-#         client_max_body_size     50m;
-#         client_body_timeout      5m;
-#         proxy_connect_timeout     60s;
-#         proxy_read_timeout      5m;
-#         proxy_send_timeout      5m;
-#
-#     }}
-#
-#     '''
-#     compose_file.write(app_docker_compose_str)
-#     nginx_app_str+=nginx_app_config
-#
-# file =open('default.conf',mode='w')
-# file.write(nginx_str%nginx_app_str)
-# file.close()
-# compose_file.close()
+
+
+# 生成docker-compose和nginx config
+docker_compose_str = '''
+version: '3'
+services:
+  aihub:
+    image: nginx
+    restart: unless-stopped
+    ports:
+      - '8888:8888'
+    volumes:
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/default.conf:/etc/nginx/conf.d/default.conf
+
+    '''
+
+nginx_str='''
+
+server {
+    listen       8888;
+    server_name  _;
+%s
+
+}
+'''
+nginx_app_str=''
+compose_file = open('docker-compose.yml',mode='w')
+compose_file.write(docker_compose_str)
+
+for app_name in app_names:
+
+    app_docker_compose_str=f'''
+  {app_name}:
+    image: ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}
+    restart: unless-stopped
+    entrypoint: /src/docker/entrypoint.sh
+    command: ["python", "app.py"]
+    volumes:
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/deep-learning/{app_name}:/app
+      - /data/k8s/kubeflow/pipeline/workspace/pengluan/cube-studio/aihub/src:/src
+      - /mnt/aihub:/src/cubestudio/aihub/web/static
+    environment:
+      APPNAME: '{app_name}'
+      REDIS_URL: 'redis://:admin@125.124.48.210:6379/0'
+      REQ_TYPE: 'asynchronous'
+      NVIDIA_VISIBLE_DEVICES: all
+
+
+    '''
+
+
+    nginx_app_config=f'''
+
+    location {"~* ^/(aihub|app1)" if app_name=='app1' else "/%s"%app_name}/ {{
+        proxy_pass http://{app_name};
+
+        proxy_http_version 1.1;
+        proxy_set_header Host       $http_host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        client_max_body_size     50m;
+        client_body_timeout      5m;
+        proxy_connect_timeout     60s;
+        proxy_read_timeout      5m;
+        proxy_send_timeout      5m;
+
+    }}
+
+    '''
+    compose_file.write(app_docker_compose_str)
+    nginx_app_str+=nginx_app_config
+
+file =open('default.conf',mode='w')
+file.write(nginx_str%nginx_app_str)
+file.close()
+compose_file.close()
 
 
 # 生成info文件

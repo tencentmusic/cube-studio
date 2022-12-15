@@ -1,5 +1,5 @@
 {
-    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/chatgpt",
     "field": "自然语言",
     "scenes": "聊天机器人",
     "type": "dateset,notebook,train,inference",
