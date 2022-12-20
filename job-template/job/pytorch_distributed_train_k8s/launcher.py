@@ -249,8 +249,9 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
 
 
     if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        pod_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        pod_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
+        gpu_num,gpu_type=k8s_client.get_gpu(GPU_RESOURCE)
+        pod_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = gpu_num
+        pod_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = gpu_num
 
     worker_pod_spec = copy.deepcopy(pod_spec)
     worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker
