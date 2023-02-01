@@ -57,10 +57,10 @@ class HandleTips {
             this.tipsTimer = setInterval(() => {
                 if (this.errorQuene.length) {
                     const contentMsg = this.errorQuene.shift();
-                    notification[type || 'info']({
-                        message: type,
-                        description: <div dangerouslySetInnerHTML={{ __html: contentMsg || '' }}></div>,
-                    });
+                    // notification[type || 'info']({
+                    //     message: type,
+                    //     description: <div dangerouslySetInnerHTML={{ __html: contentMsg || '' }}></div>,
+                    // });
                 } else {
                     this.tipsTimer && clearInterval(this.tipsTimer);
                     this.errorFlag = true;

@@ -20,7 +20,7 @@ import { changeTheme } from './theme';
 import { handleTips } from './api';
 import { IAppHeaderItem } from './api/interface/kubeflowInterface';
 
-const RouterConfig = (config: IRouterConfigPlusItem[]) => {
+const RouterConfig = (config: any[]) => {
   let element = useRoutes(config);
   return element;
 }

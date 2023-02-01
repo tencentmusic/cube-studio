@@ -1,6 +1,6 @@
-import { RouteObject } from "react-router-dom";
+import { IndexRouteObject, NonIndexRouteObject, RouteObject } from "react-router-dom";
 
-export interface IRouterConfigPlusItem extends RouteObject {
+export interface IRouterConfigPlusItem extends Omit<RouteObject, 'children' | 'index'> {
     title?: string
     name?: string
     icon?: any
@@ -20,6 +20,7 @@ export interface IRouterConfigPlusItem extends RouteObject {
     isCollapsed?: boolean
     isCloseSide?: boolean
     isExpand?: boolean
+    index?: boolean
 }
 
 
