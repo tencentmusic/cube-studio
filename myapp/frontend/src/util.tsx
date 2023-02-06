@@ -232,3 +232,24 @@ export const data2Byte = (value: number) => {
 	}
 	return Number(con.toFixed(2)) + _UNIT[index];
 };
+
+export const data2Time = (value: number) => {
+    if (Object.prototype.toString.call(value) !== '[object Number]') return '-';
+
+    const _UNIT = ['秒', '分钟', '小时'];
+    const _CARRY = 60;
+    let index = 0;
+    let con = value;
+    const isPositive = con >= 0 ? true : false;
+    if (!isPositive) {
+        con = con * -1;
+    }
+    while (con >= _CARRY && index < _UNIT.length - 1) {
+        con = con / _CARRY;
+        index++;
+    }
+    if (!isPositive) {
+        con = con * -1;
+    }
+    return Number(con.toFixed(2)) + _UNIT[index];
+};

@@ -20,7 +20,7 @@ import { changeTheme } from './theme';
 import { handleTips } from './api';
 import { IAppHeaderItem } from './api/interface/kubeflowInterface';
 
-const RouterConfig = (config: IRouterConfigPlusItem[]) => {
+const RouterConfig = (config: any[]) => {
   let element = useRoutes(config);
   return element;
 }
@@ -76,7 +76,21 @@ const AppWrapper = (props: IProps) => {
       setCurrentRouteComponent(() => () => RouterConfig(tarRoute))
       setCurrentAppList(appList)
       handleAppIndex(appList)
-    }).catch(err => { })
+    }).catch(err => {
+      const tarRoute = [...routerConfigPlus]
+      const appList = getAppList(tarRoute)
+      const { pathname } = location
+      const defaultOpenKeys = getDefaultOpenKeys(tarRoute)
+
+      handleChangePageTitle(pathname, tarRoute)
+
+      setOpenKeys(defaultOpenKeys)
+
+      setCurrnetRouteConfig(tarRoute)
+      setCurrentRouteComponent(() => () => RouterConfig(tarRoute))
+      setCurrentAppList(appList)
+      handleAppIndex(appList)
+    })
 
     getAppHeaderConfig().then(res => {
       const config = res.data

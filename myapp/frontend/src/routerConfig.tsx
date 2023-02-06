@@ -109,14 +109,19 @@ export const routerConfigPlus: IRouterConfigPlusItem[] = [
         element: lazy2Compont(() => import("./pages/IframeTemplate"), { url: '/myapp/home' })
     },
     {
+        path: '/dataSearch',
+        index: true,
+        element: lazy2Compont(() => import("./pages/DataSearch/DataSearch"))
+    },
+    {
         path: '/showData',
         title: '数据展示',
-        element: lazy2Compont(() => import("./pages/ShowData") as any)
+        element: lazy2Compont(() => import("./pages/ShowData"))
     },
     {
         path: '/showOutLink',
         title: '外链',
-        element: lazy2Compont(() => import("./pages/IframeTemplate") as any)
+        element: lazy2Compont(() => import("./pages/IframeTemplate"))
     },
     ...innerDynamicRouterConfig,
     {
