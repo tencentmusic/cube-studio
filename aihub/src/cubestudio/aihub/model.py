@@ -5,7 +5,7 @@ import base64
 import os
 import datetime
 import logging
-from ..util import py_shell
+from ..utils import py_shell
 import enum
 import os, sys
 Field_type = enum.Enum('Field_type', ('int','double','json','text', 'image', 'audio', 'video', 'stream', 'text_select', 'image_select','audio_select','video_select'))

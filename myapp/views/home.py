@@ -1018,14 +1018,14 @@ class Myapp(BaseMyappView):
             except Exception as e:
                 print(e)
                 data = {
-                    'content': '未能成功获取负算力负载信息，请检查kubeconfig文件配置',
+                    'content': '未能成功获取到算力负载信息，请检查kubeconfig文件配置',
                     'delay': 30000,
                     'hit': True,
                     'target': url,
                     'title': '检查失败',
                     'type': 'html',
                 }
-                flash('未能成功获取负算力负载信息', 'warning')
+                flash('未能成功获取到算力负载信息', 'warning')
                 return jsonify(data)
 
 

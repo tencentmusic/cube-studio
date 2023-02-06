@@ -38,9 +38,9 @@ from celery import Celery
 from celery.result import AsyncResult
 import pysnooper
 from ..model import Field,Field_type,Validator
-from ...util.py_github import get_repo_user
-from ...util.log import AbstractEventLogger
-from ...util.py_shell import exec
+from ...utils.py_github import get_repo_user
+from ...utils.log import AbstractEventLogger
+from ...utils.py_shell import exec
 
 from flask import Flask
 
@@ -103,7 +103,7 @@ class Server():
         def file2url(file_path):
             # base_name = os.path.basename(file_path)
             if '.avi' in file_path:
-                from cubestudio.util.py_video import Video2Mp4
+                from cubestudio.utils.py_video import Video2Mp4
                 Video2Mp4(file_path,file_path.replace('.avi','.mp4'))
                 file_path = file_path.replace('.avi','.mp4')
 

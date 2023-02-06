@@ -80,22 +80,6 @@ spec:
   hostPath:
     path: /mnt/ceph_fuse/meiyangchen
   persistentVolumeReclaimPolicy: Retain
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: kubeflow-model-deploy
-  namespace: pipeline
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 500Gi
-  selector:
-    matchLabels:
-      pipeline-pvname: pipeline-model-deploy
-
 # 模型归档
 ---
 apiVersion: v1
