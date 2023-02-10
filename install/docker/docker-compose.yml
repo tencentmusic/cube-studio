@@ -32,7 +32,7 @@ services:
 
   myapp:
     image:  ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01
-    restart: always
+    restart: unless-stopped
     command: ['bash','-c','sleep 1000000000 && /entrypoint.sh']
     environment:
       STAGE: 'dev'
@@ -46,7 +46,6 @@ services:
 #      - "8080:80"
     depends_on:
       - redis
-#      - mysql
     volumes:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../myapp/:/home/myapp/myapp/
@@ -59,7 +58,7 @@ services:
 #  beat:
 #    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01
 #    restart: "no"
-#    command: ["bash","-c","celery beat --app=myapp.tasks.celery_app:celery_app --loglevel=info"]
+#    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app beat --loglevel=info"]
 #    shm_size: '100gb'
 #    environment:
 #      REDIS_HOST: 'redis'
@@ -82,7 +81,8 @@ services:
 #  worker:
 #    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01
 #    restart: unless-stopped
-#    command: ["bash","-c","celery worker --app=myapp.tasks.celery_app:celery_app --loglevel=info --pool=prefork -Ofair -c 40"]
+#    # 默认的prefork池针对长时间的任务支持不是很好，如果任务运行时间有数分钟/小时，建议启用 Celery 的 -Ofair 命令参数
+#    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app worker --loglevel=info --pool=prefork -Ofair -c 2 -n worker@%h"]
 #    environment:
 #      REDIS_HOST: 'redis'
 #      REDIS_PORT: '6379'
