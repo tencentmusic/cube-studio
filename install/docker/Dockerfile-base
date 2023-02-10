@@ -1,6 +1,8 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-1.0 -f install/docker/Dockerfile-base .
 
 FROM ubuntu:20.04
+
+ENV TZ=Asia/Shanghai
 
 # 替换源
 COPY install/docker/sources.list /etc/apt/sources.list
@@ -23,7 +25,6 @@ RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei 
 ENV LANG zh_CN.UTF-8
 ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
-ENV TZ=Asia/Shanghai
 
 # 便捷操作
 RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
