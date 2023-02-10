@@ -6,6 +6,7 @@ import re
 import traceback
 import urllib.parse
 import os
+from flask import Markup
 from inspect import isfunction
 from sqlalchemy import create_engine
 from flask_appbuilder.actions import action
@@ -90,6 +91,7 @@ API_IMPORT_DATA_RIS_KEY = 'import_data'
 API_DOWNLOAD_DATA_RIS_KEY = 'download_data'
 API_OPS_BUTTON_RIS_KEY = 'ops_link'
 API_ENABLE_FAVORITE_RIS_KEY = 'enable_favorite'
+API_ECHART = 'echart'
 
 
 def get_error_msg():
@@ -328,8 +330,11 @@ class MyappModelRestApi(ModelRestApi):
     import_data=False
     download_data=False
     enable_favorite=False
+    enable_echart = False
     pre_upload = None
     set_columns_related=None
+    echart_option=None
+    alert_config={}
 
     # @pysnooper.snoop()
     def csv_response(self,file_path,file_name=None):
@@ -375,7 +380,7 @@ class MyappModelRestApi(ModelRestApi):
         super(ModelRestApi, self)._init_titles()
         class_name = self.datamodel.model_name
         if self.label_title:
-            self.list_title = "遍历 " + self.label_title
+            self.list_title = self.label_title+" 列表"
             self.add_title = "添加 " + self.label_title
             self.edit_title = "编辑 " + self.label_title
             self.show_title = "查看 " + self.label_title
@@ -396,6 +401,7 @@ class MyappModelRestApi(ModelRestApi):
             Init Properties
         """
         super(MyappModelRestApi, self)._init_properties()
+
         # 初始化action自耦段
         self.actions = {}
         for attr_name in dir(self):
@@ -424,6 +430,10 @@ class MyappModelRestApi(ModelRestApi):
 
         # 配置搜索转换器
         self._filters = self.datamodel.get_filters(self.search_columns)
+
+        if 'alert_config' not in conf:
+            conf['alert_config']={}
+        conf['alert_config'].update(self.alert_config)
 
     def _init_model_schemas(self):
         # Create Marshmalow schemas if one is not specified
@@ -500,6 +510,8 @@ class MyappModelRestApi(ModelRestApi):
         response[API_DOWNLOAD_DATA_RIS_KEY] = self.download_data
         response[API_OPS_BUTTON_RIS_KEY]=self.ops_link
         response[API_ENABLE_FAVORITE_RIS_KEY]=self.enable_favorite
+        response[API_ECHART]=self.enable_echart
+        response['page_size']=self.page_size
 
     # 重新渲染add界面
     # @pysnooper.snoop()
@@ -815,6 +827,12 @@ class MyappModelRestApi(ModelRestApi):
                     columns_info[value.key] = {
                         "type":"Relationship"
                     }
+                    class_name = value.comparator.property.argument.__class__.__name__
+                    if 'ModelDeclarativeMeta' in class_name:
+                        columns_info[value.key]['relationship'] = value.comparator.property.argument.__name__
+                    elif '_class_resolver' in class_name:
+                        columns_info[value.key]['relationship'] = value.comparator.property.argument.arg
+
         response[API_COLUMNS_INFO_RIS_KEY] = columns_info
 
     def merge_help_url_info(self, response, **kwargs):
@@ -1327,6 +1345,30 @@ class MyappModelRestApi(ModelRestApi):
         response = self.csv_response(csv_file,file_name=file_name)
         return response
 
+    @expose("/echart", methods=["GET"])
+    def echart(self):
+        _args = request.json or {}
+        _args.update(json.loads(request.args.get('form_data',"{}")))
+        _args.update(request.args)
+        joined_filters = self._handle_filters_args(_args)
+        filters = {}
+        for flt, value in joined_filters.get_filters_values():
+            filters[flt.column_name] = [value] if flt.column_name not in filters else (filters[flt.column_name] + [value])
+
+        if self.echart_option:
+            try:
+                option = self.echart_option()
+                if option:
+                    return jsonify({
+                        "message":"success",
+                        "status":0,
+                        "result":option
+                    })
+            except Exception as e:
+                print(e)
+
+        return jsonify({})
+
     @expose("/upload/", methods=["POST"])
     def upload(self):
         csv_file = request.files.get('csv_file')  # FileStorage
@@ -1379,7 +1421,7 @@ class MyappModelRestApi(ModelRestApi):
             except Exception as e:
                 db.session.rollback()
                 print(e)
-                result.append('fail')
+                result.append(str(e))
 
         flash('成功导入%s行，失败导入%s行'%(len([x for x in result if x=='success']),len([x for x in result if x=='fail'])), 'warning')
         back = {

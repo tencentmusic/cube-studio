@@ -9,12 +9,13 @@ from sqlalchemy import (
 import numpy
 import random
 import copy
+import urllib.parse
 from myapp.models.helpers import AuditMixinNullable
 
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 from myapp.models.model_team import Project
-
+import pysnooper
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from flask_appbuilder.models.decorators import renders
 from flask import Markup
@@ -595,12 +596,17 @@ class RunHistory(Model,MyappModelBase):
     execution_date=Column(String(200), nullable=False)
     status = Column(String(100),default='comed')   # commed表示已经到了该调度的时间，created表示已经发起了调度。注意操作前校验去重
 
+    @property
+    def create_time(self):
+        if self.created_on:
+            return self.created_on.strftime("%Y-%m-%d %H:%M:%S")
 
     @property
     def status_url(self):
         if self.status=='comed':
             return self.status
-        path=conf.get('MODEL_URLS',{}).get('workflow','')+'/labels='+self.run_id
+
+        path = conf.get('MODEL_URLS', {}).get('workflow', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "labels", "value": self.run_id}], ensure_ascii=False))
         return Markup(f'<a target=_blank href="{path}">{self.status}</a>')
 
     @property
@@ -612,24 +618,11 @@ class RunHistory(Model,MyappModelBase):
         return Markup(f'<a target=_blank href="/pipeline_modelview/web/{self.pipeline.id}">{self.pipeline.describe}</a>')
 
 
-    @property
-    def history(self):
-        path=conf.get('MODEL_URLS',{}).get('workflow','')+'/labels="pipeline-id"%3A+"' + '%s"' % self.pipeline_id
-        # url = r'/workflow_modelview/list/?_flt_2_labels="pipeline-id"%3A+"' + '%s"' % self.pipeline_id
-        return Markup(f"<a href='{path}'>运行记录</a>")
-
-    @property
-    def log(self):
-        if self.run_id:
-            pipeline_url = self.pipeline.project.cluster.get('PIPELINE_URL')+ "runs/details/" +str(self.run_id)
-            return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
-        else:
-            return Markup('日志')
-
 class Crd:
     # __tablename__ = "crd"
     id = Column(Integer, primary_key=True)
     name = Column(String(100),default='')
+    cluster = Column(String(100), default='')
     namespace = Column(String(100), default='')
     create_time=Column(String(100), default='')
     change_time = Column(String(100), default='')
@@ -661,7 +654,14 @@ class Crd:
                 status = json.loads(self.status_more).get('phase','未知')
         except Exception as e:
             print(e)
-        return status
+        default='<svg t="1669360410529" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6711" width="20" height="20"><path d="M937.984 741.376c-6.144 10.24-18.432 14.336-28.672 8.192-10.24-6.144-14.336-18.432-8.192-28.672 118.784-212.992 40.96-481.28-172.032-598.016-212.992-118.784-481.28-40.96-598.016 172.032s-40.96 481.28 172.032 598.016c153.6 86.016 339.968 69.632 479.232-32.768 8.192-6.144 22.528-4.096 28.672 4.096 6.144 8.192 4.096 22.528-4.096 28.672-151.552 112.64-356.352 129.024-522.24 36.864-233.472-129.024-317.44-421.888-188.416-653.312 129.024-233.472 421.888-317.44 653.312-188.416 233.472 126.976 317.44 419.84 188.416 653.312z m-647.168-243.712l190.464 169.984 282.624-303.104c8.192-8.192 20.48-8.192 28.672 0 8.192 8.192 8.192 20.48 0 28.672l-311.296 331.776-219.136-198.656c-8.192-8.192-8.192-20.48-2.048-28.672 8.192-8.192 20.48-8.192 30.72 0z" p-id="6712" fill="#dbdbdb"></path></svg>'
+        status_icon={
+            "Running":'<svg t="1669360051741" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6304" width="20" height="20"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#52C41A" p-id="6305"></path><path d="M178.614857 557.860571a42.496 42.496 0 0 1 60.123429-60.050285l85.942857 87.625143a42.496 42.496 0 0 1-60.050286 60.123428L178.614857 557.860571z m561.005714-250.148571a42.496 42.496 0 1 1 65.097143 54.637714L394.459429 725.577143a42.496 42.496 0 0 1-65.097143-54.637714l410.112-363.373715z" fill="#FFFFFF" p-id="6306"></path></svg>',
+            "Error":'<svg t="1669359973288" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3503" width="20" height="20"><path d="M549.044706 512l166.189176-166.249412a26.383059 26.383059 0 0 0 0-36.98447 26.383059 26.383059 0 0 0-37.044706 0L512 475.015529l-166.249412-166.249411a26.383059 26.383059 0 0 0-36.98447 0 26.383059 26.383059 0 0 0 0 37.044706L475.015529 512l-166.249411 166.249412a26.383059 26.383059 0 0 0 0 36.98447 26.383059 26.383059 0 0 0 37.044706 0L512 548.984471l166.249412 166.249411a26.383059 26.383059 0 0 0 36.98447 0 26.383059 26.383059 0 0 0 0-37.044706L548.984471 512zM512 1024a512 512 0 1 1 0-1024 512 512 0 0 1 0 1024z" fill="#E84335" p-id="3504"></path></svg>',
+            "Failed":'<svg t="1669359973288" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3503" width="20" height="20"><path d="M549.044706 512l166.189176-166.249412a26.383059 26.383059 0 0 0 0-36.98447 26.383059 26.383059 0 0 0-37.044706 0L512 475.015529l-166.249412-166.249411a26.383059 26.383059 0 0 0-36.98447 0 26.383059 26.383059 0 0 0 0 37.044706L475.015529 512l-166.249411 166.249412a26.383059 26.383059 0 0 0 0 36.98447 26.383059 26.383059 0 0 0 37.044706 0L512 548.984471l166.249412 166.249411a26.383059 26.383059 0 0 0 36.98447 0 26.383059 26.383059 0 0 0 0-37.044706L548.984471 512zM512 1024a512 512 0 1 1 0-1024 512 512 0 0 1 0 1024z" fill="#E84335" p-id="3504"></path></svg>',
+            'Succeeded':'<svg t="1669360077850" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6508" width="20" height="20"><path d="M512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667s-191.018667 426.666667-426.666667 426.666667S85.333333 747.648 85.333333 512 276.352 85.333333 512 85.333333z m-74.965333 550.4L346.453333 545.152a42.666667 42.666667 0 1 0-60.330666 60.330667l120.704 120.704a42.666667 42.666667 0 0 0 60.330666 0l301.653334-301.696a42.666667 42.666667 0 1 0-60.288-60.330667l-271.530667 271.488z" fill="#4e8508" p-id="6509"></path></svg>'
+        }
+        return Markup(status_icon.get(status,default)+"&nbsp;&nbsp;"+status)
 
     @renders('spec')
     def spec_html(self):
@@ -728,23 +728,25 @@ class Workflow(Model,Crd,MyappModelBase):
         else:
             return 'once'
 
-
+    # 每个任务的细节
     @property
     def task_status(self):
-        status_mode = json.loads(self.status_more)
+        status_more = json.loads(self.status_more)
         task_status={}
-        nodes=status_mode.get('nodes',{})
+        nodes=status_more.get('nodes',{})
         tasks = self.pipeline.get_tasks()
-        for pod_name in nodes:
-            pod = nodes[pod_name]
-            if pod['type']=='Pod':
-                if pod['phase']=='Succeeded':     # 那些重试和失败的都忽略掉
-                    templateName=pod['templateName']
+        for node_name in nodes:
+            node = nodes[node_name]
+            if node['type']=='Pod':
+                if node['phase']=='Succeeded':     # 那些重试和失败的都忽略掉
+                    templateName=node['templateName']
                     for task in tasks:
                         if task.name==templateName:
-                            finish_time = datetime.datetime.strptime(pod['finishedAt'], '%Y-%m-%d %H:%M:%S')
-                            start_time = datetime.datetime.strptime(pod['startedAt'], '%Y-%m-%d %H:%M:%S')
-                            elapsed = (finish_time - start_time).days * 24 + (finish_time - start_time).seconds / 60 / 60
+                            finish_time = node['finishedAt']
+                            finish_time = datetime.datetime.strptime(finish_time,f'%Y-%m-%d{"T" if "T" in finish_time else " "}%H:%M:%S{"Z" if "Z" in finish_time else ""}')
+                            start_time = node['startedAt']
+                            start_time = datetime.datetime.strptime(start_time,f'%Y-%m-%d{"T" if "T" in start_time else " "}%H:%M:%S{"Z" if "Z" in start_time else ""}')
+                            elapsed = (finish_time - start_time).total_seconds() / 60 / 60
                             task_status[task.label]= str(round(elapsed,2))+"h"
 
         message=""
@@ -756,21 +758,17 @@ class Workflow(Model,Crd,MyappModelBase):
 
     @property
     def elapsed_time(self):
-        status_mode = json.loads(self.status_more)
-        finish_time=status_mode.get('finishedAt',self.change_time)
-        if not finish_time: finish_time=self.change_time
-        start_time = status_mode.get('startedAt', '')
         try:
+            status_mode = json.loads(self.status_more)
+            finish_time=status_mode.get('finishedAt',self.change_time)
+            if not finish_time: finish_time=self.change_time
+            start_time = status_mode.get('startedAt', '')
+            # print(finish_time,start_time)
+
             if finish_time and start_time:
-                if 'T' in finish_time:
-                    finish_time = datetime.datetime.strptime(finish_time,'%Y-%m-%dT%H:%M:%S')
-                else:
-                    finish_time = datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S')
-                if 'T' in start_time:
-                    start_time = datetime.datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-                else:
-                    start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
-                elapsed = (finish_time-start_time).days*24+(finish_time-start_time).seconds/60/60
+                finish_time = datetime.datetime.strptime(finish_time, f'%Y-%m-%d{"T" if "T" in finish_time else " "}%H:%M:%S{"Z" if "Z" in finish_time else ""}')
+                start_time = datetime.datetime.strptime(start_time, f'%Y-%m-%d{"T" if "T" in start_time else " "}%H:%M:%S{"Z" if "Z" in start_time else ""}')
+                elapsed = (finish_time-start_time).total_seconds()/60/60
                 return str(round(elapsed,2))+"h"
         except Exception as e:
             print(e)
@@ -828,17 +826,9 @@ class Workflow(Model,Crd,MyappModelBase):
 
     @property
     def log(self):
-        if self.labels:
-            try:
-                labels = json.loads(self.labels)
-                run_id = labels.get("pipeline/runid",'')
-                if run_id:
-                    pipeline_url = conf.get('PIPELINE_URL')+ "runs/details/" +str(run_id)
-                    return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
-            except Exception as e:
-                print(e)
+        url = f'/frontend/commonRelation?backurl=/workflow_modelview/api/web/dag/{self.cluster}/{self.namespace}/{self.name}'
+        return Markup(f'<a target=_blank href="{url}">日志</a>')
 
-        return Markup('日志')
 
     @property
     def stop(self):

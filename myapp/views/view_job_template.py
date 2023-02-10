@@ -474,6 +474,7 @@ class Job_Template_ModelView_Base():
 # 添加api
 class Job_Template_ModelView_Api(Job_Template_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Job_Template)
+    page_size = 1000
     route_base = '/job_template_modelview/api'
     # add_columns = ['project', 'images', 'name', 'version', 'describe', 'args', 'env','hostAliases', 'privileged','accounts', 'demo','expand']
     add_columns = ['project', 'images', 'name', 'version', 'describe', 'workdir', 'entrypoint', 'volume_mount','args', 'env', 'hostAliases', 'privileged', 'accounts', 'expand']
@@ -491,7 +492,7 @@ class Job_Template_fab_ModelView_Api(Job_Template_ModelView_Base,MyappModelRestA
     route_base = '/job_template_fab_modelview/api'
     # add_columns = ['project', 'images', 'name', 'version', 'describe', 'args', 'env','hostAliases', 'privileged','accounts', 'demo','expand']
     add_columns = ['project', 'images', 'name', 'version', 'describe', 'workdir', 'entrypoint', 'volume_mount','args', 'env', 'hostAliases', 'privileged', 'accounts', 'expand']
-
+    page_size = 1000
     edit_columns = add_columns
     list_columns = ['project','name','version','creator','modified']
     show_columns = ['project', 'images', 'name', 'version', 'describe', 'workdir', 'entrypoint', 'volume_mount','args', 'env', 'hostAliases', 'privileged', 'accounts', 'expand']

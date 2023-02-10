@@ -1,22 +1,46 @@
-
+from flask_appbuilder import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask_babel import lazy_gettext as _
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired,Regexp
 from myapp import app, appbuilder
 from wtforms import StringField, SelectField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget
-
+from flask import jsonify,Markup,make_response
 from .baseApi import MyappModelRestApi
-from flask import g
-
+from flask import g,request,redirect
+import json
+import pysnooper
+from sqlalchemy import or_
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
+import importlib
+from .base import (
+    DeleteMixin,
+    MyappFilter,
+    MyappModelView,
+)
+from myapp import app, appbuilder,db
+from flask_appbuilder import expose
+from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
 from myapp.models.model_dataset import Dataset
 conf = app.config
 logging = app.logger
 
 
 
+class Dataset_Filter(MyappFilter):
+    # @pysnooper.snoop()
+    def apply(self, query, func):
+        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
+        if "admin" in user_roles:
+            return query
 
+        return query.filter(
+            or_(
+                self.model.owner.contains(g.user.username),
+                self.model.owner.contains('*')
+            )
+        )
 
 class Dataset_ModelView_base():
     label_title='数据集'
@@ -25,11 +49,13 @@ class Dataset_ModelView_base():
 
     base_order = ("id", "desc")
     order_columns=['id']
+    base_filters = [["id", Dataset_Filter, lambda: []]]  # 设置权限过滤器
 
-    add_columns = ['name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','years','url','download_url','path','storage_size','entries_num','duration','price','status','icon','owner']
+    add_columns = ['name','label','describe','subdataset','source_type','source','industry','field','usage','research','storage_class','file_type','years','url','download_url','path','storage_size','entries_num','duration','price','status','icon','owner']
     show_columns = ['id','name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url','storage_size','entries_num','duration','price','status','icon','owner']
     search_columns=['name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url']
     spec_label_columns = {
+        "subdataset": "子数据集名称",
         "source_type":"来源类型",
         "source":"数据来源",
         "usage":"数据用途",
@@ -42,18 +68,21 @@ class Dataset_ModelView_base():
         "download_url":"下载地址",
         "download_url_html": "下载地址",
         "path":"本地路径",
+        "path_html":"本地路径",
         "entries_num":"条目数量",
         "duration":"文件时长",
         "price": "价格",
         "icon": "示例图",
         "icon_html":"示例图",
+        "ops_html":"操作"
     }
 
     edit_columns = add_columns
-    list_columns = ['icon_html','name','label','describe','source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path','storage_size','entries_num','duration','price','owner']
+    list_columns = ['icon_html','name','version','label','describe','source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path_html','storage_size','entries_num','duration','price','owner','ops_html']
     cols_width = {
         "name": {"type": "ellip1", "width": 200},
-        "label": {"type": "ellip2", "width": 250},
+        "label": {"type": "ellip2", "width": 200},
+        "version": {"type": "ellip2", "width": 100},
         "describe":{"type": "ellip2", "width": 300},
         "field":{"type": "ellip1", "width": 100},
         "source_type":{"type": "ellip1", "width": 100},
@@ -61,28 +90,36 @@ class Dataset_ModelView_base():
         "industry": {"type": "ellip1", "width": 100},
         "url_html": {"type": "ellip1", "width": 200},
         "download_url_html": {"type": "ellip1", "width": 200},
-        "path":{"type": "ellip2", "width": 200},
+        "path_html":{"type": "ellip1", "width": 200},
         "storage_class": {"type": "ellip1", "width": 100},
         "storage_size":{"type": "ellip1", "width": 100},
         "file_type":{"type": "ellip1", "width": 100},
         "owner": {"type": "ellip1", "width": 200},
         "status": {"type": "ellip1", "width": 100},
-        "entries_num": {"type": "ellip1", "width": 100},
+        "entries_num": {"type": "ellip1", "width": 200},
         "duration": {"type": "ellip1", "width": 100},
         "price": {"type": "ellip1", "width": 100},
         "years": {"type": "ellip2", "width": 100},
         "usage": {"type": "ellip1", "width": 200},
         "research": {"type": "ellip2", "width": 100},
         "icon_html": {"type": "ellip1", "width": 100},
+        "ops_html":{"type": "ellip1", "width": 200},
     }
 
     add_form_extra_fields = {
         "name": StringField(
             label=_(datamodel.obj.lab('name')),
-            description='数据集英文名',
+            description='数据集英文名，小写',
             default='',
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired()]
+            validators=[DataRequired(),Regexp("^[a-z][a-z0-9_\-]*[a-z0-9]$"),]
+        ),
+        "subdataset": StringField(
+            label=_(datamodel.obj.lab('subdataset')),
+            description='子数据集名称，不存在子数据集，与name同值',
+            default='',
+            widget=BS3TextFieldWidget(),
+            validators=[DataRequired(), Regexp("^[a-z][a-z0-9_\-]*[a-z0-9]$"), ]
         ),
         "label": StringField(
             label=_(datamodel.obj.lab('label')),
@@ -147,8 +184,8 @@ class Dataset_ModelView_base():
         ),
         "owner": StringField(
             label=_(datamodel.obj.lab('owner')),
-            default='',
-            description='责任人,逗号分隔的多个用户',
+            default='*',
+            description='责任人,逗号分隔的多个用户,*表示公开',
             widget=BS3TextFieldWidget(),
         ),
         "status": SelectField(
@@ -182,13 +219,84 @@ class Dataset_ModelView_base():
     import_data=True
     download_data=True
 
+    # 数据集存储的存储方式
+    def info(self):
+        return jsonify({
+            "story_type":"cos",
+            "cos_key":"",
+            "cos_secret":""
+        })
+
     def pre_add(self,item):
         if not item.owner:
-            item.owner=g.user.username
+            item.owner=g.user.username+",*"
 
-    # def post_list(self,items):
-    #     flash(Markup('可批量删除不使用的数据集,可批量上传自产数据集'),category='info')
-    #     return items
+    # 将外部存储保存到本地存储中心
+    # @action("upload", __("上传到存储中心"), __("上传到存储中心"), "fa-trash", single=True)
+    @expose("/upload/<dataset_id>", methods=["GET"])
+    def upload(self, dataset_id):
+        dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
+        from myapp.tasks.async_task import update_dataset
+        kwargs = {
+            "dataset_id": dataset.id,
+        }
+        update_dataset.apply_async(kwargs=kwargs)
+        # update_dataset(task=None,dataset_id=item.id)
+
+    # 将外部存储保存到本地存储中心
+    @expose("/download/<dataset_name>", methods=["GET","POST"])
+    @expose("/download/<dataset_name>/<dataset_version>", methods=["GET",'POST'])
+    def download(self, dataset_name,dataset_version=None):
+        try:
+            store_type = conf.get('STORE_TYPE', 'minio')
+            params = importlib.import_module(f'myapp.utils.store.{store_type}')
+            store_client = getattr(params, store_type.upper() + '_client')(**conf.get('STORE_CONFIG', {}))
+            remote_file_path = f'/dataset/{dataset_name}/{dataset_version if dataset_version else "latest"}'
+            urls = store_client.get_download_url(remote_file_path)
+
+            return jsonify({
+                "status":0,
+                "result":{
+                    "store_type": conf.get('STORE_TYPE', 'minio'),
+                    "download_urls":urls
+                },
+                "message":"success"
+            })
+        except Exception as e:
+            print(e)
+            return jsonify({
+                "status": 1,
+                "result": '',
+                "message": str(e)
+            })
+
+    @expose("/preview/<dataset_name>", methods=["GET","POST"])
+    @expose("/preview/<dataset_name>/<dataset_version>", methods=["GET", 'POST'])
+    @expose("/preview/<dataset_name>/<dataset_version>/<dataset_segment>", methods=["GET", 'POST'])
+    def preview(self):
+        _args = request.json or {}
+        _args.update(request.args)
+        _args.update(json.loads(request.args.get('form_data',{})))
+        info={}
+        info.update(
+            {
+                "rows": [
+                    {
+                        "row_idx": 0,
+                        "row": {
+                            "col1": "",
+                            "col2": "",
+                            "col3": "",
+                            "label1": [""],
+                            "no_answer": False
+                        },
+                        "truncated_cells": []
+                    }
+                ]
+            }
+        )
+        return jsonify(info)
+
 
 class Dataset_ModelView_Api(Dataset_ModelView_base,MyappModelRestApi):
     datamodel = SQLAInterface(Dataset)

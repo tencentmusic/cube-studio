@@ -1,3 +1,4 @@
+import requests
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import jsonify
 
@@ -9,6 +10,7 @@ from flask_appbuilder.actions import action
 from myapp import app, appbuilder,db
 from flask_babel import lazy_gettext
 import re
+import pysnooper
 import copy
 from sqlalchemy.exc import InvalidRequestError
 from myapp.models.model_job import Repository
@@ -938,7 +940,7 @@ output %s
         if env=='prod':
             hpas = re.split(',|;', service.hpa)
             regex = re.compile(r"\(.*\)")
-            if not int(regex.sub('', service.resource_gpu)):
+            if float(regex.sub('', service.resource_gpu))<1:
                 for hpa in copy.deepcopy(hpas):
                     if 'gpu' in hpa:
                         hpas.remove(hpa)
@@ -974,6 +976,7 @@ output %s
         if env=='prod':
             service.model_status = 'online'
         service.deploy_history=service.deploy_history+"\n"+"deploy %s: %s %s"%(env,g.user.username,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        service.deploy_history = '\n'.join(service.deploy_history.split("\n")[-10:])
         db.session.commit()
         if env=="debug":
             time.sleep(2)

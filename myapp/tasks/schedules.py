@@ -1,6 +1,8 @@
 
 """Utility functions used across Myapp"""
 import logging
+import random
+
 import pysnooper
 import re
 import croniter
@@ -63,7 +65,7 @@ def delete_old_crd(object_info):
 
         with session_scope(nullpool=True) as dbsession:
             for crd_object in crd_objects:
-                print(crd_object['status'],crd_object['create_time'],crd_object['finish_time'])
+                # print(crd_object['status'],crd_object['create_time'],crd_object['finish_time'])
 
                 # # 如果当前还在运行，上层workflow已停止，直接删除
                 # if crd_object['status']=='Running':
@@ -72,7 +74,7 @@ def delete_old_crd(object_info):
                     try:
                         # 如果workflow被删除了，则下面的也一并被删除
                         workflows = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).all()
-                        print(workflows)
+                        # print(workflows)
                         for workflow in workflows:
                             if workflow.status=='Deleted':
                                 crd_names = k8s_client.delete_crd(group=object_info['group'],
@@ -127,208 +129,49 @@ def delete_old_crd(object_info):
 @celery_app.task(name="task.delete_workflow", bind=True)
 def delete_workflow(task):
     print('begin delete task')
+    for crd_name in ["workflow","tfjob",'pytorchjob','xgbjob','mpijob','vcjob','sparkjob','paddlejob','mxjob','framework']:
+        crd_info = conf.get("CRD_INFO", {}).get(crd_name, {})
+        if crd_info:
+            try:
+                delete_old_crd(crd_info)
+            except Exception as e:
+                print(e)
 
-    workflow_info = conf.get("CRD_INFO", {}).get('workflow', {})
-    print(workflow_info)
-    if workflow_info:
-        try:
-            delete_old_crd(workflow_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-    tfjob_info = conf.get("CRD_INFO", {}).get('tfjob', {})
-    print(tfjob_info)
-    if tfjob_info:
-        try:
-            delete_old_crd(tfjob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-    pytorchjob_info = conf.get("CRD_INFO", {}).get('pytorchjob', {})
-    print(pytorchjob_info)
-    if pytorchjob_info:
-        try:
-            delete_old_crd(pytorchjob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-
-    xgbjob_info = conf.get("CRD_INFO", {}).get('xgbjob', {})
-    print(xgbjob_info)
-    if xgbjob_info:
-        try:
-            delete_old_crd(xgbjob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-    mpijob_info = conf.get("CRD_INFO", {}).get('mpijob', {})
-    print(mpijob_info)
-    if mpijob_info:
-        try:
-            delete_old_crd(mpijob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-    vcjob_info = conf.get("CRD_INFO", {}).get('vcjob', {})
-    print(vcjob_info)
-    if vcjob_info:
-        try:
-            delete_old_crd(vcjob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-    sparkjob_info = conf.get("CRD_INFO", {}).get('sparkjob', {})
-    print(sparkjob_info)
-    if sparkjob_info:
-        try:
-            delete_old_crd(sparkjob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-    paddlejob_info = conf.get("CRD_INFO", {}).get('paddlejob', {})
-    print(paddlejob_info)
-    if paddlejob_info:
-        try:
-            delete_old_crd(paddlejob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-    mxjob_info = conf.get("CRD_INFO", {}).get('mxjob', {})
-    print(mxjob_info)
-    if mxjob_info:
-        try:
-            delete_old_crd(mxjob_info)
-        except Exception as e:
-            print(e)
-
-    time.sleep(10)
-
-
-    # # 删除framework
-    # framework_info = conf.get("CRD_INFO", {}).get('framework', {})
-    # print(framework_info)
-    # if framework_info:
-    #     delete_old_crd(framework_info)
-    #
-    # time.sleep(10)
-
+        time.sleep(10)
 
     # 删除deployment
     clusters = conf.get('CLUSTERS', {})
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
         k8s_client = K8s(cluster.get('KUBECONFIG',''))
-
-        deployments = k8s_client.AppsV1Api.list_namespaced_deployment(namespace='pipeline').items
-        for deploy in deployments:
-            run_id = deploy.metadata.labels.get('run-id', '').strip()
-            if run_id:
-                with session_scope(nullpool=True) as dbsession:
-                    try:
-                        workflows = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).all()
-                        for workflow in workflows:
-                            if workflow.status == 'Succeeded' or workflow.status == 'Deleted' or workflow.status == 'Failed':
-                                k8s_client.delete_deployment(namespace='pipeline', name=deploy.name)
-                    except Exception as e:
-                        print(e)
-
+        with session_scope(nullpool=True) as dbsession:
+            try:
+                deployments = k8s_client.AppsV1Api.list_deployment_for_all_namespaces().items
+                # namespaces = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).all()
+                # 获取所有可能的命名空间
+                namespaces = dbsession.query(Workflow.namespace).group_by(Workflow.namespace).all()
+                namespaces = list(set([item[0] for item in namespaces]))
+                namespaces = [namespace.strip() for namespace in namespaces if namespace and namespace.strip()]
+                print("workflow命名空间",namespaces)
+                for deploy in deployments:
+                    # print(deploy)
+                    namespace = deploy.metadata.namespace
+                    name = deploy.metadata.name
+                    run_id = deploy.metadata.labels.get('run-id', '').strip() if deploy.metadata.labels else ''
+                    # print('deployment'+namespace,name,run_id)
+                    # 只处理workflow命名空间，有runid的dp
+                    if namespace and namespace in namespaces and name and run_id:
+                        try:
+                            workflows = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).all()
+                            for workflow in workflows:
+                                if workflow.status == 'Succeeded' or workflow.status == 'Deleted' or workflow.status == 'Failed':
+                                    print(f'delete deployment:{namespace},{name}')
+                                    k8s_client.delete_deployment(namespace=namespace, name=name)
+                        except Exception as e1:
+                            print(e1)
+            except Exception as e2:
+                print(e2)
             # print(deploy)
-
-            # try:
-            #     create_time = deploy.metadata.creation_timestamp.strftime('%Y-%m-%d')
-            #     delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-            #     if create_time < delete_time:
-            #         print('kill %s'%deploy.metadata.name)
-            #         k8s_client.delete_deployment(namespace='pipeline', name=deploy.name)
-            # except Exception as e:
-            #     print(e)
-
-
-
-    time.sleep(60)
-
-
-    # 删除daemon
-    clusters = conf.get('CLUSTERS', {})
-    for cluster_name in clusters:
-        cluster = clusters[cluster_name]
-        try:
-            k8s_client = K8s(cluster.get('KUBECONFIG',''))
-
-            daemon_sets = k8s_client.AppsV1Api.list_namespaced_daemon_set(namespace='pipeline').items
-            for daemon_set in daemon_sets:
-                # print(deploy)
-                run_id = daemon_set.metadata.labels.get('run-id', '').strip()
-                if run_id:
-                    with session_scope(nullpool=True) as dbsession:
-                        try:
-                            workflows = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).all()
-                            for workflow in workflows:
-                                if workflow.status == 'Succeeded' or workflow.status == 'Deleted' or workflow.status == 'Failed':
-                                    k8s_client.AppsV1Api.delete_namespaced_daemon_set(namespace='pipeline', name=daemon_set.name)
-                        except Exception as e:
-                            print(e)
-
-                # try:
-                #     create_time = daemon_set.metadata.creation_timestamp.strftime('%Y-%m-%d')
-                #     delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-                #     if create_time < delete_time:
-                #         print('kill %s'%daemon_set.metadata.name)
-                #         k8s_client.AppsV1Api.delete_namespaced_daemon_set(namespace='pipeline', name=daemon_set.name)
-                # except Exception as e:
-                #     print(e)
-        except Exception as e:
-            print(e)
-
-    time.sleep(60)
-
-    # 删除sts
-    clusters = conf.get('CLUSTERS', {})
-    for cluster_name in clusters:
-        cluster = clusters[cluster_name]
-        try:
-            k8s_client = K8s(cluster.get('KUBECONFIG',''))
-
-            stss = k8s_client.AppsV1Api.list_namespaced_stateful_set(namespace='pipeline').items
-            for sts in stss:
-                run_id = sts.metadata.labels.get('run-id', '').strip()
-                if run_id:
-                    with session_scope(nullpool=True) as dbsession:
-                        try:
-                            workflows = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).all()
-                            for workflow in workflows:
-                                if workflow.status == 'Succeeded' or workflow.status == 'Deleted' or workflow.status == 'Failed':
-                                    k8s_client.AppsV1Api.delete_namespaced_stateful_set(namespace='pipeline', name=sts.name)
-                        except Exception as e:
-                            print(e)
-                # try:
-                #     create_time = sts.metadata.creation_timestamp.strftime('%Y-%m-%d')
-                #     delete_time=(datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-                #     if create_time < delete_time:
-                #         print('kill %s'%sts.metadata.name)
-                #         k8s_client.AppsV1Api.delete_namespaced_stateful_set(namespace='pipeline', name=sts.name)
-                # except Exception as e:
-                #     print(e)
-        except Exception as e:
-            print(e)
-
-    time.sleep(60)
 
 
 
@@ -423,7 +266,7 @@ def delete_debug_docker(task):
 
     push_message(conf.get('ADMIN_USER', '').split(','), 'debug pod 清理完毕')
 
-    # 删除 notebook 容器
+    # 删除 sqllab jupyter 容器
     print('begin delete idex')
     namespace = conf.get('NOTEBOOK_NAMESPACE')
     for cluster_name in clusters:
@@ -481,21 +324,6 @@ def deliver_message(pipeline,message=''):
     # push_message(conf.get('ADMIN_USER').split(','),message)
 
 
-# @pysnooper.snoop()
-def save_history(dbsession,pipeline,message=''):
-    schedule_history = RunHistory(
-        created_on=datetime.datetime.now(),
-        pipeline_id=pipeline.id,
-        pipeline_argo_id=pipeline.pipeline_id,
-        pipeline_file=pipeline.pipeline_file,
-        version_id=pipeline.version_id,
-        run_id=pipeline.run_id,
-        message=message
-    )
-    dbsession.add(schedule_history)
-    dbsession.commit()
-
-
 # 获取预计发送时间。控制发送频率不要太频繁
 # @pysnooper.snoop()
 def next_schedules(cron_time, start_at, stop_at, resolution=0):
@@ -533,12 +361,14 @@ def make_timerun_config(task):
     with session_scope(nullpool=True) as dbsession:
         try:
             resolution = conf.get("PIPELINE_TASK_CRON_RESOLUTION", 0) * 60  # 设置最小发送时间间隔，15分钟
-            # Get the top of the hour
-            # start_at = datetime.datetime.now(tzlocal()).replace(microsecond=0, second=0, minute=0)  # 当前小时整点
-            # stop_at = start_at + datetime.timedelta(seconds=3600)  # 下一个小时整点
 
             pipelines = dbsession.query(Pipeline).filter(Pipeline.schedule_type=='crontab').all()  # 获取model记录
             for pipeline in pipelines:  # 循环发起每一个调度
+                # 无效定时时间，退出
+                if not pipeline.cron_time:
+                    continue
+                if not re.match("^[0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+",pipeline.cron_time.strip().replace('  ', ' ')):
+                    continue
                 if pipeline.cronjob_start_time:
                     start_at = datetime.datetime.strptime(pipeline.cronjob_start_time,'%Y-%m-%d %H:%M:%S')
                 else:
@@ -559,11 +389,12 @@ def make_timerun_config(task):
                     for eta in next_schedules(pipeline.cron_time, start_at, stop_at, resolution=resolution):  #
                         # print('执行时间点', eta)
                         execution_date = eta.strftime('%Y-%m-%d %H:%M:%S')
-                        if execution_date>pipeline.cronjob_start_time:
+                        cronjob_start_time = pipeline.cronjob_start_time if pipeline.cronjob_start_time else json.loads(pipeline.expand).get("cronjob_start_time",'')
+                        if cronjob_start_time and execution_date>cronjob_start_time:
                             # 要检查是否重复添加记录了
                             exist_timeruns=dbsession.query(RunHistory).filter(RunHistory.pipeline_id==pipeline.id).filter(RunHistory.execution_date==execution_date).all()
                             if not exist_timeruns:
-                                pipeline_file = dag_to_pipeline(pipeline=pipeline, dbsession=dbsession,execution_date=execution_date)  # 合成workflow
+                                pipeline_file,run_id = dag_to_pipeline(pipeline=pipeline, dbsession=dbsession,workflow_label={"schedule_type":"contab"},execution_date=execution_date)  # 合成workflow
                                 # print('make pipeline file %s' % pipeline_file)
                                 if pipeline_file:
                                     schedule_history = RunHistory(
@@ -572,7 +403,7 @@ def make_timerun_config(task):
                                         pipeline_argo_id='',
                                         pipeline_file=pipeline_file,
                                         version_id='',
-                                        run_id='',
+                                        run_id=run_id,
                                         message='',
                                         status='comed',
                                         execution_date=execution_date
@@ -605,7 +436,7 @@ def make_timerun_config(task):
 # 计算那些任务可以准备上传了
 # @pysnooper.snoop()
 def upload_timerun(pipeline_id,stop_time):
-    # print('============= begin upload timerun')
+    print('============= begin upload timerun')
 
     with session_scope(nullpool=True) as dbsession:
         try:
@@ -633,6 +464,7 @@ def upload_timerun(pipeline_id,stop_time):
                     # 获取前一个定时调度的timerun
                     pass_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id==pipeline.id).filter(RunHistory.execution_date>start_time).filter(RunHistory.execution_date<timerun.execution_date).order_by(RunHistory.execution_date.desc()).first()
                     if not pass_run:
+                        pass
                         upload_workflow.apply_async(kwargs=kwargs,expires=120,retry=False)
                     elif pass_run.status=='created':
                         # 这里要注意处理一下 watch组件坏了，或者argo controller组件坏了的情况。以及误操作在workflow界面把记录删除了的情况
@@ -661,7 +493,7 @@ def upload_timerun(pipeline_id,stop_time):
                                     dbsession.commit()
 
                                     label = json.loads(crd['labels'])
-                                    if crd['status']=='Succeeded' and label.get('pipeline/runid','')==pass_run.run_id:
+                                    if crd['status']=='Succeeded' and label.get('run-id','')==pass_run.run_id:
                                         print('pass workflow success finish')
                                         upload_workflow.apply_async(kwargs=kwargs,expires=120,retry=False)
                 # 按时间倒序，只保留最新的n个实例，之前的要删掉
@@ -678,12 +510,11 @@ def upload_timerun(pipeline_id,stop_time):
                     # 如果有旧的在运行，就先删掉
                     exist_workflows = pipeline.get_workflow()
                     for exist_workflow in exist_workflows:
-                        argo_run_id = json.loads(exist_workflow['labels']).get('pipeline/runid','')
                         run_id = json.loads(exist_workflow['labels']).get('run-id', '')
-                        if argo_run_id and run_id:
-                            pass_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id == pipeline.id).filter(RunHistory.execution_date > start_time).filter(RunHistory.run_id == argo_run_id).first()
+                        if run_id:
+                            pass_run = dbsession.query(RunHistory).filter(RunHistory.pipeline_id == pipeline.id).filter(RunHistory.execution_date > start_time).filter(RunHistory.run_id == run_id).first()
                             # 如果是定时任务发起的实例，并且已经过期，就直接删除
-                            if pass_run and argo_run_id not in latest_run_ids:
+                            if pass_run and run_id not in latest_run_ids:
                                 k8s_client = K8s(pipeline.project.cluster.get('KUBECONFIG',''))
                                 k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace='pipeline',run_id=run_id)
                                 workflow = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).first()
@@ -716,10 +547,7 @@ def upload_timerun(pipeline_id,stop_time):
                                     "timerun_id": timerun.id,
                                     "pipeline_id": pipeline_id
                                 }
-
-                                # if timerun.execution_date > datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'):
-                                #     upload_workflow.apply_async(kwargs=kwargs,eta=datetime.datetime.strptime(timerun.execution_date,'%Y-%m-%d %H:%M:%S'))
-                                # else:
+                                # 执行时间会有0~5分钟差异
                                 upload_workflow.apply_async(kwargs=kwargs,expires=120,retry=False)
 
         except Exception as e:
@@ -731,6 +559,7 @@ def upload_timerun(pipeline_id,stop_time):
 # 真正去做上传动作。
 @celery_app.task(name="task.upload_workflow", bind=True)
 def upload_workflow(task,timerun_id,pipeline_id):
+    print('begin run workflow',timerun_id,pipeline_id)
     with session_scope(nullpool=True) as dbsession:
         try:
             pipeline = dbsession.query(Pipeline).filter(Pipeline.id == int(pipeline_id)).first()
@@ -745,25 +574,21 @@ def upload_workflow(task,timerun_id,pipeline_id):
             # print('read pipeline file %s' % timerun.pipeline_file)
             # return
             print('begin upload and run pipeline %s' % pipeline.name)
+            try:
+                json.loads(timerun.pipeline_file)
+            except Exception as e:
+                # 不是json要重新生成
+                timerun.pipeline_file, timerun.run_id = dag_to_pipeline(pipeline=pipeline, dbsession=dbsession,
+                                                        workflow_label={"schedule_type": "contab"},
+                                                        execution_date=timerun.execution_date)  # 合成workflow
+                dbsession.commit()
+                # print(e)
+            crd_name = run_pipeline(cluster=pipeline.project.cluster,workflow_json=json.loads(timerun.pipeline_file))
+            timerun.pipeline_argo_id = crd_name  # pipeline_argo_id用来存储workflow的name
+            timerun.status='created'
 
-            pipeline_argo_id,version_id,run_id = run_pipeline(
-                pipeline_file=timerun.pipeline_file,
-                pipeline_name=pipeline.name,
-                kfp_host=pipeline.project.cluster.get('KFP_HOST'),
-                pipeline_argo_id=timerun.pipeline_argo_id,
-                pipeline_argo_version_id=timerun.version_id
-            )
-            print('success upload and run pipeline %s,pipeline_argo_id %s, version_id %s,run_id %s ' % (pipeline.name,pipeline_argo_id,version_id,run_id))
-            if pipeline_argo_id and version_id and run_id:
-                timerun.pipeline_argo_id = pipeline_argo_id
-                timerun.version_id = version_id
-                timerun.run_id = run_id  # 这个是kfp产生的
-                timerun.status='created'
-
-                dbsession.commit()  # 更新
-                deliver_message(pipeline)   # 没有操作事务
-            else:
-                push_message(conf.get('ADMIN_USER').split(','),'crontab pipeline %s exec time %s upload fail'%(pipeline.name,timerun.execution_date))
+            dbsession.commit()  # 更新
+            deliver_message(pipeline)   # 没有操作事务
 
         except Exception as e:
             print('kubeflow cronjob run pipeline error:',e)
@@ -771,8 +596,6 @@ def upload_workflow(task,timerun_id,pipeline_id):
                 deliver_message(pipeline,'kubeflow cronjob run pipeline error:'+str(e))
             except Exception as e2:
                 print(e2)
-
-
 
 
 
@@ -808,12 +631,14 @@ def delete_old_data(task):
     # 获取路径
     paths = conf.get('DELETE_OLD_DATA', [])
     for path in paths:
-        print('delete dir', path)
-        if os.path.exists(path):
-            delDir(path, iteration=True)
-            print('delete dir finish', path)
-            time.sleep(10)
-
+        try:
+            print('delete dir', path)
+            if os.path.exists(path):
+                delDir(path, iteration=True)
+                print('delete dir finish', path)
+                time.sleep(10)
+        except Exception as e:
+            print(e)
 
 # 获取训练时长
 # @pysnooper.snoop()
@@ -957,7 +782,7 @@ def check_pipeline_run(task):
     check_pipeline_resource()
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def get_dir_size(dir):
     dir_size = {}
     try:
@@ -1027,27 +852,56 @@ def push_workspace_size(task):
 def watch_gpu(task):
     clusters = conf.get('CLUSTERS', {})
     for cluster_name in clusters:
-        cluster = clusters[cluster_name]
-        k8s_client = K8s(cluster.get('KUBECONFIG',''))
+        try:
+            cluster = clusters[cluster_name]
+            k8s_client = K8s(cluster.get('KUBECONFIG',''))
 
-        all_gpu_pods=k8s_client.get_uesd_gpu(namespaces=['pipeline','automl','jupyter','service'])
+            all_gpu_pods = k8s_client.get_uesd_gpu(namespaces=['pipeline','automl','jupyter','service'])
 
-        print(all_gpu_pods)
-        message = ''
-        used_gpu = 0
-        for pod in all_gpu_pods:
-            used_gpu+=pod['gpu']
-            message+=pod['namespace']+","+pod['user']+","+pod['name']+","+str(pod['gpu'])+"\n"
-        print(message)
-        message+="%s集群共已使用%s张卡"%(cluster_name,int(used_gpu))
-        push_message(conf.get('ADMIN_USER','').split(','),message)
+            print(all_gpu_pods)
+            message = ''
+            used_gpu = 0
+            for pod in all_gpu_pods:
+                used_gpu+=pod['gpu']
+                message+=pod['namespace']+","+pod['user']+","+pod['name']+","+str(pod['gpu'])+"\n"
+            print(message)
+            message+="%s集群共已使用%s张卡"%(cluster_name,int(used_gpu))
+            push_message(conf.get('ADMIN_USER','').split(','),message)
+
+        except Exception as e1:
+            print(e1)
+
+@celery_app.task(name="task.watch_pod_utilization", bind=True)
+def watch_pod_utilization(task=None):
+    clusters = conf.get('CLUSTERS', {})
+    for cluster_name in clusters:
+        try:
+            cluster = clusters[cluster_name]
+            k8s_client = K8s(cluster.get('KUBECONFIG', ''))
+
+            # 获取连续2天的低利用率pod要报警
+            from myapp.utils.py.py_prometheus import Prometheus
+            prometheus = Prometheus(conf.get('PROMETHEUS', 'prometheus-k8s.monitoring:9090'))
+
+            service_pods = k8s_client.get_pods(namespace='service')
+            service_pods_metrics = prometheus.get_resource_metric(namespace="service")
+            for pod in service_pods:
+                if pod['start_time'] > (datetime.datetime.now() - datetime.timedelta(days=2)) and pod['name'] in service_pods_metrics and pod['username']:
+                    try:
+                        if pod['cpu'] > 5 and service_pods_metrics[pod['name']]['cpu'] < pod['cpu'] / 5:
+                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源cpu使用率过低，最新2天平均使用率为{round(service_pods_metrics[pod["name"]]["cpu"],2)}，但申请值为{pod["cpu"]}，请及时清理或修改申请值')
+
+                        # 虚拟gpu服务不考虑
+                        if int(pod.get('gpu', 0)) >= 1 and service_pods_metrics[pod['name']]['gpu'] < 0.15:
+                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源gpu使用率过低，最新2天平均使用率为{round(service_pods_metrics[pod["name"]]["gpu"],2)}，但申请值为{pod["gpu"]}，请及时清理或修改申请值')
+                            pass
+                    except Exception as e:
+                        print(e)
+
+        except Exception as e1:
+            print(e1)
+
         # push_admin("%s集群共已使用%s张卡"%(cluster_name,int(used_gpu)))
-
-# @celery_app.task(name="task.share_public", bind=True)
-# @pysnooper.snoop()
-# def share_public(task):
-#     pass
-
 
 
 # 各项目组之间相互均衡的方案，一台机器上可能并不能被一个项目组占完，所以可能会跑多个项目组的任务
@@ -1215,7 +1069,7 @@ def adjust_node_resource(task):
 
 
 # get_dir_size('/data/k8s/kubeflow/pipeline/workspace')
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def get_deployment_node_selector(name,namespace):
     from kubernetes import client
     exist_dp = client.AppsV1Api().read_namespaced_deployment(name=name, namespace=namespace)
@@ -1246,9 +1100,8 @@ def get_deployment_node_selector(name,namespace):
     pass
 
 
-# # 不同优先级的服务之间调节算力
+# 不同优先级的服务之间调节算力
 @celery_app.task(name="task.adjust_service_resource", bind=True)
-@pysnooper.snoop(watch_explode=())
 def adjust_service_resource(task):
     from kubernetes import client
     cluster_name='tke'
@@ -1317,8 +1170,6 @@ def adjust_service_resource(task):
 
 
 from myapp.models.model_aihub import Aihub
-
-
 def add_aihub(info_path):
     if not os.path.exists(info_path):
         return
@@ -1367,7 +1218,6 @@ def add_aihub(info_path):
 
 
 @celery_app.task(name="task.update_aihub", bind=True)
-@pysnooper.snoop()
 def update_aihub(task):
     import random
     time.sleep(random.randint(10,600))

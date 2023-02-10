@@ -409,23 +409,7 @@ class Service_Pipeline_ModelView_Base():
     # # @event_logger.log_this
     @expose("/web/log/<service_pipeline_id>", methods=["GET"])
     def web_log(self,service_pipeline_id):
-        service_pipeline = db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
-        if service_pipeline.run_id:
-            data = {
-                "url": service_pipeline.project.cluster.get('PIPELINE_URL') + "runs/details/" + service_pipeline.run_id,
-                "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
-                "delay":500,
-                "loading": True
-            }
-            # 返回模板
-            if service_pipeline.project.cluster['NAME']==conf.get('ENVIRONMENT'):
-                return self.render_template('link.html', data=data)
-            else:
-                return self.render_template('external_link.html', data=data)
-        else:
-            flash('no running instance','warning')
-            return redirect('/service_pipeline_modelview/web/%s'%service_pipeline.id)
-
+        pass
     # 链路跟踪
     @expose("/web/monitoring/<service_pipeline_id>", methods=["GET"])
     def web_monitoring(self,service_pipeline_id):

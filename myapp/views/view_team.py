@@ -136,7 +136,7 @@ class Project_ModelView_Base():
     related_views = [Project_User_ModelView,]
     add_columns = ['name','describe','expand']
     edit_columns = add_columns
-
+    project_type = 'org'
 
     # @pysnooper.snoop()
     def pre_add_web(self):

@@ -188,7 +188,7 @@ class Notebook_ModelView_Base():
 
         item.resource_memory=core.check_resource_memory(item.resource_memory,self.src_item_json.get('resource_memory',None))
         item.resource_cpu = core.check_resource_cpu(item.resource_cpu,self.src_item_json.get('resource_cpu',None))
-
+        item.namespace = json.loads(item.project.expand).get('NOTEBOOK_NAMESPACE', conf.get('NOTEBOOK_NAMESPACE'))
         if 'theia' in item.images or 'vscode' in item.images:
             item.ide_type = 'theia'
         elif 'bigdata' in item.images:
@@ -281,7 +281,7 @@ class Notebook_ModelView_Base():
 
 
         k8s_client = K8s(notebook.cluster.get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = notebook.namespace
         SERVICE_EXTERNAL_IP = []
         if notebook.project.expand:
             SERVICE_EXTERNAL_IP = json.loads(notebook.project.expand).get('SERVICE_EXTERNAL_IP', '')

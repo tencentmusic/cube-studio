@@ -1,6 +1,9 @@
+import random
+
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 import uuid
+import pysnooper
 from myapp.models.model_job import Job_Template,Task,Pipeline
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
@@ -63,7 +66,7 @@ class Task_ModelView_Base():
     edit_columns = add_columns
     base_order = ('id','desc')
     order_columns = ['id']
-    search_columns = ['pipeline']
+    search_columns = ['pipeline','name','label']
 
     conv = GeneralModelConverter(datamodel)
 
@@ -121,7 +124,7 @@ class Task_ModelView_Base():
             label = _(datamodel.obj.lab('node_selector')),
             description='运行当前task所在的机器', widget=BS3TextFieldWidget(),
             default=Task.node_selector.default.arg,
-            validators=[DataRequired()]
+            validators=[]
         ),
         'resource_memory': StringField(
             label = _(datamodel.obj.lab('resource_memory')),
@@ -251,7 +254,32 @@ class Task_ModelView_Base():
         elif not item.args:
             item.args='{}'
 
+    # 在web界面上添加一个图标
+    # @pysnooper.snoop()
+    def post_add(self,task):
+        pipeline=task.pipeline
+        expand = json.loads(pipeline.expand) if pipeline.expand else []
+        for ui_node in expand:
+            if ui_node.get('id',0)==task.id:
+                return
+        expand.append(
+            {
+                "id": str(task.id),
+                "type": 'dataSet',
+                "position": {
+                    "x": random.randint(50,1000),
+                    "y": random.randint(50,600),
+                },
+                "data":{
+                    "name": task.name,
+                    "label": task.label
+                }
 
+            }
+        )
+        pipeline.expand = json.dumps(expand,ensure_ascii=False,indent=4)
+        db.session.commit()
+        pass
 
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_add(self, item):
@@ -274,7 +302,7 @@ class Task_ModelView_Base():
         item.create_datetime=datetime.datetime.now()
         item.change_datetime = datetime.datetime.now()
 
-        if core.get_gpu(item.resource_gpu)[0]:
+        if int(core.get_gpu(item.resource_gpu)[0]):
             item.node_selector = item.node_selector.replace('cpu=true','gpu=true')
         else:
             item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
@@ -325,7 +353,7 @@ class Task_ModelView_Base():
         item.change_datetime = datetime.datetime.now()
 
 
-        if core.get_gpu(item.resource_gpu)[0]:
+        if int(core.get_gpu(item.resource_gpu)[0]):
             item.node_selector = item.node_selector.replace('cpu=true','gpu=true')
         else:
             item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')

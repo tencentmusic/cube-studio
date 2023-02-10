@@ -93,8 +93,6 @@ class Service_ModelView_base():
         "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,description='访问域名，' + host_rule, widget=BS3TextFieldWidget()),
     }
 
-    gpu_type = conf.get('GPU_TYPE')
-
 
     add_form_extra_fields['resource_gpu'] = StringField(
         _(datamodel.obj.lab('resource_gpu')), default='0',

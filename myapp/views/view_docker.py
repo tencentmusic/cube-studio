@@ -119,7 +119,11 @@ class Docker_ModelView_Base():
             flash('目标镜像名称不符合规范','warning')
 
         if item.expand:
-            item.expand = json.dumps(json.loads(item.expand),indent=4,ensure_ascii=False)
+            expand = json.loads(item.expand)
+            expand['namespace'] = json.loads(item.project.expand).get('NOTEBOOK_NAMESPACE', conf.get('NOTEBOOK_NAMESPACE'))
+            item.expand = json.dumps(expand,indent=4,ensure_ascii=False)
+
+
 
     def pre_update(self,item):
         self.pre_add(item)
@@ -137,7 +141,7 @@ class Docker_ModelView_Base():
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = json.loads(docker.expand).get("namespace",conf.get('NOTEBOOK_NAMESPACE'))
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         pod = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
         if pod:
@@ -245,7 +249,7 @@ class Docker_ModelView_Base():
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = json.loads(docker.expand).get("namespace",conf.get('NOTEBOOK_NAMESPACE'))
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         pod = k8s_client.v1.read_namespaced_pod(name=pod_name, namespace=namespace)
         node_name=''

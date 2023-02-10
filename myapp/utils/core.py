@@ -1918,7 +1918,7 @@ def get_gpu(resource_gpu):
 
             resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
             resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
-            gpu_num = int(resource_gpu)
+            gpu_num = float(resource_gpu)
 
     except Exception as e:
         print(e)

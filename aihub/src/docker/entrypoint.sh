@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mkdir -p /data/log/nginx/
-pip install celery redis
+pip install celery redis pyarrow requests_toolbelt cryptography tqdm fsspec aiohttp librosa
 
 
 cp /src/docker/nginx.conf /etc/nginx/nginx.conf

@@ -283,6 +283,14 @@ class BaseMyappView(BaseView):
             "feature_flags": get_feature_flags(),
         }
 
+    alert_config = {}  # url:function
+
+    def __init__(self):
+        super(BaseMyappView, self).__init__()
+
+        if 'alert_config' not in conf:
+            conf['alert_config'] = {}
+        conf['alert_config'].update(self.alert_config)
 
 # 自定义list页面
 class MyappListWidget(ListWidget):

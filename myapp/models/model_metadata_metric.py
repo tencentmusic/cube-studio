@@ -15,7 +15,7 @@ metadata = Model.metadata
 conf = app.config
 
 
-class Metadata_metric(Model,AuditMixinNullable,ImportMixin,MyappModelBase):
+class Metadata_metric(Model,ImportMixin,MyappModelBase):
     __tablename__ = 'metadata_metric'
     id = Column(Integer, primary_key=True)
     app = Column(String(100), nullable=False)

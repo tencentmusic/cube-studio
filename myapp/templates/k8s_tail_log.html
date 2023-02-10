@@ -1,0 +1,66 @@
+<!DOCTYPE>
+<html>
+<head>
+    <title>log</title>
+    <meta charset="UTF-8" />
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+
+    <style>
+        #log-container {
+            height: 800px;
+            /*width: 800px;*/
+            overflow-x: scroll;
+            padding: 10px;
+        }
+        .logs {
+            background-color: black;
+            color: aliceblue;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<div id="log-container">
+    <pre class="logs">
+    </pre>
+</div>
+
+<script type="text/javascript">
+    var last_response_len = false;
+    var logs = $("#log-container");
+    $.ajax('{{ data.url }}', {
+        xhrFields: {
+            onprogress: function(e)
+            {
+                var this_response, response = e.currentTarget.response;
+                if(last_response_len === false)
+                {
+                    this_response = response;
+                    last_response_len = response.length;
+                }
+                else
+                {
+                    this_response = response.substring(last_response_len);
+                    last_response_len = response.length;
+                }
+                // console.log(this_response);
+                // 接收服务端的实时日志并添加到HTML页面中
+                $("#log-container pre").append(this_response);
+                // 滚动条滚动到最低部
+                $("#log-container").scrollTop($("#log-container pre").height() - $("#log-container").height() + 10);
+            }
+        }
+    })
+        .done(function(data)
+        {
+
+            console.log('Complete response = ' + data);
+        })
+        .fail(function(data)
+        {
+            console.log('Error: ', data);
+        });
+    console.log('Request Sent');
+</script>
+</body>
+</html>

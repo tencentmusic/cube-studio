@@ -162,8 +162,8 @@ class Myauthdbview(AuthDBView):
     @expose('/login/')
     @pysnooper.snoop()
     def login(self):
-        GITHUB_APPKEY = ''
-        GITHUB_SECRET = ''
+        GITHUB_APPKEY = '24c051d2b3ec2def190b'
+        GITHUB_SECRET = 'c0073b43636ca260166e0c63e6c1fd00ee68fd33'
         GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s'
 
         request_data = request.args.to_dict()

@@ -259,6 +259,7 @@ class MyappModelBase():
         "responsible":"责任人",
         "cycle_unit":"周期单位",
         "task_type":"任务类型",
+		"task_id": "任务 id",
         "creator": "创建者",
         "created_by": "创建者",
         "changed_by": "修改者",
@@ -280,14 +281,19 @@ class MyappModelBase():
         return _(re.sub("[._]", " ", col).title())
 
 
+
+    # 获取node选择器
     def get_default_node_selector(self,node_selector,resource_gpu,model_type):
-        # prefer already defined selectors
+        # 先使用项目中定义的选择器
         if not node_selector:
             node_selector=''
 
-        # completely determined by the platform
-        if core.get_gpu(resource_gpu)[0]:
+        # 不使用用户的填写，完全平台决定
+        gpu_num = core.get_gpu(resource_gpu)[0]
+        if gpu_num>=1:
             node_selector = node_selector.replace('cpu=true', 'gpu=true') + ",gpu=true,%s=true"%model_type
+        elif 1>gpu_num>0:
+            node_selector = node_selector.replace('cpu=true', 'vgpu=true') + ",vgpu=true,%s=true" % model_type
         else:
             node_selector = node_selector.replace('gpu=true', 'cpu=true') + ",cpu=true,%s=true"%model_type
         if 'org' not in node_selector:

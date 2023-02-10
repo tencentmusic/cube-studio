@@ -28,7 +28,6 @@ from datetime import datetime, timezone, timedelta
 def listen_service():
     namespace = conf.get('SERVICE_NAMESPACE')
     w = watch.Watch()
-    # label = 'pipelines.kubeflow.org/kfp_sdk_version=1.0.4'
     while(True):
         try:
             print('begin listen')
@@ -38,7 +37,9 @@ def listen_service():
                         if event['object'].status and event['object'].status.container_statuses and event["type"]=='MODIFIED':  # 容器重启会触发MODIFIED
                             # terminated 终止，waiting 等待启动，running 运行中
                             container_statuse= event['object'].status.container_statuses[0].state
-                            terminated = container_statuse.terminated  # waiting running
+                            terminated = container_statuse.terminated
+                            # waiting = container_statuse.waiting
+                            # running = container_statuse.running
                             service_name=event['object'].metadata.labels.get('app','')
                             inferenceserving = dbsession.query(InferenceService).filter_by(name=service_name).first() if service_name else None
                             if service_name and inferenceserving:
@@ -46,7 +47,7 @@ def listen_service():
                                 if terminated and terminated.finished_at:  # 任务终止
                                     finished_at = int(terminated.finished_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间
                                     if (datetime.now().timestamp() - finished_at) < 5:
-                                        message = "pod: %s, user: %s, status: %s" % (event['object'].metadata.name,inferenceserving.created_by.username, 'terminated')
+                                        message = "cluster: %s, pod: %s, user: %s, status: %s" % (cluster,event['object'].metadata.name,inferenceserving.created_by.username, 'terminated')
                                         push_message([inferenceserving.created_by.username]+conf.get('ADMIN_USER').split(','), message)
                                 # if running and running.started_at:  # 任务重启运行
                                 #     start_time = int(running.started_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间

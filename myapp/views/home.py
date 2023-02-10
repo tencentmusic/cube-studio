@@ -1,3 +1,5 @@
+import os.path
+import random
 
 from flask import (
     flash,
@@ -6,6 +8,7 @@ from flask import (
     redirect,
     Response,
 )
+import pysnooper
 from myapp.utils.py.py_k8s import K8s
 import datetime
 from flask import jsonify
@@ -16,14 +19,7 @@ from flask_appbuilder import expose
 from myapp import appbuilder
 from flask import stream_with_context, request
 
-node_resource_used = {
-    "check_time": None,
-    "data": {}
-}
-pipeline_resource_used={
-    "check_time": None,
-    "data": {}
-}
+
 
 class Myapp(BaseMyappView):
     route_base='/myapp'
@@ -69,6 +65,7 @@ class Myapp(BaseMyappView):
                 "link":conf.get('BUG_REPORT_URL','') if conf.get('BUG_REPORT_URL','') else "https://github.com/tencentmusic/cube-studio/issues/new"
             },
             {
+                "text":'',
                 "icon":'<svg t="1663658292626" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2369" width="64" height="64"><path d="M511.6 76.3C264.3 76.2 64 276.4 64 523.5 64 718.9 189.3 885 363.8 946c23.5 5.9 19.9-10.8 19.9-22.2v-77.5c-135.7 15.9-141.2-73.9-150.3-88.9C215 726 171.5 718 184.5 703c30.9-15.9 62.4 4 98.9 57.9 26.4 39.1 77.9 32.5 104 26 5.7-23.5 17.9-44.5 34.7-60.8-140.6-25.2-199.2-111-199.2-213 0-49.5 16.3-95 48.3-131.7-20.4-60.5 1.9-112.3 4.9-120 58.1-5.2 118.5 41.6 123.2 45.3 33-8.9 70.7-13.6 112.9-13.6 42.4 0 80.2 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.3-43.9 2.9 7.7 24.7 58.3 5.5 118 32.4 36.8 48.9 82.7 48.9 132.3 0 102.2-59 188.1-200 212.9 23.5 23.2 38.1 55.4 38.1 91v112.5c0.8 9 0 17.9 15 17.9 177.1-59.7 304.6-227 304.6-424.1 0-247.2-200.4-447.3-447.5-447.3z" p-id="2370" fill="#3273f1"></path></svg>',
                 "link":"https://github.com/tencentmusic/cube-studio"
             }
@@ -561,53 +558,46 @@ class Myapp(BaseMyappView):
                         "isExpand": True,
                         "children": [
                             {
-                                "name": 'model_all',
-                                "title": '所有模型',
-                                "icon": '<svg t="1664182396322" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3003" width="64" height="64"><path d="M891.821291 547.404654l0.039999-0.099999 0.03-0.109999c5.999941-24.019765 5.789943-47.799533-0.639994-67.029345C856.901632 397.756116 751.182664 206.087987 511.995 206.087987c-239.317663 0-345.186629 192.268122-379.626293 275.007315-6.369938 19.049814-6.249939 43.059579 0.339997 62.749387 34.389664 82.409195 140.198631 274.097323 379.286296 274.097323 224.037812 0.02 334.136737-169.498345 379.826291-270.537358zM511.995 737.502798c-198.068066 0-283.65723-164.488394-305.287019-215.257898l-0.859991-16.069843c14.589858-36.409644 96.759055-214.407906 306.14701-214.407906 198.118065 0 283.65723 164.578393 305.277019 215.367897l0.849992 10.699895C803.142157 555.164578 719.272976 737.502798 511.995 737.502798z" fill="#2c2c2c" p-id="3004"></path><path d="M511.995 365.516431c-82.139198 0-146.47857 64.339372-146.478569 146.478569 0 82.159198 64.339372 146.518569 146.478569 146.518569 82.139198 0 146.47857-64.359371 146.47857-146.518569 0-82.139198-64.339372-146.47857-146.47857-146.478569z m0 212.577924c-35.229656 0-66.139354-30.889698-66.139354-66.099355 0-35.209656 30.909698-66.099354 66.139354-66.099354 35.209656 0 66.099354 30.889698 66.099355 66.099354 0 35.209656-30.889698 66.099354-66.099355 66.099355zM246.187596 938.170838H105.46897c-10.839894 0-19.659808-8.809914-19.659808-19.639808V777.812404c0-23.659769-19.239812-42.909581-42.889581-42.909581C19.259812 734.892823 0 754.142635 0 777.812404v140.718626c0 57.739436 46.649544 104.798977 104.238982 105.44897v0.02h141.948614c23.659769 0 42.909581-19.249812 42.909581-42.909581 0.01-23.669769-19.239812-42.919581-42.909581-42.919581zM981.080419 734.892823c-23.649769 0-42.889581 19.249812-42.889581 42.909581v140.708626c0 10.829894-8.819914 19.639808-19.659808 19.639808H777.812404c-23.659769 0-42.909581 19.249812-42.909581 42.909581 0 23.659769 19.249812 42.909581 42.909581 42.909581h140.728626c58.149432 0 105.44897-47.309538 105.44897-105.44897V777.812404c0-23.669769-19.249812-42.919581-42.909581-42.919581zM777.812404 85.819162h140.698626c10.839894 0 19.659808 8.809914 19.659808 19.639808v140.718626c0 23.659769 19.249812 42.909581 42.909581 42.909581 23.659769 0 42.909581-19.249812 42.909581-42.909581V105.45897C1023.99 47.309538 976.670462 0 918.51103 0h-140.698626c-23.659769 0-42.909581 19.249812-42.909581 42.899581-0.01 23.669769 19.239812 42.919581 42.909581 42.919581zM42.919581 289.097177c23.649769 0 42.879581-19.249812 42.879581-42.899581V105.46897c0-10.829894 8.819914-19.639808 19.659808-19.639808h140.718626c23.659769 0 42.909581-19.249812 42.909581-42.909581C289.097177 19.259812 269.847365 0 246.177596 0H105.45897C47.309538 0 0 47.309538 0 105.45897v140.718626c0 23.669769 19.259812 42.919581 42.919581 42.919581z" fill="#2c2c2c" p-id="3005"></path></svg>',
-                                "menu_type": "api",
-                                "url": "/aihub/api/"
-                            },
-                            {
                                 "name": 'model_visual',
                                 "title": '视觉',
                                 "icon": '<svg t="1664182396322" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3003" width="64" height="64"><path d="M891.821291 547.404654l0.039999-0.099999 0.03-0.109999c5.999941-24.019765 5.789943-47.799533-0.639994-67.029345C856.901632 397.756116 751.182664 206.087987 511.995 206.087987c-239.317663 0-345.186629 192.268122-379.626293 275.007315-6.369938 19.049814-6.249939 43.059579 0.339997 62.749387 34.389664 82.409195 140.198631 274.097323 379.286296 274.097323 224.037812 0.02 334.136737-169.498345 379.826291-270.537358zM511.995 737.502798c-198.068066 0-283.65723-164.488394-305.287019-215.257898l-0.859991-16.069843c14.589858-36.409644 96.759055-214.407906 306.14701-214.407906 198.118065 0 283.65723 164.578393 305.277019 215.367897l0.849992 10.699895C803.142157 555.164578 719.272976 737.502798 511.995 737.502798z" fill="#2c2c2c" p-id="3004"></path><path d="M511.995 365.516431c-82.139198 0-146.47857 64.339372-146.478569 146.478569 0 82.159198 64.339372 146.518569 146.478569 146.518569 82.139198 0 146.47857-64.359371 146.47857-146.518569 0-82.139198-64.339372-146.47857-146.47857-146.478569z m0 212.577924c-35.229656 0-66.139354-30.889698-66.139354-66.099355 0-35.209656 30.909698-66.099354 66.139354-66.099354 35.209656 0 66.099354 30.889698 66.099355 66.099354 0 35.209656-30.889698 66.099354-66.099355 66.099355zM246.187596 938.170838H105.46897c-10.839894 0-19.659808-8.809914-19.659808-19.639808V777.812404c0-23.659769-19.239812-42.909581-42.889581-42.909581C19.259812 734.892823 0 754.142635 0 777.812404v140.718626c0 57.739436 46.649544 104.798977 104.238982 105.44897v0.02h141.948614c23.659769 0 42.909581-19.249812 42.909581-42.909581 0.01-23.669769-19.239812-42.919581-42.909581-42.919581zM981.080419 734.892823c-23.649769 0-42.889581 19.249812-42.889581 42.909581v140.708626c0 10.829894-8.819914 19.639808-19.659808 19.639808H777.812404c-23.659769 0-42.909581 19.249812-42.909581 42.909581 0 23.659769 19.249812 42.909581 42.909581 42.909581h140.728626c58.149432 0 105.44897-47.309538 105.44897-105.44897V777.812404c0-23.669769-19.249812-42.919581-42.909581-42.919581zM777.812404 85.819162h140.698626c10.839894 0 19.659808 8.809914 19.659808 19.639808v140.718626c0 23.659769 19.249812 42.909581 42.909581 42.909581 23.659769 0 42.909581-19.249812 42.909581-42.909581V105.45897C1023.99 47.309538 976.670462 0 918.51103 0h-140.698626c-23.659769 0-42.909581 19.249812-42.909581 42.899581-0.01 23.669769 19.239812 42.919581 42.909581 42.919581zM42.919581 289.097177c23.649769 0 42.879581-19.249812 42.879581-42.899581V105.46897c0-10.829894 8.819914-19.639808 19.659808-19.639808h140.718626c23.659769 0 42.909581-19.249812 42.909581-42.909581C289.097177 19.259812 269.847365 0 246.177596 0H105.45897C47.309538 0 0 47.309538 0 105.45897v140.718626c0 23.669769 19.259812 42.919581 42.919581 42.919581z" fill="#2c2c2c" p-id="3005"></path></svg>',
                                 "menu_type": "api",
-                                "url": "/aihub/visual/api/"
+                                "url": "/model_market/visual/api/"
                             },
                             {
                                 "name": 'model_voice',
                                 "title": '语音',
                                 "icon": '<svg t="1664182529451" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3966" width="64" height="64"><path d="M544 851.946667V906.666667a32 32 0 0 1-64 0v-54.72C294.688 835.733333 149.333333 680.170667 149.333333 490.666667v-21.333334a32 32 0 0 1 64 0v21.333334c0 164.949333 133.717333 298.666667 298.666667 298.666666s298.666667-133.717333 298.666667-298.666666v-21.333334a32 32 0 0 1 64 0v21.333334c0 189.514667-145.354667 345.066667-330.666667 361.28zM298.666667 298.56C298.666667 180.8 394.165333 85.333333 512 85.333333c117.781333 0 213.333333 95.541333 213.333333 213.226667v192.213333C725.333333 608.533333 629.834667 704 512 704c-117.781333 0-213.333333-95.541333-213.333333-213.226667V298.56z m64 0v192.213333C362.666667 573.12 429.557333 640 512 640c82.496 0 149.333333-66.805333 149.333333-149.226667V298.56C661.333333 216.213333 594.442667 149.333333 512 149.333333c-82.496 0-149.333333 66.805333-149.333333 149.226667z" p-id="3967"></path></svg>',
                                 "menu_type": "api",
-                                "url": "/aihub/voice/api/"
+                                "url": "/model_market/voice/api/"
                             },
                             {
                                 "name": 'model_language',
                                 "title": '自然语言',
                                 "icon": '<svg t="1664182544584" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4180" width="64" height="64"><path d="M988.542936 354.570637c2.836565-8.509695 5.67313-17.019391 5.67313-28.365651 0-31.202216-25.529086-56.731302-56.731301-56.731302s-56.731302 25.529086-56.731302 56.731302 25.529086 56.731302 56.731302 56.731302c8.509695 36.875346 14.182825 76.587258 14.182825 113.462604 0 243.944598-198.559557 439.66759-439.66759 439.66759-76.587258 0-150.33795-19.855956-215.578947-56.731302l-11.346261-5.67313-161.68421 62.404432 73.750692-136.155125-14.182825-17.01939C114.880886 703.468144 75.168975 601.351801 75.168975 496.398892c0-243.944598 198.559557-439.66759 439.66759-439.66759 93.606648 0 181.540166 28.365651 255.290859 82.260388l-28.365651 31.202216L875.080332 201.396122l-39.711911-136.155125-28.365651 31.202216C721.905817 34.038781 616.952909 0 512 0 236.853186 0 15.601108 221.252078 15.601108 496.398892c0 110.626039 36.875346 218.415512 107.789474 306.34903L24.110803 1018.32687l255.290859-85.096953c70.914127 36.875346 153.174515 59.567867 232.598338 59.567867 275.146814 0 496.398892-224.088643 496.398892-496.398892 0-48.221607-5.67313-96.443213-19.855956-141.828255z" p-id="4181"></path><path d="M599.933518 499.235457l45.385042 138.99169H710.559557l-164.520776-453.850416h-68.077562l-164.520776 453.850416h62.404432l48.221607-138.99169h175.867036z m-138.99169-116.299169c17.019391-51.058172 34.038781-99.279778 48.221607-153.174515h2.836565c17.019391 53.894737 31.202216 102.116343 48.221607 153.174515l22.69252 68.077562h-147.501385l25.529086-68.077562zM285.074792 694.958449h453.850416v56.731302H285.074792z" p-id="4182"></path></svg>',
                                 "menu_type": "api",
-                                "url": "/aihub/language/api/"
+                                "url": "/model_market/language/api/"
                             },
                             {
                                 "name": 'model_reinforcement',
                                 "title": '强化学习',
                                 "icon": '<svg t="1664182563495" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4370" width="64" height="64"><path d="M77.052 500.449c1.986 1.731 4.348 3.061 6.638 4.407 63.842 37.536 127.699 75.046 191.548 112.57 45.053 26.478 90.093 52.976 135.146 79.454 11.153 6.555 22.178 7.912 34.583 2.149 60.935-28.307 122.102-56.113 183.185-84.102 106.592-48.842 213.183-97.685 319.765-146.547 2.503-1.147 5.802-1.8 5.953-5.293 0.148-3.4-2.561-5.206-5.041-6.94a20.009 20.009 0 0 0-2.578-1.519c-22.502-11.156-45.011-22.299-67.517-33.448-1.345-0.667-2.517-1.19-4.158-0.325-17.448 9.199-34.947 18.3-53.044 27.748l23.55 11.819c-2.081 1.013-3.557 1.769-5.063 2.459-134.875 61.776-269.76 123.529-404.587 185.411-3.772 1.731-6.482 1.621-10.032-0.471-81.006-47.747-162.085-95.368-243.13-143.048-1.513-0.89-3.449-1.342-4.37-3.448l29.19-12.792c-17.216-9.806-33.879-19.185-50.395-28.817-2.802-1.634-4.973-1.694-7.825-0.432-17.032 7.535-34.133 14.914-51.211 22.345-6.404 2.787-12.862 5.458-19.198 8.392-5.434 2.518-5.964 6.459-1.409 10.428z" p-id="4371"></path><path d="M949.521 579.958a22.083 22.083 0 0 0-2.58-1.516c-22.358-11.074-44.725-22.129-67.077-33.215-1.552-0.77-2.862-1.146-4.618-0.219-17.343 9.154-34.739 18.208-52.718 27.602l23.52 11.779c-1.937 0.969-3.398 1.755-4.902 2.445-134.876 61.774-269.765 123.518-404.583 185.417-4.022 1.847-6.807 1.547-10.475-0.615-80.862-47.662-161.799-95.197-242.703-142.788-1.524-0.897-3.398-1.409-4.546-3.489l29.243-12.814c-17.689-10.089-34.894-19.835-52.005-29.741-2.391-1.384-4.127-0.341-6.053 0.492-13.889 6.008-27.764 12.047-41.64 18.084-9.607 4.18-19.249 8.281-28.797 12.592-5.526 2.495-6.125 6.401-1.635 10.381 1.969 1.746 4.332 3.084 6.62 4.429 73.455 43.187 146.924 86.349 220.386 129.522 35.583 20.912 71.129 41.889 106.757 62.725 9.873 5.774 20.099 8.321 31.339 3.167 168.56-77.292 337.158-154.501 505.737-231.751 2.501-1.146 5.843-1.786 6.064-5.22 0.233-3.626-2.691-5.474-5.334-7.267z" p-id="4372"></path><path d="M83.448 381.08c35.858 21.107 71.734 42.184 107.603 63.271 73.461 43.187 146.919 86.379 220.383 129.56 11.16 6.56 22.17 7.8 34.586 2.091 150.657-69.276 301.449-138.258 452.205-207.318 17.389-7.966 34.793-15.899 52.151-23.932 5.669-2.623 6.14-6.184 1.352-10.139-1.9-1.569-4.129-2.808-6.352-3.908-116.886-57.835-233.787-115.638-350.684-173.45-5.301-2.622-10.881-4.084-18.184-4.326-2.907-0.256-6.78 1.115-10.65 2.796-160.462 69.718-320.939 139.4-481.389 209.144-3.632 1.579-8.985 1.94-9.247 7.122-0.258 5.089 4.538 6.917 8.226 9.089z m100.644-5.054c129.953-56.432 259.914-112.846 389.836-169.35 3.021-1.314 5.34-1.316 8.308 0.154 86.441 42.826 172.93 85.554 259.407 128.306 1.331 0.658 2.614 1.411 4.428 2.396-14.621 6.696-28.788 13.181-42.953 19.671-122.315 56.033-244.639 112.048-366.904 168.191-3.612 1.659-6.198 1.555-9.589-0.444-81.005-47.738-162.078-95.363-243.134-143.016-1.543-0.907-3.033-1.904-5.111-3.214 2.281-1.08 3.974-1.939 5.712-2.694z" p-id="4373"></path></svg>',
                                 "menu_type": "api",
-                                "url": "/aihub/reinforcement/api/"
+                                "url": "/model_market/reinforcement/api/"
                             },
                             {
                                 "name": 'model_graph',
                                 "title": '图论',
                                 "icon": '<svg t="1664182607492" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6053" width="64" height="64"><path d="M554.666667 682.666667h85.333333v128h-213.333333v-128h85.333333v-128H256v128h85.333333v128H128v-128h85.333333v-170.666667h298.666667V384h-85.333333V256h213.333333v128h-85.333333v128h298.666666v170.666667h85.333334v128h-213.333334v-128h85.333334v-128h-256v128z m42.666666-384h-128v42.666666h128V298.666667zM298.666667 725.333333H170.666667v42.666667h128v-42.666667z m597.333333 0h-128v42.666667h128v-42.666667z m-298.666667 0h-128v42.666667h128v-42.666667z" fill="#444444" p-id="6054"></path></svg>',
                                 "menu_type": "api",
-                                "url": "/aihub/graph/api/"
+                                "url": "/model_market/graph/api/"
                             },
                             {
                                 "name": 'model_common',
                                 "title": '通用',
                                 "icon": '<svg t="1664182648445" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6999" width="64" height="64"><path d="M358.4 480 121.6 480C57.6 480 0 422.4 0 358.4L0 121.6C0 57.6 57.6 0 121.6 0l230.4 0c70.4 0 121.6 57.6 121.6 121.6l0 230.4C480 422.4 422.4 480 358.4 480zM121.6 64C89.6 64 64 89.6 64 121.6l0 230.4c0 32 25.6 57.6 57.6 57.6l230.4 0c32 0 57.6-25.6 57.6-57.6L409.6 121.6C416 89.6 390.4 64 358.4 64L121.6 64z" p-id="7000"></path><path d="M358.4 1024 121.6 1024C57.6 1024 0 966.4 0 902.4l0-230.4c0-70.4 57.6-121.6 121.6-121.6l230.4 0c70.4 0 121.6 57.6 121.6 121.6l0 230.4C480 966.4 422.4 1024 358.4 1024zM121.6 608C89.6 608 64 633.6 64 665.6l0 230.4C64 934.4 89.6 960 121.6 960l230.4 0c32 0 57.6-25.6 57.6-57.6l0-230.4c0-32-25.6-57.6-57.6-57.6L121.6 614.4z" p-id="7001"></path><path d="M780.8 1024c-134.4 0-243.2-108.8-243.2-243.2s108.8-243.2 243.2-243.2 243.2 108.8 243.2 243.2S915.2 1024 780.8 1024zM780.8 608c-96 0-179.2 76.8-179.2 179.2s76.8 179.2 179.2 179.2 179.2-76.8 179.2-179.2S883.2 608 780.8 608z" p-id="7002"></path><path d="M902.4 480l-230.4 0c-70.4 0-121.6-57.6-121.6-121.6L550.4 121.6C544 57.6 601.6 0 665.6 0l230.4 0C966.4 0 1024 57.6 1024 121.6l0 230.4C1024 422.4 966.4 480 902.4 480zM665.6 64C633.6 64 608 89.6 608 121.6l0 230.4c0 32 25.6 57.6 57.6 57.6l230.4 0c32 0 57.6-25.6 57.6-57.6L953.6 121.6C960 89.6 934.4 64 902.4 64L665.6 64z" p-id="7003"></path></svg>',
                                 "menu_type": "api",
-                                "url": "/aihub/common/api/"
+                                "url": "/model_market/common/api/"
                             },
                         ]
                     },
@@ -713,35 +703,6 @@ class Myapp(BaseMyappView):
 
 
 
-    @expose("/tail/log/<cluster_name>/<namespace>/<pod_name>/<lines>", methods=["GET",])
-    def tail_log(self,cluster_name,namespace,pod_name,lines=100):
-        from myapp.utils.py.py_k8s import K8s
-        all_clusters = conf.get('CLUSTERS',{})
-        if cluster_name in all_clusters:
-            kubeconfig = all_clusters[cluster_name].get('KUBECONFIG','')
-        else:
-            kubeconfig = None
-
-        k8s = K8s(kubeconfig)
-        pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
-        if pod:
-            pod = pod[0]
-            flash('当前pod状态：%s'%pod['status'],category='warning')
-
-            # tail_lines = request.values.get("tail_lines", 1000)
-
-            try:
-                resp = Response(stream_with_context(k8s.get_pod_log_stream(pod_name,namespace, int(lines))), mimetype="text/plain")
-                return resp
-
-            except Exception as e:
-                return jsonify(dict(
-                    code=7000,
-                    message=str(e)
-                ))
-
-
-
     @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>/<container_name>", methods=["GET", "POST"])
     def web_debug(self,cluster_name,namespace,pod_name,container_name):
         cluster=conf.get('CLUSTERS',{})
@@ -764,297 +725,28 @@ class Myapp(BaseMyappView):
 
 
 
-
-    # 机器学习首页资源弹窗
-    def mlops_traffic(self,url):
-        if 1 or not node_resource_used['check_time'] or node_resource_used['check_time'] < (datetime.datetime.now() - datetime.timedelta(minutes=10)):
-            clusters = conf.get('CLUSTERS', {})
-            for cluster_name in clusters:
-                cluster = clusters[cluster_name]
-                k8s_client = K8s(cluster.get('KUBECONFIG',''))
-
-                all_node = k8s_client.get_node()
-                all_node_json = {}
-                for node in all_node:  # list 转dict
-                    ip = node['hostip']
-                    if 'cpu' in node['labels'] or 'gpu' in node['labels']:
-                        all_node_json[ip] = node
-                        all_node_json[ip]['used_memory'] = []
-                        all_node_json[ip]['used_cpu'] = []
-                        all_node_json[ip]['used_gpu'] = []
-                        all_node_json[ip]['user'] = []
-
-                # print(all_node_json)
-                for namespace in ['jupyter', 'pipeline', 'automl', 'service']:
-                    all_pods = k8s_client.get_pods(namespace=namespace)
-                    for pod in all_pods:
-                        if pod['status'] == 'Running' and pod['host_ip'] in all_node_json:
-                            # print(namespace,pod)
-                            all_node_json[pod['host_ip']]['used_memory'].append(pod['memory'])
-                            all_node_json[pod['host_ip']]['used_cpu'].append(pod['cpu'])
-                            all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
-
-                            # user = pod['labels'].get('user','')
-                            # if not user:
-                            #     user = pod['labels'].get('run-rtx','')
-                            # if not user:
-                            #     user = pod['labels'].get('rtx-user','')
-                            # if user:
-                            #     all_node_json[pod['host_ip']]['user'].append(user)
-                            # print(all_node_json[pod['host_ip']])
-
-                for node in all_node_json:
-                    all_node_json[node]['used_memory'] = int(sum(all_node_json[node]['used_memory']))
-                    all_node_json[node]['used_cpu'] = int(sum(all_node_json[node]['used_cpu']))
-                    all_node_json[node]['used_gpu'] = int(sum(all_node_json[node]['used_gpu']))
-
-                node_resource_used['data'][cluster_name] = all_node_json
-            node_resource_used['check_time'] = datetime.datetime.now()
-
-        all_node_json = node_resource_used['data']
-
-        # 数据格式说明 dict:
-        # 'delay': Integer 延时隐藏 单位: 毫秒 0为不隐藏
-        # 'hit': Boolean 是否命中
-        # 'target': String 当前目标
-        # 'type': String 类型 目前仅支持html类型
-        # 'title': String 标题
-        # 'content': String 内容html内容
-        # /static/appbuilder/mnt/make_pipeline.mp4
-        message = ''
-        td_html = '<td style="border: 1px solid black;padding: 10px">%s</th>'
-        message += "<tr>%s %s %s %s %s %s %s<tr>" % (
-        td_html % "集群", td_html % "资源组(监控)", td_html % "机器", td_html % "机型", td_html % "cpu占用率", td_html % "内存占用率",td_html % "gpu占用率")
-        global_cluster_load = {}
-        for cluster_name in all_node_json:
-            global_cluster_load[cluster_name] = {
-                "cpu_req": 0,
-                "cpu_all": 0,
-                "mem_req": 0,
-                "mem_all": 0,
-                "gpu_req": 0,
-                "gpu_all": 0
-            }
-            nodes = all_node_json[cluster_name]
-            # nodes = sorted(nodes.items(), key=lambda item: item[1]['labels'].get('org','public'))
-            # ips = [node[0] for node in nodes]
-            # values = [node[1] for node in nodes]
-            # nodes = dict(zip(ips,values))
-
-            # 按项目组和设备类型分组
-            stored_nodes = {}
-            for ip in nodes:
-                org = nodes[ip]['labels'].get('org', 'public')
-                device = 'gpu/' + nodes[ip]['labels'].get('gpu-type', '') if 'gpu' in nodes[ip]['labels'] else 'cpu'
-                if org not in stored_nodes:
-                    stored_nodes[org] = {}
-                if device not in stored_nodes[org]:
-                    stored_nodes[org][device] = {}
-                stored_nodes[org][device][ip] = nodes[ip]
-            nodes = {}
-            for org in stored_nodes:
-                for device in stored_nodes[org]:
-                    nodes.update(stored_nodes[org][device])
-
-            cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
-            grafana_url = cluster_config.get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_CLUSTER_PATH')
-            for ip in nodes:
-                org = nodes[ip]['labels'].get('org', 'public')
-                enable_train = nodes[ip]['labels'].get('train', 'true')
-                ip_html = '<a target="_blank" href="%s">%s</a>' % (cluster_config.get('K8S_DASHBOARD_CLUSTER', '').rstrip('/')+'/#/node/%s?namespace=default' % nodes[ip]['name'],ip)
-                share = nodes[ip]['labels'].get('share', 'true')
-                clolr = "#FFFFFF" if share == 'true' else '#F0F0F0'
-                message += '<tr bgcolor="%s">%s %s %s %s %s %s %s<tr>' % (
-                    clolr,
-                    td_html % cluster_name,
-                    td_html % ('<a target="blank" href="%s">%s</a>' % (grafana_url + org, org)),
-                    td_html % ip_html,
-                    td_html % ('gpu/' + nodes[ip]['labels'].get('gpu-type', '') if 'gpu' in nodes[ip]['labels'] else 'cpu'),
-                    td_html % ("cpu:%s/%s" % (nodes[ip]['used_cpu'], nodes[ip]['cpu'])),
-                    td_html % ("mem:%s/%s" % (nodes[ip]['used_memory'], nodes[ip]['memory'])),
-                    td_html % ("gpu:%s/%s" % (nodes[ip]['used_gpu'], nodes[ip]['gpu'])),
-                    # td_html % (','.join(list(set(nodes[ip]['user']))[0:1]))
-                )
-
-                global_cluster_load[cluster_name]['cpu_req'] += int(nodes[ip]['used_cpu'])
-                global_cluster_load[cluster_name]['cpu_all'] += int(nodes[ip]['cpu'])
-                global_cluster_load[cluster_name]['mem_req'] += int(nodes[ip]['used_memory'])
-                global_cluster_load[cluster_name]['mem_all'] += int(nodes[ip]['memory'])
-                global_cluster_load[cluster_name]['gpu_req'] += int(nodes[ip]['used_gpu'])
-                global_cluster_load[cluster_name]['gpu_all'] += int(nodes[ip]['gpu'])
-
-        message = Markup('<table>%s</table>' % message)
-        # print(message)
-        cluster_global_info = ''
-        # for cluster_name in global_cluster_load:
-        #     cluster_global_info+='\n集群:%s,CPU:%s/%s,MEM:%s/%s,GPU::%s/%s'%(
-        #         cluster_name,
-        #         global_cluster_load[cluster_name]['cpu_req'],global_cluster_load[cluster_name]['cpu_all'],
-        #         global_cluster_load[cluster_name]['mem_req'], global_cluster_load[cluster_name]['mem_all'],
-        #         global_cluster_load[cluster_name]['gpu_req'], global_cluster_load[cluster_name]['gpu_all'],
-        #     )
-
-        data = {
-            'content': message,
-            'delay': 300000,
-            'hit': True,
-            'target': url,
-            'title': '当前负载(%s)' % cluster_global_info,
-            'type': 'html',
-        }
-        # 返回模板
-        return jsonify(data)
-
-
-
-    # pipeline每个任务的资源占用情况
-    def pipeline_task_resource(self,url):
-        if not pipeline_resource_used['check_time'] or pipeline_resource_used['check_time'] < (datetime.datetime.now() - datetime.timedelta(minutes=10)):
-            clusters = conf.get('CLUSTERS', {})
-            all_tasks_json = {}
-            for cluster_name in clusters:
-                cluster = clusters[cluster_name]
-                k8s_client = K8s(cluster.get('KUBECONFIG',''))
-                try:
-                    # 获取pod的资源占用
-                    all_tasks_json[cluster_name]={}
-                    # print(all_node_json)
-                    for namespace in ['pipeline', 'automl', 'service']:
-                        all_tasks_json[cluster_name][namespace]={}
-                        all_pods = k8s_client.get_pods(namespace=namespace)
-                        for pod in all_pods:
-                            org = pod['node_selector'].get("org", 'public')
-                            if org not in all_tasks_json[cluster_name][namespace]:
-                                all_tasks_json[cluster_name][namespace][org]={}
-                            if pod['status'] == 'Running':
-                                user = pod['labels'].get('user',pod['labels'].get('username',pod['labels'].get('run-rtx',pod['labels'].get('rtx-user',''))))
-                                if user:
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']] = {}
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['username'] = user
-                                    # print(namespace,pod)
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['request_memory']=pod['memory']
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['request_cpu']=pod['cpu']
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['request_gpu']=pod['gpu']
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_memory'] = '0'
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_cpu'] = '0'
-                                    # print(namespace,org,pod['name'])
-
-                        # 获取pod的资源使用
-                        all_pods_metrics=k8s_client.get_pod_metrics(namespace=namespace)
-                        for pod in all_pods_metrics:
-                            for org in all_tasks_json[cluster_name][namespace]:
-                                if pod['name'] in all_tasks_json[cluster_name][namespace][org]:
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_memory']=pod['memory']
-                                    all_tasks_json[cluster_name][namespace][org][pod['name']]['used_cpu']=pod['cpu']
-                                    # print(namespace,org,pod['name'])
-                                    break
-                        # print(all_tasks_json)
-                except Exception as e:
-                    print(e)
-            pipeline_resource_used['data'] = all_tasks_json
-            pipeline_resource_used['check_time'] = datetime.datetime.now()
-
-        # 数据格式说明 dict:
-        # 'delay': Integer 延时隐藏 单位: 毫秒 0为不隐藏
-        # 'hit': Boolean 是否命中
-        # 'target': String 当前目标
-        # 'type': String 类型 目前仅支持html类型
-        # 'title': String 标题
-        # 'content': String 内容html内容
-        # /static/appbuilder/mnt/make_pipeline.mp4
-        all_tasks_json = pipeline_resource_used['data']
-        message = ''
-        td_html = '<td class="ellip1" style="border: 1px solid black;padding: 10px">%s</th>'
-        message += "<tr>%s %s %s %s %s %s %s %s<tr>" % (
-        td_html % "集群", td_html % "项目组",td_html % "空间",td_html % "容器", td_html % "用户", td_html % "cpu", td_html % "内存",td_html % "gpu")
-        exist_pod = False
-        for cluster_name in all_tasks_json:
-            cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
-            for namespace in all_tasks_json[cluster_name]:
-                for org in all_tasks_json[cluster_name][namespace]:
-                    for pod_name in all_tasks_json[cluster_name][namespace][org]:
-                        exist_pod=True
-                        pod = all_tasks_json[cluster_name][namespace][org][pod_name]
-                        # print(pod)
-                        dashboard_url = cluster_config.get('K8S_DASHBOARD_CLUSTER', request.host_url).rstrip('/') + '/#/search?namespace=%s&q=%s'%(namespace,pod_name)
-                        grafana_url = cluster_config.get('GRAFANA_HOST', request.host_url).rstrip('/') + conf.get('GRAFANA_TASK_PATH')
-                        message += '<tr>%s %s %s %s %s %s %s %s<tr>' % (
-                            td_html % cluster_name,
-                            td_html % org,
-                            td_html % ('<a target="blank" href="%s">%s</a>' % (dashboard_url, namespace)),
-                            '<td class="ellip1" style="border: 1px solid black;padding: 10px">%s</th>' % ('<a target="blank" href="%s">%s</a>' % (grafana_url+pod_name, pod_name)),
-                            td_html % pod['username'],
-                            td_html % ("cpu:%s/%s" % (int(int(pod.get('used_cpu','0'))/1000), int(pod.get('request_cpu','0')))),
-                            td_html % ("mem:%s/%s" % (int(pod.get('used_memory','0')), int(pod.get('request_memory','0')))),
-                            td_html % ("gpu:%s" % (pod.get('request_gpu','')),),
-                        )
-
-
-        message = Markup('<table>%s</table>' % message)
-        # print(message)
-        data = {
-            'content': message,
-            'delay': 3000,
-            'hit': True,
-            'target': url,
-            'title': '所有用户容器负载(仅管理员可见)',
-            'type': 'html',
-        }
-        # 返回模板
-        if exist_pod:
-            return jsonify(data)
-        else:
-            return jsonify({})
-
     @expose('/feature/check')
     # @trace(tracer,depth=1,trace_content='line')
-    # @pysnooper.snoop()
     def featureCheck(self):
         url = request.values.get("url", type=str, default=None)
-        print(url)
-        if '/myapp/home' in url:
-            try:
-                return self.mlops_traffic(url)
-            except Exception as e:
-                print(e)
-                data = {
-                    'content': '未能成功获取到算力负载信息，请检查kubeconfig文件配置',
-                    'delay': 30000,
-                    'hit': True,
-                    'target': url,
-                    'title': '检查失败',
-                    'type': 'html',
-                }
-                flash('未能成功获取到算力负载信息', 'warning')
-                return jsonify(data)
-
-
-        if url=='/group/security/security-user':
-            if g.user.username in conf.get('ADMIN_USER',''):
-                return self.pipeline_task_resource(url)
-
-        # pipeline_url = conf.get('MODEL_URLS',{}).get('pipeline','')
-        # if url in pipeline_url:
-        #     data = {
-        #         'content': '',
-        #         'delay': 3000,
-        #         'hit': True,
-        #         'target': url,
-        #         'title': '重要通知',
-        #         'type': 'html',
-        #     }
-        #     # 返回模板
-        #     return jsonify(data)
-
-        # data = {
-        #     'content': url,
-        #     'delay': 3000,
-        #     'hit': True,
-        #     'target': url,
-        #     'title': url,
-        #     'type': 'html',
-        # }
-        # return jsonify(data)
+        print(conf.get('alert_config',{}))
+        for route in conf.get('alert_config',{}):
+            # 用户自定义目录
+            if url.replace("/frontend",'') == route.replace("/frontend",''):
+                try:
+                    return jsonify(conf.get('alert_config',{})[route]())
+                except Exception as e:
+                    print(e)
+                    data = {
+                        'content': '未能正常获取弹窗信息',
+                        'delay': 30000,
+                        'hit': False,
+                        'target': url,
+                        'title': '弹窗失败',
+                        'type': 'html',
+                    }
+                    # flash('未能正常获取弹窗信息', 'warning')
+                    return jsonify(data)
 
         # flash('xxxxxxx','success')
         return jsonify({})
@@ -1062,6 +754,21 @@ class Myapp(BaseMyappView):
 
 # add_view_no_menu添加视图，但是没有菜单栏显示
 appbuilder.add_view_no_menu(Myapp)
+
+
+
+from myapp.views.baseApi import (
+    MyappModelRestApi
+)
+from myapp.security import MyUserRemoteUserModelView_Base,MyUser
+from flask_appbuilder.models.sqla.interface import SQLAInterface
+# from flask_appbuilder.security.views import UserModelView
+
+class MyUserRemoteUserModelView_Api(MyUserRemoteUserModelView_Base,MyappModelRestApi):
+    datamodel = SQLAInterface(MyUser)
+    route_base = "/users/api"
+
+appbuilder.add_api(MyUserRemoteUserModelView_Api)
 
 
 

@@ -8,7 +8,11 @@ import multiprocessing
 import base64
 from kubernetes import config
 from kubernetes.client.rest import ApiException
-
+from kubernetes.stream import stream
+import pysnooper
+import traceback
+import threading
+import logging
 
 class K8s():
 
@@ -23,6 +27,7 @@ class K8s():
         self.v1 = client.CoreV1Api()
         self.v1beta1 = client.ExtensionsV1beta1Api()
         self.AppsV1Api = client.AppsV1Api()
+        self.crd = client.CustomObjectsApi()
         self.v1.api_client.configuration.verify_ssl = False  # 只能设置 /usr/local/lib/python3.6/dist-packages/kubernetes/client/configuration.py:   self.verify_ssl= True ---> False
 
     # 获取指定范围的pod
@@ -70,6 +75,7 @@ class K8s():
                 memory = [self.to_memory_GB(container.resources.requests.get('memory','0G')) for container in containers if container.resources and container.resources.requests]
                 cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources  and container.resources.requests]
                 gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
+                vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0'))/100 for container in containers if container.resources and container.resources.requests]
 
                 node_selector = {}
                 try:
@@ -83,14 +89,23 @@ class K8s():
                         if match_expression.operator == 'Equal':
                             node_selector[match_expression.key]=match_expression.values
 
-                except Exception as e:
+                except Exception:
                     pass
-                    print(e)
+                    # print(e)
                 if pod.spec.node_selector:
                     node_selector.update(pod.spec.node_selector)
 
+                username = ''
+                if pod.metadata.labels:
+                    username = pod.metadata.labels.get('run-rtx', '')
+                    if not username:
+                        username = pod.metadata.labels.get('user', '')
+                    if not username:
+                        username = pod.metadata.labels.get('rtx-user', '')
+
                 temp={
                     'name':metadata.name,
+                    "username":username,
                     'host_ip':pod.status.host_ip,
                     'pod_ip':pod.status.pod_ip,
                     'status':status,   # 每个容器都正常才算正常
@@ -99,7 +114,7 @@ class K8s():
                     "labels":metadata.labels,
                     "memory":sum(memory),
                     "cpu":sum(cpu),
-                    "gpu":sum(gpu),
+                    "gpu":sum(gpu)+sum(vgpu),
                     "start_time":(metadata.creation_timestamp+datetime.timedelta(hours=8)).replace(tzinfo=None),   # 时间格式
                     "node_selector":node_selector
                 }
@@ -111,9 +126,33 @@ class K8s():
             print(e)
             return back_pods
 
+    def get_pod_event(self,namespace,pod_name):
+        events = [item.to_dict() for item in self.v1.list_namespaced_event(namespace, field_selector=f'involvedObject.name={pod_name}').items]
+        for event in events:
+            event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
+            if not event['time']:
+                event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
+        return events
 
     # 获取 指定服务，指定命名空间的下面的endpoint
-    def get_pod_ip(self,namespace='cloudai-2',service_name='face-search-vip-service'):
+    def get_pod_humanized(self,namespace,pod_name):
+        try:
+            pod = self.v1.read_namespaced_pod(namespace=namespace,name=pod_name)
+            if pod:
+                from kubernetes.client import ApiClient
+                pod = ApiClient().sanitize_for_serialization(pod)
+                if 'managedFields' in pod.get('metadata',{}):
+                    del pod['metadata']['managedFields']
+                if 'ownerReferences' in pod.get('metadata',{}):
+                    del pod['metadata']['ownerReferences']
+                # print(json.dumps(pod,indent=4,ensure_ascii=False))
+                return pod
+        except Exception as e:
+            print(e)
+
+
+    # 获取 指定服务，指定命名空间的下面的endpoint
+    def get_pod_ip(self,namespace,service_name):
         try:
             all_pods = self.get_pods(namespace=namespace,service_name=service_name)
             all_pod_ip=[]
@@ -143,7 +182,67 @@ class K8s():
         return all_pods
 
 
+    def get_node_allocated_resources(self,node_name):
+        field_selector = 'spec.nodeName=' + node_name
+        pods = self.v1.list_pod_for_all_namespaces(watch=False, field_selector=field_selector).items
+        node = self.get_node(name=node_name)[0]
+        node_resource={
+            "used_memory":0,
+            "used_cpu":0,
+            "used_gpu":0
+        }
+        for pod in pods:
+            containers = pod.spec.containers
+            memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
+            cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
+            gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
+            vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
+            node_resource['used_memory'] += sum(memory)
+            node_resource['used_cpu'] += sum(cpu)
+            node_resource['used_gpu'] += sum(gpu)+sum(vgpu)
 
+        node_resource['used_memory'] = int(node_resource['used_memory'])
+        node_resource['used_cpu'] = int(node_resource['used_cpu'])
+        node_resource['used_gpu'] = round(node_resource['used_gpu'],1)
+        node.update(node_resource)
+        return node
+
+    def get_all_node_allocated_resources(self):
+        pods = self.v1.list_pod_for_all_namespaces(watch=False).items
+        nodes_resource = {
+        }
+        for pod in pods:
+            containers = pod.spec.containers
+            memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
+            cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
+            gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
+            vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
+            node_name = pod.spec.node_name
+            if node_name not in nodes_resource:
+                nodes_resource[node_name]={
+                    "used_memory":0,
+                    "used_cpu":0,
+                    "used_gpu":0
+                }
+            nodes_resource[node_name]['used_memory'] += sum(memory)
+            nodes_resource[node_name]['used_cpu'] += sum(cpu)
+            nodes_resource[node_name]['used_gpu'] += sum(gpu) + sum(vgpu)
+        for node_name in nodes_resource:
+            node_resource = nodes_resource[node_name]
+            node_resource['used_memory'] = int(node_resource['used_memory'])
+            node_resource['used_cpu'] = int(node_resource['used_cpu'])
+            node_resource['used_gpu'] = round(node_resource['used_gpu'], 1)
+        return nodes_resource
+
+
+    def get_node_event(self,node_name):
+        node = self.get_node(name=node_name)
+        events = [item.to_dict() for item in self.v1.list_event_for_all_namespaces(field_selector=f'source.host={node["hostip"]}').items]
+        for event in events:
+            event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
+            if not event['time']:
+                event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
+        return events
 
     # 获取指定label的nodeip列表
     # @pysnooper.snoop()
@@ -153,30 +252,26 @@ class K8s():
             all_node = self.v1.list_node(label_selector=label).items
             # print(all_node)
             for node in all_node:
-                back_node={}
-                # print(node)
-                adresses=node.status.addresses
-                cpu = node.status.allocatable.get('cpu','0')
-                if 'm' in cpu:
-                    back_node['cpu'] = int(cpu.replace('m',''))//1000
-                else:
-                    back_node['cpu'] = int(cpu)
-                back_node['memory'] = int(node.status.allocatable.get('memory', '0').replace('Ki', '')) // 1024//1024
-                back_node['gpu'] = int(node.status.allocatable.get('nvidia.com/gpu', '0'))
-                back_node['labels']=node.metadata.labels
-                back_node['name']=node.metadata.name
-                for address in adresses:
-                    if address.type=='InternalIP':
-                        back_node['hostip']=address.address
-                if name and back_node['name']==name:
-                    back_nodes.append(back_node)
-                elif ip and back_node['hostip']==ip:
-                    back_nodes.append(back_node)
-                elif not name and not ip:
-                    back_nodes.append(back_node)
-
-                # if back_node['hostip']=='10.101.140.141':
-                #     print(node.status.allocatable)
+                try:
+                    back_node={}
+                    # print(node)
+                    adresses=node.status.addresses
+                    back_node['cpu'] = int(self.to_cpu(node.status.allocatable.get('cpu','0')))
+                    back_node['memory'] = int(self.to_memory_GB(node.status.allocatable.get('memory', '0')))
+                    back_node['gpu'] = int(node.status.allocatable.get('nvidia.com/gpu', '0'))
+                    back_node['labels']=node.metadata.labels
+                    back_node['name']=node.metadata.name
+                    for address in adresses:
+                        if address.type=='InternalIP':
+                            back_node['hostip']=address.address
+                    if name and back_node['name']==name:
+                        back_nodes.append(back_node)
+                    elif ip and back_node['hostip']==ip:
+                        back_nodes.append(back_node)
+                    elif not name and not ip:
+                        back_nodes.append(back_node)
+                except Exception as e1:
+                    print(e1)
 
             return back_nodes
         except Exception as e:
@@ -277,15 +372,12 @@ class K8s():
                 "name": crd_object['metadata']['name'],
                 "namespace": crd_object['metadata']['namespace'] if 'namespace' in crd_object['metadata'] else '',
                 "annotations": json.dumps(crd_object['metadata']['annotations'], indent=4,
-                                          ensure_ascii=False) if 'annotations' in crd_object['metadata'] else '',
-                "labels": json.dumps(crd_object['metadata']['labels'], indent=4, ensure_ascii=False) if 'labels' in
-                                                                                                        crd_object[
-                                                                                                            'metadata'] else '',
+                                          ensure_ascii=False) if 'annotations' in crd_object['metadata'] else '{}',
+                "labels": json.dumps(crd_object['metadata']['labels'], indent=4, ensure_ascii=False) if 'labels' in crd_object['metadata'] else '{}',
                 "spec": json.dumps(crd_object['spec'], indent=4, ensure_ascii=False),
                 "create_time": creat_time,
                 "status": status,
-                "status_more": json.dumps(crd_object['status'], indent=4,
-                                          ensure_ascii=False) if 'status' in crd_object else ''
+                "status_more": json.dumps(crd_object['status'], indent=4,ensure_ascii=False) if 'status' in crd_object else '{}'
             }
 
                 # return
@@ -699,6 +791,29 @@ class K8s():
         return k8s_volumes,k8s_volume_mounts
 
 
+
+    # @pysnooper.snoop()
+    def get_gpu(self,resource_gpu):
+        gpu_num = 0
+        gpu_type = ''
+        try:
+            if resource_gpu:
+                if '(' in resource_gpu:
+                    gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
+                    gpu_type = gpu_type[0] if gpu_type else None
+                if '（' in resource_gpu:
+                    gpu_type = re.findall(r"（(.+?)）", resource_gpu)
+                    gpu_type = gpu_type[0] if gpu_type else None
+
+                resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
+                resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
+                gpu_num = float(resource_gpu)
+
+        except Exception as e:
+            print(e)
+        gpu_type = gpu_type.upper() if gpu_type else None
+        return gpu_num, gpu_type
+
     # @pysnooper.snoop(watch_explode=())
     def make_container(self,name,command,args,volume_mount,working_dir,resource_memory,resource_cpu,resource_gpu,image_pull_policy,image,env,privileged=False,username='',ports=None,health=None):
 
@@ -730,25 +845,6 @@ class K8s():
         env_list.append(client.V1EnvVar(name='K8S_POD_NAME', value_from=client.V1EnvVarSource(field_ref=client.V1ObjectFieldSelector(field_path='metadata.name'))))
 
         security_context = client.V1SecurityContext(privileged=privileged) if privileged else None
-        gpu_type = os.environ.get("GPU_TYPE", "NVIDIA")
-        print(gpu_type)
-
-        def get_gpu(resource_gpu):
-            try:
-                if resource_gpu:
-                    gpu_type = os.environ.get("GPU_TYPE", "NVIDIA")  # TENCENT
-                    if gpu_type == 'NVIDIA':
-                        num = int(resource_gpu.split(',')[0])
-                        # num = 2 if num>2 else num
-                        return num, num
-                    if gpu_type == 'TENCENT':
-                        core = int(resource_gpu.split(',')[0])
-                        memory = int(resource_gpu.split(',')[1]) if ',' in resource_gpu else 0
-                        return core, memory
-            except Exception as e:
-                print(e)
-
-            return 0, 0
 
 
         resources_requests = {
@@ -760,18 +856,29 @@ class K8s():
             "memory": limits_memory
         }
 
-        resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
-        resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
 
+        gpu_num,gpu_type = self.get_gpu(resource_gpu)
 
-        gpu_num = get_gpu(resource_gpu)[0]
-        if gpu_num:
-            resources_requests['nvidia.com/gpu'] = str(gpu_num)
-            resources_limits['nvidia.com/gpu'] = str(gpu_num)
+        # 整卡占用
+        if gpu_num>=1:
+            from myapp import conf
+            gpu_drive_type = conf.get("GPU_DRIVE_TYPE", "NVIDIA")
+            if gpu_drive_type=='NVIDIA':
+                resources_requests['nvidia.com/gpu'] = str(int(gpu_num))
+                resources_limits['nvidia.com/gpu'] = str(int(gpu_num))
 
+        if 0<gpu_num<1:
+            # 虚拟gpu
+            from myapp import conf
+            vgpu_drive_type = conf.get("VGPU_DRIVE_TYPE", "TENCENT")
+            if vgpu_drive_type == 'TENCENT':
+                gpu_memory = int(gpu_num*64) if gpu_type=='T4' else int(gpu_num*128) if gpu_type=='V100' else int(gpu_num*160) if gpu_type=='A100' else int(gpu_num*64)
+                resources_requests['tencent.com/vcuda-core'] = str(int(gpu_num*100))
+                resources_requests['tencent.com/vcuda-memory'] = str(gpu_memory)
+                resources_limits['tencent.com/vcuda-core'] = str(int(gpu_num*100))
+                resources_limits['tencent.com/vcuda-memory'] = str(gpu_memory)
 
-        resources_tencent = client.V1ResourceRequirements(requests=resources_requests, limits=resources_limits)
-        resources_obj=resources_tencent
+        resources_obj = client.V1ResourceRequirements(requests=resources_requests, limits=resources_limits)
 
 
         if ports:
@@ -781,7 +888,6 @@ class K8s():
             ports_k8s = [client.V1ContainerPort(name='port%s' % str(port), protocol='TCP', container_port=port) for port in ports] if ports else None
         else:
             ports_k8s=[]
-
 
         #         readinessProbe:
         #           failureThreshold: 2
@@ -842,16 +948,15 @@ class K8s():
                 if selector:
                     nodeSelector[selector.strip().split('=')[0].strip()]=selector.strip().split('=')[1].strip()
 
-        gpu_type = None
-        if '(' in resource_gpu:
-            gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
-            gpu_type = gpu_type[0] if gpu_type else None
-        if '（' in resource_gpu:
-            gpu_type = re.findall(r"（(.+?)）", resource_gpu)
-            gpu_type = gpu_type[0] if gpu_type else None
+        gpu_num,gpu_type=self.get_gpu(resource_gpu)
 
         if gpu_type and gpu_type.strip():
             nodeSelector['gpu-type']=gpu_type
+        if gpu_num>=1:
+            nodeSelector['gpu']='true'
+        if 1>gpu_num>0:
+            nodeSelector['vgpu']='true'
+
 
         k8s_volumes, k8s_volume_mounts = self.get_volume_mounts(volume_mount, username)
 
@@ -1529,6 +1634,8 @@ class K8s():
             return float(cpu.replace('m',''))/1000
         if 'n' in cpu:
             return float(cpu.replace('n', '')) / 1000/1000
+        if 'u' in cpu:
+            return float(cpu.replace('u', '')) / 1000/1000/1000
         return float(cpu)
 
     # @pysnooper.snoop(watch_explode=('item'))
@@ -1541,14 +1648,14 @@ class K8s():
             back_metrics.append({
                 "name":item['metadata']['name'],
                 "time":item['timestamp'],
-                "cpu": int(item['usage']['cpu'].replace('n',''))/1000000,
+                "cpu": self.to_cpu(item['usage']['cpu']),
                 "memory": self.to_memory_GB(item['usage']['memory']),
                 "window": item['window'],
             })
         # print(back_metrics)
         return back_metrics
 
-
+    # @pysnooper.snoop()
     def get_pod_metrics(self,namespace=None):
         back_metrics = []
         cust = client.CustomObjectsApi()
@@ -1564,11 +1671,12 @@ class K8s():
                     "name":item['metadata']['name'],
                     "time":item['timestamp'],
                     "namespace":item['metadata']['namespace'],
-                    "cpu": sum(int(container['usage']['cpu'].replace('n',''))/1000000 for container in item['containers']),
+                    "cpu": sum(self.to_cpu(container['usage']['cpu']) for container in item['containers']),
                     "memory": sum(self.to_memory_GB(container['usage']['memory']) for container in item['containers']),
                     "window": item['window']
                 })
             except Exception as e:
+                traceback.extract_stack()
                 print(e)
         # print(back_metrics)
         return back_metrics
@@ -1584,21 +1692,19 @@ class K8s():
                 print("Unknown error: %s" % e)
                 return
 
-
         self.v1.connect_get_namespaced_pod_exec(
             name,
             namespace,
             command=command,
-            # stderr = True,
-            # stdin = True,
-            # stdout = True,
-            # tty = True
+            stderr = True,
+            stdin = True,
+            stdout = True,
+            tty = False
         )
 
 
-
     # 实时跟踪指定pod日志，直到pod结束
-    def get_pod_log_stream(self, name,namespace, tail_lines=100):
+    def get_pod_log_stream(self, name,namespace,container, tail_lines=100):
         """
         获取pod的日志
         :param tail_lines: # 显示最后多少行
@@ -1609,8 +1715,10 @@ class K8s():
             streams = self.v1.read_namespaced_pod_log(
                 name,
                 namespace,
+                container=container,
                 follow=True,
                 _preload_content=False,
+                timestamps=False,
                 tail_lines=tail_lines).stream()
             return streams
 
@@ -1625,18 +1733,19 @@ class K8s():
             print("Get Log Fail: {0}".format(str(e)))
             raise e
 
-    def watch_pod_log(self,name,namespace):
-        print('begin follow log')
+    def download_pod_log(self,name,namespace,container=None,tail_lines=None,since_seconds=None,since_time=None):
+        print('begin donwload log')
         logs = self.v1.read_namespaced_pod_log(
             name=name,
             namespace=namespace,
-            follow=True,
-            _preload_content=False,
+            container=container,
+            pretty=True,
+            _preload_content=True,
+            tail_lines=int(tail_lines) if tail_lines else None,
+            since_seconds = int(since_seconds) if since_seconds else (datetime.datetime.now().timestamp()-int(since_time)) if since_time else None,
+            # timestamps=True
         )
-        for line in logs:
-            print(str(line,'utf-8'))
-
-        print('end follow log')
+        return logs
 
 
 
@@ -1660,13 +1769,11 @@ class K8s():
                 request = container.resources.requests
                 container_gpu = 0
                 if limits:
-                    container_gpu = int(limits.get('tencent.com/vcuda-core', 0)) / 100
-                    if not container_gpu:
-                        container_gpu = int(limits.get('nvidia.com/gpu', 0))
+                    container_gpu = int(limits.get('nvidia.com/gpu', 0))
                 elif request:
-                    container_gpu = int(request.get('tencent.com/vcuda-core', 0)) / 100
-                    if not container_gpu:
-                        container_gpu = int(request.get('nvidia.com/gpu', 0))
+                    # container_gpu = int(request.get('tencent.com/vcuda-core', 0)) / 100
+                    # if not container_gpu:
+                    container_gpu = int(request.get('nvidia.com/gpu', 0))
                 if container_gpu < 0.01:
                     container_gpu = 0
                 gpu += container_gpu
@@ -1694,6 +1801,64 @@ class K8s():
             pass
         pass
 
+    def to_local_time(self,time_str):
+        if type(time_str)==str:
+            return (datetime.datetime.strptime(time_str.replace('T', ' ').replace('Z', ''),'%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+        elif type(time_str)==datetime.datetime:
+            return (time_str+datetime.timedelta(hours=8)).replace(tzinfo=None).strftime('%Y-%m-%d %H:%M:%S')
+
+
+    def terminal_start(self, namespace, pod_name, container,cols=80,rows=24):
+        command = [
+            "/bin/sh",
+            "-c",
+            'TERM=xterm-256color; export TERM; [ -x /bin/bash ] '
+            '&& ([ -x /usr/bin/script ] '
+            '&& /usr/bin/script -q -c "/bin/bash" /dev/null || exec /bin/bash) '
+            '|| exec /bin/sh']
+
+        container_stream = stream(
+            self.v1.connect_get_namespaced_pod_exec,
+            name=pod_name,
+            namespace=namespace,
+            container=container,
+            command=command,
+            stderr=True, stdin=True,
+            stdout=True, tty=True,
+            _preload_content=False
+        )
+        container_stream.write_channel(4, json.dumps({"Height": int(rows), "Width": int(cols)}))
+        return container_stream
+
+
+class K8SStreamThread(threading.Thread):
+
+    def __init__(self, ws, container_stream):
+        super(K8SStreamThread, self).__init__()
+        self.ws = ws
+        self.stream = container_stream
+
+    def run(self):
+        while not self.ws.closed:
+
+            if not self.stream.is_open():
+                logging.info('container stream closed')
+                self.ws.close()
+
+            try:
+                if self.stream.peek_stdout():
+                    stdout = self.stream.read_stdout()
+                    self.ws.send(stdout)
+
+                if self.stream.peek_stderr():
+                    stderr = self.stream.read_stderr()
+                    self.ws.send(stderr)
+            except Exception as err:
+                logging.error('container stream err: {}'.format(err))
+                self.ws.close()
+                break
+
+
 # @pysnooper.snoop()
 def check_status_time(status,hour=8):
     if type(status)==dict:
@@ -1716,8 +1881,24 @@ def check_status_time(status,hour=8):
 
 #
 # if __name__=='__main__':
-#     k8s_client = K8s(file_path='~/.kube/config')
+#     k8s_client = K8s(file_path='/home/myapp/kubeconfig/dev-kubeconfig')
 #
+#     try:
+#         deployments = k8s_client.AppsV1Api.list_deployment_for_all_namespaces().items
+#         for deploy in deployments:
+#             # print(deploy)
+#             namespace = deploy.metadata.namespace
+#             name = deploy.metadata.name
+#             run_id = deploy.metadata.labels.get('run-id', '').strip() if deploy.metadata.labels else ''
+#             print(namespace,name,run_id)
+#     except Exception as e2:
+#         print(e2)
+
+    # pod = k8s_client.get_pod_humanized(namespace='infra',pod_name="kubeflow-dashboard-5fb75694c9-856ck")
+    # print(pod)
+
+
+
 
 
 

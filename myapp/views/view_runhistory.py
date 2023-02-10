@@ -1,18 +1,22 @@
+import datetime
+import random
+import json
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-
-
-from myapp.models.model_job import RunHistory
-
+import pysnooper
+import urllib.parse
+from flask import request
+from myapp.models.model_job import RunHistory,Pipeline
+import calendar
 from myapp import app, appbuilder,db
 from wtforms import SelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_babel import lazy_gettext as _
 from sqlalchemy import or_
-
+from flask_appbuilder import expose
 from .baseApi import (
     MyappModelRestApi
 )
-
+from flask import jsonify
 from myapp import security_manager
 from .base import (
     DeleteMixin,
@@ -39,17 +43,16 @@ class RunHistory_Filter(MyappFilter):
         )
 
 
-
 class RunHistory_ModelView_Base():
     label_title='定时调度历史'
     datamodel = SQLAInterface(RunHistory)
     base_order = ('id', 'desc')
     order_columns = ['id']
     base_permissions = ['can_show', 'can_list', 'can_delete']
-    list_columns = ['pipeline_url','creator','created_on','execution_date','status_url','log','history']
+    list_columns = ['pipeline_url','creator','create_time','execution_date','status_url']
     cols_width={
-        "pipeline_url": {"type": "ellip2", "width": 400},
-        "created_on":{"type": "ellip2", "width": 300}
+        "pipeline_url": {"type": "ellip2", "width": 300},
+        "create_time":{"type": "ellip2", "width": 250}
     }
     edit_columns = ['status']
     base_filters = [["id", RunHistory_Filter, lambda: []]]
@@ -62,7 +65,6 @@ class RunHistory_ModelView_Base():
         ),
     }
     edit_form_extra_fields = add_form_extra_fields
-
 
 class RunHistory_ModelView(RunHistory_ModelView_Base,MyappModelView,DeleteMixin):
     datamodel = SQLAInterface(RunHistory)

@@ -118,7 +118,7 @@ class ETL_Pipeline_ModelView_Base():
     # order_columns = ['id','changed_on']
     order_columns = ['id']
 
-    list_columns = ['project','etl_pipeline_url','workflow','creator','modified']
+    list_columns = ['id','project','etl_pipeline_url','workflow','creator','modified']
     cols_width = {
         "project":{"type": "ellip2", "width": 200},
         "etl_pipeline_url": {"type": "ellip2", "width": 400},
@@ -428,7 +428,13 @@ class ETL_Pipeline_ModelView_Base():
             pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
             params = importlib.import_module('myapp.views.view_etl_pipeline_' + pipeline.workflow)
             etl_pipeline = getattr(params, pipeline.workflow.upper() + '_ETL_PIPELINE')(pipeline)
-            redirect_url = etl_pipeline.submit_pipeline()
+            dag_json, redirect_url = etl_pipeline.submit_pipeline()
+            if dag_json:
+                if type(dag_json)==dict:
+                    dag_json=json.dumps(dag_json,indent=4,ensure_ascii=False)
+                pipeline.dag_json = dag_json
+                db.session.commit()
+
             if redirect_url:
                 return redirect(redirect_url)
         except Exception as e:
@@ -542,7 +548,7 @@ appbuilder.add_view_no_menu(ETL_Pipeline_ModelView)
 class ETL_Pipeline_ModelView_Api(ETL_Pipeline_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(ETL_Pipeline)
     route_base = '/etl_pipeline_modelview/api'
-    search_columns=['project','name','describe','dag_json','created_by']
+    search_columns=['id','project','name','describe','dag_json','created_by']
     # related_views = [ETL_Task_ModelView_Api, ]
 
     spec_label_columns = {

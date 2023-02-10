@@ -45,7 +45,7 @@ class Training_Model_ModelView_Base():
     base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('changed_on', 'desc')
     order_columns = ['id']
-    list_columns = ['project_url','name','version','framework','api_type','pipeline_url','creator','modified','deploy']
+    list_columns = ['project_url','name','version','model_metric','framework','api_type','pipeline_url','creator','modified','deploy']
     search_columns = ['created_by','project','name','version','framework','api_type','pipeline_id','run_id','path']
 
     add_columns = ['project','name','version','describe','path','framework','run_id','run_time','metrics','md5','api_type','pipeline_id']
@@ -61,13 +61,15 @@ class Training_Model_ModelView_Base():
         "version": {"type": "ellip2", "width": 200},
         "modified": {"type": "ellip2", "width": 150},
         "deploy": {"type": "ellip2", "width": 100},
+        "model_metric": {"type": "ellip2", "width": 300},
     }
     spec_label_columns = {
         "path": "模型文件",
         "framework":"算法框架",
         "api_type":"推理框架",
         "pipeline_id":"任务流id",
-        "deploy": "发布"
+        "deploy": "发布",
+        "model_metric":"指标"
     }
 
     label_title = '模型'

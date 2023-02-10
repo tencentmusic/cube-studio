@@ -13,9 +13,101 @@ class Prometheus():
         self.query_path='http://%s/api/v1/query'%self.host
         self.query_range_path = 'http://%s/api/v1/query_range' % self.host
 
+    # @pysnooper.snoop()
+    def get_resource_metric(self, namespace):
+        max_cpu = 0
+        max_mem = 0
+        ave_gpu = 0
+        pod_metric={}
+        # 这个pod  30分钟内的最大值
+        mem_expr = "sum by (pod) (container_memory_working_set_bytes{namespace='%s',container!='POD', container!=''})" % (namespace,)
+        # print(mem_expr)
+        params = {
+            'query': mem_expr,
+            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'step': "1m",  # 运行小于1分钟的，将不会被采集到
+            # 'timeout':"30s"
+        }
+        print(params)
+
+        try:
+            res = requests.get(url=self.query_range_path, params=params)
+            metrics = json.loads(res.content.decode('utf8', 'ignore'))
+            if metrics['status'] == 'success':
+                metrics = metrics['data']['result']
+                if metrics:
+                    for pod in metrics:
+                        pod_name = pod['metric']['pod']
+                        values = max([float(x[1]) for x in pod['values']])
+                        if pod_name not in pod_metric:
+                            pod_metric[pod_name]={}
+                        pod_metric[pod_name]['memory']=round(values/1024/1024/1024,2)
+
+        except Exception as e:
+            print(e)
+
+        cpu_expr = "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace='%s',container!='POD'}[1m]))" % (namespace)
+
+        params = {
+            'query': cpu_expr,
+            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'step': "1m",  # 运行小于1分钟的，将不会被采集到
+            # 'timeout':"30s"
+        }
+        print(params)
+        try:
+
+            res = requests.get(url=self.query_range_path, params=params)
+            metrics = json.loads(res.content.decode('utf8', 'ignore'))
+            if metrics['status'] == 'success':
+                metrics = metrics['data']['result']
+                if metrics:
+                    for pod in metrics:
+                        pod_name = pod['metric']['pod']
+                        values = [float(x[1]) for x in pod['values']]
+                        values = round(sum(values) / len(values), 2)
+                        if pod_name not in pod_metric:
+                            pod_metric[pod_name] = {}
+                        pod_metric[pod_name]['cpu'] = values
+
+        except Exception as e:
+            print(e)
+
+        gpu_expr = "avg by (exported_pod) (DCGM_FI_DEV_GPU_UTIL{exported_namespace='%s'})" % (namespace)
+
+        params = {
+            'query': gpu_expr,
+            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'step': "1m",  # 运行小于1分钟的，将不会被采集到
+            # 'timeout':"30s"
+        }
+        print(params)
+        try:
+
+            res = requests.get(url=self.query_range_path, params=params)
+            metrics = json.loads(res.content.decode('utf8', 'ignore'))
+            if metrics['status'] == 'success':
+                metrics = metrics['data']['result']
+                if metrics:
+                    # print(metrics)
+                    for pod in metrics:
+                        pod_name = pod['metric']['exported_pod']
+                        values = [float(x[1]) for x in pod['values']]
+                        values = round(sum(values)/len(values),2)
+                        if pod_name not in pod_metric:
+                            pod_metric[pod_name] = {}
+                        pod_metric[pod_name]['gpu'] = values/100
+
+        except Exception as e:
+            print(e)
+
+        return pod_metric
 
         # @pysnooper.snoop()
-    def get_resource_metric(self,pod_name, namespace):
+    def get_pod_resource_metric(self,pod_name, namespace):
         max_cpu = 0
         max_mem = 0
         ave_gpu = 0
@@ -91,7 +183,7 @@ class Prometheus():
                 if metrics:
                     metrics=metrics[0]['values']
                     all_util = [float(metric[1]) for metric in metrics]
-                    ave_gpu = sum(all_util)/len(all_util)
+                    ave_gpu = sum(all_util)/len(all_util)/100
         except Exception as e:
             print(e)
 
@@ -99,14 +191,18 @@ class Prometheus():
 
 
 
-
+    # todo 获取机器的负载补充完整
     @pysnooper.snoop()
     def get_machine_metric(self):
-
         # 这个pod  30分钟内的最大值
         metrics={
             "pod_num":"sum(kubelet_running_pod_count)by (node)",
-            "request_mem":""
+            "request_memory":"",
+            "request_cpu": "",
+            "request_gpu": "",
+            "used_memory": "",
+            "used_cpu": "",
+            "used_gpu": "",
         }
         back = {}
         for metric_name in metrics:
@@ -137,9 +233,10 @@ class Prometheus():
 
         return back
 
-# if __name__ == "__main__":
-#     prometheus = Prometheus('10.101.142.128:8081')
-#     prometheus.get_machine_metric()
+if __name__ == "__main__":
+    prometheus = Prometheus('10.101.142.16:8081')
+    aa = prometheus.get_resource_metric('pipeline')
+    print(aa)
 
 
 
