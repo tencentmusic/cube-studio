@@ -964,7 +964,7 @@ CLUSTERS={
         "PIPELINE_URL": '/pipeline/#/',
         # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
-        "SERVICE_DOMAIN": 'service.local.com',
+        # "SERVICE_DOMAIN": 'service.local.com',
         "GRAFANA_HOST": ''
     }
 }

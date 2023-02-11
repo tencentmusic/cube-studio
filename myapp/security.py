@@ -125,7 +125,7 @@ class MyRoleModelView(RoleModelView):
 
 
 class MyUserRemoteUserModelView_Base():
-
+    datamodel = SQLAInterface(MyUser)
     list_columns = ["username", "active", "roles", ]
     edit_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]
     add_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]

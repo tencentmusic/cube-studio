@@ -15,7 +15,7 @@ import threading
 import logging
 
 class K8s():
-
+    # @pysnooper.snoop()
     def __init__(self,file_path=None):  # kubeconfig
         kubeconfig = os.getenv('KUBECONFIG','')
         if file_path and os.path.exists(file_path) and ''.join(open(file_path).readlines()).strip():

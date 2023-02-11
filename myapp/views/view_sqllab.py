@@ -153,7 +153,7 @@ class Sqllab_Query_View(BaseMyappView):
                                     {
                                         "id":item,
                                         "value":item
-                                    } for item in ['mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8']
+                                    } for item in ['mysql+pymysql://账号:密码@host:port/db?charset=utf8']
                                 ]
                             },
                             {
@@ -163,7 +163,7 @@ class Sqllab_Query_View(BaseMyappView):
                                     {
                                         "id":item,
                                         "value":item
-                                    } for item in ['postgresql://tdw_v_xbwan:xm8404xmb@sngrpt-bi-tdw.tencent-distribute.com:5432/music_qmkg_r']
+                                    } for item in ['postgresql://账号:密码@host:port/db']
                                 ]
                             },
                             {
@@ -173,7 +173,7 @@ class Sqllab_Query_View(BaseMyappView):
                                     {
                                         "id": item,
                                         "value": item
-                                    } for item in ['clickhouse+native://default:bi4A1l@9.69.128.43:9000/default']
+                                    } for item in ['clickhouse+native://账号:密码@host:port/db']
                                 ]
                             }
                         ]

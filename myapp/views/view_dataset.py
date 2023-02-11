@@ -146,7 +146,7 @@ class Dataset_ModelView_base():
             description='数据集英文名，小写',
             default='',
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(),Regexp("^[a-z][a-z0-9_\-]*[a-z0-9]$"),]
+            validators=[DataRequired(),Regexp("^[a-z][a-z0-9_]*[a-z0-9]$"),]
         ),
         "version": StringField(
             label=_(datamodel.obj.lab('version')),
@@ -271,6 +271,8 @@ class Dataset_ModelView_base():
             item.owner=g.user.username+",*"
         if not item.icon:
             item.icon = '/static/assets/images/dataset.png'
+        if not item.version:
+            item.version='latest'
     def pre_update(self,item):
         self.pre_add(item)
 
