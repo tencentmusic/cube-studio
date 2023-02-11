@@ -1,3 +1,5 @@
+import json
+
 from flask_appbuilder import Model
 
 from sqlalchemy import Text
@@ -37,17 +39,24 @@ class Aihub(Model,MyappModelBase):
     version = Column(String(200), nullable=True, default='')
     hot = Column(Integer, default=1)
     price = Column(Integer, default=1)
+    expand = Column(Text, nullable=True, default='{}')
 
 
     @property
     def card(self):
-        notebook_url = "/aihub/api/notebook/"+self.uuid if self.status=='online' and self.notebook else ""
-        train_url = "/aihub/api/train/" + self.uuid if self.status == 'online' and (self.job_template or self.pipeline) else ""
-        service_url = "/aihub/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
+        notebook_url = "/model_market/all/api/notebook/"+self.uuid if self.status=='online' and self.notebook else ""
+        train_url = "/model_market/all/api/train/" + self.uuid if self.status == 'online' and (self.job_template or self.pipeline) else ""
+        service_url = "/model_market/all/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
+        service_text='部署服务'
+        expand = json.loads(self.expand) if self.expand else {}
+        if expand.get('status','offline')=='online':
+            service_url = "/model_market/all/api/service/delete/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
+            service_text = '卸载服务'
+
 
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
-    <a href="{self.doc if self.status=='online' else ''}">
+    <a target=_blank href="{self.doc if self.status=='online' else ''}">
         <img src="{self.pic}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
     </a>
     <br>
@@ -59,9 +68,9 @@ class Aihub(Model,MyappModelBase):
             </div>
         </div>
         <div style="border-top: 1px solid rgba(0,0,0,.06);" class="ptb8 d-f ac jc-b">
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>notebook</a>
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{train_url}'>训练</a>
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{service_url}'>服务</a>
+            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>notebook</a>
+            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{train_url}'>训练</a>
+            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{service_url}'>{service_text}</a>
         </div>
     </div>
 </div>

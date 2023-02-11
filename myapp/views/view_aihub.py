@@ -8,7 +8,7 @@ from myapp.models.model_job import Images,Job_Template,Repository
 from myapp.models.model_team import Project,Project_User
 from myapp.models.model_serving import InferenceService
 from flask import g,make_response,Markup,jsonify,request
-import random,pysnooper
+import random,pysnooper,os
 
 from .baseApi import (
     MyappModelRestApi
@@ -21,6 +21,8 @@ from .base import (
     MyappFilter,
 )
 from myapp.models.model_aihub import Aihub
+from myapp.utils import core
+from myapp.utils.py.py_k8s import K8s
 from flask_appbuilder import expose
 import datetime,json
 conf = app.config
@@ -256,24 +258,268 @@ class Aihub_base():
         return redirect(aihub.doc)
 
 
+    def aihub_inference_yaml(self,app_name,namespace,config):
+
+        service_json = {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "name": f"aihub-{app_name}",
+                "namespace": namespace,
+                "labels": {
+                    "app": f"aihub-{app_name}"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "backend",
+                        "port": 8080,
+                        "targetPort": 8080,
+                        "protocol": "TCP"
+                    },
+                    {
+                        "name": "frontend",
+                        "port": 80,
+                        "targetPort": 80,
+                        "protocol": "TCP"
+                    }
+                ],
+                "selector": {
+                    "app": f"aihub-{app_name}"
+                }
+            }
+        }
+        cpu_or_gpu='cpu' if str(config.get("resource_gpu","0"))=='0' else 'gpu'
+        deployment_json = {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "name": f"aihub-{app_name}",
+                "namespace": namespace,
+                "labels": {
+                    "app": f"aihub-{app_name}"
+                }
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "matchLabels": {
+                        "app": f"aihub-{app_name}"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "name": f"aihub-{app_name}",
+                        "labels": {
+                            "app": f"aihub-{app_name}",
+                            "aihub": cpu_or_gpu
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "tz-config",
+                                "hostPath": {
+                                    "path": "/usr/share/zoneinfo/Asia/Shanghai"
+                                }
+                            }
+                        ],
+                        "nodeSelector": {
+                            cpu_or_gpu: "true"
+                        },
+                        "affinity": {
+                            "podAntiAffinity": {
+                                "preferredDuringSchedulingIgnoredDuringExecution": [
+                                    {
+                                        "weight": 20,
+                                        "podAffinityTerm": {
+                                            "labelSelector": {
+                                                "matchLabels": {
+                                                    "aihub": cpu_or_gpu
+                                                }
+                                            },
+                                            "topologyKey": "kubernetes.io/hostname"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "containers": [
+                            {
+                                "name": f"aihub-{app_name}",
+                                "image": f"ccr.ccs.tencentyun.com/cube-studio/aihub:{app_name}",
+                                "imagePullPolicy": conf.get('IMAGE_PULL_POLICY','Always'),
+                                "command": [
+                                    "bash",
+                                    "-c",
+                                    "/src/docker/entrypoint.sh python app.py"
+                                ],
+                                "securityContext": {
+                                    "privileged": True
+                                },
+                                "env": [
+                                    {
+                                        "name": "APPNAME",
+                                        "value": f"{app_name}"
+                                    },
+                                    {
+                                        "name": "REQ_TYPE",
+                                        "value": "synchronous"
+                                    },
+                                    {
+                                        "name": "NVIDIA_VISIBLE_DEVICES",
+                                        "value": "all"
+                                    }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "name": "tz-config",
+                                        "mountPath": "/etc/localtime"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 2,
+                                    "httpGet": {
+                                        "path": f"/{app_name}/info",
+                                        "port": 80
+                                    },
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 10,
+                                    "timeoutSeconds": 5
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+
+        virtual_service_json = {
+            "apiVersion": "networking.istio.io/v1alpha3",
+            "kind": "VirtualService",
+            "metadata": {
+                "name": f"aihub-{app_name}",
+                "namespace": namespace
+            },
+            "spec": {
+                "gateways": [
+                    "kubeflow/kubeflow-gateway"
+                ],
+                "hosts": [
+                    "*" if core.checkip(request.host) else request.host
+                ],
+                "http": [
+                    {
+                        "match": [
+                            {
+                                "uri": {
+                                    "prefix": '/aihub/' if app_name=='app1' else f"/{app_name}/"
+                                }
+                            }
+                        ],
+                        "route": [
+                            {
+                                "destination": {
+                                    "host": f"{app_name}-deoldify.aihub.svc.cluster.local",
+                                    "port": {
+                                        "number": 80
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
+        return service_json,deployment_json,virtual_service_json
+
+    # @pysnooper.snoop()
+    def deploy_aihub(self,k8s_client,namespace,name,config):
+
+        service_json, deployment_json, virtual_service_json = self.aihub_inference_yaml(app_name=name,namespace=namespace,config=config)
+        print(deployment_json)
+        print(virtual_service_json)
+        # 创建service
+        try:
+            k8s_client.v1.create_namespaced_service(namespace=namespace, body=service_json)
+        except Exception as e:
+            # print(e)
+            pass
+        # 创建dp
+        try:
+            k8s_client.AppsV1Api.create_namespaced_deployment(namespace=namespace, body=deployment_json)
+        except Exception as e:
+            # print(e)
+            pass
+        # 创建虚拟服务
+        try:
+            crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
+            k8s_client.create_crd(namespace=namespace, group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'], body=virtual_service_json)
+        except Exception as e:
+            print(e)
+
+        pass
     # @event_logger.log_this
-    @expose('/service/<aihub_id>',methods=['GET','POST'])
+    @expose('/service/delete/<aihub_id>',methods=['GET'])
+    @expose('/service/<aihub_id>',methods=['GET'])
     def service(self,aihub_id):
         aihub = db.session.query(Aihub).filter_by(uuid=aihub_id).first()
         try:
-            if aihub and aihub.inference:
-                inference = json.loads(aihub.inference)
-                create_inference(**inference)
-                flash('服务已注册，部署后访问','success')
-                url = conf.get('MODEL_URLS', {}).get('inferenceservice', '') + '?filter=' + urllib.parse.quote(
-                    json.dumps([{"key": "name", "value": inference.get('service_name', '')}],
-                               ensure_ascii=False))
-                print(url)
+            from kubernetes import client
+            namespace='aihub'
+            cluster = conf.get('CLUSTERS', {}).get(os.getenv('ENVIRONMENT', '').lower(),{})
+            kubeconfig=cluster.get('KUBECONFIG', '')
+
+            k8s_client = K8s(kubeconfig)
+            if f'/service/delete/{aihub_id}' in request.path:
+                name ='aihub-'+aihub.name
+                k8s_client.delete_service(namespace=namespace,name=name)
+                k8s_client.delete_deployment(namespace=namespace,name=name)
+                crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
+                k8s_client.delete_crd(namespace=namespace,group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],name=name)
+                url = cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (namespace, name.replace('_', '-'))
+                expand = json.loads(aihub.expand) if aihub.expand else {}
+                expand['status']='offline'
+                aihub.expand = json.dumps(expand)
+                db.session.commit()
                 return redirect(url)
+
+            try:
+                k8s_client.v1.create_namespace(client.V1Namespace(api_version='v1',kind='Namespace',metadata=client.V1ObjectMeta(name=namespace)))
+            except Exception as e:
+                # print(e)
+                pass
+
+            self.deploy_aihub(k8s_client=k8s_client, namespace=namespace, name='app1',config={})
+            self.deploy_aihub(k8s_client=k8s_client,namespace=namespace,name=aihub.name,config=json.loads(aihub.inference))
+
+            url = cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (namespace, aihub.name.replace('_', '-'))
+            expand = json.loads(aihub.expand) if aihub.expand else {}
+            expand['status'] = 'online'
+            aihub.expand = json.dumps(expand)
+            db.session.commit()
+            return redirect(url)
         except Exception as e:
             print(e)
         return redirect(aihub.doc)
 
+    # # 统一变换是否显示
+    # @pysnooper.snoop()
+    # def pre_list_res(self,res):
+    #     namespace = 'aihub'
+    #     cluster = conf.get('CLUSTERS', {}).get(os.getenv('ENVIRONMENT', '').lower(), {})
+    #     kubeconfig = cluster.get('KUBECONFIG', '')
+    #     k8s_client = K8s(kubeconfig)
+    #     exist_deplymnets = k8s_client.AppsV1Api.list_namespaced_deployment(namespace=namespace).items
+    #     exist_deplymnets = [item.metadata.name for item in exist_deplymnets]
+    #     aihubs = res['data']
+    #     for aihub in aihubs:
+    #         print(aihub)
+    #         if 'aihub-'+aihub.name in exist_deplymnets:
+    #             aihub["card"] = aihub["card"].replace("部署服务",'卸载服务').replace('/model_market/all/api/service/','/model_market/all/api/service/delete/')
+    #     return res
 
 # @pysnooper.snoop()
 def aihub_demo():
@@ -284,28 +530,27 @@ def aihub_demo():
         from myapp.models.model_aihub import Aihub
         conf.all_model = db.session.query(Aihub).all()
 
-    if ENVIRONMENT == 'dev':
-        all_model = conf.all_model
-    else:
-        try:
-            from myapp.utils.py.py_k8s import K8s
-            k8s_client = K8s()
-            pods = k8s_client.get_pods(namespace='aihub')
-            all_model = {}
-            for model in conf.all_model:
-                for pod in pods:
-                    if pod['status'] == 'Running' and model.name in pod['name'] and model.name not in all_model:
-                        containerStatuses = pod['status_more'].get('container_statuses', [])
-                        if len(containerStatuses) > 0:
-                            containerStatuse = containerStatuses[0]
-                            containerStatuse = containerStatuse.get("ready", False)
-                            if containerStatuse:
-                                all_model[model.name] = model
-            all_model = list(all_model.values())
-        except Exception as e:
-            print(e)
-            return
 
+    try:
+        from myapp.utils.py.py_k8s import K8s
+        k8s_client = K8s()
+        pods = k8s_client.get_pods(namespace='aihub')
+        all_model = {}
+        for model in conf.all_model:
+            for pod in pods:
+                if pod['status'] == 'Running' and model.name in pod['name'] and model.name not in all_model:
+                    containerStatuses = pod['status_more'].get('container_statuses', [])
+                    if len(containerStatuses) > 0:
+                        containerStatuse = containerStatuses[0]
+                        containerStatuse = containerStatuse.get("ready", False)
+                        if containerStatuse:
+                            all_model[model.name] = model
+        all_model = list(all_model.values())
+    except Exception as e:
+        print(e)
+        return
+    if not all_model:
+        return None
     rec_model = random.choice(all_model)
     # img_path = "/home/myapp/myapp/assets/images/aihub/%s.png"%rec_model.name
     # os.makedirs(os.path.dirname(img_path),exist_ok=True)

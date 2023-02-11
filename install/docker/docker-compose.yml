@@ -49,6 +49,7 @@ services:
     volumes:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../myapp/:/home/myapp/myapp/
+      - ../../aihub/:/cube-studio/aihub/
       - ./file:/pvc
       - ./entrypoint.sh:/entrypoint.sh
       - ./config.py:/home/myapp/myapp/config.py

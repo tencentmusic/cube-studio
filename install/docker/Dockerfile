@@ -7,6 +7,7 @@ COPY install/docker/docker-add-file/__init__.py /usr/local/lib/python3.6/dist-pa
 
 COPY myapp /home/myapp/myapp
 COPY myapp/static/appbuilder/frontend /data/web/frontend
+COPY aihub /cube-studio/aihub
 ENV PATH=/home/myapp/myapp/bin:$PATH
 ENV PYTHONPATH=/home/myapp:/kubeflow/src/pipelines/sdk/python/:$PYTHONPATH
 
