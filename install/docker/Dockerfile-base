@@ -34,17 +34,15 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
     echo "alias la='ls -A'" >> /root/.bashrc && \
     echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc" \
+    /bin/bash -c "source /root/.bashrc"
 
-#RUN pip install clickhouse-sqlalchemy pysnooper pymysql gevent mysqlclient flower infi.clickhouse_orm opencv-python  sqlalchemy_utils
-
-WORKDIR /home/myapp
-
-COPY install/docker/requirements.txt .
+COPY install/docker/requirements.txt /requirements.txt
 
 RUN pip install --upgrade setuptools pip && \
-    pip install -r requirements.txt && \
+    pip install -r /requirements.txt && \
     rm -rf /root/.cache/pip
+
+WORKDIR /home/myapp
 
 USER root
 

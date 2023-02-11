@@ -52,12 +52,14 @@ class Aihub(Model,MyappModelBase):
         if expand.get('status','offline')=='online':
             service_url = "/model_market/all/api/service/delete/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
             service_text = '卸载服务'
-
-
+        link = ''
+        pic_url = '/static/aihub/deep-learning/'+self.name+'/'+self.pic
+        if 'http://' in self.pic or "https://" in self.pic:
+            pic_url=self.pic
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
     <a target=_blank href="{self.doc if self.status=='online' else ''}">
-        <img src="{self.pic}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
+        <img src="{pic_url}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
     </a>
     <br>
     <div>
@@ -68,8 +70,8 @@ class Aihub(Model,MyappModelBase):
             </div>
         </div>
         <div style="border-top: 1px solid rgba(0,0,0,.06);" class="ptb8 d-f ac jc-b">
-            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>notebook</a>
-            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{train_url}'>训练</a>
+            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>开发</a>
+            <a class="flex1 ta-c" style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">训练</a>
             <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{service_url}'>{service_text}</a>
         </div>
     </div>

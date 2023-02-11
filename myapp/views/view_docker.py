@@ -214,6 +214,8 @@ class Docker_ModelView_Base():
         namespace = conf.get('NOTEBOOK_NAMESPACE')
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
+        pod_name="docker-commit-%s-%s"%(docker.created_by.username,str(docker.id))
+        k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
         flash('清理结束，可重新进行调试','success')
         return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 

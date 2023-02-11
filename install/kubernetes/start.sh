@@ -125,23 +125,10 @@ kubectl wait crd/gateways.networking.istio.io --for condition=established --time
 kubectl apply -f gateway.yaml
 kubectl apply -f virtual.yaml
 
-
-
-# 部署kfp pipeline
-kubectl apply -f kubeflow/sa-rbac.yaml
-kubectl create -f kubeflow/pipeline/minio-pv-hostpath.yaml
-kubectl apply -f kubeflow/pipeline/minio-artifact-secret.yaml
-sleep 5
-kubectl apply -f kubeflow/pipeline/pipeline-runner-rolebinding.yaml
-
-cd kubeflow/pipeline/1.6.0/kustomize/
-
-#kustomize build cluster-scoped-resources/ | kubectl apply -f -
-kubectl apply -k cluster-scoped-resources
-kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
-#kustomize build env/platform-agnostic/  | kubectl apply -f -
-kubectl apply -k env/platform-agnostic
-cd ../../../../
+# 部署argo
+kubectl apply -f argo/minio-pv-pvc-hostpath.yaml
+kubectl apply -f argo/pipeline-runner-rolebinding.yaml
+kubectl apply -f argo/install-3.4.3-all.yaml
 
 # 部署trainjob:tfjob/pytorchjob/mpijob/mxnetjob/xgboostjobs
 kubectl apply -k kubeflow/train-operator/manifests/overlays/standalone

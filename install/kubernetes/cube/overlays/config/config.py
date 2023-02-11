@@ -793,16 +793,12 @@ WORKSPACE_HOST_PATH = '/data/k8s/kubeflow/pipeline/workspace'
 ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 # prometheus地址
 PROMETHEUS = 'prometheus-k8s.monitoring:9090'
-# kfp地址
-KFP_HOST = "http://ml-pipeline.kubeflow:8888"
 # nni默认镜像
 NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
 
 
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
 K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
-
-PIPELINE_URL = '/pipeline/#/'
 
 
 
@@ -920,8 +916,6 @@ CLUSTERS={
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
         "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
-        "KFP_HOST": 'http://ml-pipeline.kubeflow:8888',
-        "PIPELINE_URL": '/pipeline/#/',
         # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
         "SERVICE_DOMAIN": 'service.local.com',

@@ -1,3 +1,0 @@
-varReference:
-- path: data/artifactRepository
-  kind: ConfigMap

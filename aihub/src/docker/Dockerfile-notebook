@@ -1,0 +1,16 @@
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.6-notebook  -f Dockerfile-cuda11.4-python3.6-notebook .
+ARG FROM_IMAGES
+FROM $FROM_IMAGES
+
+RUN pip install --upgrade pip && pip install tornado gsutil simplejson sqlalchemy joblib scikit-learn jinja2 requests numpy pandas flask pymysql pysnooper pyyaml jupyterlab voila notebook && \
+    rm -rf /tmp/* /var/tmp/* /root/.cache
+
+# 安装最新版的nodejs
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get install -y nodejs && npm config set unicode false
+
+# 环境变量
+ENV NODE_HOME /usr/local
+ENV PATH $NODE_HOME/bin:$PATH
+ENV NODE_PATH $NODE_HOME/lib/node_modules:$PATH
+ENV SHELL /bin/bash

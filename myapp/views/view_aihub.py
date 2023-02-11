@@ -225,7 +225,6 @@ class Aihub_base():
         flash('AIHub内容同步于github，<a target="_blank" href="https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning">参与贡献</a>',category='success')
         return items
 
-
     # @event_logger.log_this
     @expose('/notebook/<aihub_id>',methods=['GET','POST'])
     def notebook(self,aihub_id):
@@ -505,26 +504,9 @@ class Aihub_base():
             print(e)
         return redirect(aihub.doc)
 
-    # # 统一变换是否显示
-    # @pysnooper.snoop()
-    # def pre_list_res(self,res):
-    #     namespace = 'aihub'
-    #     cluster = conf.get('CLUSTERS', {}).get(os.getenv('ENVIRONMENT', '').lower(), {})
-    #     kubeconfig = cluster.get('KUBECONFIG', '')
-    #     k8s_client = K8s(kubeconfig)
-    #     exist_deplymnets = k8s_client.AppsV1Api.list_namespaced_deployment(namespace=namespace).items
-    #     exist_deplymnets = [item.metadata.name for item in exist_deplymnets]
-    #     aihubs = res['data']
-    #     for aihub in aihubs:
-    #         print(aihub)
-    #         if 'aihub-'+aihub.name in exist_deplymnets:
-    #             aihub["card"] = aihub["card"].replace("部署服务",'卸载服务').replace('/model_market/all/api/service/','/model_market/all/api/service/delete/')
-    #     return res
-
 # @pysnooper.snoop()
 def aihub_demo():
     # 根目录
-    ENVIRONMENT = conf.get('ENVIRONMENT', 'dev')
     if not hasattr(conf, 'all_model') or not conf.all_model:
         from myapp import db
         from myapp.models.model_aihub import Aihub

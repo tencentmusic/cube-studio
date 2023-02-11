@@ -1177,8 +1177,8 @@ def add_aihub(info_path):
     with session_scope(nullpool=True) as dbsession:
         try:
             if len(aihubs)>0:
-                dbsession.query(Aihub).delete()
-                dbsession.commit()
+                # dbsession.query(Aihub).delete()
+                # dbsession.commit()
                 for data in aihubs:
                     print(data)
                     name = data.get('name','')
