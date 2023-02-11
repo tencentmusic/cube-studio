@@ -27,7 +27,7 @@ mysql> flush privileges;
 docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01 -f install/docker/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
 docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01 -f install/docker/dockerFrontend/Dockerfile .
@@ -35,7 +35,7 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
 docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01
 ```
 

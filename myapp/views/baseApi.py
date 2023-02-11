@@ -1042,7 +1042,7 @@ class MyappModelRestApi(ModelRestApi):
 
         # handle select columns
         select_cols = _args.get(API_SELECT_COLUMNS_RIS_KEY, [])
-        _pruned_select_cols = [col for col in select_cols if col in self.list_columns]
+        _pruned_select_cols = [col for col in select_cols if col in list(set(self.list_columns+self.show_columns))]
         self.set_response_key_mappings(
             _response,
             self.get_list,
@@ -1874,6 +1874,10 @@ class MyappModelRestApi(ModelRestApi):
                     if hasattr(column_field_kwargs['widget'], 'retry_info') and column_field_kwargs['widget'].retry_info:
                         ret['retry_info'] = True
 
+                    # 处理tips
+                    if hasattr(column_field_kwargs['widget'], 'tips') and column_field_kwargs['widget'].tips:
+                        ret['tips'] = column_field_kwargs['widget'].tips
+
                     # 处理选填类型
                     if hasattr(column_field_kwargs['widget'], 'can_input') and column_field_kwargs['widget'].can_input:
                         ret['ui-type'] = 'input-select'
@@ -1897,6 +1901,7 @@ class MyappModelRestApi(ModelRestApi):
                         field_contents=None
                         try:
                             field_contents = cache.get(self.datamodel.obj.__tablename__+"_"+field.name)
+                            print('从缓存中读取'+self.datamodel.obj.__tablename__+"_"+field.name)
                         except Exception as e:
                             print(e)
                         # 缓存没有数据，再从数据库中读取

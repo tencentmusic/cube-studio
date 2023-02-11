@@ -124,11 +124,11 @@ class MyRoleModelView(RoleModelView):
     list_columns = ["name", "permissions"]
 
 
-class MyUserRemoteUserModelView(UserModelView):
+class MyUserRemoteUserModelView_Base():
 
     list_columns = ["username", "active", "roles", ]
-    edit_columns = ["first_name", "last_name", "username", "active", "email", "roles",'org' ]
-    add_columns = ["first_name", "last_name", "username", "email", "active", "roles",'org' ]
+    edit_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]
+    add_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]
     show_columns = ["username", "active", "roles", "login_count"]
     list_widget = MyappSecurityListWidget
     label_columns = {
@@ -201,6 +201,18 @@ class MyUserRemoteUserModelView(UserModelView):
             widgets=widgets,
             appbuilder=self.appbuilder,
         )
+
+    # 添加默认gamma角色
+
+    def post_add(self,user):
+        from myapp import security_manager,db
+        gamma_role = security_manager.find_role('Gamma')
+        if gamma_role not in user.roles:
+            user.roles.append()
+            db.session.commit()
+
+class MyUserRemoteUserModelView(MyUserRemoteUserModelView_Base,UserModelView):
+    datamodel = SQLAInterface(MyUser)
 
 from flask_appbuilder.security.views import SimpleFormView
 from flask_appbuilder._compat import as_unicode

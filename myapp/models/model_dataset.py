@@ -47,8 +47,9 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
     price = Column(String(200), nullable=True, default='0')  # 价格
 
     secret = Column(String(200), nullable=True, default='')  # 秘钥，数据集的秘钥
-    info = Column(Text, nullable=True)  # 数据集，内容信息
-    metric_info = Column(Text, nullable=True)  # 数据集，指标信息
+    info = Column(Text, nullable=True,default='{}')  # 数据集，内容信息
+    features = Column(Text, nullable=True,default='{}')  # 特征信息
+    metric_info = Column(Text, nullable=True,default='{}')  # 数据集，指标信息
 
     owner = Column(String(200),nullable=True,default='*')  #
 
@@ -96,7 +97,6 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
     @property
     def ops_html(self):
         dom = f'''
-        <a target=_blank href="/dataset_modelview/api/upload/{self.id}">上传到云存储</a> | 
-        <a target=_blank href="/dataset_modelview/api/download/{self.name}">下载</a> 
+        <a target=_blank href="/dataset_modelview/api/download/{self.id}">下载</a> 
         '''
         return Markup(dom)

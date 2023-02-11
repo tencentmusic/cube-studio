@@ -3,6 +3,8 @@
 FROM ubuntu:20.04
 
 ENV TZ=Asia/Shanghai
+ENV DEBIAN_FRONTEND=noninteractive
+ARG PYTHON_VERSION=python3.6
 
 # 替换源
 COPY install/docker/sources.list /etc/apt/sources.list
@@ -12,9 +14,8 @@ RUN apt-get clean all && apt-get update -y
 RUN apt install -y --force-yes --no-install-recommends apt-utils ca-certificates software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip
 
 # 安装python
-RUN apt install -y python3.6-dev python3-pip libsasl2-dev libpq-dev \
-    && ln -s /usr/bin/python3 /usr/bin/python \
-    && ln -s /usr/bin/pip3 /usr/bin/pip
+RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip python3.6-distutils
+RUN set -x; rm -rf /usr/bin/python /usr/bin/python3; apt install -y --fix-missing ${PYTHON_VERSION} ${PYTHON_VERSION}-dev && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python3 && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip && pip3 install -U pip
 
 # 安装node
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash
@@ -26,16 +27,16 @@ ENV LANG zh_CN.UTF-8
 ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
 
+# 安装kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
+
 # 便捷操作
 RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
     echo "alias la='ls -A'" >> /root/.bashrc && \
     echo "alias vi='vim'" >> /root/.bashrc && \
     /bin/bash -c "source /root/.bashrc" \
 
-# 安装kubelet软件
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
-
-#RUN pip install clickhouse-sqlalchemy pysnooper pymysql gevent mysqlclient flower infi.clickhouse_orm opencv-python numpy sqlalchemy_utils
+#RUN pip install clickhouse-sqlalchemy pysnooper pymysql gevent mysqlclient flower infi.clickhouse_orm opencv-python  sqlalchemy_utils
 
 WORKDIR /home/myapp
 

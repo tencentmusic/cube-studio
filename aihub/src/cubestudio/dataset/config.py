@@ -28,7 +28,7 @@ UPLOAD_DATASETS_URL = HUB_ENDPOINT + "/dataset_modelview/api/"
 DOWNLOAD_DATASETS_URL = HUB_ENDPOINT + "/dataset_modelview/api/"
 PREVIEW_DATASETS_URL = HUB_ENDPOINT + "/dataset_modelview/api/"
 
-HUB_DEFAULT_VERSION = "2022.12.01"
+HUB_DEFAULT_VERSION = "2023.01.01"
 
 PY_VERSION = version.parse(platform.python_version())
 
