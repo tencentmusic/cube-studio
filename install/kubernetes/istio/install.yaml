@@ -2850,7 +2850,7 @@ spec:
         fsGroup: 1337
       containers:
         - name: discovery
-          image: "ccr.ccs.tencentyun.com/cube-studio/istio:proxyv2-1.14.1"    # "docker.io/istio/pilot:1.14.1"
+          image: "docker.io/istio/pilot:1.14.1"
           args:
           - "discovery"
           - --monitoringAddr=:15014
