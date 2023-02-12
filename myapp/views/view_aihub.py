@@ -269,6 +269,7 @@ class Aihub_base():
     order_columns = ['id']
     search_columns=['describe','label','name','scenes']
     list_columns = ['card']
+    page_size=100
 
     spec_label_columns={
         "name":"英文名",
