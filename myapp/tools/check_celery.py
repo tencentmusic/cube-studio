@@ -11,26 +11,7 @@ import json
 import requests
 
 def push_admin(message):
-    try:
-        data = {
-
-            "msgtype": "rich_text",
-            "rich_text": [
-                {
-                    "type": "text",
-                    "text": {
-                        "content": message
-                    }
-                }
-            ]
-        }
-
-        url = "http://api.di.music.woa.com/di/api-center/push?key=kubeflow-admin"
-        res = requests.post(url,json=data)
-        print(res.content)
-    except Exception as e:
-        print(e)
-
+    pass
 
 @pysnooper.snoop()
 def check_push():
@@ -41,8 +22,6 @@ def check_push():
                               db=0,
                               decode_responses=True,
                               password='admin')
-        # r = redis.StrictRedis(host='100.116.64.86', port=8080, db=0, decode_responses=True, password='admin')
-        # r = redis.StrictRedis(host='9.22.26.233', port=8080, db=0, decode_responses=True, password='admin')
 
         if r.exists('celery'):
             unscheduld_num = r.llen('celery')
