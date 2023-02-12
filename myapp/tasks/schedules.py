@@ -1202,7 +1202,7 @@ def add_aihub(info_path):
                         aihub.version=data.get('version', '')
                         aihub.dataset=json.dumps(data.get('dataset', {}),indent=4,ensure_ascii=False)
                         aihub.notebook=json.dumps(data.get('notebook', {}),indent=4,ensure_ascii=False)
-                        aihub.job_template=json.dumps(data.get('job_template', {}),indent=4,ensure_ascii=False)
+                        aihub.job_template=json.dumps(data.get('train', {}),indent=4,ensure_ascii=False)
                         aihub.pre_train_model=json.dumps(data.get('pre_train_model', {}),indent=4,ensure_ascii=False)
                         aihub.inference=json.dumps(data.get('inference', {}),indent=4,ensure_ascii=False)
                         aihub.service=json.dumps(data.get('service', {}),indent=4,ensure_ascii=False)

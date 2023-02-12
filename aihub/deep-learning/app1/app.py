@@ -18,6 +18,11 @@ class APP1_Model(Model):
     version='v20221001'
     pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
+    train_inputs = [
+        Field(Field_type.text, name='arg1', label='训练函数的输入参数arg1', describe='arg1的详细说明，用于在任务界面展示',default='这里是默认值',validators=Validator(regex='[a-z]*')),
+        Field(Field_type.text_select, name='arg2', label='训练函数的输入参数arg2', describe='arg2的详细说明，用于在任务界面展示', default='这里是默认值',choices=['choice1','choice2','choice3'])
+    ]
+
     inference_inputs = [
         Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',
               describe='arg1的详细说明，用于在界面展示',default='这里是默认值',validators=Validator(regex='[a-z]*')),
@@ -51,6 +56,13 @@ class APP1_Model(Model):
             }
         }
     ]
+
+    # 训练的入口函数，将用户输入参数传递
+    def train(self, **kwargs):
+        print(kwargs)
+        # 训练的逻辑
+
+
     # 加载模型
     def load_model(self):
         # self.model = load("/xxx/xx/a.pth")
@@ -86,12 +98,14 @@ class APP1_Model(Model):
         return back
 
 model=APP1_Model()
+
 # model.load_model()
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
 
 if __name__=='__main__':
-    # # 启动服务
-    server = Server(model=model)
-    server.server(port=8080)
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()
 

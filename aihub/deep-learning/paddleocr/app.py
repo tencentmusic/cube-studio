@@ -81,7 +81,8 @@ model=Paddleocr_Model()
 # result = model.inference(img_file_path='test.png')  # 测试
 # print(result)
 
-# # 启动服务
-server = Server(model=model)
-server.server(port=8080)
-
+if __name__=='__main__':
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()

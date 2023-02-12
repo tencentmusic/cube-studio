@@ -44,15 +44,19 @@ class Aihub(Model,MyappModelBase):
 
     @property
     def card(self):
+        job_template = json.loads(self.job_template) if self.job_template else {}
         notebook_url = "/model_market/all/api/notebook/"+self.uuid if self.status=='online' and self.notebook else ""
+        disable = 'javascript:void(0)'
         train_url = "/model_market/all/api/train/" + self.uuid if self.status == 'online' and (self.job_template or self.pipeline) else ""
+        if not job_template:
+            train_url=disable
         service_url = "/model_market/all/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
         service_text='部署服务'
         expand = json.loads(self.expand) if self.expand else {}
         if expand.get('status','offline')=='online':
             service_url = "/model_market/all/api/service/delete/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
             service_text = '卸载服务'
-        link = ''
+
         pic_url = '/static/aihub/deep-learning/'+self.name+'/'+self.pic
         if 'http://' in self.pic or "https://" in self.pic:
             pic_url=self.pic
@@ -71,7 +75,7 @@ class Aihub(Model,MyappModelBase):
         </div>
         <div style="border-top: 1px solid rgba(0,0,0,.06);" class="ptb8 d-f ac jc-b">
             <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>开发</a>
-            <a class="flex1 ta-c" style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">训练</a>
+            <a class="flex1 ta-c" target=_blank style="{"color:Gray;" if train_url==disable else ""}border-right: 1px solid rgba(0,0,0,.06);" href="{train_url}">训练</a>
             <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{service_url}'>{service_text}</a>
         </div>
     </div>

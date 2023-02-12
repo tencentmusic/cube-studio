@@ -60,7 +60,7 @@ class Notebook_ModelView_Base():
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Notebook_Filter, lambda: []]]
     order_columns = ['id']
-    search_columns = ['created_by']
+    search_columns = ['created_by','name']
     add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
     list_columns = ['project','ide_type','name_url','status','describe','resource','renew','reset']
     cols_width={

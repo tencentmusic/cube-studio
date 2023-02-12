@@ -17,6 +17,41 @@
         "jupyter": [],
         "appendix": []
     },
-    "train": {},
+    "train": {
+        "job_template_args": {
+            "参数": {
+                "arg1": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练函数的输入参数arg1",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "这里是默认值",
+                    "placeholder": "",
+                    "describe": "arg1的详细说明，用于在任务界面展示",
+                    "editable": 1,
+                    "condition": ""
+                },
+                "arg2": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练函数的输入参数arg2",
+                    "require": 1,
+                    "choice": [
+                        "choice1",
+                        "choice2",
+                        "choice3"
+                    ],
+                    "range": "",
+                    "default": "这里是默认值",
+                    "placeholder": "",
+                    "describe": "arg2的详细说明，用于在任务界面展示",
+                    "editable": 1,
+                    "condition": ""
+                }
+            }
+        }
+    },
     "inference": {}
 }

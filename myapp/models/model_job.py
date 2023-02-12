@@ -425,6 +425,9 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
                     "data": {
                         # "taskId": task_id,
                         # "taskName": tasks[task_id].name,
+                        "info": {
+                            "describe": tasks[task_id].job_template.describe
+                        },
                         "name": tasks[task_id].name,
                         "label": tasks[task_id].label
                     }

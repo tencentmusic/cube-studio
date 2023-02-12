@@ -82,16 +82,8 @@ model = Yolov5_Model()
 # result = model.inference(img_file_path='test.jpg')  # 测试
 # print(result)
 
-# # 启动服务
-server = Server(model=model)
-server.server(port=8080)
-
-# if __name__ == '__main__':
-#     args = {
-#         'data' : 'yolov5/data/voc_ball.yaml',
-#         'weights' : 'yolov5/yolov5s.pt',
-#         'cfg' : 'yolov5/models/yolov5s_ball.yaml',
-#         'epochs' : 50,
-#         'workers' : 1
-#     }
-#     model.train(**args)
+if __name__=='__main__':
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()

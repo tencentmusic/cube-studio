@@ -1,12 +1,13 @@
 
 import os,sys,json,time,random,io,base64
-
+import argparse
 import base64
 import os
 import datetime
 import logging
 from ..utils import py_shell
 import enum
+import pysnooper
 import os, sys
 Field_type = enum.Enum('Field_type', ('int','double','json','text', 'image', 'audio', 'video', 'stream', 'text_select', 'image_select','audio_select','video_select'))
 
@@ -169,28 +170,89 @@ class Model():
             info["inference"]['resource_cpu']=self.inference_resource.get('resource_cpu',"0")
         if self.inference_resource.get('resource_gpu',"0")!='0':
             info["inference"]['resource_gpu']=self.inference_resource.get('resource_gpu',"0")
+        if self.train_inputs:
+            info["train"]={
+                "job_template_args": {
+                    "参数": {}
+                }
+            }
+            for input in self.train_inputs:
+                info["train"]['job_template_args']['参数'][input.name]={
+                    "type":"str",
+                    "item_type":"str",
+                    "label":input.label,
+                    "require":1,
+                    "choice":input.choices,
+                    "range":"",
+                    "default":input.default,
+                    "placeholder":"",
+                    "describe":input.describe,
+                    "editable":1,
+                    "condition":""
+                }
+
 
         file=open('info.json',mode='w')
         file.write(json.dumps(info,indent=4,ensure_ascii=False))
         file.close()
 
+    def init_args(self):
+
+        task_type='web'
+        if len(sys.argv)>1:
+            task_type=sys.argv[1]
+
+        parser = argparse.ArgumentParser(prog='PROG',description=f'{self.name}应用启动训练，推理，web界面等')
+        subparsers = parser.add_subparsers(help='启动内容的帮助参数')
+        # 添加子命令 add
+
+        parser_train = subparsers.add_parser('train', help='启动训练')
+        for train_arg in self.train_inputs:
+            parser_train.add_argument('--'+train_arg.name, type=str, help=train_arg.label,default=train_arg.default)
+
+        parser_web = subparsers.add_parser('web', help='启动web界面')
+
+        parser_inference = subparsers.add_parser('inference', help='启动推理')
+        for inference_arg in self.inference_inputs:
+            parser_inference.add_argument('--'+inference_arg.name, type=str, help=inference_arg.label,default=inference_arg.default)
+
+        args = vars(parser.parse_args())
+        return task_type,args
+
+    def run(self):
+        task_type, args = self.init_args()
+        # print(task_type,args)
+        if task_type == 'train':
+            print('启动训练')
+            self.train(**args)
+        elif task_type == 'inference':
+            print('启动推理')
+            self.load_model()
+            result = self.inference(**args)  # 测试
+            print(result)
+        else:
+            print('启动web服务')
+            from .web.server import Server
+            server = Server(model=self)
+            server.server(port=8080)
+
     # 配置数据集，在分布式训练时自动进行分配
     def set_dataset(self,**kwargs):
         pass
 
-    # 训练函数
-    def train(self,**kwargs):
-        pass
+    # 训练的入口函数，将用户输入参数传递
+    def train(self, **kwargs):
+        print('train函数接收到参数：',kwargs,'但是此模型并未实现train逻辑')
 
     # 推理前加载模型
     def load_model(self,**kwargs):
-        pass
+        print('load_model函数接收到参数：', kwargs, '但是此模型并未实现load_model逻辑')
 
     # 同步推理函数
-    def inference(self,**kargs):
-        pass
+    def inference(self,**kwargs):
+        print('inference函数接收到参数：', kwargs, '但是此模型并未实现inference逻辑')
 
     # 批推理
     def batch_inference(self,**kwargs):
-        pass
+        print('batch_inference函数接收到参数：', kwargs, '但是此模型并未实现batch_inference逻辑')
 

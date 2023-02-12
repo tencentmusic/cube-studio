@@ -27,7 +27,7 @@ ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.9  为conda，pyt
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
+sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
 
 ```
 如果需要使用gpu调试

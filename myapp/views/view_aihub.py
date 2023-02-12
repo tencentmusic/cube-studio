@@ -1,5 +1,6 @@
 import re
 import shutil
+import time
 
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 import urllib.parse
@@ -55,8 +56,8 @@ def add_job_template_group(name, describe, expand={}):
             print(e)
             db.session.rollback()
 
-
-def create_template(project_name, image_name, image_describe, job_template_name,
+# @pysnooper.snoop()
+def create_template(group_name, image_name, image_describe, job_template_name,
                     job_template_old_names=[], job_template_describe='', job_template_command='',
                     job_template_args=None, job_template_volume='', job_template_account='', job_template_expand=None,
                     job_template_env='', gitpath=''):
@@ -64,12 +65,12 @@ def create_template(project_name, image_name, image_describe, job_template_name,
     repository = db.session.query(Repository).filter_by(name='hubsecret').first()
 
     images = db.session.query(Images).filter_by(name=image_name).first()
-    project = db.session.query(Project).filter_by(name=project_name).filter_by(type='job-template').first()
+    project = db.session.query(Project).filter_by(name=group_name).filter_by(type='job-template').first()
     # 创建分组
     if not project:
-        add_job_template_group(project_name,project_name)
+        add_job_template_group(name=group_name,describe=group_name,expand={"index":100})
     # 创建镜像
-    if images is None and project:
+    if images is None and project and repository:
         try:
             images = Images()
             images.name = image_name
@@ -81,6 +82,7 @@ def create_template(project_name, image_name, image_describe, job_template_name,
             images.gitpath = gitpath
             db.session.add(images)
             db.session.commit()
+            time.sleep(0.1)
             print('add images %s' % image_name)
         except Exception as e:
             print(e)
@@ -88,7 +90,6 @@ def create_template(project_name, image_name, image_describe, job_template_name,
     # 创建模板
     job_template = db.session.query(Job_Template).filter_by(name=job_template_name).first()
 
-    project = db.session.query(Project).filter_by(name=project_name).filter_by(type='job-template').first()
     if project and images.id:
         if job_template is None:
             try:
@@ -111,6 +112,7 @@ def create_template(project_name, image_name, image_describe, job_template_name,
                 db.session.add(job_template)
                 db.session.commit()
                 print('add job_template %s' % job_template_name.replace('_', '-'))
+                return job_template
             except Exception as e:
                 print(e)
                 db.session.rollback()
@@ -134,55 +136,119 @@ def create_template(project_name, image_name, image_describe, job_template_name,
                                                ensure_ascii=False) if job_template_args else '{}'
                 db.session.commit()
                 print('update job_template %s' % job_template_name.replace('_', '-'))
+                return job_template
             except Exception as e:
                 print(e)
                 db.session.rollback()
 
 
 
-# 添加 demo 推理 服务
-# @pysnooper.snoop()
-def create_inference(project_name,service_name,service_describe,image_name,command,env,model_name,workdir='',model_version='',model_path='',service_type='serving',resource_memory='2G',resource_cpu='2',resource_gpu='0',ports='80',volume_mount='kubeflow-user-workspace(pvc):/mnt',metrics='',health='',inference_config='',expand={}):
-    service = db.session.query(InferenceService).filter_by(name=service_name).first()
-    project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
-    if service is None and project:
+# 创建demo pipeline
+@pysnooper.snoop()
+def create_pipeline(pipeline,tasks):
+    from myapp.models.model_job import Pipeline,Task
+    # 如果项目组或者task的模板不存在就丢失
+    org_project = db.session.query(Project).filter_by(name=pipeline['project']).filter_by(type='org').first()
+    if not org_project:
+        return
+    for task in tasks:
+        job_template = db.session.query(Job_Template).filter_by(name=task['job_templete']).first()
+        if not job_template:
+            return
+
+
+    # 创建pipeline
+    pipeline_model = db.session.query(Pipeline).filter_by(name=pipeline['name']).first()
+    if pipeline_model is None:
         try:
-            service = InferenceService()
-            service.name = service_name.replace('_','-')
-            service.label=service_describe
-            service.service_type=service_type
-            service.model_name=model_name
-            service.model_version=model_version if model_version else datetime.now().strftime('v%Y.%m.%d.1')
-            service.model_path = model_path
-            service.created_by_fk=1
-            service.changed_by_fk=1
-            service.project_id=project.id
-            service.project=project
-            service.images=image_name
-            service.resource_memory=resource_memory
-            service.resource_cpu=resource_cpu
-            service.resource_gpu = resource_gpu
-            service.working_dir=workdir
-            service.command = command
-            service.inference_config = inference_config
-            service.env='\n'.join([x.strip() for x in env.split('\n') if x.split()])
-            service.ports = ports
-            service.volume_mount=volume_mount
-            service.metrics=metrics
-            service.health=health
-            service.expand = json.dumps(expand,indent=4,ensure_ascii=False)
-
-            from myapp.views.view_inferenceserving import InferenceService_ModelView_base
-            inference_class = InferenceService_ModelView_base()
-            inference_class.src_item_json = {}
-            inference_class.pre_add(service)
-
-            db.session.add(service)
+            pipeline_model = Pipeline()
+            pipeline_model.name = pipeline['name']
+            pipeline_model.describe = pipeline['describe']
+            pipeline_model.dag_json=json.dumps(pipeline['dag_json'],indent=4,ensure_ascii=False).replace('_','-')
+            pipeline_model.created_by_fk = 1
+            pipeline_model.changed_by_fk = 1
+            pipeline_model.project_id = org_project.id
+            pipeline_model.parameter = json.dumps(pipeline.get('parameter',{}),indent=4,ensure_ascii=False)
+            db.session.add(pipeline_model)
             db.session.commit()
-            print('add inference %s' % service_name)
+            print('add pipeline %s' % pipeline['name'])
         except Exception as e:
             print(e)
             db.session.rollback()
+    else:
+        pipeline_model.describe = pipeline['describe']
+        pipeline_model.dag_json = json.dumps(pipeline['dag_json'],indent=4,ensure_ascii=False).replace('_', '-')
+        pipeline_model.created_by_fk = 1
+        pipeline_model.changed_by_fk = 1
+        pipeline_model.project_id = org_project.id
+        pipeline_model.parameter = json.dumps(pipeline.get('parameter', {}))
+        print('update pipeline %s' % pipeline['name'])
+        db.session.commit()
+
+
+    # 创建task
+    for task in tasks:
+        task_model = db.session.query(Task).filter_by(name=task['name']).filter_by(pipeline_id=pipeline_model.id).first()
+        job_template = db.session.query(Job_Template).filter_by(name=task['job_templete']).first()
+        if task_model is None and job_template:
+            try:
+                task_model = Task()
+                task_model.name = task['name'].replace('_','-')
+                task_model.label = task['label']
+                task_model.args = json.dumps(task['args'],indent=4,ensure_ascii=False)
+                task_model.volume_mount = task.get('volume_mount','')
+                task_model.resource_memory = task.get('resource_memory','2G')
+                task_model.resource_cpu = task.get('resource_cpu','2')
+                task_model.resource_gpu = task.get('resource_gpu','0')
+                task_model.created_by_fk = 1
+                task_model.changed_by_fk = 1
+                task_model.pipeline_id = pipeline_model.id
+                task_model.job_template_id = job_template.id
+                db.session.add(task_model)
+                db.session.commit()
+                print('add task %s' % task['name'])
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+        else:
+            task_model.label = task['label']
+            task_model.args = json.dumps(task['args'],indent=4,ensure_ascii=False)
+            task_model.volume_mount = task.get('volume_mount', '')
+            task_model.node_selector = task.get('node_selector', 'cpu=true,train=true,org=public')
+            task_model.retry = int(task.get('retry', 0))
+            task_model.timeout = int(task.get('timeout', 0))
+            task_model.resource_memory = task.get('resource_memory', '2G')
+            task_model.resource_cpu = task.get('resource_cpu', '2')
+            task_model.resource_gpu = task.get('resource_gpu', '0')
+            task_model.created_by_fk = 1
+            task_model.changed_by_fk = 1
+            task_model.pipeline_id = pipeline_model.id
+            task_model.job_template_id = job_template.id
+            print('update task %s' % task['name'])
+            db.session.commit()
+
+    # 修正pipeline
+    pipeline_model.dag_json = pipeline_model.fix_dag_json()  # 修正 dag_json
+    pipeline_model.expand = json.dumps(pipeline_model.fix_expand(), indent=4, ensure_ascii=False)   # 修正 前端expand字段缺失
+    pipeline_model.expand = json.dumps(pipeline_model.fix_position(), indent=4, ensure_ascii=False)  # 修正 节点中心位置到视图中间
+    db.session.commit()
+    # 自动排版
+    db_tasks = pipeline_model.get_tasks(db.session)
+    if db_tasks:
+        try:
+            tasks={}
+            for task in db_tasks:
+                tasks[task.name]=task.to_json()
+
+            from myapp.utils import core
+            expand = core.fix_task_position(pipeline_model.to_json(),tasks,json.loads(pipeline_model.expand))
+            pipeline_model.expand=json.dumps(expand,indent=4,ensure_ascii=False)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+
+    return pipeline_model
+
 
 
 # 获取某类project分组
@@ -234,15 +300,15 @@ class Aihub_base():
 
         aihub = db.session.query(Aihub).filter_by(uuid=aihub_id).first()
         config = json.loads(aihub.inference) if aihub.inference else {}
-
-        notebook = db.session.query(Notebook).filter_by(name='aihub-'+aihub.name).first()
+        notebook_name = f'{g.user.username}-aihub-{aihub.name}'
+        notebook = db.session.query(Notebook).filter_by(name=notebook_name).first()
         if not notebook:
             notebook=Notebook()
-        notebook.name='aihub-'+aihub.name
+        notebook.name=notebook_name
         notebook.project_id=db.session.query(Project).filter_by(name='public').first().id
         notebook.describe=f'aihub开发 {aihub.label}'
         notebook.namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
-        @pysnooper.snoop()
+        # @pysnooper.snoop()
         def get_base_image(dockerfile_path):
             if os.path.exists(dockerfile_path):
                 allline = open(dockerfile_path).readlines()
@@ -256,7 +322,7 @@ class Aihub_base():
         dockerfile_path=f'/cube-studio/aihub/deep-learning/{aihub.name}/Dockerfile'
         base_image = get_base_image(dockerfile_path)
         if base_image and 'ccr.ccs.tencentyun.com/cube-studio/aihub' in base_image:
-            notebook.images = base_image
+            notebook.images = base_image+"-notebook"
         else:
             notebook.images = 'ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.8-notebook'
         notebook.image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always')
@@ -284,11 +350,11 @@ class Aihub_base():
         #     shutil.copytree('/cube-studio/aihub/deep-learning',os.path.join(des_path,'deep-learning'))
         # shutil.copytree('/cube-studio/aihub/src',os.path.join(des_path,'src'))
         from myapp.views.view_notebook import Notebook_ModelView_Base
-        notebook_view = Notebook_ModelView_Base().reset_notebook(notebook)
-        # pod =
-        url = f'/notebook_modelview/api/reset/{notebook.id}'
+        Notebook_ModelView_Base().reset_notebook(notebook)
+        url = conf.get('MODEL_URLS', {}).get('notebook', '') + '?filter=' + urllib.parse.quote(
+            json.dumps([{"key": "name", "value": notebook_name}], ensure_ascii=False))
+        print(url)
         return redirect(url)
-
 
     # @event_logger.log_this
     @expose('/train/<aihub_id>',methods=['GET','POST'])
@@ -297,10 +363,64 @@ class Aihub_base():
         try:
             if aihub and aihub.job_template:
                 job_template = json.loads(aihub.job_template)
-                create_template(**job_template)
+                args = {
+                    "group_name":aihub.field,
+                    "image_name":f"ccr.ccs.tencentyun.com/cube-studio/aihub:{aihub.name}",
+                    "image_describe":aihub.describe,
+                    "job_template_name":aihub.name,
+                    "job_template_describe": aihub.label,
+                    "job_template_command": '',
+                    "job_template_args": job_template.get('job_template_args',{}),
+                    "job_template_expand": {"help":f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"},
+                    "job_template_env": '',
+                    "gitpath": f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"
+                }
+                job_template = create_template(**args)
+
+                if not job_template:
+                    flash('任务模板注册失败，请重试', 'fail')
+                    list_url =''
+                    if 'visual' in self.route_base:
+                        list_url=conf.get('MODEL_URLS').get('model_market_visual')
+                    if 'voice' in self.route_base:
+                        list_url=conf.get('MODEL_URLS').get('model_market_voice')
+                    if 'language' in self.route_base:
+                        list_url=conf.get('MODEL_URLS').get('model_market_language')
+                    return list_url
                 flash('任务模板已注册，拖拉模板配置训练任务','success')
-                url = conf.get('MODEL_URLS', {}).get('job_template', '') + '?filter=' + urllib.parse.quote(
-                    json.dumps([{"key": "name", "value": job_template.get('job_template_name','')}], ensure_ascii=False))
+                config = json.loads(aihub.job_template)
+                args={}
+                for group in config.get("job_template_args",{}):
+                    for arg in config.get("job_template_args",{}).get(group,{}):
+                        args[arg]=config.get("job_template_args",{}).get(group,{}).get(arg,{}).get("default",'')
+                try:
+                    pipeline={
+                        "project":"public",
+                        "name":aihub.name,
+                        "describe":aihub.label,
+                        "parameter":{},
+                        "dag_json":{aihub.name:{}},
+                    }
+                    tasks=[{
+                        "name":aihub.name,
+                        "label":aihub.name+"模型训练",
+                        "args":args,
+                        "volume_mount":"kubeflow-user-workspace(pvc):/mnt",
+                        "resource_memory":config.get('resource_cpu','10'),
+                        "resource_cpu": config.get('resource_cpu', '10'),
+                        "resource_gpu": config.get('resource_gpu', '0'),
+                        "job_templete":job_template.name
+                    }]
+                    pipeline = create_pipeline(pipeline=pipeline, tasks=tasks)
+
+                    url = '/frontend/showOutLink?url=%2Fstatic%2Fappbuilder%2Fvison%2Findex.html%3Fpipeline_id%3D' + str(pipeline.id)
+                    print(url)
+                    return redirect(url)
+
+                except Exception as e:
+                    print(e)
+
+                url = conf.get('MODEL_URLS', {}).get('job_template', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "name", "value": aihub.name}], ensure_ascii=False))
                 print(url)
                 return redirect(url)
 

@@ -933,12 +933,7 @@ MODEL_URLS = {
     "service": "/frontend/service/k8s_service",
     "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
     "train_model": "/frontend/service/inferenceservice/model_manager",
-    "metadata_metric": "/frontend/dataleap/metadata/metadata_metric",
-    "dimension": "/frontend/dataleap/metadata/metadata_dimension",
-    "metadata_table": "/frontend/dataleap/metadata/metadata_table",
-
     "dataset":"/frontend/dataleap/media_data/dataset",
-	
 	"model_market_visual": "/frontend/aihub/model_market/model_visual",
     "model_market_voice": "/frontend/aihub/model_market/model_voice",
     "model_market_language": "/frontend/aihub/model_market/model_language",
