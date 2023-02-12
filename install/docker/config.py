@@ -945,33 +945,33 @@ NNI_DOMAIN='kubeflow.local.com'
 SERVICE_DOMAIN='service.local.com'
 #
 # # 所有训练集群的信息
-# CLUSTERS={
-#     # 和project expand里面的名称一致
-#     "dev":{
-#         "NAME":"dev",
-#         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-#         "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
-#         # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
-#         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
-#         # "SERVICE_DOMAIN": 'service.local.com',
-#         "GRAFANA_HOST": ''
-#     }
-# }
-
-
-# 所有训练集群的信息
 CLUSTERS={
     # 和project expand里面的名称一致
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        "K8S_DASHBOARD_CLUSTER":'http://9.135.92.226/k8s/dashboard/cluster/',
-        "JUPYTER_DOMAIN":"9.135.92.226",   # 如果没有域名就用*   有域名就配置成 HOST
+        "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
+        # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
         # "SERVICE_DOMAIN": 'service.local.com',
-        "GRAFANA_HOST": 'http://9.135.92.226'
+        "GRAFANA_HOST": ''
     }
 }
+
+
+# 所有训练集群的信息
+# CLUSTERS={
+#     # 和project expand里面的名称一致
+#     "dev":{
+#         "NAME":"dev",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
+#         "K8S_DASHBOARD_CLUSTER":'http://9.135.92.226/k8s/dashboard/cluster/',
+#         "JUPYTER_DOMAIN":"9.135.92.226",   # 如果没有域名就用*   有域名就配置成 HOST
+#         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
+#         # "SERVICE_DOMAIN": 'service.local.com',
+#         "GRAFANA_HOST": 'http://9.135.92.226'
+#     }
+# }
 
 
 
