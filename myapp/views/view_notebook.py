@@ -338,8 +338,12 @@ class Notebook_ModelView_Base():
             "SSH_PORT":str(10000 + 10 * notebook.id+1),
             "PORT1":str(10000 + 10 * notebook.id+2),
             "PORT2":str(10000 + 10 * notebook.id+3),
-
         }
+        notebook_env = [x.strip() for x in notebook.env.split('\n') if x.strip()]
+        notebook_env=[env.split("=") for env in notebook_env if '=' in env]
+        notebook_env = dict(zip([env[0] for env in notebook_env],[env[1] for env in notebook_env]))
+        if notebook_env:
+            env.update(notebook_env)
         if SERVICE_EXTERNAL_IP:
             env["SERVICE_EXTERNAL_IP"]=SERVICE_EXTERNAL_IP[0]
 

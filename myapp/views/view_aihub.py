@@ -1,3 +1,5 @@
+import re
+import shutil
 
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 import urllib.parse
@@ -21,6 +23,7 @@ from .base import (
     MyappFilter,
 )
 from myapp.models.model_aihub import Aihub
+from myapp.models.model_notebook import Notebook
 from myapp.utils import core
 from myapp.utils.py.py_k8s import K8s
 from flask_appbuilder import expose
@@ -228,14 +231,63 @@ class Aihub_base():
     # @event_logger.log_this
     @expose('/notebook/<aihub_id>',methods=['GET','POST'])
     def notebook(self,aihub_id):
+
         aihub = db.session.query(Aihub).filter_by(uuid=aihub_id).first()
+        config = json.loads(aihub.inference) if aihub.inference else {}
+
+        notebook = db.session.query(Notebook).filter_by(name='aihub-'+aihub.name).first()
+        if not notebook:
+            notebook=Notebook()
+        notebook.name='aihub-'+aihub.name
+        notebook.project_id=db.session.query(Project).filter_by(name='public').first().id
+        notebook.describe=f'aihub开发 {aihub.label}'
+        notebook.namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
+        @pysnooper.snoop()
+        def get_base_image(dockerfile_path):
+            if os.path.exists(dockerfile_path):
+                allline = open(dockerfile_path).readlines()
+                base_image=''
+                for line in allline:
+                    find_image = re.findall('^FROM *(.*) ?',line)
+                    if len(find_image)>0:
+                        base_image = find_image[0]
+                return base_image
+
+        dockerfile_path=f'/cube-studio/aihub/deep-learning/{aihub.name}/Dockerfile'
+        base_image = get_base_image(dockerfile_path)
+        if base_image and 'ccr.ccs.tencentyun.com/cube-studio/aihub' in base_image:
+            notebook.images = base_image
+        else:
+            notebook.images = 'ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.8-notebook'
+        notebook.image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always')
+        notebook.ide_type='jupyter'
+        notebook.resource_cpu=config.get('resource_cpu','10')
+        notebook.resource_memory=config.get('resource_memory','10G')
+        notebook.resource_gpu=config.get('resource_gpu','0')
+        notebook.env=f"APPNAME={aihub.name}\nPYTHONPATH=/mnt/{g.user.username}/cube-studio/aihub/src/:$PYTHONPATH"
+        notebook.volume_mount='kubeflow-user-workspace(pvc):/mnt'
+        notebook.node_selector=f'{"cpu" if notebook.resource_gpu=="0" else "gpu"}=true,notebook=true'
+        notebook.expand =json.dumps({"root":f"cube-studio/aihub/deep-learning/{aihub.name}/app.py"},indent=4,ensure_ascii=False)
+        if not notebook.id:
+            db.session.add(notebook)
+        db.session.commit()
+        # 将文件复制过去
+        des_path = f'/data/k8s/kubeflow/pipeline/workspace/{g.user.username}/cube-studio/'
+        os.makedirs(des_path,exist_ok=True)
         try:
-            if aihub and aihub.notebook:
-                notebook = json.loads(aihub.notebook)
-                return redirect(notebook.get("jupyter",[])[0])
+            core.run_shell(f'cp -r /cube-studio/aihub {des_path}')
         except Exception as e:
             print(e)
-        return redirect(aihub.doc)
+        # if os.path.exists(os.path.join(des_path,'src')):
+        #     shutil.rmtree(os.path.join(des_path,'src'))
+        # if not os.path.exists(os.path.join(des_path,'deep-learning')):
+        #     shutil.copytree('/cube-studio/aihub/deep-learning',os.path.join(des_path,'deep-learning'))
+        # shutil.copytree('/cube-studio/aihub/src',os.path.join(des_path,'src'))
+        from myapp.views.view_notebook import Notebook_ModelView_Base
+        notebook_view = Notebook_ModelView_Base().reset_notebook(notebook)
+        # pod =
+        url = f'/notebook_modelview/api/reset/{notebook.id}'
+        return redirect(url)
 
 
     # @event_logger.log_this

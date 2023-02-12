@@ -14,3 +14,5 @@ ENV NODE_HOME /usr/local
 ENV PATH $NODE_HOME/bin:$PATH
 ENV NODE_PATH $NODE_HOME/lib/node_modules:$PATH
 ENV SHELL /bin/bash
+
+COPY notebook-init.sh /init.sh
