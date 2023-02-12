@@ -91,6 +91,6 @@ spec:
             failureThreshold: 1
             exec:
               command: ["bash","-c","python3 /home/myapp/myapp/tools/check_celery.py"]
-            initialDelaySeconds: 3600
-            periodSeconds: 3600
-            timeoutSeconds: 3600
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 60
