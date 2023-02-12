@@ -131,6 +131,7 @@ kubectl apply -f argo/pipeline-runner-rolebinding.yaml
 kubectl apply -f argo/install-3.4.3-all.yaml
 
 # 部署trainjob:tfjob/pytorchjob/mpijob/mxnetjob/xgboostjobs
+kubectl apply -f kubeflow/sa-rbac.yaml
 kubectl apply -k kubeflow/train-operator/manifests/overlays/standalone
 # 部署sparkjob
 kubectl apply -f spark/install.yaml
