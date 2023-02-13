@@ -625,7 +625,7 @@ class Aihub_base():
                 ]
             }
         }
-        print(deployment_json)
+
         return service_json,deployment_json,virtual_service_json
 
     # @pysnooper.snoop()

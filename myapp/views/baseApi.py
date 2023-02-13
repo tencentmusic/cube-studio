@@ -6,15 +6,13 @@ import re
 import traceback
 import urllib.parse
 import os
-from flask import Markup
+from flask import Markup,Response,current_app, make_response,send_file,flash,g,jsonify, request
 from inspect import isfunction
+
 from sqlalchemy import create_engine
 from flask_appbuilder.actions import action
 from flask_babel import gettext as __
 from flask_appbuilder.actions import ActionItem
-from flask import jsonify, request
-from flask import flash,g
-from flask import current_app, make_response,send_file
 from flask.globals import session
 from flask_babel import lazy_gettext as _
 import jsonschema
@@ -346,6 +344,15 @@ class MyappModelRestApi(ModelRestApi):
             file_name=file_name+".csv"
         response.headers["Content-Disposition"] = f"attachment; filename={file_name}".format(file_name=file_name)
         return response
+
+    #流式读取
+    def send_file(self,store_path):
+        with open(store_path, 'rb') as targetfile:
+            while 1:
+                data = targetfile.read(20 * 1024 * 1024)   # 每次读取20M
+                if not data:
+                    break
+                yield data
 
     # 建构响应体
     @staticmethod
@@ -1448,8 +1455,8 @@ class MyappModelRestApi(ModelRestApi):
         sql_engine = create_engine(uri)
         table_name = self.datamodel.obj.__tablename__
         # sql = 'select `%s` from %s' % ('`,`'.join(self.show_columns), table_name)
-        file_path = '%s.csv' % table_name
-        csv_file_path = os.path.abspath(file_path)
+        file_name = '%s.csv' % table_name
+        csv_file_path = os.path.abspath(file_name)
         if os.path.exists(csv_file_path):
             os.remove(csv_file_path)
 
@@ -1478,7 +1485,9 @@ class MyappModelRestApi(ModelRestApi):
                             data.append(getattr(item,col))
                         csvwrite.writerow(data)
                     csvfile.close()
-                response = self.csv_response(csv_file_path, file_name=table_name)
+
+                response = Response(self.send_file(csv_file_path), content_type='application/octet-stream')
+                response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name  # 如果不加上这行代码，导致下图的问题
                 return response
 
         # 下载全量
@@ -1487,8 +1496,12 @@ class MyappModelRestApi(ModelRestApi):
         results = pandas.read_sql_query(sql, sql_engine)
         results.to_csv(csv_file_path, index=False, sep=",",encoding='utf-8-sig')  # index 是第几行的表示
 
-        response = self.csv_response(csv_file_path, file_name=table_name)
+        response = Response(self.send_file(csv_file_path), content_type='application/octet-stream')
+        response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name  # 如果不加上这行代码，导致下图的问题
         return response
+
+        # response = self.csv_response(csv_file_path, file_name=table_name)
+        # return response
 
 
 

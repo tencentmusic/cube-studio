@@ -106,7 +106,7 @@ def ddl_hive_external_table(table_id):
             return
         cols = json.loads(item.columns)
         # 创建hive外表
-        hive_type_map = {'INT': 'BIGINT', 'TEXT': 'STRING', 'STRING': 'STRING', 'DATE': 'STRING'}
+        hive_type_map = {'INT': 'BIGINT', 'TEXT': 'STRING', 'STRING': 'STRING', 'DATE': 'STRING','ENUM':'STRING'}
         cols_lst = []
         for col_name in cols:
             if col_name in ['id',]:

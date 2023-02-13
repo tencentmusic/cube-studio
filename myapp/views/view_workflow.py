@@ -271,8 +271,8 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         k8s_client = py_k8s.K8s(conf.get('CLUSTERS', {}).get(cluster_name,{}).get('KUBECONFIG', ''))
         crd_info = conf.get('CRD_INFO', {}).get('workflow', {})
         workflow_obj = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=workflow_name)
+        workflow_model = db.session.query(Workflow).filter_by(name=workflow_name).first()
         if not workflow_obj:
-            workflow_model = db.session.query(Workflow).filter_by(name=workflow_name).first()
             if workflow_model:
                 workflow_obj=workflow_model.to_json()
             else:
@@ -335,7 +335,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         if workflow_obj['status']=='Running':
             layout_config['right_button'].append({
                 "label":"Terminate",
-                "url":f"/workflow_modelview/api/terminate/{cluster_name}/{namespace}/{workflow_name}"
+                "url":f"/workflow_modelview/api/stop/{workflow_model.id}"
             })
         elif workflow_obj['status']=='Failed' or workflow_obj['status']=='Error':
             layout_config['right_button'].append({

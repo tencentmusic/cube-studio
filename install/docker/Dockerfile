@@ -11,7 +11,6 @@ COPY aihub /cube-studio/aihub
 ENV PATH=/home/myapp/myapp/bin:$PATH
 ENV PYTHONPATH=/home/myapp:/kubeflow/src/pipelines/sdk/python/:$PYTHONPATH
 
-# RUN pip install ipdb==0.12
 
 COPY install/docker/entrypoint.sh /entrypoint.sh
 
