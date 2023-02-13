@@ -501,7 +501,9 @@ def init():
     except Exception as e:
         print(e)
 
-
+    # 复制cube-studio代码（aihub和sdk）
+    from myapp.tasks.schedules import cp_cubestudio
+    cp_cubestudio()
 
 
 

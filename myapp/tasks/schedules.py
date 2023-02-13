@@ -1216,6 +1216,16 @@ def add_aihub(info_path):
             print(e)
 
 
+def cp_cubestudio():
+    # 复制cube-studio代码
+    import os
+    from myapp.utils import core
+    des_path = f'/data/k8s/kubeflow/global/'
+    os.makedirs(des_path, exist_ok=True)
+    try:
+        core.run_shell(f'cp -rf /cube-studio {des_path}')
+    except Exception as e:
+        print(e)
 
 @celery_app.task(name="task.update_aihub", bind=True)
 def update_aihub(task):
@@ -1232,6 +1242,7 @@ def update_aihub(task):
     else:
         if os.path.exists(info_path):
             info_path = '/cube-studio/aihub/info.json'
+            cp_cubestudio()
     add_aihub(info_path)
 
 if __name__=="__main__":

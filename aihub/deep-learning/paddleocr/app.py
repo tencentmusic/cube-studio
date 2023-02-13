@@ -4,7 +4,7 @@ import io,sys,os
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server,Field,Field_type
-from cubestudio.util.py_image import img_base64
+from cubestudio.utils.py_image import img_base64
 
 import pysnooper
 from paddleocr import PaddleOCR, draw_ocr

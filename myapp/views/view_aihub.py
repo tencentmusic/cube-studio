@@ -331,25 +331,22 @@ class Aihub_base():
         notebook.resource_cpu=config.get('resource_cpu','10')
         notebook.resource_memory=config.get('resource_memory','10G')
         notebook.resource_gpu=config.get('resource_gpu','0')
-        notebook.env=f"APPNAME={aihub.name}\nPYTHONPATH=/mnt/{g.user.username}/cube-studio/aihub/src/:$PYTHONPATH"
-        notebook.volume_mount='kubeflow-user-workspace(pvc):/mnt'
-        notebook.node_selector=f'{"cpu" if notebook.resource_gpu=="0" else "gpu"}=true,notebook=true'
+        notebook.env=f"APPNAME={aihub.name}"
+        notebook.volume_mount='kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/global/cube-studio/aihub/src(hostpath):/src'
+        notebook.node_selector=f'{"cpu" if notebook.resource_gpu=="0" else "gpu"}=true,notebook=true,org=public'
         notebook.expand =json.dumps({"root":f"cube-studio/aihub/deep-learning/{aihub.name}/app.py"},indent=4,ensure_ascii=False)
         if not notebook.id:
             db.session.add(notebook)
         db.session.commit()
+
         # 将文件复制过去
-        des_path = f'/data/k8s/kubeflow/pipeline/workspace/{g.user.username}/cube-studio/'
+        des_path = f'/data/k8s/kubeflow/pipeline/workspace/{g.user.username}/cube-studio/aihub/deep-learning/'
         os.makedirs(des_path,exist_ok=True)
         try:
-            core.run_shell(f'cp -r /cube-studio/aihub {des_path}')
+            core.run_shell(f'cp -r /cube-studio/aihub/deep-learning/{aihub.name} {des_path}')
         except Exception as e:
             print(e)
-        # if os.path.exists(os.path.join(des_path,'src')):
-        #     shutil.rmtree(os.path.join(des_path,'src'))
-        # if not os.path.exists(os.path.join(des_path,'deep-learning')):
-        #     shutil.copytree('/cube-studio/aihub/deep-learning',os.path.join(des_path,'deep-learning'))
-        # shutil.copytree('/cube-studio/aihub/src',os.path.join(des_path,'src'))
+
         from myapp.views.view_notebook import Notebook_ModelView_Base
         Notebook_ModelView_Base().reset_notebook(notebook)
         url = conf.get('MODEL_URLS', {}).get('notebook', '') + '?filter=' + urllib.parse.quote(
@@ -371,9 +368,10 @@ class Aihub_base():
                     "job_template_name":aihub.name,
                     "job_template_describe": aihub.label,
                     "job_template_command": 'python app.py train',
+                    "job_template_volume":"/data/k8s/kubeflow/global/cube-studio/aihub/src(hostpath):/src",
                     "job_template_args": job_template.get('job_template_args',{}),
                     "job_template_expand": {"help":f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"},
-                    "job_template_env": '',
+                    "job_template_env": f'APPNAME={aihub.name}',
                     "gitpath": f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"
                 }
                 job_template = create_template(**args)
@@ -410,6 +408,7 @@ class Aihub_base():
                         "resource_memory":config.get('resource_cpu','10'),
                         "resource_cpu": config.get('resource_cpu', '10'),
                         "resource_gpu": config.get('resource_gpu', '0'),
+                        "node_selector":f'{"cpu" if config.get("resource_gpu", "0") == "0" else "gpu"}=true,train=true,org=public',
                         "job_templete":job_template.name
                     }]
                     pipeline = create_pipeline(pipeline=pipeline, tasks=tasks)
@@ -495,10 +494,18 @@ class Aihub_base():
                                 "hostPath": {
                                     "path": "/usr/share/zoneinfo/Asia/Shanghai"
                                 }
+                            },
+                            {
+                                "name": "cube-studio",
+                                "hostPath": {
+                                    "path": "/data/k8s/kubeflow/global/cube-studio/aihub/src"
+                                }
                             }
                         ],
                         "nodeSelector": {
-                            cpu_or_gpu: "true"
+                            cpu_or_gpu: "true",
+                            "service":"true",
+                            "org":"public"
                         },
                         "affinity": {
                             "podAntiAffinity": {
@@ -548,6 +555,10 @@ class Aihub_base():
                                     {
                                         "name": "tz-config",
                                         "mountPath": "/etc/localtime"
+                                    },
+                                    {
+                                        "name": "cube-studio",
+                                        "mountPath": "/src"
                                     }
                                 ],
                                 "readinessProbe": {

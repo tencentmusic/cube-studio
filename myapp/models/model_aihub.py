@@ -48,8 +48,8 @@ class Aihub(Model,MyappModelBase):
         notebook_url = "/model_market/all/api/notebook/"+self.uuid if self.status=='online' and self.notebook else ""
         disable = 'javascript:void(0)'
         train_url = "/model_market/all/api/train/" + self.uuid if self.status == 'online' and (self.job_template or self.pipeline) else ""
-        if not job_template:
-            train_url=disable
+        # if not job_template:
+        #     train_url=disable
         service_url = "/model_market/all/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
         service_text='部署web'
         link = 'https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/' + self.name
