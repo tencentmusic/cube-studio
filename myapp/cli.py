@@ -66,10 +66,15 @@ def init():
         add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 6})
         add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 7})
         add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 8})
-        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 9})
-        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 10})
-        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 11})
+        add_project('job-template', '模型处理', '模型服务化部署相关的组件模板', {"index": 9})
+        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 10})
+        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 11})
         add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 12})
+        add_project('job-template', '广告类模板', '推荐领域常用的任务模板', {"index": 13})
+        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 14})
+        add_project('job-template', '机器视觉', '视觉类相关模板', {"index": 15})
+        add_project('job-template', '听觉', '听觉类相关模板', {"index": 16})
+        add_project('job-template', '自然语言', '自然语言类相关模板', {"index": 17})
 
     except Exception as e:
         print(e)
