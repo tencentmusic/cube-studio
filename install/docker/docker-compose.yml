@@ -50,7 +50,7 @@ services:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../myapp/:/home/myapp/myapp/
       - ../../aihub/:/cube-studio/aihub/
-      - ./file:/pvc
+      - ./file:/data/k8s/kubeflow
       - ./entrypoint.sh:/entrypoint.sh
       - ./config.py:/home/myapp/myapp/config.py
       - ./kubeconfig:/home/myapp/kubeconfig
@@ -76,28 +76,28 @@ services:
 #      - ./config.py:/home/myapp/myapp/config.py
 #      - ./kubeconfig:/home/myapp/kubeconfig
 ##
+
 #
-##
-#
-#  worker:
-#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
-#    restart: unless-stopped
-#    # 默认的prefork池针对长时间的任务支持不是很好，如果任务运行时间有数分钟/小时，建议启用 Celery 的 -Ofair 命令参数
-#    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app worker --loglevel=info --pool=prefork -Ofair -c 2 -n worker@%h"]
-#    environment:
-#      REDIS_HOST: 'redis'
-#      REDIS_PORT: '6379'
-#      REDIS_PASSWORD: admin
-#      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
-#      ENVIRONMENT: DEV
-#    depends_on:
-#      - redis
-#    volumes:
-#      - ../../myapp/:/home/myapp/myapp/
-#      - ./file:/pvc
-#      - ./entrypoint.sh:/entrypoint.sh
-#      - ./config.py:/home/myapp/myapp/config.py
-#      - ./kubeconfig:/home/myapp/kubeconfig
-#
+
+  worker:
+    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
+    restart: unless-stopped
+    # 默认的prefork池针对长时间的任务支持不是很好，如果任务运行时间有数分钟/小时，建议启用 Celery 的 -Ofair 命令参数
+    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app worker --loglevel=info --pool=prefork -Ofair -c 2 -n worker@%h"]
+    environment:
+      REDIS_HOST: 'redis'
+      REDIS_PORT: '6379'
+      REDIS_PASSWORD: admin
+      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow1?charset=utf8'
+      ENVIRONMENT: DEV
+    depends_on:
+      - redis
+    volumes:
+      - ../../myapp/:/home/myapp/myapp/
+      - ./file:/data/k8s/kubeflow
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./config.py:/home/myapp/myapp/config.py
+      - ./kubeconfig:/home/myapp/kubeconfig
+
 
 
