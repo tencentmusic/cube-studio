@@ -9,7 +9,7 @@ COPY myapp /home/myapp/myapp
 COPY myapp/static/appbuilder/frontend /data/web/frontend
 COPY aihub /cube-studio/aihub
 ENV PATH=/home/myapp/myapp/bin:$PATH
-ENV PYTHONPATH=/home/myapp:/kubeflow/src/pipelines/sdk/python/:$PYTHONPATH
+ENV PYTHONPATH=/home/myapp:$PYTHONPATH
 
 
 COPY install/docker/entrypoint.sh /entrypoint.sh
