@@ -500,6 +500,12 @@ class Aihub_base():
                                 "hostPath": {
                                     "path": "/data/k8s/kubeflow/global/cube-studio/aihub/src"
                                 }
+                            },
+                            {
+                                "name": app_name,
+                                "hostPath": {
+                                    "path": "/data/k8s/kubeflow/global/cube-studio/aihub/deep-learning/"+app_name
+                                }
                             }
                         ],
                         "nodeSelector": {
@@ -559,6 +565,10 @@ class Aihub_base():
                                     {
                                         "name": "cube-studio",
                                         "mountPath": "/src"
+                                    },
+                                    {
+                                        "name": app_name,
+                                        "mountPath": "/app"
                                     }
                                 ],
                                 "readinessProbe": {
@@ -615,7 +625,7 @@ class Aihub_base():
                 ]
             }
         }
-
+        print(deployment_json)
         return service_json,deployment_json,virtual_service_json
 
     # @pysnooper.snoop()

@@ -1,5 +1,5 @@
 export const data = {
-    "aihub_url": "/frontend/aihub/model_market/model_all",
+    "aihub_url": "/frontend/aihub/model_market/model_visual",
     "describe": "ai\u793a\u4f8b\u5e94\u7528\uff0c\u8be6\u7ec6\u63cf\u8ff0\uff0c\u90fd\u4f1a\u663e\u793a\u5e94\u7528\u63cf\u8ff0\u4e0a\uff0c\u652f\u6301markdown",
     "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub",
     "field": "\u673a\u5668\u89c6\u89c9",

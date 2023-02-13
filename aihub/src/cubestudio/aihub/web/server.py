@@ -455,7 +455,7 @@ class Server():
                 {
                     "text": "AIHub",
                     "icon": '',
-                    "link": '/frontend/aihub/model_market/model_all'
+                    "link": '/frontend/aihub/model_market/model_visual'
                 },
                 {
                     "text": '',
@@ -581,7 +581,7 @@ class Server():
                 "web_examples":web_examples,
                 "inference_inputs": inference_inputs,
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
-                "aihub_url":"/frontend/aihub/model_market/model_all",
+                "aihub_url":"/frontend/aihub/model_market/model_visual",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
                 "user":f"/login",
                 "rec_apps":rec_apps
