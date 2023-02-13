@@ -75,7 +75,7 @@ class Job_Template_ModelView_Base():
     edit_columns = add_columns
 
     base_filters = [["id", Job_Tempalte_Filter, lambda: []]]
-    base_order = ('id', 'desc')
+    base_order = ('created_on', 'desc')
     order_columns = ['id']
     add_form_query_rel_fields = {
         "images": [["name", Images_Filter, None]],

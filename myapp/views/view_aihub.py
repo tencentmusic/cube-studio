@@ -370,7 +370,7 @@ class Aihub_base():
                     "image_describe":aihub.describe,
                     "job_template_name":aihub.name,
                     "job_template_describe": aihub.label,
-                    "job_template_command": '',
+                    "job_template_command": 'python app.py train',
                     "job_template_args": job_template.get('job_template_args',{}),
                     "job_template_expand": {"help":f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"},
                     "job_template_env": '',
@@ -593,7 +593,7 @@ class Aihub_base():
                         "route": [
                             {
                                 "destination": {
-                                    "host": f"{app_name}-deoldify.aihub.svc.cluster.local",
+                                    "host": f"aihub-{app_name}.aihub.svc.cluster.local",
                                     "port": {
                                         "number": 80
                                     }

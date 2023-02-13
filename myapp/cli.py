@@ -309,6 +309,7 @@ def init():
                 dataset = Dataset()
                 dataset.name = kwargs['name']
                 dataset.field=kwargs.get('field','')
+                dataset.version = 'latest'
                 dataset.label=kwargs.get('label','')
                 dataset.status=kwargs.get('status','')
                 dataset.describe=kwargs.get('describe','')

@@ -3,7 +3,7 @@ import logging
 import jwt
 
 from flask_babel import lazy_gettext
-
+import pysnooper
 from flask import current_app
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
@@ -203,12 +203,12 @@ class MyUserRemoteUserModelView_Base():
         )
 
     # 添加默认gamma角色
-
+    # @pysnooper.snoop()
     def post_add(self,user):
         from myapp import security_manager,db
         gamma_role = security_manager.find_role('Gamma')
         if gamma_role not in user.roles:
-            user.roles.append()
+            user.roles.append(gamma_role)
             db.session.commit()
 
 class MyUserRemoteUserModelView(MyUserRemoteUserModelView_Base,UserModelView):

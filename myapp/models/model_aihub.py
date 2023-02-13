@@ -51,18 +51,21 @@ class Aihub(Model,MyappModelBase):
         if not job_template:
             train_url=disable
         service_url = "/model_market/all/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
-        service_text='部署服务'
+        service_text='部署web'
+        link = 'https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/' + self.name
         expand = json.loads(self.expand) if self.expand else {}
         if expand.get('status','offline')=='online':
             service_url = "/model_market/all/api/service/delete/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
-            service_text = '卸载服务'
+            service_text = '卸载web'
+            link = f'/aihub/{self.name}/'
 
         pic_url = '/static/aihub/deep-learning/'+self.name+'/'+self.pic
         if 'http://' in self.pic or "https://" in self.pic:
             pic_url=self.pic
+
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
-    <a target=_blank href="{self.doc if self.status=='online' else ''}">
+    <a target=_blank href="{link if self.status=='online' else ''}">
         <img src="{pic_url}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
     </a>
     <br>

@@ -1138,646 +1138,646 @@ class InMemoryTable(TableBlock):
             if type(key[0])==int and len(key)==2:  # 索引多行
                 return self.table.slice(*key)
 
-
-
-    @pysnooper.snoop()
-    def map(
-        self,
-        function: Optional[Callable] = None,
-        with_indices: bool = False,
-        with_rank: bool = False,
-        input_columns: Optional[Union[str, List[str]]] = None,
-        batched: bool = False,
-        batch_size: Optional[int] = 1000,
-        drop_last_batch: bool = False,
-        remove_columns: Optional[Union[str, List[str]]] = None,
-        keep_in_memory: bool = False,
-        load_from_cache_file: bool = None,
-        cache_file_name: Optional[str] = None,
-        writer_batch_size: Optional[int] = 1000,
-        features: Optional[Features] = None,
-        disable_nullable: bool = False,
-        fn_kwargs: Optional[dict] = None,
-        num_proc: Optional[int] = None,
-        suffix_template: str = "_{rank:05d}_of_{num_proc:05d}",
-        new_fingerprint: Optional[str] = None,
-        desc: Optional[str] = None,
-    ) -> "Table":
-        """
-        Apply a function to all the examples in the table (individually or in batches) and update the table.
-        If your function returns a column that already exists, then it overwrites it.
-
-        You can specify whether the function should be batched or not with the `batched` parameter:
-
-        - If batched is `False`, then the function takes 1 example in and should return 1 example.
-          An example is a dictionary, e.g. `{"text": "Hello there !"}`.
-        - If batched is `True` and `batch_size` is 1, then the function takes a batch of 1 example as input and can return a batch with 1 or more examples.
-          A batch is a dictionary, e.g. a batch of 1 example is `{"text": ["Hello there !"]}`.
-        - If batched is `True` and `batch_size` is `n > 1`, then the function takes a batch of `n` examples as input and can return a batch with `n` examples, or with an arbitrary number of examples.
-          Note that the last batch may have less than `n` examples.
-          A batch is a dictionary, e.g. a batch of `n` examples is `{"text": ["Hello there !"] * n}`.
-
-        Args:
-            function (`Callable`): Function with one of the following signatures:
-
-                - `function(example: Dict[str, Any]) -> Dict[str, Any]` if `batched=False` and `with_indices=False` and `with_rank=False`
-                - `function(example: Dict[str, Any], *extra_args) -> Dict[str, Any]` if `batched=False` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
-                - `function(batch: Dict[str, List]) -> Dict[str, List]` if `batched=True` and `with_indices=False` and `with_rank=False`
-                - `function(batch: Dict[str, List], *extra_args) -> Dict[str, List]` if `batched=True` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
-
-                For advanced usage, the function can also return a `pyarrow.Table`.
-                Moreover if your function returns nothing (`None`), then `map` will run your function and return the dataset unchanged.
-                If no function is provided, default to identity function: `lambda x: x`.
-            with_indices (`bool`, defaults to `False`):
-                Provide example indices to `function`. Note that in this case the
-                signature of `function` should be `def function(example, idx[, rank]): ...`.
-            with_rank (`bool`, defaults to `False`):
-                Provide process rank to `function`. Note that in this case the
-                signature of `function` should be `def function(example[, idx], rank): ...`.
-            input_columns (`Optional[Union[str, List[str]]]`, defaults to `None`):
-                The columns to be passed into `function`
-                as positional arguments. If `None`, a `dict` mapping to all formatted columns is passed as one argument.
-            batched (`bool`, defaults to `False`):
-                Provide batch of examples to `function`.
-            batch_size (`int`, *optional*, defaults to `1000`):
-                Number of examples per batch provided to `function` if `batched=True`.
-                If `batch_size <= 0` or `batch_size == None`, provide the full dataset as a single batch to `function`.
-            drop_last_batch (`bool`, defaults to `False`):
-                Whether a last batch smaller than the batch_size should be
-                dropped instead of being processed by the function.
-            remove_columns (`Optional[Union[str, List[str]]]`, defaults to `None`):
-                Remove a selection of columns while doing the mapping.
-                Columns will be removed before updating the examples with the output of `function`, i.e. if `function` is adding
-                columns with names in `remove_columns`, these columns will be kept.
-            keep_in_memory (`bool`, defaults to `False`):
-                Keep the dataset in memory instead of writing it to a cache file.
-            load_from_cache_file (`bool`, defaults to `True` if caching is enabled):
-                If a cache file storing the current computation from `function`
-                can be identified, use it instead of recomputing.
-            cache_file_name (`str`, *optional*, defaults to `None`):
-                Provide the name of a path for the cache file. It is used to store the
-                results of the computation instead of the automatically generated cache file name.
-            writer_batch_size (`int`, defaults to `1000`):
-                Number of rows per write operation for the cache file writer.
-                This value is a good trade-off between memory usage during the processing, and processing speed.
-                Higher value makes the processing do fewer lookups, lower value consume less temporary memory while running `map`.
-            features (`Optional[datasets.Features]`, defaults to `None`):
-                Use a specific Features to store the cache file
-                instead of the automatically generated one.
-            disable_nullable (`bool`, defaults to `False`):
-                Disallow null values in the table.
-            fn_kwargs (`Dict`, *optional*, defaults to `None`):
-                Keyword arguments to be passed to `function`.
-            num_proc (`int`, *optional*, defaults to `None`):
-                Max number of processes when generating cache. Already cached shards are loaded sequentially.
-            suffix_template (`str`):
-                If `cache_file_name` is specified, then this suffix
-                will be added at the end of the base name of each. Defaults to `"_{rank:05d}_of_{num_proc:05d}"`. For example, if `cache_file_name` is "processed.arrow", then for
-                `rank=1` and `num_proc=4`, the resulting file would be `"processed_00001_of_00004.arrow"` for the default suffix.
-            new_fingerprint (`str`, *optional*, defaults to `None`):
-                The new fingerprint of the dataset after transform.
-                If `None`, the new fingerprint is computed using a hash of the previous fingerprint, and the transform arguments.
-            desc (`str`, *optional*, defaults to `None`):
-                Meaningful description to be displayed alongside with the progress bar while mapping examples.
-
-        Example:
-
-        ```py
-        >>> from datasets import load_dataset
-        >>> ds = load_dataset("rotten_tomatoes", split="validation")
-        >>> def add_prefix(example):
-        ...     example["text"] = "Review: " + example["text"]
-        ...     return example
-        >>> ds = ds.map(add_prefix)
-        >>> ds[0:3]["text"]
-        ['Review: compassionately explores the seemingly irreconcilable situation between conservative christian parents and their estranged gay and lesbian children .',
-         'Review: the soundtrack alone is worth the price of admission .',
-         'Review: rodriguez does a splendid job of racial profiling hollywood style--casting excellent latin actors of all ages--a trend long overdue .']
-
-        # process a batch of examples
-        >>> ds = ds.map(lambda example: tokenizer(example["text"]), batched=True)
-        # set number of processors
-        >>> ds = ds.map(add_prefix, num_proc=4)
-        ```
-        """
-        if keep_in_memory and cache_file_name is not None:
-            raise ValueError("Please use either `keep_in_memory` or `cache_file_name` but not both.")
-
-        if num_proc is not None and num_proc <= 0:
-            raise ValueError("num_proc must be an integer > 0.")
-
-        # If the array is empty we do nothing (but we make sure to handle an empty indices mapping and remove the requested columns anyway)
-        if self.num_rows== 0:
-            return self
-
-        if function is None:
-            function = lambda x: x  # noqa: E731
-
-        if isinstance(input_columns, str):
-            input_columns = [input_columns]
-
-        if input_columns is not None:
-            for input_column in input_columns:
-                if input_column not in self.column_names:
-                    raise ValueError(
-                        f"Input column {input_column} not in the dataset. Current columns in the dataset: {self.column_names}"
-                    )
-
-        load_from_cache_file = load_from_cache_file if load_from_cache_file is not None else True
-
-        if fn_kwargs is None:
-            fn_kwargs = {}
-
-        if num_proc is not None and num_proc > self.num_rows:
-            num_proc = self.num_rows
-            logger.warning(
-                f"num_proc must be <= {self.num_rows}. Reducing num_proc to {num_proc} for dataset of size {self.num_rows}."
-            )
-
-        disable_tqdm = not logging.is_progress_bar_enabled()
-
-        if num_proc is None or num_proc == 1:
-            return self._map_single(
-                function=function,
-                with_indices=with_indices,
-                with_rank=with_rank,
-                input_columns=input_columns,
-                batched=batched,
-                batch_size=batch_size,
-                drop_last_batch=drop_last_batch,
-                remove_columns=remove_columns,
-                keep_in_memory=keep_in_memory,
-                load_from_cache_file=load_from_cache_file,
-                cache_file_name=cache_file_name,
-                writer_batch_size=writer_batch_size,
-                features=features,
-                disable_nullable=disable_nullable,
-                fn_kwargs=fn_kwargs,
-                new_fingerprint=new_fingerprint,
-                disable_tqdm=disable_tqdm,
-                desc=desc,
-            )
-        else:
-
-            def format_cache_file_name(cache_file_name, rank):
-                sep = cache_file_name.rindex(".")
-                base_name, extension = cache_file_name[:sep], cache_file_name[sep:]
-                cache_file_name = base_name + suffix_template.format(rank=rank, num_proc=num_proc) + extension
-                logger.info(f"Process #{rank} will write at {cache_file_name}")
-                return cache_file_name
-
-            def format_new_fingerprint(new_fingerprint, rank):
-                return new_fingerprint + suffix_template.format(rank=rank, num_proc=num_proc)
-
-            prev_env = copy.deepcopy(os.environ)
-            # check if parallelism if off
-            # from https://github.com/huggingface/tokenizers/blob/bb668bc439dc34389b71dbb8ce0c597f15707b53/tokenizers/src/utils/parallelism.rs#L22
-            if prev_env.get("TOKENIZERS_PARALLELISM", "false").lower() not in (
-                "",
-                "off",
-                "false",
-                "f",
-                "no",
-                "n",
-                "0",
-            ):
-                logger.warning("Setting TOKENIZERS_PARALLELISM=false for forked processes.")
-            os.environ["TOKENIZERS_PARALLELISM"] = "false"
-            initargs, initializer = None, None
-            if not disable_tqdm:
-                initargs, initializer = (RLock(),), tqdm.set_lock
-
-            shards = [
-                self.shard(num_shards=num_proc, index=rank)
-                for rank in range(num_proc)
-            ]
-            kwds_per_shard = [
-                dict(
-                    self=shards[rank],
-                    function=function,
-                    with_indices=with_indices,
-                    with_rank=with_rank,
-                    input_columns=input_columns,
-                    batched=batched,
-                    batch_size=batch_size,
-                    drop_last_batch=drop_last_batch,
-                    remove_columns=remove_columns,
-                    keep_in_memory=keep_in_memory,
-                    load_from_cache_file=load_from_cache_file,
-                    cache_file_name=format_cache_file_name(cache_file_name, rank)
-                    if cache_file_name is not None
-                    else None,
-                    writer_batch_size=writer_batch_size,
-                    features=features.copy() if features is not None else None,
-                    disable_nullable=disable_nullable,
-                    fn_kwargs=fn_kwargs,
-                    rank=rank,
-                    offset=sum(len(s) for s in shards[:rank]),
-                    disable_tqdm=disable_tqdm,
-                    new_fingerprint=format_new_fingerprint(new_fingerprint, rank)
-                    if new_fingerprint is not None
-                    else None,
-                    desc=desc,
-                )
-                for rank in range(num_proc)
-            ]
-
-            # We search for already cached shards
-            def catch_non_existent_error(func, kwargs):
-                try:
-                    return func(**kwargs)
-                except NonExistentDatasetError:
-                    return None
-
-            transformed_shards = [
-                catch_non_existent_error(self.__class__._map_single, dict(cache_only=True, **kwds))
-                for kwds in kwds_per_shard
-            ]
-
-            # We try to create a pool with as many workers as dataset not yet cached.
-            nb_of_missing_shards = transformed_shards.count(None)
-            if nb_of_missing_shards > 0:
-                with Pool(nb_of_missing_shards, initargs=initargs, initializer=initializer) as pool:
-                    os.environ = prev_env
-                    logger.info(f"Spawning {num_proc} processes")
-                    results = {
-                        i: pool.apply_async(self.__class__._map_single, kwds=kwds)
-                        for i, (kwds, cached_shard) in enumerate(zip(kwds_per_shard, transformed_shards))
-                        if cached_shard is None
-                    }
-                    assert (
-                        len(results) == nb_of_missing_shards
-                    ), "The number of missing cached shards needs to correspond to the number of `_map_single` we're running"
-
-                    for index, async_result in results.items():
-                        transformed_shards[index] = async_result.get()
-
-            assert (
-                transformed_shards.count(None) == 0
-            ), "All shards have to be defined Datasets, none should still be missing."
-
-            logger.info(f"Concatenating {num_proc} shards")
-            result = _concatenate_map_style_datasets(transformed_shards)
-            if new_fingerprint is not None:
-                result._fingerprint = new_fingerprint
-            return result
-
-    @pysnooper.snoop()
-    def _map_single(
-        self,
-        function: Optional[Callable] = None,
-        with_indices: bool = False,
-        with_rank: bool = False,
-        input_columns: Optional[List[str]] = None,
-        batched: bool = False,
-        batch_size: Optional[int] = 1000,
-        drop_last_batch: bool = False,
-        remove_columns: Optional[List[str]] = None,
-        keep_in_memory: bool = False,
-        load_from_cache_file: bool = None,
-        cache_file_name: Optional[str] = None,
-        writer_batch_size: Optional[int] = 1000,
-        features: Optional[Features] = None,
-        disable_nullable: bool = False,
-        fn_kwargs: Optional[dict] = None,
-        new_fingerprint: Optional[str] = None,
-        rank: Optional[int] = None,
-        offset: int = 0,
-        disable_tqdm: bool = False,
-        desc: Optional[str] = None,
-        cache_only: bool = False,
-    ) -> "Table":
-        """Apply a function to all the elements in the table (individually or in batches)
-        and update the table (if function does update examples).
-
-        Args:
-            function (`Callable`): with one of the following signature:
-                - `function(example: Dict[str, Any]) -> Dict[str, Any]` if `batched=False` and `with_indices=False` and `with_rank=False`
-                - `function(example: Dict[str, Any], *extra_args) -> Dict[str, Any]` if `batched=False` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
-                - `function(batch: Dict[str, List]) -> Dict[str, List]` if `batched=True` and `with_indices=False` and `with_rank=False`
-                - `function(batch: Dict[str, List], *extra_args) -> Dict[str, List]` if `batched=True` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
-
-                For advanced usage, the function can also return a `pyarrow.Table`.
-                Moreover if your function returns nothing (`None`), then `map` will run your function and return the dataset unchanged.
-                If no function is provided, default to identity function: lambda x: x
-            with_indices (`bool`, defaults to `False`): Provide example indices to `function`. Note that in this case the signature of `function` should be `def function(example, idx[, rank]): ...`.
-            with_rank (`bool`, default `False`): Provide process rank to `function`. Note that in this case the signature of `function` should be `def function(example[, idx], rank): ...`.
-            input_columns (`Optional[List[str]]`, defaults to `None`): The columns to be passed into `function` as
-                positional arguments. If `None`, a dict mapping to all formatted columns is passed as one argument.
-            batched (`bool`, defaults to `False`): Provide batch of examples to `function`
-            batch_size (`int`, optional, defaults to `1000`): Number of examples per batch provided to `function` if `batched=True`
-                `batch_size <= 0` or `batch_size == None`: Provide the full dataset as a single batch to `function`
-            drop_last_batch (`bool`, default: `False`): Whether a last batch smaller than the batch_size should be
-                dropped instead of being processed by the function.
-            remove_columns (`Optional[List[str]]`, defaults to `None`): Remove a selection of columns while doing the mapping.
-                Columns will be removed before updating the examples with the output of `function`, i.e. if `function` is adding
-                columns with names in `remove_columns`, these columns will be kept.
-            keep_in_memory (`bool`, defaults to `False`): Keep the dataset in memory instead of writing it to a cache file.
-            load_from_cache_file (`bool`, defaults to `True` if caching is enabled): If a cache file storing the current computation from `function`
-                can be identified, use it instead of recomputing.
-            cache_file_name (`str`, optional, defaults to `None`): Provide the name of a path for the cache file. It is used to store the
-                results of the computation instead of the automatically generated cache file name.
-            writer_batch_size (`int`, default `1000`): Number of rows per write operation for the cache file writer.
-                This value is a good trade-off between memory usage during the processing, and processing speed.
-                Higher value makes the processing do fewer lookups, lower value consume less temporary memory while running `.map()`.
-            features (`Optional[datasets.Features]`, defaults to `None`): Use a specific Features to store the cache file
-                instead of the automatically generated one.
-            disable_nullable (`bool`, defaults to `False`): Disallow null values in the table.
-            fn_kwargs (`Dict`, optional, defaults to `None`): Keyword arguments to be passed to `function`
-            new_fingerprint (`str`, optional, defaults to `None`): the new fingerprint of the dataset after transform.
-                If `None`, the new fingerprint is computed using a hash of the previous fingerprint, and the transform arguments
-            rank: (`int`, optional, defaults to `None`): If specified, this is the process rank when doing multiprocessing
-            offset: (`int`, defaults to 0): If specified, this is an offset applied to the indices passed to `function` if `with_indices=True`.
-            disable_tqdm (`bool`, defaults to `False`): Whether to silence tqdm's output.
-            desc (`str`, optional, defaults to `None`): Meaningful description to be displayed alongside with the progress bar while mapping examples.
-            cache_only (`bool`, defaults to `False`): Flag in order to notifiy the method will either find a cached dataset or raise `NonExistentDatasetError` exception,
-        """
-        from .formatting import format_table, get_format_type_from_alias, get_formatter, query_table
-
-        # Reduce logging to keep things readable in multiprocessing with tqdm
-        if rank is not None and logging.get_verbosity() < logging.WARNING:
-            logging.set_verbosity_warning()
-        # Print at least one thing to fix tqdm in notebooks in multiprocessing
-        # see https://github.com/tqdm/tqdm/issues/485#issuecomment-473338308
-        if rank is not None and not disable_tqdm and any("notebook" in tqdm_cls.__name__ for tqdm_cls in tqdm.__mro__):
-            print(" ", end="", flush=True)
-
-        if fn_kwargs is None:
-            fn_kwargs = {}
-
-        # If we do batch computation but no batch size is provided, default to the full dataset
-        if batched and (batch_size is None or batch_size <= 0):
-            batch_size = self.num_rows
-
-        # Check if we've already cached this computation (indexed by a hash)
-        if self.cache_files:
-            if cache_file_name is None:
-                # we create a unique hash from the function,
-                # current dataset file and the mapping args
-                cache_file_name = self._get_cache_file_path(new_fingerprint)
-            if os.path.exists(cache_file_name) and load_from_cache_file:
-                logger.warning(f"Loading cached processed dataset at {cache_file_name}")
-                info = self.info.copy()
-                info.features = features
-                info.task_templates = None
-                return Dataset.from_file(cache_file_name, info=info, split=self.split)
-
-        # Raise an error if we were supposed to return a cached dataset and none was found
-        if cache_only:
-            raise NonExistentDatasetError
-
-        # We set this variable to True after processing the first example/batch in
-        # `apply_function_on_filtered_inputs` if the map function returns a dict.
-        # If set to False, no new arrow table will be created
-
-        update_data = None
-
-        format_kwargs = self._format_kwargs.copy()
-        # Lazy formatting is only available for the default format (None/python)
-        if not input_columns and self._format_type is None:
-            format_kwargs["lazy"] = True
-        input_formatter = get_formatter(
-            self._format_type,
-            features=self.features,
-            **format_kwargs,
-        )
-
-        class NumExamplesMismatchError(Exception):
-            pass
-
-        def validate_function_output(processed_inputs, indices):
-            """Validate output of the map function."""
-            if processed_inputs is not None and not isinstance(processed_inputs, (Mapping, pa.Table)):
-                raise TypeError(
-                    f"Provided `function` which is applied to all elements of table returns a variable of type {type(processed_inputs)}. Make sure provided `function` returns a variable of type `dict` (or a pyarrow table) to update the dataset or `None` if you are only interested in side effects."
-                )
-            elif isinstance(indices, list) and isinstance(processed_inputs, Mapping):
-                allowed_batch_return_types = (list, np.ndarray, pd.Series)
-                if config.TF_AVAILABLE and "tensorflow" in sys.modules:
-                    import tensorflow as tf
-
-                    allowed_batch_return_types += (tf.Tensor,)
-                if config.TORCH_AVAILABLE and "torch" in sys.modules:
-                    import torch
-
-                    allowed_batch_return_types += (torch.Tensor,)
-                if config.JAX_AVAILABLE and "jax" in sys.modules:
-                    import jax.numpy as jnp
-
-                    allowed_batch_return_types += (jnp.ndarray,)
-                all_dict_values_are_lists = all(
-                    isinstance(value, allowed_batch_return_types) for value in processed_inputs.values()
-                )
-                if all_dict_values_are_lists is False:
-                    raise TypeError(
-                        f"Provided `function` which is applied to all elements of table returns a `dict` of types {[type(x) for x in processed_inputs.values()]}. When using `batched=True`, make sure provided `function` returns a `dict` of types like `{allowed_batch_return_types}`."
-                    )
-
-        def apply_function_on_filtered_inputs(pa_inputs, indices, check_same_num_examples=False, offset=0):
-            """Utility to apply the function on a selection of columns."""
-            nonlocal update_data
-            from .formatting import format_table, get_formatter, query_table
-            from .formatting.formatting import LazyDict, _is_range_contiguous
-
-
-            inputs = format_table(
-                pa_inputs,
-                0 if not batched else range(pa_inputs.num_rows),
-                format_columns=input_columns,
-                formatter=input_formatter,
-            )
-            fn_args = [inputs] if input_columns is None else [inputs[col] for col in input_columns]
-            if offset == 0:
-                effective_indices = indices
-            else:
-                effective_indices = [i + offset for i in indices] if isinstance(indices, list) else indices + offset
-            additional_args = ()
-            if with_indices:
-                additional_args += (effective_indices,)
-            if with_rank:
-                additional_args += (rank,)
-            processed_inputs = function(*fn_args, *additional_args, **fn_kwargs)
-            if isinstance(processed_inputs, LazyDict):
-                processed_inputs = {
-                    k: v for k, v in processed_inputs.data.items() if k not in processed_inputs.keys_to_format
-                }
-                returned_lazy_dict = True
-            else:
-                returned_lazy_dict = False
-            if update_data is None:
-                # Check if the function returns updated examples
-                update_data = isinstance(processed_inputs, (Mapping, pa.Table))
-                validate_function_output(processed_inputs, indices)
-            if not update_data:
-                return None  # Nothing to update, let's move on
-            if self._format_type or input_columns:
-                # TODO(QL, MS): ideally the behavior should be the same even if the dataset is formatted (may require major release)
-                inputs_to_merge = {k: v for k, v in zip(pa_inputs.column_names, pa_inputs.itercolumns())}
-            elif isinstance(inputs, LazyDict):
-                inputs_to_merge = {
-                    k: (v if k not in inputs.keys_to_format else pa_inputs[k]) for k, v in inputs.data.items()
-                }
-            else:
-                inputs_to_merge = inputs
-            if remove_columns is not None:
-                for column in remove_columns:
-                    # `function` can modify input in-place causing column to be already removed.
-                    if column in inputs_to_merge:
-                        inputs_to_merge.pop(column)
-                    if returned_lazy_dict and column in processed_inputs:
-                        processed_inputs.pop(column)
-            if check_same_num_examples:
-                input_num_examples = len(pa_inputs)
-                processed_inputs_num_examples = len(processed_inputs[next(iter(processed_inputs.keys()))])
-                if input_num_examples != processed_inputs_num_examples:
-                    raise NumExamplesMismatchError()
-            if isinstance(inputs, Mapping) and isinstance(processed_inputs, Mapping):
-                # The .map() transform *updates* the dataset:
-                # the output dictionary contains both the the input data and the output data.
-                # The output dictionary may contain Arrow values from `inputs_to_merge` so that we can re-write them efficiently.
-                return {**inputs_to_merge, **processed_inputs}
-            else:
-                return processed_inputs
-
-        def init_buffer_and_writer():
-            from .arrow_reader import ArrowReader
-            from .arrow_writer import ArrowWriter, OptimizedTypedSequence
-            # Prepare output buffer and batched writer in memory or on file if we update the table
-            writer_features = features
-            if writer_features is None:
-                writer_features = self.renew_features()
-                update_features = True
-            else:
-                update_features = False
-            if keep_in_memory or cache_file_name is None:
-                buf_writer = pa.BufferOutputStream()
-                tmp_file = None
-                writer = ArrowWriter(
-                    features=writer_features,
-                    stream=buf_writer,
-                    writer_batch_size=writer_batch_size,
-                    update_features=update_features,
-                    fingerprint=new_fingerprint,
-                    disable_nullable=disable_nullable,
-                )
-            else:
-                buf_writer = None
-                logger.info(f"Caching processed dataset at {cache_file_name}")
-                tmp_file = tempfile.NamedTemporaryFile("wb", dir=os.path.dirname(cache_file_name), delete=False)
-                writer = ArrowWriter(
-                    features=writer_features,
-                    path=tmp_file.name,
-                    writer_batch_size=writer_batch_size,
-                    update_features=update_features,
-                    fingerprint=new_fingerprint,
-                    disable_nullable=disable_nullable,
-                )
-            return buf_writer, writer, tmp_file
-
-        # If `update_data` is True after processing the first example/batch, initalize these resources with `init_buffer_and_writer`
-        buf_writer, writer, tmp_file = None, None, None
-
-        # Optionally initialize the writer as a context manager
-        with contextlib.ExitStack() as stack:
-            try:
-                input_dataset = self.with_format("arrow")
-
-                # Loop over single examples or batches and write to buffer/file if examples are to be updated
-                if not batched:
-                    pbar_total = len(input_dataset)
-                    pbar_iterable = enumerate(input_dataset)
-                else:
-                    num_rows = (
-                        len(input_dataset) if not drop_last_batch else len(input_dataset) // batch_size * batch_size
-                    )
-                    pbar_total = (num_rows // batch_size) + 1 if num_rows % batch_size else num_rows // batch_size
-                    pbar_iterable = zip(
-                        range(0, num_rows, batch_size),
-                        input_dataset.iter(batch_size, drop_last_batch=drop_last_batch),
-                    )
-                pbar_unit = "ex" if not batched else "ba"
-                pbar_desc = (desc + " " if desc is not None else "") + "#" + str(rank) if rank is not None else desc
-                pbar = logging.tqdm(
-                    pbar_iterable,
-                    total=pbar_total,
-                    disable=disable_tqdm,
-                    position=rank,
-                    unit=pbar_unit,
-                    desc=pbar_desc,
-                )
-                if not batched:
-                    for i, example in pbar:
-                        example = apply_function_on_filtered_inputs(example, i, offset=offset)
-                        if update_data:
-                            if i == 0:
-                                buf_writer, writer, tmp_file = init_buffer_and_writer()
-                                stack.enter_context(writer)
-                            if isinstance(example, pa.Table):
-                                writer.write_row(example)
-                            else:
-                                writer.write(example)
-                else:
-                    for i, batch in pbar:
-                        indices = list(
-                            range(*(slice(i, i + batch_size).indices(input_dataset.num_rows)))
-                        )  # Something simpler?
-                        try:
-                            batch = apply_function_on_filtered_inputs(
-                                batch,
-                                indices,
-                                check_same_num_examples=len(input_dataset.list_indexes()) > 0,
-                                offset=offset,
-                            )
-                        except NumExamplesMismatchError:
-                            raise DatasetTransformationNotAllowedError(
-                                "Using `.map` in batched mode on a dataset with attached indexes is allowed only if it doesn't create or remove existing examples. You can first run `.drop_index() to remove your index and then re-add it."
-                            ) from None
-                        if update_data:
-                            if i == 0:
-                                buf_writer, writer, tmp_file = init_buffer_and_writer()
-                                stack.enter_context(writer)
-                            if isinstance(batch, pa.Table):
-                                writer.write_table(batch)
-                            else:
-                                writer.write_batch(batch)
-                if update_data and writer is not None:
-                    writer.finalize()  # close_stream=bool(buf_writer is None))  # We only close if we are writing in a file
-            except (Exception, KeyboardInterrupt):
-                if update_data:
-                    if writer is not None:
-                        writer.finalize()
-                    if tmp_file is not None:
-                        tmp_file.close()
-                        if os.path.exists(tmp_file.name):
-                            os.remove(tmp_file.name)
-                raise
-
-        if update_data and tmp_file is not None:
-            tmp_file.close()
-            shutil.move(tmp_file.name, cache_file_name)
-            umask = os.umask(0o666)
-            os.umask(umask)
-            os.chmod(cache_file_name, 0o666 & ~umask)
-
-        if update_data:
-            if buf_writer is None:
-                return Dataset.from_file(cache_file_name)
-            else:
-                return Dataset.from_buffer(buf_writer.getvalue())
-        else:
-            return self
-
-
-    def shard(self,num_shards: int,index: int) -> "Table":
-        if not 0 <= index < num_shards:
-            raise ValueError("index should be in [0, num_shards-1]")
-
-        div = len(self) // num_shards
-        mod = len(self) % num_shards
-        start = div * index + min(index, mod)
-        end = start + div + (1 if index < mod else 0)
-
-        return self.slice(start,end)
+    # 
+    # 
+    # @pysnooper.snoop()
+    # def map(
+    #     self,
+    #     function: Optional[Callable] = None,
+    #     with_indices: bool = False,
+    #     with_rank: bool = False,
+    #     input_columns: Optional[Union[str, List[str]]] = None,
+    #     batched: bool = False,
+    #     batch_size: Optional[int] = 1000,
+    #     drop_last_batch: bool = False,
+    #     remove_columns: Optional[Union[str, List[str]]] = None,
+    #     keep_in_memory: bool = False,
+    #     load_from_cache_file: bool = None,
+    #     cache_file_name: Optional[str] = None,
+    #     writer_batch_size: Optional[int] = 1000,
+    #     features: Optional[Features] = None,
+    #     disable_nullable: bool = False,
+    #     fn_kwargs: Optional[dict] = None,
+    #     num_proc: Optional[int] = None,
+    #     suffix_template: str = "_{rank:05d}_of_{num_proc:05d}",
+    #     new_fingerprint: Optional[str] = None,
+    #     desc: Optional[str] = None,
+    # ) -> "Table":
+    #     """
+    #     Apply a function to all the examples in the table (individually or in batches) and update the table.
+    #     If your function returns a column that already exists, then it overwrites it.
+    # 
+    #     You can specify whether the function should be batched or not with the `batched` parameter:
+    # 
+    #     - If batched is `False`, then the function takes 1 example in and should return 1 example.
+    #       An example is a dictionary, e.g. `{"text": "Hello there !"}`.
+    #     - If batched is `True` and `batch_size` is 1, then the function takes a batch of 1 example as input and can return a batch with 1 or more examples.
+    #       A batch is a dictionary, e.g. a batch of 1 example is `{"text": ["Hello there !"]}`.
+    #     - If batched is `True` and `batch_size` is `n > 1`, then the function takes a batch of `n` examples as input and can return a batch with `n` examples, or with an arbitrary number of examples.
+    #       Note that the last batch may have less than `n` examples.
+    #       A batch is a dictionary, e.g. a batch of `n` examples is `{"text": ["Hello there !"] * n}`.
+    # 
+    #     Args:
+    #         function (`Callable`): Function with one of the following signatures:
+    # 
+    #             - `function(example: Dict[str, Any]) -> Dict[str, Any]` if `batched=False` and `with_indices=False` and `with_rank=False`
+    #             - `function(example: Dict[str, Any], *extra_args) -> Dict[str, Any]` if `batched=False` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
+    #             - `function(batch: Dict[str, List]) -> Dict[str, List]` if `batched=True` and `with_indices=False` and `with_rank=False`
+    #             - `function(batch: Dict[str, List], *extra_args) -> Dict[str, List]` if `batched=True` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
+    # 
+    #             For advanced usage, the function can also return a `pyarrow.Table`.
+    #             Moreover if your function returns nothing (`None`), then `map` will run your function and return the dataset unchanged.
+    #             If no function is provided, default to identity function: `lambda x: x`.
+    #         with_indices (`bool`, defaults to `False`):
+    #             Provide example indices to `function`. Note that in this case the
+    #             signature of `function` should be `def function(example, idx[, rank]): ...`.
+    #         with_rank (`bool`, defaults to `False`):
+    #             Provide process rank to `function`. Note that in this case the
+    #             signature of `function` should be `def function(example[, idx], rank): ...`.
+    #         input_columns (`Optional[Union[str, List[str]]]`, defaults to `None`):
+    #             The columns to be passed into `function`
+    #             as positional arguments. If `None`, a `dict` mapping to all formatted columns is passed as one argument.
+    #         batched (`bool`, defaults to `False`):
+    #             Provide batch of examples to `function`.
+    #         batch_size (`int`, *optional*, defaults to `1000`):
+    #             Number of examples per batch provided to `function` if `batched=True`.
+    #             If `batch_size <= 0` or `batch_size == None`, provide the full dataset as a single batch to `function`.
+    #         drop_last_batch (`bool`, defaults to `False`):
+    #             Whether a last batch smaller than the batch_size should be
+    #             dropped instead of being processed by the function.
+    #         remove_columns (`Optional[Union[str, List[str]]]`, defaults to `None`):
+    #             Remove a selection of columns while doing the mapping.
+    #             Columns will be removed before updating the examples with the output of `function`, i.e. if `function` is adding
+    #             columns with names in `remove_columns`, these columns will be kept.
+    #         keep_in_memory (`bool`, defaults to `False`):
+    #             Keep the dataset in memory instead of writing it to a cache file.
+    #         load_from_cache_file (`bool`, defaults to `True` if caching is enabled):
+    #             If a cache file storing the current computation from `function`
+    #             can be identified, use it instead of recomputing.
+    #         cache_file_name (`str`, *optional*, defaults to `None`):
+    #             Provide the name of a path for the cache file. It is used to store the
+    #             results of the computation instead of the automatically generated cache file name.
+    #         writer_batch_size (`int`, defaults to `1000`):
+    #             Number of rows per write operation for the cache file writer.
+    #             This value is a good trade-off between memory usage during the processing, and processing speed.
+    #             Higher value makes the processing do fewer lookups, lower value consume less temporary memory while running `map`.
+    #         features (`Optional[datasets.Features]`, defaults to `None`):
+    #             Use a specific Features to store the cache file
+    #             instead of the automatically generated one.
+    #         disable_nullable (`bool`, defaults to `False`):
+    #             Disallow null values in the table.
+    #         fn_kwargs (`Dict`, *optional*, defaults to `None`):
+    #             Keyword arguments to be passed to `function`.
+    #         num_proc (`int`, *optional*, defaults to `None`):
+    #             Max number of processes when generating cache. Already cached shards are loaded sequentially.
+    #         suffix_template (`str`):
+    #             If `cache_file_name` is specified, then this suffix
+    #             will be added at the end of the base name of each. Defaults to `"_{rank:05d}_of_{num_proc:05d}"`. For example, if `cache_file_name` is "processed.arrow", then for
+    #             `rank=1` and `num_proc=4`, the resulting file would be `"processed_00001_of_00004.arrow"` for the default suffix.
+    #         new_fingerprint (`str`, *optional*, defaults to `None`):
+    #             The new fingerprint of the dataset after transform.
+    #             If `None`, the new fingerprint is computed using a hash of the previous fingerprint, and the transform arguments.
+    #         desc (`str`, *optional*, defaults to `None`):
+    #             Meaningful description to be displayed alongside with the progress bar while mapping examples.
+    # 
+    #     Example:
+    # 
+    #     ```py
+    #     >>> from datasets import load_dataset
+    #     >>> ds = load_dataset("rotten_tomatoes", split="validation")
+    #     >>> def add_prefix(example):
+    #     ...     example["text"] = "Review: " + example["text"]
+    #     ...     return example
+    #     >>> ds = ds.map(add_prefix)
+    #     >>> ds[0:3]["text"]
+    #     ['Review: compassionately explores the seemingly irreconcilable situation between conservative christian parents and their estranged gay and lesbian children .',
+    #      'Review: the soundtrack alone is worth the price of admission .',
+    #      'Review: rodriguez does a splendid job of racial profiling hollywood style--casting excellent latin actors of all ages--a trend long overdue .']
+    # 
+    #     # process a batch of examples
+    #     >>> ds = ds.map(lambda example: tokenizer(example["text"]), batched=True)
+    #     # set number of processors
+    #     >>> ds = ds.map(add_prefix, num_proc=4)
+    #     ```
+    #     """
+    #     if keep_in_memory and cache_file_name is not None:
+    #         raise ValueError("Please use either `keep_in_memory` or `cache_file_name` but not both.")
+    # 
+    #     if num_proc is not None and num_proc <= 0:
+    #         raise ValueError("num_proc must be an integer > 0.")
+    # 
+    #     # If the array is empty we do nothing (but we make sure to handle an empty indices mapping and remove the requested columns anyway)
+    #     if self.num_rows== 0:
+    #         return self
+    # 
+    #     if function is None:
+    #         function = lambda x: x  # noqa: E731
+    # 
+    #     if isinstance(input_columns, str):
+    #         input_columns = [input_columns]
+    # 
+    #     if input_columns is not None:
+    #         for input_column in input_columns:
+    #             if input_column not in self.column_names:
+    #                 raise ValueError(
+    #                     f"Input column {input_column} not in the dataset. Current columns in the dataset: {self.column_names}"
+    #                 )
+    # 
+    #     load_from_cache_file = load_from_cache_file if load_from_cache_file is not None else True
+    # 
+    #     if fn_kwargs is None:
+    #         fn_kwargs = {}
+    # 
+    #     if num_proc is not None and num_proc > self.num_rows:
+    #         num_proc = self.num_rows
+    #         logger.warning(
+    #             f"num_proc must be <= {self.num_rows}. Reducing num_proc to {num_proc} for dataset of size {self.num_rows}."
+    #         )
+    # 
+    #     disable_tqdm = not logging.is_progress_bar_enabled()
+    # 
+    #     if num_proc is None or num_proc == 1:
+    #         return self._map_single(
+    #             function=function,
+    #             with_indices=with_indices,
+    #             with_rank=with_rank,
+    #             input_columns=input_columns,
+    #             batched=batched,
+    #             batch_size=batch_size,
+    #             drop_last_batch=drop_last_batch,
+    #             remove_columns=remove_columns,
+    #             keep_in_memory=keep_in_memory,
+    #             load_from_cache_file=load_from_cache_file,
+    #             cache_file_name=cache_file_name,
+    #             writer_batch_size=writer_batch_size,
+    #             features=features,
+    #             disable_nullable=disable_nullable,
+    #             fn_kwargs=fn_kwargs,
+    #             new_fingerprint=new_fingerprint,
+    #             disable_tqdm=disable_tqdm,
+    #             desc=desc,
+    #         )
+    #     else:
+    # 
+    #         def format_cache_file_name(cache_file_name, rank):
+    #             sep = cache_file_name.rindex(".")
+    #             base_name, extension = cache_file_name[:sep], cache_file_name[sep:]
+    #             cache_file_name = base_name + suffix_template.format(rank=rank, num_proc=num_proc) + extension
+    #             logger.info(f"Process #{rank} will write at {cache_file_name}")
+    #             return cache_file_name
+    # 
+    #         def format_new_fingerprint(new_fingerprint, rank):
+    #             return new_fingerprint + suffix_template.format(rank=rank, num_proc=num_proc)
+    # 
+    #         prev_env = copy.deepcopy(os.environ)
+    #         # check if parallelism if off
+    #         # from https://github.com/huggingface/tokenizers/blob/bb668bc439dc34389b71dbb8ce0c597f15707b53/tokenizers/src/utils/parallelism.rs#L22
+    #         if prev_env.get("TOKENIZERS_PARALLELISM", "false").lower() not in (
+    #             "",
+    #             "off",
+    #             "false",
+    #             "f",
+    #             "no",
+    #             "n",
+    #             "0",
+    #         ):
+    #             logger.warning("Setting TOKENIZERS_PARALLELISM=false for forked processes.")
+    #         os.environ["TOKENIZERS_PARALLELISM"] = "false"
+    #         initargs, initializer = None, None
+    #         if not disable_tqdm:
+    #             initargs, initializer = (RLock(),), tqdm.set_lock
+    # 
+    #         shards = [
+    #             self.shard(num_shards=num_proc, index=rank)
+    #             for rank in range(num_proc)
+    #         ]
+    #         kwds_per_shard = [
+    #             dict(
+    #                 self=shards[rank],
+    #                 function=function,
+    #                 with_indices=with_indices,
+    #                 with_rank=with_rank,
+    #                 input_columns=input_columns,
+    #                 batched=batched,
+    #                 batch_size=batch_size,
+    #                 drop_last_batch=drop_last_batch,
+    #                 remove_columns=remove_columns,
+    #                 keep_in_memory=keep_in_memory,
+    #                 load_from_cache_file=load_from_cache_file,
+    #                 cache_file_name=format_cache_file_name(cache_file_name, rank)
+    #                 if cache_file_name is not None
+    #                 else None,
+    #                 writer_batch_size=writer_batch_size,
+    #                 features=features.copy() if features is not None else None,
+    #                 disable_nullable=disable_nullable,
+    #                 fn_kwargs=fn_kwargs,
+    #                 rank=rank,
+    #                 offset=sum(len(s) for s in shards[:rank]),
+    #                 disable_tqdm=disable_tqdm,
+    #                 new_fingerprint=format_new_fingerprint(new_fingerprint, rank)
+    #                 if new_fingerprint is not None
+    #                 else None,
+    #                 desc=desc,
+    #             )
+    #             for rank in range(num_proc)
+    #         ]
+    # 
+    #         # We search for already cached shards
+    #         def catch_non_existent_error(func, kwargs):
+    #             try:
+    #                 return func(**kwargs)
+    #             except NonExistentDatasetError:
+    #                 return None
+    # 
+    #         transformed_shards = [
+    #             catch_non_existent_error(self.__class__._map_single, dict(cache_only=True, **kwds))
+    #             for kwds in kwds_per_shard
+    #         ]
+    # 
+    #         # We try to create a pool with as many workers as dataset not yet cached.
+    #         nb_of_missing_shards = transformed_shards.count(None)
+    #         if nb_of_missing_shards > 0:
+    #             with Pool(nb_of_missing_shards, initargs=initargs, initializer=initializer) as pool:
+    #                 os.environ = prev_env
+    #                 logger.info(f"Spawning {num_proc} processes")
+    #                 results = {
+    #                     i: pool.apply_async(self.__class__._map_single, kwds=kwds)
+    #                     for i, (kwds, cached_shard) in enumerate(zip(kwds_per_shard, transformed_shards))
+    #                     if cached_shard is None
+    #                 }
+    #                 assert (
+    #                     len(results) == nb_of_missing_shards
+    #                 ), "The number of missing cached shards needs to correspond to the number of `_map_single` we're running"
+    # 
+    #                 for index, async_result in results.items():
+    #                     transformed_shards[index] = async_result.get()
+    # 
+    #         assert (
+    #             transformed_shards.count(None) == 0
+    #         ), "All shards have to be defined Datasets, none should still be missing."
+    # 
+    #         logger.info(f"Concatenating {num_proc} shards")
+    #         result = _concatenate_map_style_datasets(transformed_shards)
+    #         if new_fingerprint is not None:
+    #             result._fingerprint = new_fingerprint
+    #         return result
+    # 
+    # @pysnooper.snoop()
+    # def _map_single(
+    #     self,
+    #     function: Optional[Callable] = None,
+    #     with_indices: bool = False,
+    #     with_rank: bool = False,
+    #     input_columns: Optional[List[str]] = None,
+    #     batched: bool = False,
+    #     batch_size: Optional[int] = 1000,
+    #     drop_last_batch: bool = False,
+    #     remove_columns: Optional[List[str]] = None,
+    #     keep_in_memory: bool = False,
+    #     load_from_cache_file: bool = None,
+    #     cache_file_name: Optional[str] = None,
+    #     writer_batch_size: Optional[int] = 1000,
+    #     features: Optional[Features] = None,
+    #     disable_nullable: bool = False,
+    #     fn_kwargs: Optional[dict] = None,
+    #     new_fingerprint: Optional[str] = None,
+    #     rank: Optional[int] = None,
+    #     offset: int = 0,
+    #     disable_tqdm: bool = False,
+    #     desc: Optional[str] = None,
+    #     cache_only: bool = False,
+    # ) -> "Table":
+    #     """Apply a function to all the elements in the table (individually or in batches)
+    #     and update the table (if function does update examples).
+    # 
+    #     Args:
+    #         function (`Callable`): with one of the following signature:
+    #             - `function(example: Dict[str, Any]) -> Dict[str, Any]` if `batched=False` and `with_indices=False` and `with_rank=False`
+    #             - `function(example: Dict[str, Any], *extra_args) -> Dict[str, Any]` if `batched=False` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
+    #             - `function(batch: Dict[str, List]) -> Dict[str, List]` if `batched=True` and `with_indices=False` and `with_rank=False`
+    #             - `function(batch: Dict[str, List], *extra_args) -> Dict[str, List]` if `batched=True` and `with_indices=True` and/or `with_rank=True` (one extra arg for each)
+    # 
+    #             For advanced usage, the function can also return a `pyarrow.Table`.
+    #             Moreover if your function returns nothing (`None`), then `map` will run your function and return the dataset unchanged.
+    #             If no function is provided, default to identity function: lambda x: x
+    #         with_indices (`bool`, defaults to `False`): Provide example indices to `function`. Note that in this case the signature of `function` should be `def function(example, idx[, rank]): ...`.
+    #         with_rank (`bool`, default `False`): Provide process rank to `function`. Note that in this case the signature of `function` should be `def function(example[, idx], rank): ...`.
+    #         input_columns (`Optional[List[str]]`, defaults to `None`): The columns to be passed into `function` as
+    #             positional arguments. If `None`, a dict mapping to all formatted columns is passed as one argument.
+    #         batched (`bool`, defaults to `False`): Provide batch of examples to `function`
+    #         batch_size (`int`, optional, defaults to `1000`): Number of examples per batch provided to `function` if `batched=True`
+    #             `batch_size <= 0` or `batch_size == None`: Provide the full dataset as a single batch to `function`
+    #         drop_last_batch (`bool`, default: `False`): Whether a last batch smaller than the batch_size should be
+    #             dropped instead of being processed by the function.
+    #         remove_columns (`Optional[List[str]]`, defaults to `None`): Remove a selection of columns while doing the mapping.
+    #             Columns will be removed before updating the examples with the output of `function`, i.e. if `function` is adding
+    #             columns with names in `remove_columns`, these columns will be kept.
+    #         keep_in_memory (`bool`, defaults to `False`): Keep the dataset in memory instead of writing it to a cache file.
+    #         load_from_cache_file (`bool`, defaults to `True` if caching is enabled): If a cache file storing the current computation from `function`
+    #             can be identified, use it instead of recomputing.
+    #         cache_file_name (`str`, optional, defaults to `None`): Provide the name of a path for the cache file. It is used to store the
+    #             results of the computation instead of the automatically generated cache file name.
+    #         writer_batch_size (`int`, default `1000`): Number of rows per write operation for the cache file writer.
+    #             This value is a good trade-off between memory usage during the processing, and processing speed.
+    #             Higher value makes the processing do fewer lookups, lower value consume less temporary memory while running `.map()`.
+    #         features (`Optional[datasets.Features]`, defaults to `None`): Use a specific Features to store the cache file
+    #             instead of the automatically generated one.
+    #         disable_nullable (`bool`, defaults to `False`): Disallow null values in the table.
+    #         fn_kwargs (`Dict`, optional, defaults to `None`): Keyword arguments to be passed to `function`
+    #         new_fingerprint (`str`, optional, defaults to `None`): the new fingerprint of the dataset after transform.
+    #             If `None`, the new fingerprint is computed using a hash of the previous fingerprint, and the transform arguments
+    #         rank: (`int`, optional, defaults to `None`): If specified, this is the process rank when doing multiprocessing
+    #         offset: (`int`, defaults to 0): If specified, this is an offset applied to the indices passed to `function` if `with_indices=True`.
+    #         disable_tqdm (`bool`, defaults to `False`): Whether to silence tqdm's output.
+    #         desc (`str`, optional, defaults to `None`): Meaningful description to be displayed alongside with the progress bar while mapping examples.
+    #         cache_only (`bool`, defaults to `False`): Flag in order to notifiy the method will either find a cached dataset or raise `NonExistentDatasetError` exception,
+    #     """
+    #     from .formatting import format_table, get_format_type_from_alias, get_formatter, query_table
+    # 
+    #     # Reduce logging to keep things readable in multiprocessing with tqdm
+    #     if rank is not None and logging.get_verbosity() < logging.WARNING:
+    #         logging.set_verbosity_warning()
+    #     # Print at least one thing to fix tqdm in notebooks in multiprocessing
+    #     # see https://github.com/tqdm/tqdm/issues/485#issuecomment-473338308
+    #     if rank is not None and not disable_tqdm and any("notebook" in tqdm_cls.__name__ for tqdm_cls in tqdm.__mro__):
+    #         print(" ", end="", flush=True)
+    # 
+    #     if fn_kwargs is None:
+    #         fn_kwargs = {}
+    # 
+    #     # If we do batch computation but no batch size is provided, default to the full dataset
+    #     if batched and (batch_size is None or batch_size <= 0):
+    #         batch_size = self.num_rows
+    # 
+    #     # Check if we've already cached this computation (indexed by a hash)
+    #     if self.cache_files:
+    #         if cache_file_name is None:
+    #             # we create a unique hash from the function,
+    #             # current dataset file and the mapping args
+    #             cache_file_name = self._get_cache_file_path(new_fingerprint)
+    #         if os.path.exists(cache_file_name) and load_from_cache_file:
+    #             logger.warning(f"Loading cached processed dataset at {cache_file_name}")
+    #             info = self.info.copy()
+    #             info.features = features
+    #             info.task_templates = None
+    #             return Dataset.from_file(cache_file_name, info=info, split=self.split)
+    # 
+    #     # Raise an error if we were supposed to return a cached dataset and none was found
+    #     if cache_only:
+    #         raise NonExistentDatasetError
+    # 
+    #     # We set this variable to True after processing the first example/batch in
+    #     # `apply_function_on_filtered_inputs` if the map function returns a dict.
+    #     # If set to False, no new arrow table will be created
+    # 
+    #     update_data = None
+    # 
+    #     format_kwargs = self._format_kwargs.copy()
+    #     # Lazy formatting is only available for the default format (None/python)
+    #     if not input_columns and self._format_type is None:
+    #         format_kwargs["lazy"] = True
+    #     input_formatter = get_formatter(
+    #         self._format_type,
+    #         features=self.features,
+    #         **format_kwargs,
+    #     )
+    # 
+    #     class NumExamplesMismatchError(Exception):
+    #         pass
+    # 
+    #     def validate_function_output(processed_inputs, indices):
+    #         """Validate output of the map function."""
+    #         if processed_inputs is not None and not isinstance(processed_inputs, (Mapping, pa.Table)):
+    #             raise TypeError(
+    #                 f"Provided `function` which is applied to all elements of table returns a variable of type {type(processed_inputs)}. Make sure provided `function` returns a variable of type `dict` (or a pyarrow table) to update the dataset or `None` if you are only interested in side effects."
+    #             )
+    #         elif isinstance(indices, list) and isinstance(processed_inputs, Mapping):
+    #             allowed_batch_return_types = (list, np.ndarray, pd.Series)
+    #             if config.TF_AVAILABLE and "tensorflow" in sys.modules:
+    #                 import tensorflow as tf
+    # 
+    #                 allowed_batch_return_types += (tf.Tensor,)
+    #             if config.TORCH_AVAILABLE and "torch" in sys.modules:
+    #                 import torch
+    # 
+    #                 allowed_batch_return_types += (torch.Tensor,)
+    #             if config.JAX_AVAILABLE and "jax" in sys.modules:
+    #                 import jax.numpy as jnp
+    # 
+    #                 allowed_batch_return_types += (jnp.ndarray,)
+    #             all_dict_values_are_lists = all(
+    #                 isinstance(value, allowed_batch_return_types) for value in processed_inputs.values()
+    #             )
+    #             if all_dict_values_are_lists is False:
+    #                 raise TypeError(
+    #                     f"Provided `function` which is applied to all elements of table returns a `dict` of types {[type(x) for x in processed_inputs.values()]}. When using `batched=True`, make sure provided `function` returns a `dict` of types like `{allowed_batch_return_types}`."
+    #                 )
+    # 
+    #     def apply_function_on_filtered_inputs(pa_inputs, indices, check_same_num_examples=False, offset=0):
+    #         """Utility to apply the function on a selection of columns."""
+    #         nonlocal update_data
+    #         from .formatting import format_table, get_formatter, query_table
+    #         from .formatting.formatting import LazyDict, _is_range_contiguous
+    # 
+    # 
+    #         inputs = format_table(
+    #             pa_inputs,
+    #             0 if not batched else range(pa_inputs.num_rows),
+    #             format_columns=input_columns,
+    #             formatter=input_formatter,
+    #         )
+    #         fn_args = [inputs] if input_columns is None else [inputs[col] for col in input_columns]
+    #         if offset == 0:
+    #             effective_indices = indices
+    #         else:
+    #             effective_indices = [i + offset for i in indices] if isinstance(indices, list) else indices + offset
+    #         additional_args = ()
+    #         if with_indices:
+    #             additional_args += (effective_indices,)
+    #         if with_rank:
+    #             additional_args += (rank,)
+    #         processed_inputs = function(*fn_args, *additional_args, **fn_kwargs)
+    #         if isinstance(processed_inputs, LazyDict):
+    #             processed_inputs = {
+    #                 k: v for k, v in processed_inputs.data.items() if k not in processed_inputs.keys_to_format
+    #             }
+    #             returned_lazy_dict = True
+    #         else:
+    #             returned_lazy_dict = False
+    #         if update_data is None:
+    #             # Check if the function returns updated examples
+    #             update_data = isinstance(processed_inputs, (Mapping, pa.Table))
+    #             validate_function_output(processed_inputs, indices)
+    #         if not update_data:
+    #             return None  # Nothing to update, let's move on
+    #         if self._format_type or input_columns:
+    #             # TODO(QL, MS): ideally the behavior should be the same even if the dataset is formatted (may require major release)
+    #             inputs_to_merge = {k: v for k, v in zip(pa_inputs.column_names, pa_inputs.itercolumns())}
+    #         elif isinstance(inputs, LazyDict):
+    #             inputs_to_merge = {
+    #                 k: (v if k not in inputs.keys_to_format else pa_inputs[k]) for k, v in inputs.data.items()
+    #             }
+    #         else:
+    #             inputs_to_merge = inputs
+    #         if remove_columns is not None:
+    #             for column in remove_columns:
+    #                 # `function` can modify input in-place causing column to be already removed.
+    #                 if column in inputs_to_merge:
+    #                     inputs_to_merge.pop(column)
+    #                 if returned_lazy_dict and column in processed_inputs:
+    #                     processed_inputs.pop(column)
+    #         if check_same_num_examples:
+    #             input_num_examples = len(pa_inputs)
+    #             processed_inputs_num_examples = len(processed_inputs[next(iter(processed_inputs.keys()))])
+    #             if input_num_examples != processed_inputs_num_examples:
+    #                 raise NumExamplesMismatchError()
+    #         if isinstance(inputs, Mapping) and isinstance(processed_inputs, Mapping):
+    #             # The .map() transform *updates* the dataset:
+    #             # the output dictionary contains both the the input data and the output data.
+    #             # The output dictionary may contain Arrow values from `inputs_to_merge` so that we can re-write them efficiently.
+    #             return {**inputs_to_merge, **processed_inputs}
+    #         else:
+    #             return processed_inputs
+    # 
+    #     def init_buffer_and_writer():
+    #         from .arrow_reader import ArrowReader
+    #         from .arrow_writer import ArrowWriter, OptimizedTypedSequence
+    #         # Prepare output buffer and batched writer in memory or on file if we update the table
+    #         writer_features = features
+    #         if writer_features is None:
+    #             writer_features = self.renew_features()
+    #             update_features = True
+    #         else:
+    #             update_features = False
+    #         if keep_in_memory or cache_file_name is None:
+    #             buf_writer = pa.BufferOutputStream()
+    #             tmp_file = None
+    #             writer = ArrowWriter(
+    #                 features=writer_features,
+    #                 stream=buf_writer,
+    #                 writer_batch_size=writer_batch_size,
+    #                 update_features=update_features,
+    #                 fingerprint=new_fingerprint,
+    #                 disable_nullable=disable_nullable,
+    #             )
+    #         else:
+    #             buf_writer = None
+    #             logger.info(f"Caching processed dataset at {cache_file_name}")
+    #             tmp_file = tempfile.NamedTemporaryFile("wb", dir=os.path.dirname(cache_file_name), delete=False)
+    #             writer = ArrowWriter(
+    #                 features=writer_features,
+    #                 path=tmp_file.name,
+    #                 writer_batch_size=writer_batch_size,
+    #                 update_features=update_features,
+    #                 fingerprint=new_fingerprint,
+    #                 disable_nullable=disable_nullable,
+    #             )
+    #         return buf_writer, writer, tmp_file
+    # 
+    #     # If `update_data` is True after processing the first example/batch, initalize these resources with `init_buffer_and_writer`
+    #     buf_writer, writer, tmp_file = None, None, None
+    # 
+    #     # Optionally initialize the writer as a context manager
+    #     with contextlib.ExitStack() as stack:
+    #         try:
+    #             input_dataset = self.with_format("arrow")
+    # 
+    #             # Loop over single examples or batches and write to buffer/file if examples are to be updated
+    #             if not batched:
+    #                 pbar_total = len(input_dataset)
+    #                 pbar_iterable = enumerate(input_dataset)
+    #             else:
+    #                 num_rows = (
+    #                     len(input_dataset) if not drop_last_batch else len(input_dataset) // batch_size * batch_size
+    #                 )
+    #                 pbar_total = (num_rows // batch_size) + 1 if num_rows % batch_size else num_rows // batch_size
+    #                 pbar_iterable = zip(
+    #                     range(0, num_rows, batch_size),
+    #                     input_dataset.iter(batch_size, drop_last_batch=drop_last_batch),
+    #                 )
+    #             pbar_unit = "ex" if not batched else "ba"
+    #             pbar_desc = (desc + " " if desc is not None else "") + "#" + str(rank) if rank is not None else desc
+    #             pbar = logging.tqdm(
+    #                 pbar_iterable,
+    #                 total=pbar_total,
+    #                 disable=disable_tqdm,
+    #                 position=rank,
+    #                 unit=pbar_unit,
+    #                 desc=pbar_desc,
+    #             )
+    #             if not batched:
+    #                 for i, example in pbar:
+    #                     example = apply_function_on_filtered_inputs(example, i, offset=offset)
+    #                     if update_data:
+    #                         if i == 0:
+    #                             buf_writer, writer, tmp_file = init_buffer_and_writer()
+    #                             stack.enter_context(writer)
+    #                         if isinstance(example, pa.Table):
+    #                             writer.write_row(example)
+    #                         else:
+    #                             writer.write(example)
+    #             else:
+    #                 for i, batch in pbar:
+    #                     indices = list(
+    #                         range(*(slice(i, i + batch_size).indices(input_dataset.num_rows)))
+    #                     )  # Something simpler?
+    #                     try:
+    #                         batch = apply_function_on_filtered_inputs(
+    #                             batch,
+    #                             indices,
+    #                             check_same_num_examples=len(input_dataset.list_indexes()) > 0,
+    #                             offset=offset,
+    #                         )
+    #                     except NumExamplesMismatchError:
+    #                         raise DatasetTransformationNotAllowedError(
+    #                             "Using `.map` in batched mode on a dataset with attached indexes is allowed only if it doesn't create or remove existing examples. You can first run `.drop_index() to remove your index and then re-add it."
+    #                         ) from None
+    #                     if update_data:
+    #                         if i == 0:
+    #                             buf_writer, writer, tmp_file = init_buffer_and_writer()
+    #                             stack.enter_context(writer)
+    #                         if isinstance(batch, pa.Table):
+    #                             writer.write_table(batch)
+    #                         else:
+    #                             writer.write_batch(batch)
+    #             if update_data and writer is not None:
+    #                 writer.finalize()  # close_stream=bool(buf_writer is None))  # We only close if we are writing in a file
+    #         except (Exception, KeyboardInterrupt):
+    #             if update_data:
+    #                 if writer is not None:
+    #                     writer.finalize()
+    #                 if tmp_file is not None:
+    #                     tmp_file.close()
+    #                     if os.path.exists(tmp_file.name):
+    #                         os.remove(tmp_file.name)
+    #             raise
+    # 
+    #     if update_data and tmp_file is not None:
+    #         tmp_file.close()
+    #         shutil.move(tmp_file.name, cache_file_name)
+    #         umask = os.umask(0o666)
+    #         os.umask(umask)
+    #         os.chmod(cache_file_name, 0o666 & ~umask)
+    # 
+    #     if update_data:
+    #         if buf_writer is None:
+    #             return Dataset.from_file(cache_file_name)
+    #         else:
+    #             return Dataset.from_buffer(buf_writer.getvalue())
+    #     else:
+    #         return self
+    # 
+    # 
+    # def shard(self,num_shards: int,index: int) -> "Table":
+    #     if not 0 <= index < num_shards:
+    #         raise ValueError("index should be in [0, num_shards-1]")
+    # 
+    #     div = len(self) // num_shards
+    #     mod = len(self) % num_shards
+    #     start = div * index + min(index, mod)
+    #     end = start + div + (1 if index < mod else 0)
+    # 
+    #     return self.slice(start,end)
 
 
 # The MemoryMappedTable needs replays to properly reload tables from the disk
