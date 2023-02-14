@@ -15,7 +15,7 @@ import threading
 import logging
 
 class K8s():
-    # @pysnooper.snoop()
+
     def __init__(self,file_path=None):  # kubeconfig
         kubeconfig = os.getenv('KUBECONFIG','')
         if file_path and os.path.exists(file_path) and ''.join(open(file_path).readlines()).strip():
@@ -208,30 +208,35 @@ class K8s():
         return node
 
     def get_all_node_allocated_resources(self):
-        pods = self.v1.list_pod_for_all_namespaces(watch=False).items
-        nodes_resource = {
-        }
-        for pod in pods:
-            containers = pod.spec.containers
-            memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
-            cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
-            gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
-            vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
-            node_name = pod.spec.node_name
-            if node_name not in nodes_resource:
-                nodes_resource[node_name]={
-                    "used_memory":0,
-                    "used_cpu":0,
-                    "used_gpu":0
-                }
-            nodes_resource[node_name]['used_memory'] += sum(memory)
-            nodes_resource[node_name]['used_cpu'] += sum(cpu)
-            nodes_resource[node_name]['used_gpu'] += sum(gpu) + sum(vgpu)
-        for node_name in nodes_resource:
-            node_resource = nodes_resource[node_name]
-            node_resource['used_memory'] = int(node_resource['used_memory'])
-            node_resource['used_cpu'] = int(node_resource['used_cpu'])
-            node_resource['used_gpu'] = round(node_resource['used_gpu'], 1)
+        nodes_resource = {}
+        try:
+            pods = self.v1.list_pod_for_all_namespaces(watch=False).items
+
+            for pod in pods:
+                containers = pod.spec.containers
+                memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
+                cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
+                gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
+                vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
+                node_name = pod.spec.node_name
+                if node_name not in nodes_resource:
+                    nodes_resource[node_name]={
+                        "used_memory":0,
+                        "used_cpu":0,
+                        "used_gpu":0
+                    }
+                nodes_resource[node_name]['used_memory'] += sum(memory)
+                nodes_resource[node_name]['used_cpu'] += sum(cpu)
+                nodes_resource[node_name]['used_gpu'] += sum(gpu) + sum(vgpu)
+            for node_name in nodes_resource:
+                node_resource = nodes_resource[node_name]
+                node_resource['used_memory'] = int(node_resource['used_memory'])
+                node_resource['used_cpu'] = int(node_resource['used_cpu'])
+                node_resource['used_gpu'] = round(node_resource['used_gpu'], 1)
+
+        except Exception as e:
+            print(e)
+
         return nodes_resource
 
 

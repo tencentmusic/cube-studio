@@ -383,8 +383,7 @@ class Notebook_ModelView_Base():
             k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
             time.sleep(1)
 
-
-        host = notebook.project.cluster.get('JUPYTER_DOMAIN',request.host)
+        host = notebook.project.cluster.get('HOST',request.host)
         if not host:
             host=request.host
         if ':' in host:

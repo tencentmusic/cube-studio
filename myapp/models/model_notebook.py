@@ -60,7 +60,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
                 url = "/notebook/"+self.namespace + "/" + self.name+"/lab?#"+self.mount
 
         # url= url + "#"+self.mount
-        JUPYTER_DOMAIN = self.project.cluster.get('JUPYTER_DOMAIN',request.host)
+        JUPYTER_DOMAIN = self.project.cluster.get('HOST',request.host)
         if JUPYTER_DOMAIN:
             host = "http://"+JUPYTER_DOMAIN
         else:

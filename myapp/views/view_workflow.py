@@ -592,7 +592,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             print(e)
 
 
-        host = conf.get("CLUSTERS",{}).get(cluster_name,{}).get("JUPYTER_DOMAIN",'')
+        host = conf.get("CLUSTERS",{}).get(cluster_name,{}).get("HOST",'')
         if not host:
             host_url=request.host_url.rstrip("/")
         else:
