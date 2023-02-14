@@ -6,6 +6,7 @@ from cryptography.fernet import Fernet
 from cubestudio.request.model import Model
 from cubestudio.request.model_client import Client,init
 from cubestudio.dataset.dataset import Dataset
+from cubestudio.dataset.table import InMemoryTable
 from cubestudio.dataset.features import Image,Audio,ClassLabel
 import pyarrow.compute as pc
 import pyarrow as pa
@@ -15,13 +16,6 @@ from pandarallel import pandarallel
 # Initialization
 pandarallel.initialize(nb_workers=10)
 
-def test(item):
-    print('11111')
-    # print(item)
-    # print(type(item))
-    # print(item['audio'])
-    # print(item['num'])
-    time.sleep(1)
 
 if __name__=="__main__":
     HOST = "http://host.docker.internal:80"
@@ -44,6 +38,10 @@ if __name__=="__main__":
     dataset.load(save_dir)
     # print(dataset.features)
     table = dataset.table
+
+    # 读取基础属性
+    # print(table.info)
+    # print(table.features)
 
     # dataset索引，会decode_example
     # print(dataset[1])
@@ -79,34 +77,33 @@ if __name__=="__main__":
     # table = table.concat_table(table)
     # table = table.flatten()
 
-    # todo 实现map函数
-
-    # print(table.info)
-    # print(table.features)
-
-    # print(table)
-
     # 列的的计算操作
     # col = table['num']
     # print(pc.mean(col))
     # print(pc.min_max(col))
     # print(pc.value_counts(col))
 
-    # 列的变换
+    # 列的类型变换
     # table = table.cast_column("audio", Audio(sampling_rate=16000，decode=True))
     # table = table.cast_column("image", Image())
-    # print(table.slice(1,2))
-    df = table.to_pandas()
-    df.parallel_apply(test,axis=1)
-    def prepare_dataset(batch):
-        audio = batch["audio"]
-        batch["input_values"] = processor(audio["array"], sampling_rate=audio["sampling_rate"]).input_values[0]
-        batch["input_length"] = len(batch["input_values"])
-        with processor.as_target_processor():
-            batch["labels"] = processor(batch["sentence"]).input_ids
-        return batch
 
-    dataset = dataset.map(prepare_dataset, remove_columns=dataset.column_names)
+    # # table/dataframe类型转换
+    # df = table.to_pandas()   # feature元信息丢失
+    # table = InMemoryTable(pa.Table.from_pandas(df),features=table.features)
+    # print(table.features)
+
+    # todo 实现map函数
+    # 通过pandas apply实现并行
+    # df = table.to_pandas()
+    # sub_df = df.parallel_apply(lambda item:item["num"]+1,axis=1)
+    # print(sub_df)
+
+    # def prepare_dataset(batch):
+    #     audio = batch["audio"]
+    #     print(audio)
+    #     return batch
+    #
+    # table = table.map(prepare_dataset, remove_columns=table.column_names)
 
 
 

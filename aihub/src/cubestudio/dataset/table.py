@@ -6,15 +6,16 @@ from functools import partial
 from itertools import groupby
 from typing import TYPE_CHECKING, Callable, Iterator, List, Optional, Tuple, TypeVar, Union
 import pysnooper
-import numpy as np
 import shutil
 import contextlib
-import pyarrow as pa
 import pyarrow.compute as pc
 from collections import Counter
 from collections.abc import Mapping
 import json,sys,io
 from multiprocess import Pool, RLock
+import numpy as np
+import pandas as pd
+import pyarrow as pa
 
 from tqdm.auto import tqdm
 from typing import (
@@ -34,7 +35,7 @@ from typing import (
 from . import config
 from .utils import logging
 from .utils.logging import get_logger
-
+from .formatting import format_table, get_format_type_from_alias, get_formatter, query_table
 
 # if TYPE_CHECKING:
 from .features.features import Features, FeatureType
@@ -1141,10 +1142,47 @@ class InMemoryTable(TableBlock):
 
         if type(key)==tuple and len(key)>0:
             if type(key[0])==str:
-                return self.table.select(list(key))  # 索引多列
+                return self.select(list(key))  # 索引多列
             if type(key[0])==int and len(key)==2:  # 索引多行
                 return self.table.slice(*key)
 
+    # @pysnooper.snoop()
+    # 索引数据的时候，进行decode_example的调用。
+    def _getitem(self, key: Union[int, slice, str], **kwargs) -> Union[Dict, List]:
+        from .formatting import format_table, get_formatter, query_table
+        formatter = get_formatter(None, features=self.features)
+        pa_subtable = query_table(self.table, key, None)
+        formatted_output = format_table(
+            pa_subtable, key, formatter=formatter, format_columns=None, output_all_columns=False
+        )
+        return formatted_output
+
+    def __iter__(self):
+        """Iterate through the examples.
+
+        If a formatting is set with :meth:`Dataset.set_format` rows will be returned with the
+        selected format.
+        """
+        format_kwargs = {}
+        self._format_type=None
+        formatter = get_formatter(self._format_type, features=self.features, **format_kwargs)
+        batch_size = config.ARROW_READER_BATCH_SIZE_IN_DATASET_ITER
+        for pa_subtable in table_iter(self, batch_size=batch_size):
+            for i in range(pa_subtable.num_rows):
+                pa_subtable_ex = pa_subtable.slice(i, 1)
+                formatted_output = format_table(
+                    pa_subtable_ex,
+                    0,
+                    formatter=formatter,
+                    format_columns=self._format_columns,
+                    output_all_columns=self._output_all_columns,
+                )
+                yield formatted_output
+        else:
+            for i in range(self.num_rows):
+                yield self._getitem(
+                    i,
+                )
 
 
     @pysnooper.snoop()
@@ -1501,7 +1539,7 @@ class InMemoryTable(TableBlock):
             cache_only (`bool`, defaults to `False`): Flag in order to notifiy the method will either find a cached dataset or raise `NonExistentDatasetError` exception,
         """
 
-        from .formatting import format_table, get_format_type_from_alias, get_formatter, query_table
+
 
         # Reduce logging to keep things readable in multiprocessing with tqdm
         if rank is not None and logging.get_verbosity() < logging.WARNING:
@@ -1527,6 +1565,9 @@ class InMemoryTable(TableBlock):
         # If set to False, no new arrow table will be created
 
         update_data = None
+
+        self._format_kwargs={}
+        self._format_type=None
 
         format_kwargs = self._format_kwargs.copy()
         # Lazy formatting is only available for the default format (None/python)
@@ -1676,8 +1717,8 @@ class InMemoryTable(TableBlock):
         # Optionally initialize the writer as a context manager
         with contextlib.ExitStack() as stack:
             try:
-                input_dataset = self.with_format("arrow")
-
+                # input_dataset = self.with_format("arrow")
+                input_dataset=self
                 # Loop over single examples or batches and write to buffer/file if examples are to be updated
                 if not batched:
                     pbar_total = len(input_dataset)

@@ -142,20 +142,9 @@ class Dataset(Model):
     def save_cloud_storage(self):
         pass
 
-    # @pysnooper.snoop()
-    # 索引数据的时候，进行decode_example的调用。
-    def _getitem(self, key: Union[int, slice, str], **kwargs) -> Union[Dict, List]:
-        from .formatting import format_table, get_formatter, query_table
-        formatter = get_formatter(None, features=self.table.features)
-        pa_subtable = query_table(self.table, key, None)
-        formatted_output = format_table(
-            pa_subtable, key, formatter=formatter, format_columns=None, output_all_columns=False
-        )
-        return formatted_output
-
     def __getitem__(self, key):
         """Can be used to index columns (by string names) or rows (by integer index or iterable of indices or bools)."""
-        return self._getitem(
+        return self.table._getitem(
             key,
         )
 
