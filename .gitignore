@@ -16,4 +16,3 @@ myapp/test
 /sdk/dist/
 /install/docker/data/
 /aihub/src/cubestudio/aihub/web/frontend/node_modules
-/myapp/project.py

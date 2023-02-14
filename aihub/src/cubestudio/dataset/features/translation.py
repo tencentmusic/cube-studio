@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Union
 
 import pyarrow as pa
 
-
 if TYPE_CHECKING:
     from .features import FeatureType
 

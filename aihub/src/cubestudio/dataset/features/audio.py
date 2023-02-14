@@ -10,7 +10,7 @@ from packaging import version
 
 from .. import config
 from ..download.streaming_download_manager import xopen
-from ..table import array_cast
+from ..core import array_cast
 from ..utils.py_utils import no_op_if_value_is_null, string_to_dict
 import pysnooper
 

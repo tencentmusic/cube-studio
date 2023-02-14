@@ -148,7 +148,7 @@ PY7ZR_AVAILABLE = importlib.util.find_spec("py7zr") is not None
 # Cache location
 DEFAULT_XDG_CACHE_HOME = "~/.cache"
 XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME", DEFAULT_XDG_CACHE_HOME)
-DEFAULT_HF_CACHE_HOME = os.path.join(XDG_CACHE_HOME, "huggingface")
+DEFAULT_HF_CACHE_HOME = os.path.join(XDG_CACHE_HOME, "cube-studio")
 HF_CACHE_HOME = os.path.expanduser(os.getenv("HF_HOME", DEFAULT_HF_CACHE_HOME))
 
 DEFAULT_HF_DATASETS_CACHE = os.path.join(HF_CACHE_HOME, "datasets")

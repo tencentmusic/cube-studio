@@ -146,7 +146,7 @@ class Dataset(Model):
     # 索引数据的时候，进行decode_example的调用。
     def _getitem(self, key: Union[int, slice, str], **kwargs) -> Union[Dict, List]:
         from .formatting import format_table, get_formatter, query_table
-        formatter = get_formatter(None, features=self.table.renew_features())
+        formatter = get_formatter(None, features=self.table.features)
         pa_subtable = query_table(self.table, key, None)
         formatted_output = format_table(
             pa_subtable, key, formatter=formatter, format_columns=None, output_all_columns=False
@@ -158,7 +158,6 @@ class Dataset(Model):
         return self._getitem(
             key,
         )
-
 
     # table的函数
     # columns,num_columns，num_rows，column_names，shape,drop(col),rename_column(col),rename_columns(cols),filter,select,sort,shard,add_column,add_item
