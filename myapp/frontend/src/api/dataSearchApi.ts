@@ -3,11 +3,8 @@ import axios, { AxiosResFormat } from '.'
 import { TTaskStatus } from '../pages/DataSearch/interface'
 
 export const actionRun = (params: {
-    tdw_app_group: string,
     sql: string,
-    dbs?: string,
-    tables?: string
-    biz?: string
+    [key: string]: any
 }): Promise<AxiosResponse<{
     err_msg: string
     log_url: string
@@ -72,4 +69,30 @@ export const getIndexResourceOverview = (group_id: string): Promise<AxiosRespons
     result: Array<Array<string | number>>
 }>> => {
     return axios.get(`/idex/get_resource/${group_id}`)
+}
+
+export interface IIdexFormConfigItem {
+    id: string,
+    label: string,
+    type: 'input' | 'select' | 'input-select',
+    value: IIdexFormConfigOption[]
+    defaultValue: string
+    multiple: boolean
+    disable: boolean
+    placeHolder: string
+}
+
+export interface IIdexFormConfigOption {
+    label: string
+    value: string
+    relate: {
+        relateId: string
+        value: IIdexFormConfigOption[]
+    }
+}
+
+export const getIdexFormConfig = (): Promise<AxiosResponse<{
+    result: IIdexFormConfigItem[]
+}>> => {
+    return axios.get(`/idex/config`)
 }

@@ -39,15 +39,12 @@ export interface IEditorItem {
     status: TTaskStatus
     taskMap: Record<string, IEditorTaskItem>
     content?: string
-    appGroup: string
-    database?: string
-    table?: string
-    biz?: string
     smartContent?: string
     smartTimer?: any
     smartShow?: boolean
     loading?: boolean
     smartCache?: string
+    [key: string]: any
 }
 
 export interface IEditorItemParams {
