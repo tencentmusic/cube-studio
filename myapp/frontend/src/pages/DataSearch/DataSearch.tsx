@@ -1,7 +1,7 @@
 import Icon, { ExclamationCircleOutlined, MenuOutlined, ReloadOutlined, RightCircleOutlined, SaveOutlined, SlidersOutlined, StarOutlined, StopOutlined } from '@ant-design/icons';
 import { Button, Drawer, message, Modal, Select, Switch, Tabs, Tooltip } from 'antd'
 import React, { useEffect, useRef, useState } from 'react'
-import { actionGetDataSearchRes, actionRun } from '../../api/dataSearchApi';
+import { actionGetDataSearchRes, actionRun, getIdexFormConfig } from '../../api/dataSearchApi';
 import CodeEdit from '../../components/CodeEdit'
 import InputSearch from '../../components/InputSearch/InputSearch';
 import Draggable from 'react-draggable';
@@ -13,6 +13,7 @@ import { data2Time } from '../../util';
 // import LineChartTemplate from '../../components/LineChartTemplate/LineChartTemplate';
 import LoadingStar from '../../components/LoadingStar/LoadingStar';
 import cookies from 'js-cookie';
+import ConfigFormData, { IConfigFormDataOptionItem } from './ConfigFormData';
 const userName = cookies.get('myapp_username')
 
 const createId = () => {
@@ -81,8 +82,6 @@ export default function DataSearch() {
         tabId: initId,
         title: '新查询 1',
         status: 'init',
-        appGroup: '',
-        biz: 'your',
         smartShow: false,
         smartContent: '',
         smartCache: '',
@@ -109,12 +108,21 @@ export default function DataSearch() {
         _seteditorStore(data);
     };
 
+    const [configOption, _setConfigOption] = useState<IConfigFormDataOptionItem[]>([])
+    const configOptionRef = useRef(configOption);
+    const setConfigOption = (data: IConfigFormDataOptionItem[]): void => {
+        configOptionRef.current = data;
+        _setConfigOption(data);
+    };
+
     const initialPanes = Object.entries(editorStore).reduce((pre: IEditorItem[], [key, value]) => ([...pre, { ...value }]), [])
     const [panes, setPanes] = useState(initialPanes);
     const newTabIndex = useRef(initEditorDataList.length);
 
     const [columnConfig, setColumnConfig] = useState<any[]>([])
     const [dataList, setDataList] = useState<any[]>([])
+
+    const configDataComponentRefs: any = useRef(null);
 
     const setEditorState = (currentState: IEditorItemParams, key?: string) => {
 
@@ -142,6 +150,13 @@ export default function DataSearch() {
         editorStoreRef.current = targetRes
         seteditorStore(targetRes)
     }
+
+    useEffect(() => {
+        getIdexFormConfig().then(res => {
+            const option = res.data.result
+            setConfigOption(option)
+        })
+    }, [])
 
     useEffect(() => {
         const targetDom = document.getElementById("buttonDrag")
@@ -267,13 +282,11 @@ export default function DataSearch() {
                 title,
                 tabId: newActiveKey,
                 status: 'init',
-                appGroup: '',
-                biz: 'your',
                 smartShow: false,
                 smartContent: '',
                 smartTimer: undefined,
-                loading: false,
                 smartCache: '',
+                loading: false,
                 taskMap: {}
             }
             newPanes.push(initState);
@@ -400,13 +413,11 @@ export default function DataSearch() {
     const runTask = () => {
         if (editorStore[activeKey].appGroup) {
             setEditorState({ status: 'running' })
+            const customParams = configOption.map(item => item.id).reduce((pre: any, next: any) => ({ ...pre, [next]: editorStore[activeKey][next] }), {})
             // 运行子任务
             actionRun({
-                tdw_app_group: editorStore[activeKey].appGroup,
                 sql: editorStore[activeKey]?.content || '',
-                dbs: editorStore[activeKey]?.database || '',
-                tables: editorStore[activeKey]?.table || '',
-                biz: editorStore[activeKey]?.biz || '',
+                ...customParams
             }).then(res => {
                 const { err_msg, task_id } = res.data
                 if (err_msg) {
@@ -529,23 +540,23 @@ export default function DataSearch() {
                                             }
                                         </div>
                                         <div className="d-f ac">
-                                            {/* <span className="pl16">集群：</span>
-                                            <Select
-                                                value={editorStore[activeKey].biz}
-                                                onChange={(value) => {
-                                                    setEditorState({ biz: value })
-                                                }} options={[]} placeholder="选择集群" style={{ width: 200 }} />
-
-                                            <span className="pl16">应用组：</span>
-                                            <InputSearch
-                                                value={editorStore[activeKey].appGroup}
-                                                isOpenSearchMatch
-                                                onChange={(value) => {
-                                                    setEditorState({ appGroup: value })
-                                                    // setAppGroup(value)
-                                                }} options={['test']} placeholder="应用组" width={'400px'} /> */}
+                                            <ConfigFormData
+                                                ref={configDataComponentRefs}
+                                                dataValue={editorStore[activeKey]}
+                                                onChange={(dataValue) => {
+                                                    setEditorState(dataValue)
+                                                }}
+                                                onConfigChange={(option) => {
+                                                    setConfigOption(option)
+                                                    setEditorState({
+                                                        database: 'db'
+                                                    })
+                                                }}
+                                                option={configOptionRef.current} />
                                             <Button className="ml16" type="primary" loading={editorStore[activeKey].status === 'running'} onClick={() => {
-                                                runTask()
+                                                configDataComponentRefs.current.onSubmit().then((res: any) => {
+                                                    runTask()
+                                                })
                                             }}>运行<RightCircleOutlined /></Button>
                                         </div>
                                     </div>
