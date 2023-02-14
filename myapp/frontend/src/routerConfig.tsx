@@ -86,15 +86,15 @@ export const securitySettingConfig: IRouterConfigPlusItem[] = [
 ]
 
 export const innerDynamicRouterConfig: IRouterConfigPlusItem[] = [
-    // {
-    //     path: '/xxx',
-    //     title: 'xxx',
-    //     key: 'xxx',
-    //     icon: '',
-    //     menu_type: 'innerRouter',
-    //     isCollapsed: true,
-    //     element: lazy2Compont(() => import("./pages/xxx"))
-    // },
+    {
+        path: '/dataSearch',
+        title: '数据查询',
+        key: 'data_search',
+        icon: '',
+        menu_type: 'innerRouter',
+        isCollapsed: true,
+        element: lazy2Compont(() => import("./pages/DataSearch/DataSearch"))
+    },
 ]
 
 const innerDynamicRouterConfigMap = innerDynamicRouterConfig.reduce((pre, next) => ({
@@ -108,11 +108,11 @@ export const routerConfigPlus: IRouterConfigPlusItem[] = [
         index: true,
         element: lazy2Compont(() => import("./pages/IframeTemplate"), { url: '/myapp/home' })
     },
-    {
-        path: '/dataSearch',
-        index: true,
-        element: lazy2Compont(() => import("./pages/DataSearch/DataSearch"))
-    },
+    // {
+    //     path: '/dataSearch',
+    //     index: true,
+    //     element: lazy2Compont(() => import("./pages/DataSearch/DataSearch"))
+    // },
     {
         path: '/showData',
         title: '数据展示',
