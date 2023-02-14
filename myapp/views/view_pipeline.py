@@ -3,6 +3,7 @@ from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import uuid
 import urllib.parse
+from sqlalchemy.exc import InvalidRequestError
 
 from myapp.models.model_job import Task,Pipeline,Workflow, RunHistory
 from myapp.models.model_team import Project
@@ -40,6 +41,7 @@ from flask import (
 from myapp import security_manager
 from myapp.views.view_team import filter_join_org_project
 import kfp
+import pysnooper
 from kubernetes import client
 from .base import (
     DeleteMixin,
@@ -574,7 +576,7 @@ class Pipeline_ModelView_Base():
     cols_width={
         "id":{"type": "ellip2", "width": 100},
         "project": {"type": "ellip2", "width": 200},
-        "pipeline_url":{"type": "ellip2", "width": 500},
+        "pipeline_url":{"type": "ellip2", "width": 400},
         "modified": {"type": "ellip2", "width": 150}
     }
     add_columns = ['project','name','describe']
@@ -697,6 +699,43 @@ class Pipeline_ModelView_Base():
 
 
     related_views = [Task_ModelView, ]
+
+    def delete_task_run(self,task):
+        from myapp.utils.py.py_k8s import K8s
+        k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG',''))
+        namespace = conf.get('PIPELINE_NAMESPACE')
+        # 删除运行时容器
+        pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
+        pod_name = pod_name.lower()[:60].strip('-')
+        pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
+        # print(pod)
+        if pod:
+            pod = pod[0]
+        # 有历史，直接删除
+        if pod:
+            k8s_client.delete_pods(namespace=namespace,pod_name=pod['name'])
+            run_id = pod['labels'].get('run-id', '')
+            if run_id:
+                k8s_client.delete_workflow(all_crd_info = conf.get("CRD_INFO", {}), namespace=namespace,run_id=run_id)
+                k8s_client.delete_pods(namespace=namespace, labels={"run-id": run_id})
+                time.sleep(2)
+
+
+        # 删除debug容器
+        pod_name = "debug-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
+        pod_name = pod_name.lower()[:60].strip('-')
+        pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
+        # print(pod)
+        if pod:
+            pod = pod[0]
+        # 有历史，直接删除
+        if pod:
+            k8s_client.delete_pods(namespace=namespace, pod_name=pod['name'])
+            run_id = pod['labels'].get('run-id','')
+            if run_id:
+                k8s_client.delete_workflow(all_crd_info = conf.get("CRD_INFO", {}), namespace=namespace,run_id=run_id)
+                k8s_client.delete_pods(namespace=namespace, labels={"run-id":run_id})
+                time.sleep(2)
 
 
     # 检测是否具有编辑权限，只有creator和admin可以编辑
@@ -835,12 +874,13 @@ class Pipeline_ModelView_Base():
                     flash('无法保障公共集群的稳定性，定时任务请选择专门的日更集群项目组','warning')
 
 
-    def pre_update_get(self,item):
+    def pre_update_web(self,item):
         item.dag_json = item.fix_dag_json()
         item.expand = json.dumps(item.fix_expand(),indent=4,ensure_ascii=False)
         db.session.commit()
 
-    # 删除前先把下面的task删除了
+
+    # 删除前先把下面的task删除了，把里面的运行实例也删除了
     # @pysnooper.snoop()
     def pre_delete(self, pipeline):
         tasks = pipeline.get_tasks()
@@ -853,6 +893,14 @@ class Pipeline_ModelView_Base():
         pipeline.expand=""
         pipeline.dag_json="{}"
         db.session.commit()
+
+        back_crds = pipeline.get_workflow()
+        self.delete_bind_crd(back_crds)
+
+        # 删除task启动的所有实例
+        for task in tasks:
+            self.delete_task_run(task)
+
 
 
     @expose("/my/list/")
@@ -942,14 +990,17 @@ class Pipeline_ModelView_Base():
         return wraps
 
 
-    # # @event_logger.log_this
+    # @event_logger.log_this
     @expose("/run_pipeline/<pipeline_id>", methods=["GET", "POST"])
     @check_pipeline_perms
     def run_pipeline(self,pipeline_id):
         print(pipeline_id)
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
-
         pipeline.delete_old_task()
+        tasks = db.session.query(Task).filter_by(pipeline_id=pipeline_id).all()
+        if not tasks:
+            flash('no task', 'warning')
+            return redirect('/pipeline_modelview/web/%s' % pipeline.id)
 
         time.sleep(1)
         back_crds = pipeline.get_workflow()
@@ -982,6 +1033,13 @@ class Pipeline_ModelView_Base():
         # 这里直接删除所有的历史任务流，正在运行的也删除掉
         # not_running_crds = back_crds  # [crd for crd in back_crds if 'running' not in crd['status'].lower()]
         self.delete_bind_crd(back_crds)
+
+
+
+        # 删除task启动的所有实例
+        for task in tasks:
+            self.delete_task_run(task)
+
 
         # running_crds = [1 for crd in back_crds if 'running' in crd['status'].lower()]
         # if len(running_crds)>0:
@@ -1075,10 +1133,10 @@ class Pipeline_ModelView_Base():
     def web_monitoring(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
         if pipeline.run_id:
-            url = pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
+            url = pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
             return redirect(url)
             # data = {
-            #     "url": pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH') + pipeline.name,
+            #     "url": pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH') + pipeline.name,
             #     # "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
             #     "delay":1000,
             #     "loading": True
@@ -1214,7 +1272,7 @@ class Pipeline_ModelView_Api(Pipeline_ModelView_Base,MyappModelRestApi):
 
     related_views = [Task_ModelView_Api,]
 
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.default_filter = {
             "created_by": g.user.id
         }

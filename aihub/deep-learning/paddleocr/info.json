@@ -1,0 +1,22 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/paddleocr",
+    "field": "机器视觉",
+    "scenes": "图像识别",
+    "type": "dateset,notebook,train,inference",
+    "name": "paddleocr",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "paddleocr-v20221001",
+    "label": "ocr识别",
+    "describe": "paddleocr提供的ocr识别",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {}
+}

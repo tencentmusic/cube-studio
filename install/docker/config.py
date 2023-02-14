@@ -246,9 +246,6 @@ MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")
 # not the production version of the site.
 WARNING_MSG = None
 
-from celery.schedules import crontab
-from werkzeug.contrib.cache import RedisCache
-
 # 自动添加到响应头的配置
 HTTP_HEADERS = {
     "Access-Control-Allow-Origin":"*",
@@ -576,6 +573,7 @@ class CeleryConfig(object):
     }
 
  # 帮助文档地址，显示在web导航栏
+BUG_REPORT_URL = 'https://github.com/tencentmusic/cube-studio/issues/new'
 DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/wiki'
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
@@ -806,9 +804,7 @@ K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
 
 PIPELINE_URL = '/pipeline/#/'
 
-# 这两部分功能需要泛化域名。没有泛化域名此部分功能受限。ISTIO_INGRESS_DOMAIN为泛域名后缀
-ISTIO_INGRESS_DOMAIN = os.getenv('ISTIO_INGRESS_DOMAIN','local.com')  #  泛化域名，尾缀，可以和HOST不一致，没有泛化域名对应的功能没法使用
-SERVICE_DOMAIN = 'service.%s' % ISTIO_INGRESS_DOMAIN
+
 
 # 多行分割内网特定host
 HOSTALIASES='''
@@ -911,7 +907,11 @@ MODEL_URLS = {
     "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
     "dataset":"/frontend/dataleap/media_data/dataset"
 }
-
+ # 可以跨域分享cookie的子域名，例如.local.com
+COOKIE_DOMAIN = ''
+JUPYTER_DOMAIN="kubeflow.local.com"
+NNI_DOMAIN='kubeflow.local.com'
+SERVICE_DOMAIN='service.local.com'
 
 # 所有训练集群的信息
 CLUSTERS={
@@ -924,6 +924,8 @@ CLUSTERS={
         "PIPELINE_URL": '/pipeline/#/',
         # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
+        "SERVICE_DOMAIN": 'service.local.com',
+        "GRAFANA_HOST": ''
     }
 }
 

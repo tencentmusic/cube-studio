@@ -1,7 +1,7 @@
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-
+import pysnooper
 import uuid
 from myapp.models.model_notebook import Notebook
 from myapp.models.model_job import Repository
@@ -15,13 +15,14 @@ from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
 from myapp.forms import MySelect2Widget, MyBS3TextFieldWidget
-from myapp.utils.py import py_k8s
+from flask import Markup
+from myapp.utils.py.py_k8s import K8s
 from flask import (
     abort,
     flash,
     g,
     redirect,
-    request,
+    request, make_response,
 )
 from .baseApi import (
     MyappModelRestApi
@@ -34,7 +35,7 @@ from .base import (
 from flask_appbuilder import expose
 import datetime,time,json
 from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
-
+from myapp.models.model_team import Project
 conf = app.config
 
 class Notebook_Filter(MyappFilter):
@@ -61,11 +62,11 @@ class Notebook_ModelView_Base():
     order_columns = ['id']
     search_columns = ['created_by']
     add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
-    list_columns = ['project','ide_type','name_url','describe','resource','status','renew','reset']
+    list_columns = ['project','ide_type','name_url','status','describe','resource','renew','reset']
     cols_width={
         "project":{"type": "ellip2", "width": 150},
         "ide_type": {"type": "ellip2", "width": 150},
-        "name_url":{"type": "ellip2", "width": 300},
+        "name_url":{"type": "ellip2", "width": 250},
         "describe":{"type": "ellip2", "width": 300},
         "resource":{"type": "ellip2", "width": 300},
         "status":{"type": "ellip2", "width": 100},
@@ -263,8 +264,8 @@ class Notebook_ModelView_Base():
     #             self.add_template, title=self.add_title, widgets=widget
     #         )
 
-    pre_update_get=set_column
-    pre_add_get=set_column
+    pre_update_web=set_column
+    pre_add_web=set_column
 
 
     # @pysnooper.snoop(watch_explode=('notebook'))
@@ -277,7 +278,7 @@ class Notebook_ModelView_Base():
     # 部署pod，service，VirtualService
     # @pysnooper.snoop(watch_explode=('notebook',))
     def reset_theia(self, notebook):
-        from myapp.utils.py.py_k8s import K8s
+
 
         k8s_client = K8s(notebook.cluster.get('KUBECONFIG',''))
         namespace = conf.get('NOTEBOOK_NAMESPACE')
@@ -483,7 +484,7 @@ class Notebook_ModelView_Base():
             abort(404)
         for item in items:
             try:
-                k8s_client = py_k8s.K8s(item.cluster.get('KUBECONFIG',''))
+                k8s_client = K8s(item.cluster.get('KUBECONFIG',''))
                 k8s_client.delete_pods(namespace=item.namespace,pod_name=item.name)
                 k8s_client.delete_service(namespace=item.namespace,name=item.name)
                 k8s_client.delete_service(namespace=item.namespace, name=(item.name + "-external").lower()[:60].strip('-'))

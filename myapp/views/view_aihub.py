@@ -219,7 +219,7 @@ class Aihub_base():
 
 
     def post_list(self,items):
-        flash('AIHub内容同步于github，<a target="_blank" href="https://github.com/tencentmusic/cube-studio/tree/master/aihub">参与贡献</a>',category='success')
+        flash('AIHub内容同步于github，<a target="_blank" href="https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning">参与贡献</a>',category='success')
         return items
 
 

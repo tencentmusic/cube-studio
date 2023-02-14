@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service            # 类型包含Pod, Deployment、Job、Ingress、Service
+metadata:                # 包含应用的一些meta信息，比如名称、namespace、标签等信息。
+  name: cloud-pushgateway-service    # 名称还能为小写和-
+  namespace: monitoring
+  labels:
+    app: cloud-pushgateway-service
+spec:           
+#  type: LoadBalancer        # NodePort类型每个 node 上都会监听同一个端口，会自动找到pod所在的节点，LoadBalancer会为这个服务提供一个对外ip，ip代理下面的pod。pod可能在不同的机器上
+  ports:
+  - port: 80
+    targetPort: 80   # container端口
+    protocol: TCP
+    name: http
+  selector:
+    app: cloud-pushgateway-pod
+  # externalIPs:
+  #   - 9.66.37.181

@@ -1319,22 +1319,9 @@ def adjust_service_resource(task):
 from myapp.models.model_aihub import Aihub
 
 
-@celery_app.task(name="task.update_aihub", bind=True)
-@pysnooper.snoop()
-def update_aihub(task):
-    # time.sleep(random.randint(10,600))
-    from myapp.utils.core import run_shell
-
-    # 更新git
-    info_path='info.json'
-    status = run_shell('rm -rf /cube-studio && cd / && git clone https://github.com/tencentmusic/cube-studio.git')
-    if status:
-        print('clone fail')
+def add_aihub(info_path):
+    if not os.path.exists(info_path):
         return
-    else:
-        if os.path.exists(info_path):
-            info_path = '/cube-studio/aihub/info.json'
-
     aihubs = json.load(open(info_path, mode='r'))
     with session_scope(nullpool=True) as dbsession:
         try:
@@ -1362,12 +1349,12 @@ def update_aihub(task):
                         aihub.status=data.get('status', '')
                         aihub.uuid=uuid
                         aihub.version=data.get('version', '')
-                        aihub.dataset=json.dumps(data.get('dataset', {}))
-                        aihub.notebook=json.dumps(data.get('notebook', {}))
-                        aihub.job_template=json.dumps(data.get('job_template', {}))
-                        aihub.pre_train_model=json.dumps(data.get('pre_train_model', {}))
-                        aihub.inference=json.dumps(data.get('inference', {}))
-                        aihub.service=json.dumps(data.get('service', {}))
+                        aihub.dataset=json.dumps(data.get('dataset', {}),indent=4,ensure_ascii=False)
+                        aihub.notebook=json.dumps(data.get('notebook', {}),indent=4,ensure_ascii=False)
+                        aihub.job_template=json.dumps(data.get('job_template', {}),indent=4,ensure_ascii=False)
+                        aihub.pre_train_model=json.dumps(data.get('pre_train_model', {}),indent=4,ensure_ascii=False)
+                        aihub.inference=json.dumps(data.get('inference', {}),indent=4,ensure_ascii=False)
+                        aihub.service=json.dumps(data.get('service', {}),indent=4,ensure_ascii=False)
                         aihub.hot=int(data.get('hot', '0'))
                         aihub.price=int(data.get('price', '0'))
                         aihub.source=data.get('source', '')
@@ -1377,8 +1364,28 @@ def update_aihub(task):
         except Exception as e:
             print(e)
 
+
+
+@celery_app.task(name="task.update_aihub", bind=True)
+@pysnooper.snoop()
+def update_aihub(task):
+    import random
+    time.sleep(random.randint(10,600))
+    from myapp.utils.core import run_shell
+
+    # 更新git
+    info_path='info.json'
+    status = run_shell('rm -rf /cube-studio && cd / && git clone https://github.com/tencentmusic/cube-studio.git')
+    if status:
+        print('clone fail')
+        return
+    else:
+        if os.path.exists(info_path):
+            info_path = '/cube-studio/aihub/info.json'
+    add_aihub(info_path)
+
 if __name__=="__main__":
-    update_aihub(task=None)
+    add_aihub('info.json')
 
 
 

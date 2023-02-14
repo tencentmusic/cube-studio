@@ -13,7 +13,7 @@ from myapp.models.helpers import AuditMixinNullable
 
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
-
+from myapp.models.model_team import Project
 
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from flask_appbuilder.models.decorators import renders
@@ -186,11 +186,13 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     parallelism = Column(Integer, nullable=False,default=1)  # 同一个pipeline，最大并行的task数目
     alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated')   # 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated
     alert_user = Column(String(300), default='')
+
     expand = Column(Text(65536),default='[]')
     depends_on_past = Column(Boolean, default=False)
     max_active_runs = Column(Integer, nullable=False,default=3)   # 最大同时运行的pipeline实例
     expired_limit = Column(Integer, nullable=False, default=1)  # 过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能
     parameter = Column(Text(65536), default='{}')
+
 
     def __repr__(self):
         return self.name
@@ -541,7 +543,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def monitoring_html(self):
         try:
             monitoring = json.loads(self.monitoring)
-            monitoring['link']=self.pipeline.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
+            monitoring['link']=self.pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
         except Exception:
             return Markup('<pre><code> 暂无 </code></pre>')

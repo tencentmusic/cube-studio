@@ -23,7 +23,7 @@ class service_common():
     @property
     def monitoring_url(self):
         # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
-        url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        url=self.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         return Markup(f'<a href="{url}">监控</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
 
@@ -62,7 +62,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def deploy(self):
-        monitoring_url = self.project.cluster.get('GRAFANA_HOST', '').strip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
+        monitoring_url = self.project.cluster.get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
         help_url=''
         try:
             help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
@@ -110,6 +110,10 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
                 SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
+            if '|' in SERVICE_EXTERNAL_IP:
+                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
         else:
@@ -117,7 +121,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def host_url(self):
-        url = "http://" + self.name + "." + conf.get('SERVICE_DOMAIN')
+        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
                 url = self.host
@@ -202,7 +206,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         except Exception as e:
             print(e)
 
-        monitoring_url=self.project.cluster.get('GRAFANA_HOST','').strip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        monitoring_url=self.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
         dom = f'''
                 <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
@@ -250,6 +254,10 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
                 SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
+            if '|' in SERVICE_EXTERNAL_IP:
+                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
         else:
@@ -263,7 +271,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def inference_host_url(self):
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
+        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
                 url = self.host

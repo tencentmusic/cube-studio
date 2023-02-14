@@ -49,13 +49,13 @@ class Service_Filter(MyappFilter):
 class Service_ModelView_base():
     datamodel = SQLAInterface(Service)
 
-    show_columns = ['project','name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host_url']
+    show_columns = ['project','name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
     add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
     list_columns = ['project','name_url','host_url','ip','deploy','creator','modified']
     cols_width={
         "name_url":{"type": "ellip2", "width": 200},
         "host_url": {"type": "ellip2", "width": 400},
-        "ip": {"type": "ellip2", "width": 200},
+        "ip": {"type": "ellip2", "width": 250},
         "deploy": {"type": "ellip2", "width": 200},
         "modified": {"type": "ellip2", "width": 150}
     }
@@ -70,7 +70,7 @@ class Service_ModelView_base():
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
-
+    host_rule = ", ".join([cluster + "集群:*." + conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN", conf.get('SERVICE_DOMAIN',''))])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
@@ -90,9 +90,7 @@ class Service_ModelView_base():
         "replicas": StringField(_(datamodel.obj.lab('replicas')), default=Service.replicas.default.arg,description='pod副本数，用来配置高可用',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "ports": StringField(_(datamodel.obj.lab('ports')), default=Service.ports.default.arg,description='进程端口号，逗号分隔',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "env": StringField(_(datamodel.obj.lab('env')), default=Service.env.default.arg, description='使用模板的task自动添加的环境变量，支持模板变量。书写格式:每行一个环境变量env_key=env_value',widget=MyBS3TextAreaFieldWidget()),
-        "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,
-                           description='访问域名，http://xx.service.%s'%conf.get('ISTIO_INGRESS_DOMAIN',''),
-                           widget=BS3TextFieldWidget()),
+        "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,description='访问域名，' + host_rule, widget=BS3TextFieldWidget()),
     }
 
     gpu_type = conf.get('GPU_TYPE')
@@ -158,6 +156,10 @@ class Service_ModelView_base():
 
         volume_mount = service.volume_mount
         labels = {"app":service.name,"user":service.created_by.username,"pod-type":"service"}
+        env = service.env
+        env+="\nRESOURCE_CPU="+service.resource_cpu
+        env += "\nRESOURCE_MEMORY=" + service.resource_memory
+
         k8s_client.create_deployment(namespace=namespace,
                               name=service.name,
                               replicas=service.replicas,
@@ -174,7 +176,7 @@ class Service_ModelView_base():
                               image_pull_secrets=image_secrets,
                               image=service.images,
                               hostAliases=conf.get('HOSTALIASES',''),
-                              env=service.env,
+                              env=env,
                               privileged=False,
                               accounts=None,
                               username=service.created_by.username,
@@ -192,7 +194,7 @@ class Service_ModelView_base():
             selector=labels
         )
         # 如果域名配置的gateway，就用这个
-        host = service.name+"."+conf.get('SERVICE_DOMAIN')
+        host = service.name+"."+service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if service.host:
             host=service.host.replace('http://','').replace('https://','').strip()
             if "/" in host:
@@ -212,8 +214,10 @@ class Service_ModelView_base():
         # 使用项目组ip
         if service.project.expand:
             ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
-            if ip and type(SERVICE_EXTERNAL_IP)==str:
+            if ip and type(ip)==str:
                 SERVICE_EXTERNAL_IP = [ip]
+            if ip and type(ip)==list:
+                SERVICE_EXTERNAL_IP=ip
 
         # 使用全局ip
         if not SERVICE_EXTERNAL_IP:
@@ -226,7 +230,11 @@ class Service_ModelView_base():
                 SERVICE_EXTERNAL_IP=[ip]
 
 
+
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
+
             service_ports = [[30000+10*service.id+index,port] for index,port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(

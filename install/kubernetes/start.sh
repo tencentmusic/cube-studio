@@ -8,6 +8,7 @@ kubectl label node $node train=true cpu=true notebook=true service=true org=publ
 
 # 创建命名空间
 sh create_ns_secret.sh
+kubectl apply -f sa-rbac.yaml
 # 部署dashboard
 kubectl apply -f dashboard/v2.2.0-cluster.yaml
 # 部署mysql
@@ -117,10 +118,19 @@ kubectl apply -f istio/install.yaml
 # kubectl delete -f istio/install.yaml
 # kubectl apply -f istio/install-1.15.0.yaml
 
+kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s
+kubectl wait crd/gateways.networking.istio.io --for condition=established --timeout=60s
+
+kubectl apply -f gateway.yaml
+kubectl apply -f virtual.yaml
+
+
+
 # 部署kfp pipeline
 kubectl apply -f kubeflow/sa-rbac.yaml
 kubectl create -f kubeflow/pipeline/minio-pv-hostpath.yaml
 kubectl apply -f kubeflow/pipeline/minio-artifact-secret.yaml
+sleep 5
 kubectl apply -f kubeflow/pipeline/pipeline-runner-rolebinding.yaml
 
 cd kubeflow/pipeline/1.6.0/kustomize/
@@ -158,14 +168,6 @@ kubectl create -f pv-pvc-service.yaml
 
 kubectl delete -k cube/overlays
 kubectl apply -k cube/overlays
-
-kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s
-kubectl wait crd/gateways.networking.istio.io --for condition=established --timeout=60s
-
-kubectl apply -f gateway.yaml
-kubectl apply -f sa-rbac.yaml
-kubectl apply -f virtual.yaml
-
 
 # 配置入口
 #ip=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1`

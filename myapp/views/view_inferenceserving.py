@@ -18,8 +18,7 @@ from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget,Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget, MyBS3TextFieldWidget,MySelectMultipleField
-from myapp.views.view_team import Project_Join_Filter
-from myapp.views.view_team import filter_join_org_project
+from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
 from flask import (
     flash,
     g,
@@ -76,7 +75,7 @@ class InferenceService_ModelView_base():
         "model_name_url":{"type": "ellip2", "width": 300},
         "model_version": {"type": "ellip2", "width": 200},
         "inference_host_url": {"type": "ellip2", "width": 500},
-        "ip": {"type": "ellip2", "width": 200},
+        "ip": {"type": "ellip2", "width": 250},
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 350},
@@ -100,7 +99,7 @@ class InferenceService_ModelView_base():
         "replicas_html":"副本数"
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
-    host_rule=",".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",'') for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",'')])
+    host_rule=",".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
@@ -317,7 +316,7 @@ class InferenceService_ModelView_base():
 
     edit_fieldsets = add_fieldsets
 
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.default_filter = {
             "created_by": g.user.id
         }
@@ -621,7 +620,7 @@ output %s
         # 修改了名称的话，要把之前的删掉
         self.use_expand(item)
 
-        # 如果模型版本和名称变了，需要把之前的服务删除掉
+        # 如果模型版本和模型名称变了，需要把之前的服务删除掉
         if self.src_item_json.get('name','') and item.name!=self.src_item_json.get('name',''):
             self.delete_old_service(self.src_item_json.get('name',''), item.project.cluster)
             flash('发现模型服务变更，启动清理服务%s:%s'%(self.src_item_json.get('model_name',''),self.src_item_json.get('model_version','')),'success')
@@ -741,7 +740,7 @@ output %s
     def deploy(self,service_id,env='prod'):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         namespace = conf.get('SERVICE_NAMESPACE','service')
-        name =  service.name
+        name = service.name
         command = service.command
         deployment_replicas = service.min_replicas
         if env=='debug':
@@ -783,14 +782,15 @@ output %s
 
 
         pod_env = service.env
-        pod_env+="\nKUBEFLOW_ENV="+env
-        pod_env+='\nKUBEFLOW_MODEL_PATH='+service.model_path if service.model_path else ''
-        pod_env+='\nKUBEFLOW_MODEL_VERSION='+service.model_version
-        pod_env+='\nKUBEFLOW_MODEL_IMAGES='+service.images
-        pod_env+='\nKUBEFLOW_MODEL_NAME='+service.model_name
-        pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area','guangzhou')
-        pod_env=pod_env.strip(',')
-
+        pod_env += "\nKUBEFLOW_ENV=" + env
+        pod_env += '\nKUBEFLOW_MODEL_PATH=' + service.model_path if service.model_path else ''
+        pod_env += '\nKUBEFLOW_MODEL_VERSION=' + service.model_version
+        pod_env += '\nKUBEFLOW_MODEL_IMAGES=' + service.images
+        pod_env += '\nKUBEFLOW_MODEL_NAME=' + service.model_name
+        pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area', 'guangzhou')
+        pod_env += "\nRESOURCE_CPU=" + service.resource_cpu
+        pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
+        pod_env = pod_env.strip(',')
 
         if env=='test' or env =='debug':
             try:
@@ -872,7 +872,7 @@ output %s
             selector=labels
         )
         # 如果域名配置的gateway，就用这个
-        host = service.name+"."+ service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN'))
+        host = service.name+"."+ service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
 
         if service.host:
             host=service.host.replace('http://','').replace('https://','').strip()
@@ -901,8 +901,10 @@ output %s
         # 使用项目组ip
         if service.project.expand:
             ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
-            if ip and type(SERVICE_EXTERNAL_IP)==str:
+            if ip and type(ip) == str:
                 SERVICE_EXTERNAL_IP = [ip]
+            if ip and type(ip) == list:
+                SERVICE_EXTERNAL_IP = ip
 
         # 使用全局ip
         if not SERVICE_EXTERNAL_IP:
@@ -916,6 +918,9 @@ output %s
 
 
         if SERVICE_EXTERNAL_IP:
+            # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
+
             service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             print('deploy proxy ip')

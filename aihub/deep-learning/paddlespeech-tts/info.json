@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/PaddlePaddle/PaddleSpeech",
+    "field": "听觉",
+    "scenes": "语音处理",
+    "type": "dateset,notebook,train,inference",
+    "name": "paddlespeech-tts",
+    "status": "online",
+    "version": "v20221114",
+    "uuid": "paddle-speech-tts-v20221114",
+    "label": "文字转语音",
+    "describe": "文字转语音，支持280多种音色模型",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {
+    }
+}

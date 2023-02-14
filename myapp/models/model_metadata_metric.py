@@ -1,4 +1,5 @@
 from flask_appbuilder import Model
+from flask import Markup
 from sqlalchemy import (
     Boolean,
     Text,
@@ -30,10 +31,14 @@ class Metadata_metric(Model,AuditMixinNullable,ImportMixin,MyappModelBase):
     status = Column(String(100), nullable=True, default='')  # 状态  下线  上线   创建中
     task_id = Column(String(200), nullable=True, default='')  # 所有相关任务id
     public = Column(Boolean, default=True)  # 是否公开
+    remark = Column(Text(65536), nullable=True,default='')   # 备注
     expand = Column(Text(65536), nullable=True,default='{}')
     def __repr__(self):
         return self.name
 
+    @property
+    def remark_html(self):
+        return "<br>".join(self.remark.split('\n'))
 
     def clone(self):
         return Metadata_metric(

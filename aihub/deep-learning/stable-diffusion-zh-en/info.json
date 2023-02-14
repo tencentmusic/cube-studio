@@ -1,0 +1,24 @@
+{
+    "doc": "https://github.com/CompVis/stable-diffusion",
+    "field": "机器视觉",
+    "scenes": "图像创作",
+    "type": "dateset,notebook,train,inference",
+    "name": "stable-diffusion-zh-en",
+    "status": "online",
+    "version": "v20221122",
+    "uuid": "stable-diffusion-zh-en-v20221122",
+    "label": "文字转图像-中英文混合9种语言",
+    "describe": "输入一串文字描述，可生成相应的图片，暂已支持语言：英语(En)、中文(Zh)、西班牙语(Es)、法语(Fr)、俄语(Ru)、日语(Ja)、韩语(Ko)、阿拉伯语(Ar)和意大利语(It)",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {
+        "resource_gpu": "1"
+    }
+}

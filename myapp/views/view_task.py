@@ -287,15 +287,23 @@ class Task_ModelView_Base():
             item.resource_gpu=str(item.resource_gpu).upper()
         if item.job_template is None:
             raise MyappException("Job Template 为必选")
-        # if item.job_template.volume_mount and item.job_template.volume_mount not in item.volume_mount:
-        #     if item.volume_mount:
-        #         item.volume_mount += ","+item.job_template.volume_mount
-        #     else:
-        #         item.volume_mount = item.job_template.volume_mount
 
+        # # 切换了项目组，要把项目组的挂载加进去
+        all_project_volumes=[]
+        if item.volume_mount:
+            all_project_volumes = [x.strip() for x in item.volume_mount.split(',') if x.strip()]
+        if item.job_template.volume_mount:
+            all_project_volumes += [x.strip() for x in item.job_template.volume_mount.split(',') if x.strip()]
+        for volume_mount in all_project_volumes:
+            if ":" in volume_mount:
+                volume,mount = volume_mount.split(":")[0],volume_mount.split(":")[1]
+                if mount not in item.volume_mount:
+                    item.volume_mount=item.volume_mount.strip(',')+","+volume_mount
+
+        # 修改失败，直接换为原来的
         if item.volume_mount and ':' not in item.volume_mount:
             item.volume_mount = self.src_item_json.get('volume_mount','')
-
+        # 规范文本内容
         if item.volume_mount:
             item.volume_mount = ','.join([x.strip() for x in item.volume_mount.split(',') if x.strip()])
 
@@ -353,6 +361,8 @@ class Task_ModelView_Base():
     def pre_delete(self, item):
         self.check_redirect_list_url = '/pipeline_modelview/edit/' + str(item.pipeline.id)
         self.pipeline = item.pipeline
+        # 删除task启动的所有实例
+        self.delete_task_run(item)
 
 
     widget_config = {
@@ -639,15 +649,10 @@ class Task_ModelView_Base():
         return redirect("/myapp/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
 
 
-
-
-    @expose("/clear/<task_id>", methods=["GET", "POST"])
-    def clear_task(self,task_id):
-        task = db.session.query(Task).filter_by(id=task_id).first()
+    def delete_task_run(self,task):
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG',''))
         namespace = conf.get('PIPELINE_NAMESPACE')
-
         # 删除运行时容器
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name.lower()[:60].strip('-')
@@ -680,6 +685,12 @@ class Task_ModelView_Base():
                 k8s_client.delete_workflow(all_crd_info = conf.get("CRD_INFO", {}), namespace=namespace,run_id=run_id)
                 k8s_client.delete_pods(namespace=namespace, labels={"run-id":run_id})
                 time.sleep(2)
+
+
+    @expose("/clear/<task_id>", methods=["GET", "POST"])
+    def clear_task(self,task_id):
+        task = db.session.query(Task).filter_by(id=task_id).first()
+        self.delete_task_run(task)
         flash("删除完成",category='success')
         # self.update_redirect()
         return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))

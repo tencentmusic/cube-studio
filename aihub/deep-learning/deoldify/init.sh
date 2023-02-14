@@ -1,0 +1,2 @@
+
+python /app/load.py

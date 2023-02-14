@@ -1,0 +1,1 @@
+pip3 install transformers Pillow torch torchvision timm

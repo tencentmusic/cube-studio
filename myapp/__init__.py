@@ -261,14 +261,26 @@ if flask_app_mutator:
 # 添加每次请求后的操作函数，必须要返回res
 from flask import request
 
+import pysnooper
 
 @app.before_request
 # @pysnooper.snoop(watch_explode='aa')
 def check_login():
-    if '/static' in request.path or '/logout' in request.path or '/login' in request.path or '/health' in request.path:
+    if '/static' in request.path or '/logout' in request.path or '/login' in request.path or '/health' in request.path or '/wechat' in request.path:
         return
 
     if not g.user or not g.user.get_id():
+
+        # 支持跨域名cookie登录
+        myapp_username = request.cookies.get('myapp_username', '')
+        if myapp_username:
+            try:
+                user = security_manager.find_user(myapp_username)
+                g.user = user
+                return
+            except Exception as e:
+                print(e)
+
         abort(401)
 
 
@@ -277,7 +289,10 @@ def check_login():
 def myapp_after_request(resp):
     try:
         if g.user and g.user.username:
-            resp.set_cookie('myapp_username', g.user.username)
+
+            resp.set_cookie('myapp_username', g.user.username,domain=conf.get('COOKIE_DOMAIN',None) if conf.get('COOKIE_DOMAIN',None) else None)  # 设置用户信息传递
+            # resp.set_cookie('myapp_username', g.user.username)  # 设置用户信息传递
+
             if hasattr(g, 'id'):
                 resp.set_cookie('id', str(g.id),max_age=3)   # 设置有效期
         if g.user and g.user.first_name:

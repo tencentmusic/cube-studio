@@ -5,9 +5,9 @@
 
 ```
 linux
-docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:5.7
+docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -d mysql:5.7
 mac
-docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:5.7
+docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -d mysql:5.7
 
 ```
 进入mysql，创建kubeflow数据库
@@ -27,7 +27,7 @@ mysql> flush privileges;
 docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01 -f install/docker/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
 docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01 -f install/docker/dockerFrontend/Dockerfile .
@@ -35,7 +35,7 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.09.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01
 docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01
 ```
 
@@ -48,7 +48,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.
 
 #### 本地后端python代码开发
 
-需要安装下面的环境包
+需要安装下面的环境包, python 3.6.9
 
 ```bash
 pip3 install --upgrade setuptools pip 
@@ -128,7 +128,7 @@ docker-compose -f docker-compose.yml  up
 ```
 
 ## Q&A
-如果构建镜像过程中因为网络问题失败，可以通过新增pip国内镜像地址来解决。
+1） 如果构建镜像过程中因为网络问题失败，可以通过新增pip国内镜像地址来解决。
 
 在cube-studio/install/docker中新建pip.conf，输入以下内容: 
 ```
@@ -145,6 +145,14 @@ trusted-host=mirrors.aliyun.com pypi.tuna.tsinghua.edu.cn
 COPY install/docker/pip.conf /root/.pip/pip.conf
 ```
 
+2） 如果前端安装依赖失败，可以通过新增npm国内镜像来解决
 
+npm配置镜像命令
+```
+npm config set registry https://registry.npmmirror.com
+```
 
-
+yarn配置镜像命令
+```
+yarn config set registry https://registry.npmmirror.com
+```

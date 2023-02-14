@@ -12,3 +12,10 @@ kubectl apply -f install.yaml
 
 istiod 将先前由 Pilot，Galley，Citadel 和 sidecar 注入器执行的功能统一为一个二进制文件。
 
+
+# 由1.3.1版本升级到1.4.1+
+需要先删除validatingwebhookconfigurations mutatingwebhookconfigurations  deployment和svc ds等
+
+查看所有资源
+namespace=istio-system
+kubectl api-resources -o name --verbs=list --namespaced | xargs -n 1 kubectl get --show-kind --ignore-not-found -n $namespace

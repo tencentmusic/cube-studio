@@ -12,7 +12,7 @@ metadata = Model.metadata
 conf = app.config
 
 
-class Aihub(Model,ImportMixin,MyappModelBase):
+class Aihub(Model,MyappModelBase):
     __tablename__ = 'aihub'
 
     id = Column(Integer, primary_key=True)
@@ -46,15 +46,15 @@ class Aihub(Model,ImportMixin,MyappModelBase):
         service_url = "/aihub/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
 
         return Markup(f'''
-<div style="border: 3px solid rgba({'29,152,29,.9' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
+<div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
     <a href="{self.doc if self.status=='online' else ''}">
-        <img src="{self.pic}" style="height:200px;width:100%" alt="{self.describe}"/>
+        <img src="{self.pic}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
     </a>
     <br>
     <div>
         <div class="p16" alt="{self.describe}">
             <div class="p-r card-popup ellip1">
-                {("在线:" if self.status=='online' else '待上线:')+self.describe}
+                { self.name+": "+self.describe }
                 <div class="p-a card-popup-target d-n" style="top:100%;left:0;background:rgba(0,0,0,0.5);color:#fff;border-radius:3px;">{self.describe}</div>
             </div>
         </div>

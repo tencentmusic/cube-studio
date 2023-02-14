@@ -136,8 +136,8 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8',
 ]
 
-# images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + volcano + kube_batch + nni+ cube_studio
-images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + volcano + kube_batch + nni
+# images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + istio+ volcano + kube_batch + nni+ cube_studio
+images = kubeflow + kubernetes_dashboard + new_pipline + new_gpu + new_prometheus + istio + volcano + nni
 images = list(set(images))
 
 # 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网docker.oa.com的仓库

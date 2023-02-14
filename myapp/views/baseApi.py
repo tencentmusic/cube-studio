@@ -1,3 +1,4 @@
+import csv
 import functools
 import json
 import logging
@@ -11,7 +12,7 @@ from flask_appbuilder.actions import action
 from flask_babel import gettext as __
 from flask_appbuilder.actions import ActionItem
 from flask import jsonify, request
-from flask import flash
+from flask import flash,g
 from flask import current_app, make_response,send_file
 from flask.globals import session
 from flask_babel import lazy_gettext as _
@@ -64,8 +65,11 @@ from flask import (
     abort,
 )
 from flask_appbuilder.exceptions import FABException, InvalidOrderByColumnFABException
-from flask_appbuilder.api import ModelRestApi
-from myapp import app, db,cache
+from flask_appbuilder.security.decorators import permission_name, protect,has_access
+from flask_appbuilder.api import BaseModelApi,BaseApi,ModelRestApi
+from sqlalchemy.sql import sqltypes
+from myapp import app, appbuilder,db,event_logger,cache
+from myapp.models.favorite import Favorite
 conf = app.config
 
 log = logging.getLogger(__name__)
@@ -77,12 +81,16 @@ API_HELP_URL_RIS_KEY = 'help_url'
 API_ACTION_RIS_KEY='action'
 API_ROUTE_RIS_KEY ='route_base'
 
+API_PERMISSIONS_RIS_KEY="permissions"
 API_USER_PERMISSIONS_RIS_KEY="user_permissions"
 API_RELATED_RIS_KEY="related"
 API_COLS_WIDTH_RIS_KEY='cols_width'
 API_EXIST_ADD_ARGS_RIS_KEY='exist_add_args'
 API_IMPORT_DATA_RIS_KEY = 'import_data'
 API_DOWNLOAD_DATA_RIS_KEY = 'download_data'
+API_OPS_BUTTON_RIS_KEY = 'ops_link'
+API_ENABLE_FAVORITE_RIS_KEY = 'enable_favorite'
+
 
 def get_error_msg():
     if current_app.config.get("FAB_API_SHOW_STACKTRACE"):
@@ -225,6 +233,7 @@ def json_response(message,status,result):
 
 
 
+import pysnooper
 # @pysnooper.snoop(depth=5)
 # 暴露url+视图函数。视图函数会被覆盖，暴露url也会被覆盖
 class MyappModelRestApi(ModelRestApi):
@@ -240,20 +249,68 @@ class MyappModelRestApi(ModelRestApi):
     src_item_json={}    # 原始model对象的json
     check_edit_permission = None
     datamodel=None
-    post_list=None
-    pre_json_load=None
+
+    def pre_show(self,item):
+        pass
+    def pre_show_res(self,result):
+        return result
+    def pre_add(self, item):
+        pass
+    def post_add(self, item):
+        pass
+    def pre_add_req(self,req_json):
+        return req_json
+    def pre_add_res(self,result):
+        return result
+
+    def pre_update_req(self,req_json):
+        return req_json
+    def pre_update_res(self,result):
+        return result
+
+    def pre_update(self, item):
+        pass
+    def post_update(self, item):
+        pass
+
+    def pre_list_req(self,req_json):
+        return req_json
+    def pre_list_res(self,result):
+        return result
+
+    # 可以调整顺序
+    def post_list(self, items):
+        return items
+
+    def pre_delete(self, item):
+        pass
+    def post_delete(self, item):
+        pass
+
+    # 添加和更新前info信息的查询，或者填写界面的查询
+    def pre_add_web(self):
+        pass
+    def pre_update_web(self,item):
+        pass
+
     edit_form_extra_fields={}
     add_form_extra_fields = {}
     add_fieldsets = []
     edit_fieldsets=[]
     show_fieldsets = []
-    pre_add_get=None
-    pre_update_get=None
+
+    ops_link=[
+        # {
+        #     "text": "git",
+        #     "url": "https://github.com/tencentmusic/cube-studio"
+        # }
+    ]
+
     help_url = None
-    pre_show = None
+
     default_filter={}
     actions = {}
-    pre_list=None
+
     user_permissions = {
         "add": True,
         "edit": True,
@@ -270,11 +327,9 @@ class MyappModelRestApi(ModelRestApi):
     cols_width={}
     import_data=False
     download_data=False
+    enable_favorite=False
     pre_upload = None
     set_columns_related=None
-
-    # def pre_list(self,**kargs):
-    #     return
 
     # @pysnooper.snoop()
     def csv_response(self,file_path,file_name=None):
@@ -367,6 +422,8 @@ class MyappModelRestApi(ModelRestApi):
         # 帮助地址
         self.help_url = conf.get('HELP_URL', {}).get(self.datamodel.obj.__tablename__, '') if self.datamodel else ''
 
+        # 配置搜索转换器
+        self._filters = self.datamodel.get_filters(self.search_columns)
 
     def _init_model_schemas(self):
         # Create Marshmalow schemas if one is not specified
@@ -441,6 +498,8 @@ class MyappModelRestApi(ModelRestApi):
     def merge_ops_data(self, response, **kwargs):
         response[API_IMPORT_DATA_RIS_KEY] = self.import_data
         response[API_DOWNLOAD_DATA_RIS_KEY] = self.download_data
+        response[API_OPS_BUTTON_RIS_KEY]=self.ops_link
+        response[API_ENABLE_FAVORITE_RIS_KEY]=self.enable_favorite
 
     # 重新渲染add界面
     # @pysnooper.snoop()
@@ -561,8 +620,8 @@ class MyappModelRestApi(ModelRestApi):
 
     # @pysnooper.snoop(watch_explode=('edit_columns'))
     def merge_add_fieldsets_info(self, response, **kwargs):
-        # if self.pre_add_get:
-        #     self.pre_add_get()
+        # if self.pre_add_web:
+        #     self.pre_add_web()
         add_fieldsets=[]
         if self.add_fieldsets:
             for group in self.add_fieldsets:
@@ -825,9 +884,7 @@ class MyappModelRestApi(ModelRestApi):
             except Exception as e:
                 print(e)
 
-
-
-    def response_error(self,code,message='error',status=1,result={}):
+    def response_error(self, code, message='error', status=1, result={}):
         back_data = {
             'result': result,
             "status": status,
@@ -872,9 +929,9 @@ class MyappModelRestApi(ModelRestApi):
         id = _args.get(self.primary_key,'')
         if id:
             item = self.datamodel.get(id)
-            if item and self.pre_update_get:
+            if item and self.pre_update_web:
                 try:
-                    self.pre_update_get(item)
+                    self.pre_update_web(item)
                 except Exception as e:
                     print(e)
             if item and self.check_item_permissions:
@@ -882,9 +939,9 @@ class MyappModelRestApi(ModelRestApi):
                     self.check_item_permissions(item)
                 except Exception as e:
                     print(e)
-        elif self.pre_add_get:
+        elif self.pre_add_web:
             try:
-                self.pre_add_get()
+                self.pre_add_web()
             except Exception as e:
                 print(e)
 
@@ -894,15 +951,16 @@ class MyappModelRestApi(ModelRestApi):
 
     @expose("/<int:pk>", methods=["GET"])
     # @pysnooper.snoop(depth=4)
-    def api_get(self, pk, **kwargs):
-        if self.pre_show:
-            src_item_object = self.datamodel.get(pk, self._base_filters)
-            self.pre_show(src_item_object)
+    def api_show(self, pk, **kwargs):
+
 
         # from flask_appbuilder.models.sqla.interface import SQLAInterface
         item = self.datamodel.get(pk, self._base_filters)
         if not item:
             return self.response_error(404, "Not found")
+
+        if self.pre_show:
+            self.pre_show(item)
 
         _response = dict()
         _args = kwargs.get("rison", {})
@@ -935,7 +993,7 @@ class MyappModelRestApi(ModelRestApi):
         _response['data'] = data # item.to_json()
         _response['data'][self.primary_key] = pk
 
-        back = self.pre_get(_response)
+        back = self.pre_show_res(_response)
         back_data = {
             'result': back['data'] if back else _response['data'],
             "status": 0,
@@ -945,17 +1003,15 @@ class MyappModelRestApi(ModelRestApi):
 
 
     @expose("/", methods=["GET"])
-    # @pysnooper.snoop(watch_explode=('_response','lst'))
+    # @pysnooper.snoop(watch_explode=('_args','_filters'))
     def api_list(self, **kwargs):
         _response = dict()
-        if self.pre_json_load:
-            req_json = self.pre_json_load(request.json)
-        else:
-            try:
-                req_json = request.json or {}
-            except Exception as e:
-                print(e)
-                req_json={}
+
+        try:
+            req_json = request.json or {}
+        except Exception as e:
+            print(e)
+            req_json={}
 
         _args = req_json or {}
         _args.update(request.args)
@@ -963,9 +1019,8 @@ class MyappModelRestApi(ModelRestApi):
         if 'form_data' in request.args:
             _args.update(json.loads(request.args.get('form_data')))
 
-        if self.pre_list:
-            self.pre_list(**_args)
-
+        if self.pre_list_req:
+            _args = self.pre_list_req(_args)
 
         # handle select columns
         select_cols = _args.get(API_SELECT_COLUMNS_RIS_KEY, [])
@@ -996,6 +1051,23 @@ class MyappModelRestApi(ModelRestApi):
         page_index, page_size = self._handle_page_args(_args)
         # Make the query
         query_select_columns = _pruned_select_cols or self.list_columns
+
+        # @pysnooper.snoop()
+        def get_favorite():
+            all_rows = db.session.query(Favorite.row_id).filter(Favorite.model_name==self.datamodel.obj.__tablename__).filter(Favorite.user_id==g.user.id).all()
+            all_rows_id = [int(row[0]) for row in all_rows]
+            return all_rows_id
+
+        # 如果只查询收藏
+        if _args.get('only_favorite',False):
+            if self.primary_key not in self.search_columns:
+                self.search_columns.append(self.primary_key)
+            _args['filters']=[]
+            self._filters.clear_filters()
+            from flask_appbuilder.models.sqla.filters import FilterInFunction
+            self._filters.add_filter(self.primary_key,FilterInFunction,get_favorite)
+            joined_filters = self._filters.get_joined_filters(self._base_filters)  # 将基础filter加入到过滤器中你那个
+
         count, lst = self.datamodel.query(
             joined_filters,
             order_column,
@@ -1028,14 +1100,14 @@ class MyappModelRestApi(ModelRestApi):
         for index in range(len(lst)):
 
             _response['data'][index][self.primary_key]= getattr(lst[index],self.primary_key)
-
+        result=_response
         try:
-            self.pre_get_list(_response)
+            result = self.pre_list_res(_response)
         except Exception as e:
             print(e)
 
         back_data = {
-            'result': _response,# _response['data']
+            'result': result,
             "status": 0,
             'message': "success"
         }
@@ -1069,8 +1141,8 @@ class MyappModelRestApi(ModelRestApi):
         if not request.is_json:
             return self.response_error(400,message="Request is not JSON")
         try:
-            if self.pre_json_load:
-                json_data = self.pre_json_load(request.json)
+            if self.pre_add_req:
+                json_data = self.pre_add_req(request.json)
             else:
                 json_data = request.json
 
@@ -1111,7 +1183,6 @@ class MyappModelRestApi(ModelRestApi):
         item = self.datamodel.get(pk, self._base_filters)
         self.src_item_json = item.to_json()
 
-        # if self.check_redirect_list_url:
         try:
             if self.check_edit_permission:
                 has_permission = self.check_edit_permission(item)
@@ -1128,8 +1199,8 @@ class MyappModelRestApi(ModelRestApi):
         if not item:
             return self.response_error(404,message='Not found')
         try:
-            if self.pre_json_load:
-                json_data = self.pre_json_load(request.json)
+            if self.pre_update_req:
+                json_data = self.pre_update_req(request.json)
             else:
                 json_data = request.json
             data = self._merge_update_item(item, json_data)
@@ -1144,7 +1215,8 @@ class MyappModelRestApi(ModelRestApi):
 
         try:
             self.datamodel.edit(item.data, raise_exception=True)
-            self.post_update(item.data)
+            if self.post_update:
+                self.post_update(item.data)
             result = self.edit_model_schema.dump(
                 item.data, many=False
             ).data
@@ -1167,7 +1239,8 @@ class MyappModelRestApi(ModelRestApi):
         item = self.datamodel.get(pk, self._base_filters)
         if not item:
             return self.response_error(404,message='Not found')
-        self.pre_delete(item)
+        if self.pre_delete:
+            self.pre_delete(item)
         try:
             self.datamodel.delete(item, raise_exception=True)
             self.post_delete(item)
@@ -1191,7 +1264,7 @@ class MyappModelRestApi(ModelRestApi):
         pk = self._deserialize_pk_if_composite(pk)
         action = self.actions.get(name)
         try:
-            action.func(self.datamodel.get(pk))
+            res = action.func(self.datamodel.get(pk))
             back = {
                 "status": 0,
                 "result": {},
@@ -1333,17 +1406,91 @@ class MyappModelRestApi(ModelRestApi):
         sql_engine = create_engine(uri)
         table_name = self.datamodel.obj.__tablename__
         # sql = 'select `%s` from %s' % ('`,`'.join(self.show_columns), table_name)
+        file_path = '%s.csv' % table_name
+        csv_file_path = os.path.abspath(file_path)
+        if os.path.exists(csv_file_path):
+            os.remove(csv_file_path)
+
+        _args = request.json or {}
+        req_json = json.loads(request.args.get('form_data', "{}"))  # 根据请求筛选下载数据，而不是全量下载
+        _args.update(req_json)
+        # 下载搜索出来的
+        if _args and _args.get('filters',[]):
+            joined_filters = self._handle_filters_args(_args)
+            count, lst = self.datamodel.query(
+                joined_filters,
+                '',
+                '',
+                page=0,
+                page_size='20000',
+                select_columns=self.show_columns,
+            )
+            print(count,lst)
+            if count>0:
+                with(open(csv_file_path,'w',newline='',encoding="utf-8-sig")) as csvfile:
+                    csvwrite = csv.writer(csvfile,delimiter=',')
+                    csvwrite.writerow(self.show_columns)
+                    for item in lst:
+                        data = []
+                        for col in self.show_columns:
+                            data.append(getattr(item,col))
+                        csvwrite.writerow(data)
+                    csvfile.close()
+                response = self.csv_response(csv_file_path, file_name=table_name)
+                return response
+
+        # 下载全量
         sql = 'select * from %s' % (table_name)
         print(sql)
         results = pandas.read_sql_query(sql, sql_engine)
+        results.to_csv(csv_file_path, index=False, sep=",",encoding='utf-8-sig')  # index 是第几行的表示
 
-        file_path = '%s.csv' % table_name
-        csv_file = os.path.abspath(file_path)
-        if os.path.exists(csv_file):
-            os.remove(csv_file)
-        results.to_csv(csv_file, index=False, sep=",",encoding='utf-8-sig')  # index 是第几行的表示
-        response = self.csv_response(csv_file, file_name=table_name)
+        response = self.csv_response(csv_file_path, file_name=table_name)
         return response
+
+
+
+    @expose("/favorite/<pk>", methods=["POST",'DELETE'])
+    # @pysnooper.snoop()
+    def favorite(self,pk):
+        if request.method=='POST':
+            item = self.datamodel.get(pk, self._base_filters)
+            if item:
+                exist_favorite = db.session.query(Favorite).filter(Favorite.model_name==self.datamodel.obj.__tablename__).filter(Favorite.row_id==str(pk)).filter(Favorite.user_id==g.user.id).first()
+                if not exist_favorite:
+                    favorite = Favorite(model_name=self.datamodel.obj.__tablename__,row_id=str(pk),user_id=g.user.id)
+                    db.session.add(favorite)
+                    db.session.commit()
+                back_data = {
+                    'result': '',
+                    "status": 'success',
+                    'message': '收藏成功'
+                }
+                return self.response(200,**back_data)
+
+            else:
+                back_data = {
+                    'result': '',
+                    "status": 'fail',
+                    'message': '目标不存在，或无权限查看'
+                }
+                return self.response(404, **back_data)
+        elif request.method=='DELETE':
+            exist_favorite = db.session.query(Favorite).filter(Favorite.model_name == self.datamodel.obj.__tablename__).filter(Favorite.row_id == str(pk)).filter(Favorite.user_id == g.user.id).first()
+            if exist_favorite:
+                db.session.delete(exist_favorite)
+                db.session.commit()
+            back_data = {
+                'result': '',
+                "status": 'success',
+                'message': '取消收藏成功'
+            }
+            return self.response(200, **back_data)
+
+    # @expose("/git/<pk>", methods=["GET"])
+    # def git(self,pk):
+    #     item = self.datamodel.get(pk, self._base_filters)
+    #     return response
 
 
     @action("muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False)

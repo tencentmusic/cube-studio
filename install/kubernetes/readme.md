@@ -27,9 +27,9 @@ sh start.sh xx.xx.xx.xx
 控制器机器管理：
 - mysql=true 部署mysql服务的机器
 - redis=true 部署mysql服务的机器
-- kubeflow-dashobard=true 部署cube服务的机器
+- kubeflow-dashboard=true 部署cube服务的机器
 - kubeflow=true 部署kubeflow的机器
-- isito=true 部署istio的机器
+- istio=true 部署istio的机器
 - knative=true 部署knative的机器
 - monitoring=true 部署prometheus的机器
 
@@ -51,7 +51,7 @@ rancher修改kubelet容器挂载目录(选中集群-升级-编辑yaml)
 ```
     kubelet:
       extra_binds:
-        - '/data/k8s:/data/k8s'
+        - '/data:/data'
 ```
   
 # gpu环境的准备  

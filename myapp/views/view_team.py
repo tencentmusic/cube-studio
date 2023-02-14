@@ -139,7 +139,7 @@ class Project_ModelView_Base():
 
 
     # @pysnooper.snoop()
-    def pre_add_get(self):
+    def pre_add_web(self):
         self.edit_form_extra_fields['type'] = StringField(
             _(self.datamodel.obj.lab('type')),
             description="项目分组",
@@ -162,8 +162,8 @@ class Project_ModelView_Base():
             raise MyappException('just creator can add/edit')
 
     # before update, check permission
-    def pre_update_get(self, item):
-        self.pre_add_get()
+    def pre_update_web(self, item):
+        self.pre_add_web()
         self.check_item_permissions(item)
         if not self.user_permissions['edit']:
             flash('just creator can add/edit user','warning')
@@ -262,7 +262,7 @@ class Project_ModelView_org_Api(Project_ModelView_Base,MyappModelRestApi):
         ),
         'expand': StringField(
             _(datamodel.obj.lab('expand')),
-            description='扩展参数。示例参数：<br>"cluster": "dev"<br>"node_selector": "org=public"<br>"volume_mount": "kubeflow-user-workspace(pvc):/mnt/;/data/k8s/../group1(hostpath):/mnt1;4G(memory):/dev/shm"<br>"SERVICE_EXTERNAL_IP":"xx.xx.xx.xx"',
+            description='扩展参数。示例参数：<br>"cluster": "dev"<br>"node_selector": "org=public"<br>"volume_mount": "kubeflow-user-workspace(pvc):/mnt/;/data/k8s/../group1(hostpath):/mnt1"<br>"SERVICE_EXTERNAL_IP":"xx.xx.xx.xx"',
             widget=MyBS3TextAreaFieldWidget(),
             default=json.dumps({"cluster": "dev"},indent=4,ensure_ascii=False),
         )
