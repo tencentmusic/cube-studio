@@ -102,7 +102,6 @@ sudo docker run --name ${aiapp} --privileged --rm -it --gpu=0  -e APPNAME=$aiapp
 - 实例分割：FCN、DeepLab、Pyramid Scene Parsing Network、Mask R-CNN、U-Net
 
 
-![humanseg](humanseg/example.jpg)
 
 ## 图像生成与转换
 
@@ -112,18 +111,14 @@ sudo docker run --name ${aiapp} --privileged --rm -it --gpu=0  -e APPNAME=$aiapp
 
 animegan
 
-![animegan](animegan/example.jpg)
 
 - 有监督图像转换：CGAN、pix2pix
 
 - 无监督图像转换：cycleGAN
 
-![gfpgan](https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f)
-
 
 stable-diffusion
 
-![stable-diffusion](https://images.nightcafe.studio//assets/stable-tile.jpg)
 
 ## 目标检测
 
@@ -131,9 +126,6 @@ stable-diffusion
 
 - 基于回归单阶段: YOLO系列、SSD
 
-![yolov3](yolov3/example.jpg)
-
-![panoptic](panoptic/test.jpg)
 
 ## 目标跟踪
 
@@ -152,8 +144,6 @@ stable-diffusion
 - PartialConv
 - EdgeConnect
 
-![deoldify](https://picx.zhimg.com/v2-e96dd757c96464427560a9b5e5b07bc3_720w.jpg?source=172ae18b)
-
 
 ## 超分辨率
 
@@ -171,13 +161,7 @@ stable-diffusion
 
 [paddleocr](../paddleocr/README.md)
 
-<img width="740" alt="640" src="https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png">
-
 [ddddocr](../ddddocr/README.md)
-
-<img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="300px">
-
-
 
 ## 图像检索
 
