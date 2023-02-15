@@ -672,7 +672,7 @@ class Aihub_base():
                 k8s_client.delete_deployment(namespace=namespace,name=name)
                 crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
                 k8s_client.delete_crd(namespace=namespace,group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],name=name)
-                url = cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (namespace, name.replace('_', '-'))
+                url = "http://" + cluster.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (namespace, name.replace('_', '-'))
                 expand = json.loads(aihub.expand) if aihub.expand else {}
                 expand['status']='offline'
                 aihub.expand = json.dumps(expand)
@@ -688,7 +688,7 @@ class Aihub_base():
             self.deploy_aihub(k8s_client=k8s_client, namespace=namespace, name='app1',config={})
             self.deploy_aihub(k8s_client=k8s_client,namespace=namespace,name=aihub.name,config=json.loads(aihub.inference))
 
-            url = cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (namespace, aihub.name.replace('_', '-'))
+            url = "http://" + cluster.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (namespace, aihub.name.replace('_', '-'))
             expand = json.loads(aihub.expand) if aihub.expand else {}
             expand['status'] = 'online'
             aihub.expand = json.dumps(expand)

@@ -75,7 +75,7 @@ class Job_Template_ModelView_Base():
     edit_columns = add_columns
 
     base_filters = [["id", Job_Tempalte_Filter, lambda: []]]
-    base_order = ('created_on', 'desc')
+    base_order = ('id', 'desc')
     order_columns = ['id']
     add_form_query_rel_fields = {
         "images": [["name", Images_Filter, None]],
@@ -403,10 +403,7 @@ class Job_Template_ModelView_Base():
             return response
 
         user_roles = [role.name.lower() for role in list(g.user.roles)]
-        if "admin" in user_roles:
-            pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
-        else:
-            pod_url = conf.get('K8S_DASHBOARD_PIPELINE') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
+        pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
         print(pod_url)
         response = make_response("启动成功，日志地址: %s"%pod_url)
         response.status_code = 200

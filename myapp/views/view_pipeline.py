@@ -1029,19 +1029,8 @@ class Pipeline_ModelView_Base():
     def web_monitoring(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
         if pipeline.run_id:
-            url = pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
+            url = "http://"+pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
             return redirect(url)
-            # data = {
-            #     "url": pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH') + pipeline.name,
-            #     # "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
-            #     "delay":1000,
-            #     "loading": True
-            # }
-            # # 返回模板
-            # if pipeline.project.cluster['NAME']==conf.get('ENVIRONMENT'):
-            #     return self.render_template('link.html', data=data)
-            # else:
-            #     return self.render_template('external_link.html', data=data)
         else:
             flash('no running instance','warning')
             return redirect('/pipeline_modelview/web/%s'%pipeline.id)
@@ -1051,7 +1040,7 @@ class Pipeline_ModelView_Base():
     def web_pod(self,pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
         data = {
-            "url": pipeline.project.cluster.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (conf.get('PIPELINE_NAMESPACE'), pipeline.name.replace('_', '-').lower()),
+            "url": "http://" + pipeline.project.cluster.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (conf.get('PIPELINE_NAMESPACE'), pipeline.name.replace('_', '-').lower()),
             "target":"div.kd-chrome-container.kd-bg-background",
             "delay":500,
             "loading": True

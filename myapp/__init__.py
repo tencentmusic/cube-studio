@@ -1,13 +1,16 @@
 # 避免多进程同时启动对系统cpu负载过高
+import time,random
+
+# from gevent import monkey
+# monkey.patch_all()
+
 # time.sleep(random.randint(1,10))
 from copy import deepcopy
 import json
+from flask import redirect, g, flash, request, session, abort, render_template,redirect,Flask
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from flask import g, abort
 import os
-from flask import render_template
-from flask import Flask, redirect
 from flask_appbuilder import AppBuilder, IndexView, SQLA
 from flask_appbuilder.baseviews import expose
 from flask_compress import Compress
@@ -16,19 +19,15 @@ from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 import wtforms_json
-
 from myapp.security import MyappSecurityManager
 from myapp.utils.core import pessimistic_connection_handling, setup_cache
 from myapp.utils.log import DBEventLogger
+import pysnooper
 wtforms_json.init()
 
 # 在这个文件里面只创建app，不要做view层面的事情。
-
 APP_DIR = os.path.dirname(__file__)
-
 CONFIG_MODULE = os.environ.get("MYAPP_CONFIG", "myapp.config")
-
-
 
 # app = Flask(__name__,static_url_path='/static',static_folder='static',template_folder='templates')
 app = Flask(__name__)  # ,static_folder='/mnt',static_url_path='/mnt'
@@ -134,6 +133,13 @@ pessimistic_connection_handling(db.engine)
 cache = setup_cache(app, conf.get("CACHE_CONFIG"))
 
 migrate = Migrate(app, db, directory=APP_DIR + "/migrations")
+
+
+# from flask_socketio import SocketIO
+#
+# message_queue = conf.get('SOCKETIO_MESSAGE_QUEUE','')
+# socketio = SocketIO(app,cors_allowed_origins='*', message_queue=message_queue)
+
 
 # Logging configuration
 logging.basicConfig(format=app.config.get("LOG_FORMAT"))
@@ -256,10 +262,9 @@ if flask_app_mutator:
     flask_app_mutator(app)
 
 
+# 先经历这里的before_request，再进行sm里面的before_request，比如load_user_from_header函数
 
-# from flask import Flask, json, make_response
 # 添加每次请求后的操作函数，必须要返回res
-from flask import request
 
 import pysnooper
 

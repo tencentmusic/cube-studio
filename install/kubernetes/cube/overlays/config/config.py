@@ -828,7 +828,6 @@ STORE_CONFIG = {
 }
 
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
-K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
 
 
 # 多行分割内网特定host
@@ -940,8 +939,6 @@ MODEL_URLS = {
 }
  # 可以跨域分享cookie的子域名，例如.local.com
 COOKIE_DOMAIN = ''
-JUPYTER_DOMAIN="kubeflow.local.com"
-NNI_DOMAIN='kubeflow.local.com'
 SERVICE_DOMAIN='service.local.com'
 #
 # # 所有训练集群的信息
@@ -951,10 +948,7 @@ CLUSTERS={
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
         "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
-        # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
-        # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
         # "SERVICE_DOMAIN": 'service.local.com',
-        "GRAFANA_HOST": ''
     }
 }
 
@@ -966,10 +960,7 @@ CLUSTERS={
 #         "NAME":"dev",
 #         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
 #         "K8S_DASHBOARD_CLUSTER":'http://9.135.92.226/k8s/dashboard/cluster/',
-#         "JUPYTER_DOMAIN":"9.135.92.226",   # 如果没有域名就用*   有域名就配置成 HOST
-#         # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
 #         # "SERVICE_DOMAIN": 'service.local.com',
-#         "GRAFANA_HOST": 'http://9.135.92.226'
 #     }
 # }
 

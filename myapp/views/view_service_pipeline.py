@@ -415,7 +415,7 @@ class Service_Pipeline_ModelView_Base():
     def web_monitoring(self,service_pipeline_id):
         service_pipeline = db.session.query(Service_Pipeline).filter_by(id=int(service_pipeline_id)).first()
         if service_pipeline.run_id:
-            url = service_pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH')+ service_pipeline.name
+            url = "http://"+service_pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+ service_pipeline.name
             return redirect(url)
         else:
             flash('no running instance','warning')
@@ -426,7 +426,7 @@ class Service_Pipeline_ModelView_Base():
     def web_pod(self,service_pipeline_id):
         service_pipeline = db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
         data = {
-            "url": service_pipeline.project.cluster.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_PIPELINE_NAMESPACE'), service_pipeline.name.replace('_', '-')),
+            "url": "http://" + service_pipeline.project.cluster.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_PIPELINE_NAMESPACE'), service_pipeline.name.replace('_', '-')),
             "target":"div.kd-chrome-container.kd-bg-background",
             "delay":500,
             "loading": True

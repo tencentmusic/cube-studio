@@ -170,11 +170,12 @@ def node_traffic():
                 nodes.update(stored_nodes[org][device])
 
         cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
-        grafana_url = cluster_config.get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_CLUSTER_PATH')
+        grafana_url = "http://"+cluster_config.get('HOST', request.host) + conf.get('GRAFANA_CLUSTER_PATH')
         for ip in nodes:
+            node_dashboard_url = "http://" + cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/node/%s?namespace=default' % nodes[ip]['name']
             org = nodes[ip]['labels'].get('org', 'public')
             enable_train = nodes[ip]['labels'].get('train', 'true')
-            ip_html = '<a target="_blank" href="%s">%s</a>' % (cluster_config.get('K8S_DASHBOARD_CLUSTER', '').rstrip('/') + '/#/node/%s?namespace=default' % nodes[ip]['name'], ip)
+            ip_html = '<a target="_blank" href="%s">%s</a>' % (node_dashboard_url, ip)
             share = nodes[ip]['labels'].get('share', 'true')
             clolr = "#FFFFFF" if share == 'true' else '#F0F0F0'
             device = 'cpu'
@@ -275,9 +276,9 @@ def pod_resource():
             for org in all_tasks_json[cluster_name][namespace]:
                 for pod_name in all_tasks_json[cluster_name][namespace][org]:
                     pod = all_tasks_json[cluster_name][namespace][org][pod_name]
-                    dashboard_url = cluster_config.get('K8S_DASHBOARD_CLUSTER', request.host_url).rstrip('/') + '/#/search?namespace=%s&q=%s' % (namespace, pod_name)
-                    task_grafana_url = cluster_config.get('GRAFANA_HOST', request.host_url).rstrip('/') + conf.get('GRAFANA_TASK_PATH')
-                    node_grafana_url = cluster_config.get('GRAFANA_HOST', request.host_url).rstrip('/') + conf.get('GRAFANA_NODE_PATH')
+                    dashboard_url = "http://" + cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (namespace, pod_name)
+                    task_grafana_url = "http://"+cluster_config.get('HOST', request.host) + conf.get('GRAFANA_TASK_PATH')
+                    node_grafana_url = "http://"+cluster_config.get('HOST', request.host) + conf.get('GRAFANA_NODE_PATH')
 
                     pod_resource={
                         "cluster":cluster_name,
@@ -323,11 +324,11 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
     ops_link = [
         {
             "text": "gpu资源监控",
-            "url": conf.get('CLUSTERS', {}).get(conf.get('ENVIRONMENT','dev'), {}).get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_GPU_PATH')
+            "url": conf.get('GRAFANA_GPU_PATH')
         },
         {
             "text": "集群负载",
-            "url": conf.get('CLUSTERS', {}).get(conf.get('ENVIRONMENT','dev'), {}).get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_CLUSTER_PATH')
+            "url": conf.get('GRAFANA_CLUSTER_PATH')
         }
     ]
     label_title='整体资源'

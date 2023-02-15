@@ -20,7 +20,7 @@ myapp fab create-admin --username admin --firstname admin --lastname admin --ema
 # myapp db migrate   # 生成对应版本数据库表的升级文件到versions文件夹下，需要你的数据库是已经upgrade的
 myapp db upgrade   # 数据库表同步更新到mysql
 # 会创建默认的角色和权限。会创建自定义的menu权限，也才能显示自定义menu。
-# myapp init
+myapp init
 
 if [ "$STAGE" = "build" ]; then
 #  cd /home/myapp/myapp/vision && yarn && yarn build

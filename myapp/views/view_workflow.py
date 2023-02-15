@@ -592,18 +592,13 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             print(e)
 
 
-        host = conf.get("CLUSTERS",{}).get(cluster_name,{}).get("HOST",'')
-        if not host:
-            host_url=request.host_url.rstrip("/")
-        else:
-            host_url = "http://"+host
+        host_url = "http://"+conf.get("CLUSTERS",{}).get(cluster_name,{}).get("HOST",request.host)
 
-
-        online_pod_log_url=conf.get('CLUSTERS',{}).get(cluster_name,{}).get('K8S_DASHBOARD_CLUSTER',"/k8s/dashboard/cluster/") + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, 'main')
+        online_pod_log_url=host_url+conf.get('K8S_DASHBOARD_CLUSTER') + f"#/log/{namespace}/{pod_name}/pod?namespace={namespace}&container=main"
         offline_pod_log_url = f'/workflow_modelview/api/web/log/{cluster_name}/{namespace}/{workflow_name}/{pod_name}'
-        debug_online_url=conf.get('CLUSTERS',{}).get(cluster_name,{}).get('K8S_DASHBOARD_CLUSTER',"/k8s/dashboard/cluster/") + "#/shell/%s/%s/%s?namespace=%s" % (namespace, pod_name, 'main',namespace)
+        debug_online_url=host_url+conf.get('K8S_DASHBOARD_CLUSTER') + f"#/shell/{namespace}/{pod_name}/main?namespace={namespace}"
         grafana_pod_url = host_url+conf.get('GRAFANA_TASK_PATH','/grafana/d/pod-info/pod-info?var-pod=')+pod_name
-        bind_pod_url=f"{host_url}/k8s/dashboard/cluster/#/search?namespace={namespace}&q={workflow_name}"
+        bind_pod_url=host_url+f"/k8s/dashboard/cluster/#/search?namespace={namespace}&q={workflow_name}"
 
         echart_option = '''
 {

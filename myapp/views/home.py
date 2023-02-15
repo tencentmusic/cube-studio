@@ -53,7 +53,7 @@ class Myapp(BaseMyappView):
             # },
             {
                 "pic_url": '%s/static/assets/images/tip.gif'%request.host_url.strip('/'),
-                "link": "%s/frontend/aihub/model_market/model_all"%request.host_url.strip('/')
+                "link": "%s/frontend/aihub/model_market/model_visual"%request.host_url.strip('/')
             },
             {
                 "text":"帮助文档",

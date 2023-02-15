@@ -211,7 +211,7 @@ class Docker_ModelView_Base():
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = json.loads(docker.expand).get("namespace",conf.get('NOTEBOOK_NAMESPACE'))
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
         pod_name="docker-commit-%s-%s"%(docker.created_by.username,str(docker.id))
@@ -223,9 +223,10 @@ class Docker_ModelView_Base():
     @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>", methods=["GET", "POST"])
     # @pysnooper.snoop()
     def web_debug(self,cluster_name,namespace,pod_name):
-        cluster=conf.get('CLUSTERS',{})
-        if cluster_name in cluster:
-            pod_url = cluster[cluster_name].get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,pod_name, namespace)
+        from flask import request
+        clusters=conf.get('CLUSTERS',{})
+        if cluster_name in clusters:
+            pod_url = "http://" + clusters[cluster_name].get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,pod_name, namespace)
         else:
             pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, pod_name, namespace)
         print(pod_url)

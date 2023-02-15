@@ -18,7 +18,7 @@ from myapp.models.model_team import Project
 import pysnooper
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from flask_appbuilder.models.decorators import renders
-from flask import Markup
+from flask import Markup,request
 from myapp.models.base import MyappModelBase
 import datetime
 metadata = Model.metadata
@@ -547,7 +547,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def monitoring_html(self):
         try:
             monitoring = json.loads(self.monitoring)
-            monitoring['link']=self.pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
+            monitoring['link']="http://"+self.pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
         except Exception:
             return Markup('<pre><code> 暂无 </code></pre>')
@@ -683,8 +683,6 @@ class Crd:
         # user_roles = [role.name.lower() for role in list(g.user.roles)]
         # if "admin" in user_roles:
         url = conf.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (self.namespace, self.name.replace('_', '-'))
-        # else:
-        #     url = conf.get('K8S_DASHBOARD_PIPELINE','')+'#/search?namespace=%s&q=%s'%(self.namespace,self.name.replace('_','-'))
         return Markup(f'<a target=_blank href="{url}">{self.namespace}</a>')
 
     @property

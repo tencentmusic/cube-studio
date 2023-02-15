@@ -33,7 +33,7 @@ services:
   myapp:
     image:  ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
     restart: unless-stopped
-    command: ['bash','-c','/entrypoint.sh']
+    command: ['bash','-c','sleep 10000000 && /entrypoint.sh']
     environment:
       STAGE: 'dev'
       REDIS_HOST: 'redis'

@@ -1474,7 +1474,7 @@ class MyappModelRestApi(ModelRestApi):
                 page_size='20000',
                 select_columns=self.show_columns,
             )
-            print(count,lst)
+            # print(count,lst)
             if count>0:
                 with(open(csv_file_path,'w',newline='',encoding="utf-8-sig")) as csvfile:
                     csvwrite = csv.writer(csvfile,delimiter=',')

@@ -60,11 +60,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
                 url = "/notebook/"+self.namespace + "/" + self.name+"/lab?#"+self.mount
 
         # url= url + "#"+self.mount
-        JUPYTER_DOMAIN = self.project.cluster.get('HOST',request.host)
-        if JUPYTER_DOMAIN:
-            host = "http://"+JUPYTER_DOMAIN
-        else:
-            host = request.host_url.strip('/') # 使用当前域名打开
+        host = "http://"+self.project.cluster.get('HOST',request.host)
 
         # 对于有边缘节点，直接使用边缘集群的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
@@ -106,7 +102,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
             status = pods[0]['status']
             if g.user.is_admin():
-                k8s_dash_url = self.cluster.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
+                k8s_dash_url = "http://"+self.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
 
                 url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
                 return url

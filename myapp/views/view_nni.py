@@ -391,7 +391,7 @@ class NNI_ModelView_Base():
 
 
 
-        host = nni.project.cluster.get('NNI_DOMAIN',request.host)
+        host = nni.project.cluster.get('HOST',request.host)
         if not host:
             host=request.host
         if ':' in host:
