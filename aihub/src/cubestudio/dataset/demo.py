@@ -86,7 +86,7 @@ if __name__=="__main__":
     # 列的类型变换
     # table = table.cast_column("audio", Audio(sampling_rate=16000，decode=True))
     # table = table.cast_column("image", Image())
-
+    #
     # # table/dataframe类型转换
     # df = table.to_pandas()   # feature元信息丢失
     # table = InMemoryTable(pa.Table.from_pandas(df),features=table.features)
@@ -98,12 +98,12 @@ if __name__=="__main__":
     # sub_df = df.parallel_apply(lambda item:item["num"]+1,axis=1)
     # print(sub_df)
 
-    # def prepare_dataset(batch):
-    #     audio = batch["audio"]
-    #     print(audio)
-    #     return batch
-    #
-    # table = table.map(prepare_dataset, remove_columns=table.column_names)
+    def prepare_dataset(batch):
+        audio = batch["audio"]
+        print(audio)
+        return batch
+
+    table = table.map(prepare_dataset, remove_columns=table.column_names)
 
 
 

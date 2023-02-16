@@ -601,8 +601,6 @@ output %s
                     k8s_client.delete_istio_ingress(namespace=namespace, name=name)
                     k8s_client.delete_hpa(namespace=namespace, name=name)
                     k8s_client.delete_configmap(namespace=namespace, name=name)
-                    isvc_crd=conf.get('CRD_INFO')['inferenceservice']
-                    k8s_client.delete_crd(isvc_crd['group'],isvc_crd['version'],isvc_crd['plural'],namespace=namespace,name=name)
         except Exception as e:
             print(e)
 

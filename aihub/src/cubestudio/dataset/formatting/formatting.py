@@ -12,9 +12,8 @@ import pysnooper
 from .. import config
 from ..features import Features
 from ..features.features import _ArrayXDExtensionType, _is_zero_copy_only, decode_nested_example, pandas_types_mapper
-from ..table import Table
 from ..utils.py_utils import no_op_if_value_is_null
-
+from ..table import Table
 
 T = TypeVar("T")
 

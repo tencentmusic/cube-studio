@@ -35,7 +35,7 @@ from typing import (
 from . import config
 from .utils import logging
 from .utils.logging import get_logger
-from .formatting import format_table, get_format_type_from_alias, get_formatter, query_table
+
 
 # if TYPE_CHECKING:
 from .features.features import Features, FeatureType
@@ -1157,12 +1157,14 @@ class InMemoryTable(TableBlock):
         )
         return formatted_output
 
+    @pysnooper.snoop()
     def __iter__(self):
         """Iterate through the examples.
 
         If a formatting is set with :meth:`Dataset.set_format` rows will be returned with the
         selected format.
         """
+        from .formatting import format_table, get_formatter
         format_kwargs = {}
         self._format_type=None
         formatter = get_formatter(self._format_type, features=self.features, **format_kwargs)
@@ -1183,7 +1185,6 @@ class InMemoryTable(TableBlock):
                 yield self._getitem(
                     i,
                 )
-
 
     @pysnooper.snoop()
     def map(
@@ -1539,7 +1540,7 @@ class InMemoryTable(TableBlock):
             cache_only (`bool`, defaults to `False`): Flag in order to notifiy the method will either find a cached dataset or raise `NonExistentDatasetError` exception,
         """
 
-
+        from .formatting import format_table, get_formatter
 
         # Reduce logging to keep things readable in multiprocessing with tqdm
         if rank is not None and logging.get_verbosity() < logging.WARNING:
@@ -1743,7 +1744,10 @@ class InMemoryTable(TableBlock):
                     desc=pbar_desc,
                 )
                 if not batched:
+                    # 携带table
                     for i, example in pbar:
+                        print(type(example))
+
                         example = apply_function_on_filtered_inputs(example, i, offset=offset)
                         if update_data:
                             if i == 0:

@@ -360,7 +360,7 @@ class Aihub_base():
         aihub = db.session.query(Aihub).filter_by(uuid=aihub_id).first()
         try:
             if aihub and aihub.job_template:
-                job_template = json.loads(aihub.job_template)
+                config = json.loads(aihub.job_template)
                 args = {
                     "group_name":aihub.field,
                     "image_name":f"ccr.ccs.tencentyun.com/cube-studio/aihub:{aihub.name}",
@@ -369,7 +369,7 @@ class Aihub_base():
                     "job_template_describe": aihub.label,
                     "job_template_command": 'python app.py train',
                     "job_template_volume":"/data/k8s/kubeflow/global/cube-studio/aihub/src(hostpath):/src",
-                    "job_template_args": job_template.get('job_template_args',{}),
+                    "job_template_args": config.get('job_template_args',{}),
                     "job_template_expand": {"help":f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"},
                     "job_template_env": f'APPNAME={aihub.name}',
                     "gitpath": f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"
@@ -426,6 +426,7 @@ class Aihub_base():
 
         except Exception as e:
             print(e)
+
         return redirect(aihub.doc)
 
 
