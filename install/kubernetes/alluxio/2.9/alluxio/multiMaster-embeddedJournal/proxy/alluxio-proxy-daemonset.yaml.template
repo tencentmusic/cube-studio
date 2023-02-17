@@ -1,0 +1,73 @@
+---
+# Source: alluxio/templates/proxy/daemonset.yaml
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: alluxio-proxy
+  labels:
+    app: alluxio
+    chart: alluxio-0.6.53
+    release: alluxio
+    heritage: Helm
+    role: alluxio-proxy
+spec:
+  selector:
+    matchLabels:
+      app: alluxio
+      chart: alluxio-0.6.53
+      release: alluxio
+      heritage: Helm
+      role: alluxio-proxy
+  template:
+    metadata:
+      labels:
+        app: alluxio
+        chart: alluxio-0.6.53
+        release: alluxio
+        heritage: Helm
+        role: alluxio-proxy
+    spec:
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+      tolerations:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: alluxio-proxy
+          image: alluxio/alluxio:2.9.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 4
+              memory: 4Gi
+            requests:
+              cpu: 0.5
+              memory: 1Gi
+          command: ["/entrypoint.sh"]
+          args:
+            - proxy
+          env:
+          - name: ALLUXIO_CLIENT_HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          envFrom:
+          - configMapRef:
+              name: alluxio-config
+          ports:
+            - containerPort: 39999
+              name: web # proxy enabled

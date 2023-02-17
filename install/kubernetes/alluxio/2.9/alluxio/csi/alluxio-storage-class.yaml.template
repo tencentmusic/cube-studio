@@ -1,0 +1,29 @@
+---
+# Source: alluxio/templates/csi/storage-class.yaml
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: alluxio
+provisioner: alluxio
+parameters:
+  alluxioPath: /
+  mountInPod: "false"
+  javaOptions: -Dalluxio.user.metadata.cache.enabled=true 
+volumeBindingMode: Immediate
+mountOptions:
+  - "direct_io"
+  - "allow_other"
+  - "entry_timeout=36000"
+  - "attr_timeout=36000"
+  - "max_readahead=0"

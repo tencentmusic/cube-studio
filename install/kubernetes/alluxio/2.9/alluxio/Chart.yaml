@@ -1,0 +1,17 @@
+apiVersion: v1
+description: Open source data orchestration for analytics and machine learning in
+  any cloud.
+home: https://www.alluxio.io/
+maintainers:
+- email: adit@alluxio.com
+  name: Adit Madan
+- email: czhu@alluxio.com
+  name: Chris Zhu
+- email: jiacheng@alluxio.com
+  name: Jiacheng Liu
+- email: shawn.sun@alluxio.com
+  name: Shawn Sun
+- email: cheyang@163.com
+  name: Yang Che
+name: alluxio
+version: 0.6.53

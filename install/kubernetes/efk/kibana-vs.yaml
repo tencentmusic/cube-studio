@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: logging-kibana
+  namespace: logging
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - '*'
+  http:
+  - match:
+    - uri:
+        prefix: /logging
+    rewrite:
+      uri: /logging
+    route:
+    - destination:
+        host: kibana-logging.logging.svc.cluster.local
+        port:
+          number: 5601

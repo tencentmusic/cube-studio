@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ilogtail-user-cm
+  namespace: logging
+data:
+  docker_stdout.yaml: |
+    enable: true
+    inputs:
+      - Type: service_docker_stdout
+        Stderr: true
+        Stdout: true
+        ExternalK8sLabelTag:
+          app: k8s_label_app
+        IncludeEnv:
+          ilogtail: "true"
+    flushers:
+      - Type: flusher_kafka_v2
+        Brokers:
+          - kafka-cluster-kafka-0.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-1.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-2.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+        Topic: pod-%{content.k8s_label_app}
+#      - Type: flusher_stdout
+#        OnlyStdout: false
+#        FileName: clouds.log #不支持动态创建文件
+#        MaxSize: 10
+#        MaxRolls: 3
+
+  nginx_in_file.yaml: |
+    enable: true
+    inputs:
+      - Type: file_log
+        LogPath: /var/log/nginx/
+        FilePattern: access.log
+        ExternalK8sLabelTag:
+          app: k8s_label_app
+        ContainerFile: true
+        ContainerInfo:
+          IncludeEnv:
+            ilogtail: "true"
+    processors:
+    - Type: processor_json
+      SourceKey: content
+      KeepSource: false
+      ExpandDepth: 1
+      ExpandConnector: ""
+    flushers:
+      - Type: flusher_kafka_v2
+        Brokers:
+          - kafka-cluster-kafka-0.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-1.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-2.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+        Topic: pod-%{content.k8s_label_app}
+
+  pipeline_in_file.yaml: |
+    enable: true
+    inputs:
+      - Type: file_log
+        LogPath: /var/log/pipeline/
+        FilePattern: *.log
+        ContainerFile: true
+        ExternalK8sLabelTag:
+          app: k8s_label_app
+        ContainerInfo:
+          IncludeEnv:
+            ilogtail: "true"
+    flushers:
+      - Type: flusher_kafka_v2
+        Brokers:
+          - kafka-cluster-kafka-0.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-1.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-2.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+        Topic: pod-%{content.k8s_label_app}
+
+  service_in_file.yaml: |
+    enable: true
+    inputs:
+      - Type: file_log
+        LogPath: /var/log/service/
+        FilePattern: *.log
+        ExternalK8sLabelTag:
+          app: k8s_label_app
+        ContainerFile: true
+        ContainerInfo:
+          IncludeEnv:
+            ilogtail: "true"
+    flushers:
+      - Type: flusher_kafka_v2
+        Brokers:
+          - kafka-cluster-kafka-0.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-1.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+          - kafka-cluster-kafka-2.kafka-cluster-kafka-brokers.logging.svc.cluster.local:9092
+        Topic: pod-%{content.k8s_label_app}
+#  gpu-log.yaml: |
+#    enable: true
+#    inputs:
+#      - Type: service_gpu_metric
+#    flushers:
+#      - Type: flusher_kafka_v2
+#        Brokers:
+#          - 192.168.0.149:9092
+#        Topic: docker-gpu-logs

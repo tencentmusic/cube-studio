@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ilogtail-ds
+  namespace: logging
+  labels:
+    k8s-app: logtail-ds
+spec:
+  selector:
+    matchLabels:
+      k8s-app: logtail-ds
+  template:
+    metadata:
+      labels:
+        k8s-app: logtail-ds
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+        - name: logtail
+          env:
+            - name: cpu_usage_limit
+              value: "1"
+            - name: mem_usage_limit
+              value: "512"
+          image: sls-opensource-registry.cn-shanghai.cr.aliyuncs.com/ilogtail-community-edition/ilogtail:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 400m
+              memory: 384Mi
+          volumeMounts:
+            - mountPath: /var/run
+              name: run
+            - mountPath: /logtail_host
+              mountPropagation: HostToContainer
+              name: root
+              readOnly: true
+            - mountPath: /usr/local/ilogtail/checkpoint
+              name: checkpoint
+            - mountPath: /usr/local/ilogtail/user_yaml_config.d
+              name: user-config
+              readOnly: true
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      volumes:
+        - hostPath:
+            path: /var/run
+            type: Directory
+          name: run
+        - hostPath:
+            path: /
+            type: Directory
+          name: root
+        - hostPath:
+            path: /lib/var/ilogtail-ilogtail-ds/checkpoint
+            type: DirectoryOrCreate
+          name: checkpoint
+        - configMap:
+            defaultMode: 420
+            name: ilogtail-user-cm
+          name: user-config
