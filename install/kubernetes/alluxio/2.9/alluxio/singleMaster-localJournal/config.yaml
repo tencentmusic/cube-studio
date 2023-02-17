@@ -1,0 +1,7 @@
+master:
+  count: 1 # For multiMaster mode increase this to >1
+
+journal:
+  type: "UFS"
+  ufsType: "local"
+  folder: "/journal"

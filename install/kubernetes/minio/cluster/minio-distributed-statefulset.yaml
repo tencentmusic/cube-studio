@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: infra
+spec:
+  serviceName: minio
+  replicas: 6
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      terminationGracePeriodSeconds: 20
+      containers:
+      - name: minio
+        env:
+        - name: MINIO_ACCESS_KEY
+          value: "minio"
+        - name: MINIO_SECRET_KEY
+          value: "minio2022"
+        - name: MINIO_PROMETHEUS_AUTH_TYPE
+          value: public
+        image: minio/minio:RELEASE.2022-10-08T20-11-00Z
+        imagePullPolicy: IfNotPresent
+        args:
+        - server
+        - --console-address
+        - ":9001"
+        - http://minio-0.minio.infra.svc.cluster.local/data
+        - http://minio-1.minio.infra.svc.cluster.local/data
+        - http://minio-2.minio.infra.svc.cluster.local/data
+        - http://minio-3.minio.infra.svc.cluster.local/data
+        - http://minio-4.minio.infra.svc.cluster.local/data
+        - http://minio-5.minio.infra.svc.cluster.local/data
+        ports:
+        - containerPort: 9000
+        resources:
+          limits:
+            cpu: "6"
+            memory: 8192Mi
+          requests:
+            cpu: 10m
+            memory: 300Mi
+        volumeMounts:
+        - name: "data"
+          mountPath: "/data"
+        livenessProbe:
+          httpGet:
+            path: "/minio/health/live"
+            port: 9000
+          initialDelaySeconds: 120
+          periodSeconds: 20
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2000Gi
+      storageClassName: local-minio
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-service
+  namespace: infra
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector:
+    app: minio
+    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: infra
+  labels:
+    app: minio
+spec:
+  clusterIP: None
+  ports:
+    - port: 9000
+      name: minio
+  selector:
+    app: minio

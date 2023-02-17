@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: logging
+  labels:
+    k8s-app: filebeat
+data:
+  filebeat.yml: |-
+    filebeat.inputs:
+    - type: container
+      paths:
+        - /var/log/containers/*.log
+      processors:
+        - add_kubernetes_metadata:
+            host: ${NODE_NAME}
+            matchers:
+            - logs_path:
+                logs_path: "/var/log/containers/"
+
+    processors:
+      - add_cloud_metadata:
+      - add_host_metadata:
+
+    processors:
+      - decode_json_fields:               # 指定message字段
+        fields: ["message"]
+        target: ""
+
+      - add_kubernetes_metadata:
+          default_indexers.enabled: true
+          default_matchers.enabled: true
+      - add_resource_metadata:
+          deployment: true
+          cronjob: true
+    processors:
+      - drop_fields:
+        #删除的多余字段
+          fields: ["ecs.version","agent","container","host","input","log.offset"]
+          ignore_missing: true
+      - drop_event.when:
+          or:
+          - equals:
+              kubernetes.namespace: "ingress-nginx"
+          - equals:
+              kubernetes.namespace: "kube-system"
+          - equals:
+              kubernetes.namespace: "kuboard"
+          - equals:
+              kubernetes.namespace: "default"
+          - equals:
+              kubernetes.namespace: "istio-system"
+          - equals:
+              kubernetes.namespace: "kube-node-lease"
+          - equals:
+              kubernetes.namespace: "kube-public"
+          - equals:
+              kubernetes.namespace: "logging"
+          - equals:
+              kubernetes.namespace: "local"
+          - equals:
+              kubernetes.namespace: "kubeflow"
+          - equals:
+              kubernetes.namespace: "monitoring"
+          - equals:
+              kubernetes.namespace: "cattle-system"
+          - equals:
+              kubernetes.namespace: "cattle-fleet-system"
+          - equals:
+              kubernetes.namespace: "cattle-impersonation-system"
+          - equals:
+              kubernetes.namespace: "jupyter"
+          - equals:
+              kubernetes.namespace: "katib"
+          - equals:
+              kubernetes.namespace: "harbor"
+
+
+    output.elasticsearch:
+      hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
+      index: "logging-%{+yyyy.MM.dd}"
+
+    setup.ilm.rollover_alias: "logging"
+    #索引模板名称
+    setup.template.name: "logging"
+    #模糊匹配索引模板
+    setup.template.pattern: "logging-*"
+    #关闭默认的模板配置
+    setup.template.enabled: true
+    #开启自定义的模板设置
+    setup.template.overwrite: true
+    #索引生命周期ilm默认开启，网上说法开启后索引名称都是filebeat-*,这里我们自定义需要关闭
+    setup.ilm.enabled: false
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-ilm
+  namespace: logging
+  labels:
+    k8s-app: filebeat
+data:
+  log_policy.json: |
+    {
+      "policy": {
+          "phases": {
+              "hot": {
+                  "min_age": "0ms",
+                  "actions": {
+                      "rollover": {
+                          "max_size": "1gb",
+                          "max_age": "7d",
+                          "max_docs": 10000000
+                      },
+                      "set_priority": {
+                          "priority": 100
+                      }
+                  }
+              },
+              "delete": {
+                  "min_age": "3d",
+                  "actions": {
+                      "delete": {
+  
+                      }
+                  }
+              }
+          }
+      }
+    }

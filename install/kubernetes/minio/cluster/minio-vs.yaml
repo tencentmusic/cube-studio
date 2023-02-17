@@ -1,0 +1,31 @@
+# 私有云环境minio存放public所有静态资源vs
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: infra-minio
+  namespace: infra
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - '*'
+  http:
+  - corsPolicy:
+      allowHeaders:
+      - '*'
+      allowMethods:
+      - POST
+      - GET
+      allowOrigin:
+      - '*'
+    match:
+    - uri:
+        prefix: /files/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: minio-service.infra.svc.cluster.local
+        port:
+          number: 9000
+
