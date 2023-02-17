@@ -2154,6 +2154,7 @@ class Dataset(DatasetInfoMixin, IndexableMixin, TensorflowDatasetMixin):
         """
         return self.num_rows
 
+    @pysnooper.snoop()
     def __iter__(self):
         """Iterate through the examples.
 
@@ -3216,7 +3217,11 @@ class Dataset(DatasetInfoMixin, IndexableMixin, TensorflowDatasetMixin):
                 )
                 if not batched:
                     for i, example in pbar:
+                        print(type(example))
+                        print(example)
                         example = apply_function_on_filtered_inputs(example, i, offset=offset)
+                        print(type(example))
+                        print(example)
                         if update_data:
                             if i == 0:
                                 buf_writer, writer, tmp_file = init_buffer_and_writer()

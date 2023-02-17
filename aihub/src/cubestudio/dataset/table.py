@@ -1151,13 +1151,13 @@ class InMemoryTable(TableBlock):
     def _getitem(self, key: Union[int, slice, str], **kwargs) -> Union[Dict, List]:
         from .formatting import format_table, get_formatter, query_table
         formatter = get_formatter(None, features=self.features)
-        pa_subtable = query_table(self.table, key, None)
+        pa_subtable = query_table(self, key, None)
         formatted_output = format_table(
             pa_subtable, key, formatter=formatter, format_columns=None, output_all_columns=False
         )
         return formatted_output
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def __iter__(self):
         """Iterate through the examples.
 
@@ -1166,12 +1166,14 @@ class InMemoryTable(TableBlock):
         """
         from .formatting import format_table, get_formatter
         format_kwargs = {}
-        self._format_type=None
         formatter = get_formatter(self._format_type, features=self.features, **format_kwargs)
         batch_size = config.ARROW_READER_BATCH_SIZE_IN_DATASET_ITER
         for pa_subtable in table_iter(self, batch_size=batch_size):
+            # print(type(pa_subtable))
             for i in range(pa_subtable.num_rows):
                 pa_subtable_ex = pa_subtable.slice(i, 1)
+                self._format_columns=None
+                self._output_all_columns = False
                 formatted_output = format_table(
                     pa_subtable_ex,
                     0,
@@ -1180,13 +1182,15 @@ class InMemoryTable(TableBlock):
                     output_all_columns=self._output_all_columns,
                 )
                 yield formatted_output
-        else:
-            for i in range(self.num_rows):
-                yield self._getitem(
-                    i,
-                )
 
-    @pysnooper.snoop()
+    def __repr__(self):
+        return f"{self.__class__.__name__} ({{\n    features: {self.features},\n    num_rows: {self.num_rows}\n}})"
+
+    def __str__(self):
+        return f"{self.__class__.__name__} ({{\n    features: {self.features},\n    num_rows: {self.num_rows}\n}})"
+
+
+    # @pysnooper.snoop()
     def map(
         self,
         function: Optional[Callable] = None,
@@ -1469,7 +1473,7 @@ class InMemoryTable(TableBlock):
             #     result._fingerprint = new_fingerprint
             # return result
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def _map_single(
         self,
         function: Optional[Callable] = None,
@@ -1676,10 +1680,9 @@ class InMemoryTable(TableBlock):
                 return {**inputs_to_merge, **processed_inputs}
             else:
                 return processed_inputs
-
+        # @pysnooper.snoop()
         def init_buffer_and_writer():
-            from .arrow_reader import ArrowReader
-            from .arrow_writer import ArrowWriter, OptimizedTypedSequence
+            from .arrow_writer import ArrowWriter
             # Prepare output buffer and batched writer in memory or on file if we update the table
             writer_features = features
             if writer_features is None:
@@ -1719,7 +1722,10 @@ class InMemoryTable(TableBlock):
         with contextlib.ExitStack() as stack:
             try:
                 # input_dataset = self.with_format("arrow")
+
                 input_dataset=self
+                input_dataset._format_type = 'arrow'
+
                 # Loop over single examples or batches and write to buffer/file if examples are to be updated
                 if not batched:
                     pbar_total = len(input_dataset)
@@ -1746,9 +1752,11 @@ class InMemoryTable(TableBlock):
                 if not batched:
                     # 携带table
                     for i, example in pbar:
-                        print(type(example))
-
+                        # from datasets.arrow_dataset import Dataset
+                        # print(example)
                         example = apply_function_on_filtered_inputs(example, i, offset=offset)
+                        # print(type(example))
+                        # print(example)
                         if update_data:
                             if i == 0:
                                 buf_writer, writer, tmp_file = init_buffer_and_writer()
@@ -1802,9 +1810,9 @@ class InMemoryTable(TableBlock):
 
         if update_data:
             if buf_writer is None:
-                return Dataset.from_file(cache_file_name)
+                return self.from_file(cache_file_name)
             else:
-                return Dataset.from_buffer(buf_writer.getvalue())
+                return self.from_buffer(buf_writer.getvalue())
         else:
             return self
 

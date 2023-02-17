@@ -7,7 +7,6 @@ import re,datetime,time,os,sys,io
 import inspect
 from cubestudio.request.model_client import Client,HOST,USERNAME
 from inspect import isfunction
-import socketio
 from cubestudio.utils.py_inspect import get_classes
 MODEL_CLASS = {
 }

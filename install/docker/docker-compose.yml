@@ -19,12 +19,14 @@ services:
 #      - "3306:3306"
 #    volumes:
 #      - ./data/mysql:/var/lib/mysql
+#      - ./docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
 
   frontend:
     image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.01.01
     restart: unless-stopped
     ports:
       - '80:80'
+      - '8880:80'
     volumes:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../install/docker/dockerFrontend/nginx.conf:/etc/nginx/nginx.conf
@@ -33,7 +35,7 @@ services:
   myapp:
     image:  ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
     restart: unless-stopped
-    command: ['bash','-c','sleep 10000000 && /entrypoint.sh']
+    command: ['bash','-c','sleep 100000000 && /entrypoint.sh']
     environment:
       STAGE: 'dev'
       REDIS_HOST: 'redis'
@@ -76,8 +78,6 @@ services:
 #      - ./config.py:/home/myapp/myapp/config.py
 #      - ./kubeconfig:/home/myapp/kubeconfig
 ##
-
-#
 
   worker:
     image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01

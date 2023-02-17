@@ -596,6 +596,8 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         "width": 200
                     }
 
+
+
                 column_sql_type = BigInteger if column_type == 'int' else String  # 因为实际使用的时候，会在数据库中存储浮点数据，通用性也更强
 
                 val=[DataRequired()] if not columns[column_name].get('nullable',True) else []
@@ -869,8 +871,6 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     base_permissions = ['can_list','can_add','can_delete','can_edit','can_show'],
                     pre_add=pre_add,
                     pre_update=pre_update,
-                    pre_show_res=pre_show_res,
-                    pre_add_req=pre_add_req,
                     upload=upload,
                     muldelete=muldelete,
                     copy_row=copy_row,

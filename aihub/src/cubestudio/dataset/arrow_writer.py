@@ -24,7 +24,6 @@ from .features.features import (
     to_pyarrow_listarray,
 )
 from .filesystems import is_remote_filesystem
-from .info import DatasetInfo
 from .keyhash import DuplicatedKeysError, KeyHasher
 from .table import array_cast, array_concat, cast_array_to_feature, embed_table_storage, table_cast
 from .utils import logging
@@ -381,7 +380,7 @@ class ArrowWriter:
         if self.disable_nullable:
             schema = pa.schema(pa.field(field.name, field.type, nullable=False) for field in schema)
         if self.with_metadata:
-            schema = schema.with_metadata(self._build_metadata(DatasetInfo(features=self._features), self.fingerprint))
+            schema = schema.with_metadata(self._build_metadata(features=self._features, fingerprint=self.fingerprint))
         self._schema = schema
         self.pa_writer = self._WRITER_CLASS(self.stream, schema)
 
@@ -397,11 +396,13 @@ class ArrowWriter:
         return _schema if _schema is not None else []
 
     @staticmethod
-    def _build_metadata(info: DatasetInfo, fingerprint: Optional[str] = None) -> Dict[str, str]:
+    def _build_metadata(features: Features, fingerprint: Optional[str] = None) -> Dict[str, str]:
         info_keys = ["features"]  # we can add support for more DatasetInfo keys in the future
-        info_as_dict = asdict(info)
-        metadata = {}
-        metadata["info"] = {key: info_as_dict[key] for key in info_keys}
+        metadata = {
+            "info":{
+                "features":features.to_dict()
+            }
+        }
         if fingerprint is not None:
             metadata["fingerprint"] = fingerprint
         return {"cube-studio": json.dumps(metadata)}

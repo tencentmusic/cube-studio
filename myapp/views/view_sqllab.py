@@ -1,7 +1,7 @@
-
+import copy
 import traceback
 # 将model添加成视图，并控制在前端的显示
-from myapp import app, appbuilder,db,event_logger
+from myapp import app, appbuilder,db,event_logger,cache
 from flask import jsonify,g,request
 from .base import BaseMyappView
 from flask_appbuilder import CompactCRUDMixin, expose
@@ -30,13 +30,13 @@ engine_impls = {
     "mssql":Base_Impl()
 }
 db_uri_demo = {
-    'mysql': 'mysql+pymysql://username:password@host:port/database',
-    'presto': 'presto://username:password@host:port/database',
-    'clikchouse': 'clickhouse+native://username:password@host:port/database',
-    'postgres': 'postgresql+psycopg2://username:password@host:port/database',
-    "impala": 'impala://host:port/database',
-    "oracle":'oracle://username:password@host:port/database',
-    "mssql": 'mssql+pymssql://username:password@host:port/database'
+    'mysql': ['mysql+pymysql://username:password@host:port/database'],
+    'presto': ['presto://username:password@host:port/database'],
+    'clikchouse': ['clickhouse+native://username:password@host:port/database'],
+    'postgres': ['postgresql+psycopg2://username:password@host:port/database'],
+    "impala": ['impala://host:port/database'],
+    "oracle": ['oracle://username:password@host:port/database'],
+    "mssql": ['mssql+pymssql://username:password@host:port/database']
 }
 
 def add_task(req_data):
@@ -89,6 +89,21 @@ class Sqllab_Query_View(BaseMyappView):
 
     @expose('/config', methods=(["GET", "POST"]))
     def sqllab_config(self):
+        all_uri=copy.deepcopy(db_uri_demo)
+        try:
+            success_uris = db.session.query(Sqllab_Query.engine_arg1,Sqllab_Query.engine_arg2).filter(Sqllab_Query.username==g.user.username).filter(Sqllab_Query.status=='success').filter(Sqllab_Query.submit_time>(datetime.datetime.now()-datetime.timedelta(days=30)).strftime("%Y-%m-%d")).group_by(Sqllab_Query.engine_arg1,Sqllab_Query.engine_arg2).all()
+            for success_uri in success_uris:
+                all_uri[success_uri[0]].append(success_uri[1])
+            # cache_uri = cache.get('sqllab_uri')
+            # if cache_uri:
+            #     cache_uri = json.loads()
+            #     cache_uri = cache_uri.get(g.user.username)
+            #     for enginer in db_uri_demo:
+            #         all_uri[enginer] = all_uri[enginer]+cache_uri[enginer]
+        except Exception as e:
+            print(e)
+
+        # print(all_uri)
         config = {
             "status": 0,
             "message": "",
@@ -105,12 +120,12 @@ class Sqllab_Query_View(BaseMyappView):
                                 "relateId": 'engine_arg2',
                                 "value": [
                                     {
-                                        "label": db_uri_demo[enginer],
-                                        "value": db_uri_demo[enginer],
-                                    }
+                                        "label": x,
+                                        "value": x,
+                                    } for x in all_uri[enginer]
                                 ]
                             }
-                        } for enginer in db_uri_demo
+                        } for enginer in all_uri
                     ]
                 },
                 {
@@ -121,7 +136,7 @@ class Sqllab_Query_View(BaseMyappView):
                 }
             ]
         }
-        print(config)
+        # print(config)
         return jsonify(config)
 
 

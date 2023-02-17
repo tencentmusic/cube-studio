@@ -100,10 +100,12 @@ if __name__=="__main__":
 
     def prepare_dataset(batch):
         audio = batch["audio"]
-        print(audio)
+        # print(type(audio),type(batch))
         return batch
 
-    table = table.map(prepare_dataset, remove_columns=table.column_names)
+    table = table.map(prepare_dataset)
+    # print(type(table))
+    print(str(table))
 
 
 

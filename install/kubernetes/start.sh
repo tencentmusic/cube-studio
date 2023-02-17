@@ -1,6 +1,8 @@
 
 bash init_node.sh
 iptables -P FORWARD ACCEPT
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
 mkdir -p ~/.kube && cp config ~/.kube/config && cp ~/.kube/config /etc/kubernetes/admin.conf
 mkdir -p kubeconfig && echo "" > kubeconfig/dev-kubeconfig
 curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && cp kubectl /usr/bin/ && mv kubectl /usr/local/bin/
@@ -133,8 +135,10 @@ kubectl apply -f argo/install-3.4.3-all.yaml
 # 部署trainjob:tfjob/pytorchjob/mpijob/mxnetjob/xgboostjobs
 kubectl apply -f kubeflow/sa-rbac.yaml
 kubectl apply -k kubeflow/train-operator/manifests/overlays/standalone
+
 # 部署sparkjob
 kubectl apply -f spark/install.yaml
+
 # 部署paddlejob
 kubectl apply -f paddle/crd.yaml
 kubectl apply -f paddle/operator.yaml
