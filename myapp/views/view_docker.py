@@ -315,7 +315,7 @@ class Docker_ModelView_Base():
         }
         check_docker_commit.apply_async(kwargs=kwargs)
 
-        return redirect("/myapp/web/log/%s/%s/%s" % (conf.get('ENVIRONMENT'),namespace, pod_name))
+        return redirect("/k8s/web/log/%s/%s/%s" % (conf.get('ENVIRONMENT'),namespace, pod_name))
 
 
 

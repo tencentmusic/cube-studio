@@ -177,7 +177,7 @@ class Model():
                 }
             }
             for input in self.train_inputs:
-                info["train"]['job_template_args']['参数'][input.name]={
+                info["train"]['job_template_args']['参数']['--'+input.name]={
                     "type":"str",
                     "item_type":"str",
                     "label":input.label,

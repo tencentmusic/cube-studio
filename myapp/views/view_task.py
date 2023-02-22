@@ -575,7 +575,7 @@ class Task_ModelView_Base():
             # return redirect('/pipeline_modelview/web/%s'%str(task.pipeline.id))
 
 
-        return redirect("/myapp/web/debug/%s/%s/%s/%s"%(task.pipeline.project.cluster['NAME'],namespace,pod_name,pod_name))
+        return redirect("/k8s/web/debug/%s/%s/%s/%s"%(task.pipeline.project.cluster['NAME'],namespace,pod_name,pod_name))
 
 
 
@@ -674,7 +674,7 @@ class Task_ModelView_Base():
             return self.response(400, **{"status": 1, "result": {}, "message": message})
             # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
-        return redirect("/myapp/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
+        return redirect("/k8s/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
 
 
     def delete_task_run(self,task):
@@ -735,7 +735,7 @@ class Task_ModelView_Base():
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         if pod:
             pod = pod[0]
-            return redirect("/myapp/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
+            return redirect("/k8s/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
 
         flash("未检测到当前task正在运行的容器",category='success')
         return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))

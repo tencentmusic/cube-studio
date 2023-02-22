@@ -5,9 +5,9 @@ import pysnooper
 from datetime import datetime
 import torch
 import torch.distributed as dist
-from yolov5.train import run
-
 os.symlink('/yolov5', '/app/yolov5')
+
+from yolov5.train import run
 
 class Yolov5_Model(Model):
     # 模型基础信息定义
@@ -21,11 +21,11 @@ class Yolov5_Model(Model):
     pic = 'example.jpg'
 
     train_inputs = [
-        Field(Field_type.text, name='data', label='数据地址', describe='数据地址'),
-        Field(Field_type.text, name='weights', label='模型存储地址', describe='权重存储地址'),
-        Field(Field_type.text, name='cfg', label='配置文件地址', describe='配置文件地址'),
-        Field(Field_type.int, name='epochs', label='共进行的循环次数', describe='循环次数'),
-        Field(Field_type.int, name='workers', label='加载数据工作数量', describe='加载数据工作数量'),
+        Field(Field_type.text, name='data', label='数据地址', describe='数据地址',default='yolov5/data/voc_ball.yaml'),
+        Field(Field_type.text, name='weights', label='模型存储地址', describe='权重存储地址',default='yolov5/yolov5s.pt'),
+        Field(Field_type.text, name='cfg', label='配置文件地址', describe='配置文件地址',default='yolov5/models/yolov5s_ball.yaml'),
+        Field(Field_type.int, name='epochs', label='共进行的循环次数', describe='循环次数',default='50'),
+        Field(Field_type.int, name='workers', label='加载数据工作数量', describe='加载数据工作数量',default='4'),
     ]
     # 初始 已包含 可以直接使用 (注：范围值仅供参考，并非上限)
     # data='yolov5/data/voc_ball.yaml'

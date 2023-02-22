@@ -20,66 +20,66 @@
     "train": {
         "job_template_args": {
             "参数": {
-                "data": {
+                "--data": {
                     "type": "str",
                     "item_type": "str",
                     "label": "数据地址",
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "",
+                    "default": "yolov5/data/voc_ball.yaml",
                     "placeholder": "",
                     "describe": "数据地址",
                     "editable": 1,
                     "condition": ""
                 },
-                "weights": {
+                "--weights": {
                     "type": "str",
                     "item_type": "str",
                     "label": "模型存储地址",
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "",
+                    "default": "yolov5/yolov5s.pt",
                     "placeholder": "",
                     "describe": "权重存储地址",
                     "editable": 1,
                     "condition": ""
                 },
-                "cfg": {
+                "--cfg": {
                     "type": "str",
                     "item_type": "str",
                     "label": "配置文件地址",
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "",
+                    "default": "yolov5/models/yolov5s_ball.yaml",
                     "placeholder": "",
                     "describe": "配置文件地址",
                     "editable": 1,
                     "condition": ""
                 },
-                "epochs": {
+                "--epochs": {
                     "type": "str",
                     "item_type": "str",
                     "label": "共进行的循环次数",
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "",
+                    "default": "50",
                     "placeholder": "",
                     "describe": "循环次数",
                     "editable": 1,
                     "condition": ""
                 },
-                "workers": {
+                "--workers": {
                     "type": "str",
                     "item_type": "str",
                     "label": "加载数据工作数量",
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "",
+                    "default": "4",
                     "placeholder": "",
                     "describe": "加载数据工作数量",
                     "editable": 1,

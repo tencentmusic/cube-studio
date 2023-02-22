@@ -686,60 +686,6 @@ class Myapp(BaseMyappView):
 
         return jsonify(menu)
 
-
-    @expose("/web/log/<cluster_name>/<namespace>/<pod_name>", methods=["GET",])
-    def web_log(self,cluster_name,namespace,pod_name):
-        from myapp.utils.py.py_k8s import K8s
-        all_clusters = conf.get('CLUSTERS',{})
-        if cluster_name in all_clusters:
-            kubeconfig = all_clusters[cluster_name].get('KUBECONFIG','')
-            pod_url = all_clusters[cluster_name].get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
-        else:
-            kubeconfig = None
-            pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
-
-        k8s = K8s(kubeconfig)
-        pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
-        if pod:
-            pod = pod[0]
-            flash('当前pod状态：%s'%pod['status'],category='warning')
-        data = {
-            "url": pod_url,
-            "target": 'div.kd-scroll-container',     #  kd-logs-container  :nth-of-type(0)
-            "delay": 2000,
-            "loading":True,
-            "currentHeight": 128
-        }
-        # 返回模板
-        if cluster_name == conf.get('ENVIRONMENT'):
-            return self.render_template('link.html', data=data)
-        else:
-            return self.render_template('external_link.html', data=data)
-
-
-
-    @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>/<container_name>", methods=["GET", "POST"])
-    def web_debug(self,cluster_name,namespace,pod_name,container_name):
-        cluster=conf.get('CLUSTERS',{})
-        if cluster_name in cluster:
-            pod_url = cluster[cluster_name].get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,container_name, namespace)
-        else:
-            pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, container_name, namespace)
-        print(pod_url)
-        data = {
-            "url": pod_url,
-            "target":'div.kd-scroll-container', #  'div.kd-scroll-container.ng-star-inserted',
-            "delay": 2000,
-            "loading": True
-        }
-        # 返回模板
-        if cluster_name==conf.get('ENVIRONMENT'):
-            return self.render_template('link.html', data=data)
-        else:
-            return self.render_template('external_link.html', data=data)
-
-
-
     @expose('/feature/check')
     # @trace(tracer,depth=1,trace_content='line')
     # @pysnooper.snoop()

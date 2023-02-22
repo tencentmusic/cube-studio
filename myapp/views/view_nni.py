@@ -632,7 +632,7 @@ frameworkcontrollerConfig:
         pod = k8s.get_pods(namespace=namespace, pod_name=nni.name)
         if pod:
             pod = pod[0]
-            return redirect("/myapp/web/log/%s/%s/%s" % (nni.project.cluster['NAME'],namespace, nni.name))
+            return redirect("/k8s/web/log/%s/%s/%s" % (nni.project.cluster['NAME'],namespace, nni.name))
 
         flash("未检测到当前搜索正在运行的容器",category='success')
         return redirect(conf.get('MODEL_URLS',{}).get('nni',''))

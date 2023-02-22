@@ -982,7 +982,7 @@ output %s
             if pods:
                 pod = pods[0]
                 print('deploy debug success')
-                return redirect("/myapp/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
+                return redirect("/k8s/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
 
         # 生产环境才有域名代理灰度的问题
         if env=='prod':
