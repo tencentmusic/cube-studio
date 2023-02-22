@@ -97,15 +97,15 @@ if __name__=="__main__":
     # df = table.to_pandas()
     # sub_df = df.parallel_apply(lambda item:item["num"]+1,axis=1)
     # print(sub_df)
-
+    index=0
     def prepare_dataset(batch):
         audio = batch["audio"]
         # print(type(audio),type(batch))
         return batch
 
     table = table.map(prepare_dataset)
-    # print(type(table))
-    print(str(table))
+    print(type(table))
+    # print(str(table))
 
 
 

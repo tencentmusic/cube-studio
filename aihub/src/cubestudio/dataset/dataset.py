@@ -32,19 +32,22 @@ from pyarrow import csv
 class Dataset(Model):
     path = '/dataset_modelview/api'
 
-    @property
-    def local_dir(self):
-        return f"/data/k8s/kubeflow/dataset/{self.name}/{self.version}"
-
+    # @property
+    # def local_dir(self):
+    #     return f"/data/k8s/kubeflow/dataset/{self.name}/{self.version}"
+    local_dir = ''
     # @pysnooper.snoop()
     def download(self,des_dir=None):
-        if not des_dir:
-            des_dir = self.local_dir
+        if des_dir:
+            self.local_dir=des_dir
+        else:
+            self.local_dir=os.getcwd()
+        print('准备下载数据到',self.local_dir)
         url = self.client.path+f"/download/{self.id}"
         donwload_urls = self.client.req(url).get("result",{}).get("download_urls",[])
-        os.makedirs(des_dir,exist_ok=True)
+        os.makedirs(self.local_dir,exist_ok=True)
         pool = Pool(len(donwload_urls))  # 开辟包含指定数目线程的线程池
-        pool.map(partial(download_file,des_dir=des_dir), donwload_urls)  # 当前worker，只处理分配给当前worker的任务
+        pool.map(partial(download_file,des_dir=self.local_dir), donwload_urls)  # 当前worker，只处理分配给当前worker的任务
         pool.close()
         pool.join()
 
@@ -59,6 +62,7 @@ class Dataset(Model):
         headers = {
             "Authorization":self.client.token
         }
+        print('准备上传本地数据', file_path_list)
         pool = Pool(min(10,len(file_path_list)))  # 开辟包含指定数目线程的线程池
         pool.map(partial(upload_file,url=url,headers=headers), file_path_list)  # 当前worker，只处理分配给当前worker的任务
         pool.close()
@@ -73,9 +77,19 @@ class Dataset(Model):
             original = original_file.read()
 
         encrypted = f.encrypt(original)
-        os.remove(save_path)
+        if os.path.exists(save_path):
+            os.remove(save_path)
         with open(save_path, 'wb') as encrypted_file:
             encrypted_file.write(encrypted)
+
+    # 文件解压
+    def compress(self,zip_path,compress_dir):
+        shutil.make_archive(zip_path[:zip_path.index('.')],'zip',compress_dir)
+
+    # 文件加密
+    def decompress(self,zip_path,extract_dir=None):
+        shutil.unpack_archive(zip_path, extract_dir=extract_dir, format=None)
+
 
     # 文件解密
     def decrypt(self,file_path,save_path,key):
@@ -86,7 +100,8 @@ class Dataset(Model):
             encrypted = encrypted_file.read()
 
         decrypted = f.decrypt(encrypted)
-        os.remove(save_path)
+        if os.path.exists(save_path):
+            os.remove(save_path)
         with open(save_path, 'wb') as decrypted_file:
             decrypted_file.write(decrypted)
 
@@ -96,21 +111,22 @@ class Dataset(Model):
         if not local_dir:
             local_dir = self.local_dir
 
-        # 解压压缩文件
-        files = os.listdir(local_dir)
-        files = [os.path.join(local_dir,filename) for filename in files if re.match('\.zip$',filename)  or re.match('\.tar\.gz$',filename)]
-        if files:
-            pool = Pool(min(10, len(files)))  # 开辟包含指定数目线程的线程池
-            pool.map(partial(decompress_file, des_dir=local_dir), files)  # 当前worker，只处理分配给当前worker的任务
-            pool.close()
-            pool.join()
-            for path in files:
-                os.remove(path)
+        # # 解压压缩文件
+        # files = os.listdir(local_dir)
+        # files = [os.path.join(local_dir,filename) for filename in files if re.match('\.zip$',filename)  or re.match('\.tar\.gz$',filename)]
+        # if files:
+        #     pool = Pool(min(10, len(files)))  # 开辟包含指定数目线程的线程池
+        #     pool.map(partial(decompress_file, des_dir=local_dir), files)  # 当前worker，只处理分配给当前worker的任务
+        #     pool.close()
+        #     pool.join()
+        #     for path in files:
+        #         os.remove(path)
 
         # 根据data.csv读取成table
         data_csv_path = os.path.join(local_dir,f'{self.name}.csv')
         if os.path.exists(data_csv_path):
             self.table = InMemoryTable(table=csv.read_csv(data_csv_path))
+            self.table.local_dir = local_dir
 
 
         # 根据解析代码，解析成table
@@ -123,6 +139,7 @@ class Dataset(Model):
 
             datase_builer = importlib.import_module(name=f"{self.name}.{self.name}")
             self.table = InMemoryTable(datase_builer.load(self.name))
+            self.table.local_dir = local_dir
 
         # 将info信息，将数据列转化为特征
         info_path = os.path.join(local_dir, f'{self.name}.json')
@@ -136,6 +153,7 @@ class Dataset(Model):
                     del feature['_type']
                     import cubestudio.dataset.features as fea
                     self.table = self.table.cast_column(feature_name,getattr(fea,_type)(**feature))
+                    self.table.local_dir = local_dir
 
 
     # todo 将数据集转存到云存储，cos，minio，oss等
