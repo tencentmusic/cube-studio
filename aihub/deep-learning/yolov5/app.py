@@ -5,7 +5,8 @@ import pysnooper
 from datetime import datetime
 import torch
 import torch.distributed as dist
-os.symlink('/yolov5', '/app/yolov5')
+if not os.path.exists('/app/yolov5'):
+    os.symlink('/yolov5', '/app/yolov5')
 
 from yolov5.train import run
 

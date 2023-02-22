@@ -1,0 +1,29 @@
+{
+  "features": {
+    "image": {
+      "_type": "Image"
+    },
+    "num": {
+      "_type": "Value",
+      "dtype": "int32"
+    },
+    "id": {
+      "_type": "Value",
+      "dtype": "string"
+    },
+    "audio": {
+      "_type": "Audio"
+    },
+    "label": {
+      "num_classes": 5,
+      "names": [
+        "甚至出现交易几乎停滞的情况",
+        "一二线城市虽然也处于调整中",
+        "但因为聚集了过多公共资源",
+        "为了规避三四线城市明显过剩的市场风险",
+        "标杆房企必然调整市场战略"
+      ],
+      "_type": "ClassLabel"
+    }
+  }
+}
