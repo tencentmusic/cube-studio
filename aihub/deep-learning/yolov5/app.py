@@ -7,6 +7,7 @@ import torch
 import torch.distributed as dist
 from yolov5.train import run
 
+os.symlink('/yolov5', '/app/yolov5')
 
 class Yolov5_Model(Model):
     # 模型基础信息定义
