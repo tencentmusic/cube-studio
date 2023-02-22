@@ -1,8 +1,7 @@
 #!/bin/bash
 
 mkdir -p /data/log/nginx/
-pip install celery redis pyarrow requests_toolbelt cryptography tqdm fsspec aiohttp librosa pandarallel
-
+pip install pysnooper requests flask kubernetes celery redis cryptography tqdm pyarrow celery redis fsspec aiohttp librosa pandarallel requests_toolbelt multiprocess
 
 cp /src/docker/nginx.conf /etc/nginx/nginx.conf
 cp /src/docker/default.conf /etc/nginx/conf.d/default.conf
@@ -13,3 +12,4 @@ echo "started nginx"
 if [ "$#" -ne 0 ]; then
     exec "$@"
 fi
+

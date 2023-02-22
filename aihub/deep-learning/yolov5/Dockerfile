@@ -11,3 +11,4 @@ RUN bash /init.sh
 WORKDIR /app
 COPY * /app/
 COPY /app/upsampling.py /root/miniconda3/envs/py39/lib/python3.9/site-packages/torch/nn/modules/upsampling.py
+

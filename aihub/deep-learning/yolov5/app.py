@@ -1,6 +1,5 @@
 import io, sys, os
 from cubestudio.aihub.model import Model
-from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server, Field, Field_type
 import pysnooper
 from datetime import datetime
@@ -21,9 +20,9 @@ class Yolov5_Model(Model):
     pic = 'example.jpg'
 
     train_inputs = [
-        Field(Field_type.str, name='data', label='数据地址', describe='数据地址'),
-        Field(Field_type.str, name='weights', label='模型存储地址', describe='权重存储地址'),
-        Field(Field_type.str, name='cfg', label='配置文件地址', describe='配置文件地址'),
+        Field(Field_type.text, name='data', label='数据地址', describe='数据地址'),
+        Field(Field_type.text, name='weights', label='模型存储地址', describe='权重存储地址'),
+        Field(Field_type.text, name='cfg', label='配置文件地址', describe='配置文件地址'),
         Field(Field_type.int, name='epochs', label='共进行的循环次数', describe='循环次数'),
         Field(Field_type.int, name='workers', label='加载数据工作数量', describe='加载数据工作数量'),
     ]

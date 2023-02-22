@@ -312,5 +312,97 @@
     },
     "train": {},
     "inference": {}
+  },
+  {
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/yolov5",
+    "field": "机器视觉",
+    "scenes": "目标识别",
+    "type": "dateset,notebook,train,inference",
+    "name": "yolov5",
+    "status": "online",
+    "version": "v20221118",
+    "uuid": "yolov5-v20221118",
+    "label": "目标识别",
+    "describe": "darknet yolov5 目标识别",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "job_template_args": {
+            "参数": {
+                "data": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "数据地址",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "数据地址",
+                    "editable": 1,
+                    "condition": ""
+                },
+                "weights": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "模型存储地址",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "权重存储地址",
+                    "editable": 1,
+                    "condition": ""
+                },
+                "cfg": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "配置文件地址",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "配置文件地址",
+                    "editable": 1,
+                    "condition": ""
+                },
+                "epochs": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "共进行的循环次数",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "循环次数",
+                    "editable": 1,
+                    "condition": ""
+                },
+                "workers": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "加载数据工作数量",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "加载数据工作数量",
+                    "editable": 1,
+                    "condition": ""
+                }
+            }
+        }
+    },
+    "inference": {}
   }
 ]

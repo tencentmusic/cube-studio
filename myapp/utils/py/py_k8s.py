@@ -192,6 +192,8 @@ class K8s():
             "used_gpu":0
         }
         for pod in pods:
+            if not pod.status or pod.status.phase!='Running':
+                continue
             containers = pod.spec.containers
             memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
             cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
@@ -213,6 +215,8 @@ class K8s():
             pods = self.v1.list_pod_for_all_namespaces(watch=False).items
 
             for pod in pods:
+                if not pod.status or pod.status.phase!='Running':
+                    continue
                 containers = pod.spec.containers
                 memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
                 cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
@@ -242,12 +246,16 @@ class K8s():
 
     def get_node_event(self,node_name):
         node = self.get_node(name=node_name)
-        events = [item.to_dict() for item in self.v1.list_event_for_all_namespaces(field_selector=f'source.host={node["hostip"]}').items]
+        events = [item.to_dict() for item in self.v1.list_event_for_all_namespaces().items]   # field_selector=f'source.host={node["hostip"]}'
         for event in events:
             event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
             if not event['time']:
                 event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
-        return events
+        back_event = []
+        for event in events:
+            if event.get("source",{}).get("host",'')==node["hostip"]:
+                back_event.append(event)
+        return back_event
 
     # 获取指定label的nodeip列表
     # @pysnooper.snoop()
