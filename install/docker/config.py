@@ -842,11 +842,6 @@ JSON_SORT_KEYS=False
 # 链接菜单
 ALL_LINKS=[
     {
-        "label":"Minio",
-        "name":"minio",
-        "url":"/minio/public/"
-    },
-    {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
         "url": "/k8s/dashboard/cluster/#/pod?namespace=infra"
