@@ -101,7 +101,7 @@ class InferenceService_ModelView_base():
         "replicas_html":"副本数"
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
-    host_rule=",".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
+    host_rule=",<br>".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
@@ -625,6 +625,34 @@ output %s
             self.delete_old_service(self.src_item_json.get('name',''), item.project.cluster)
             flash('发现模型服务变更，启动清理服务%s:%s'%(self.src_item_json.get('model_name',''),self.src_item_json.get('model_version','')),'success')
 
+
+        src_project_id = self.src_item_json.get('project_id',0)
+        if src_project_id and src_project_id!=item.project.id:
+            try:
+                from myapp.models.model_team import Project
+                src_project = db.session.query(Project).filter_by(id=int(src_project_id)).first()
+                if src_project and src_project.cluster['NAME']!=item.project.cluster['NAME']:
+                    # 如果集群变了，原有集群的已经部署的服务要clear掉
+                    service_name = self.src_item_json.get('name','')
+                    if service_name:
+                        from myapp.utils.py.py_k8s import K8s
+                        k8s_client = K8s(src_project.cluster.get('KUBECONFIG', ''))
+                        service_namespace = conf.get('SERVICE_NAMESPACE')
+                        for namespace in [service_namespace, ]:
+                            for name in [service_name, 'debug-' + service_name, 'test-' + service_name]:
+                                service_external_name = (name + "-external").lower()[:60].strip('-')
+                                k8s_client.delete_deployment(namespace=namespace, name=name)
+                                k8s_client.delete_service(namespace=namespace, name=name)
+                                k8s_client.delete_service(namespace=namespace, name=service_external_name)
+                                k8s_client.delete_istio_ingress(namespace=namespace, name=name)
+                                k8s_client.delete_hpa(namespace=namespace, name=name)
+                                k8s_client.delete_configmap(namespace=namespace, name=name)
+                # 域名后缀如果不一样也要变了
+                if src_project and src_project.cluster['SERVICE_DOMAIN'] != item.project.cluster['SERVICE_DOMAIN']:
+                    item.host=item.host.replace(src_project.cluster['SERVICE_DOMAIN'],item.project.cluster['SERVICE_DOMAIN'])
+            except Exception as e:
+                print(e)
+
     # 事后无法读取到project属性
     def pre_delete(self, item):
         self.delete_old_service(item.name,item.project.cluster)
@@ -933,6 +961,32 @@ output %s
                 external_ip=SERVICE_EXTERNAL_IP
             )
 
+
+        # # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
+        # ip和端口形式只定向到生产，因为不能像泛化域名一样随意添加
+        TKE_EXISTED_LBID=''
+        if service.project.expand:
+            TKE_EXISTED_LBID = json.loads(service.project.expand).get('TKE_EXISTED_LBID',"")
+        if not TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = service.project.cluster.get("TKE_EXISTED_LBID",'')
+        if not TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = conf.get('TKE_EXISTED_LBID','')
+
+        if not SERVICE_EXTERNAL_IP and TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')[0]
+            service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
+            service_external_name = (service.name + "-external").lower()[:60].strip('-')
+            k8s_client.create_service(
+                namespace=namespace,
+                name=service_external_name,
+                username=service.created_by.username,
+                ports=service_ports,
+                selector=labels,
+                service_type='LoadBalancer',
+                annotations={
+                    "service.kubernetes.io/tke-existed-lbid":TKE_EXISTED_LBID,
+                }
+            )
 
 
         if env=='prod':

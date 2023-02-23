@@ -52,11 +52,12 @@ def init():
 
 
         # 添加一些默认的记录
+        add_project('org', 'public', '公共项目组')
         add_project('org','推荐中心','推荐项目组')
-        add_project('org', '多媒体中心', '多媒体项目组')
         add_project('org', '搜索中心', '搜索项目组')
         add_project('org', '广告中心', '广告项目组')
-        add_project('org', 'public', '公共项目组')
+        add_project('org', '安全中心', '安全项目组')
+        add_project('org', '多媒体中心', '多媒体项目组')
 
         add_project('job-template', '基础命令', 'python/bash等直接在服务器命令行中执行命令的模板',{"index":1})
         add_project('job-template', '数据导入导出', '集群与用户机器或其他集群之间的数据迁移',{"index":2})

@@ -63,7 +63,10 @@ def create_template(group_name, image_name, image_describe, job_template_name,
                     job_template_env='', gitpath=''):
 
     repository = db.session.query(Repository).filter_by(name='hubsecret').first()
-
+    if not repository:
+        repository = db.session.query(Repository).filter_by(hubsecret='hubsecret').first()
+    if repository:
+        flash('hubsecret repository不存在','warning')
     images = db.session.query(Images).filter_by(name=image_name).first()
     project = db.session.query(Project).filter_by(name=group_name).filter_by(type='job-template').first()
     # 创建分组
