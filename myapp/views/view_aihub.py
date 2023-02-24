@@ -168,8 +168,8 @@ def create_pipeline(pipeline,tasks):
             pipeline_model.name = pipeline['name']
             pipeline_model.describe = pipeline['describe']
             pipeline_model.dag_json=json.dumps(pipeline['dag_json'],indent=4,ensure_ascii=False).replace('_','-')
-            pipeline_model.created_by_fk = 1
-            pipeline_model.changed_by_fk = 1
+            pipeline_model.created_by_fk = g.user.id
+            pipeline_model.changed_by_fk = g.user.id
             pipeline_model.project_id = org_project.id
             pipeline_model.parameter = json.dumps(pipeline.get('parameter',{}),indent=4,ensure_ascii=False)
             db.session.add(pipeline_model)
@@ -181,8 +181,8 @@ def create_pipeline(pipeline,tasks):
     else:
         pipeline_model.describe = pipeline['describe']
         pipeline_model.dag_json = json.dumps(pipeline['dag_json'],indent=4,ensure_ascii=False).replace('_', '-')
-        pipeline_model.created_by_fk = 1
-        pipeline_model.changed_by_fk = 1
+        pipeline_model.created_by_fk = g.user.id
+        pipeline_model.changed_by_fk = g.user.id
         pipeline_model.project_id = org_project.id
         pipeline_model.parameter = json.dumps(pipeline.get('parameter', {}))
         print('update pipeline %s' % pipeline['name'])
@@ -203,8 +203,8 @@ def create_pipeline(pipeline,tasks):
                 task_model.resource_memory = task.get('resource_memory','2G')
                 task_model.resource_cpu = task.get('resource_cpu','2')
                 task_model.resource_gpu = task.get('resource_gpu','0')
-                task_model.created_by_fk = 1
-                task_model.changed_by_fk = 1
+                task_model.created_by_fk = g.user.id1
+                task_model.changed_by_fk = g.user.id
                 task_model.pipeline_id = pipeline_model.id
                 task_model.job_template_id = job_template.id
                 db.session.add(task_model)
@@ -223,8 +223,8 @@ def create_pipeline(pipeline,tasks):
             task_model.resource_memory = task.get('resource_memory', '2G')
             task_model.resource_cpu = task.get('resource_cpu', '2')
             task_model.resource_gpu = task.get('resource_gpu', '0')
-            task_model.created_by_fk = 1
-            task_model.changed_by_fk = 1
+            task_model.created_by_fk = g.user.id
+            task_model.changed_by_fk = g.user.id
             task_model.pipeline_id = pipeline_model.id
             task_model.job_template_id = job_template.id
             print('update task %s' % task['name'])
