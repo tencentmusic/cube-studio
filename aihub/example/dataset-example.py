@@ -27,7 +27,7 @@ pandarallel.initialize(nb_workers=10)
 
 if __name__=="__main__":
     HOST = 'http://host.docker.internal'
-    token = '在星云右上角个人界面查看Authorization'
+    token = '在平台右上角个人界面查看Authorization'
     init(host=HOST,username='pengluan',token=token)
     key=Fernet.generate_key()
     print(key)
