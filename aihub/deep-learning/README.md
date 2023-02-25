@@ -12,15 +12,14 @@
 
 镜像调试，基础镜像为conda环境。先使用如下命令启动基础环境进入容器
 
-ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 为conda，python3.9环境
-
-ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8 为conda，python3.8环境
-
-ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
-
 ccr.ccs.tencentyun.com/cube-studio/aihub:base 无python环境
-
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 为conda，python3.9环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8 为conda，python3.8环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4 无python环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.6  为conda，python3.6环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.8  为conda，python3.8环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.9  为conda，python3.9环境
 
 ```bash
 # 进入模型应用
@@ -28,7 +27,7 @@ ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4 无python环境
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
+sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
 
 ```
 如果需要使用gpu调试
@@ -60,15 +59,15 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
 如果是gpu服务
 ```bash
 docker 1.19.3以前，需要安装NVIDIA-docker2
-sudo docker run --name ${aiapp} --privileged --rm -it --runtime=nvidia  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it --runtime=nvidia  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 docker 1.19.3以后，
-sudo docker run --name ${aiapp} --privileged --rm -it --gpu=0  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
 
@@ -102,6 +101,7 @@ sudo docker run --name ${aiapp} --privileged --rm -it --gpu=0  -e APPNAME=$aiapp
 - 实例分割：FCN、DeepLab、Pyramid Scene Parsing Network、Mask R-CNN、U-Net
 
 
+![humanseg](humanseg/example.jpg)
 
 ## 图像生成与转换
 
@@ -111,14 +111,18 @@ sudo docker run --name ${aiapp} --privileged --rm -it --gpu=0  -e APPNAME=$aiapp
 
 animegan
 
+![animegan](animegan/example.jpg)
 
 - 有监督图像转换：CGAN、pix2pix
 
 - 无监督图像转换：cycleGAN
 
+![gfpgan](https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f)
+
 
 stable-diffusion
 
+![stable-diffusion](https://images.nightcafe.studio//assets/stable-tile.jpg)
 
 ## 目标检测
 
@@ -126,6 +130,9 @@ stable-diffusion
 
 - 基于回归单阶段: YOLO系列、SSD
 
+![yolov3](yolov3/example.jpg)
+
+![panoptic](panoptic/test.jpg)
 
 ## 目标跟踪
 
@@ -144,6 +151,8 @@ stable-diffusion
 - PartialConv
 - EdgeConnect
 
+![deoldify](https://picx.zhimg.com/v2-e96dd757c96464427560a9b5e5b07bc3_720w.jpg?source=172ae18b)
+
 
 ## 超分辨率
 
@@ -161,7 +170,13 @@ stable-diffusion
 
 [paddleocr](../paddleocr/README.md)
 
+<img width="740" alt="640" src="https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png">
+
 [ddddocr](../ddddocr/README.md)
+
+<img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="300px">
+
+
 
 ## 图像检索
 

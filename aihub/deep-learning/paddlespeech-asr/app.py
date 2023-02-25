@@ -16,7 +16,6 @@ class Speech_Asr_Model(Model):
     scenes = "语音处理"
     status = 'online'
     version = 'v20221116'
-    doc = 'https://github.com/PaddlePaddle/PaddleSpeech'  # 'https://帮助文档的链接地址'
     pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     # inference_resource = {
@@ -60,6 +59,8 @@ model = Speech_Asr_Model()
 # result = model.inference('/zh.wav')  # 测试
 # print(result)
 
-# 启动服务
-server = Server(model=model)
-server.server(port=8080)
+if __name__=='__main__':
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()

@@ -1,5 +1,5 @@
 {
-    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/humanseg",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",

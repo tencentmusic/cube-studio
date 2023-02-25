@@ -40,7 +40,6 @@ class SD_Model(Model):
     scenes = "图像创作"
     status = 'online'
     version = 'v20221022'
-    doc = 'https://github.com/CompVis/stable-diffusion'  # 'https://帮助文档的链接地址'
     pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     inference_resource = {
@@ -257,6 +256,7 @@ model = SD_Model()
 # print(result)
 
 if __name__=='__main__':
-    # # 启动服务
-    server = Server(model=model)
-    server.server(port=8080)
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()
