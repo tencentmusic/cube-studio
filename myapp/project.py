@@ -3,7 +3,8 @@ from werkzeug.security import check_password_hash
 from flask_appbuilder.security.views import AuthDBView
 from flask_appbuilder.security.views import expose
 from flask_appbuilder.const import LOGMSG_WAR_SEC_LOGIN_FAILED
-
+from flask import send_file
+import os
 # 推送给管理员消息的函数
 def push_admin(message):
     pass
@@ -90,7 +91,42 @@ class Myauthdbview(AuthDBView):
         logout_user()
         return redirect(login_url)
 
+    # 从csdn过来的转接到github，用于百度站长统计
+    @expose('/csdn/<username>')
+    def csdn(self,username):
+        data={
+            "url":"https://github.com/tencentmusic/cube-studio",
+            "src":"csdn",
+            "username":username
+        }
+        return self.render_template('redirect.html', data=data)
 
+    # 从juejin过来的转接到github，用于百度站长统计
+    @expose('/juejin/<username>')
+    def juejin(self, username):
+        data={
+            "url":"https://github.com/tencentmusic/cube-studio",
+            "src":"juejin",
+            "username":username
+        }
+        return self.render_template('redirect.html', data=data)
 
+    # 从51cto过来的转接到github，用于百度站长统计
+    @expose('/51cto/<username>')
+    def cto(self, username):
+        data={
+            "url":"https://github.com/tencentmusic/cube-studio",
+            "src":"51cto",
+            "username":username
+        }
+        return self.render_template('redirect.html', data=data)
 
-
+    # 从zhihu过来的转接到github，用于百度站长统计
+    @expose('/zhihu/<username>')
+    def zhihu(self, username):
+        data={
+            "url":"https://github.com/tencentmusic/cube-studio",
+            "src":"zhihu",
+            "username":username
+        }
+        return self.render_template('redirect.html', data=data)
