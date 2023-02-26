@@ -5,7 +5,7 @@
 
 ```
 linux
-docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:5.7
+docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/mysql:/var/lib/mysql -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:5.7
 mac
 docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -d mysql:5.7
 
