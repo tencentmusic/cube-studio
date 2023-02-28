@@ -26,11 +26,9 @@ pandarallel.initialize(nb_workers=10)
 
 
 if __name__=="__main__":
-    HOST = 'http://data.tme.woa.com'
     HOST = 'http://host.docker.internal'
     token = '在平台右上角个人界面查看Authorization'
-    token='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJwZW5nbHVhbiJ9.3WrxmDOK7PMt0P2xdgUx-1HLvhgeNRPKFaeQzFiIkoU'
-    init(host=HOST,username='pengluan',token=token)
+    init(host=HOST,username='$username',token=token)
     key=Fernet.generate_key()
     print(key)
     # key = b'aViHLsGcYgmzMJrS98N2yRD3oTPMZf5JcZvKzr47f6E='
