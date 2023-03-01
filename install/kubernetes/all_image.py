@@ -15,7 +15,8 @@ kubernetes_dashboard=[
 
 new_gpu = [
     'nvidia/k8s-device-plugin:v0.7.1',    # gpu k8s插件
-    'nvidia/dcgm-exporter:2.3.1-2.6.1-ubuntu20.04'   # gpu监控
+    'nvidia/dcgm-exporter:2.3.1-2.6.1-ubuntu20.04',   # gpu监控
+    'tkestack/gpu-manager:1.0.3'
 ]
 
 new_prometheus = [
@@ -44,7 +45,12 @@ volcano = [
 nni = [
     'frameworkcontroller/frameworkcontroller'   # 超参搜索
 ]
-
+pipeline = [
+    'minio/minio',
+    'quay.io/argoproj/workflow-controller:latest',
+    'quay.io/argoproj/workflow-controller:v3.4.3',
+    'quay.io/argoproj/argocli:latest'
+]
 cube_studio = [
     # notebook基础镜像
     'ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base',
@@ -130,12 +136,12 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8',
 ]
 
-# images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio+ volcano + nni+ cube_studio
-images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio + volcano + nni
+# images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio+ volcano + nni+ pipeline+cube_studio
+images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio + volcano + nni+pipeline
 images = list(set(images))
 
 # 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网docker.oa.com的仓库
-HOST = 'ccr.ccs.tencentyun.com/cube-studio/'
+HOST = 'mirrors.tencent.com/tmedi/'
 for image in images:
     # print(image)
     if 'gpu' in image:
@@ -150,12 +156,12 @@ for image in images:
     # print('docker push %s' % (image_name))
 
     # 内网机器上拉取私有仓库镜像
-    # image=image.replace('@sha256','')
-    # print("docker pull %s" % image_name)
-    # print("docker tag %s %s"%(image_name,image))
-
     image=image.replace('@sha256','')
-    print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
+    print("docker pull %s" % image_name)
+    print("docker tag %s %s"%(image_name,image))
+
+    # image=image.replace('@sha256','')
+    # print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
 
 
 print('')

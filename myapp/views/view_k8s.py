@@ -1,6 +1,6 @@
 import json
 
-import pysnooper
+import pysnooper,os
 
 from myapp import app,conf
 from myapp.utils.py.py_k8s import K8s,K8SStreamThread
@@ -9,8 +9,8 @@ import flask_socketio
 import datetime,time
 
 # 打开pod日志界面
-@app.route("/k8s/web/log/<cluster_name>/<namespace>/<pod_name>/<container_name>", methods=["GET",])
-def web_log(cluster_name,namespace,pod_name,container_name):
+@app.route("/k8s/watch/log/<cluster_name>/<namespace>/<pod_name>/<container_name>", methods=["GET",])
+def watch_log(cluster_name,namespace,pod_name,container_name):
     data = {
         "url":'/k8s/stream/log',
         "server_event_name":"server_event_name",
@@ -60,9 +60,9 @@ def web_log(cluster_name,namespace,pod_name,container_name):
 
 
 # 打开pod执行命令界面
-@app.route("/k8s/web/exec/<cluster_name>/<namespace>/<pod_name>/<container_name>")
+@app.route("/k8s/watch/exec/<cluster_name>/<namespace>/<pod_name>/<container_name>")
 @pysnooper.snoop()
-def web_exec(cluster_name,namespace,pod_name,container_name):
+def watch_exec(cluster_name,namespace,pod_name,container_name):
     data = {
         "ws_url":f"/k8s/stream/exec/{cluster_name}/{namespace}/{pod_name}/{container_name}"
     }
@@ -192,3 +192,85 @@ def read_pod(cluster_name,namespace,pod_name):
         response = make_response(str(e))
         response.status_code = 500
         return response
+
+
+# 强制删除pod的信息
+@app.route("/k8s/delete/pod/<cluster_name>/<namespace>/<pod_name>")
+def delete_pod(cluster_name,namespace,pod_name):
+    try:
+        all_clusters = conf.get('CLUSTERS',{})
+        cluster=all_clusters[cluster_name]
+        kubeconfig = cluster.get('KUBECONFIG', '')
+
+        from myapp.utils.core import run_shell
+        command = f'kubectl delete pod {pod_name} -n {namespace} --force --grace-period=0 '
+        if kubeconfig:
+            command+= f' --kubeconfig {kubeconfig}'
+
+        status = run_shell(command)
+        return jsonify({
+            "status": 0,
+            "message": f"删除完成。查看被删除pod是否完成。http://{cluster.get('HOST',request.host)}/k8s/dashboard/cluster/#/search?namespace={namespace}&q={pod_name}",
+            "result": {}
+        })
+
+    except Exception as e:
+        print(e)
+        response = make_response(str(e))
+        response.status_code = 500
+        return
+
+
+
+@app.route("/k8s/web/log/<cluster_name>/<namespace>/<pod_name>", methods=["GET",])
+def web_log(cluster_name,namespace,pod_name):
+    from myapp.utils.py.py_k8s import K8s
+    all_clusters = conf.get('CLUSTERS',{})
+    if cluster_name in all_clusters:
+        kubeconfig = all_clusters[cluster_name].get('KUBECONFIG','')
+        pod_url = all_clusters[cluster_name].get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
+    else:
+        kubeconfig = None
+        pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
+
+    k8s = K8s(kubeconfig)
+    pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
+    if pod:
+        pod = pod[0]
+        flash('当前pod状态：%s'%pod['status'],category='warning')
+    data = {
+        "url": pod_url,
+        "target": 'div.kd-scroll-container',     #  kd-logs-container  :nth-of-type(0)
+        "delay": 2000,
+        "loading":True,
+        "currentHeight": 128
+    }
+    # 返回模板
+    if cluster_name == conf.get('ENVIRONMENT'):
+        return render_template('link.html', data=data)
+    else:
+        return render_template('external_link.html', data=data)
+
+
+
+@app.route("/k8s/web/debug/<cluster_name>/<namespace>/<pod_name>/<container_name>", methods=["GET", "POST"])
+def web_debug(cluster_name,namespace,pod_name,container_name):
+    cluster=conf.get('CLUSTERS',{})
+    if cluster_name in cluster:
+        pod_url = cluster[cluster_name].get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,container_name, namespace)
+    else:
+        pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, container_name, namespace)
+    print(pod_url)
+    data = {
+        "url": pod_url,
+        "target":'div.kd-scroll-container', #  'div.kd-scroll-container.ng-star-inserted',
+        "delay": 2000,
+        "loading": True
+    }
+    # 返回模板
+    if cluster_name==conf.get('ENVIRONMENT'):
+        return render_template('link.html', data=data)
+    else:
+        return render_template('external_link.html', data=data)
+
+
