@@ -5,7 +5,7 @@ from sqlalchemy import Text
 from myapp.models.helpers import AuditMixinNullable
 from myapp import app
 from sqlalchemy import Column, Integer, String
-from flask import Markup
+from flask import Markup,request
 from myapp.models.base import MyappModelBase
 metadata = Model.metadata
 conf = app.config
@@ -75,7 +75,8 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
         html = ''
         for path in paths:
             if path.strip():
-                html += '<a target=_blank>%s</a><br>' % (path.strip(),)
+                download_url = request.host_url+'/static/'+path.replace('/data/k8s/kubeflow/','')
+                html += f'<a target=_blank href="{download_url}">{path.strip()}</a><br>'
         return Markup('<div>%s</div>'%html)
 
 

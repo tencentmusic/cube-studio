@@ -228,7 +228,7 @@ def web_log(cluster_name,namespace,pod_name):
     all_clusters = conf.get('CLUSTERS',{})
     if cluster_name in all_clusters:
         kubeconfig = all_clusters[cluster_name].get('KUBECONFIG','')
-        pod_url = all_clusters[cluster_name].get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
+        pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
     else:
         kubeconfig = None
         pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
@@ -257,7 +257,7 @@ def web_log(cluster_name,namespace,pod_name):
 def web_debug(cluster_name,namespace,pod_name,container_name):
     cluster=conf.get('CLUSTERS',{})
     if cluster_name in cluster:
-        pod_url = cluster[cluster_name].get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,container_name, namespace)
+        pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,container_name, namespace)
     else:
         pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, container_name, namespace)
     print(pod_url)

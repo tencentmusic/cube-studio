@@ -160,7 +160,7 @@ class Dataset_ModelView_base():
             description='子数据集名称，不存在子数据集，与name同值',
             default='',
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), Regexp("^[a-z][a-z0-9_\-]*[a-z0-9]$"), ]
+            validators=[]
         ),
         "label": StringField(
             label=_(datamodel.obj.lab('label')),
@@ -182,7 +182,7 @@ class Dataset_ModelView_base():
             widget=MySelect2Widget(can_input=True),
             default='',
             choices=[[x,x] for x in ['农业','生物学','气候+天气','复杂网络','计算机网络','网络安全','数据挑战','地球科学','经济学','教育','能源','娱乐','金融','GIS','政府','医疗','图像处理','机器学习','博物馆','自然语言','神经科学','物理','前列腺癌','心理学+认知','公共领域','搜索引擎','社交网络','社会科学','软件','运动','时间序列','交通','电子竞技']],
-            validators=[DataRequired()]
+            validators=[]
         ),
         "field":SelectField(
             label=_(datamodel.obj.lab('field')),
@@ -273,6 +273,9 @@ class Dataset_ModelView_base():
             item.icon = '/static/assets/images/dataset.png'
         if not item.version:
             item.version='latest'
+        if not item.subdataset:
+            item.subdataset=item.name
+
     def pre_update(self,item):
         self.pre_add(item)
 

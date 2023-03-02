@@ -20,7 +20,7 @@
     "train": {
         "job_template_args": {
             "参数": {
-                "arg1": {
+                "--arg1": {
                     "type": "str",
                     "item_type": "str",
                     "label": "训练函数的输入参数arg1",
@@ -33,7 +33,7 @@
                     "editable": 1,
                     "condition": ""
                 },
-                "arg2": {
+                "--arg2": {
                     "type": "str",
                     "item_type": "str",
                     "label": "训练函数的输入参数arg2",

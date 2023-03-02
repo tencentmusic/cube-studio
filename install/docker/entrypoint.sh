@@ -25,6 +25,7 @@ myapp init
 if [ "$STAGE" = "build" ]; then
 #  cd /home/myapp/myapp/vision && yarn && yarn build
   cd /home/myapp/myapp/vision && npm install && yarn build
+  cd /home/myapp/myapp/frontend && npm install && yarn build
 
 elif [ "$STAGE" = "dev" ]; then
   export FLASK_APP=myapp:app
