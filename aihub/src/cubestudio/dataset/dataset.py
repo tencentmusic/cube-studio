@@ -110,7 +110,7 @@ class Dataset(Model):
     def load(self,local_dir=None):
         if not local_dir:
             local_dir = self.local_dir
-
+        self.local_dir=local_dir
         # # 解压压缩文件
         # files = os.listdir(local_dir)
         # files = [os.path.join(local_dir,filename) for filename in files if re.match('\.zip$',filename)  or re.match('\.tar\.gz$',filename)]

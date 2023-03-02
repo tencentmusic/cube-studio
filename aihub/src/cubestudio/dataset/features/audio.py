@@ -80,6 +80,7 @@ class Audio:
     def __call__(self):
         return self.pa_type
 
+    # 按采样率采样编码
     def encode_example(self, value: Union[str, dict]) -> dict:
         """Encode example into a format for Arrow.
 
@@ -127,7 +128,7 @@ class Audio:
                 f"An audio sample should have one of 'path' or 'bytes' but they are missing or None in {value}."
             )
 
-    # 索引时才执行，避免大内存占用
+    # 索引时才执行，避免大内存占用，解析文件成字节
     # @pysnooper.snoop()
     def decode_example(
         self, value: dict, token_per_repo_id: Optional[Dict[str, Union[str, bool, None]]] = None
@@ -152,6 +153,7 @@ class Audio:
             raise RuntimeError("Decoding is disabled for this feature. Please use Audio(decode=True) instead.")
 
         path, file = (value["path"], BytesIO(value["bytes"])) if value["bytes"] is not None else (value["path"], None)
+        # path转化为绝对地址
         if path is None and file is None:
             raise ValueError(f"An audio sample should have one of 'path' or 'bytes' but both are None in {value}.")
         elif path is not None and path.endswith("mp3"):
@@ -180,7 +182,8 @@ class Audio:
             "bytes": Value("binary"),
             "path": Value("string"),
         }
-    # pyarrow转换为此类型时调用
+
+    # pyarrow类型转换为此feature类型时调用
     def cast_storage(self, storage: Union[pa.StringArray, pa.StructArray]) -> pa.StructArray:
         """Cast an Arrow array to the Audio arrow storage type.
         The Arrow types that can be converted to the Audio pyarrow storage type are:
