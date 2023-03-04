@@ -1,8 +1,11 @@
 import base64
 import io,sys,os
-from cubestudio.aihub.model import Model
+
+import datasets
+import pandas as pd
+from cubestudio.aihub.model import Model,Field,Field_type,Validator
 from cubestudio.aihub.docker import Docker
-from cubestudio.aihub.web.server import Server,Field,Field_type,Validator
+from cubestudio.aihub.web.server import Server
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 import pysnooper
@@ -28,7 +31,7 @@ class GPT3_Model(Model):
     pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     train_inputs = [
-        Field(Field_type.text, name='file_path', label='文本文件地址', describe='每行一段文字',default='/mnt/'),
+        Field(Field_type.text, name='file_path', label='csv文件地址', describe='每行一段文字，需要csv格式，续写模式，字段名需为src_txt，问答模式，字段名需为src_txt,tgt_txt',default='',validators=Validator(regex='.*csv')),
         Field(Field_type.text, name='max_epochs', label='最大迭代次数', describe='最大迭代次数', default='10')
     ]
 
@@ -46,8 +49,14 @@ class GPT3_Model(Model):
             train_dataset = dataset_dict['train'].remap_columns({'text1': 'src_txt'})
             eval_dataset = dataset_dict['test'].remap_columns({'text1': 'src_txt'})
         else:
-            train_dataset=None
-            eval_dataset=None
+            data_df = pd.read_csv(file_path)
+            train_df = data_df.sample(frac=0.9, random_state=0, axis=0)  # 划分数据集
+            eval_df = data_df[~data_df.index.isin(train_df.index)]
+            train_dataset = Dataset.from_pandas(train_df)
+            eval_dataset = Dataset.from_pandas(eval_df)
+            print('训练集',train_dataset.num_rows)
+            print('验证集',eval_dataset.num_rows)
+        # dataset = MsDataset.load(data_files="my_file.csv")
 
         max_epochs = int(max_epochs)
         tmp_dir = "./gpt3_poetry"
@@ -94,7 +103,7 @@ class GPT3_Model(Model):
             self.text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_chinese-base')
 
     # 推理
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def inference(self,text,**kwargs):
         result_zh = self.text_generation_zh(text)
         back=[

@@ -1,8 +1,8 @@
 import base64
 import io,sys,os
-from cubestudio.aihub.model import Model
+from cubestudio.aihub.model import Model,Validator,Field_type,Field
 from cubestudio.aihub.docker import Docker
-from cubestudio.aihub.web.server import Server,Field,Field_type,Validator
+from cubestudio.aihub.web.server import Server
 
 import pysnooper
 import os

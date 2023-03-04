@@ -23,13 +23,26 @@
                 "--file_path": {
                     "type": "str",
                     "item_type": "str",
-                    "label": "文本文件地址",
+                    "label": "csv文件地址",
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "/mnt/",
+                    "default": "",
                     "placeholder": "",
-                    "describe": "每行一段文字",
+                    "describe": "每行一段文字，需要csv格式，续写模式，字段名需为src_txt，问答模式，字段名需为src_txt,tgt_txt",
+                    "editable": 1,
+                    "condition": ""
+                },
+                "--max_epochs": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "最大迭代次数",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "10",
+                    "placeholder": "",
+                    "describe": "最大迭代次数",
                     "editable": 1,
                     "condition": ""
                 }

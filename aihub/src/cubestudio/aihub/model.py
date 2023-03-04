@@ -1,4 +1,4 @@
-
+import copy
 import os,sys,json,time,random,io,base64
 import argparse
 import base64
@@ -196,15 +196,13 @@ class Model():
         file.write(json.dumps(info,indent=4,ensure_ascii=False))
         file.close()
 
-    @pysnooper.snoop()
     def init_args(self):
-        parent_parser = argparse.ArgumentParser(description=f'{self.name}应用启动训练，推理，web界面等')
-        main_parser = argparse.ArgumentParser()
+        main_parser = argparse.ArgumentParser(prog='PROG')
         task_type_subparsers = main_parser.add_subparsers(title="启动类型", dest="task_type")
 
-        train_parser = task_type_subparsers.add_parser("train", help="启动训练", parents=[parent_parser])
-        web_parser = task_type_subparsers.add_parser("web", help="启动web界面", parents=[parent_parser])
-        inference_parser = task_type_subparsers.add_parser("inference", help="启动推理", parents=[parent_parser])
+        train_parser = task_type_subparsers.add_parser("train", help="启动训练")
+        web_parser = task_type_subparsers.add_parser("web", help="启动web界面")
+        inference_parser = task_type_subparsers.add_parser("inference", help="启动推理")
 
         # 训练子命令的参数
         for train_arg in self.train_inputs:
@@ -215,8 +213,13 @@ class Model():
         # web子命令的参数
         web_parser.add_argument('--model_dir', type=str, help='load_mode函数的参数',default='')
 
-        args = vars(main_parser.parse_args())
-        return args.get('task_type','web'),args
+        input = vars(main_parser.parse_args())
+        task_type = input.get('task_type','web')
+        kwargs = copy.deepcopy(input)
+        if 'task_type' in kwargs:
+            del kwargs['task_type']
+
+        return task_type,input,kwargs
 
     def config(self,key,value=None):
         AIHUB_MODEL_CONFIG_PATH = os.getenv('AIHUB_MODEL_CONFIG_PATH', '')
@@ -233,11 +236,11 @@ class Model():
         else:
             return config.get(key,None)
 
-
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def run(self):
-        task_type, kwargs = self.init_args()
-        print(task_type,kwargs)
+        task_type, input,kwargs = self.init_args()
+
+        print(task_type,input,kwargs)
         if task_type == 'train':
             print('启动训练')
             model_dir = self.train(**kwargs)
@@ -246,7 +249,8 @@ class Model():
         elif task_type == 'inference':
             print('启动推理')
             # 先从启动参数中读取，再从配置文件中读取
-            model_dir = kwargs.get('model_dir',self.config('model_dir'))
+            model_dir = input.get('model_dir',self.config('model_dir'))
+
             self.load_model(model_dir)
             result = self.inference(**kwargs)  # 测试
             print(result)
