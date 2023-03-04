@@ -172,6 +172,7 @@ def create_pipeline(pipeline,tasks):
             pipeline_model.changed_by_fk = g.user.id
             pipeline_model.project_id = org_project.id
             pipeline_model.parameter = json.dumps(pipeline.get('parameter',{}),indent=4,ensure_ascii=False)
+            pipeline_model.global_env = pipeline.get("global_env",'')
             db.session.add(pipeline_model)
             db.session.commit()
             print('add pipeline %s' % pipeline['name'])
@@ -185,6 +186,7 @@ def create_pipeline(pipeline,tasks):
         pipeline_model.changed_by_fk = g.user.id
         pipeline_model.project_id = org_project.id
         pipeline_model.parameter = json.dumps(pipeline.get('parameter', {}))
+        pipeline_model.global_env = pipeline.get("global_env", '')
         print('update pipeline %s' % pipeline['name'])
         db.session.commit()
 
@@ -200,10 +202,10 @@ def create_pipeline(pipeline,tasks):
                 task_model.label = task['label']
                 task_model.args = json.dumps(task['args'],indent=4,ensure_ascii=False)
                 task_model.volume_mount = task.get('volume_mount','')
-                task_model.resource_memory = task.get('resource_memory','2G')
-                task_model.resource_cpu = task.get('resource_cpu','2')
+                task_model.resource_memory = task.get('resource_memory','10G')
+                task_model.resource_cpu = task.get('resource_cpu','10')
                 task_model.resource_gpu = task.get('resource_gpu','0')
-                task_model.created_by_fk = g.user.id1
+                task_model.created_by_fk = g.user.id
                 task_model.changed_by_fk = g.user.id
                 task_model.pipeline_id = pipeline_model.id
                 task_model.job_template_id = job_template.id
@@ -220,8 +222,8 @@ def create_pipeline(pipeline,tasks):
             task_model.node_selector = task.get('node_selector', 'cpu=true,train=true,org=public')
             task_model.retry = int(task.get('retry', 0))
             task_model.timeout = int(task.get('timeout', 0))
-            task_model.resource_memory = task.get('resource_memory', '2G')
-            task_model.resource_cpu = task.get('resource_cpu', '2')
+            task_model.resource_memory = task.get('resource_memory', '10G')
+            task_model.resource_cpu = task.get('resource_cpu', '10')
             task_model.resource_gpu = task.get('resource_gpu', '0')
             task_model.created_by_fk = g.user.id
             task_model.changed_by_fk = g.user.id
@@ -361,6 +363,7 @@ class Aihub_base():
     @expose('/train/<aihub_id>',methods=['GET','POST'])
     def train(self,aihub_id):
         aihub = db.session.query(Aihub).filter_by(uuid=aihub_id).first()
+
         try:
             if aihub and aihub.job_template:
                 config = json.loads(aihub.job_template)
@@ -401,19 +404,45 @@ class Aihub_base():
                         "name":aihub.name,
                         "describe":aihub.label,
                         "parameter":{},
-                        "dag_json":{aihub.name:{}},
+                        "global_env":f"CONFIG_PATH=/mnt/{g.user.username}/cube-studio/aihub/deep-learning/{aihub.name}/",
+                        "dag_json":{
+                            aihub.name:{ "upstream": []},
+                            'deploy-'+aihub.name: {"upstream": [aihub.name]}
+                        },
                     }
-                    tasks=[{
-                        "name":aihub.name,
-                        "label":aihub.name+"模型训练",
-                        "args":args,
-                        "volume_mount":"kubeflow-user-workspace(pvc):/mnt",
-                        "resource_memory":config.get('resource_cpu','10'),
-                        "resource_cpu": config.get('resource_cpu', '10'),
-                        "resource_gpu": config.get('resource_gpu', '0'),
-                        "node_selector":f'{"cpu" if config.get("resource_gpu", "0") == "0" else "gpu"}=true,train=true,org=public',
-                        "job_templete":job_template.name
-                    }]
+                    tasks=[
+                        {
+                            "name":aihub.name,
+                            "label":aihub.name+"模型训练",
+                            "args":args,
+                            "volume_mount":"kubeflow-user-workspace(pvc):/mnt",
+                            "resource_memory":config.get('resource_cpu','10'),
+                            "resource_cpu": config.get('resource_cpu', '10'),
+                            "resource_gpu": config.get('resource_gpu', '0'),
+                            "node_selector":f'{"cpu" if config.get("resource_gpu", "0") == "0" else "gpu"}=true,train=true,org=public',
+                            "job_templete":job_template.name
+                        },
+                        {
+                            "name": 'deploy-'+aihub.name,
+                            "label": aihub.name + "服务部署",
+                            "args": {
+                                "--label":aihub.label,
+                                "--model_name":g.user.username+"-"+aihub.name,
+                                "--service_type":"serving",
+                                "--images":f"ccr.ccs.tencentyun.com/cube-studio/aihub:{aihub.name}",
+                                "--command":"python app.py web",
+                                "--env":"CONFIG_PATH=${CONFIG_PATH}",
+                                "--ports":"80",
+                                "--resource_gpu":config.get('resource_gpu', '0')
+                            },
+                            "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+                            "resource_memory": '2G',
+                            "resource_cpu": '2',
+                            "resource_gpu": '0',
+                            "node_selector": f'cpu=true,train=true,org=public',
+                            "job_templete": 'deploy-service'
+                        }
+                    ]
                     pipeline = create_pipeline(pipeline=pipeline, tasks=tasks)
 
                     url = '/frontend/showOutLink?url=%2Fstatic%2Fappbuilder%2Fvison%2Findex.html%3Fpipeline_id%3D' + str(pipeline.id)

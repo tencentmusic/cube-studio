@@ -9,7 +9,7 @@
     "uuid": "gpt3-v20221001",
     "label": "文本生成模型",
     "describe": "文本生成模型",
-    "pic": "result.jpg",
+    "pic": "example.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},
@@ -20,38 +20,23 @@
     "train": {
         "job_template_args": {
             "参数": {
-                "arg1": {
+                "--file_path": {
                     "type": "str",
                     "item_type": "str",
-                    "label": "训练函数的输入参数arg1",
+                    "label": "文本文件地址",
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "这里是默认值",
+                    "default": "/mnt/",
                     "placeholder": "",
-                    "describe": "arg1的详细说明，用于在任务界面展示",
-                    "editable": 1,
-                    "condition": ""
-                },
-                "arg2": {
-                    "type": "str",
-                    "item_type": "str",
-                    "label": "训练函数的输入参数arg2",
-                    "require": 1,
-                    "choice": [
-                        "choice1",
-                        "choice2",
-                        "choice3"
-                    ],
-                    "range": "",
-                    "default": "这里是默认值",
-                    "placeholder": "",
-                    "describe": "arg2的详细说明，用于在任务界面展示",
+                    "describe": "每行一段文字",
                     "editable": 1,
                     "condition": ""
                 }
             }
         }
     },
-    "inference": {}
+    "inference": {
+        "resource_gpu": "1"
+    }
 }

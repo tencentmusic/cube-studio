@@ -29,24 +29,27 @@ class GPT3_Model(Model):
 
     train_inputs = [
         Field(Field_type.text, name='file_path', label='文本文件地址', describe='每行一段文字',default='/mnt/'),
+        Field(Field_type.text, name='max_epochs', label='最大迭代次数', describe='最大迭代次数', default='10')
     ]
 
     inference_inputs = [
         Field(type=Field_type.text, name='text', label='文本前段不分',describe='输入前一部分文本，会自动补充后一部分文本',default='今天天气真好，')
     ]
-
+    inference_resource = {
+        "resource_gpu": "1"
+    }
     # 训练的入口函数，将用户输入参数传递
     # @pysnooper.snoop()
-    def train(self, **kwargs):
-        dataset_dict = MsDataset.load('chinese-poetry-collection')
-        train_dataset = dataset_dict['train'].remap_columns({'text1': 'src_txt'})
-        eval_dataset = dataset_dict['test'].remap_columns({'text1': 'src_txt'})
-        # print(eval_dataset)
-        # print(train_dataset)
-        # print(train_dataset[1])
-        # print(eval_dataset[1])
+    def train(self,file_path=None,max_epochs=10, **kwargs):
+        if not file_path:
+            dataset_dict = MsDataset.load('chinese-poetry-collection')
+            train_dataset = dataset_dict['train'].remap_columns({'text1': 'src_txt'})
+            eval_dataset = dataset_dict['test'].remap_columns({'text1': 'src_txt'})
+        else:
+            train_dataset=None
+            eval_dataset=None
 
-        max_epochs = 10
+        max_epochs = int(max_epochs)
         tmp_dir = "./gpt3_poetry"
 
         num_warmup_steps = 100
@@ -80,10 +83,15 @@ class GPT3_Model(Model):
         trainer = build_trainer(
             name=Trainers.nlp_base_trainer, default_args=kwargs)
         trainer.train()
+        return tmp_dir+"/output"
 
     # 加载模型
-    def load_model(self):
-        self.text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_chinese-base')
+    def load_model(self,model_dir=None,**kwargs):
+        if model_dir:
+            from modelscope.models import Model
+            self.text_generation_zh = Model.from_pretrained(model_dir)
+        else:
+            self.text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_chinese-base')
 
     # 推理
     @pysnooper.snoop()

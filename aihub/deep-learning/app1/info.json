@@ -1,5 +1,6 @@
 {
     "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/app1",
+    "images": "",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",

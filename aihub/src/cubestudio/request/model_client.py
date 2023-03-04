@@ -132,7 +132,9 @@ class Model_Client():
         for col in self.add_columns:
             col_name = col['name']
             if col_name not in kwargs:
-                kwargs[col_name]=col['default']
+                default = col.get('default','')
+                if default:
+                    kwargs[col_name]=default
             # print(col, kwargs[col_name])
             validators = col['validators']
             for val in validators:

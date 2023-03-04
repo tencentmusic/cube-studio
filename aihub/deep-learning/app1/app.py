@@ -58,13 +58,14 @@ class APP1_Model(Model):
     ]
 
     # 训练的入口函数，将用户输入参数传递
-    def train(self, **kwargs):
-        print(kwargs)
+    def train(self,arg1,arg2, **kwargs):
+        print(arg1,arg2,kwargs)
         # 训练的逻辑
+        return '/mnt/admin'
 
 
     # 加载模型
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         # self.model = load("/xxx/xx/a.pth")
         pass
 

@@ -58,13 +58,16 @@ class Yolov5_Model(Model):
     def load_model(self):
         self.yolo_model = torch.hub.load('yolov5', 'yolov5s6', source='local', pretrained=True)
 
+    # rtsp流的推理
+    def rtsp_inference(self,frame,**kwargs):
+        return frame
+
     # 推理
     @pysnooper.snoop()
     def inference(self, img_file_path):
-        yolo_model = self.yolo_model
         os.makedirs('result', exist_ok=True)
         time_str = datetime.now().strftime('%Y%m%d%H%M%S')
-        result = yolo_model(img_file_path)
+        result = self.yolo_model(img_file_path)
         # result_text = result.print()
         # result.save(save_dir=f'result/{time_str}-{img_file_path.split(".")[0]}')
         # result_pic_dir = f"result/{time_str}-{img_file_path.split('.')[0]}/{img_file_path}"

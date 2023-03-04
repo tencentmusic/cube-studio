@@ -177,7 +177,7 @@ class Model():
                 }
             }
             for input in self.train_inputs:
-                info["train"]['job_template_args']['参数']['--'+input.name]={
+                info["train"]['job_template_args']['参数']['--'+input.name.lstrip('-')]={
                     "type":"str",
                     "item_type":"str",
                     "label":input.label,
@@ -196,43 +196,66 @@ class Model():
         file.write(json.dumps(info,indent=4,ensure_ascii=False))
         file.close()
 
+    @pysnooper.snoop()
     def init_args(self):
+        parent_parser = argparse.ArgumentParser(description=f'{self.name}应用启动训练，推理，web界面等')
+        main_parser = argparse.ArgumentParser()
+        task_type_subparsers = main_parser.add_subparsers(title="启动类型", dest="task_type")
 
-        task_type='web'
-        if len(sys.argv)>1:
-            task_type=sys.argv[1]
+        train_parser = task_type_subparsers.add_parser("train", help="启动训练", parents=[parent_parser])
+        web_parser = task_type_subparsers.add_parser("web", help="启动web界面", parents=[parent_parser])
+        inference_parser = task_type_subparsers.add_parser("inference", help="启动推理", parents=[parent_parser])
 
-        parser = argparse.ArgumentParser(prog='PROG',description=f'{self.name}应用启动训练，推理，web界面等')
-        subparsers = parser.add_subparsers(help='启动内容的帮助参数')
-        # 添加子命令 add
-
-        parser_train = subparsers.add_parser('train', help='启动训练')
+        # 训练子命令的参数
         for train_arg in self.train_inputs:
-            parser_train.add_argument('--'+train_arg.name, type=str, help=train_arg.label,default=train_arg.default)
-
-        parser_web = subparsers.add_parser('web', help='启动web界面')
-
-        parser_inference = subparsers.add_parser('inference', help='启动推理')
+            train_parser.add_argument('--'+train_arg.name, type=str, help=train_arg.label,default=train_arg.default)
+        # 推理子命令的参数
         for inference_arg in self.inference_inputs:
-            parser_inference.add_argument('--'+inference_arg.name, type=str, help=inference_arg.label,default=inference_arg.default)
+            inference_parser.add_argument('--'+inference_arg.name, type=str, help=inference_arg.label,default=inference_arg.default)
+        # web子命令的参数
+        web_parser.add_argument('--model_dir', type=str, help='load_mode函数的参数',default='')
 
-        args = vars(parser.parse_args())
-        return task_type,args
+        args = vars(main_parser.parse_args())
+        return args.get('task_type','web'),args
 
+    def config(self,key,value=None):
+        AIHUB_MODEL_CONFIG_PATH = os.getenv('AIHUB_MODEL_CONFIG_PATH', '')
+        config = {}
+        if AIHUB_MODEL_CONFIG_PATH:
+            try:
+                config = json.load(open(AIHUB_MODEL_CONFIG_PATH, mode='w'))
+            except:
+                config = {}
+
+        if value:
+            config[key] = value
+            json.dump(config, open(AIHUB_MODEL_CONFIG_PATH, mode='w'), indent=4, ensure_ascii=False)
+        else:
+            return config.get(key,None)
+
+
+    @pysnooper.snoop()
     def run(self):
-        task_type, args = self.init_args()
-        # print(task_type,args)
+        task_type, kwargs = self.init_args()
+        print(task_type,kwargs)
         if task_type == 'train':
             print('启动训练')
-            self.train(**args)
+            model_dir = self.train(**kwargs)
+            self.config('model_dir',model_dir)
+
         elif task_type == 'inference':
             print('启动推理')
-            self.load_model()
-            result = self.inference(**args)  # 测试
+            # 先从启动参数中读取，再从配置文件中读取
+            model_dir = kwargs.get('model_dir',self.config('model_dir'))
+            self.load_model(model_dir)
+            result = self.inference(**kwargs)  # 测试
             print(result)
         else:
             print('启动web服务')
             from .web.server import Server
+            if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
+                # 先从启动参数中读取，再从配置文件中读取
+                self.load_model(model_dir=kwargs.get('model_dir',self.config('model_dir')))
             server = Server(model=self)
             server.server(port=8080)
 
@@ -241,17 +264,21 @@ class Model():
         pass
 
     # 训练的入口函数，将用户输入参数传递
-    def train(self, **kwargs):
+    def train(self, **kwargs) -> str:
         print('train函数接收到参数：',kwargs,'但是此模型并未实现train逻辑')
+        return 'model_dir'
 
     # 推理前加载模型
-    def load_model(self,**kwargs):
+    def load_model(self,model_dir=None,**kwargs):
         print('load_model函数接收到参数：', kwargs, '但是此模型并未实现load_model逻辑')
 
     # 同步推理函数
     def inference(self,**kwargs):
         print('inference函数接收到参数：', kwargs, '但是此模型并未实现inference逻辑')
-
+    # 接受rtsp流的推理
+    def rtsp_inference(self,frame,**kwargs):
+        print('rtsp inference函数接收到参数：', kwargs, '但是此模型并未实现rtsp inference逻辑')
+        return frame
     # 批推理
     def batch_inference(self,**kwargs):
         print('batch_inference函数接收到参数：', kwargs, '但是此模型并未实现batch_inference逻辑')

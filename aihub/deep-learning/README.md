@@ -32,9 +32,6 @@ sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/
 ```
 如果需要使用gpu调试
 ```bash
-docker 1.19.3以前，需要安装NVIDIA-docker2
-sudo docker run --name ${aiapp} --privileged -it --runtime=nvidia  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
-docker 1.19.3以后，
 sudo docker run --name ${aiapp} --privileged -it --gpu=0  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
 ```
 补全init.sh环境脚本。
@@ -59,132 +56,11 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
 如果是gpu服务
 ```bash
-docker 1.19.3以前，需要安装NVIDIA-docker2
-sudo docker run --name ${aiapp} --privileged --rm -it --runtime=nvidia  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
-docker 1.19.3以后，
 sudo docker run --name ${aiapp} --privileged --rm -it  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
-
-此目录包含大量开源深度学习算法，包括但不限于
-
-# 机器视觉
-
-## 图像分类
-
-二分类
-- SVM
-
-多类别分类：
- - LetNet
- - AlexNet
- - VGGNet系列
- - GoogLeNet
- - ResNet系列
- - Inception系列
- - DenseNet系列
-
-多标签分类：
-- R-CNN&LSTM
-
-## 图像分割
-
-- 普通分割：阈值处理分割、k-means聚类、基于直方图、边缘检测、GrabCut算法
-
-- 语义分割：
-
-- 实例分割：FCN、DeepLab、Pyramid Scene Parsing Network、Mask R-CNN、U-Net
-
-
-![humanseg](humanseg/example.jpg)
-
-## 图像生成与转换
-
-- 变分自编码器（VAE）：FCN-U-NET
-
-- 生成对抗网络（GAN）：DCGAN
-
-animegan
-
-![animegan](animegan/example.jpg)
-
-- 有监督图像转换：CGAN、pix2pix
-
-- 无监督图像转换：cycleGAN
-
-![gfpgan](https://p6.toutiaoimg.com/origin/tos-cn-i-qvj2lq49k0/6a284d35f42b414d9f4dcb474b0e644f)
-
-
-stable-diffusion
-
-![stable-diffusion](https://images.nightcafe.studio//assets/stable-tile.jpg)
-
-## 目标检测
-
-- 基于区域提取两阶段: R-CNN、SPP-Net、FAST R-CNN、FASTER R-CNN
-
-- 基于回归单阶段: YOLO系列、SSD
-
-![yolov3](yolov3/example.jpg)
-
-![panoptic](panoptic/test.jpg)
-
-## 目标跟踪
-
-- VOT系列
-
-## 视频分析
-
-## 图像重构（图像修复）
-
-- Context Encoder
-- MSNPS
-- GLCIC
-- Shift-Net
-- DeepFill
-- GMCNN
-- PartialConv
-- EdgeConnect
-
-![deoldify](https://picx.zhimg.com/v2-e96dd757c96464427560a9b5e5b07bc3_720w.jpg?source=172ae18b)
-
-
-## 超分辨率
-
-- SRCNN
-
-## 风格迁移
-
-- VGG系列
-
-## 人体姿态估计
-
-- opecv&mediapipe
-
-## ocr
-
-[paddleocr](../paddleocr/README.md)
-
-<img width="740" alt="640" src="https://blog.devzeng.com/images/ios-tesseract-ocr/how-ocr.png">
-
-[ddddocr](../ddddocr/README.md)
-
-<img src="https://user-images.githubusercontent.com/20157705/191401572-43eb066c-e1cb-451b-8656-260df3a7b0e3.png" width="300px">
-
-
-
-## 图像检索
-
-## 图像识别
-
-## 人脸识别
-
-## 无人驾驶
-
-## 手势识别
-

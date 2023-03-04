@@ -41,11 +41,10 @@ from ..model import Field,Field_type,Validator
 from ...utils.py_github import get_repo_user
 from ...utils.log import AbstractEventLogger
 from ...utils.py_shell import exec
-
+from .RtspCapture import RtspCapture
 from flask import Flask
 
 user_history={
-
 }
 
 
@@ -86,8 +85,9 @@ class Server():
                 command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 4'%(self.model.name)
                 # print(command)
                 exec(command)
-            # 同步任务要加载模型
-            self.model.load_model()
+
+            # # 同步任务要加载模型
+            # self.model.load_model(model_dir)
 
             # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
             if self.model.web_examples and len(self.model.web_examples)>0:
@@ -180,7 +180,6 @@ class Server():
             data = request.json
             data.update(request.form.to_dict())
             return jsonify(model_inference(data))
-
 
         # 将请求data转化为推理函数参数
         def req2inference_args(data):
@@ -588,7 +587,35 @@ class Server():
             }
             return jsonify(info)
 
-        @app.before_request
+        @app.route(f'/{self.pre_url}/rtspcapture')
+        def rtspcapture():
+            rtsp_url = os.getenv('RTSP_URL','')
+            rtsp_url = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4'
+            if rtsp_url:
+                return render_template('rtspcapture.html')
+            else:
+                return jsonify({
+                    "mesage":"环境变量未配置RTSP_URL"
+                })
+
+        def gen(rtsp):
+            while True:
+                this_frame = rtsp.cap_frame()
+                this_frame = self.model.rtsp_inference(this_frame)
+                if this_frame is not None:
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + this_frame + b'\r\n')
+
+        @app.route(f'/{self.pre_url}/video_feed')
+        def video_feed():
+            rtsp_url = os.getenv('RTSP_URL','')
+            rtsp_url = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4'
+            cap = RtspCapture(url=rtsp_url)
+            cap.start()
+            return Response(gen(cap),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+        # @app.before_request
         # @pysnooper.snoop()
         def check_login():
             req_url = request.path
@@ -641,7 +668,7 @@ class Server():
 
 
         # 配置响应后操作：统计
-        @app.after_request
+        # @app.after_request
         # @pysnooper.snoop()
         def apply_http_headers(response):
 
