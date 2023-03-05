@@ -5,6 +5,9 @@ import base64
 import os
 import datetime
 import logging
+
+import numpy
+
 from ..utils import py_shell
 import enum
 import pysnooper
@@ -281,9 +284,9 @@ class Model():
     def inference(self,**kwargs):
         print('inference函数接收到参数：', kwargs, '但是此模型并未实现inference逻辑')
     # 接受rtsp流的推理
-    def rtsp_inference(self,frame,**kwargs):
+    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
         print('rtsp inference函数接收到参数：', kwargs, '但是此模型并未实现rtsp inference逻辑')
-        return frame
+        return img
     # 批推理
     def batch_inference(self,**kwargs):
         print('batch_inference函数接收到参数：', kwargs, '但是此模型并未实现batch_inference逻辑')

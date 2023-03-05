@@ -602,12 +602,14 @@ class Server():
 
         def gen(rtsp):
             while True:
-                this_frame = rtsp.cap_frame()
-                if this_frame:
-                    this_frame = self.model.rtsp_inference(this_frame)
-                if this_frame is not None:
+                img = rtsp.cap_frame()
+                # print(type(img))
+                if img is not None:
+                    img = self.model.rtsp_inference(img)
+                if img is not None:
+                    data_bytes = cv2.imencode('.jpg', img)[1].tobytes()
                     yield (b'--frame\r\n'
-                           b'Content-Type: image/jpeg\r\n\r\n' + this_frame + b'\r\n')
+                           b'Content-Type: image/jpeg\r\n\r\n' + data_bytes + b'\r\n')
 
         @app.route(f'/{self.pre_url}/video_feed')
         def video_feed():

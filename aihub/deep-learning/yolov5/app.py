@@ -60,13 +60,14 @@ class Yolov5_Model(Model):
         self.yolo_model = torch.hub.load('yolov5', 'yolov5s6', source='local', pretrained=True)
 
     # rtsp流的推理
-    @pysnooper.snoop()
-    def rtsp_inference(self,frame,**kwargs):
+    # @pysnooper.snoop()
+    def rtsp_inference(self,img,**kwargs):
         img_path = "frame.jpg"
-        cv2.imwrite(img_path, frame)
+        cv2.imwrite(img_path, img)
         result = self.yolo_model(img_path)
-        print(result)
-        return frame
+        result_text = result.print()
+        print(result_text)
+        return img
 
     # 推理
     def inference(self, img_file_path):

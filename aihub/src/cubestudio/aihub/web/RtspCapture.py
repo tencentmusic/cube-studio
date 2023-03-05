@@ -11,8 +11,8 @@ class RtspCapture(object):
     pop_frame = None  # current frame is stored here by background thread
     last_access = 0  # time of last client access to the camera
     imgList = None
-    url = "rtsp://admin:admin888@192.168.1.64:554/h264/ch1/sub/av_stream"
-    top = 100
+    url = ""
+    top = 100  # 在缓冲队列中保存的个数
     lock = None
 
     def __init__(self,url):
@@ -59,11 +59,12 @@ class RtspCapture(object):
 
     def cap_frame(self):
         if self.pop_frame is None:
-            print('frame is None')
+            pass
+            # print('frame is None')
         else:
             # print('set frame')
             self.lock.acquire()
-
-            jpg = cv2.imencode('.jpg', self.pop_frame)[1].tobytes()
+            jpg = self.pop_frame
+            # jpg = cv2.imencode('.jpg', self.pop_frame)[1].tobytes()
             self.lock.release()
             return jpg
