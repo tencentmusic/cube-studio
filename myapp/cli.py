@@ -21,12 +21,16 @@ def make_shell_context():
 @app.cli.command('init')
 # @pysnooper.snoop()
 def init():
-
-    # 初始化创建项目组
     try:
         """Inits the Myapp application"""
         appbuilder.add_permissions(update_perms=True)   # update_perms为true才会检测新权限
         security_manager.sync_role_definitions()
+    except Exception as e:
+        print(e)
+
+    # 初始化创建项目组
+    try:
+
         def add_project(project_type,name,describe,expand={}):
             project = db.session.query(Project).filter_by(name=name).filter_by(type=project_type).first()
             if project is None:

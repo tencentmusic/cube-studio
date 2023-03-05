@@ -103,6 +103,7 @@ def create_template(group_name, image_name, image_describe, job_template_name,
                 job_template.volume_mount = job_template_volume
                 job_template.accounts = job_template_account
                 job_template_expand['source'] = "aihub"
+                job_template_expand['help_url'] = "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/"+job_template_name
                 job_template.expand = json.dumps(job_template_expand, indent=4,ensure_ascii=False) if job_template_expand else '{}'
                 job_template.created_by_fk = 1
                 job_template.changed_by_fk = 1
@@ -363,7 +364,6 @@ class Aihub_base():
     @expose('/train/<aihub_id>',methods=['GET','POST'])
     def train(self,aihub_id):
         aihub = db.session.query(Aihub).filter_by(uuid=aihub_id).first()
-
         try:
             if aihub and aihub.job_template:
                 config = json.loads(aihub.job_template)
@@ -376,7 +376,7 @@ class Aihub_base():
                     "job_template_command": 'python app.py train',
                     "job_template_volume":"/data/k8s/kubeflow/global/cube-studio/aihub/src(hostpath):/src",
                     "job_template_args": config.get('job_template_args',{}),
-                    "job_template_expand": {"help":f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"},
+                    "job_template_expand": {"help_url":f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"},
                     "job_template_env": f'APPNAME={aihub.name}',
                     "gitpath": f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"
                 }
@@ -416,7 +416,7 @@ class Aihub_base():
                             "label":aihub.name+"模型训练",
                             "args":args,
                             "volume_mount":"kubeflow-user-workspace(pvc):/mnt",
-                            "resource_memory":config.get('resource_cpu','10'),
+                            "resource_memory":config.get('resource_cpu','10G'),
                             "resource_cpu": config.get('resource_cpu', '10'),
                             "resource_gpu": config.get('resource_gpu', '0'),
                             "node_selector":f'{"cpu" if config.get("resource_gpu", "0") == "0" else "gpu"}=true,train=true,org=public',
@@ -433,6 +433,8 @@ class Aihub_base():
                                 "--command":"python app.py web",
                                 "--env":"CONFIG_PATH=${CONFIG_PATH}",
                                 "--ports":"80",
+                                "--resource_memory": config.get('resource_memory', '10G'),
+                                "--resource_cpu": config.get('resource_cpu', '10'),
                                 "--resource_gpu":config.get('resource_gpu', '0')
                             },
                             "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
