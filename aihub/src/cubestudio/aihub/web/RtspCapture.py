@@ -63,6 +63,7 @@ class RtspCapture(object):
         else:
             # print('set frame')
             self.lock.acquire()
+
             jpg = cv2.imencode('.jpg', self.pop_frame)[1].tobytes()
             self.lock.release()
             return jpg

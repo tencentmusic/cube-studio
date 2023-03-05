@@ -36,7 +36,7 @@ class Speaker_diarization_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop(depth=2)
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         self.pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization@2.1",
             use_auth_token=os.getenv('HUGGINGFACE_TOKEN',None)

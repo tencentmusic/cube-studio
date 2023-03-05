@@ -48,7 +48,7 @@ class Speech_Tts_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop()
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         self.tts = TTSExecutor()  # 语音合成
 
     # 推理

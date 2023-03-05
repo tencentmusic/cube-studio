@@ -4,6 +4,7 @@ from cubestudio.aihub.web.server import Server, Field, Field_type
 import pysnooper
 from datetime import datetime
 import torch
+import cv2
 import torch.distributed as dist
 if not os.path.exists('/app/yolov5'):
     os.symlink('/yolov5', '/app/yolov5')
@@ -55,15 +56,19 @@ class Yolov5_Model(Model):
         dist.destroy_process_group()
 
     # 加载模型
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         self.yolo_model = torch.hub.load('yolov5', 'yolov5s6', source='local', pretrained=True)
 
     # rtsp流的推理
+    @pysnooper.snoop()
     def rtsp_inference(self,frame,**kwargs):
+        img_path = "frame.jpg"
+        cv2.imwrite(img_path, frame)
+        result = self.yolo_model(img_path)
+        print(result)
         return frame
 
     # 推理
-    @pysnooper.snoop()
     def inference(self, img_file_path):
         os.makedirs('result', exist_ok=True)
         time_str = datetime.now().strftime('%Y%m%d%H%M%S')

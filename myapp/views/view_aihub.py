@@ -401,7 +401,7 @@ class Aihub_base():
                 try:
                     pipeline={
                         "project":"public",
-                        "name":aihub.name,
+                        "name":g.user.username+"-"+aihub.name.replace('_','-'),
                         "describe":aihub.label,
                         "parameter":{},
                         "global_env":f"CONFIG_PATH=/mnt/{g.user.username}/cube-studio/aihub/deep-learning/{aihub.name}/",

@@ -38,7 +38,7 @@ class Whisper_large_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop(depth=2)
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         self.processor = WhisperProcessor.from_pretrained("openai/whisper-large-v2",use_auth_token=os.getenv('HUGGINGFACE_TOKEN',None))
         self.model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-large-v2",use_auth_token=os.getenv('HUGGINGFACE_TOKEN',None))
 

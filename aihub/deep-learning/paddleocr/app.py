@@ -37,7 +37,7 @@ class Paddleocr_Model(Model):
     ]
 
     # 加载模型
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         self.ocr = PaddleOCR(use_angle_cls=True, lang="ch")
 
     # 推理

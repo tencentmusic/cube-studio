@@ -36,7 +36,7 @@ class Chatgpt_Model(Model):
         }
     ]
     # 加载模型
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         # self.model = load("/xxx/xx/a.pth")
         pass
 

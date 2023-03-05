@@ -589,10 +589,12 @@ class Server():
 
         @app.route(f'/{self.pre_url}/rtspcapture')
         def rtspcapture():
-            rtsp_url = os.getenv('RTSP_URL','')
-            rtsp_url = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4'
+            rtsp_url = request.args.to_dict().get('rtsp_url',os.getenv('RTSP_URL',''))
             if rtsp_url:
-                return render_template('rtspcapture.html')
+                data={
+                    "rtsp_url":rtsp_url
+                }
+                return render_template('rtspcapture.html',data=data)
             else:
                 return jsonify({
                     "mesage":"环境变量未配置RTSP_URL"
@@ -601,15 +603,15 @@ class Server():
         def gen(rtsp):
             while True:
                 this_frame = rtsp.cap_frame()
-                this_frame = self.model.rtsp_inference(this_frame)
+                if this_frame:
+                    this_frame = self.model.rtsp_inference(this_frame)
                 if this_frame is not None:
                     yield (b'--frame\r\n'
                            b'Content-Type: image/jpeg\r\n\r\n' + this_frame + b'\r\n')
 
         @app.route(f'/{self.pre_url}/video_feed')
         def video_feed():
-            rtsp_url = os.getenv('RTSP_URL','')
-            rtsp_url = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4'
+            rtsp_url = request.args.to_dict().get('rtsp_url', os.getenv('RTSP_URL', ''))
             cap = RtspCapture(url=rtsp_url)
             cap.start()
             return Response(gen(cap),mimetype='multipart/x-mixed-replace; boundary=frame')

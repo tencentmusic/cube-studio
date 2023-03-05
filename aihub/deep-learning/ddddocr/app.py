@@ -34,7 +34,7 @@ class DDDDOCR_Model(Model):
     ]
 
     # 加载模型
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         # 模型
         self.ocr = ddddocr.DdddOcr(beta=True)
         self.dec = ddddocr.DdddOcr(det=True)

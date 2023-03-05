@@ -37,7 +37,7 @@ class Speech_St_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop()
-    def load_model(self):
+    def load_model(self,model_dir=None,**kwargs):
         self.st = STExecutor()  # 语音翻译
 
     # 推理

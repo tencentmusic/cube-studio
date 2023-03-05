@@ -45,7 +45,7 @@ class Mnist_Model(Model):
         dist.destroy_process_group()
 
     # 推理前load模型
-    def load_model(self,**kwargs):
+    def load_model(self,model_dir=None,**kwargs):
         from mnist import Net
         self.model = Net()
         device = 'cpu'
