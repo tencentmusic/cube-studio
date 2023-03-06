@@ -63,21 +63,23 @@ class Yolov5_Model(Model):
     # rtsp流的推理
     # @pysnooper.snoop()
     def rtsp_inference(self,img,**kwargs):
-        img_path = "frame.jpg"
+        img_path = "result/frame.jpg"
+        result_path = 'result/result/frame.jpg'
+        os.makedirs(os.path.dirname(result_path),exist_ok=True)
         cv2.imwrite(img_path, img)
+        # from yolov5.models.common import Dec
         result = self.yolo_model(img_path)
-        result_text = result.print()
-        print(result_text)
-        return img
+        result.save(os.path.dirname(result_path))
+        return cv2.imread(result_path)
 
     # 推理
     def inference(self, img_file_path,rtsp_url=None):
-        # if rtsp_url:
-        #     return [
-        #         {
-        #             "image": result_pic_dir,
-        #         }
-        #     ]
+        if rtsp_url:
+            return [
+                {
+                    "image": f'/{self.name}/video_feed?rtsp_url={rtsp_url}',
+                }
+            ]
         os.makedirs('result', exist_ok=True)
         time_str = datetime.now().strftime('%Y%m%d%H%M%S')
         result = self.yolo_model(img_file_path)
