@@ -415,7 +415,7 @@ class Aihub_base():
                             "name":aihub.name,
                             "label":aihub.name+"模型训练",
                             "args":args,
-                            "volume_mount":"kubeflow-user-workspace(pvc):/mnt",
+                            "volume_mount":f"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/global/cube-studio/aihub/src(hostpath):/src,/data/k8s/kubeflow/global/cube-studio/aihub/deep-learning/{aihub.name}:/app",
                             "resource_memory":config.get('resource_cpu','10G'),
                             "resource_cpu": config.get('resource_cpu', '10'),
                             "resource_gpu": config.get('resource_gpu', '0'),
@@ -435,7 +435,8 @@ class Aihub_base():
                                 "--ports":"80",
                                 "--resource_memory": config.get('resource_memory', '10G'),
                                 "--resource_cpu": config.get('resource_cpu', '10'),
-                                "--resource_gpu":config.get('resource_gpu', '0')
+                                "--resource_gpu":config.get('resource_gpu', '0'),
+                                "--volume_mount":f"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/global/cube-studio/aihub/src(hostpath):/src,/data/k8s/kubeflow/global/cube-studio/aihub/deep-learning/{aihub.name}:/app",
                             },
                             "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
                             "resource_memory": '2G',

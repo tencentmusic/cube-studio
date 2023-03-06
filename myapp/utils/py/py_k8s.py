@@ -327,6 +327,7 @@ class K8s():
         status = ''
         # workflows 使用最后一个node的状态为真是状态
         if plural == 'workflows':
+            status=crd_object.get('status',{}).get('phase','')
             if 'status' in crd_object and 'nodes' in crd_object['status']:
                 keys = list(crd_object['status']['nodes'].keys())
                 status = crd_object['status']['nodes'][keys[-1]]['phase']

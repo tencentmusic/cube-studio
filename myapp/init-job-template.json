@@ -2341,6 +2341,23 @@
                     "sub_args":{
 
                     }
+                },
+                "--volume_mount": {
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"挂载",
+                    "require":0,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"",
+                    "placeholder":"",
+                    "describe":"容器的挂载，支持pvc/hostpath/configmap三种形式,格式示例:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
                 }
             }
         }

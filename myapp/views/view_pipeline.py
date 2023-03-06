@@ -808,9 +808,6 @@ class Pipeline_ModelView_Base():
     # 删除前先把下面的task删除了，把里面的运行实例也删除了
     # @pysnooper.snoop()
     def pre_delete(self, pipeline):
-        tasks = pipeline.get_tasks()
-        for task in tasks:
-            db.session.delete(task)
         db.session.commit()
         if "(废弃)" not in pipeline.describe:
             pipeline.describe+="(废弃)"
@@ -822,11 +819,13 @@ class Pipeline_ModelView_Base():
         back_crds = pipeline.get_workflow()
         self.delete_bind_crd(back_crds)
 
+        tasks = pipeline.get_tasks()
         # 删除task启动的所有实例
         for task in tasks:
             self.delete_task_run(task)
 
-
+        for task in tasks:
+            db.session.delete(task)
 
     @expose("/my/list/")
     def my(self):
