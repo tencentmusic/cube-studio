@@ -67,7 +67,8 @@ class Yolov5_Model(Model):
         result_path = 'result/result/frame.jpg'
         os.makedirs(os.path.dirname(result_path),exist_ok=True)
         cv2.imwrite(img_path, img)
-        # from yolov5.models.common import Dec
+        # from yolov5.models.common.Detections
+        # from torch.nn.modules.module import
         result = self.yolo_model(img_path)
         result.save(os.path.dirname(result_path))
         return cv2.imread(result_path)
