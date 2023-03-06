@@ -4,19 +4,16 @@ import io,sys,os
 import datasets
 import pandas as pd
 from cubestudio.aihub.model import Model,Field,Field_type,Validator
-from cubestudio.aihub.docker import Docker
-from cubestudio.aihub.web.server import Server
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 import pysnooper
 import os
-from modelscope.msdatasets import MsDataset
-from modelscope.trainers import build_trainer
-from modelscope.msdatasets import MsDataset
-from modelscope.utils.hub import read_config
-from modelscope.metainfo import Metrics, Trainers
 from datasets import Dataset
 from modelscope.msdatasets import MsDataset
+from torch.utils.tensorboard import SummaryWriter
+from modelscope.msdatasets import MsDataset
+from modelscope.trainers import build_trainer
+from modelscope.metainfo import Trainers
 
 
 class GPT3_Model(Model):
@@ -31,6 +28,7 @@ class GPT3_Model(Model):
     pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     train_inputs = [
+        Field(Field_type.text, name='model_type', label='模型类型，续写或问答',describe='模型类型，续写或问答，续写：为自动补全输入，问答：为根据问题返回答案', default='续写',choices=['续写','问答']),
         Field(Field_type.text, name='file_path', label='csv文件地址', describe='每行一段文字，需要csv格式，续写模式，字段名需为src_txt，问答模式，字段名需为src_txt,tgt_txt',default='',validators=Validator(regex='.*csv')),
         Field(Field_type.text, name='max_epochs', label='最大迭代次数', describe='最大迭代次数', default='10')
     ]
@@ -41,9 +39,10 @@ class GPT3_Model(Model):
     inference_resource = {
         "resource_gpu": "1"
     }
-    # 训练的入口函数，将用户输入参数传递
-    # @pysnooper.snoop()
-    def train(self,file_path=None,max_epochs=10, **kwargs):
+
+    # 续写训练
+    def train_1(self,file_path=None,max_epochs=10,**kwargs):
+
         if not file_path:
             dataset_dict = MsDataset.load('chinese-poetry-collection')
             train_dataset = dataset_dict['train'].remap_columns({'text1': 'src_txt'})
@@ -54,45 +53,125 @@ class GPT3_Model(Model):
             eval_df = data_df[~data_df.index.isin(train_df.index)]
             train_dataset = Dataset.from_pandas(train_df)
             eval_dataset = Dataset.from_pandas(eval_df)
-            print('训练集',train_dataset.num_rows)
-            print('验证集',eval_dataset.num_rows)
-        # dataset = MsDataset.load(data_files="my_file.csv")
+            print('训练集', train_dataset.num_rows)
+            print('验证集', eval_dataset.num_rows)
+
 
         max_epochs = int(max_epochs)
-        tmp_dir = "./gpt3_poetry"
+        tmp_dir = './gpt3_poetry'
 
         num_warmup_steps = 100
 
         def noam_lambda(current_step: int):
             current_step += 1
-            return min(current_step ** (-0.5), current_step * num_warmup_steps ** (-1.5))
+            return min(current_step ** (-0.5),
+                       current_step * num_warmup_steps ** (-1.5))
 
         def cfg_modify_fn(cfg):
             cfg.train.lr_scheduler = {
-                "type": "LambdaLR",
-                "lr_lambda": noam_lambda,
-                "options": {"by_epoch": False}
+                'type': 'LambdaLR',
+                'lr_lambda': noam_lambda,
+                'options': {
+                    'by_epoch': False
+                }
             }
-            cfg.train.optimizer = {
-                "type": "AdamW",
-                "lr": 3e-4
+            cfg.train.optimizer = {'type': 'AdamW', 'lr': 3e-4}
+            cfg.train.dataloader = {
+                'batch_size_per_gpu': 16,
+                'workers_per_gpu': 1
             }
-            cfg.train.dataloader = {"batch_size_per_gpu": 16, "workers_per_gpu": 1}
+            cfg.train.hooks.append({
+                'type': 'MegatronHook'
+            })
+            cfg.evaluation.dataloader = {
+                'batch_size_per_gpu': 8,
+                'workers_per_gpu': 1
+            }
+            cfg.evaluation.metrics = 'ppl'
             return cfg
 
         kwargs = dict(
-            model='damo/nlp_gpt3_text-generation_chinese-base',
+            model='damo/nlp_gpt3_text-generation_1.3B',
             train_dataset=train_dataset,
-            eval_datase=eval_dataset,
+            eval_dataset=eval_dataset,
             max_epochs=max_epochs,
             work_dir=tmp_dir,
             cfg_modify_fn=cfg_modify_fn)
 
-        # 构造 trainer 并进行训练
+        # Construct trainer and train
         trainer = build_trainer(
-            name=Trainers.nlp_base_trainer, default_args=kwargs)
+            name=Trainers.gpt3_trainer, default_args=kwargs)
         trainer.train()
-        return tmp_dir+"/output"
+        return tmp_dir + "/output"
+
+    # 问答训练
+    def train_2(self,file_path=None,max_epochs=10,**kwargs):
+        if not file_path:
+            dataset_dict = MsDataset.load('DuReader_robust-QG')
+            train_dataset = dataset_dict['train'].remap_columns({'text1': 'src_txt', 'text2': 'tgt_txt'}) \
+                .map(lambda example: {'src_txt': example['src_txt'] + '\n'})
+            eval_dataset = dataset_dict['validation'].remap_columns({'text1': 'src_txt', 'text2': 'tgt_txt'}) \
+                .map(lambda example: {'src_txt': example['src_txt'] + '\n'})
+        else:
+            data_df = pd.read_csv(file_path)
+            train_df = data_df.sample(frac=0.9, random_state=0, axis=0)  # 划分数据集
+            eval_df = data_df[~data_df.index.isin(train_df.index)]
+            train_dataset = Dataset.from_pandas(train_df)
+            eval_dataset = Dataset.from_pandas(eval_df)
+            print('训练集', train_dataset.num_rows)
+            print('验证集', eval_dataset.num_rows)
+
+        max_epochs = int(max_epochs)
+
+        tmp_dir = './gpt3_dureader'
+
+        num_warmup_steps = 200
+
+        def noam_lambda(current_step: int):
+            current_step += 1
+            return min(current_step ** (-0.5),
+                       current_step * num_warmup_steps ** (-1.5))
+
+        def cfg_modify_fn(cfg):
+            cfg.train.lr_scheduler = {
+                'type': 'LambdaLR',
+                'lr_lambda': noam_lambda,
+                'options': {
+                    'by_epoch': False
+                }
+            }
+            cfg.train.optimizer = {'type': 'AdamW', 'lr': 1e-4}
+            cfg.train.dataloader = {
+                'batch_size_per_gpu': 4,
+                'workers_per_gpu': 1
+            }
+            cfg.train.hooks.append({
+                'type': 'MegatronHook'
+            })
+            cfg.preprocessor.sequence_length = 512
+            cfg.model.checkpoint_model_parallel_size = 1
+            return cfg
+
+        kwargs = dict(
+            model='damo/nlp_gpt3_text-generation_1.3B',
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            max_epochs=max_epochs,
+            work_dir=tmp_dir,
+            cfg_modify_fn=cfg_modify_fn)
+
+        trainer = build_trainer(
+            name=Trainers.gpt3_trainer, default_args=kwargs)
+        trainer.train()
+        return tmp_dir + "/output"
+
+    # 训练的入口函数，将用户输入参数传递
+    # @pysnooper.snoop()
+    def train(self,model_type,file_path=None,max_epochs=10, **kwargs):
+        if model_type=='续写':
+            return self.train_1(file_path,max_epochs,**kwargs)
+        if model_type=='问答':
+            return self.train_2(file_path,max_epochs,**kwargs)
 
     # 加载模型
     def load_model(self,model_dir=None,**kwargs):
@@ -100,7 +179,7 @@ class GPT3_Model(Model):
             from modelscope.models import Model
             self.text_generation_zh = Model.from_pretrained(model_dir)
         else:
-            self.text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_chinese-base')
+            self.text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_1.3B')
 
     # 推理
     # @pysnooper.snoop()

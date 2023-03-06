@@ -20,6 +20,19 @@
     "train": {
         "job_template_args": {
             "参数": {
+                "--model_type": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "模型类型，续写或问答",
+                    "require": 1,
+                    "choice": ["续写","问答"],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "模型类型，续写或问答，续写：为自动补全输入，问答：为根据问题返回答案",
+                    "editable": 1,
+                    "condition": ""
+                },
                 "--file_path": {
                     "type": "str",
                     "item_type": "str",

@@ -37,7 +37,8 @@ class Yolov5_Model(Model):
     # workers=1-8
 
     inference_inputs = [
-        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于目标识别的原始图片')
+        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于目标识别的原始图片'),
+        Field(type=Field_type.text, name='rtsp_url', label='视频流的地址', describe='rtsp视频流的地址')
     ]
     web_examples = [
         {
@@ -70,7 +71,13 @@ class Yolov5_Model(Model):
         return img
 
     # 推理
-    def inference(self, img_file_path):
+    def inference(self, img_file_path,rtsp_url=None):
+        # if rtsp_url:
+        #     return [
+        #         {
+        #             "image": result_pic_dir,
+        #         }
+        #     ]
         os.makedirs('result', exist_ok=True)
         time_str = datetime.now().strftime('%Y%m%d%H%M%S')
         result = self.yolo_model(img_file_path)
