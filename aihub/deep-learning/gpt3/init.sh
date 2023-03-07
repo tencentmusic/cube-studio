@@ -6,5 +6,5 @@ pip install deepspeed
 #conda install -y -c nvidia cuda-nvcc
 #conda install -y -c conda-forge tensorboard
 pip install tensorboard
-cd /app/ && python app.py download_model
+cd /app/ && python download_model.py
 
