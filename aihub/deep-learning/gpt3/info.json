@@ -20,6 +20,19 @@
     "train": {
         "job_template_args": {
             "参数": {
+                "--save_model_dir": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "模型保存目录",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "/mnt/{{creator}}/cube-studio/aihub/deep-learning/gpt3/save_model_dir",
+                    "placeholder": "",
+                    "describe": "模型保存目录，需要配置为分布式存储下的目录",
+                    "editable": 1,
+                    "condition": ""
+                },
                 "--model_type": {
                     "type": "str",
                     "item_type": "str",

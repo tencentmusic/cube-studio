@@ -215,7 +215,7 @@ class Model():
         for inference_arg in self.inference_inputs:
             inference_parser.add_argument('--'+inference_arg.name, type=str, help=inference_arg.label,default=inference_arg.default)
         # web子命令的参数
-        web_parser.add_argument('--model_dir', type=str, help='load_mode函数的参数',default='')
+        web_parser.add_argument('--save_model_dir', type=str, help='load_mode函数的参数',default='')
 
         input = vars(main_parser.parse_args())
         task_type = input.get('task_type','web')
@@ -247,15 +247,15 @@ class Model():
         print(task_type,input,kwargs)
         if task_type == 'train':
             print('启动训练')
-            model_dir = self.train(**kwargs)
-            self.config('model_dir',model_dir)
+            save_model_dir = self.train(**kwargs)
+            self.config('save_model_dir',save_model_dir)
 
         elif task_type == 'inference':
             print('启动推理')
             # 先从启动参数中读取，再从配置文件中读取
-            model_dir = input.get('model_dir',self.config('model_dir'))
+            save_model_dir = input.get('save_model_dir',self.config('save_model_dir'))
 
-            self.load_model(model_dir)
+            self.load_model(save_model_dir)
             result = self.inference(**kwargs)  # 测试
             print(result)
         else:
@@ -263,7 +263,7 @@ class Model():
             from .web.server import Server
             if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
                 # 先从启动参数中读取，再从配置文件中读取
-                self.load_model(model_dir=kwargs.get('model_dir',self.config('model_dir')))
+                self.load_model(save_model_dir=kwargs.get('save_model_dir',self.config('save_model_dir')))
             server = Server(model=self)
             server.server(port=8080)
 
@@ -272,12 +272,12 @@ class Model():
         pass
 
     # 训练的入口函数，将用户输入参数传递
-    def train(self, **kwargs) -> str:
+    def train(self,save_model_dir:str, **kwargs):
         print('train函数接收到参数：',kwargs,'但是此模型并未实现train逻辑')
-        return 'model_dir'
+
 
     # 推理前加载模型
-    def load_model(self,model_dir=None,**kwargs):
+    def load_model(self,save_model_dir=None,**kwargs):
         print('load_model函数接收到参数：', kwargs, '但是此模型并未实现load_model逻辑')
 
     # 同步推理函数

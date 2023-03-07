@@ -57,6 +57,7 @@ class Yolov5_Model(Model):
         dist.destroy_process_group()
 
     # 加载模型
+    # @pysnooper.snoop()
     def load_model(self,model_dir=None,**kwargs):
         self.yolo_model = torch.hub.load('yolov5', 'yolov5s6', source='local', pretrained=True)
 
@@ -98,12 +99,12 @@ class Yolov5_Model(Model):
 
 
 model = Yolov5_Model()
-# model.load_model()
+# model.load_model(model_dir='')
 # result = model.inference(img_file_path='test.jpg')  # 测试
 # print(result)
 
 if __name__=='__main__':
     # python app.py train --arg1 xx --arg2 xx
     # python app.py inference --arg1 xx --arg2 xx
-    # python app.py web
+    # python app.py web --model_dir aa
     model.run()
