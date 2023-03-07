@@ -66,6 +66,6 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 # 公司
 
-![image](https://user-images.githubusercontent.com/20157705/205842184-1c12c782-e560-44c7-b09f-c978a34a3613.png)
+![图片 1](https://user-images.githubusercontent.com/20157705/223387901-1b922d96-0a79-4542-b53b-e70938404b2e.png)
 
 
