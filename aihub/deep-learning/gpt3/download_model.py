@@ -1,5 +1,3 @@
-import base64
-import io,sys,os
 
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
