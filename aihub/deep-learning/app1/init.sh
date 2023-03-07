@@ -6,4 +6,4 @@ pip3 install pysnooper flask requests Pillow
 #git clone xxx && mv xx /github
 
 # 下载模型
-cd /app/ && python app.py download_model
+#cd /app/ && python download_model.py
