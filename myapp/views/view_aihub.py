@@ -364,12 +364,13 @@ class Aihub_base():
     @expose('/train/<aihub_id>',methods=['GET','POST'])
     def train(self,aihub_id):
         aihub = db.session.query(Aihub).filter_by(uuid=aihub_id).first()
+        images = aihub.images if aihub.images else f"ccr.ccs.tencentyun.com/cube-studio/aihub:{aihub.name}"
         try:
             if aihub and aihub.job_template:
                 config = json.loads(aihub.job_template)
                 args = {
                     "group_name":aihub.field,
-                    "image_name":f"ccr.ccs.tencentyun.com/cube-studio/aihub:{aihub.name}",
+                    "image_name":images,
                     "image_describe":aihub.describe,
                     "job_template_name":aihub.name,
                     "job_template_describe": aihub.label,
@@ -381,6 +382,7 @@ class Aihub_base():
                     "gitpath": f"https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/{aihub.name}"
                 }
                 job_template = create_template(**args)
+
 
                 if not job_template:
                     flash('任务模板注册失败，请重试', 'fail')
@@ -398,18 +400,23 @@ class Aihub_base():
                 for group in config.get("job_template_args",{}):
                     for arg in config.get("job_template_args",{}).get(group,{}):
                         args[arg]=config.get("job_template_args",{}).get(group,{}).get(arg,{}).get("default",'')
+                save_model_dir=''
+                if '--save_model_dir' in args:
+                    save_model_dir = args.get('--save_model_dir','/mnt/{{creator}}/cube-studio/aihub/deep-learning/%s/save_model_dir'%aihub.name)
+                    args['--save_model_dir'] = save_model_dir
                 try:
                     pipeline={
                         "project":"public",
                         "name":g.user.username+"-"+aihub.name.replace('_','-'),
                         "describe":aihub.label,
                         "parameter":{},
-                        "global_env":f"CONFIG_PATH=/mnt/{g.user.username}/cube-studio/aihub/deep-learning/{aihub.name}/",
+                        # "global_env":f"CONFIG_PATH=/mnt/{g.user.username}/cube-studio/aihub/deep-learning/{aihub.name}/",
                         "dag_json":{
                             aihub.name:{ "upstream": []},
                             'deploy-'+aihub.name: {"upstream": [aihub.name]}
                         },
                     }
+
                     tasks=[
                         {
                             "name":aihub.name,
@@ -430,9 +437,9 @@ class Aihub_base():
                                 "--label":aihub.label,
                                 "--model_name":g.user.username+"-"+aihub.name,
                                 "--service_type":"serving",
-                                "--images":f"ccr.ccs.tencentyun.com/cube-studio/aihub:{aihub.name}",
-                                "--command":"/src/docker/entrypoint.sh python app.py web",
-                                "--env":"CONFIG_PATH=${CONFIG_PATH}\nAPPNAME="+aihub.name,
+                                "--images":images,
+                                "--command":"/src/docker/entrypoint.sh python app.py web " + (f"--save_model_dir {save_model_dir}" if save_model_dir else ''),
+                                "--env":"APPNAME="+aihub.name,
                                 "--ports":"80",
                                 "--resource_memory": config.get('resource_memory', '10G'),
                                 "--resource_cpu": config.get('resource_cpu', '10'),

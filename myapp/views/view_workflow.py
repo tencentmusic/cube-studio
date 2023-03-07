@@ -332,18 +332,17 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         layout_config['icon']=dag_status_icon.get(workflow_obj['status'],dag_default_status_icon)
         layout_config['title'] = workflow_name
         layout_config['right_button']=[]
-        if workflow_obj['status']=='Running':
-            layout_config['right_button'].append({
-                "label":"Terminate",
-                "url":f"/workflow_modelview/api/stop/{workflow_model.id}"
-            })
-        elif workflow_obj['status']=='Failed' or workflow_obj['status']=='Error':
+        if workflow_obj['status']=='Failed' or workflow_obj['status']=='Error':
             layout_config['right_button'].append({
                 "label": "Retry",
                 "url": f"/workflow_modelview/api/retry/{cluster_name}/{namespace}/{workflow_name}"
             })
 
         layout_config["right_button"].append(
+            {
+                "label": "Terminate",
+                "url": f"/workflow_modelview/api/stop/{workflow_model.id}"
+            },
             {
                 "label": "pipeline",
                 "url": f'/pipeline_modelview/web/{pipeline.id}'
@@ -411,6 +410,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                     "label": "执行人",
                     "value": labels.get("run-rtx",'')
                 },
+
                 {
                     "name": "progress",
                     "label": "进度",
@@ -653,6 +653,14 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         message = node_detail_config.get('message','')
         node_type = node_detail_config.get('node_type','')
+        volumes = {}
+        for vol in node_detail_config['volumes']:
+            if vol.get("persistentVolumeClaim",{}).get("claimName",''):
+                volumes[vol['name']]=vol.get("persistentVolumeClaim",{}).get("claimName",'')+"(pvc)"
+            if vol.get("hostPath", {}).get("path", ''):
+                volumes[vol['name']] = vol.get("hostPath", {}).get("path", '')+"(hostpath)"
+            if vol.get("emptyDir", {}).get("medium", ''):
+                volumes[vol['name']] = vol.get("emptyDir", {}).get("medium", '')
 
         tab1 = [
                 {
@@ -689,7 +697,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                             "groupName": "挂载详情",
                             "groupContent": {
                                 "label": '挂载详情',
-                                "value": dict([[item['name'],item['mountPath']] for item in node_detail_config['volumeMounts']]),
+                                "value": dict([['容器路径','主机路径']]+[[item['mountPath'],volumes.get(item['name'],'')] for item in node_detail_config['volumeMounts']]),
                                 "type": 'map'
                             }
                         },

@@ -403,7 +403,7 @@ class Job_Template_ModelView_Base():
             return response
 
         user_roles = [role.name.lower() for role in list(g.user.roles)]
-        pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
+        pod_url = request.host_url.rstrip('/')+conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
         print(pod_url)
         response = make_response("启动成功，日志地址: %s"%pod_url)
         response.status_code = 200

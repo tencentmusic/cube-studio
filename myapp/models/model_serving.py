@@ -238,6 +238,9 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def ip(self):
         port = 20000+10*self.id
+
+        TKE_EXISTED_LBID = json.loads(self.project.expand).get('TKE_EXISTED_LBID', self.project.cluster.get("TKE_EXISTED_LBID",conf.get('TKE_EXISTED_LBID','')))
+
         # first, Use the proxy ip configured by the project group
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
         if not SERVICE_EXTERNAL_IP:
@@ -258,8 +261,14 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
-        else:
-            return "未开通"
+
+        elif TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')
+            if len(TKE_EXISTED_LBID)>1:
+                host = TKE_EXISTED_LBID[1] + ":" + str(port)
+                return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+
+        return "未开通"
 
 
     def __repr__(self):

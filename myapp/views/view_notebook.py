@@ -240,7 +240,6 @@ class Notebook_ModelView_Base():
 
     def post_list(self,items):
         flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/%s/下'%g.user.username,category='info')
-        # items.sort(key=lambda item:item.created_by.username==g.user.username,reverse=True)
         return items
 
     # @event_logger.log_this

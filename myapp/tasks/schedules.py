@@ -689,12 +689,11 @@ def check_pipeline_time():
             message = ''
             for pipeline_id in monitoring_workflow:
                 work = monitoring_workflow[pipeline_id]
-                message += "\npipeline:%s" % work['pipeline'] + "\nuser:%s" % work['user'] + "\nstatus:%s" % work[
-                    'status'] + "\n每次训练耗时(h):%s" % work['time'] + "\n"
+                message += "\npipeline:%s" % work['pipeline'] + "\nuser:%s" % work['user'] + "\nstatus:%s" % work['status'] + "\n每次训练耗时(h):%s" % work['time'] + "\n"
 
             print(message)
-            if message:
-                push_admin(message)
+            # if message:
+            #     push_admin(message)
 
         except Exception as e:
             print(e)
@@ -1199,6 +1198,7 @@ def add_aihub(info_path):
                         aihub.pic=data.get('pic','')
                         aihub.status=data.get('status', '')
                         aihub.uuid=uuid
+                        aihub.images = data.get('images', '')
                         aihub.version=data.get('version', '')
                         aihub.dataset=json.dumps(data.get('dataset', {}),indent=4,ensure_ascii=False)
                         aihub.notebook=json.dumps(data.get('notebook', {}),indent=4,ensure_ascii=False)

@@ -29,6 +29,7 @@ class Aihub(Model,MyappModelBase):
     describe = Column(String(2000), nullable=True, default='')
     source = Column(String(200), nullable=True, default='')
     pic = Column(String(500), nullable=True, default='')
+    images = Column(String(200), nullable=True, default='')
     dataset = Column(Text, nullable=True, default='')
     notebook = Column(String(2000), nullable=True, default='')
     job_template = Column(Text, nullable=True, default='')
@@ -65,6 +66,16 @@ class Aihub(Model,MyappModelBase):
         if 'http://' in self.pic or "https://" in self.pic:
             pic_url=self.pic
 
+        ops_html=f'''
+            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>开发</a>
+            <a class="flex1 ta-c" target=_blank style="{"color:Gray;" if train_url==disable else ""}border-right: 1px solid rgba(0,0,0,.06);" href="{train_url}">训练</a>
+            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{web_url}'>{web_text}</a>
+        '''
+        if self.price and int(self.price)>0:
+            ops_html = f'''
+            <a class="flex1 ta-c" style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">收费模型</a>
+            '''
+
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
     <a target=_blank href="{link if self.status=='online' else ''}">
@@ -79,9 +90,7 @@ class Aihub(Model,MyappModelBase):
             </div>
         </div>
         <div style="border-top: 1px solid rgba(0,0,0,.06);" class="ptb8 d-f ac jc-b">
-            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>开发</a>
-            <a class="flex1 ta-c" target=_blank style="{"color:Gray;" if train_url==disable else ""}border-right: 1px solid rgba(0,0,0,.06);" href="{train_url}">训练</a>
-            <a class="flex1 ta-c" target=_blank style="border-right: 1px solid rgba(0,0,0,.06);" href='{web_url}'>{web_text}</a>
+{ops_html}
         </div>
     </div>
 </div>

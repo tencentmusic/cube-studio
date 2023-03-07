@@ -96,6 +96,7 @@ class Model():
     describe="这里可以添加模型的详细描述，建议在10~100字内"
     pic="http://xx.xx.jpg"
     price="0"
+    images=''
 
     # 训练数据集
     dataset_config = {}
@@ -164,7 +165,8 @@ class Model():
             "dataset":self.dataset_config,
             "notebook":self.notebook_config,
             "train": self.train_config,
-            "inference": self.inference_config
+            "inference": self.inference_config,
+            'images':self.images
           }
         info["train"]={}
         if self.inference_resource.get('resource_memory',"0")!='0':

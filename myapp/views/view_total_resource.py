@@ -61,48 +61,6 @@ global_cluster_load = {}
 # @pysnooper.snoop()
 def node_traffic():
     if not node_resource_used['check_time'] or node_resource_used['check_time'] < (datetime.datetime.now() - datetime.timedelta(minutes=10)):
-    #     clusters = conf.get('CLUSTERS', {})
-    #     for cluster_name in clusters:
-    #         cluster = clusters[cluster_name]
-    #         k8s_client = K8s(cluster.get('KUBECONFIG', ''))
-    #
-    #         all_node = k8s_client.get_node()
-    #         all_node_json = {}
-    #         for node in all_node:  # list 转dict
-    #             ip = node['hostip']
-    #             if 'cpu' in node['labels'] or 'gpu' in node['labels'] or 'vgpu' in node['labels']:
-    #                 all_node_json[ip] = node
-    #                 all_node_json[ip]['used_memory'] = []
-    #                 all_node_json[ip]['used_cpu'] = []
-    #                 all_node_json[ip]['used_gpu'] = []
-    #                 all_node_json[ip]['user'] = []
-    #
-    #         # print(all_node_json)
-    #         for namespace in ['jupyter', 'pipeline', 'automl', 'service']:
-    #             all_pods = k8s_client.get_pods(namespace=namespace)
-    #             for pod in all_pods:
-    #                 if pod['status'] == 'Running' and pod['host_ip'] in all_node_json:
-    #                     # print(namespace,pod)
-    #                     all_node_json[pod['host_ip']]['used_memory'].append(pod['memory'])
-    #                     all_node_json[pod['host_ip']]['used_cpu'].append(pod['cpu'])
-    #                     all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
-    #
-    #                     # user = pod['labels'].get('user','')
-    #                     # if not user:
-    #                     #     user = pod['labels'].get('run-rtx','')
-    #                     # if not user:
-    #                     #     user = pod['labels'].get('rtx-user','')
-    #                     # if user:
-    #                     #     all_node_json[pod['host_ip']]['user'].append(user)
-    #                     # print(all_node_json[pod['host_ip']])
-    #
-    #         for node in all_node_json:
-    #             all_node_json[node]['used_memory'] = int(sum(all_node_json[node]['used_memory']))
-    #             all_node_json[node]['used_cpu'] = int(sum(all_node_json[node]['used_cpu']))
-    #             all_node_json[node]['used_gpu'] = round(float(sum(all_node_json[node]['used_gpu'])),2)
-    #
-    #         node_resource_used['data'][cluster_name] = all_node_json
-    #     node_resource_used['check_time'] = datetime.datetime.now()
 
         all_node_json={}
         clusters = conf.get('CLUSTERS', {})
@@ -115,7 +73,12 @@ def node_traffic():
             all_node_json[cluster_name]={}
             for node in all_node:
                 all_node_json[cluster_name][node['hostip']]=node
-                all_node_json[cluster_name][node['hostip']].update(all_node_resource[node['name']])
+                node_allocated_resources=all_node_resource.get(node['name'],{
+                    "used_cpu":0,
+                    "used_memory":0,
+                    "used_gpu":0
+                })
+                all_node_json[cluster_name][node['hostip']].update(node_allocated_resources)
         node_resource_used['data']=all_node_json
         node_resource_used['check_time'] = datetime.datetime.now()
 
