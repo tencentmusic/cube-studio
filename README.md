@@ -68,4 +68,4 @@ tips:
 
 # Company
 
-![image](https://user-images.githubusercontent.com/20157705/216338054-cd59d7c9-9e1a-411b-98fe-d0e41bd604a8.png)
+![图片 1](https://user-images.githubusercontent.com/20157705/223387901-1b922d96-0a79-4542-b53b-e70938404b2e.png)
