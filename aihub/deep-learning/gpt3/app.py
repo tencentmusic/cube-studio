@@ -174,6 +174,9 @@ class GPT3_Model(Model):
         if model_type=='问答':
             return self.train_2(save_model_dir,file_path,max_epochs,**kwargs)
 
+    def download_model(self):
+        self.text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_1.3B')
+
     # 加载模型
     def load_model(self,save_model_dir=None,**kwargs):
         if save_model_dir:
@@ -182,7 +185,7 @@ class GPT3_Model(Model):
                 from modelscope.models import Model
                 self.text_generation_zh = Model.from_pretrained(save_model_dir)
                 return
-        self.text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_1.3B')
+        self.download_model()
 
     # 推理
     # @pysnooper.snoop()
@@ -204,4 +207,5 @@ if __name__=='__main__':
     # python app.py train --arg1 xx --arg2 xx
     # python app.py inference --arg1 xx --arg2 xx
     # python app.py web --save_model_dir xx
+    # python app.py download_model 用于再构建镜像下载一些预训练模型
     model.run()

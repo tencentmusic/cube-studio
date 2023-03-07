@@ -207,7 +207,7 @@ class Model():
         train_parser = task_type_subparsers.add_parser("train", help="启动训练")
         web_parser = task_type_subparsers.add_parser("web", help="启动web界面")
         inference_parser = task_type_subparsers.add_parser("inference", help="启动推理")
-
+        download_model_parser = task_type_subparsers.add_parser("download_model", help="下载模型")
         # 训练子命令的参数
         for train_arg in self.train_inputs:
             train_parser.add_argument('--'+train_arg.name, type=str, help=train_arg.label,default=train_arg.default)
@@ -234,11 +234,11 @@ class Model():
             except:
                 config = {}
 
-        if value:
-            config[key] = value
-            json.dump(config, open(AIHUB_MODEL_CONFIG_PATH, mode='w'), indent=4, ensure_ascii=False)
-        else:
-            return config.get(key,None)
+            if value:
+                config[key] = value
+                json.dump(config, open(AIHUB_MODEL_CONFIG_PATH, mode='w'), indent=4, ensure_ascii=False)
+            else:
+                return config.get(key,None)
 
     # @pysnooper.snoop()
     def run(self):
@@ -249,6 +249,9 @@ class Model():
             print('启动训练')
             save_model_dir = self.train(**kwargs)
             self.config('save_model_dir',save_model_dir)
+        elif task_type == 'download_model':
+            print('下载模型')
+            self.download_model()
 
         elif task_type == 'inference':
             print('启动推理')
@@ -279,6 +282,9 @@ class Model():
     # 推理前加载模型
     def load_model(self,save_model_dir=None,**kwargs):
         print('load_model函数接收到参数：', kwargs, '但是此模型并未实现load_model逻辑')
+
+    def download_model(self):
+        print('开始下载模型')
 
     # 同步推理函数
     def inference(self,**kwargs):

@@ -38,7 +38,7 @@ class Yolov3_Model(Model):
     ]
 
     # 加载模型
-    def load_model(self,model_dir=None,**kwargs):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.detector = Detector('/yolo/coco.data', '/yolo/yolov3.cfg', '/yolo/yolov3.weights')
 
     # 推理

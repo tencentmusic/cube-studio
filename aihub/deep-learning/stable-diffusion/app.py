@@ -67,7 +67,7 @@ class SD_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop()
-    def load_model(self,model_dir=None,**kwargs):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.device = 'cuda'  # cuda
         if not torch.cuda.is_available():  # CPU
             self.device = 'cpu'

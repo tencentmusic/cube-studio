@@ -56,10 +56,16 @@ class Yolov5_Model(Model):
         run(data=data, weights=weights, workers=workers, cfg=cfg,epochs=int(epochs))
         dist.destroy_process_group()
 
+    def download_model(self):
+        self.yolo_model = torch.hub.load('yolov5', 'yolov5s6', source='local', pretrained=True)
+
     # 加载模型
     # @pysnooper.snoop()
     def load_model(self,save_model_dir=None,**kwargs):
-        self.yolo_model = torch.hub.load('yolov5', 'yolov5s6', source='local', pretrained=True)
+        if save_model_dir:
+            pass
+        else:
+            self.download_model()
 
     # rtsp流的推理
     # @pysnooper.snoop()
@@ -99,7 +105,7 @@ class Yolov5_Model(Model):
 
 
 model = Yolov5_Model()
-# model.load_model(model_dir='')
+# model.load_model()
 # result = model.inference(img_file_path='test.jpg')  # 测试
 # print(result)
 

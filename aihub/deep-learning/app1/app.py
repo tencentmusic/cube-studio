@@ -58,14 +58,14 @@ class APP1_Model(Model):
     ]
 
     # 训练的入口函数，将用户输入参数传递
-    def train(self,arg1,arg2, **kwargs):
+    def train(self,save_model_dir,arg1,arg2, **kwargs):
         print(arg1,arg2,kwargs)
         # 训练的逻辑
         return '/mnt/admin'
 
 
     # 加载模型
-    def load_model(self,model_dir=None,**kwargs):
+    def load_model(self,save_model_dir=None,**kwargs):
         # self.model = load("/xxx/xx/a.pth")
         pass
 
@@ -107,6 +107,7 @@ model=APP1_Model()
 if __name__=='__main__':
     # python app.py train --arg1 xx --arg2 xx
     # python app.py inference --arg1 xx --arg2 xx
-    # python app.py web
+    # python app.py web --save_model_dir xx
+    # python app.py download_model 用于再构建镜像下载一些预训练模型
     model.run()
 

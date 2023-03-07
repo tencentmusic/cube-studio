@@ -27,7 +27,7 @@
                     "require": 1,
                     "choice": [],
                     "range": "",
-                    "default": "/mnt/{{creator}}/cube-studio/aihub/deep-learning/gpt3/save_model_dir",
+                    "default": "",
                     "placeholder": "",
                     "describe": "模型保存目录，需要配置为分布式存储下的目录",
                     "editable": 1,
@@ -38,9 +38,12 @@
                     "item_type": "str",
                     "label": "模型类型，续写或问答",
                     "require": 1,
-                    "choice": ["续写","问答"],
+                    "choice": [
+                        "续写",
+                        "问答"
+                    ],
                     "range": "",
-                    "default": "",
+                    "default": "续写",
                     "placeholder": "",
                     "describe": "模型类型，续写或问答，续写：为自动补全输入，问答：为根据问题返回答案",
                     "editable": 1,

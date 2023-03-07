@@ -72,7 +72,7 @@ class AnimeGANv3_Model(Model):
     ]
 
     # 加载模型
-    def load_model(self,model_dir=None,**kwargs):
+    def load_model(self,save_model_dir=None,**kwargs):
         pass
 
     # 推理
