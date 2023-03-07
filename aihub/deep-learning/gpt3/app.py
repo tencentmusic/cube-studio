@@ -42,7 +42,7 @@ class GPT3_Model(Model):
     }
 
     # 续写训练
-    def train_1(self,file_path=None,max_epochs=10,**kwargs):
+    def train_1(self,save_model_dir,file_path=None,max_epochs=10,**kwargs):
 
         if not file_path:
             dataset_dict = MsDataset.load('chinese-poetry-collection')
@@ -59,7 +59,7 @@ class GPT3_Model(Model):
 
 
         max_epochs = int(max_epochs)
-        tmp_dir = './gpt3_poetry'
+        tmp_dir = save_model_dir
 
         num_warmup_steps = 100
 
