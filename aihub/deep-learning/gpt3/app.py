@@ -28,7 +28,7 @@ class GPT3_Model(Model):
     pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
 
     train_inputs = [
-        Field(Field_type.text, name='save_model_dir', label='模型保存目录', describe='模型保存目录，需要配置为分布式存储下的目录',default='/mnt/{{creator}}/cube-studio/aihub/deep-learning/%s/save_model_dir'%name),
+        Field(Field_type.text, name='save_model_dir', label='模型保存目录', describe='模型保存目录，需要配置为分布式存储下的目录',default=''),
         Field(Field_type.text, name='model_type', label='模型类型，续写或问答',describe='模型类型，续写或问答，续写：为自动补全输入，问答：为根据问题返回答案', default='续写',choices=['续写','问答']),
         Field(Field_type.text, name='file_path', label='csv文件地址', describe='每行一段文字，需要csv格式，续写模式，字段名需为src_txt，问答模式，字段名需为src_txt,tgt_txt',default='',validators=Validator(regex='.*csv')),
         Field(Field_type.text, name='max_epochs', label='最大迭代次数', describe='最大迭代次数', default='10')

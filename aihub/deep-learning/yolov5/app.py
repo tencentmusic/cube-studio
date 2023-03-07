@@ -23,6 +23,7 @@ class Yolov5_Model(Model):
     pic = 'example.jpg'
 
     train_inputs = [
+        Field(Field_type.text, name='save_model_dir', label='模型保存目录', describe='模型保存目录，需要配置为分布式存储下的目录', default=''),
         Field(Field_type.text, name='data', label='数据地址', describe='数据地址',default='yolov5/data/voc_ball.yaml'),
         Field(Field_type.text, name='weights', label='模型存储地址', describe='权重存储地址',default='yolov5/yolov5s.pt'),
         Field(Field_type.text, name='cfg', label='配置文件地址', describe='配置文件地址',default='yolov5/models/yolov5s_ball.yaml'),
@@ -50,15 +51,14 @@ class Yolov5_Model(Model):
     ]
 
     # 训练的入口函数，将用户输入参数传递
-    def train(self, **kwargs):
+    def train(self,save_model_dir,data,weights,workers,cfg,epochs, **kwargs):
         dist.init_process_group(backend='gloo')
-        run(data=kwargs['data'], weights=kwargs['weights'], workers=kwargs['workers'], cfg=kwargs['cfg'],
-            epochs=kwargs['epochs'])
+        run(data=data, weights=weights, workers=workers, cfg=cfg,epochs=int(epochs))
         dist.destroy_process_group()
 
     # 加载模型
     # @pysnooper.snoop()
-    def load_model(self,model_dir=None,**kwargs):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.yolo_model = torch.hub.load('yolov5', 'yolov5s6', source='local', pretrained=True)
 
     # rtsp流的推理
