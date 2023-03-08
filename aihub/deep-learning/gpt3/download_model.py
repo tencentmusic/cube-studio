@@ -1,6 +1,5 @@
 
-from modelscope.pipelines import pipeline
-from modelscope.utils.constant import Tasks
 
-text_generation_zh = pipeline(Tasks.text_generation, model='damo/nlp_gpt3_text-generation_1.3B')
+from modelscope.hub.snapshot_download import snapshot_download
+model_dir = snapshot_download('damo/nlp_gpt3_text-generation_1.3B', cache_dir='/root/.cache/modelscope/hub/')
 
