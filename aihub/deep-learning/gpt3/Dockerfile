@@ -12,7 +12,7 @@ RUN pip install "modelscope[nlp]" -f https://modelscope.oss-cn-beijing.aliyuncs.
 
 RUN conda install -y -c nvidia cuda-nvcc
 RUN conda install -y -c conda-forge tensorboard
-RUN python download_model.py
+RUN cd /app/ && python download_model.py
 
 # RUN bash /init.sh
 # 安装文件
