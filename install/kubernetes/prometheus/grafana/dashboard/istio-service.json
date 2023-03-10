@@ -93,7 +93,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "域名服务平均qps请求量(1分钟内)",
+      "title": "域名服务平均qps请求量(1分钟内平均)",
       "tooltip": {
         "shared": true,
         "sort": 1,
