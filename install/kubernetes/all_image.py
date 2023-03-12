@@ -47,6 +47,7 @@ nni = [
 ]
 pipeline = [
     'minio/minio',
+    'quay.io/argoproj/argoexec:v3.4.3',
     'quay.io/argoproj/workflow-controller:latest',
     'quay.io/argoproj/workflow-controller:v3.4.3',
     'quay.io/argoproj/argocli:latest'
