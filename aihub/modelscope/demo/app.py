@@ -41,16 +41,16 @@ class {{app.name.upper().replace("-","_")}}_Model(Model):
         {{app.load_model_fun}}
 
     # 推理
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def inference(self,{{app.inference_fun_args}},**kwargs):
         {{app.inference_fun}}
         back=[
             {
-                "image": result_img,
-                "text": result_text,
-                "video": result_video,
-                "audio": result_audio,
-                "markdown":result_markdown
+                "image": 'result/aa.jpg',
+                "text": '结果文本',
+                "video": 'result/aa.mp4',
+                "audio": 'result/aa.mp3',
+                "markdown":''
             }
         ]
         return back

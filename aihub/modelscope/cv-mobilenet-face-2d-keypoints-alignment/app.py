@@ -17,7 +17,7 @@ class CV_MOBILENET_FACE_2D_KEYPOINTS_ALIGNMENT_Model(Model):
     status='online'
     version='v20221001'
     pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
-    hot = "6123"
+    hot = "6153"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_mobilenet_face-2d-keypoints_alignment/summary"
 
@@ -35,55 +35,55 @@ class CV_MOBILENET_FACE_2D_KEYPOINTS_ALIGNMENT_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/1.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/1.jpg"
             }
         },
         {
             "label": "示例2",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/2.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/2.jpg"
             }
         },
         {
             "label": "示例3",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/3.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/3.jpg"
             }
         },
         {
             "label": "示例4",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/4.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/4.jpg"
             }
         },
         {
             "label": "示例5",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/5.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/5.jpg"
             }
         },
         {
             "label": "示例6",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/6.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/6.jpg"
             }
         },
         {
             "label": "示例7",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/7.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/7.jpg"
             }
         },
         {
             "label": "示例10",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/10.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/10.jpg"
             }
         },
         {
             "label": "示例11",
             "input": {
-                "arg0": "/root/.cache/modelscope/hub/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/11.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/11.jpg"
             }
         }
     ]
@@ -101,16 +101,17 @@ class CV_MOBILENET_FACE_2D_KEYPOINTS_ALIGNMENT_Model(Model):
         self.p = pipeline('face-2d-keypoints', 'damo/cv_mobilenet_face-2d-keypoints_alignment')
 
     # 推理
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def inference(self,arg0,**kwargs):
-        pass
+        result = self.p('http://www.modelscope.cn/api/v1/models/damo/cv_mobilenet_face-2d-keypoints_alignment/repo?Revision=master\u0026FilePath=resources/1.jpg',)
+
         back=[
             {
-                "image": result_img,
-                "text": result_text,
-                "video": result_video,
-                "audio": result_audio,
-                "markdown":result_markdown
+                "image": 'result/aa.jpg',
+                "text": '结果文本',
+                "video": 'result/aa.mp4',
+                "audio": 'result/aa.mp3',
+                "markdown": ''
             }
         ]
         return back

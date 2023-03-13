@@ -29,22 +29,20 @@ def download_one():
         print(save_path)
         os.makedirs(os.path.dirname(save_path),exist_ok=True)
         try:
-            if not os.path.exists(save_path):
-                url = f'https://modelscope.cn/api/v1/models/{model_name}'
-                print(url)
-                res = requests.get(url)
-                result = res.json()
-                json.dump(result,open(save_path,mode='w'),ensure_ascii=False,indent=4)
+            url = f'https://modelscope.cn/api/v1/models/{model_name}'
+            print(url)
+            res = requests.get(url)
+            result = res.json()
+            json.dump(result,open(save_path,mode='w'),ensure_ascii=False,indent=4)
         except Exception as e:
             print(e)
         try:
             quickstart_save_path = os.path.join('modelscope', model_name + ".quickstart.json")
-            if not os.path.exists(quickstart_save_path):
-                url = f'https://modelscope.cn/api/v1/models/{model_name}/quickstart'
-                print(url)
-                res = requests.get(url)
-                result = res.json()
-                json.dump(result, open(quickstart_save_path, mode='w'), ensure_ascii=False, indent=4)
+            url = f'https://modelscope.cn/api/v1/models/{model_name}/quickstart'
+            print(url)
+            res = requests.get(url)
+            result = res.json()
+            json.dump(result, open(quickstart_save_path, mode='w'), ensure_ascii=False, indent=4)
         except Exception as e:
             print(e)
 
@@ -121,7 +119,7 @@ def make_aihub():
         field = '自然语言' if 'nlp' in field else '机器视觉' if 'cv' in field else '听觉' if 'audio' in field else '多模态' if 'multi-modal' in field else "未知"
         app['field']=field
 
-        model_cache_path = f'/root/.cache/modelscope/hub/{model_path}/'
+        model_cache_path = f'/mnt/workspace/.cache/modelscope/{model_path}/'
 
         widgets = model['widgets']
         if widgets:
