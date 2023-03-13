@@ -64,13 +64,13 @@ def make_aihub():
         #     print(model_path,'集成中')
         #     continue
         # 使用有障碍的不要
-        if model['IsAccessible']==0:
-            print(model_path, '有障碍')
-            continue
+        # if model['IsAccessible']==0:
+        #     print(model_path, '有障碍')
+        #     continue
         # 下载量太少的不要
-        if int(model['Downloads'])<100:
-            print(model_path, '下载少')
-            continue
+        # if int(model['Downloads'])<100:
+        #     print(model_path, '下载少')
+        #     continue
 
         save_path = os.path.join('modelscope', model_path + ".json")
         model = json.load(open(save_path)).get("Data", {})
@@ -98,23 +98,6 @@ def make_aihub():
         file.write(des_str)
         file.close()
 
-        # download_model
-        path = os.path.join(aihub_save_dir, 'download_model.py')
-        content = open(path, mode='r').readlines()
-        content = ''.join(content)
-        rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(content)
-        des_str = rtemplate.render(APP_PATH=model_path)
-        file = open(path, mode='w')
-        file.write(des_str)
-        file.close()
-
-
-        # app
-        path = os.path.join(aihub_save_dir, 'app.py')
-        content = open(path, mode='r').readlines()
-        content = ''.join(content)
-        rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(content)
-        # print(model_path)
 
         app={
             "name":save_model_name,
@@ -225,6 +208,32 @@ def make_aihub():
         # # 从readme中尝试读取依赖安装
 
 
+        # download_model
+        path = os.path.join(aihub_save_dir, 'download_model.py')
+        content = open(path, mode='r').readlines()
+        content = ''.join(content)
+        rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(content)
+        download_fun = app['load_model_fun']
+        download_fun = download_fun.replace('        ','').replace('self.','')
+        if not download_fun:
+            download_fun='''
+from modelscope.hub.snapshot_download import snapshot_download
+model_dir = snapshot_download('%s', cache_dir='/root/.cache/modelscope/hub/')
+            '''%model_path
+        des_str = rtemplate.render(download_fun=download_fun)
+        print(des_str)
+        print(path)
+        file = open(path, mode='w')
+        file.write(des_str)
+        file.close()
+
+
+        # app
+        path = os.path.join(aihub_save_dir, 'app.py')
+        content = open(path, mode='r').readlines()
+        content = ''.join(content)
+        rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(content)
+        # print(model_path)
 
         from collections import namedtuple
         app = namedtuple('Struct', app.keys())(*app.values())
