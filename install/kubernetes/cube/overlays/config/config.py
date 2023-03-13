@@ -102,8 +102,20 @@ AUTH_USER_REGISTRATION_ROLE = "Gamma"
 
 OAUTH_PROVIDERS=[]
 
-#LDAP认证时, ldap server
-# AUTH_LDAP_SERVER = "ldap://ldapserver.new"
+#LDAP认证时, 只需要把一下几行注释去掉即可
+#使用 LDAP 的时候用户在首次认证的时候会跟 LDAP 服务器交互验证，验证通过后会在 cube 的 MySQL 的 ab_user 表中添加用户信息，使用 LDAP 认证方式要求用户环境有一个 LDAP 服务器，cube 的后端服务镜像需要安装 python-ldap包
+#AUTH_TYPE = 2 # LDAP 方式编号为 2 
+#AUTH_LDAP_SERVER = "ldap://xx.xx.xx.xX" # LDAP 的服务地址
+#AUTH_LDAP_USE_TLS = False
+ 
+# registration configs
+#AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
+ 
+#AUTH_LDAP_BIND_USER = "cn=admin,dc=xx,dc=com"  #  填写管理员的密码 
+#AUTH_LDAP_BIND_PASSWORD="xxxxxx"
+# search configs
+#AUTH_LDAP_SEARCH = "ou=xx,dc=xx,dc=com"  # the LDAP search base (if non-empty, a search will ALWAYS happen)
+#AUTH_LDAP_UID_FIELD = "uid"  # the username field
 
 # OpenID认证的提供方
 # OPENID_PROVIDERS = [
