@@ -34,8 +34,7 @@ from PIL import Image,ImageFont
 from PIL import ImageDraw
 import urllib
 from PIL import Image
-from celery import Celery
-from celery.result import AsyncResult
+
 import pysnooper
 from ..model import Field,Field_type,Validator
 from ...utils.py_github import get_repo_user
@@ -74,9 +73,6 @@ class Server():
         redis_url_default = 'redis://:admin@127.0.0.1:6379/0'
         CELERY_BROKER_URL = os.getenv('REDIS_URL', redis_url_default)
         CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', redis_url_default)
-
-        celery_app = Celery(self.model.name, broker=CELERY_BROKER_URL,backend=CELERY_RESULT_BACKEND)
-        celery_app.conf.update(app.config)
 
         # 如果是同步服务，并且是一个celery worker，就多进程启动消费推理
         if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
@@ -377,6 +373,10 @@ class Server():
                     begin_time = datetime.datetime.now()
                     for i in range(100):
                         time.sleep(1)
+                        from celery.result import AsyncResult
+                        from celery import Celery
+                        celery_app = Celery(self.model.name, broker=CELERY_BROKER_URL,backend=CELERY_RESULT_BACKEND)
+                        celery_app.conf.update(app.config)
                         async_task = AsyncResult(id=task.id, app=celery_app)
                         # print("async_task.id", async_task.id, flush=True)
                         # 判断异步任务是否执行成功
