@@ -5,19 +5,19 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 import pysnooper
 import os
 
-class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
+class CV_DLA34_TABLE_STRUCTURE_RECOGNITION_CYCLE_CENTERNET_Model(Model):
     # 模型基础信息定义
-    name='cv-ddsar-face-detection-iclr23-damofd'   # 该名称与目录名必须一样，小写
-    label='DamoFD人脸检测关键点模型-0.5G'
-    describe="给定一张图片，返回图片中人脸区域的位置和五点关键点。DamoFD-0.5G为Damo自研的sota轻量级人脸检测器，针对如何设计可以预测stage-level表征能力的精度预测器，DamoFD从刻画network expressivity的角度出发，提出了SAR-score来无偏的刻画stage-wise network expressivity，进而Auto搜索了适合人脸检测的backbone结构。后续被ICLR23接收。"
+    name='cv-dla34-table-structure-recognition-cycle-centernet'   # 该名称与目录名必须一样，小写
+    label='读光-表格结构识别-有线表格'
+    describe="有线表格结构识别，输入图像，检测出单元格bbox并将其拼接起来得到精准而完整的表格。"
     field="机器视觉"
     scenes=""
     status='online'
     version='v20221001'
     pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
-    hot = "330"
+    hot = "3190"
     frameworks = "pytorch"
-    doc = "https://modelscope.cn/models/damo/cv_ddsar_face-detection_iclr23-damofd/summary"
+    doc = "https://modelscope.cn/models/damo/cv_dla34_table-structure-recognition_cycle-centernet/summary"
 
     train_inputs = []
 
@@ -26,14 +26,14 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
     ]
 
     inference_resource = {
-        "resource_gpu": "1"
+        "resource_gpu": "0"
     }
 
     web_examples=[
         {
-            "label": "示例1",
+            "label": "示例",
             "input": {
-                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg"
+                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/table_recognition.jpg"
             }
         }
     ]
@@ -48,12 +48,12 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
         
-        self.p = pipeline('face-detection', 'damo/cv_ddsar_face-detection_iclr23-damofd')
+        self.p = pipeline('table-recognition', 'damo/cv_dla34_table-structure-recognition_cycle-centernet')
 
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
-        result= self.p(image)
+        result = self.p(image)
         back=[
             {
                 "image": 'result/aa.jpg',
@@ -65,11 +65,11 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
         ]
         return back
 
-model=CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model()
+model=CV_DLA34_TABLE_STRUCTURE_RECOGNITION_CYCLE_CENTERNET_Model()
 
 # 测试后将此部分注释
 model.load_model()
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg')  # 测试
+result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/table_recognition.jpg')  # 测试
 print(result)
 
 # 测试后打开此部分

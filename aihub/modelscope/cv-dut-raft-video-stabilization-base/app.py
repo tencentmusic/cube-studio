@@ -5,24 +5,24 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 import pysnooper
 import os
 
-class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
+class CV_DUT_RAFT_VIDEO_STABILIZATION_BASE_Model(Model):
     # 模型基础信息定义
-    name='cv-ddsar-face-detection-iclr23-damofd'   # 该名称与目录名必须一样，小写
-    label='DamoFD人脸检测关键点模型-0.5G'
-    describe="给定一张图片，返回图片中人脸区域的位置和五点关键点。DamoFD-0.5G为Damo自研的sota轻量级人脸检测器，针对如何设计可以预测stage-level表征能力的精度预测器，DamoFD从刻画network expressivity的角度出发，提出了SAR-score来无偏的刻画stage-wise network expressivity，进而Auto搜索了适合人脸检测的backbone结构。后续被ICLR23接收。"
+    name='cv-dut-raft-video-stabilization-base'   # 该名称与目录名必须一样，小写
+    label='DUT-RAFT视频稳像'
+    describe=""
     field="机器视觉"
     scenes=""
     status='online'
     version='v20221001'
     pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
-    hot = "330"
+    hot = "1757"
     frameworks = "pytorch"
-    doc = "https://modelscope.cn/models/damo/cv_ddsar_face-detection_iclr23-damofd/summary"
+    doc = "https://modelscope.cn/models/damo/cv_dut-raft_video-stabilization_base/summary"
 
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.video, name='arg0', label='',describe='',default='',validators=None)
     ]
 
     inference_resource = {
@@ -33,7 +33,13 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg"
+                "arg0": "https://vigen-video.oss-cn-shanghai.aliyuncs.com/ModelScope/test/videos/regular_0.mp4?OSSAccessKeyId=LTAI5tR4AFwfzcCNtb8WXCXR&Expires=1682265190&Signature=IznE8bXg2u7g3cxE3MmzJ0E6Z14%3D"
+            }
+        },
+        {
+            "label": "示例2",
+            "input": {
+                "arg0": "https://vigen-video.oss-cn-shanghai.aliyuncs.com/ModelScope/test/videos/moving_104c.mp4?OSSAccessKeyId=LTAI5tR4AFwfzcCNtb8WXCXR&Expires=1682265668&Signature=R5mxpw8VenabGkpaeZsbBoIIW74%3D"
             }
         }
     ]
@@ -48,12 +54,12 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
         
-        self.p = pipeline('face-detection', 'damo/cv_ddsar_face-detection_iclr23-damofd')
+        self.p = pipeline('video-stabilization', 'damo/cv_dut-raft_video-stabilization_base')
 
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,image,**kwargs):
-        result= self.p(image)
+    def inference(self,arg0,**kwargs):
+        result =self.p(arg0)
         back=[
             {
                 "image": 'result/aa.jpg',
@@ -65,11 +71,11 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model(Model):
         ]
         return back
 
-model=CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_Model()
+model=CV_DUT_RAFT_VIDEO_STABILIZATION_BASE_Model()
 
 # 测试后将此部分注释
 model.load_model()
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg')  # 测试
+result = model.inference(arg0='https://vigen-video.oss-cn-shanghai.aliyuncs.com/ModelScope/test/videos/regular_0.mp4?OSSAccessKeyId=LTAI5tR4AFwfzcCNtb8WXCXR&Expires=1682265190&Signature=IznE8bXg2u7g3cxE3MmzJ0E6Z14%3D')  # 测试
 print(result)
 
 # 测试后打开此部分

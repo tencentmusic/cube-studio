@@ -31,7 +31,7 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_2.5G_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg"
             }

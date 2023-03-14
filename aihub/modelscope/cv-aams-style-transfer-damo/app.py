@@ -1,8 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-sys.path.append("root/cube-studio/aihub/modelscope")
-import modelscope
+
 
 import pysnooper
 import os

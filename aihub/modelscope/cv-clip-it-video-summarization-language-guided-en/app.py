@@ -32,7 +32,7 @@ class CV_CLIP_IT_VIDEO_SUMMARIZATION_LANGUAGE_GUIDED_EN_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "video": "/mnt/workspace/.cache/modelscope/damo/cv_clip-it_video-summarization_language-guided_en/video/video_category_test_video.mp4",
                 "text": "phone box"

@@ -31,7 +31,7 @@ class CV_ALEX_VIDEO_SINGLE_OBJECT_TRACKING_SIAMFC_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "dog": "http://dmshared.oss-cn-hangzhou.aliyuncs.com/ljp/maas/sot_demo_resouce/dog.mp4?OSSAccessKeyId=LTAI5tC7NViXtQKpxFUpxd3a&Expires=1706482434&Signature=7e3npX5OdADQV%2FV7JF970WsPnDI%3D"
             }
