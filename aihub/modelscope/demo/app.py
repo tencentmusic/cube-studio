@@ -41,7 +41,7 @@ class {{app.name.upper().replace("-","_")}}_Model(Model):
         {{app.load_model_fun}}
 
     # 推理
-    @pysnooper.snoop()
+    @pysnooper.snoop(watch_explode=('result'))
     def inference(self,{{app.inference_fun_args}},**kwargs):
         {{app.inference_fun}}
         back=[
@@ -57,14 +57,12 @@ class {{app.name.upper().replace("-","_")}}_Model(Model):
 
 model={{app.name.upper().replace("-","_")}}_Model()
 
-# model.load_model()
-# result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
-# print(result)
+# 测试后将此部分注释
+model.load_model()
+result = model.inference({{app.inference_fun_args_value}})  # 测试
+print(result)
 
-if __name__=='__main__':
-    # python app.py train --arg1 xx --arg2 xx
-    # python app.py inference --arg1 xx --arg2 xx
-    # python app.py web --save_model_dir xx
-    # python app.py download_model 用于再构建镜像下载一些预训练模型
-    model.run()
+# 测试后打开此部分
+# if __name__=='__main__':
+#     model.run()
 

@@ -112,7 +112,8 @@ def make_aihub():
             "load_model_fun":"pass",
             "inference_fun":"pass",
             "inference_fun_args":"arg1",
-            "train_fun":"pass"
+            "train_fun":"pass",
+            "inference_fun_args_value":""
         }
 
         field = ' '.join(model['Domain'])
@@ -142,7 +143,17 @@ def make_aihub():
                             aihub_example['input'][name] = input['data']
 
                     aihub_web_examples.append(aihub_example)
+                if len(aihub_web_examples)>0:
+                    aihub_example = aihub_web_examples[0]['input']
+                    inference_fun_args_value=[]
+                    for key in aihub_example:
+                        inference_fun_args_value.append(f"{key}='{aihub_example[key]}'")
+                    if inference_fun_args_value:
+                        inference_fun_args_value = ','.join(inference_fun_args_value)
+                        app['inference_fun_args_value']=inference_fun_args_value
                 # print(aihub_web_examples)
+
+
                 app['web_examples']=json.dumps(aihub_web_examples,indent=4,ensure_ascii=False).replace('\n','\n    ')
 
             # 从widgets中读取推理资源
@@ -219,8 +230,6 @@ from modelscope.hub.snapshot_download import snapshot_download
 model_dir = snapshot_download('%s', cache_dir='/root/.cache/modelscope/hub/')
             '''%model_path
         des_str = rtemplate.render(download_fun=download_fun)
-        print(des_str)
-        print(path)
         file = open(path, mode='w')
         file.write(des_str)
         file.close()
