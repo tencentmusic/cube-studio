@@ -22,7 +22,7 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_34G_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.image, name='arg0', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
     ]
 
     inference_resource = {
@@ -53,7 +53,7 @@ class CV_DDSAR_FACE_DETECTION_ICLR23_DAMOFD_34G_Model(Model):
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
-        pass
+        result= self.p(image)
         back=[
             {
                 "image": 'result/aa.jpg',
