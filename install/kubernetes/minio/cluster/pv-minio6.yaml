@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio6-pv
+  namespace: infra
+spec:
+  capacity:
+    storage: 2000Gi
+  # volumeMode field requires BlockVolume Alpha feature gate to be enabled.
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-minio
+  local:
+    path: /data/minio6
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: pvrole
+          operator: In
+          values:
+          - node3

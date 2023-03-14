@@ -12,15 +12,14 @@
 
 镜像调试，基础镜像为conda环境。先使用如下命令启动基础环境进入容器
 
-ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 为conda，python3.9环境
-
-ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8 为conda，python3.8环境
-
-ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
-
 ccr.ccs.tencentyun.com/cube-studio/aihub:base 无python环境
-
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 为conda，python3.9环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.8 为conda，python3.8环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.6 为conda，python3.6环境
 ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4 无python环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.6  为conda，python3.6环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.8  为conda，python3.8环境
+ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4-python3.9  为conda，python3.9环境
 
 ```bash
 # 进入模型应用
@@ -28,7 +27,7 @@ ccr.ccs.tencentyun.com/cube-studio/aihub:base-cuda11.4 无python环境
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
+sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:base-python3.9 bash 
 
 ```
 如果需要使用gpu调试
@@ -60,15 +59,15 @@ docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp}  .
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
 如果是gpu服务
 ```bash
 docker 1.19.3以前，需要安装NVIDIA-docker2
-sudo docker run --name ${aiapp} --privileged --rm -it --runtime=nvidia  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it --runtime=nvidia  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 docker 1.19.3以后，
-sudo docker run --name ${aiapp} --privileged --rm -it --gpu=0  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it  -e APPNAME=$aiapp -e NVIDIA_VISIBLE_DEVICES=all -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 ```
 

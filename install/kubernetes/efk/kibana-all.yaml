@@ -1,0 +1,90 @@
+apiVersion: v1
+data:
+  kibana.yml: |-
+    server.host: "0"
+    elasticsearch.hosts: [ "http://elasticsearch-log:9200" ]
+    monitoring.ui.container.elasticsearch.enabled: true
+    server.basePath: /logging
+    server.rewriteBasePath: true
+
+kind: ConfigMap
+metadata:
+  name: kibana-yml
+  namespace: logging
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-logging
+  namespace: logging
+  labels:
+    k8s-app: kibana-logging
+spec:
+  ports:
+  - port: 5601
+    protocol: TCP
+    targetPort: ui
+  selector:
+    k8s-app: kibana-logging
+---
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  annotations:
+#    kubernetes.io/ingress.class: nginx
+#  name: kibana-logging
+#  namespace: logging
+#spec:
+#  rules:
+#  - http:
+#      paths:
+#      - backend:
+#          serviceName: kibana-logging
+#          servicePort: 5601
+#        path: /kibana/(.*)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: kibana-logging
+  name: kibana-logging
+  namespace: logging
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: kibana-logging
+  template:
+    metadata:
+      labels:
+        k8s-app: kibana-logging
+    spec:
+      containers:
+      - env:
+        - name: ELASTICSEARCH_HOSTS
+          value: http://elasticsearch-log:9200
+        image: docker.io/kibana:7.13.3
+        imagePullPolicy: IfNotPresent
+        name: kibana-logging
+        ports:
+        - containerPort: 5601
+          name: ui
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: 10m
+        volumeMounts:
+        - mountPath: /usr/share/kibana/config
+          name: config-volume-kibana
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: kibana-yml
+        name: config-volume-kibana

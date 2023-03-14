@@ -1,5 +1,5 @@
 {
-    "doc": "https://github.com/PaddlePaddle/PaddleSpeech",
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/paddlespeech-cls",
     "field": "听觉",
     "scenes": "语音处理",
     "type": "dateset,notebook,train,inference",

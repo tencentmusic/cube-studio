@@ -55,7 +55,7 @@ AI平台：
  - ~~任务流编排~~
  - 任务流调试
    - 去除对kubernetes dashboard的依赖，提供服务支持pod，搜索，日志的查看，删除，执行命令界面
-   - kubeflow-pipeline依赖去除
+   - kubeflow-pipeline依赖去除，去除依赖组件metadata-envoy-deployment/metadata-grpc-deployment/metadata-writer/ml-pipeline/ml-pipeline-persistenceagent/ml-pipeline-ui/ml-pipeline-viewer-crd/ml-pipeline-visualizationserver/kfp sdk
    - 支持任务结果可视化
  - automl
    - ~~nni超参搜索~~

@@ -21,8 +21,8 @@ https://github.com/tencentmusic/cube-studio/wiki
 # WeChat group
 
  learning、deploy、consult、contribution、cooperation, join group, wechart id luanpeng1234 remark`<open source>`, [construction guide](https://github.com/tencentmusic/cube-studio/blob/master/CONTRIBUTING.md)
-
-<img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
+ 
+ <img border="0" width="20%" src="https://user-images.githubusercontent.com/20157705/219829986-66384e34-7ae9-4511-af67-771c9bbe91ce.jpg" />
  
 # Job Template
 
@@ -68,4 +68,4 @@ tips:
 
 # Company
 
-![image](https://user-images.githubusercontent.com/20157705/205842184-1c12c782-e560-44c7-b09f-c978a34a3613.png)
+![图片 1](https://user-images.githubusercontent.com/20157705/223387901-1b922d96-0a79-4542-b53b-e70938404b2e.png)

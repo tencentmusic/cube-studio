@@ -21,10 +21,9 @@ class DeOldify_Model(Model):
     scenes="图像合成"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/DeOldify'
     pic='example.jpg'
     inference_inputs = [
-        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于文本识别的原始图片')
+        Field(type=Field_type.image, name='img_file_path', label='待识别图片', describe='用于上色的黑白图片')
     ]
     web_examples = [
         {
@@ -60,6 +59,7 @@ model=DeOldify_Model()
 # print(result)
 
 if __name__=='__main__':
-    # # 启动服务
-    server = Server(model=model)
-    server.server(port=8080)
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()

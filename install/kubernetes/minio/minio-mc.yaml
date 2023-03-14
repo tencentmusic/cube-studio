@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: minio-mc
+  name: minio-mc
+  namespace: infra
+spec:
+  selector:
+    matchLabels:
+      app: minio-mc
+  template:
+    metadata:
+      labels:
+        app: minio-mc
+    spec:
+      containers:
+        - command:
+            - /bin/bash
+            - -c
+            - while true; do mc alias set minio http://minio-service:9000 minio minio2022 && mc mb minio/alluxio/data && sleep 10000000000000000000000000; done
+          image: minio/mc
+          imagePullPolicy: IfNotPresent
+          name: minio-mc
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

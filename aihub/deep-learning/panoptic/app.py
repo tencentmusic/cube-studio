@@ -27,7 +27,6 @@ class Panoptic_Model(Model):
     scenes="目标识别"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/DeOldify'
     pic='test.jpg'
 
     inference_inputs = [
@@ -84,7 +83,9 @@ model=Panoptic_Model()
 # result = model.inference(img_file_path='test.jpg')  # 测试
 # print(result)
 
-# # 启动服务
-server = Server(model=model)
-server.server(port=8080)
+if __name__=='__main__':
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()
 

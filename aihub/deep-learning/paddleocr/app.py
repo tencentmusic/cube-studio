@@ -4,7 +4,7 @@ import io,sys,os
 from cubestudio.aihub.model import Model
 from cubestudio.aihub.docker import Docker
 from cubestudio.aihub.web.server import Server,Field,Field_type
-from cubestudio.util.py_image import img_base64
+from cubestudio.utils.py_image import img_base64
 
 import pysnooper
 from paddleocr import PaddleOCR, draw_ocr
@@ -22,7 +22,6 @@ class Paddleocr_Model(Model):
     scenes="图像识别"
     status='online'
     version='v20221001'
-    doc='https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/paddleocr'
     pic='example.jpg'
 
     inference_inputs = [
@@ -82,7 +81,8 @@ model=Paddleocr_Model()
 # result = model.inference(img_file_path='test.png')  # 测试
 # print(result)
 
-# # 启动服务
-server = Server(model=model)
-server.server(port=8080)
-
+if __name__=='__main__':
+    # python app.py train --arg1 xx --arg2 xx
+    # python app.py inference --arg1 xx --arg2 xx
+    # python app.py web
+    model.run()
