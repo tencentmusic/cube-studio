@@ -14,7 +14,7 @@ class {{app.name.upper().replace("-","_")}}_Model(Model):
     scenes="{{app.scenes}}"
     status='online'
     version='v20221001'
-    pic='result.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "{{app.hot}}"
     frameworks = "{{app.frameworks}}"
     doc = "{{app.url}}"
@@ -73,7 +73,7 @@ model={{app.name.upper().replace("-","_")}}_Model()
 
 # 容器中运行调试推理时
 model.load_model(save_model_dir=None)
-result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
+result = model.inference({{app.inference_fun_args_value}})  # 测试
 print(result)
 
 # # 模型启动web时使用
