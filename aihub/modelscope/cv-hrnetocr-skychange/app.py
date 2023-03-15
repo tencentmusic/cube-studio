@@ -5,26 +5,27 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 import pysnooper
 import os
 
-class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
+class CV_HRNETOCR_SKYCHANGE_Model(Model):
     # 模型基础信息定义
-    name='cv-gpen-image-portrait-enhancement-hires'   # 该名称与目录名必须一样，小写
-    label='GPEN人像增强修复-大分辨率人脸'
-    describe="GPEN通过将预训练的人像生成网络嵌入到Unet网络中联合微调的方式在人像修复任务的多项指标中上达到了sota的结果。"
+    name='cv-hrnetocr-skychange'   # 该名称与目录名必须一样，小写
+    label='图像天空替换模型'
+    describe=""
     field="机器视觉"    # [机器视觉，听觉，自然语言，多模态，强化学习，图论]
     scenes=""
     status='online'
     version='v20221001'
     pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
-    hot = "900"
+    hot = "2383"
     frameworks = "pytorch"
-    doc = "https://modelscope.cn/models/damo/cv_gpen_image-portrait-enhancement-hires/summary"
+    doc = "https://modelscope.cn/models/damo/cv_hrnetocr_skychange/summary"
 
     # 和train函数的输入参数对应，并且会对接显示到pipeline的模板参数中
     train_inputs = []
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='scene_image', label='',describe='',default='',validators=None),
+        Field(type=Field_type.image, name='sky_image', label='',describe='',default='',validators=None)
     ]
 
     inference_resource = {
@@ -33,15 +34,10 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
-            "label": "示例1",
+            "label": "示例0",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg"
-            }
-        },
-        {
-            "label": "示例2",
-            "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo2.jpg"
+                "scene_image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/scene_image.jpg",
+                "sky_image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/sky_image.jpg"
             }
         }
     ]
@@ -58,7 +54,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
         
-        self.p = pipeline('image-portrait-enhancement', 'damo/cv_gpen_image-portrait-enhancement-hires')
+        self.p = pipeline('image-skychange', 'damo/cv_hrnetocr_skychange')
 
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
@@ -66,8 +62,8 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,image,**kwargs):
-        result = self.p(image)
+    def inference(self,scene_image,sky_image,**kwargs):
+        result = self.p({"scene_image": scene_image, "sky_image": sky_image})
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
@@ -82,7 +78,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         ]
         return back
 
-model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
+model=CV_HRNETOCR_SKYCHANGE_Model()
 
 
 # 容器中调试训练时
@@ -91,7 +87,7 @@ model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
 
 # 容器中运行调试推理时
 model.load_model(save_model_dir=None)
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg')  # 测试
+result = model.inference(scene_image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/scene_image.jpg',sky_image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/sky_image.jpg')  # 测试
 print(result)
 
 # # 模型启动web时使用

@@ -33,7 +33,7 @@ class CV_HDFORMER_BODY_3D_KEYPOINTS_VIDEO_Model(Model):
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "video": "https://dmshared.oss-cn-hangzhou.aliyuncs.com/maas/test/video/Walking.54138969.h264.mp4"
             }
