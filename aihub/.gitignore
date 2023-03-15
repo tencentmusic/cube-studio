@@ -8,5 +8,7 @@ deep-learning/*/result
 /deep-learning/test.py
 /deep-learning/*/deploy.yaml
 /deep-learning/*/upload
+/modelscope/*/upload
+/modelscope/*/result
 /deep-learning/deploy/
 /dist/
