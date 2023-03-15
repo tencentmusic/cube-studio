@@ -643,7 +643,7 @@ class Server():
             if '/api/model/' in req_url:
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
                 # 匿名用户对后端的请求次数超过1次就需要登录
-                if 4 > num > 0 and 'anonymous-' in username:
+                if 4 > num > 1 and 'anonymous-' in username:
 
                     return jsonify(
                         {
@@ -651,7 +651,7 @@ class Server():
                             "result": [
                                 {
                                     "text": "匿名用户仅可访问一次，star github 项目后获得无限访问次数",
-                                    "html":"<a href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
+                                    "html":"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
                                 }
                             ],
                             "status": 0
