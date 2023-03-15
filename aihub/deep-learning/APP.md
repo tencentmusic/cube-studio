@@ -20,18 +20,19 @@ cubestudio自带了前端，整体的启动命令
 
 # app.py开发
 
-开发调试模型训练和推理是
+1、Model class 内的配置
 
-1、启动内容
+参考app1/app.py，注意代码中的注释
 
-在app.py内，统一使用model.run()启动，会根据用户的命令行启动方式识别具体做什么工作
+2、启动内容
+
+在app.py内，生产发布时统一使用model.run()启动，会根据用户的命令行启动方式识别具体做什么工作
 
 ```bash
 python app.py train --arg1 xx --arg2 xx        启动训练，会调用Model的train方法，该方法必须将模型文件保存到save_model_dir指定的目录下
 python app.py web --save_model_dir xx          启动web服务，对接load_mode方法和inference方法
 ```
 
-2、Model class 内的配置
 
-参考app1/app.py，注意代码中的注释
+
 
