@@ -30,7 +30,7 @@ sudo docker run --name ${aiapp} --privileged -it --gpu=0  -e APPNAME=$aiapp -e N
 # init.sh 脚本会被复制到容器/根目录下，环境文件不要放置在容器/app/目录下，不然会被加载到git
 cp init.sh /init.sh && bash /init.sh
 ```
-补齐app.py，运行调试
+补齐app.py，运行调试，参考aihub/deep-learning/app1/app.py
 ```bash
 /src/docker/entrypoint.sh python app.py
 ```
