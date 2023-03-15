@@ -1,7 +1,8 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import cv2
+from modelscope.outputs import OutputKeys
 
 import pysnooper
 import os
@@ -15,7 +16,7 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='background.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     hot = "11162"
     frameworks = "tensorflow"
     doc = "https://modelscope.cn/models/damo/cv_aams_style-transfer_damo/summary"
@@ -23,8 +24,9 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.image, name='content', label='',describe='',default='',validators=None),
-        Field(type=Field_type.image, name='style', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='content', label='',describe='内容图片',default='https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_content.jpg',validators=None),
+        # Field(type=Field_type.image_select, choices=['result/result5.jpg','result/result34.jpg'],name='style', label='',describe='风格图片',default='https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_style.jpg',validators=None)
+        Field(type=Field_type.image,name='style', label='',describe='风格图片',default='https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_style.jpg',validators=None)
     ]
 
     inference_resource = {
@@ -51,30 +53,64 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
         
-        self.p = pipeline('image-style-transfer', 'damo/cv_aams_style-transfer_damo')
+        
+        self.p = pipeline(Tasks.image_style_transfer, 'damo/cv_aams_style-transfer_damo')
 
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,content,style,**kwargs):
+        import random
+        from PIL import Image
+
+
+        # '''
+        # print(content)
+        im = Image.open(content)
+        w,h = im.size
+        # print(im.size)
+        if max(w,h)>1200:
+            ratio = max(w,h)/1200
+            reim=im.resize(int(w/ratio),int(h/ratio))#宽*高
+            os.remove(content)
+            reim.save(content)
+        
+        im = Image.open(style)
+        w,h = im.size
+        # print(im.size)
+        if max(w,h)>1200:
+            ratio = max(w,h)/1200
+            reim=im.resize(int(w/ratio),int(h/ratio))#宽*高
+            os.remove(style)
+            reim.save(style)
+
+        # print(im.size)
+        # '''
+
         result = self.p({'content':content,'style':style})
+        
+
+        save_path='result/result'+str(random.randint(5,5000))+'.jpg'
+        os.makedirs(os.path.dirname(save_path),exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        # print(result,type(result))
+        cv2.imwrite(save_path, result[OutputKeys.OUTPUT_IMG])
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
 
 model=CV_AAMS_STYLE_TRANSFER_DAMO_Model()
 
-# 测试后将此部分注释
-model.load_model()
-result = model.inference(content='https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_content.jpg',style='https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_style.jpg')  # 测试
-print(result)
+# # 测试后将此部分注释
+# model.load_model()
+# result = model.inference(
+#     "content": "https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_content.jpg",
+#     "style": "https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_style.jpg"
+#     )  # 测试
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()

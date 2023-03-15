@@ -31,7 +31,7 @@ class CV_CONVNEXT_BASE_IMAGE_CLASSIFICATION_GARBAGE_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "image": "/mnt/workspace/.cache/modelscope/damo/cv_convnext-base_image-classification_garbage/resources/test.jpg"
             }

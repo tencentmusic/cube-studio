@@ -31,7 +31,7 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_GENERAL_DAMO_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "image": "http://duguang-labelling.oss-cn-shanghai.aliyuncs.com/mass_img_tmp_20220922/ocr_recognition.jpg"
             }

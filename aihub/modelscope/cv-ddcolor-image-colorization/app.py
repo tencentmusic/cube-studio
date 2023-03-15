@@ -31,19 +31,19 @@ class CV_DDCOLOR_IMAGE_COLORIZATION_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "image": "/mnt/workspace/.cache/modelscope/damo/cv_ddcolor_image-colorization/resources/demo.jpg"
             }
         },
         {
-            "label": "",
+            "label": "示例2",
             "input": {
                 "image": "/mnt/workspace/.cache/modelscope/damo/cv_ddcolor_image-colorization/resources/demo2.jpg"
             }
         },
         {
-            "label": "",
+            "label": "示例3",
             "input": {
                 "image": "/mnt/workspace/.cache/modelscope/damo/cv_ddcolor_image-colorization/resources/demo3.jpg"
             }

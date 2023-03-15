@@ -31,7 +31,7 @@ class CV_CANONICAL_BODY_3D_KEYPOINTS_VIDEO_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "arg0": "https://dmshared.oss-cn-hangzhou.aliyuncs.com/maas/test/video/Walking.54138969.h264.mp4"
             }

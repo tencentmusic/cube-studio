@@ -9,7 +9,7 @@
     "uuid": "cv-aams-style-transfer-damo-v20221001",
     "label": "AAMS图像风格迁移",
     "describe": "给定内容图像和风格图像作为输入，风格迁移模型会自动地将内容图像的风格、纹理特征变换为风格图像的类型，同时保证图像的内容特征不变",
-    "pic": "result.jpg",
+    "pic": "background.jpg",
     "hot": "1",
     "price": "0",
     "dataset": {},

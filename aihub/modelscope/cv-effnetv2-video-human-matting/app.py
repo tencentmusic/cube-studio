@@ -31,7 +31,7 @@ class CV_EFFNETV2_VIDEO_HUMAN_MATTING_Model(Model):
 
     web_examples=[
         {
-            "label": "",
+            "label": "示例1",
             "input": {
                 "video_input_path": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/videos/video_matting_test.mp4"
             }
