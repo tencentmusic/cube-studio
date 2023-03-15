@@ -642,9 +642,10 @@ class Server():
             # 只对后端接口
             if '/api/model/' in req_url:
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
-                # 匿名用户对后端的请求次数超过1次就需要登录
-                if 4 > num > 1 and 'anonymous-' in username:
+                anonymous_max_req = int(os.getenv('MAX_REQ','1000'))
 
+                # 匿名用户对后端的请求次数超过1次就需要登录
+                if anonymous_max_req+3 > num > anonymous_max_req and 'anonymous-' in username:
                     return jsonify(
                         {
                             "message": "",
