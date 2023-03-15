@@ -5,43 +5,55 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 import pysnooper
 import os
 
-class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
+class CV_HRNETW48_HUMAN_WHOLEBODY_KEYPOINT_IMAGE_Model(Model):
     # 模型基础信息定义
-    name='cv-gpen-image-portrait-enhancement-hires'   # 该名称与目录名必须一样，小写
-    label='GPEN人像增强修复-大分辨率人脸'
-    describe="GPEN通过将预训练的人像生成网络嵌入到Unet网络中联合微调的方式在人像修复任务的多项指标中上达到了sota的结果。"
+    name='cv-hrnetw48-human-wholebody-keypoint-image'   # 该名称与目录名必须一样，小写
+    label='全身关键点检测-通用领域-2D'
+    describe="输入一张人物图像，端到端检测全身133点关键点，输出人体框和对应的全身关键点，包含68个人脸关键点、42个手势关键点、17个骨骼关键点和6个脚步关键点。"
     field="机器视觉"    # [机器视觉，听觉，自然语言，多模态，强化学习，图论]
     scenes=""
     status='online'
     version='v20221001'
     pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
-    hot = "900"
+    hot = "3373"
     frameworks = "pytorch"
-    doc = "https://modelscope.cn/models/damo/cv_gpen_image-portrait-enhancement-hires/summary"
+    doc = "https://modelscope.cn/models/damo/cv_hrnetw48_human-wholebody-keypoint_image/summary"
 
     # 和train函数的输入参数对应，并且会对接显示到pipeline的模板参数中
     train_inputs = []
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='arg0', label='带人体的输入图像',describe='带人体的输入图像',default='',validators=None)
     ]
 
     inference_resource = {
-        "resource_gpu": "1"
+        "resource_gpu": "0"
     }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
             "label": "示例1",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_hrnetw48_human-wholebody-keypoint_image/resources/000000000785.jpg"
             }
         },
         {
             "label": "示例2",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo2.jpg"
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_hrnetw48_human-wholebody-keypoint_image/resources/000000025393.jpg"
+            }
+        },
+        {
+            "label": "示例3",
+            "input": {
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_hrnetw48_human-wholebody-keypoint_image/resources/000000283520.jpg"
+            }
+        },
+        {
+            "label": "示例4",
+            "input": {
+                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_hrnetw48_human-wholebody-keypoint_image/resources/000000566282.jpg"
             }
         }
     ]
@@ -58,7 +70,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
         
-        self.p = pipeline('image-portrait-enhancement', 'damo/cv_gpen_image-portrait-enhancement-hires')
+        self.p = pipeline('human-wholebody-keypoint', 'damo/cv_hrnetw48_human-wholebody-keypoint_image')
 
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
@@ -66,8 +78,8 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,image,**kwargs):
-        result = self.p(image)
+    def inference(self,arg0,**kwargs):
+        result = self.p(arg0)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
@@ -82,7 +94,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         ]
         return back
 
-model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
+model=CV_HRNETW48_HUMAN_WHOLEBODY_KEYPOINT_IMAGE_Model()
 
 
 # 容器中调试训练时
@@ -91,7 +103,7 @@ model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
 
 # 容器中运行调试推理时
 model.load_model(save_model_dir=None)
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg')  # 测试
+result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_hrnetw48_human-wholebody-keypoint_image/resources/000000000785.jpg')  # 测试
 print(result)
 
 # # 模型启动web时使用

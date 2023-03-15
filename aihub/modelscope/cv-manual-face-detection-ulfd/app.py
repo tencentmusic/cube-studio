@@ -5,26 +5,26 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 import pysnooper
 import os
 
-class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
+class CV_MANUAL_FACE_DETECTION_ULFD_Model(Model):
     # 模型基础信息定义
-    name='cv-gpen-image-portrait-enhancement-hires'   # 该名称与目录名必须一样，小写
-    label='GPEN人像增强修复-大分辨率人脸'
-    describe="GPEN通过将预训练的人像生成网络嵌入到Unet网络中联合微调的方式在人像修复任务的多项指标中上达到了sota的结果。"
+    name='cv-manual-face-detection-ulfd'   # 该名称与目录名必须一样，小写
+    label='ULFD人脸检测模型-tiny'
+    describe="1M轻量级人脸检测模型。给定一张图片，返回图片中人脸位置的坐标。ULFD为轻量级人脸检测算法, 基于SSD框架手工设计了backbone结构，是业界开源的第一个1M人脸检测模型。当输入320x240分辨率的图片且未使用onnxruntime加速时，在CPU上跑需要50-60ms，当使用onnxruntime加速后，在CPU上仅需要8-11ms。"
     field="机器视觉"    # [机器视觉，听觉，自然语言，多模态，强化学习，图论]
     scenes=""
     status='online'
     version='v20221001'
     pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
-    hot = "900"
+    hot = "4672"
     frameworks = "pytorch"
-    doc = "https://modelscope.cn/models/damo/cv_gpen_image-portrait-enhancement-hires/summary"
+    doc = "https://modelscope.cn/models/damo/cv_manual_face-detection_ulfd/summary"
 
     # 和train函数的输入参数对应，并且会对接显示到pipeline的模板参数中
     train_inputs = []
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='arg0', label='',describe='',default='',validators=None)
     ]
 
     inference_resource = {
@@ -33,15 +33,9 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
-            "label": "示例1",
+            "label": "示例0",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg"
-            }
-        },
-        {
-            "label": "示例2",
-            "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo2.jpg"
+                "arg0": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/ulfd_face_detection.jpg"
             }
         }
     ]
@@ -58,7 +52,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
         
-        self.p = pipeline('image-portrait-enhancement', 'damo/cv_gpen_image-portrait-enhancement-hires')
+        self.p = pipeline('face-detection', 'damo/cv_manual_face-detection_ulfd')
 
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
@@ -66,8 +60,8 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,image,**kwargs):
-        result = self.p(image)
+    def inference(self,arg0,**kwargs):
+        result = self.p(arg0)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
@@ -82,7 +76,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         ]
         return back
 
-model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
+model=CV_MANUAL_FACE_DETECTION_ULFD_Model()
 
 
 # 容器中调试训练时
@@ -91,7 +85,7 @@ model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
 
 # 容器中运行调试推理时
 model.load_model(save_model_dir=None)
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg')  # 测试
+result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/ulfd_face_detection.jpg')  # 测试
 print(result)
 
 # # 模型启动web时使用

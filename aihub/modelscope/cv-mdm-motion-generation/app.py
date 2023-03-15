@@ -5,26 +5,26 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 import pysnooper
 import os
 
-class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
+class CV_MDM_MOTION_GENERATION_Model(Model):
     # 模型基础信息定义
-    name='cv-gpen-image-portrait-enhancement-hires'   # 该名称与目录名必须一样，小写
-    label='GPEN人像增强修复-大分辨率人脸'
-    describe="GPEN通过将预训练的人像生成网络嵌入到Unet网络中联合微调的方式在人像修复任务的多项指标中上达到了sota的结果。"
+    name='cv-mdm-motion-generation'   # 该名称与目录名必须一样，小写
+    label='运动生成-人体运动-英文'
+    describe="根据文本描述，生成对应的人体运动数据"
     field="机器视觉"    # [机器视觉，听觉，自然语言，多模态，强化学习，图论]
     scenes=""
     status='online'
     version='v20221001'
     pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
-    hot = "900"
+    hot = "162"
     frameworks = "pytorch"
-    doc = "https://modelscope.cn/models/damo/cv_gpen_image-portrait-enhancement-hires/summary"
+    doc = "https://modelscope.cn/models/damo/cv_mdm_motion-generation/summary"
 
     # 和train函数的输入参数对应，并且会对接显示到pipeline的模板参数中
     train_inputs = []
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.text, name='text', label='',describe='',default='',validators=None)
     ]
 
     inference_resource = {
@@ -33,15 +33,15 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
-            "label": "示例1",
+            "label": "示例0",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg"
+                "text": "the person walked forward and is picking up his toolbox"
             }
         },
         {
-            "label": "示例2",
+            "label": "示例1",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo2.jpg"
+                "text": "/mnt/workspace/.cache/modelscope/damo/cv_mdm_motion-generation/description/call.mp4"
             }
         }
     ]
@@ -58,7 +58,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
         
-        self.p = pipeline('image-portrait-enhancement', 'damo/cv_gpen_image-portrait-enhancement-hires')
+        self.p = pipeline('motion-generation', 'damo/cv_mdm_motion-generation')
 
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
@@ -66,8 +66,8 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,image,**kwargs):
-        result = self.p(image)
+    def inference(self,text,**kwargs):
+        result = self.p(text)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
@@ -82,7 +82,7 @@ class CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model(Model):
         ]
         return back
 
-model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
+model=CV_MDM_MOTION_GENERATION_Model()
 
 
 # 容器中调试训练时
@@ -91,7 +91,7 @@ model=CV_GPEN_IMAGE_PORTRAIT_ENHANCEMENT_HIRES_Model()
 
 # 容器中运行调试推理时
 model.load_model(save_model_dir=None)
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_gpen_image-portrait-enhancement-hires/description/demo.jpg')  # 测试
+result = model.inference(text='the person walked forward and is picking up his toolbox')  # 测试
 print(result)
 
 # # 模型启动web时使用
