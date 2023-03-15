@@ -622,7 +622,7 @@ class Server():
             return Response(gen(cap),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-        # @app.before_request
+        @app.before_request
         # @pysnooper.snoop()
         def check_login():
             req_url = request.path
@@ -640,20 +640,18 @@ class Server():
             g.username=username
 
             # 只对后端接口
-            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:
-
+            if '/api/model/' in req_url:
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
-
                 # 匿名用户对后端的请求次数超过1次就需要登录
-                if num > 0 and 'anonymous-' in username:
+                if 4 > num > 0 and 'anonymous-' in username:
 
                     return jsonify(
                         {
                             "message": "",
                             "result": [
                                 {
-                                    "text": "匿名用户仅可访问一次，扫码进群获取更多访问次数",
-                                    "image":"https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/ad1.jpg"
+                                    "text": "匿名用户仅可访问一次，star github 项目后获得无限访问次数",
+                                    "html":"<a herf='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
                                 }
                             ],
                             "status": 0
@@ -675,12 +673,12 @@ class Server():
 
 
         # 配置响应后操作：统计
-        # @app.after_request
+        @app.after_request
         # @pysnooper.snoop()
         def apply_http_headers(response):
 
             req_url = request.path
-            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:  #  and type(response.get_json())==list
+            if '/api/model/' in req_url:  #  and type(response.get_json())==list
                 response.set_cookie('aihub_username', g.username)
                 username = g.username
                 if username not in user_history:
