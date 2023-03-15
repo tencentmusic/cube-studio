@@ -20,28 +20,30 @@ class APP1_Model(Model):
     ]
 
     inference_inputs = [
-        Field(type=Field_type.text, name='arg1', label='推理函数的输入参数arg1',
-              describe='arg1的详细说明，用于在界面展示',default='这里是默认值',validators=Validator(regex='[a-z]*')),
-        Field(type=Field_type.image, name='arg2', label='推理函数的输入参数arg2',
-              describe='arg2的详细说明，用于在界面展示,传递到推理函数中将是图片本地地址，最多可上传2张',validators=Validator(max=2,required=False)),
-        Field(type=Field_type.video, name='arg3', label='推理函数的输入参数arg3',
-              describe='arg3的详细说明，用于在界面展示,传递到推理函数中将是视频本地地址'),
-        Field(type=Field_type.audio, name='arg4', label='推理函数的输入参数arg4',
-              describe='arg4的详细说明，用于在界面展示,传递到推理函数中将是音频本地地址'),
-        Field(type=Field_type.text_select, name='arg5', label='推理函数的输入参数arg5',
-              describe='arg5的详细说明，用于在界面展示,单选组件',choices=['choice1','choice2','choice3'],
+
+        Field(type=Field_type.text, name='arg1', label='文本类推理输入参数',
+              describe='接收到的参数值为字符串',default='这里是默认值',validators=Validator(regex='[a-z]*')),
+        Field(type=Field_type.image, name='arg2', label='图片类推理输入',
+              describe='需要用户上传图片,传递到推理函数中将是图片本地地址，Validator/max，控制可以上传多少张照片',validators=Validator(max=2,required=False)),
+        Field(type=Field_type.video, name='arg3', label='视频类推理输入',
+              describe='需要用户上传视频文件,传递到推理函数中将是视频本地地址'),
+        Field(type=Field_type.audio, name='arg4', label='音频类推理输入',
+              describe='需要用户上传音频文件,传递到推理函数中将是音频本地地址'),
+        Field(type=Field_type.text_select, name='arg5', label='文本 选项类输入',
+              describe='单选/多选 组件，传递到推理函数的值为选中的可选项的值，也就是choices中的值，Validator/max控制单选还是多选',choices=['choice1','choice2','choice3'],
               default='choice2',validators=Validator(max=1)),
-        Field(type=Field_type.image_select, name='arg6', label='推理函数的输入参数arg6',
-              describe='arg6的详细说明，用于在界面展示,单选组件', choices=['风格1.jpg', '风格2.jpg'],
+        Field(type=Field_type.image_select, name='arg6', label='图片 选项类输入',
+              describe='单选/多选 图片 组件，传递到推理函数的值为选中的可选项的值，也就是choices中的值，Validator/max控制单选还是多选', choices=['风格1.jpg', '风格2.jpg'],
               default='风格2.jpg',validators=Validator(max=1)),
-        Field(type=Field_type.text_select, name='arg7', label='推理函数的输入参数arg7',
-              describe='arg7的详细说明，用于在界面展示,多选组件，最多可选3个', choices=['choice1', 'choice2', 'choice3'],
+        Field(type=Field_type.text_select, name='arg7', label='文本 选项类输入',
+              describe='用于在界面展示,多选组件，max控制多选', choices=['choice1', 'choice2', 'choice3'],
               default=['choice1'],validators=Validator(max=3)),
-        Field(type=Field_type.image_select, name='arg8', label='推理函数的输入参数arg8',
-              describe='arg8的详细说明，用于在界面展示,多选组件，最多可选2张', choices=['风格1.jpg', '风格2.jpg'],
+        Field(type=Field_type.image_select, name='arg8', label='图片 选项类输入',
+              describe='用于在界面展示,多选组件，max控制多选', choices=['风格1.jpg', '风格2.jpg'],
               default=['风格1.jpg','风格2.jpg'],validators=Validator(max=2))
     ]
 
+    # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
             "lable": "示例一描述",
@@ -65,7 +67,7 @@ class APP1_Model(Model):
         # self.model = load("/xxx/xx/a.pth")
         pass
 
-    # rtsp流的推理
+    # rtsp流的推理,输入为cv2 img,输出也为cv2 img
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
         return img
 
@@ -81,6 +83,8 @@ class APP1_Model(Model):
         result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
         result_audio = 'result/test.wav'
         result_markdown=open('test.md',mode='r').read()
+
+        # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
                 "image":result_img,
