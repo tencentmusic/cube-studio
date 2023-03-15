@@ -14,7 +14,7 @@ class CV_DLA34_TABLE_STRUCTURE_RECOGNITION_CYCLE_CENTERNET_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     hot = "3190"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_dla34_table-structure-recognition_cycle-centernet/summary"

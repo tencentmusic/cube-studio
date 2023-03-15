@@ -14,7 +14,7 @@ class CV_ADAINT_IMAGE_COLOR_ENHANCE_MODELS_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     hot = "70"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_adaint_image-color-enhance-models/summary"
