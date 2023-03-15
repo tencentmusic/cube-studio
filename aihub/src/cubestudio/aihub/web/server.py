@@ -651,7 +651,7 @@ class Server():
                             "result": [
                                 {
                                     "text": "匿名用户仅可访问一次，star github 项目后获得无限访问次数",
-                                    "html":"<a herf='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
+                                    "html":"<a href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
                                 }
                             ],
                             "status": 0
