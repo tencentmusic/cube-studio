@@ -1,22 +1,18 @@
-import base64
-import io,sys,os
-from cubestudio.aihub.model import Model,Validator,Field_type,Field
-from cubestudio.aihub.docker import Docker
-from cubestudio.aihub.web.server import Server
 
-import pysnooper
-import os
+import io,sys,os,base64,pysnooper
+from cubestudio.aihub.model import Model,Validator,Field_type,Field
+import numpy
 
 class APP1_Model(Model):
     # 模型基础信息定义
     name='app1'   # 该名称与目录名必须一样，小写
     label='示例应用中文名'
     describe="ai示例应用，详细描述，都会显示应用描述上，支持markdown"
-    field="机器视觉"
+    field="机器视觉"  # [机器视觉，听觉，自然语言，多模态，强化学习，图论]
     scenes="图像识别"
     status='online'
     version='v20221001'
-    pic='result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
 
     train_inputs = [
         Field(Field_type.text, name='arg1', label='训练函数的输入参数arg1', describe='arg1的详细说明，用于在任务界面展示',default='这里是默认值',validators=Validator(regex='[a-z]*')),
@@ -57,27 +53,33 @@ class APP1_Model(Model):
         }
     ]
 
-    # 训练的入口函数，将用户输入参数传递
+    # 训练的入口函数，此函数会自动对接pipeline，将用户在web界面填写的参数传递给该方法
     def train(self,save_model_dir,arg1,arg2, **kwargs):
         print(arg1,arg2,kwargs)
         # 训练的逻辑
-        return '/mnt/admin'
+        # 将模型保存到save_model_dir 指定的目录下
 
 
-    # 加载模型
+    # 加载模型，所有一次性的初始化工作可以放到该方法下。注意save_model_dir必须和训练函数导出的模型结构对应
     def load_model(self,save_model_dir=None,**kwargs):
         # self.model = load("/xxx/xx/a.pth")
         pass
 
-    # 推理
+    # rtsp流的推理
+    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
+        return img
+
+
+    # web每次用户请求推理，用于对接web界面请求
     # @pysnooper.snoop()
     def inference(self,arg1,arg2=None,arg3=None,arg4=None,arg5=None,arg6=None,arg7=None,**kwargs):
         # save_path = os.path.join('result', os.path.basename(arg1))
         # os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        result_img='result.jpg'
+        # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
+        result_img='result/result.jpg'
         result_text='cat,dog'
         result_video='https://pengluan-76009.sz.gfp.tencent-cloud.com/cube-studio%20install.mp4'
-        result_audio = 'test.wav'
+        result_audio = 'result/test.wav'
         result_markdown=open('test.md',mode='r').read()
         back=[
             {
@@ -100,14 +102,19 @@ class APP1_Model(Model):
 
 model=APP1_Model()
 
-# model.load_model()
+
+# 容器中调试训练时
+# save_model_dir = "result"
+# model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
+
+# 容器中运行调试推理时
+# model.load_model(save_model_dir)
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
 
+# 模型启动web时使用
 if __name__=='__main__':
     # python app.py train --arg1 xx --arg2 xx
-    # python app.py inference --arg1 xx --arg2 xx
     # python app.py web --save_model_dir xx
-    # python app.py download_model 用于再构建镜像下载一些预训练模型
     model.run()
 
