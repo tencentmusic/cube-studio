@@ -13,12 +13,12 @@ class APP1_Model(Model):
     status='online'
     version='v20221001'
     pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
-
+    # 和train函数的输入参数对应，并且会对接显示到pipeline的模板参数中
     train_inputs = [
         Field(Field_type.text, name='arg1', label='训练函数的输入参数arg1', describe='arg1的详细说明，用于在任务界面展示',default='这里是默认值',validators=Validator(regex='[a-z]*')),
         Field(Field_type.text_select, name='arg2', label='训练函数的输入参数arg2', describe='arg2的详细说明，用于在任务界面展示', default='这里是默认值',choices=['choice1','choice2','choice3'])
     ]
-
+    # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
 
         Field(type=Field_type.text, name='arg1', label='文本类推理输入参数',
@@ -67,7 +67,7 @@ class APP1_Model(Model):
         # self.model = load("/xxx/xx/a.pth")
         pass
 
-    # rtsp流的推理,输入为cv2 img,输出也为cv2 img
+    # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
         return img
 
@@ -112,7 +112,7 @@ model=APP1_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-# model.load_model(save_model_dir)
+# model.load_model(save_model_dir=None)
 # result = model.inference(arg1='测试输入文本',arg2='test.jpg')  # 测试
 # print(result)
 
