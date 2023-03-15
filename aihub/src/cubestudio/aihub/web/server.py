@@ -642,22 +642,23 @@ class Server():
             # 只对后端接口
             if '/api/model/' in req_url:
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
-                anonymous_max_req = int(os.getenv('MAX_REQ','1000'))
+                anonymous_max_req = int(os.getenv('MAX_REQ','-1'))
 
                 # 匿名用户对后端的请求次数超过1次就需要登录
-                if anonymous_max_req+3 > num > anonymous_max_req and 'anonymous-' in username:
-                    return jsonify(
-                        {
-                            "message": "",
-                            "result": [
-                                {
-                                    "text": "匿名用户仅可访问一次，star github 项目后获得无限访问次数",
-                                    "html":"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
-                                }
-                            ],
-                            "status": 0
-                        }
-                    )
+                if anonymous_max_req>0:
+                    if anonymous_max_req+3 > num > anonymous_max_req and 'anonymous-' in username:
+                        return jsonify(
+                            {
+                                "message": "",
+                                "result": [
+                                    {
+                                        "text": "匿名用户仅可访问一次，star github 项目后获得无限访问次数",
+                                        "html":"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
+                                    }
+                                ],
+                                "status": 0
+                            }
+                        )
 
                 # if num > 10:
                 #     return jsonify(
