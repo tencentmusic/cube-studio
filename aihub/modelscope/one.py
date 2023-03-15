@@ -70,6 +70,11 @@ def make_aihub():
         #     print(model_path, '下载少')
         #     continue
 
+        # 已经处理过的不再处理
+        if os.path.exists(model_name.replace('_',"-").replace('.','_')):
+            print('已经处理过的模型')
+            continue
+
         save_path = os.path.join('modelscope', model_path + ".json")
         model = json.load(open(save_path)).get("Data", {})
 
@@ -128,15 +133,21 @@ def make_aihub():
             examples = widgets[0]['examples']
             if examples:
                 aihub_web_examples=[]
-                for example in examples:
+                for ii,example in enumerate(examples):
                     aihub_example = {
-                        "label":example['title'],
+                        "label":example['title'] if example['title'] else f'示例{ii}',
                         "input":{}
                     }
                     for i,input in enumerate(example['inputs']):
                         name = input['name']
                         if not name:
                             name = f'arg{i}'
+                        if '.jpg' in name:
+                            name = 'image'
+                        if '.mp3' in name:
+                            name='aduio'
+                        if '.mp4' in name:
+                            name = 'video'
                         if type(input['data'])==str:
                             aihub_example['input'][name]= input['data'].replace("git://",model_cache_path)
                         else:
@@ -177,6 +188,9 @@ def make_aihub():
                     name = inference_input["name"]
                     if not name:
                         name = f'arg{i}'
+                        if name not in app['web_examples']:  # 如果在web example中有定义，就尝试用那边的
+                            name = inference_input["type"]
+                        #
                     inference_fun_args.append(name)
                     # from cubestudio.aihub.model import Model, Validator, Field_type, Field
                     input = f'''Field(type=Field_type.{input_type}, name='{name}', label='{inference_input["title"]}',describe='{inference_input["title"]}',default='',validators={aihub_validators})'''
@@ -207,7 +221,20 @@ def make_aihub():
                     inference_fun = python_code[1].strip('\n')
                     # print(inference_fun)
                     app['inference_fun'] = ("result = self."+inference_fun).replace('\n', '\n        ')
-
+        if app['inference_fun']=='pass':
+            args_num = len(app['inference_fun_args'].split(','))
+            if args_num==1:
+                app['inference_fun']='result = self.p(%s)'%app['inference_fun_args']
+            elif args_num>1:
+                # print(model_path,app['inference_fun_args'])
+                args = app['inference_fun_args'].split(',')
+                inference_fun_args = {}
+                for arg in args:
+                    inference_fun_args[arg]=arg
+                inference_fun = 'result = self.p(%s)' % json.dumps(inference_fun_args)
+                inference_fun =  inference_fun.replace(': "',': ').replace('",',',').replace('"}','}')
+                app['inference_fun'] = inference_fun
+                # print(app['inference_fun'])
                 # print(quickstart)
                 # print(python_code)
 
