@@ -32,7 +32,7 @@ cp init.sh /init.sh && bash /init.sh
 ```
 补齐app.py，运行调试
 ```bash
-python app.py
+/src/docker/entrypoint.sh python app.py
 ```
 生成aiapp的镜像
 ```bash

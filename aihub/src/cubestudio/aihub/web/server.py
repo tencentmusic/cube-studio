@@ -104,6 +104,8 @@ class Server():
                 file_path = file_path.replace('.avi','.mp4')
 
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + file_path.strip('/')
+            if os.path.exists(save_path):
+                os.remove(save_path)
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copyfile(file_path, save_path)
@@ -482,7 +484,8 @@ class Server():
             web_examples = copy.deepcopy(self.model.web_examples)
 
             # example中图片转为在线地址
-            for example in web_examples:
+            for i,example in enumerate(web_examples):
+                example['label'] = example['label'] if example.get('label','') else f"示例{i}"
                 example_input = example.get('input',{})
                 for arg_filed in inference_inputs:
                     if arg_filed.name in example_input:  # 这个示例提供了这个参数
