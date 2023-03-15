@@ -22,7 +22,7 @@ cubestudio自带了前端，整体的启动命令
 
 1、Model class 内的配置
 
-参考app1/app.py，注意代码中的注释
+重要：参考app1/app.py，注意代码中的注释
 
 2、启动内容
 
