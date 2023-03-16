@@ -66,9 +66,9 @@ def make_aihub():
         #     print(model_path, '有障碍')
         #     continue
         # 下载量太少的不要
-        # if int(model['Downloads'])<100:
-        #     print(model_path, '下载少')
-        #     continue
+        if int(model['Downloads'])<100:
+            print(model_path, '下载少')
+            continue
 
         # 已经处理过的不再处理
         if os.path.exists(model_name.replace('_',"-").replace('.','_')):
