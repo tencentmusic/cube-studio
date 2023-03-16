@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-canonical-body-3d-keypoints-video",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-canonical-body-3d-keypoints-video",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-canonical-body-3d-keypoints-video-v20221001",
+    "label": "人体关键点检测-通用领域-3D",
+    "describe": "输入一段单人视频，实现端到端的3D人体关键点检测，输出视频中每一帧的3D人体关键点坐标。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}
