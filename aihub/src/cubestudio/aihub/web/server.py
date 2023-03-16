@@ -647,31 +647,33 @@ class Server():
                 # 匿名用户对后端的请求次数超过1次就需要登录
                 if anonymous_max_req>0:
                     if anonymous_max_req+3 > num > anonymous_max_req and 'anonymous-' in username:
+                        group_pic_url = os.getenv('GROUP_PIC_URL','https://luanpeng.oss-cn-qingdao.aliyuncs.com/csdn/ad1.jpg')
                         return jsonify(
                             {
                                 "message": "",
                                 "result": [
                                     {
-                                        "text": "匿名用户仅可访问一次，star github 项目后获得无限访问次数",
-                                        "html":"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
+                                        "text": "匿名用户仅可访问一次，入群获取更多访问次数",
+                                        "html":f"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> <img alt='图片不可达，访问github获取入群方式' src='{group_pic_url}' /> </a>"
                                     }
                                 ],
                                 "status": 0
                             }
                         )
 
-                # if num > 10:
-                #     return jsonify(
-                #         {
-                #             "message": "",
-                #             "result": [
-                #                 {
-                #                     "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
-                #                 }
-                #             ],
-                #             "status": 0
-                #         }
-                #     )
+                if num > 10:
+                    return jsonify(
+                        {
+                            "message": "",
+                            "result": [
+                                {
+                                    "text": "匿名用户仅可访问一次，star github项目获得无限访问次数",
+                                    "html":"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
+                                }
+                            ],
+                            "status": 0
+                        }
+                    )
 
 
         # 配置响应后操作：统计

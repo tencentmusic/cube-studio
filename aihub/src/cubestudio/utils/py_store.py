@@ -43,17 +43,18 @@ def upload_file(file_path,url,**kwargs):
         with open(file_path, 'rb') as f:
             f.seek(start)
             file_chunk_data = f.read(end - start)
-        data = MultipartEncoder(
-            fields={
-                "filename": filename,
-                "total_size": str(total_size),
-                "current_chunk": str(current_chunk),
-                "current_offset":str(start),
-                "total_chunk": str(total_chunk),
-                # "md5": get_md5(file_path),
-                "file": (filename,file_chunk_data)
-            }
-        )
+
+        fields = {
+            "filename": filename,
+            "total_size": str(total_size),
+            "current_chunk": str(current_chunk),
+            "current_offset": str(start),
+            "total_chunk": str(total_chunk),
+            # "md5": get_md5(file_path),
+            "file": (filename, file_chunk_data)
+        }
+        fields.update(kwargs.get('data',{}))
+        data = MultipartEncoder(fields)
         headers = {
             "Accept": "application/json",
             "Accept-Encoding": "gzip, deflate",
