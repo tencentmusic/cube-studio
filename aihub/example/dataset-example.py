@@ -45,13 +45,13 @@ if __name__=="__main__":
     dataset = dataset.update(path='',features=features)
     dataset.compress(file_path,data_dir)
     # dataset.encrypt(file_path,file_path+".crypt",key)
-    dataset.upload(file_path)
+    dataset.upload(file_path,partition='20230201')
     # #
     # # 清除下本地模拟使用方
-    # os.remove(file_path)
+    os.remove(file_path)
     # os.remove(file_path+".crypt")
     # shutil.rmtree(data_dir)
-    # dataset.download()
+    dataset.download(partition='20230201')
     # dataset.decrypt(file_path+".crypt",file_path,key)
     # dataset.decompress(file_path,data_dir)
     #

@@ -37,14 +37,17 @@ class Dataset(Model):
     #     return f"/data/k8s/kubeflow/dataset/{self.name}/{self.version}"
     local_dir = ''
     # @pysnooper.snoop()
-    def download(self,des_dir=None):
+    def download(self,partition='',des_dir=None):
         if des_dir:
             self.local_dir=des_dir
         else:
             self.local_dir=os.getcwd()
         print('准备下载数据到',self.local_dir)
         url = self.client.path+f"/download/{self.id}"
+        if partition:
+            url = url+"/"+partition
         donwload_urls = self.client.req(url).get("result",{}).get("download_urls",[])
+        print(donwload_urls)
         os.makedirs(self.local_dir,exist_ok=True)
         pool = Pool(len(donwload_urls))  # 开辟包含指定数目线程的线程池
         pool.map(partial(download_file,des_dir=self.local_dir), donwload_urls)  # 当前worker，只处理分配给当前worker的任务
@@ -55,16 +58,19 @@ class Dataset(Model):
 
     # 上传数据部分
     # @pysnooper.snoop()
-    def upload(self,file_path_list):
+    def upload(self,file_path_list,partition=''):
         if type(file_path_list)!=list:
             file_path_list=[file_path_list]
         url = self.client.host.rstrip('/')+self.client.path + f"/upload/{self.id}"
         headers = {
             "Authorization":self.client.token
         }
+        data = {
+            "partition":partition
+        }
         print('准备上传本地数据', file_path_list)
         pool = Pool(min(10,len(file_path_list)))  # 开辟包含指定数目线程的线程池
-        pool.map(partial(upload_file,url=url,headers=headers), file_path_list)  # 当前worker，只处理分配给当前worker的任务
+        pool.map(partial(upload_file,url=url,data=data,headers=headers), file_path_list)  # 当前worker，只处理分配给当前worker的任务
         pool.close()
         pool.join()
         pass
