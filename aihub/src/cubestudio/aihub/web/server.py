@@ -621,6 +621,15 @@ class Server():
             cap.start()
             return Response(gen(cap),mimetype='multipart/x-mixed-replace; boundary=frame')
 
+        @app.route(f'/wechat/jsapi')
+        def wechat():
+            return jsonify({
+                "code": 0,
+                "message": "success",
+                "data": {
+                }
+            })
+
 
         @app.before_request
         # @pysnooper.snoop()
@@ -654,7 +663,7 @@ class Server():
                                 "result": [
                                     {
                                         "text": "匿名用户仅可访问一次，入群获取更多访问次数",
-                                        "html":f"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> <img alt='图片不可达，访问github获取入群方式' src='{group_pic_url}' /> </a>"
+                                        "html":f"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> <img width='200' alt='图片不可达，访问github获取入群方式' src='{group_pic_url}' /> </a>"
                                     }
                                 ],
                                 "status": 0
