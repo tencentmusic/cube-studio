@@ -3,6 +3,7 @@
 # 安装python包
 # pip uninstall cubestudio
 # pip install -U git+https://git.woa.com/tme-kubeflow/aihub.git
+# pip install git+https://github.com/tencentmusic/cube-studio.git@aihub  暂时不可用
 
 import datetime
 import json
@@ -36,6 +37,8 @@ if __name__=="__main__":
     # 数据集操作
     # datasets = Client(Dataset).search(name="audio_test")
     dataset = Client(Dataset).one(name="audio_test")
+    if not dataset:
+        dataset = Client(Dataset).add(name='audio_test', version='latest', label='语音测试数据集', describe='语音测试数据集')
     data_dir='audio_test'
     file_path = 'audio_test.zip'
     print(dataset.path)
