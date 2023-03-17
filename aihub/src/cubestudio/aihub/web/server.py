@@ -470,7 +470,8 @@ class Server():
         # 监控度量
         @app.route(f'/{self.pre_url}/metrics')
         def metrics():
-            return jsonify(user_history)
+            from flask import Markup
+            return Markup(jsonify(user_history))
 
         # 健康检查
         @app.route(f'/{self.pre_url}/health')
