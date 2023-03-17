@@ -62,7 +62,7 @@ sudo docker run --name ${aiapp} --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --rm -it -e APPNAME=$aiapp -e MAX_REQ=1 -e GROUP_PIC_URL=https://cube-studio.oss-cn-hangzhou.aliyuncs.com/aihub.jpg -v $cube_dir/src:/src -v $PWD:/app -p 80:80 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
+sudo docker run --name ${aiapp} --restart always -d -e APPNAME=$aiapp -e MAX_REQ=1 -e GROUP_PIC_URL=https://cube-studio.oss-cn-hangzhou.aliyuncs.com/aihub.jpg -v $cube_dir/src:/src -v $PWD:/app -p 80:80 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/aihub:${aiapp} python app.py 
 
 
 ```
