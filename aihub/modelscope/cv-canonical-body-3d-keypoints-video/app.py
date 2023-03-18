@@ -54,25 +54,31 @@ class CV_CANONICAL_BODY_3D_KEYPOINTS_VIDEO_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
+        # print(result)
 
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "keypoints": str(result['keypoints']),
+                "timestamp": str(result['timestamps']),
+                "video": result['output_video']
             }
         ]
+
+
         return back
 
 model=CV_CANONICAL_BODY_3D_KEYPOINTS_VIDEO_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(arg0='https://dmshared.oss-cn-hangzhou.aliyuncs.com/maas/test/video/Walking.54138969.h264.mp4')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(arg0='https://dmshared.oss-cn-hangzhou.aliyuncs.com/maas/test/video/Walking.54138969.h264.mp4')  # 测试
+# print(result)
 
-# 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+# 测试后打开此部分，已完成
+if __name__=='__main__':
+    # 1. 模型输出的视频是火柴棍形式，不是原视频加描线；
+    # 2. 模型不能采帧，因为需要连续帧来判断3D的动作；
+    # 3. 如果想输出更长的视频对应的人物动作，需要配置/mnt文件下的configuration.json的model.INPUT.MAX_FRAME，1秒30帧，如果输出5s的结果，就设置150帧
+    # 4. 视频的输出结果没有位置信息，是原地的动作识别，需要配合一个人体框识别才能输出完整的位置+动作信息；
+    # 5. 模型非常慢，识别5s的动作，需要57分钟，最好是能上GPU，GPU是否可行，目前不知道。
+    model.run()

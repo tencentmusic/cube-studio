@@ -111,6 +111,6 @@ model=CV_AAMS_STYLE_TRANSFER_DAMO_Model()
 #     "style": "https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-style-transfer/style_transfer_style.jpg"
 #     )  # 测试
 
-# 测试后打开此部分
+# 测试后打开此部分，已完成
 if __name__=='__main__':
     model.run()
