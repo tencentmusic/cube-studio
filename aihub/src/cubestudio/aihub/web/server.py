@@ -671,7 +671,7 @@ class Server():
                             }
                         )
 
-                if num > 10:
+                if num > 100:
                     return jsonify(
                         {
                             "message": "",
