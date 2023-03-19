@@ -12,3 +12,8 @@ deep-learning/*/result
 /modelscope/*/result
 /deep-learning/deploy/
 /dist/
+
+/modelscope/*/.mp4
+/modelscope/*/.mp3
+/modelscope/*/result
+/modelscope/*/upload
