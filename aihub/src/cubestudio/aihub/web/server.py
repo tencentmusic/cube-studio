@@ -425,6 +425,9 @@ class Server():
                 if type(all_back)==dict and 'status' in all_back:
                     return jsonify(all_back)
 
+                all_back.append({
+                    "image":'https://cube-studio.oss-cn-hangzhou.aliyuncs.com/aihub.jpg'
+                })
                 return jsonify({
                     "status": status,
                     "result": all_back,
@@ -536,7 +539,7 @@ class Server():
             rec_apps = [
                 {
                     "pic": f"/{self.pre_url.strip('/')}/static/rec/rec1.jpg",
-                    "label": "图片卡通化",
+                    "label": "图片风格迁移",
                     "url": "/aihub/gfpgan"
                 },
                 {
