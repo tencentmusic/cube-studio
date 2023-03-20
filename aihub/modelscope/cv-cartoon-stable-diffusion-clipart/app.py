@@ -3,7 +3,9 @@ import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
-import os
+import os,cv2
+
+import random
 
 class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
     # 模型基础信息定义
@@ -47,20 +49,26 @@ class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
     def load_model(self,save_model_dir=None,**kwargs):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
-        
+
         self.p = pipeline('text-to-image-synthesis', 'damo/cv_cartoon_stable_diffusion_clipart')
 
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,text,**kwargs):
-        result = self.p({'text':text})
+        from diffusers.schedulers import EulerAncestralDiscreteScheduler
+        self.p.pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(self.p.pipeline.scheduler.config)
+
+        result = self.p({'text':'archer style, a portrait painting of '+text})
+        print(result)
+
+        save_path='result/result'+str(random.randint(5,5000))+'.jpg'
+        os.makedirs(os.path.dirname(save_path),exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, result['output_imgs'][0])
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
@@ -68,10 +76,11 @@ class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
 model=CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(text='archer style, a portrait painting of Johnny Depp')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(text='archer style, a portrait painting of Johnny Depp')  # 测试
+
+
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
