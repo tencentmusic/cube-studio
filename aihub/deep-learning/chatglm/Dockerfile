@@ -3,7 +3,7 @@ FROM zxdu20/glm-cuda112:latest
 
 WORKDIR /app
 USER root
-
+WORKDIR /workspace
 # 安装中文，和基础的apt工具包
 COPY sources.list /etc/apt/sources.list
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
@@ -40,3 +40,4 @@ RUN pip3 install celery redis pyarrow requests_toolbelt cryptography tqdm fsspec
 
 ENV PYTHONPATH /src/:/github/:$PYTHONPATH
 
+WORKDIR /app
