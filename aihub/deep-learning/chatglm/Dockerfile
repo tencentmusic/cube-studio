@@ -10,9 +10,8 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # 安装中文，和基础的apt工具包
 COPY sources.list /etc/apt/sources.list
-
-RUN apt -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true update
-RUN apt install -y --force-yes --no-install-recommends -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true software-properties-common vim apt-transport-https gnupg2 ca-certificates-java jq wget git dnsutils iputils-ping net-tools curl lrzsz locales python3-distutils
+RUN apt update -y
+RUN apt install -y --force-yes --no-install-recommends software-properties-common vim apt-transport-https gnupg2 ca-certificates-java jq wget git dnsutils iputils-ping net-tools curl lrzsz locales python3-distutils
 
 RUN locale-gen zh_CN && locale-gen zh_CN.utf8
 
