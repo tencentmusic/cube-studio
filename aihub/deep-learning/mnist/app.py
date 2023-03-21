@@ -39,13 +39,13 @@ class Mnist_Model(Model):
     ]
 
     # 训练的入口函数，将用户输入参数传递
-    def train(self,**kwargs):
+    def train(self,save_model_dir,**kwargs):
         dist.init_process_group(backend='gloo')
         run(modelpath=kwargs['modelpath'], gpu=False, datapath=kwargs['datapath'])
         dist.destroy_process_group()
 
     # 推理前load模型
-    def load_model(self,**kwargs):
+    def load_model(self,save_model_dir=None,**kwargs):
         from mnist import Net
         self.model = Net()
         device = 'cpu'

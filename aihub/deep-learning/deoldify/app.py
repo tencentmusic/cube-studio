@@ -35,7 +35,7 @@ class DeOldify_Model(Model):
     ]
 
     # 加载模型
-    def load_model(self):
+    def load_model(self,save_model_dir=None,**kwargs):
         plt.style.use('dark_background')
         torch.backends.cudnn.benchmark = True
         import warnings

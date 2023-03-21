@@ -18,5 +18,6 @@
         "appendix": []
     },
     "train": {},
-    "inference": {}
+    "inference": {},
+    "images": ""
 }

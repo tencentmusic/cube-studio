@@ -42,7 +42,7 @@ class Panoptic_Model(Model):
     ]
 
     # 加载模型
-    def load_model(self):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.feature_extractor = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50-panoptic")
         self.model = DetrForSegmentation.from_pretrained("facebook/detr-resnet-50-panoptic")
         self.config = json.load(open('config.json'))

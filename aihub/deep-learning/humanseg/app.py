@@ -48,7 +48,7 @@ class HumanSeg_Model(Model):
     ]
 
     # 加载模型
-    def load_model(self):
+    def load_model(self,save_model_dir=None,**kwargs):
         args = parse_args()
         env_info = get_sys_env()
         args.use_gpu = True if env_info['Paddle compiled with cuda'] and env_info['GPUs used'] else False

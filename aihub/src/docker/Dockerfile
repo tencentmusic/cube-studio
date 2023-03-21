@@ -1,6 +1,8 @@
 # docker build -t ccr.ccs.tencentyun.com/cube-studio/aihub:base  -f Dockerfile .
 
-FROM ubuntu:20.04
+#FROM ubuntu:20.04
+ARG FROM_IMAGES
+FROM $FROM_IMAGES
 
 RUN apt update
 ENV TZ Asia/Shanghai

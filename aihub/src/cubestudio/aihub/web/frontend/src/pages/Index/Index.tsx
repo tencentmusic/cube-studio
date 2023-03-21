@@ -13,6 +13,11 @@ import Checkbox from '../../components/CheckoutGroupPlus/CheckoutGroupPlus'
 import { useLocation } from 'react-router-dom'
 import Loading from '../../components/Loading/Loading'
 import { isInWeixin, share } from '../../utils/weixin'
+import remarkGfm from 'remark-gfm'
+import rehypeReact from 'rehype-react'
+import rehypeRaw from 'rehype-raw'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const AutoplaySlider = withAutoplay(AwesomeSlider);
 
@@ -36,9 +41,7 @@ export default function Index() {
 
     useEffect(() => {
         const timerTagRecord = setInterval(() => {
-            if (activeKeyRef.current < 99) {
-                setActiveKey(activeKeyRef.current + 1);
-            }
+            setActiveKey(activeKeyRef.current + 1);
         }, 1000);
         return () => {
             clearInterval(timerTagRecord);
@@ -131,8 +134,8 @@ export default function Index() {
             } */}
             {
                 loading ? <Loading value={activeKey} content={
-                    <div className="ta-c">
-                        <div className="c-text-w fs18 pb8">结果生成中，稍等片刻</div>
+                    <div className="ta-c pt48">
+                        <div className="fs18 pb8">结果生成中，稍等片刻</div>
                         <Button onClick={() => {
                             setLoading(false)
                         }}>退出等待</Button>
@@ -215,7 +218,28 @@ export default function Index() {
                                         result.text ? <div className="paper p16"><span>文本结果：</span>{result.text}</div> : null
                                     }
                                     {
-                                        result.markdown ? <div className="paper p16 mt16"><ReactMarkdown>{result.markdown}</ReactMarkdown></div> : null
+                                        result.markdown ? <div className="paper p16 mt16 ov-a md-container"><ReactMarkdown
+                                            children={result.markdown}
+                                            remarkPlugins={[remarkGfm]}
+                                            rehypePlugins={[rehypeRaw]}
+                                            components={{
+                                                code({ node, inline, className, children, ...props }) {
+                                                    const match = /language-(\w+)/.exec(className || '')
+                                                    return !inline && match ? (
+                                                        <SyntaxHighlighter
+                                                            children={String(children).replace(/\n$/, '')}
+                                                            style={atomDark as any}
+                                                            language={match[1]}
+                                                            PreTag="div"
+                                                            {...props}
+                                                        />
+                                                    ) : (
+                                                            <code className={className} {...props}>
+                                                                {children}
+                                                            </code>
+                                                        )
+                                                }
+                                            }} /></div> : null
                                     }
                                     {
                                         result.image ? <div className="paper p16 mt16"><div className="pb8">图片结果：</div><img className="w100" src={result.image} alt="" /></div> : null

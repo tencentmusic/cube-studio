@@ -43,8 +43,8 @@ class GFPGAN_Model(Model):
     ]
 
     # 加载模型
-    @pysnooper.snoop()
-    def load_model(self):
+    # @pysnooper.snoop()
+    def load_model(self,save_model_dir=None,**kwargs):
         if not torch.cuda.is_available():  # CPU
             import warnings
             warnings.warn('The unoptimized RealESRGAN is slow on CPU. We do not use it. '

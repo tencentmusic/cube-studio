@@ -127,7 +127,7 @@ class Cartoon_SD_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop()
-    def load_model(self):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.model, config, model_hash = init_config_model()
         try:
             embedmodel = EmbedderModel()

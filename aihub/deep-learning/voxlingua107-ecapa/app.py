@@ -34,7 +34,7 @@ class Voxlingua107_ecapa_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop(depth=2)
-    def load_model(self):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.language_id = EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa", savedir="tmp",use_auth_token=os.getenv('HUGGINGFACE_TOKEN',None))
 
     # 推理

@@ -37,7 +37,7 @@ class Speech_Cls_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop()
-    def load_model(self):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.cls = CLSExecutor()  # 语音分类
 
     # 推理

@@ -37,7 +37,7 @@ class Speech_Asr_Model(Model):
 
     # 加载模型
     # @pysnooper.snoop()
-    def load_model(self):
+    def load_model(self,save_model_dir=None,**kwargs):
         self.asr = ASRExecutor()  # 语音识别
 
     # 推理

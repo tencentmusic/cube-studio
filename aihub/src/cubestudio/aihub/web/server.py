@@ -34,18 +34,16 @@ from PIL import Image,ImageFont
 from PIL import ImageDraw
 import urllib
 from PIL import Image
-from celery import Celery
-from celery.result import AsyncResult
+
 import pysnooper
 from ..model import Field,Field_type,Validator
-from ...util.py_github import get_repo_user
-from ...util.log import AbstractEventLogger
-from ...util.py_shell import exec
-
+from ...utils.py_github import get_repo_user
+from ...utils.log import AbstractEventLogger
+from ...utils.py_shell import exec
+from .RtspCapture import RtspCapture
 from flask import Flask
 
 user_history={
-
 }
 
 
@@ -76,9 +74,6 @@ class Server():
         CELERY_BROKER_URL = os.getenv('REDIS_URL', redis_url_default)
         CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', redis_url_default)
 
-        celery_app = Celery(self.model.name, broker=CELERY_BROKER_URL,backend=CELERY_RESULT_BACKEND)
-        celery_app.conf.update(app.config)
-
         # 如果是同步服务，并且是一个celery worker，就多进程启动消费推理
         if os.getenv('REQ_TYPE', 'synchronous') == 'synchronous':
             # 如果同时消费其他异步任务，就启动celery
@@ -86,28 +81,31 @@ class Server():
                 command = 'celery --app=cubestudio.aihub.web.celery_app:celery_app worker -Q %s --loglevel=info --pool=prefork -Ofair -c 4'%(self.model.name)
                 # print(command)
                 exec(command)
-            # 同步任务要加载模型
-            self.model.load_model()
 
-            # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
-            if self.model.web_examples and len(self.model.web_examples)>0:
-                input = self.model.web_examples[0].get("input",{})
-                try:
-                    if input:
-                        self.model.inference(**input)
-                except Exception as e:
-                    print(e)
+            # # 同步任务要加载模型
+            # self.model.load_model(model_dir)
+
+            # # 如果有测试用例，就直接推理一遍测试用户，可以预加载模型
+            # if self.model.web_examples and len(self.model.web_examples)>0:
+            #     input = self.model.web_examples[0].get("input",{})
+            #     try:
+            #         if input:
+            #             self.model.inference(**input)
+            #     except Exception as e:
+            #         print(e)
 
         # 文件转url。视频转码，音频转码等
         # @pysnooper.snoop()
         def file2url(file_path):
             # base_name = os.path.basename(file_path)
             if '.avi' in file_path:
-                from cubestudio.util.py_video import Video2Mp4
+                from cubestudio.utils.py_video import Video2Mp4
                 Video2Mp4(file_path,file_path.replace('.avi','.mp4'))
                 file_path = file_path.replace('.avi','.mp4')
 
             save_path = os.path.dirname(os.path.abspath(__file__)) + '/static/example/'+self.model.name+"/" + file_path.strip('/')
+            if os.path.exists(save_path):
+                os.remove(save_path)
             if not os.path.exists(save_path):
                 os.makedirs(os.path.dirname(save_path),exist_ok=True)
                 shutil.copyfile(file_path, save_path)
@@ -180,7 +178,6 @@ class Server():
             data = request.json
             data.update(request.form.to_dict())
             return jsonify(model_inference(data))
-
 
         # 将请求data转化为推理函数参数
         def req2inference_args(data):
@@ -378,6 +375,10 @@ class Server():
                     begin_time = datetime.datetime.now()
                     for i in range(100):
                         time.sleep(1)
+                        from celery.result import AsyncResult
+                        from celery import Celery
+                        celery_app = Celery(self.model.name, broker=CELERY_BROKER_URL,backend=CELERY_RESULT_BACKEND)
+                        celery_app.conf.update(app.config)
                         async_task = AsyncResult(id=task.id, app=celery_app)
                         # print("async_task.id", async_task.id, flush=True)
                         # 判断异步任务是否执行成功
@@ -424,6 +425,9 @@ class Server():
                 if type(all_back)==dict and 'status' in all_back:
                     return jsonify(all_back)
 
+                all_back.append({
+                    "image":'https://cube-studio.oss-cn-hangzhou.aliyuncs.com/aihub.jpg'
+                })
                 return jsonify({
                     "status": status,
                     "result": all_back,
@@ -455,7 +459,7 @@ class Server():
                 {
                     "text": "AIHub",
                     "icon": '',
-                    "link": '/frontend/aihub/model_market/model_all'
+                    "link": '/frontend/aihub/model_market/model_visual'
                 },
                 {
                     "text": '',
@@ -469,7 +473,8 @@ class Server():
         # 监控度量
         @app.route(f'/{self.pre_url}/metrics')
         def metrics():
-            return jsonify(user_history)
+            from flask import Markup
+            return Markup(jsonify(user_history))
 
         # 健康检查
         @app.route(f'/{self.pre_url}/health')
@@ -483,12 +488,13 @@ class Server():
             web_examples = copy.deepcopy(self.model.web_examples)
 
             # example中图片转为在线地址
-            for example in web_examples:
+            for i,example in enumerate(web_examples):
+                example['label'] = example['label'] if example.get('label','') else f"示例{i}"
                 example_input = example.get('input',{})
                 for arg_filed in inference_inputs:
                     if arg_filed.name in example_input:  # 这个示例提供了这个参数
                         # 示例图片/视频转为在线地址
-                        if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name or 'audio' in arg_filed.type.name) and 'http' not in example_input[arg_filed.name]:
+                        if ("image" in arg_filed.type.name or 'video' in arg_filed.type.name or 'audio' in arg_filed.type.name) and example_input[arg_filed.name] and 'http' not in example_input[arg_filed.name]:
                             example_input[arg_filed.name]=file2url(example_input[arg_filed.name])
 
 
@@ -533,7 +539,7 @@ class Server():
             rec_apps = [
                 {
                     "pic": f"/{self.pre_url.strip('/')}/static/rec/rec1.jpg",
-                    "label": "图片卡通化",
+                    "label": "图片风格迁移",
                     "url": "/aihub/gfpgan"
                 },
                 {
@@ -581,12 +587,53 @@ class Server():
                 "web_examples":web_examples,
                 "inference_inputs": inference_inputs,
                 'inference_url':f'/{self.pre_url}/api/model/{self.model.name}/version/{self.model.version}/',
-                "aihub_url":"/frontend/aihub/model_market/model_all",
+                "aihub_url":"/frontend/aihub/model_market/model_visual",
                 "github_url":"https://github.com/tencentmusic/cube-studio",
                 "user":f"/login",
                 "rec_apps":rec_apps
             }
             return jsonify(info)
+
+        @app.route(f'/{self.pre_url}/rtspcapture')
+        def rtspcapture():
+            rtsp_url = request.args.to_dict().get('rtsp_url',os.getenv('RTSP_URL',''))
+            if rtsp_url:
+                data={
+                    "rtsp_url":rtsp_url
+                }
+                return render_template('rtspcapture.html',data=data)
+            else:
+                return jsonify({
+                    "mesage":"环境变量未配置RTSP_URL"
+                })
+
+        def gen(rtsp):
+            while True:
+                img = rtsp.cap_frame()
+                # print(type(img))
+                if img is not None:
+                    img = self.model.rtsp_inference(img)
+                if img is not None:
+                    data_bytes = cv2.imencode('.jpg', img)[1].tobytes()
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + data_bytes + b'\r\n')
+
+        @app.route(f'/{self.pre_url}/video_feed')
+        def video_feed():
+            rtsp_url = request.args.to_dict().get('rtsp_url', os.getenv('RTSP_URL', ''))
+            cap = RtspCapture(url=rtsp_url)
+            cap.start()
+            return Response(gen(cap),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+        @app.route(f'/wechat/jsapi')
+        def wechat():
+            return jsonify({
+                "code": 0,
+                "message": "success",
+                "data": {
+                }
+            })
+
 
         @app.before_request
         # @pysnooper.snoop()
@@ -597,47 +644,49 @@ class Server():
             username = request.cookies.get('myapp_username','')
             # 获取来自上一次的记忆
             if not username:
-                username = session.get('username','')
+                username = request.cookies.get('aihub_username','')
             # 创建新匿名用户
             if not username:
                 username = "anonymous-" + uuid.uuid4().hex[:16]
 
             # res传递给浏览器记录
-            session['username']=username
+            g.username=username
 
             # 只对后端接口
-            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:
-
+            if '/api/model/' in req_url:
                 num = user_history.get(username, {}).get(req_url, {}).get('num',0)
+                anonymous_max_req = int(os.getenv('MAX_REQ','-1'))
 
-                # 匿名用户对后端的请求次数超过1次就需要登录
-                if num > 0 and 'anonymous-' in username:
+                # # 匿名用户对后端的请求次数超过1次就需要登录
+                # if anonymous_max_req>0:
+                #     if anonymous_max_req+3 > num > anonymous_max_req and 'anonymous-' in username:
+                #         group_pic_url = os.getenv('GROUP_PIC_URL','https://luanpeng.oss-cn-qingdao.aliyuncs.com/csdn/ad1.jpg')
+                #         return jsonify(
+                #             {
+                #                 "message": "",
+                #                 "result": [
+                #                     {
+                #                         "text": "匿名用户仅可访问一次，入群获取更多访问次数",
+                #                         "html":f"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> <img width='200' alt='图片不可达，访问github获取入群方式' src='{group_pic_url}' /> </a>"
+                #                     }
+                #                 ],
+                #                 "status": 0
+                #             }
+                #         )
 
+                if num > 100:
                     return jsonify(
                         {
                             "message": "",
                             "result": [
                                 {
-                                    "text": "匿名用户仅可访问一次，扫码进群获取更多访问次数",
-                                    "image":"https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/ad1.jpg"
+                                    "text": "匿名用户仅可访问一次，star github项目获得无限访问次数",
+                                    "html":"<a target='_blank' href='https://github.com/tencentmusic/cube-studio'> 打开github地址 </a>"
                                 }
                             ],
                             "status": 0
                         }
                     )
-
-                # if num > 10:
-                #     return jsonify(
-                #         {
-                #             "message": "",
-                #             "result": [
-                #                 {
-                #                     "text": "登录用户仅可访问10次，播放视频获得更多访问次数"
-                #                 }
-                #             ],
-                #             "status": 0
-                #         }
-                #     )
 
 
         # 配置响应后操作：统计
@@ -646,8 +695,9 @@ class Server():
         def apply_http_headers(response):
 
             req_url = request.path
-            if os.getenv('REQ_TYPE', 'synchronous') == 'asynchronous' and '/api/model/' in req_url:  #  and type(response.get_json())==list
-                username = session['username']
+            if '/api/model/' in req_url:  #  and type(response.get_json())==list
+                response.set_cookie('aihub_username', g.username)
+                username = g.username
                 if username not in user_history:
                     user_history[username] = {}
                 if req_url not in user_history[username]:

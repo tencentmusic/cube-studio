@@ -280,7 +280,7 @@ const AppWrapper = (props: IProps) => {
           </a>
 
           <a
-            href='/frontend/aihub/model_market/model_all'
+            href='/frontend/aihub/model_market/model_visual'
             target="_blank"
             className="mr12 d-f ac"
           >
