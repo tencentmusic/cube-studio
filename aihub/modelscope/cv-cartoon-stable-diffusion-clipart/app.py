@@ -24,8 +24,8 @@ class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.text_select, name='choice_t', label='选择人物还是景象', describe='人、物', default='',choices=['人、物','景象'],validators=Validator(max=1)),
-        Field(type=Field_type.text, name='text', label='输入关键词',describe='可输入人物、物体、场景,如Johnny Depp、猫、supermarket',default='Johnny Depp',validators=Validator(max=75))
+        Field(type=Field_type.text_select, name='choice_t', label='选择生成人还是物体景象', describe='', default='',choices=['人','物体景象'],validators=Validator(max=1)),
+        Field(type=Field_type.text, name='text', label='输入关键词',describe='可输入人物、物体、场景,如Johnny Depp、猫、supermarket，中文描述效果不佳时，可尝试用英文描述',default='Johnny Depp',validators=Validator(max=75))
         # Field(type=Field_type.text, name='text', label='输入关键词',describe='',default='Johnny Depp',validators=Validator(max=75))
 
     ]
@@ -62,7 +62,7 @@ class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
         self.p.pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(self.p.pipeline.scheduler.config)
 
         #archer type,sks type
-        describe_t = 'sks style, a portrait painting of ' if choice_t=='人、物' else 'archer style, a painting of '
+        describe_t = 'archer style, a portrait painting of ' if choice_t=='人' else 'archer style, a painting of '
 
         result = self.p({'text':describe_t+text})
         print(result)
@@ -93,6 +93,6 @@ model=CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model()
 # 2. 有最佳实践和一般实践的区别，主要是是否加这两行代码，结果上，最佳实践背景占比更少，图片颜色更正
 # from diffusers.schedulers import EulerAncestralDiscreteScheduler
 # self.p.pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(self.p.pipeline.scheduler.config)
-# 3. 描述中的archer type不知道什么意思，不清楚是否有其他type可以尝试
+# 3. 描述中的archer type不知道什么意思，不清楚是否有其他type可以尝试，破案了，有5个小模型！！可以生成不同类型的卡通画！！
 if __name__=='__main__':
     model.run()
