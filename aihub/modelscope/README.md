@@ -31,6 +31,16 @@ cp init.sh /init.sh && bash /init.sh
 /src/docker/entrypoint.sh python app.py
 ```
 
+# 记录模型效果
+
+在模型app.py文件末尾添加注释，描述下列内容：
+
+模型大小：  
+模型效果：  
+推理性能：  
+占用内存/gpu：  
+巧妙使用方法：  
+
 # 用户：部署体验应用
 首先需要部署docker
 ```bash
