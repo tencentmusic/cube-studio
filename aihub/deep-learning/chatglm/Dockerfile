@@ -4,10 +4,13 @@ FROM zxdu20/glm-cuda112:latest
 WORKDIR /app
 USER root
 WORKDIR /workspace
+
+ENV TZ Asia/Shanghai
+ENV DEBIAN_FRONTEND noninteractive
+
 # 安装中文，和基础的apt工具包
 COPY sources.list /etc/apt/sources.list
-RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone
+
 RUN apt -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true update
 RUN apt install -y --force-yes --no-install-recommends -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true software-properties-common vim apt-transport-https gnupg2 ca-certificates-java jq wget git dnsutils iputils-ping net-tools curl lrzsz locales python3-distutils
 
@@ -28,9 +31,6 @@ RUN pip install --upgrade pip
 COPY requirements.txt /workspace/ChatGLM-6B_requirements.txt
 RUN pip install -r ChatGLM-6B_requirements.txt -i https://pypi.douban.com/simple
 RUN pip install -U deep_training cpm_kernels icetk deepspeed -i https://pypi.douban.com/simple
-
-ENV TZ Asia/Shanghai
-ENV DEBIAN_FRONTEND noninteractive
 
 # 安装运维工具
 RUN apt install -y -f --no-install-recommends apt-transport-https gnupg2 jq dnsutils iputils-ping net-tools mysql-client locales zip unzip nginx lsof
