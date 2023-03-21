@@ -48,7 +48,7 @@ DAMO-YOLO现已支持使用自定义数据训练，欢迎试用！如在使用�
  "images": 
   [{
       "license": 1, 
-      "file_name": "000000425226.jpg",        
+      "file_name": "https://modelscope.cn/api/v1/models/damo/cv_tinynas_object-detection_damoyolo/repo?Revision=master&FilePath=000000425226.jpg&View=true",        
       "coco_url": "http://images.cocodataset.org/val2017/000000425226.jpg", 
       "height": 640, 
       "width": 480, 

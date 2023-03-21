@@ -12,7 +12,7 @@
 
 其系统结构如[图1]所示：
 
-![系统结构](description/tts-system.jpg)
+![系统结构](https://modelscope.cn/api/v1/models/damo/speech_sambert-hifigan_tts_en-us_16k/repo?Revision=master&FilePath=description/tts-system.jpg&View=true)
 
 前端模块我们采用模型结合规则的方式灵活处理各种场景下的文本，后端模块则采用SAM-BERT + HIFIGAN提供高表现力的流式合成效果。
 
@@ -26,12 +26,12 @@
 ```
 
 
-![SAMBERT结构](description/sambert.jpg)
+![SAMBERT结构](https://modelscope.cn/api/v1/models/damo/speech_sambert-hifigan_tts_en-us_16k/repo?Revision=master&FilePath=description/sambert.jpg&View=true)
 
 ### 声码器模型:HIFI-GAN
 后端模块中声码器采用HIFI-GAN, 基于GAN的方式利用判别器(Discriminator)来指导声码器(即生成器Generator)的训练，相较于经典的自回归式逐样本点CE训练, 训练方式更加自然，在生成效率和效果上具有明显的优势。其系统结构如[图3]所示：
 
-![系统结构](description/hifigan.jpg)
+![系统结构](https://modelscope.cn/api/v1/models/damo/speech_sambert-hifigan_tts_en-us_16k/repo?Revision=master&FilePath=description/hifigan.jpg&View=true)
 
 在HIFI-GAN开源工作[1]的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。
 

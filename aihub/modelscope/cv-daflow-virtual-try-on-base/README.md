@@ -62,15 +62,15 @@ cv2.imwrite('demo.jpg', img[:, :, ::-1])
 
 - 量化结果
 
-![table](./figs/table.jpg)
+![table](https://modelscope.cn/api/v1/models/damo/cv_daflow_virtual-try-on_base/repo?Revision=master&FilePath=./figs/table.jpg&View=true)
 
 - VITON dataset
 
-![viton](./figs/fig1.jpg)
+![viton](https://modelscope.cn/api/v1/models/damo/cv_daflow_virtual-try-on_base/repo?Revision=master&FilePath=./figs/fig1.jpg&View=true)
 
 - MPV dataset
 
-![mpv](./figs/mpv.jpg)
+![mpv](https://modelscope.cn/api/v1/models/damo/cv_daflow_virtual-try-on_base/repo?Revision=master&FilePath=./figs/mpv.jpg&View=true)
 
 - FashionVideo
 
@@ -78,7 +78,7 @@ cv2.imwrite('demo.jpg', img[:, :, ::-1])
 
 - ShapeNet
 
-![shapenet](./figs/shapenet.jpg)
+![shapenet](https://modelscope.cn/api/v1/models/damo/cv_daflow_virtual-try-on_base/repo?Revision=master&FilePath=./figs/shapenet.jpg&View=true)
 
 
 

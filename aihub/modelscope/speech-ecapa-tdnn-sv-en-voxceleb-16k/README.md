@@ -4,7 +4,7 @@ ECAPA-TDNN模型是基于时延神经网络构建的说话人模型，由于识�
 ## 模型结构简述
 ECAPA-TDNN在传统的TDNN模型上有3种改进。第一，融合了一维的Res2Net层和Squeeze-and-Excitation模块，对特征channel之间的关系进行建模。第二，融合多个层级特征，同时利用网络浅层和深层的信息。第三，采用了基于attention机制的pooling层，生成基于全局attention的说话人特征。
 <div align=center>
-<img src="ecapa_tdnn.jpg" width="300" />
+<img src="https://modelscope.cn/api/v1/models/damo/speech_ecapa-tdnn_sv_en_voxceleb_16k/repo?Revision=master&FilePath=ecapa_tdnn.jpg&View=true" width="300" />
 </div>
 更详细的信息见：[论文](https://arxiv.org/abs/2005.07143)
 

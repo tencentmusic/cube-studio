@@ -2,7 +2,7 @@
 对于一个输入视频，只需在第一帧图像中用矩形框指定待跟踪目标，单目跟踪算法将在整个视频帧中持续跟踪该目标，输出跟踪目标在所有图像帧中的矩形框信息。
 
 ## 模型描述
-<img src="resources/ProContEXT_framework.jpg" width="800" >
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vitb_video-single-object-tracking_procontext/repo?Revision=master&FilePath=resources/ProContEXT_framework.jpg&View=true" width="800" >
 
 本模型是基于ProContEXT方案的单目标跟踪框架，使用ViT作为主干网络进行训练，是One-Stream单目标跟踪算法。
 本算法将特征抽取和匹配过程通过注意力机制同步进行，获得较高的目标跟踪精度。

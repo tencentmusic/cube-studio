@@ -7,7 +7,7 @@
 
 ## 3D人体关键点系列模型
 
-| [<img src="assets/HDFormer.jpg" width="300px">](https://modelscope.cn/models/damo/cv_hdformer_body-3d-keypoints_video/summary) |	[<img src="assets/CanonicalPose3D.jpg" width="300px">](https://modelscope.cn/models/damo/cv_canonical_body-3d-keypoints_video/summary)  |
+| [<img src="https://modelscope.cn/api/v1/models/damo/cv_canonical_body-3d-keypoints_video/repo?Revision=master&FilePath=assets/HDFormer.jpg&View=true" width="300px">](https://modelscope.cn/models/damo/cv_hdformer_body-3d-keypoints_video/summary) |	[<img src="assets/CanonicalPose3D.jpg" width="300px">](https://modelscope.cn/models/damo/cv_canonical_body-3d-keypoints_video/summary)  |
  |:--:|:--:|
 | [HDFormer](https://modelscope.cn/models/damo/cv_hdformer_body-3d-keypoints_video/summary) |	 [CannoicalPose3D](https://modelscope.cn/models/damo/cv_canonical_body-3d-keypoints_video/summary) 	 |
 
@@ -16,7 +16,7 @@
 </br>
 </br>
 </br>
-![](./assets/CanonicalPose3D.jpg)
+![](https://modelscope.cn/api/v1/models/damo/cv_canonical_body-3d-keypoints_video/repo?Revision=master&FilePath=./assets/CanonicalPose3D.jpg&View=true)
 </br>
 </br>
 
@@ -99,7 +99,7 @@ print(output)
 输出的3D关键点可视化结果如下：
 
 <div align="center">
-  <img src="assets/frame1.jpg" width="500" />
+  <img src="https://modelscope.cn/api/v1/models/damo/cv_canonical_body-3d-keypoints_video/repo?Revision=master&FilePath=assets/frame1.jpg&View=true" width="500" />
   <center>输入视频截图</center>
   </br>
   <img src="assets/result.png" width="500" />

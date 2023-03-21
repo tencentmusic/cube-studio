@@ -13,7 +13,7 @@
 ## 模型描述
 
 采用Transformer经典的[ViT-Base](https://github.com/google-research/vision_transformer)结构, 并采用了DeiT的知识蒸馏方式进行训练。  
-<img src="./resources/overview.jpg" alt="overview"/>
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vit-base_image-classification_Dailylife-labels/repo?Revision=master&FilePath=./resources/overview.jpg&View=true" alt="overview"/>
 
 ## 期望模型使用方式以及适用范围
 

@@ -5,7 +5,7 @@ YOLOPv2 适用于自动驾驶场景下的实时全景驾驶感知, 同时执行�
 ## 模型描述
 YOLOPv2([官方代码](https://github.com/CAIC-AD/YOLOPv2)) 是[YOLOP](https://arxiv.org/abs/2108.11250)(You Only Look Once for Panoptic Driving Perception)的升级版，输入一张图像，输出所有车辆区域检测框、可行驶区域(Drivable area)和车道线(Lane Line)分割图。可视化结果如下。
 
-<img src="./assets/image_driving_perception.jpg" width = "576" height = "324" alt="source"/> <img src="./assets/result.jpg" width = "576" height = "324" alt="result"/>
+<img src="https://modelscope.cn/api/v1/models/damo/cv_yolopv2_image-driving-perception_bdd100k/repo?Revision=master&FilePath=./assets/image_driving_perception.jpg&View=true" width = "576" height = "324" alt="source"/> <img src="https://modelscope.cn/api/v1/models/damo/cv_yolopv2_image-driving-perception_bdd100k/repo?Revision=master&FilePath=./assets/result.jpg&View=true" width = "576" height = "324" alt="result"/>
 
 模型整体架构图如下:
 

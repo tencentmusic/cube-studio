@@ -8,7 +8,7 @@ TAdaConv是一种在行为识别模型中即插即用的时序自适应卷积（
 
 其模型结构如下所示：
 
-![模型结构](description/model_image.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_TAdaConv_action-recognition/repo?Revision=master&FilePath=description/model_image.jpg&View=true)
 
 
 ## 使用方式和范围

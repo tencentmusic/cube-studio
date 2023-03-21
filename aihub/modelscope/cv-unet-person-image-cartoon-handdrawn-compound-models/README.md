@@ -33,7 +33,11 @@
 
 在ModelScope框架上，提供输入图片，即可以通过简单的Pipeline调用来使用人像卡通化模型。
 
+
 #### 代码范例
+
+- 模型推理(支持CPU/GPU)：
+
 ```python
 import cv2
 from modelscope.outputs import OutputKeys
@@ -50,8 +54,69 @@ result = img_cartoon(img_path)
 
 cv2.imwrite('result.png', result[OutputKeys.OUTPUT_IMG])
 print('finished!')
-
 ```
+
+- 模型训练：
+
+环境要求：tf1.14/15及兼容cuda，支持GPU训练
+
+```python
+import os
+import unittest
+import cv2
+from modelscope.exporters.cv import CartoonTranslationExporter
+from modelscope.msdatasets import MsDataset
+from modelscope.outputs import OutputKeys
+from modelscope.pipelines import pipeline
+from modelscope.pipelines.base import Pipeline
+from modelscope.trainers.cv import CartoonTranslationTrainer
+from modelscope.utils.constant import Tasks
+from modelscope.utils.test_utils import test_level
+
+model_id = 'damo/cv_unet_person-image-cartoon-handdrawn_compound-models'
+data_dir = MsDataset.load(
+            'dctnet_train_clipart_mini_ms',
+            namespace='menyifang',
+            split='train').config_kwargs['split_config']['train']
+
+data_photo = os.path.join(data_dir, 'face_photo')
+data_cartoon = os.path.join(data_dir, 'face_cartoon')
+work_dir = 'exp_localtoon'
+max_steps = 10
+trainer = CartoonTranslationTrainer(
+            model=model_id,
+            work_dir=work_dir,
+            photo=data_photo,
+            cartoon=data_cartoon,
+            max_steps=max_steps)
+trainer.train()
+```
+
+上述训练代码仅仅提供简单训练的范例，对大规模自定义数据，替换data_photo为真实人脸数据路径，data_cartoon为卡通风格人脸数据路径，max_steps建议设置为300000，可视化结果将存储在work_dir下；此外configuration.json(~/.cache/modelscope/hub/damo/cv_unet_person-image-cartoon_compound-models/)可以进行自定义修改；
+
+Note: notebook预装环境下存在numpy依赖冲突，可手动更新解决：pip install numpy==1.18.5
+
+
+- 卡通人脸数据获取
+
+卡通人脸数据可由设计师设计/网络收集得到，在此提供一种基于[Stable-Diffusion风格预训练模型](https://modelscope.cn/models/damo/cv_cartoon_stable_diffusion_design/summary)的卡通数据生成方式
+
+```python
+import cv2
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+pipe = pipeline(Tasks.text_to_image_synthesis, model='damo/cv_cartoon_stable_diffusion_clipart', model_revision='v1.0.0')
+from diffusers.schedulers import EulerAncestralDiscreteScheduler
+pipe.pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.pipeline.scheduler.config)
+output = pipe({'text': 'archer style, a portrait painting of Johnny Depp'})
+cv2.imwrite('result.png', output['output_imgs'][0])
+print('Image saved to result.png')
+
+print('finished!')
+```
+可通过替换Johnny Depp为其他名人姓名，产生多样化风格数据，通过人脸对齐裁剪即可得到卡通人脸数据；可以通过修改pipeline的model参数指定不同风格的SD预训练模型。
+
 
 ### 模型局限性以及可能的偏差
 

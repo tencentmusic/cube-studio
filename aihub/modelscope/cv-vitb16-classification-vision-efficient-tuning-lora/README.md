@@ -26,7 +26,7 @@ from modelscope.pipelines import pipeline
 
 lora_pipeline = pipeline('vision-efficient-tuning',
                          'damo/cv_vitb16_classification_vision-efficient-tuning-lora',
-                          model_revision='v1.0.1')
+                          model_revision='v1.0.2')
 result = lora_pipeline('https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/vision_efficient_tuning_test_1.png')
 print(f'Output: {result}.')            
 ```
@@ -62,6 +62,68 @@ print(f'Output: {result}.')
 |     Average     |       89.84%      |      90.21%     |
 
 其中，ViT-B/16模型使用 [ImageNet-21K](https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz) 作为预训练模型，ViT-L/14使用 [CLIP](https://github.com/openai/CLIP) 作为预训练模型。
+
+## 模型训练和验证
+
+以下为使用[FME Benchmark](https://modelscope.cn/datasets/damo/foundation_model_evaluation_benchmark/summary)中的子数据集[OxfordFlowers](https://www.robots.ox.ac.uk/~vgg/data/flowers/102/)[[点击预览](https://modelscope.cn/datasets/damo/foundation_model_evaluation_benchmark/dataPeview)]进行finetune训练和评测的示例代码：
+
+```python
+import tempfile
+from modelscope.msdatasets import MsDataset
+from modelscope.metainfo import Trainers
+from modelscope.trainers import build_trainer
+from modelscope.utils.constant import DownloadMode
+
+# 模型ID
+model_id = 'damo/cv_vitb16_classification_vision-efficient-tuning-lora'
+
+# 加载训练集
+ms_train_dataset = MsDataset.load(
+    'foundation_model_evaluation_benchmark', 
+    namespace='damo',
+    subset_name='OxfordFlowers', 
+    split='train',
+	download_mode=DownloadMode.FORCE_REDOWNLOAD)   
+
+# 加载验证集
+ms_eval_dataset = MsDataset.load(
+    'foundation_model_evaluation_benchmark', 
+    namespace='damo',
+    subset_name='OxfordFlowers', 
+    split='eval',
+	download_mode=DownloadMode.FORCE_REDOWNLOAD)      
+
+tmp_dir = tempfile.TemporaryDirectory().name # 使用临时目录作为工作目录
+
+# 修改配置文件
+def cfg_modify_fn(cfg):
+    max_epochs = 1                            # 最大训练轮次
+    cfg.model.head.num_classes = 102          # 类别数
+    cfg.model.finetune = True                 # 进行微调
+    cfg.train.max_epochs = max_epochs         # 最大训练轮次
+    cfg.train.lr_scheduler.T_max = max_epochs # 学习率调度器的参数
+    cfg.model.backbone.lora_length = 10       # 模型超参数
+    return cfg
+
+# 构建训练器
+kwargs = dict(
+    model=model_id,                 # 模型id
+    work_dir=tmp_dir,               # 工作目录
+    train_dataset=ms_train_dataset, # 训练集  
+    eval_dataset=ms_eval_dataset,   # 验证集
+    cfg_modify_fn=cfg_modify_fn     # 用于修改训练配置文件的回调函数
+)
+trainer = build_trainer(name=Trainers.vision_efficient_tuning, default_args=kwargs)
+
+# 进行训练
+trainer.train()
+
+# 进行评估
+result = trainer.evaluate()
+print('result:', result)
+```
+
+训练说明见示例代码中的注释部分，详细的训练说明和用法见官方的[训练文档](https://modelscope.cn/docs/%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%AE%AD%E7%BB%83Train)。
 
 ## 相关论文以及引用信息
 

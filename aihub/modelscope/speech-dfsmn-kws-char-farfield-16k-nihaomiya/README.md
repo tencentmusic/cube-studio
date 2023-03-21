@@ -8,7 +8,7 @@
 
 本项目以你好米雅等开源数据集为基础，提供了一种基于盲源分离（blind source separation, BSS）理论框架的语音增强方法，以及一种可扩展的多通道关键词检测与通道选择模型。同时还提供了配套的数据模拟，模型训练以及测试工具链。该模型参数量为123k，适合于低资源嵌入式应用。并且该模型还实现了和语音增强算法的匹配训练，进一步提升了模型在实际系统中的性能。
 
-本项目的总体框架如图1所示，其中主要分为语音增强和关键词检测两个部分。首先，语音增强模块以多通道麦克风信号<img height="22" src="figs/fx.jpg"/>和单路参考信号r为输入，经过去混响、回声消除、盲源分离、增益控制等操作后，输出多路分离后的信号<img height="22" src="figs/fy.jpg"/>。此时我们可以认为其中一路输出是包含"你好米雅"关键词信噪比较高的目标语音，而其它输出则是信噪比较低的噪声或干扰信号。之后多路信号经过关键词检测模块进行处理，检测其中的关键词音频，抛出唤醒事件，并选择关键词信噪比最高的通道，即n'，供后续交互流程使用。
+本项目的总体框架如图1所示，其中主要分为语音增强和关键词检测两个部分。首先，语音增强模块以多通道麦克风信号<img height="22" src="https://modelscope.cn/api/v1/models/damo/speech_dfsmn_kws_char_farfield_16k_nihaomiya/repo?Revision=master&FilePath=figs/fx.jpg&View=true"/>和单路参考信号r为输入，经过去混响、回声消除、盲源分离、增益控制等操作后，输出多路分离后的信号<img height="22" src="https://modelscope.cn/api/v1/models/damo/speech_dfsmn_kws_char_farfield_16k_nihaomiya/repo?Revision=master&FilePath=figs/fy.jpg&View=true"/>。此时我们可以认为其中一路输出是包含"你好米雅"关键词信噪比较高的目标语音，而其它输出则是信噪比较低的噪声或干扰信号。之后多路信号经过关键词检测模块进行处理，检测其中的关键词音频，抛出唤醒事件，并选择关键词信噪比最高的通道，即n'，供后续交互流程使用。
 
 <div align=center>
 <img width="780" src="figs/system_overview.png"/>
@@ -104,7 +104,7 @@ print(result)
 为了达到更好的唤醒效果，训练套件默认会做两轮训练和评测。第一轮训出的模型根据评测结果选出最优的模型作为基础，第二轮再继续finetune。大致流程如下图所示，更多详细信息请参考套件说明文档。
 
 <div align=center>
-<img width="400" src="figs/training_pipeline.jpg"/>
+<img width="400" src="https://modelscope.cn/api/v1/models/damo/speech_dfsmn_kws_char_farfield_16k_nihaomiya/repo?Revision=master&FilePath=figs/training_pipeline.jpg&View=true"/>
 </div>
 <center>图5 模型训练流程图</center>
 

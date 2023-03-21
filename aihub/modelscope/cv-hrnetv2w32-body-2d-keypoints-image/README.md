@@ -99,10 +99,10 @@ COCO数据集上模型指标：
 | 84.781 | 79.093 | 68.739 | 50.955 | 22.579 | 11.956 |
 
 ### 模型效果
-![人体关键检测结果](assets/results1.jpg)
-![人体关键检测结果](assets/results2.jpg)
-![人体关键检测结果](assets/results3.jpg)
-![人体关键检测结果](assets/results5.jpg)
+![人体关键检测结果](https://modelscope.cn/api/v1/models/damo/cv_hrnetv2w32_body-2d-keypoints_image/repo?Revision=master&FilePath=assets/results1.jpg&View=true)
+![人体关键检测结果](https://modelscope.cn/api/v1/models/damo/cv_hrnetv2w32_body-2d-keypoints_image/repo?Revision=master&FilePath=assets/results2.jpg&View=true)
+![人体关键检测结果](https://modelscope.cn/api/v1/models/damo/cv_hrnetv2w32_body-2d-keypoints_image/repo?Revision=master&FilePath=assets/results3.jpg&View=true)
+![人体关键检测结果](https://modelscope.cn/api/v1/models/damo/cv_hrnetv2w32_body-2d-keypoints_image/repo?Revision=master&FilePath=assets/results5.jpg&View=true)
 
 ### 引用
 ```BibTeX

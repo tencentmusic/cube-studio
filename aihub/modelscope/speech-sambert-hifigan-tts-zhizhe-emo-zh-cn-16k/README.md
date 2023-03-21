@@ -12,7 +12,7 @@
 
 其系统结构如[图1]所示：
 
-![系统结构](description/tts-system.jpg)
+![系统结构](https://modelscope.cn/api/v1/models/damo/speech_sambert-hifigan_tts_zhizhe_emo_zh-cn_16k/repo?Revision=master&FilePath=description/tts-system.jpg&View=true)
 
 前端模块我们采用模型结合规则的方式灵活处理各种场景下的文本，后端模块则采用SAM-BERT + HIFIGAN提供高表现力的流式合成效果。
 
@@ -26,12 +26,12 @@
 ```
 
 
-![SAMBERT结构](description/sambert.jpg)
+![SAMBERT结构](https://modelscope.cn/api/v1/models/damo/speech_sambert-hifigan_tts_zhizhe_emo_zh-cn_16k/repo?Revision=master&FilePath=description/sambert.jpg&View=true)
 
 ### 声码器模型:HIFI-GAN
 后端模块中声码器采用HIFI-GAN, 基于GAN的方式利用判别器(Discriminator)来指导声码器(即生成器Generator)的训练，相较于经典的自回归式逐样本点CE训练, 训练方式更加自然，在生成效率和效果上具有明显的优势。其系统结构如[图3]所示：
 
-![系统结构](description/hifigan.jpg)
+![系统结构](https://modelscope.cn/api/v1/models/damo/speech_sambert-hifigan_tts_zhizhe_emo_zh-cn_16k/repo?Revision=master&FilePath=description/hifigan.jpg&View=true)
 
 在HIFI-GAN开源工作[1]的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。
 
@@ -47,15 +47,8 @@
 * 各种语音合成任务，比如配音，虚拟主播，数字人等
 
 ### 如何使用
-参考代码范例的推理部分可以了解如何使用pipeline进行推理；参考训练部分可以了解如何进行finetune。
+参考代码范例的推理部分可以了解如何使用pipeline进行推理，该模型目前不支持finetune。
 
-目前基于modelscope框架的训练还不能直接使用aishell3数据集，需要参考[语音合成-中文-kantts-公开数据集](https://modelscope.cn/datasets/speech_tts/speech_kantts_opendata/summary)数据集格式进行调整。
-
-也可以参考[kan-tts](https://github.com/alibabaresearch/kan-tts)代码进行基于kan-tts框架的finetune。具体使用方法参考：
-
-[sambert训练教程](https://github.com/alibabaresearch/kan-tts/wiki/training_sambert)
-
-[hifigan训练教程](https://github.com/alibabaresearch/kan-tts/wiki/training_hifigan)
 #### 代码范例
 推理
 ```Python
@@ -71,60 +64,6 @@ wav = output[OutputKeys.OUTPUT_WAV]
 with open('output.wav', 'wb') as f:
     f.write(wav)
 ```
-训练
-```Python
-import os
-import shutil
-import tempfile
-
-from modelscope.metainfo import Trainers
-from modelscope.msdatasets import MsDataset
-from modelscope.trainers import build_trainer
-from modelscope.utils.audio.audio_utils import TtsTrainType
-
-model_id = 'damo/speech_sambert-hifigan_tts_zhizhe_emo_zh-cn_16k'
-dataset_id = 'speech_kantts_opendata'
-dataset_namespace = 'speech_tts'
-# 训练信息，用于指定需要训练哪个或哪些模型，这里展示AM和Vocoder模型皆进行训练
-# 目前支持训练：TtsTrainType.TRAIN_TYPE_SAMBERT, TtsTrainType.TRAIN_TYPE_VOC
-# 训练SAMBERT会以模型最新step作为基础进行finetune
-# 训练Vocoder（HifiGAN）会从0开始进行训练，指定多少个step，训练多少个step
-train_info = {
-    TtsTrainType.TRAIN_TYPE_SAMBERT: {  # 配置训练AM（sambert）模型
-        'train_steps': 2,               # 训练多少个step 
-        'save_interval_steps': 1,       # 每训练多少个step保存一次checkpoint
-        'eval_interval_steps': 1,       # 每训练多少个step评估一次
-        'log_interval': 1               # 每训练多少个step打印一次训练日志
-    },
-    TtsTrainType.TRAIN_TYPE_VOC: {      # 配置训练Vocoder（HifiGAN）模型
-        'train_steps': 2,
-        'save_interval_steps': 1,
-        'eval_interval_steps': 1,
-        'log_interval': 1
-    }
-}
-# 这里展示使用临时目录作为训练的workdir
-tmp_dir = tempfile.TemporaryDirectory().name
-if not os.path.exists(tmp_dir):
-    os.makedirs(tmp_dir)
-# 配置训练参数，指定数据集，临时工作目录和train_info
-kwargs = dict(
-    model=model_id,                             # 指定要finetune的模型
-    work_dir=tmp_dir,                           # 指定临时工作目录
-    train_dataset=dataset_id,                   # 指定数据集id
-    train_dataset_namespace=dataset_namespace,  # 指定数据集所属namespace
-    train_type=train_info                       # 指定要训练类型及参数
-)                      
-trainer = build_trainer(
-    Trainers.speech_kantts_trainer, default_args=kwargs)
-trainer.train()
-# 训练好的checkpoint位于{tmp_dir}/tmp_am/ckpt及{tmp_dir}/tmp_voc/ckpt中
-tmp_am = os.path.join(tmp_dir, 'tmp_am', 'ckpt')
-tmp_voc = os.path.join(tmp_dir, 'tmp_voc', 'ckpt')
-assert os.path.exists(tmp_am)
-assert os.path.exists(tmp_voc)
-```
-
 #### 多情感标签
 使用SSML的emotion标签即可添加多情感，zhizhe_emo支持如下情感：neutral，happy，angry，sad，fear，calm，serious
 

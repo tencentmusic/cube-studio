@@ -12,7 +12,7 @@ FRIR是基于残差网络结构的对红外（IR）人脸提取人脸特征的�
 ## 模型结构
 FRIR采用残差网络结构，loss采用arcface loss。
 
-![FRIR模型结构](arcface.jpg)
+![FRIR模型结构](https://modelscope.cn/api/v1/models/damo/cv_manual_face-recognition_frir/repo?Revision=master&FilePath=arcface.jpg&View=true)
 
 ## 模型使用方式和使用范围
 可用于红外成像的人脸比对，例如低成本红外摄像头的门禁或门锁场景。

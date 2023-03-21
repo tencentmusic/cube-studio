@@ -108,9 +108,9 @@ temp_file_dir.cleanup()
 | 640x640x3 | **0.3526** | **0.7294** | **0.3035** | **0.3002** | **0.4414** | **0.4218** |
 
 ### 模型效果
-![手部检测结果](assets/007888_006.jpg)
-![手部检测结果](assets/047062_003.jpg)
-![手部检测结果](assets/000000184320.jpg)
+![手部检测结果](https://modelscope.cn/api/v1/models/damo/cv_yolox-pai_hand-detection/repo?Revision=master&FilePath=assets/007888_006.jpg&View=true)
+![手部检测结果](https://modelscope.cn/api/v1/models/damo/cv_yolox-pai_hand-detection/repo?Revision=master&FilePath=assets/047062_003.jpg&View=true)
+![手部检测结果](https://modelscope.cn/api/v1/models/damo/cv_yolox-pai_hand-detection/repo?Revision=master&FilePath=assets/000000184320.jpg&View=true)
 
 ### 引用
 ```BibTeX

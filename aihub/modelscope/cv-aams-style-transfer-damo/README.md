@@ -5,7 +5,7 @@
 
 ## [项目主页](https://sites.google.com/view/yuanyao/attention-aware-multi-stroke-style-transfer)
 
-![内容图像](description/showcase_small.jpg)
+![内容图像](https://modelscope.cn/api/v1/models/damo/cv_aams_style-transfer_damo/repo?Revision=master&FilePath=description/showcase_small.jpg&View=true)
 
 
 ## 模型描述

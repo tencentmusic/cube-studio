@@ -10,7 +10,7 @@
 
 
 ## 模型结构
-![模型结构](arcface.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_manual_face-recognition_frfm/repo?Revision=master&FilePath=arcface.jpg&View=true)
 
 ## 模型使用方式和使用范围
 本模型可以检测输入图片中带口罩和不戴口罩人脸的特征
