@@ -26,7 +26,7 @@ def check_docker_commit(task,docker_id):  # 在页面中测试时会自定接收
             begin_time=datetime.datetime.now()
             now_time=datetime.datetime.now()
             while((now_time-begin_time).seconds<1800):   # 也就是最多commit push 30分钟
-                time.sleep(12000)
+                time.sleep(60)
                 commit_pods = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
                 if commit_pods:
                     commit_pod=commit_pods[0]
