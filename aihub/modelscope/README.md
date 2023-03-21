@@ -20,10 +20,7 @@ chmod +x $cube_dir/src/docker/entrypoint.sh
 sudo docker run --name ${aiapp} --privileged -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/modelscope:base-cuda11.3-python3.7 bash 
 
 ```
-如果需要使用gpu调试
-```bash
-sudo docker run --name ${aiapp} --privileged -it  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/modelscope:base-cuda11.3-python3.7 bash 
-```
+
 补全init.sh环境脚本，没有环境问题可以忽略。
 ```bash
 # init.sh 脚本会被复制到容器/根目录下，下载的环境文件不要放置在容器/app/目录下，不然会被加载到git
@@ -41,11 +38,6 @@ cp init.sh /init.sh && bash /init.sh
 aiapp=$(basename `pwd`)
 cube_dir=($(dirname $(dirname "$PWD")))
 chmod +x $cube_dir/src/docker/entrypoint.sh
-sudo docker run --name ${aiapp} --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/modelscope:${aiapp} sh /app/init.sh && python app.py 
-
-```
-如果是gpu服务
-```bash
-sudo docker run --name ${aiapp} --privileged --rm -it  -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/modelscope:${aiapp} sh /app/init.sh && python app.py 
+sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/modelscope:${aiapp} sh /app/init.sh && python app.py 
 
 ```
