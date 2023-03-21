@@ -7,6 +7,10 @@
  - 将tme-dev分支 fork到自己的仓库，不然没法发起pr，成为贡献者
  - 包含info.json文件的应用为已整理的AIHUB应用，可以跳过
 
+# 模型列表/分工/进度
+
+https://docs.qq.com/sheet/DT0tPcWxHTG9OWUZE?tab=BB08J2
+
 # 应用文件结构
 
 其中（内容基本已自动填写）
