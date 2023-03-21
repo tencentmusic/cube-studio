@@ -1,6 +1,10 @@
 
 #  [视频教程 快速入门](https://www.bilibili.com/video/BV1X84y1y7xy/?vd_source=bddb004da42430029e7bd52d0bdd0fe7)
 
+# 注意： 
+
+包含info.json文件的应用为已整理的AIHUB应用，可以跳过
+
 # 应用文件结构
 
 其中（内容基本已自动填写）
