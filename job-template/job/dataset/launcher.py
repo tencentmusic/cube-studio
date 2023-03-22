@@ -16,7 +16,6 @@ KFJ_CREATOR = os.getenv('KFJ_CREATOR', 'admin')
 KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME','public')
 
 host = os.getenv('HOST',os.getenv('KFJ_MODEL_REPO_API_URL','http://kubeflow-dashboard.infra')).strip('/')
-# host = 'http://data.tme.woa.com'
 
 # @pysnooper.snoop()
 def download_file(url,des_dir=None,local_path=None):
