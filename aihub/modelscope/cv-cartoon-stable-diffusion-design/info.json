@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-cartoon-stable-diffusion-design",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-cartoon-stable-diffusion-design",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-cartoon-stable-diffusion-design-v20221001",
+    "label": "卡通系列文生图模型-插画风",
+    "describe": "",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}
