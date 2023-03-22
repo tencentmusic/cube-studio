@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 import numpy
 import os
 import platform
+from flask import g
 from transformers import AutoTokenizer, AutoModel
 
 class Chatglm_Model(Model):
@@ -19,7 +20,7 @@ class Chatglm_Model(Model):
     # 和train函数的输入参数对应，并且会对接显示到pipeline的模板参数中
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(Field_type.text, name='text', label='你的问题', describe='你的问题，最长200字',default='请问cube-studio是什么？',validators=Validator(max=200))
+        Field(Field_type.text, name='query', label='你的问题', describe='你的问题，最长200字',default='请问cube-studio是什么？',validators=Validator(max=200))
     ]
 
     # 会显示在web界面上，让用户作为示例输入
@@ -27,50 +28,29 @@ class Chatglm_Model(Model):
         {
             "lable": "示例一描述",
             "input": {
-                "text": '请问cube-studio是什么？'
+                "query": '请问cube-studio是什么？'
             }
         }
     ]
 
     # 加载模型，所有一次性的初始化工作可以放到该方法下。注意save_model_dir必须和训练函数导出的模型结构对应
     def load_model(self,save_model_dir=None,**kwargs):
-        tokenizer = AutoTokenizer.from_pretrained("/mnt/uthermai/gpt/data/modules/chatglm-6b", trust_remote_code=True)
-        model = AutoModel.from_pretrained("/mnt/uthermai/gpt/data/modules/chatglm-6b",trust_remote_code=True).half().quantize(4).cuda()
+        self.tokenizer = AutoTokenizer.from_pretrained("/models/", trust_remote_code=True)
+        model = AutoModel.from_pretrained("/models/",trust_remote_code=True).half().quantize(4).cuda()
         self.model = model.eval()
         self.history={}
 
     # web每次用户请求推理，用于对接web界面请求
     # @pysnooper.snoop()
-    def inference(self,text,**kwargs):
-        history = []
-        while True:
-            query = input("\n问题：")
-            if query == "stop":
-                break
-            if query == "clear":
-                history = []
-                command = 'cls' if os_name == 'Windows' else 'clear'
-                os.system(command)
-                continue
-            response, history = model.chat(tokenizer, query, history=history)
-            print(f"回答：{response}")
+    def inference(self,query,**kwargs):
+        history = self.history.get(g.username,[]) if g.username else []
+        response, history = self.model.chat(self.tokenizer, query, history=history)
+        print(f"回答：{response}")
 
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image":result_img,
-                "text":result_text,
-                "video":result_video,
-                "audio":result_audio,
-                "html":'<a href="/frontend/aihub/model_market/model_all">查看全部</a>',
-                "markdown":result_markdown
-            },
-            {
-                "image": result_img,
-                "text": result_text,
-                "video": result_video,
-                "audio": result_audio,
-                "markdown":result_markdown
+                "text":response
             }
         ]
         return back
