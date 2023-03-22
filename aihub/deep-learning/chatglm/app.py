@@ -36,7 +36,7 @@ class Chatglm_Model(Model):
     # 加载模型，所有一次性的初始化工作可以放到该方法下。注意save_model_dir必须和训练函数导出的模型结构对应
     def load_model(self,save_model_dir=None,**kwargs):
         self.tokenizer = AutoTokenizer.from_pretrained("/models/", trust_remote_code=True)
-        model = AutoModel.from_pretrained("/models/",trust_remote_code=True).half().quantize(4).cuda()
+        model = AutoModel.from_pretrained("/models/",trust_remote_code=True).half().cuda()
         self.model = model.eval()
         self.history={}
 
