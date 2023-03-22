@@ -72,3 +72,24 @@ chmod +x $cube_dir/src/docker/entrypoint.sh
 sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/modelscope:${aiapp} sh /app/init.sh && python app.py 
 
 ```
+
+
+
+# 部分常用代码
+
+将图片最大边缩小到不大于1280
+```bash
+import cv2
+
+def resize_image(image):
+    height, width = image.shape[:2]
+    max_size = 1280
+    if max(height, width) > max_size:
+        if height > width:
+            ratio = max_size / height
+        else:
+            ratio = max_size / width
+        image = cv2.resize(image, (int(width * ratio), int(height * ratio)))
+    return image
+```
+
