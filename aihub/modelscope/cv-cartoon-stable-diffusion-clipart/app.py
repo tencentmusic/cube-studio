@@ -36,7 +36,7 @@ class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "text": "archer style, a portrait painting of Johnny Depp"
+                "text": "Johnny Depp"
             }
         }
     ]
