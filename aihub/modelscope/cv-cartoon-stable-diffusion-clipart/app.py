@@ -24,7 +24,7 @@ class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.text_select, name='choice_t', label='选择生成人还是物体景象', describe='', default='',choices=['人','物体景象'],validators=Validator(max=1)),
+        Field(type=Field_type.text_select, name='choice_t', label='选择生成人还是物体景象', describe='', default='人',choices=['人','物体景象'],validators=Validator(max=1)),
         Field(type=Field_type.text, name='text', label='输入关键词',describe='目前仅支持英文文本提示词输入，可输入人物、物体、场景,如Johnny Depp、cat、supermarket',default='Johnny Depp',validators=Validator(max=75))
     ]
 
