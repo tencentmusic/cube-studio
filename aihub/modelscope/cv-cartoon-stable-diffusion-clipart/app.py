@@ -26,8 +26,6 @@ class CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model(Model):
     inference_inputs = [
         Field(type=Field_type.text_select, name='choice_t', label='选择生成人还是物体景象', describe='', default='',choices=['人','物体景象'],validators=Validator(max=1)),
         Field(type=Field_type.text, name='text', label='输入关键词',describe='目前仅支持英文文本提示词输入，可输入人物、物体、场景,如Johnny Depp、cat、supermarket',default='Johnny Depp',validators=Validator(max=75))
-        # Field(type=Field_type.text, name='text', label='输入关键词',describe='',default='Johnny Depp',validators=Validator(max=75))
-
     ]
 
     inference_resource = {
@@ -89,7 +87,7 @@ model=CV_CARTOON_STABLE_DIFFUSION_CLIPART_Model()
 
 
 # 测试后打开此部分
-# 1. 跑一张图的时间是6分左右；
+# 1. cpu跑一张图的时间是6分左右； gpu大概10s
 # 2. 有最佳实践和一般实践的区别，主要是是否加这两行代码，结果上，最佳实践背景占比更少，图片颜色更正
 # from diffusers.schedulers import EulerAncestralDiscreteScheduler
 # self.p.pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(self.p.pipeline.scheduler.config)
