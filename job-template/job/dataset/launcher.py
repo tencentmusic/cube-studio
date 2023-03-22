@@ -4,6 +4,8 @@ import argparse
 import datetime
 import json
 import time
+from multiprocessing import Pool
+from functools import partial
 import uuid
 import pysnooper
 import re
@@ -14,9 +16,26 @@ KFJ_CREATOR = os.getenv('KFJ_CREATOR', 'admin')
 KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME','public')
 
 host = os.getenv('HOST',os.getenv('KFJ_MODEL_REPO_API_URL','http://kubeflow-dashboard.infra')).strip('/')
+# host = 'http://data.tme.woa.com'
+
+# @pysnooper.snoop()
+def download_file(url,des_dir=None,local_path=None):
+    if des_dir:
+        local_path = os.path.join(des_dir, url.split('/')[-1])
+    print(f'begin donwload {local_path} from {url}')
+    # 注意传入参数 stream=True
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        if os.path.exists(local_path):
+            print(local_path,'已经存在')
+            return
+        with open(local_path, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=102400):
+                f.write(chunk)
+        r.close()
 
 @pysnooper.snoop()
-def download(**kwargs):
+def download(name,version,partition,save_dir,**kwargs):
     # print(kwargs)
     headers = {
         'Content-Type': 'application/json',
@@ -29,107 +48,55 @@ def download(**kwargs):
             {
                 "col": "name",
                 "opr": "eq",
-                "value": kwargs['project_name']
+                "value":name
+            },
+            {
+                "col": "version",
+                "opr": "eq",
+                "value": version
             }
         ]
     })
     res = requests.get(url, headers=headers)
-    exist_project = res.json().get('result', {}).get('data', [])
-    if not exist_project:
-        print('不存在项目组')
-        return
-    exist_project = exist_project[0]
+    exist_dataset = res.json().get('result', {}).get('data', [])
+    if not exist_dataset:
+        print('不存在数据集')
+        exit(1)
+    exist_dataset = exist_dataset[0]
 
     # 查询同名是否存在，创建者是不是指定用户
-    url = host+"/inferenceservice_modelview/api/?form_data="+json.dumps({
-        "filters":[
-            {
-                "col": "model_name",
-                "opr": "eq",
-                "value": kwargs['model_name']
-            },
-            {
-                "col": "model_version",
-                "opr": "eq",
-                "value": kwargs['model_version']
-            }
-        ]
-    })
-
+    url = host+f"/dataset_modelview/api/download/{exist_dataset['id']}"
+    if partition:
+        url = url + "/" + partition
     # print(url)
     res = requests.get(url,headers=headers, allow_redirects=False)
     # print(res.content)
     if res.status_code==200:
+        donwload_urls = res.json().get("result", {}).get("download_urls", [])
+        print(donwload_urls)
+        os.makedirs(save_dir, exist_ok=True)
+        pool = Pool(len(donwload_urls))  # 开辟包含指定数目线程的线程池
+        pool.map(partial(download_file, des_dir=save_dir), donwload_urls)  # 当前worker，只处理分配给当前worker的任务
+        pool.close()
+        pool.join()
+        exit(0)
 
-        payload = {
-            'model_name': kwargs['model_name'],
-            'model_version': kwargs['model_version'],
-            'model_path':kwargs['model_path'],
-            'label': kwargs['label'],
-            'project': exist_project['id'],
-            'images': kwargs['images'],
-            'working_dir': kwargs['working_dir'],
-            'command': kwargs['command'],
-            'args': kwargs['args'],
-            'env': kwargs['env'],
-            'resource_memory': kwargs['resource_memory'],
-            'resource_cpu': kwargs['resource_cpu'],
-            'resource_gpu': kwargs['resource_gpu'],
-            'min_replicas': kwargs['replicas'],
-            'max_replicas': kwargs['replicas'],
-            'ports': kwargs['ports'],
-            'volume_mount': kwargs['volume_mount'],
-            'host': kwargs['host'],
-            'hpa': kwargs['hpa'],
-            'service_type':kwargs['service_type']
-        }
-
-        exist_services = res.json().get('result',{}).get('data',[])
-        new_service=None
-        # 不存在就创建新的服务
-        if not exist_services:
-            url = host + "/inferenceservice_modelview/api/"
-            res = requests.post(url, headers=headers,json=payload, allow_redirects=False)
-            if res.status_code==200:
-                new_service = res.json().get('result', {})
-            # print(res)
-
-        else:
-            exist_service=exist_services[0]
-            # 更新服务
-            url = host + "/inferenceservice_modelview/api/%s"%exist_service['id']
-            res = requests.put(url, headers=headers, json=payload, allow_redirects=False)
-            if res.status_code==200:
-                new_service = res.json().get('result',{})
-            # print(res)
-
-        if new_service:
-            time.sleep(5)  # 等待数据刷入数据库
-            print(new_service)
-            url = host + "/inferenceservice_modelview/deploy/prod/%s"%new_service['id']
-            res = requests.get(url,headers=headers, allow_redirects=False)
-            if res.status_code==302 or res.status_code==200:
-                print('部署成功')
-            else:
-                print(res.content)
-                print('部署失败')
-                exit(1)
-
-    else:
-        print(res.content)
-        exit(1)
-
+    exit(1)
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser("deploy service launcher")
+    arg_parser = argparse.ArgumentParser("download dataset launcher")
     arg_parser.add_argument('--src_type', type=str, help="数据集来源", default='当前平台')
     arg_parser.add_argument('--name', type=str, help="数据集名称", default='')
-    arg_parser.add_argument('--version', type=str, help="数据集版本", default='')
+    arg_parser.add_argument('--version', type=str, help="数据集版本", default='latest')
     arg_parser.add_argument('--partition', type=str, help="数据集分区", default='')
     arg_parser.add_argument('--save_dir', type=str, help="保存目录", default='')
 
     args = arg_parser.parse_args()
+    if not args.save_dir:
+        args.save_dir = f'/mnt/{KFJ_CREATOR}/dataset/{args.name}/{args.version}'
+        if args.partition:
+            args.save_dir=f'/mnt/{KFJ_CREATOR}/dataset/{args.name}/{args.version}/{args.partition}'
     # print("{} args: {}".format(__file__, args))
     if args.src_type=='当前平台':
         download(**args.__dict__)
@@ -137,5 +104,4 @@ if __name__ == "__main__":
         pass
     elif args.src_type=='魔塔':
         pass
-
 

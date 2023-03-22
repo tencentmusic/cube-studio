@@ -1,22 +1,76 @@
-# datax 模板
-镜像：ccr.ccs.tencentyun.com/cube-studio/datax  
-
-参数为job.json文件，格式可参考[datax github官网](https://github.com/alibaba/DataX)
+# dataset 模板
+镜像：ccr.ccs.tencentyun.com/cube-studio/dataset
 
 参数
 ```bash
 {
     "参数": {
-        "-f": {
+      "--src_type": {
             "type": "str",
             "item_type": "str",
-            "label": "job.json文件地址，<a target='_blank' href='https://github.com/alibaba/DataX'>书写格式参考</a>",
+            "label": "数据集的来源",
+            "require": 1,
+            "choice": ["当前平台","hugging-face","魔塔"],
+            "range": "",
+            "default": "当前平台",
+            "placeholder": "",
+            "describe": "数据集的来源",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--name": {
+            "type": "str",
+            "item_type": "str",
+            "label": "数据集的名称",
             "require": 1,
             "choice": [],
             "range": "",
-            "default": "/usr/local/datax/job/job.json",
+            "default": "",
             "placeholder": "",
-            "describe": "job.json文件地址，<a target='_blank' href='https://github.com/alibaba/DataX'>书写格式参考</a>",
+            "describe": "数据集的名称",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--version": {
+            "type": "str",
+            "item_type": "str",
+            "label": "数据集的版本",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "latest",
+            "placeholder": "",
+            "describe": "数据集的版本",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--partition": {
+            "type": "str",
+            "item_type": "str",
+            "label": "数据集的分区，或者子数据集",
+            "require": 0,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "数据集的分区，或者子数据集",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
+        "--save_dir": {
+            "type": "str",
+            "item_type": "str",
+            "label": "数据集的保存地址",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "数据集的保存地址",
             "editable": 1,
             "condition": "",
             "sub_args": {}
