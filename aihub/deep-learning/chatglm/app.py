@@ -20,7 +20,7 @@ class Chatglm_Model(Model):
     # 和train函数的输入参数对应，并且会对接显示到pipeline的模板参数中
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(Field_type.text, name='query', label='你的问题', describe='你的问题，最长200字',default='请问cube-studio是什么？',validators=Validator(max=200))
+        Field(Field_type.text, name='query', label='你的问题', describe='你的问题，最长200字',default='mlops一站式机器学习平台一般包含什么功能？',validators=Validator(max=200))
     ]
 
     # 会显示在web界面上，让用户作为示例输入
@@ -28,7 +28,7 @@ class Chatglm_Model(Model):
         {
             "lable": "示例一描述",
             "input": {
-                "query": '请问cube-studio是什么？'
+                "query": 'mlops一站式机器学习平台一般包含什么功能？'
             }
         }
     ]
@@ -50,7 +50,7 @@ class Chatglm_Model(Model):
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "text":response
+                "markdown":response
             }
         ]
         return back
