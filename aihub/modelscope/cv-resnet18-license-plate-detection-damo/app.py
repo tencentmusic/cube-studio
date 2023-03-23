@@ -1,9 +1,11 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy
 import pysnooper
 import os
+import cv2
+import random
 
 class CV_RESNET18_LICENSE_PLATE_DETECTION_DAMO_Model(Model):
     # 模型基础信息定义
@@ -33,7 +35,7 @@ class CV_RESNET18_LICENSE_PLATE_DETECTION_DAMO_Model(Model):
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
-            "label": "示例0",
+            "label": "",
             "input": {
                 "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/license_plate_detection.jpg"
             }
@@ -53,7 +55,7 @@ class CV_RESNET18_LICENSE_PLATE_DETECTION_DAMO_Model(Model):
         from modelscope.utils.constant import Tasks
         
         self.p = pipeline('license-plate-detection', 'damo/cv_resnet18_license-plate-detection_damo')
-
+        
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
         return img
@@ -61,17 +63,35 @@ class CV_RESNET18_LICENSE_PLATE_DETECTION_DAMO_Model(Model):
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
-        result = self.p(image)
+
+        img = cv2.imread(image)
+        height, width, _ = img.shape
+        if height > width:
+            new_height = 1024
+            new_width = int(width * new_height / height)
+        else:
+            new_width = 1024
+            new_height = int(height * new_width / width)
+        resized_img = cv2.resize(img, (new_width, new_height))
+        result = self.p(resized_img)
+
+        rect = result['polygons']
+        rect = rect.astype(int)
+        cv2.rectangle(resized_img, (rect[0][0], rect[0][1]), (rect[0][4], rect[0][5]), (0, 0, 255), 2) 
+
+        save_path='result/result'+str(random.randint(5,5000))+'.jpg'
+        os.makedirs(os.path.dirname(save_path),exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, resized_img)
+        
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": result['text'],
+                "image": save_path
             }
         ]
         return back
@@ -84,10 +104,14 @@ model=CV_RESNET18_LICENSE_PLATE_DETECTION_DAMO_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/license_plate_detection.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='example2.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+#1. cpu推理单次耗时约2.5秒
+#2. 模型占用内存532.4MiB
+#3. 模型大小：119M

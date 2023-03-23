@@ -13,7 +13,7 @@ RetinaFace为当前学术界和工业界精度较高的人脸检测和人脸关�
 
 RetinaFace 的结构如下：
 
-![模型结构](RetinaFace.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_resnet50_face-detection_retinaface/repo?Revision=master&FilePath=RetinaFace.jpg&View=true)
 
 
 ## 模型效果

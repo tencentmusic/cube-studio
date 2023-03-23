@@ -11,7 +11,7 @@ Swin transformer是一种具有金字塔结构的transformer架构，其表征�
 
 MaskDINO是一种用于目标检测、全景、实例和语义分割的统一架构。它可以实现检测和分割之间的任务和数据协同，并在相同设置下达到最先进性能。其结构示意图如下。
 
-![MaskDINO模型结构](description/maskdino.jpg)
+![MaskDINO模型结构](https://modelscope.cn/api/v1/models/damo/cv_maskdino-swin-l_image-instance-segmentation_coco/repo?Revision=master&FilePath=description/maskdino.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 
@@ -74,7 +74,7 @@ Image.open(output).show()
 
 可视化结果：
 
-![source](description/demo.jpg)  ![result](description/result.jpg)
+![source](https://modelscope.cn/api/v1/models/damo/cv_maskdino-swin-l_image-instance-segmentation_coco/repo?Revision=master&FilePath=description/demo.jpg&View=true)  ![result](https://modelscope.cn/api/v1/models/damo/cv_maskdino-swin-l_image-instance-segmentation_coco/repo?Revision=master&FilePath=description/result.jpg&View=true)
 
 ## 引用
 如果你觉得该模型对你有所帮助，请考虑引用下面的相关论文：

@@ -18,7 +18,7 @@
 
 <p align="center">
     <br>
-    <img src="data/ddpm-seg-schema.jpg" width="800" />
+    <img src="https://modelscope.cn/api/v1/models/damo/cv_diffusion_image-segmentation/repo?Revision=master&FilePath=data/ddpm-seg-schema.jpg&View=true" width="800" />
     <br>
 <p>
 

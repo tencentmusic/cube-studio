@@ -9,7 +9,7 @@
 
 DINO模型算法框架图如下，是改进的DETR系列模型。
 
-<img src="assets/dino_framework.jpg" width="800" >
+<img src="https://modelscope.cn/api/v1/models/damo/cv_swinl_image-object-detection_dino/repo?Revision=master&FilePath=assets/dino_framework.jpg&View=true" width="800" >
 
 
 ## 期望模型使用方式以及适用范围

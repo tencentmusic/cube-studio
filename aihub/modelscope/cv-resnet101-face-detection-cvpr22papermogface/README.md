@@ -15,10 +15,10 @@ MogFace为当前SOTA的人脸检测方法，已在Wider Face六项榜单上霸�
 
 MogFace在WiderFace榜单上的指标如下：
 
-![Wider Face 榜单结果](MogFace.jpg)
+![Wider Face 榜单结果](https://modelscope.cn/api/v1/models/damo/cv_resnet101_face-detection_cvpr22papermogface/repo?Revision=master&FilePath=MogFace.jpg&View=true)
 
 ## 模型效果
-![模型效果](demo.jpg)
+![模型效果](https://modelscope.cn/api/v1/models/damo/cv_resnet101_face-detection_cvpr22papermogface/repo?Revision=master&FilePath=demo.jpg&View=true)
 
 ## 模型使用方式和使用范围
 本模型可以检测输入图片中人脸的位置。

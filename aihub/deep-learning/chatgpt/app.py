@@ -46,17 +46,17 @@ class Chatgpt_Model(Model):
         req_data={
             "msgType": "text",
             "chatType": "group",
-            "chatId": "wrkSFfCgAA1AxOagtYsQ5R******-iw",
+            "chatId": "",
             "userName": "zhang-san",
             "msgContent": question,
             "botName": "text",
-            "botKey": "c1534e3f-****-4d21-****-484bc1a1307f",
+            "botKey": "",
             "hookUrl": "string",
-            "msgId": "fCgAA1AxOagtYsQ5R",
+            "msgId": "",
             "chatInfoUrl": "string",
             "eventType": "add_to_chat"
         }
-        res = requests.post('https://chatgpt.gometadata.xyz/api/v1/chat',timeout=120,headers={"accept": "application/json","Content-Type": "application/json","x-token":"4fc6b7d6-8c07-41db-8161-7c6365ce5214"},json=req_data)
+        res = requests.post('https://chatgpt.gometadata.xyz/api/v1/chat',timeout=120,headers={"accept": "application/json","Content-Type": "application/json","x-token":""},json=req_data)
         result='系统出现问题'
         if res.status_code==200:
             result=res.json().get("msgContent",'').replace('`degrade to GPT3`','')

@@ -11,7 +11,7 @@ Swin transformer是一种具有金字塔结构的transformer架构，其表征�
 
 Cascade R-CNN是一种多阶段目标检测架构，该架构由一系列经过不断提高的IOU阈值的检测器组成。检测器串联进行训练，前一个检测器的输出作为下一个检测器的输入。通过重采样不断提高proposal质量，达到高质量检测定位的效果。Cascade R-CNN可以被推广到实例分割，并对Mask R-CNN产生重大改进。其结构示意图如下所示。
 
-![Cascade-rcnn模型结构](description/cascade-rcnn.jpg)
+![Cascade-rcnn模型结构](https://modelscope.cn/api/v1/models/damo/cv_swin-b_image-instance-segmentation_coco/repo?Revision=master&FilePath=description/cascade-rcnn.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 
@@ -76,7 +76,7 @@ Image.open(output).show()
 
 可视化结果：
 
-![source](description/demo.jpg)  ![result](description/result.jpg)
+![source](https://modelscope.cn/api/v1/models/damo/cv_swin-b_image-instance-segmentation_coco/repo?Revision=master&FilePath=description/demo.jpg&View=true)  ![result](https://modelscope.cn/api/v1/models/damo/cv_swin-b_image-instance-segmentation_coco/repo?Revision=master&FilePath=description/result.jpg&View=true)
 
 
 ### 模型评估代码

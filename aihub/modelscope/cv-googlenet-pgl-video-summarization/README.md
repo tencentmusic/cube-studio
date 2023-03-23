@@ -6,12 +6,12 @@
 
 输入视频：
 
-[![IMAGE ALT TEXT](video/preview_input_4.jpg)](https://dmshared.oss-cn-hangzhou.aliyuncs.com/james.wjg/MAAS/video/video_category_test_video.mp4?OSSAccessKeyId=LTAI5tC7NViXtQKpxFUpxd3a&Expires=2023833695&Signature=9ZUwnqVyGdMlmukFazup0r9%2BbJ8%3D)
+[![IMAGE ALT TEXT](https://modelscope.cn/api/v1/models/damo/cv_googlenet_pgl-video-summarization/repo?Revision=master&FilePath=video/preview_input_4.jpg&View=true)](https://dmshared.oss-cn-hangzhou.aliyuncs.com/james.wjg/MAAS/video/video_category_test_video.mp4?OSSAccessKeyId=LTAI5tC7NViXtQKpxFUpxd3a&Expires=2023833695&Signature=9ZUwnqVyGdMlmukFazup0r9%2BbJ8%3D)
 
 
 输出摘要视频：
 
-[![IMAGE ALT TEXT](video/preview_output_4.jpg)](https://dmshared.oss-cn-hangzhou.aliyuncs.com/james.wjg/MAAS/video/summarization_result.mp4?OSSAccessKeyId=LTAI5tC7NViXtQKpxFUpxd3a&Expires=2023835215&Signature=62dIjYT%2BjTkCiNbsSNY6u%2FicuYk%3D)
+[![IMAGE ALT TEXT](https://modelscope.cn/api/v1/models/damo/cv_googlenet_pgl-video-summarization/repo?Revision=master&FilePath=video/preview_output_4.jpg&View=true)](https://dmshared.oss-cn-hangzhou.aliyuncs.com/james.wjg/MAAS/video/summarization_result.mp4?OSSAccessKeyId=LTAI5tC7NViXtQKpxFUpxd3a&Expires=2023835215&Signature=62dIjYT%2BjTkCiNbsSNY6u%2FicuYk%3D)
 -->
 
 

@@ -22,7 +22,7 @@
 
 <p align="center">
     <br>
-    <img src="data/mttr-schema.jpg" width="800" />
+    <img src="https://modelscope.cn/api/v1/models/damo/cv_swin-t_referring_video-object-segmentation/repo?Revision=master&FilePath=data/mttr-schema.jpg&View=true" width="800" />
     <br>
 <p>
 

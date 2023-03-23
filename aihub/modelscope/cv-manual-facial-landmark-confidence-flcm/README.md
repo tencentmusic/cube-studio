@@ -13,7 +13,7 @@ FLCM为达摩院自研的关键点置信度算法，基于关键点的好坏来�
 ![模型结构](FLC.png)
 
 ## 模型效果
-![模型效果](flc_demo_1.jpg)
+![模型效果](https://modelscope.cn/api/v1/models/damo/cv_manual_facial-landmark-confidence_flcm/repo?Revision=master&FilePath=flc_demo_1.jpg&View=true)
 
 ## 模型使用方式和使用范围
 本模型可以检测输入图片中人脸的5点关键点和对应的人脸质量质量分

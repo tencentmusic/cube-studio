@@ -6,11 +6,11 @@
 输入Y通道的低分辨率图像（单通道灰度图像），返回2倍超分辨率后的高清晰Y通道图像。模型基于Edgeoriented
 Convolution Block (ECB)模块构建，完整模型可导出为简洁的CNN网络，适用于移动端、嵌入式等严格限制算力的场景。为了适用于大部分移动端场景，模型只支持单通道图像处理，如果是RGB图像，需要将图像从RGB颜色空间转换为YCbCr格式并只提取Y通道部分输入给模型处理。完整模型结构如下所示：
 
-![模型流程图](assets/ecbsr_modelscope.jpg)
+![模型流程图](https://modelscope.cn/api/v1/models/damo/cv_ecbsr_image-super-resolution_mobile/repo?Revision=master&FilePath=assets/ecbsr_modelscope.jpg&View=true)
 
 其中Edgeoriented Convolution Block (ECB)模块可以通过重参数化技术等价转换为一个普通的3x3卷积模块。
 
-![ecb模块图](assets/ecb_modelscope.jpg)
+![ecb模块图](https://modelscope.cn/api/v1/models/damo/cv_ecbsr_image-super-resolution_mobile/repo?Revision=master&FilePath=assets/ecb_modelscope.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 本模型使用于移动端等算力限制严格的普通Y通道图像超分辨率。

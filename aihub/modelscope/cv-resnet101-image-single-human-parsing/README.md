@@ -55,7 +55,7 @@ print(result[OutputKeys.LABELS])
 
 可视化结果：
 
-![source](description/demo.jpg)  ![result](description/demo_result.jpg)
+![source](https://modelscope.cn/api/v1/models/damo/cv_resnet101_image-single-human-parsing/repo?Revision=master&FilePath=description/demo.jpg&View=true)  ![result](https://modelscope.cn/api/v1/models/damo/cv_resnet101_image-single-human-parsing/repo?Revision=master&FilePath=description/demo_result.jpg&View=true)
 
 ## 引用
 如果你觉得该模型对你有所帮助，请考虑引用下面的相关论文：

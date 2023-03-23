@@ -63,7 +63,7 @@ print(result)
 |  Next-ViT-S  | 74.5   |  95.5   |  31.7M   |  7.7   |  3.5   | modelscope |
 
 模型在ImageNet1K的测试集进行测试，结果如下:  
-<img src="./resources/comparison_in1k.jpg" width = "512" height = "512" alt="ImageNet1K测试结果"/>
+<img src="https://modelscope.cn/api/v1/models/damo/cv_nextvit-small_image-classification_Dailylife-labels/repo?Revision=master&FilePath=./resources/comparison_in1k.jpg&View=true" width = "512" height = "512" alt="ImageNet1K测试结果"/>
 
 
 ## 模型训练

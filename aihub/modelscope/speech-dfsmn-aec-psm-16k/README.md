@@ -10,7 +10,7 @@
 #### 回声消除应用场景示意：
 
 <div align=center>
-<img width="570" src="description/scenario.jpg"/>
+<img width="570" src="https://modelscope.cn/api/v1/models/damo/speech_dfsmn_aec_psm_16k/repo?Revision=master&FilePath=description/scenario.jpg&View=true"/>
 </div>
 
 #### 模型训练和推理流程示意：

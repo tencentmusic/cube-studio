@@ -6,7 +6,7 @@
 
 本模型是以自底向上的方式: 1）首先识别出车牌的中心点；2）基于中心点回归出车牌的bbox；3）基于车牌中心点识别出车类型。模型介绍，详见：
 
-![pipeline](./description/Pipeline.jpg)
+![pipeline](https://modelscope.cn/api/v1/models/damo/cv_resnet18_license-plate-detection_damo/repo?Revision=master&FilePath=./description/Pipeline.jpg&View=true)
 
 
 ## 期望模型使用方式以及适用范围

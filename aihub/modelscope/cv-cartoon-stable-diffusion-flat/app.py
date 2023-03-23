@@ -3,7 +3,7 @@ import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
-import os
+import os,random,cv2
 
 class CV_CARTOON_STABLE_DIFFUSION_FLAT_Model(Model):
     # 模型基础信息定义
@@ -22,7 +22,8 @@ class CV_CARTOON_STABLE_DIFFUSION_FLAT_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.text, name='text', label='输入prompt',describe='输入prompt',default='',validators=Validator(max=75))
+        Field(type=Field_type.text_select, name='choice_t', label='选择生成人还是物体景象', describe='', default='人',choices=['人','物体景象'],validators=Validator(max=1)),
+        Field(type=Field_type.text, name='text', label='输入关键词',describe='目前仅支持英文文本提示词输入，可输入人物、物体、场景,如Johnny Depp、cat、supermarket',default='Johnny Depp',validators=Validator(max=75))
     ]
 
     inference_resource = {
@@ -33,7 +34,7 @@ class CV_CARTOON_STABLE_DIFFUSION_FLAT_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "text": "sks style, a portrait painting of Johnny Depp"
+                "text": "Johnny Depp"
             }
         }
     ]
@@ -52,15 +53,25 @@ class CV_CARTOON_STABLE_DIFFUSION_FLAT_Model(Model):
 
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,text,**kwargs):
-        result = self.p({'text':text})
+    def inference(self,choice_t,text,**kwargs):
+        from diffusers.schedulers import EulerAncestralDiscreteScheduler
+        self.p.pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(self.p.pipeline.scheduler.config)
+
+        #archer type,sks type
+        describe_t = 'sks style, a portrait painting of ' if choice_t=='人' else 'sks style, a painting of '
+
+        result = self.p({'text':describe_t+text})
+        print(result)
+
+        save_path='result/result'+str(random.randint(5,5000))+'.jpg'
+        os.makedirs(os.path.dirname(save_path),exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        print(save_path)
+        cv2.imwrite(save_path, result['output_imgs'][0])
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
@@ -68,10 +79,10 @@ class CV_CARTOON_STABLE_DIFFUSION_FLAT_Model(Model):
 model=CV_CARTOON_STABLE_DIFFUSION_FLAT_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(text='sks style, a portrait painting of Johnny Depp')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(text='sks style, a portrait painting of Johnny Depp')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()

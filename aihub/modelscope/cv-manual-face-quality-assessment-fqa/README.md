@@ -13,10 +13,10 @@ FQA模型包含3个方面的创新, rank映射, Ordinal Regression和multi-label
 
 
 ## 模型结构
-![模型结构](arch.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_manual_face-quality-assessment_fqa/repo?Revision=master&FilePath=arch.jpg&View=true)
 
 ## 质量等级划分
-![模型结构](quality_rank.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_manual_face-quality-assessment_fqa/repo?Revision=master&FilePath=quality_rank.jpg&View=true)
 
 ## 模型效果
 ![模型效果](result.png)
@@ -49,7 +49,7 @@ print(f'Face quality score={face_quality_score}')
 - 当前版本在python 3.7环境测试通过，其他环境下可用性待测试
 
 ### 模型性能指标
-![模型性能曲线](performance.jpg)
+![模型性能曲线](https://modelscope.cn/api/v1/models/damo/cv_manual_face-quality-assessment_fqa/repo?Revision=master&FilePath=performance.jpg&View=true)
 
 ## 来源说明
 本模型及代码来自达摩院自研技术

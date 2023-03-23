@@ -9,7 +9,7 @@ DDColor 是最新的图像上色算法，能够对输入的黑白图像生成自
 
 算法整体流程如下图，使用 UNet 结构的骨干网络和图像解码器分别实现图像特征提取和特征图上采样，并利用 Transformer 结构的颜色解码器完成基于视觉语义的颜色查询，最终聚合输出彩色通道预测结果。
 
-![ofa-image-caption](./resources/ddcolor_arch.jpg)
+![ofa-image-caption](https://modelscope.cn/api/v1/models/damo/cv_ddcolor_image-colorization/repo?Revision=master&FilePath=./resources/ddcolor_arch.jpg&View=true)
 
 ## 模型期望使用方式和适用范围
 

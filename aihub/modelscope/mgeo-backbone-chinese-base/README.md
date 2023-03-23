@@ -117,6 +117,23 @@ POI（Point Of Interest，兴趣点）搜索是地图类应用的核心功能，
 基于MGeo训练好的模型已提供一键使用，详情见ModelCard : [点我试用训练好的WhereWhat切分模型](https://modelscope.cn/models/damo/mgeo_geographic_where_what_cut_chinese_base/summary)
 
 
+## 直接推理
+使用MGeo直接对输入的地址进行编码
+```python
+from modelscope.models import Model
+from modelscope.utils.constant import Tasks
+from modelscope.preprocessors.nlp import Tokenize
+
+model_id = 'damo/mgeo_backbone_chinese_base'
+model = Model.from_pretrained(model_id, task=Tasks.backbone)
+tokenizer = Tokenize.from_pretrained(model_id)
+
+text = '文一西路'
+output = tokenizer(text, return_tensors='pt')
+enc_res = model(**output)
+print(enc_res)
+```
+
 ## 自定义训练
 
 当用户有自己标注好的数据希望基于MGeo底座进行训练时，可使用自定义训练功能。我们针对序列标注、分类、排序三类任务提供示例代码。

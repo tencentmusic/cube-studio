@@ -41,6 +41,17 @@ cp init.sh /init.sh && bash /init.sh
 /src/docker/entrypoint.sh python app.py
 ```
 
+# 图像处理技巧
+
+图上处理都有些技巧。  
+1、图片resize 输入输出图像，避免输入输出过大，  
+2、尽可能不经过中间磁盘储存，不然视频流进来的话跟不上推理速度。    
+3、对于不同用户结果要把处理结果尽量添加随机数，不然不同请求结果可能存储冲突，  
+4、中间文件都在result目录下面，这个目录gitignore了，不然会被git加载太大了。   
+5、比较大的必须文件放在init脚本里面download下来，不要放在代码目录下，不然会被git加载  
+6、如果涉及到其他的外部项目，可以下载到镜像/github下面，如果必须放在当前目录，建议软链过来  
+
+
 # 记录模型效果
 
 在模型app.py文件末尾添加注释，描述下列内容：
@@ -61,3 +72,24 @@ chmod +x $cube_dir/src/docker/entrypoint.sh
 sudo docker run --name ${aiapp} --privileged --rm -it -e APPNAME=$aiapp -v $cube_dir/src:/src -v $PWD:/app -p 80:80 -p 8080:8080 --entrypoint='/src/docker/entrypoint.sh' ccr.ccs.tencentyun.com/cube-studio/modelscope:${aiapp} sh /app/init.sh && python app.py 
 
 ```
+
+
+
+# 部分常用代码
+
+将图片最大边缩小到不大于1280
+```bash
+import cv2
+
+def resize_image(image):
+    height, width = image.shape[:2]
+    max_size = 1280
+    if max(height, width) > max_size:
+        if height > width:
+            ratio = max_size / height
+        else:
+            ratio = max_size / width
+        image = cv2.resize(image, (int(width * ratio), int(height * ratio)))
+    return image
+```
+

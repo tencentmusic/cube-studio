@@ -8,7 +8,7 @@
 
 ![Output1](results/result_1.gif)
 
-![Output2](results/result_2.jpg)
+![Output2](https://modelscope.cn/api/v1/models/damo/cv_resnet50_face-reconstruction/repo?Revision=master&FilePath=results/result_2.jpg&View=true)
 
 ## 模型描述
 
@@ -19,7 +19,7 @@
 
 模型相关方法 [HRN](https://arxiv.org/abs/2302.14434) 已被CVPR2023接收，网络结构如下图。与HRN略有差异的是，目前该模型采用inference+fitting的方式进行重建，针对输入图进行finetune以实现更为精确的重建效果。
 
-![内容图像](assets/HRN_framework.jpg)
+![内容图像](https://modelscope.cn/api/v1/models/damo/cv_resnet50_face-reconstruction/repo?Revision=master&FilePath=assets/HRN_framework.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 
