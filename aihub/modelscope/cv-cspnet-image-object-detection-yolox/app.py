@@ -52,6 +52,14 @@ class CV_CSPNET_IMAGE_OBJECT_DETECTION_YOLOX_Model(Model):
         
         self.p = pipeline('image-object-detection', 'damo/cv_cspnet_image-object-detection_yolox')
 
+    def resize_image(self, image):
+        height, width = image.shape[:2]
+        max_size = 1280
+        if max(height, width) > max_size:
+            scale = max_size / max(height, width)
+            image = cv2.resize(image, (int(width * scale), int(height * scale)))
+        return image
+
     # 可视化代码
     def vis_det_img(self, input_path, res):
         def get_color(idx):
@@ -73,13 +81,14 @@ class CV_CSPNET_IMAGE_OBJECT_DETECTION_YOLOX_Model(Model):
             cv2.putText(img, score, (int(x1), int(y2) + 10 + int(text_size*5)),
                         cv2.FONT_HERSHEY_PLAIN, text_size, color, line_width)
         # 为了方便展示，此处对图片进行了缩放
-        if img.shape[0] >1080 or img.shape[1] > 1920:
-            img = cv2.resize(img, (int(img.shape[1]/2), int(img.shape[0]/2)))
+        img = self.resize_image(img)
         return img
     
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
+        image_input = self.resize_image(cv2.imread(image))
+        cv2.imwrite(image, image_input)
         result = self.p(image)
         savePath = 'result/result_' + str(int(1000*time.time())) + '.jpg'
         os.makedirs(os.path.dirname(savePath), exist_ok=True)
@@ -91,10 +100,7 @@ class CV_CSPNET_IMAGE_OBJECT_DETECTION_YOLOX_Model(Model):
         back=[
             {
                 "image": savePath,
-                "text": str(result),
-                "video": '',
-                "audio": '',
-                "markdown":''
+                "text": str(result)
             }
         ]
         return back
@@ -112,7 +118,7 @@ if __name__=='__main__':
 
 '''
 Date: 2023-03-22
-Test by: 秋水泡茶
+Tested by: 秋水泡茶
 模型大小：69M
 模型效果：支持80类通用目标检测，对图片中的大目标具有良好的检测效果，对小目标检测较困难。
 推理性能：以1330*1330的图片为例，推理速度平均为300ms。以720*1280的图片为例，推理速度最快234ms，最慢为486ms。
