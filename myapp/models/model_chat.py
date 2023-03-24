@@ -28,7 +28,7 @@ class Chat(Model,MyappModelBase):
     hello = Column(String(200), nullable=True, default='')
     pre_question = Column(Text, nullable=True, default='')   # 加载问题前面的先验知识
     service_type = Column(String(200), nullable=True, default='')  # 推理服务的类型   [chatgpt,gptglm]
-    service_url = Column(String(2000), nullable=True, default='')  # 推理服务的地址
+    service_config = Column(Text, nullable=True, default='{}')  # 推理服务的配置，url  header  json等
     owner = Column(String(2000), nullable=True, default='*')  # 可访问用户，* 表示所有用户
 
     expand = Column(Text, nullable=True, default='{}')

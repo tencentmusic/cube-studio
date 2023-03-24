@@ -84,11 +84,11 @@ def handle_task(qid, username=""):
 class Base_Impl():
     # 提交任务
     # @pysnooper.snoop()
-    def submit_task(self, qid, async=True):
+    def submit_task(self, qid, enable_async=True):
         err_msg = ""
         result = ""
         try:
-            if async:
+            if enable_async:
                 async_task = handle_task.delay(qid, username = g.user.username)
             else:
                 stage, status, _err_msg = handle_task(qid, username = g.user.username)
@@ -102,7 +102,7 @@ class Base_Impl():
         except Exception as e:
             err_msg = traceback.format_exc()
 
-        if async:
+        if enable_async:
             return {"err_msg":err_msg, "task_id": qid}
         return {"err_msg":err_msg, "task_id": qid, "result":result}
 
