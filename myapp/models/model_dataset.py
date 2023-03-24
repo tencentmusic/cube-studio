@@ -21,7 +21,7 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
     version = Column(String(200), nullable=True, default='')  # 版本
     subdataset = Column(String(200), nullable=True, default='')  # 数据子集名称，例如英文数据子集，中文数据子集
     split = Column(String(200), nullable=True, default='')  # train test val等
-    segment = Column(String(200), nullable=True, default='')  # 可以追加数据块，避免整块更新
+    segment = Column(Text, nullable=True, default='{}')  # 可以追加数据块，避免整块更新，记录分区信息。分区名，文件文件信息
 
     doc = Column(String(200), nullable=True, default='')  # 数据集的文档页面
     source_type = Column(String(200), nullable=True)  # 数据集来源，开源，资产，采购

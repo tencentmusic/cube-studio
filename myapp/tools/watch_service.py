@@ -48,7 +48,7 @@ def listen_service():
                                     finished_at = int(terminated.finished_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间
                                     if (datetime.now().timestamp() - finished_at) < 5:
                                         message = "cluster: %s, pod: %s, user: %s, status: %s" % (cluster,event['object'].metadata.name,inferenceserving.created_by.username, 'terminated')
-                                        push_message([inferenceserving.created_by.username]+conf.get('ADMIN_USER').split(','), message)
+                                        push_message([inferenceserving.created_by.username], message)
                                 # if running and running.started_at:  # 任务重启运行
                                 #     start_time = int(running.started_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间
                                 #     if (datetime.now().timestamp() - start_time) < 5:

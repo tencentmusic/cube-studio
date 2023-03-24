@@ -56,7 +56,7 @@ class Dataset_ModelView_base():
     base_filters = [["id", Dataset_Filter, lambda: []]]  # 设置权限过滤器
 
     add_columns = ['name','version','label','describe','subdataset','source_type','source','industry','field','usage','research','storage_class','file_type','years','url','download_url','path','storage_size','entries_num','duration','price','status','icon','owner','features']
-    show_columns = ['id','name','version','label','describe','subdataset','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url','storage_size','entries_num','duration','price','status','icon','owner','features']
+    show_columns = ['id','name','version','label','describe','subdataset','segment','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url','storage_size','entries_num','duration','price','status','icon','owner','features']
     search_columns=['name','version','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url']
     spec_label_columns = {
         "subdataset": "子数据集名称",
@@ -79,14 +79,15 @@ class Dataset_ModelView_base():
         "icon": "示例图",
         "icon_html":"示例图",
         "ops_html":"操作",
-        "features":"特征列"
+        "features":"特征列",
+        "segment":"分区"
     }
 
     edit_columns = add_columns
     list_columns = ['icon_html','name','version','label','describe','source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path_html','storage_size','entries_num','duration','price','owner','ops_html']
     cols_width = {
         "name": {"type": "ellip1", "width": 200},
-        "label": {"type": "ellip2", "width": 200},
+        "label": {"type": "ellip2", "width": 300},
         "version": {"type": "ellip2", "width": 100},
         "describe":{"type": "ellip2", "width": 300},
         "field":{"type": "ellip1", "width": 100},
@@ -291,10 +292,12 @@ class Dataset_ModelView_base():
         # update_dataset(task=None,dataset_id=item.id)
 
     @expose("/upload/<dataset_id>", methods=["POST"])
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def upload(self, dataset_id):
         dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
         filename = request.form['filename']
+        partition = request.form.get('partition','')
+
         print(request.form)
         print(request.files)
         file= request.files['file']
@@ -327,8 +330,15 @@ class Dataset_ModelView_base():
                 # save_type = request.form['save_type']  # 替换，还是追加数据集
                 dataset.path=(dataset.path or '')+"\n"+save_path
                 dataset.path = '\n'.join(list(set([x.strip() for x in dataset.path.split('\n') if x.strip()])))
+                if partition:
+                    segment=json.loads(dataset.segment) if dataset.segment else {}
+                    if partition not in segment:
+                        segment[partition] = [save_path]
+                    else:
+                        segment[partition].append(save_path)
+                        segment[partition] = list(set(segment[partition]))
+                    dataset.segment = json.dumps(segment,indent=4,ensure_ascii=False)
                 db.session.commit()
-                # if save_type=='replace':
         else:
             print(f'Chunk {current_chunk + 1} of {total_chunks} for file {filename} complete')
 
@@ -364,8 +374,20 @@ class Dataset_ModelView_base():
     #         })
 
     # 将外部存储保存到本地存储中心
-    @expose("/download/<dataset_id>", methods=["GET","POST"])
-    def download(self, dataset_id):
+    @expose("/download/<dataset_id>", methods=["GET", "POST"])
+    @expose("/download/<dataset_id>/<partition>", methods=["GET","POST"])
+    # @pysnooper.snoop()
+    def download(self, dataset_id,partition=''):
+
+        # 生成下载链接
+        def path2url(path):
+            if 'http://' in path or "https://" in path:
+                return path
+            if re.match('^/mnt/', path):
+                return f'{request.host_url.strip("/")}/static{path}'
+            if re.match('^/data/k8s/kubeflow/dataset', path):
+                return f'{request.host_url.strip("/")}/static{path.replace("/data/k8s/kubeflow", "")}'
+
         dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
         try:
             download_url=[]
@@ -374,10 +396,7 @@ class Dataset_ModelView_base():
                 # 如果存储在个人目录
                 paths = dataset.path.split('/n')
                 for path in paths:
-                    if re.match('^/mnt/',path):
-                        download_url.append(f'{request.host_url.strip("/")}/static{path}')
-                    if re.match('^/data/k8s/kubeflow/dataset',path):
-                        download_url.append(f'{request.host_url.strip("/")}/static{path.replace("/data/k8s/kubeflow","")}')
+                    download_url.append(path2url(path))
 
             # 如果存储在外部链接
             elif dataset.download_url:
@@ -389,6 +408,12 @@ class Dataset_ModelView_base():
                 store_client = getattr(params, store_type.upper() + '_client')(**conf.get('STORE_CONFIG', {}))
                 remote_file_path = f'/dataset/{dataset.name}/{dataset.version}'
                 download_url = store_client.get_download_url(remote_file_path)
+
+            if partition:
+                segment = json.loads(dataset.segment) if dataset.segment else {}
+                if partition in segment:
+                    download_url = segment[partition]
+                    download_url = [path2url(url) for url in download_url]
 
             return jsonify({
                 "status":0,

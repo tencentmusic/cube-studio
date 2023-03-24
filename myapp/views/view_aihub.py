@@ -857,9 +857,9 @@ class Aihub_language_Api(Aihub_base,MyappModelRestApi):
 appbuilder.add_api(Aihub_language_Api)
 
 
-class Aihub_reinforcement_Api(Aihub_base,MyappModelRestApi):
-    route_base = '/model_market/reinforcement/api'
-    base_filters = [["id", Aihub_Filter, '强化学习']]
+class Aihub_multimodal_Api(Aihub_base,MyappModelRestApi):
+    route_base = '/model_market/multimodal/api'
+    base_filters = [["id", Aihub_Filter, '多模态']]
     # @pysnooper.snoop()
     def add_more_info(self,response,**kwargs):
         response['list_ui_type'] = 'card'
@@ -868,7 +868,7 @@ class Aihub_reinforcement_Api(Aihub_base,MyappModelRestApi):
             "card_heigh": '250px'
         }
 
-appbuilder.add_api(Aihub_reinforcement_Api)
+appbuilder.add_api(Aihub_multimodal_Api)
 
 class Aihub_graph_Api(Aihub_base,MyappModelRestApi):
     route_base = '/model_market/graph/api'
