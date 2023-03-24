@@ -112,7 +112,7 @@ class Chat_View(MyappModelRestApi):
             description='对话类型',
             default='文本对话',
             widget=MySelect2Widget(),
-            choices=[['text','文本对话'], ['speech',"语音对话"],['image',"图片"],  ['text_speech',"文本+语音"],['multi_modal', "多模态"], ['digital_human',"数字人"]],
+            choices=[['text','文本对话'],['image',"图片"],  ['text_speech',"文本+语音"],['multi_modal', "多模态"], ['digital_human',"数字人"]],
             validators=[]
         ),
         "service_type": SelectField(
@@ -120,7 +120,7 @@ class Chat_View(MyappModelRestApi):
             description='推理服务类型',
             widget=Select2Widget(),
             default='chatgpt',
-            choices=[[x, x] for x in ["chatgpt3.5","chatgpt4", "chatglm", "微调模型",'AIGC']],
+            choices=[[x, x] for x in ["chatgpt3.5","chatgpt4", "chatglm", "微调模型",'AIGC','组合']],
             validators=[]
         ),
         "service_config": StringField(
@@ -137,7 +137,8 @@ class Chat_View(MyappModelRestApi):
     @expose('/chat/<chat_id>', methods=['POST','GET'])
     def chat(self,chat_id):
         request_id = request.json.get('request_id')
-        search_data = request.json.get('search_data')
+        search_text = request.json.get('search_text','')
+        search_audio = request.json.get('search_audio',None)
         chat= db.session.query(Chat).filter_by(id=int(chat_id)).first()
         if request_id not in self.all_history:
             self.all_history[request_id]=[]
@@ -148,40 +149,92 @@ class Chat_View(MyappModelRestApi):
                 history=history[0-session_num:]
 
         if chat.service_type.lower()=='chatglm':
-            result = self.chatglm(chat=chat,search_data=search_data,history=history)
+            status,text = self.chatglm(chat=chat,search_text=search_text,history=history)
             # 追加记录的方法
-            self.all_history[request_id].append(search_data)
+            self.all_history[request_id].append(search_text)
             return jsonify({
-                "status":0,
-                "message":"成功",
-                "result":result
+                "status":1 if status else 0,
+                "message":'失败' if status else "成功",
+                "result":[
+                        {
+                            "text":text
+                        }
+                    ]
             })
         if chat.service_type.lower()=='chatgpt':
-            result = self.chatgpt(chat=chat,search_data=search_data,history=history)
+            status,text = self.chatgpt(chat=chat,search_text=search_text,history=history)
             # 追加记录的方法
-            self.all_history[request_id].append(search_data)
+            self.all_history[request_id].append(search_text)
             return jsonify({
-                "status":0,
-                "message":"成功",
-                "result":result
+                "status":1 if status else 0,
+                "message":'失败' if status else "成功",
+                "result":[
+                        {
+                            "text":text
+                        }
+                    ]
             })
         if chat.service_type.lower()=='aigc':
-            result = self.aigc(chat=chat,search_data=search_data,history=history)
+            status,image = self.aigc(chat=chat,search_text=search_text,history=history)
             # 追加记录的方法
-            self.all_history[request_id].append(search_data)
+            self.all_history[request_id].append(search_text)
             return jsonify({
-                "status":0,
-                "message":"成功",
-                "result":result
+                "status":1 if status else 0,
+                "message":'失败' if status else "成功",
+                "result":[
+                        {
+                            "image":image
+                        }
+                    ]
             })
+        if chat.service_type.lower()=='组合':
+            if chat.chat_type=='text_speech':
+                if search_text:
+                    status,result = self.chatglm(chat=chat,search_text=search_text,history=history)
+                elif search_audio:
+                    status,message = self.asr(search_audio)
+                    if not status:
+                        return jsonify({
+                            "status": 1 if status else 0,
+                            "message": 'asr失败' if status else "asr成功",
+                            "result": [
+                                {
+                                    "text": message
+                                }
+                            ]
+                        })
+                    status,message = self.chatglm(chat=chat, search_text=message, history=history)
+                    if not status:
+                        return jsonify({
+                            "status": 1 if status else 0,
+                            "message": 'chatglm失败' if status else "chatglm成功",
+                            "result": [
+                                {
+                                    "text": message
+                                }
+                            ]
+                        })
+                    status,audio = self.tts(chat=chat, search_text=message, history=history)
+                    return jsonify({
+                        "status":1 if status else 0,
+                        "message":'tts失败' if status else "tts成功",
+                        "result":[
+                            {
+                                "text":message,
+                                "audio":audio
+                            }
+                        ]
+                    })
+
+
 
     @pysnooper.snoop()
-    def chatgpt(self,chat,search_data,history=[]):
+    def chatgpt(self,chat,search_text,history=[]):
         try:
-            url = json.loads(chat.service_config).get("url", '')
-            headers = json.loads(chat.service_config).get("headers", {})
+            url = json.loads(chat.service_config).get("chatgpt_url", '')
+            headers = json.loads(chat.service_config).get("chatgpt_headers", {})
             data = {
-                "msgContent": chat.pre_question + search_data,
+                "msgContent": chat.pre_question + search_text,
                 "msgType": "text",
                 "chatType": "group",
                 "userName": "zhang-san",
@@ -192,7 +245,7 @@ class Chat_View(MyappModelRestApi):
                 "chatInfoUrl": "string",
                 "eventType": "add_to_chat"
             }
-            data.update(json.loads(chat.service_config).get("data", {}))
+            data.update(json.loads(chat.service_config).get("chatgpt_data", {}))
             res = requests.post(
                 url,
                 headers=headers,
@@ -200,53 +253,95 @@ class Chat_View(MyappModelRestApi):
             )
             mes = res.json().get("msgContent", '')
             mes = mes[:mes.index('\n')]
-            return mes
+            return True,mes
         except Exception as e:
-            return "聊天报错："+str(e)
+            return False,"聊天报错："+str(e)
 
 
 
     @pysnooper.snoop()
-    def chatglm(self,chat,search_data,history=[]):
+    def chatglm(self,chat,search_text,history=[]):
         try:
             query={
-                "query":chat.pre_question+search_data
+                "query":chat.pre_question+search_text
             }
-            res = requests.post(json.loads(chat.service_config).get("url",''),json=query)
+            res = requests.post(json.loads(chat.service_config).get("chatglm_url",''),json=query)
             result = res.json().get("result", [])
-            return result
+            if result:
+                result = result[0]['markdown']
+                return True,result
+            return False,res.json().get("message", [])
         except Exception as e:
-            return [
-                {
-                    "text":"聊天报错："+str(e)
-                }
-            ]
+            return False,str(e)
+
 
     @pysnooper.snoop()
-    def aigc(self,chat,search_data,history=[]):
+    def tts(self, chat, search_text, history=[]):
         try:
-            url = json.loads(chat.service_config).get("url",'')
-            headers = json.loads(chat.service_config).get("headers",{})
+            url = json.loads(chat.service_config).get("tts_url", '')
+            headers = json.loads(chat.service_config).get("tts_headers", {})
             data = {
-                "choice_t":"物体景象",
-                "text": chat.pre_question + search_data
+                "text": search_text
             }
-            data.update(json.loads(chat.service_config).get("data",{}))
+            data.update(json.loads(chat.service_config).get("tts_data", {}))
             res = requests.post(url,
                                 headers=headers,
                                 json=data
                                 )
             result = res.json().get("result", [])
-            for image in result:
-                if 'http:' not in image['image'] and 'https://' not in image['image']:
-                    image['image'] = urllib.parse.urljoin(url, image['image'])
-            return result
+            if result:
+                audio = result[0]['audio']
+                if 'http:' not in audio and 'https://' not in audio:
+                    audio = urllib.parse.urljoin(url, audio)
+                return True,audio
+
+            return False,result.get('message')
         except Exception as e:
-            return [
-                {
-                    "text": "绘制报错：" + str(e)
-                }
-            ]
+            return False,str(e)
+
+    @pysnooper.snoop()
+    def asr(self, chat, search_audio, history=[]):
+        try:
+            url = json.loads(chat.service_config).get("asr_url", '')
+            headers = json.loads(chat.service_config).get("asr_headers", {})
+            data = {
+                "audio": search_audio
+            }
+            data.update(json.loads(chat.service_config).get("asr_data", {}))
+            res = requests.post(url,
+                                headers=headers,
+                                json=data
+                                )
+            result = res.json().get("result", [])
+            if result:
+                result = result[0]['text']
+                return True,result
+            return False,res.json().get("message", [])
+        except Exception as e:
+            return False,"绘制报错：" + str(e)
+
+    @pysnooper.snoop()
+    def aigc(self,chat,search_text,history=[]):
+        try:
+            url = json.loads(chat.service_config).get("aigc_url",'')
+            headers = json.loads(chat.service_config).get("aigc_headers",{})
+            data = {
+                "choice_t":"物体景象",
+                "text": chat.pre_question + search_text
+            }
+            data.update(json.loads(chat.service_config).get("aigc_data",{}))
+            res = requests.post(
+                url,
+                headers=headers,
+                json=data
+            )
+            result = res.json().get("result", [])
+            if result:
+                image = result[0]['image']
+                return True,image
+            return False,result.get("message")
+        except Exception as e:
+            return False,str(e)
 
 appbuilder.add_api(Chat_View)
 
