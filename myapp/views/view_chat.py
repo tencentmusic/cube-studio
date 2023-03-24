@@ -11,6 +11,7 @@ from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget
 from flask import jsonify,Markup,make_response
 from .baseApi import MyappModelRestApi
 from flask import g,request,redirect
+import urllib
 import json,os,sys
 from werkzeug.utils import secure_filename
 import pysnooper
@@ -146,7 +147,7 @@ class Chat_View(MyappModelRestApi):
             if session_num>0:
                 history=history[0-session_num:]
 
-        if chat.service_type=='chatglm':
+        if chat.service_type.lower()=='chatglm':
             result = self.chatglm(chat=chat,search_data=search_data,history=history)
             # 追加记录的方法
             self.all_history[request_id].append(search_data)
@@ -155,8 +156,17 @@ class Chat_View(MyappModelRestApi):
                 "message":"成功",
                 "result":result
             })
-        if chat.service_type=='chatgpt':
+        if chat.service_type.lower()=='chatgpt':
             result = self.chatgpt(chat=chat,search_data=search_data,history=history)
+            # 追加记录的方法
+            self.all_history[request_id].append(search_data)
+            return jsonify({
+                "status":0,
+                "message":"成功",
+                "result":result
+            })
+        if chat.service_type.lower()=='aigc':
+            result = self.aigc(chat=chat,search_data=search_data,history=history)
             # 追加记录的方法
             self.all_history[request_id].append(search_data)
             return jsonify({
@@ -212,13 +222,13 @@ class Chat_View(MyappModelRestApi):
                 }
             ]
 
-
     @pysnooper.snoop()
     def aigc(self,chat,search_data,history=[]):
         try:
             url = json.loads(chat.service_config).get("url",'')
             headers = json.loads(chat.service_config).get("headers",{})
             data = {
+                "choice_t":"物体景象",
                 "text": chat.pre_question + search_data
             }
             data.update(json.loads(chat.service_config).get("data",{}))
@@ -227,6 +237,9 @@ class Chat_View(MyappModelRestApi):
                                 json=data
                                 )
             result = res.json().get("result", [])
+            for image in result:
+                if 'http:' not in image['image'] and 'https://' not in image['image']:
+                    image['image'] = urllib.parse.urljoin(url, image['image'])
             return result
         except Exception as e:
             return [
