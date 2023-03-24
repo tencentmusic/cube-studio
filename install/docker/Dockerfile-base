@@ -1,10 +1,10 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-1.0 -f install/docker/Dockerfile-base .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 FROM ubuntu:20.04
 
 ENV TZ=Asia/Shanghai
 ENV DEBIAN_FRONTEND=noninteractive
-ARG PYTHON_VERSION=python3.6
+ARG PYTHON_VERSION=python3.9
 
 # 替换源
 COPY install/docker/sources.list /etc/apt/sources.list
@@ -15,7 +15,7 @@ RUN apt install -y --force-yes --no-install-recommends apt-utils ca-certificates
 
 # 安装python
 RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip python3.6-distutils
-RUN set -x; rm -rf /usr/bin/python /usr/bin/python3; apt install -y --fix-missing ${PYTHON_VERSION} ${PYTHON_VERSION}-dev && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python3 && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip && pip3 install -U pip
+RUN set -x; rm -rf /usr/bin/python /usr/bin/python3; apt install -y --fix-missing ${PYTHON_VERSION} ${PYTHON_VERSION}-dev && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python3 && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip && pip3 install --upgrade pip setuptools wheel
 
 # 安装node
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash
