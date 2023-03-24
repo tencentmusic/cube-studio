@@ -7,8 +7,6 @@ import time
 import cv2
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "4"
-
 class CV_CSPNET_IMAGE_OBJECT_DETECTION_YOLOX_NANO_COCO_Model(Model):
     # 模型基础信息定义
     name='cv-cspnet-image-object-detection-yolox-nano-coco'   # 该名称与目录名必须一样，小写
