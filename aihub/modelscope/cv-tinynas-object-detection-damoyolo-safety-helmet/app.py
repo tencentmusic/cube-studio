@@ -130,5 +130,5 @@ model=CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_SAFETY_HELMET_Model()
 if __name__=='__main__':
      model.run()
 
-#模型识别一张图片响应速度再3秒以内
-
+#模型识别一张图片响应速度在3秒以内
+#模型大小129M,内存占用大约7M
