@@ -11,6 +11,8 @@
 
 https://docs.qq.com/sheet/DT0tPcWxHTG9OWUZE?tab=BB08J2
 
+[代码中的常用方法](https://docs.qq.com/doc/DUkZoWUZ6bUxwUXl3)
+
 # 应用文件结构
 
 其中（内容基本已自动填写）
