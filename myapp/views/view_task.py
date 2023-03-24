@@ -565,8 +565,17 @@ class Task_ModelView_Base():
                 if pod['status'] == 'Running':
                     break
                 else:
+                    events = k8s_client.get_pod_event(namespace=namespace,pod_name=pod_name)
+                    # try:
+                    #     message = '启动时间过长，一分钟后刷新此页面'+", status:"+pod['status']+", message:"+json.dumps(pod['status_more']['conditions'],indent=4,ensure_ascii=False)
+                    # except Exception as e:
+                    #     print(e)
                     try:
-                        message = '启动时间过长，一分钟后刷新此页面'+", status:"+pod['status']+", message:"+json.dumps(pod['status_more']['conditions'],indent=4,ensure_ascii=False)
+                        # 有新消息要打印
+                        for event in events:
+                            message = f'"时间："{event["time"]} ，类型：{event["type"]} ，原因：{event["reason"]} ，消息：{event["message"]}'
+                            # print(message, flush=True)
+                            message+="\n"+message
                     except Exception as e:
                         print(e)
             try_num=try_num-1
@@ -606,7 +615,7 @@ class Task_ModelView_Base():
                 time.sleep(2)
                 pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
                 check_date = datetime.datetime.now()
-                if (check_date-delete_time).seconds>60:
+                if (check_date-delete_time).total_seconds()>60:
                     message="超时，请稍后重试"
                     flash(message,category='warning')
                     return self.response(400, **{"status": 1, "result": {}, "message": message})

@@ -446,6 +446,7 @@ def dag_to_pipeline(pipeline,dbsession,workflow_label=None,**kwargs):
     workflow_label['pipeline-rtx'] = pipeline.created_by.username
     workflow_label['save-time'] = datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
     workflow_label['pipeline-id'] = str(pipeline.id)
+    workflow_label['pipeline-name'] = str(pipeline.name)
     workflow_label['run-id'] = global_envs.get('KFJ_RUN_ID','')   # 以此来绑定运行时id，不能用kfp的run—id。那个是传到kfp以后才产生的。
     workflow_label['cluster'] = pipeline.project.cluster['NAME']
 
