@@ -349,13 +349,12 @@ class Chat_View(MyappModelRestApi):
         except Exception as e:
             return 1,"asr报错：" + str(e)
 
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def aigc(self,chat,search_text,history=[]):
         try:
             url = json.loads(chat.service_config).get("aigc_url",'')
             headers = json.loads(chat.service_config).get("aigc_headers",{})
             data = {
-                "choice_t":"物体景象",
                 "text": chat.pre_question + search_text
             }
             data.update(json.loads(chat.service_config).get("aigc_data",{}))
@@ -368,6 +367,9 @@ class Chat_View(MyappModelRestApi):
                 result = res.json().get("result", [])
                 if result:
                     image = result[0]['image']
+                    if 'http:' not in image and 'https://' not in image:
+                        image = urllib.parse.urljoin(url, image)
+                        print(image)
                     return 0,image
                 return 1,result.get("message")
             else:

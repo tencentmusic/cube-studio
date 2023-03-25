@@ -33,7 +33,7 @@ class MULTI_MODAL_CHINESE_STABLE_DIFFUSION_Model(Model):
         Field(type=Field_type.text, name='text', label='输入prompt', describe='想要绘画的内容，支持中文输入。',
               default='', validators=Validator(max=50)),
         Field(type=Field_type.text_select, name='steps', label='推理步数', default='30',
-              choices=[str(x) for x in range(1, 50)]),
+              choices=[str(x) for x in range(1, 70)]),
     ]
 
     inference_resource = {
