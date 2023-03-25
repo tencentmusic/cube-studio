@@ -67,7 +67,7 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_GENERAL_DAMO_Model(Model):
         ]
 
         # 输出运行时间
-        run_time_ms = 0.0
+        # run_time_ms = 0.0
         # max_run_time_ms = 0.0
         # min_run_time_ms = 1000000.0
         # for i in range(20):
