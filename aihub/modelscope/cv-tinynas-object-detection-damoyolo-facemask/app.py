@@ -1,9 +1,27 @@
 import base64
 import io,sys,os
+import numpy
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
-import os
+import os,random,cv2
+from PIL import Image,ImageFont
+from PIL import ImageDraw
+
+myfont = ImageFont.truetype('/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc', 20)
+
+
+# def resize_image(image):
+#     height, width = image.shape[:2]
+#     max_size = 1280
+#     if max(height, width) > max_size:
+#         if height > width:
+#             ratio = max_size / height
+#         else:
+#             ratio = max_size / width
+#         image = cv2.resize(image, (int(width * ratio), int(height * ratio)))
+#     return image
+
 
 class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_FACEMASK_Model(Model):
     # 模型基础信息定义
@@ -24,7 +42,8 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_FACEMASK_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='arg0', label='任意输入图像',describe='任意输入图像',default='',validators=None)
+        Field(type=Field_type.image, name='arg0', label='待识别图片', describe='用于目标识别的原始图片'),
+        # Field(type=Field_type.text, name='rtsp_url', label='视频流的地址', describe='rtsp视频流的地址')
     ]
 
     inference_resource = {
@@ -35,19 +54,19 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_FACEMASK_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00000954.jpg"
+                "img_file_path": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00000954.jpg"
             }
         },
         {
             "label": "示例2",
             "input": {
-                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00003592.jpg"
+                "img_file_path": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00003592.jpg"
             }
         },
         {
             "label": "示例3",
             "input": {
-                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00001095.jpg"
+                "img_file_path": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00001095.jpg"
             }
         }
     ]
@@ -63,7 +82,6 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_FACEMASK_Model(Model):
     def load_model(self,save_model_dir=None,**kwargs):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
-        
         self.p = pipeline('domain-specific-object-detection', 'damo/cv_tinynas_object-detection_damoyolo_facemask')
 
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
@@ -73,20 +91,43 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_FACEMASK_Model(Model):
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
+        global ratio
         result = self.p(arg0)
-
-        # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
-        # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
+        img = Image.open(arg0)
+        dr = ImageDraw.Draw(img)
+        for idx in range(len(result['scores'])):
+            class_name = result['labels'][idx]
+            x1, y1, x2, y2 = result['boxes'][idx][0], result['boxes'][idx][1], result['boxes'][idx][2], result['boxes'][idx][3]
+            # 画矩形框
+            dr.rectangle((x1, y1, x2, y2), outline=(46, 254, 46), width=5)
+            dr.text((x1, y1-25), class_name, font=myfont, fill='blue')
+        save_path='result/result'+str(random.randint(5,5000))+'.jpg'
+        os.makedirs(os.path.dirname(save_path),exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        w, h = img.size
+        max_size = 1280
+        if max(h, w) > max_size:
+            if h > w:
+                ratio = max_size/h
+                w = w * ratio
+                h = h * ratio
+            else:
+                ratio = max_size/w
+                w = w * ratio
+                h = h * ratio
+        img.resize((int(w), int(h)))
+        img.save(save_path)
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path,
+                "text": str(result['scores']) + str(result['labels']),
             }
         ]
         return back
+
+
+
 
 model=CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_FACEMASK_Model()
 
@@ -96,10 +137,16 @@ model=CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_FACEMASK_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00000954.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_tinynas_object-detection_damoyolo_facemask/assets/demo/test_00000954.jpg')  # 测试
+# print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+# 模型大小：124.94MB
+# 模型效果：best
+# 推理性能:首次调用3s内/后续100ms以内
+# 占用内存/推理服务/gpu：7MB/2.5G/1.5GB
+# 巧妙使用方法：第一次调用后，后面推理速度会加快
