@@ -135,6 +135,7 @@ class Chat_View(MyappModelRestApi):
     edit_form_extra_fields = add_form_extra_fields
     all_history={}
     @expose('/chat/<chat_id>', methods=['POST','GET'])
+    @pysnooper.snoop()
     def chat(self,chat_id):
         request_id = request.json.get('request_id')
         search_text = request.json.get('search_text','')
@@ -153,7 +154,7 @@ class Chat_View(MyappModelRestApi):
             # 追加记录的方法
             self.all_history[request_id].append(search_text)
             return jsonify({
-                "status":1 if status else 0,
+                "status":status,
                 "message":'失败' if status else "成功",
                 "result":[
                         {
@@ -166,7 +167,7 @@ class Chat_View(MyappModelRestApi):
             # 追加记录的方法
             self.all_history[request_id].append(search_text)
             return jsonify({
-                "status":1 if status else 0,
+                "status":status,
                 "message":'失败' if status else "成功",
                 "result":[
                         {
@@ -179,7 +180,7 @@ class Chat_View(MyappModelRestApi):
             # 追加记录的方法
             self.all_history[request_id].append(search_text)
             return jsonify({
-                "status":1 if status else 0,
+                "status":status,
                 "message":'失败' if status else "成功",
                 "result":[
                         {
@@ -189,13 +190,25 @@ class Chat_View(MyappModelRestApi):
             })
         if chat.service_type.lower()=='组合':
             if chat.chat_type=='text_speech':
+                # 发送的是文字，就返回文字
                 if search_text:
-                    status,result = self.chatglm(chat=chat,search_text=search_text,history=history)
+                    status,message = self.chatglm(chat=chat,search_text=search_text,history=history)
+
+                    return jsonify({
+                        "status": status,
+                        "message": 'chatglm失败' if status else "chatglm成功",
+                        "result": [
+                            {
+                                "text": message
+                            }
+                        ]
+                    })
+                # 发送的是语音，就返回文字+语音
                 elif search_audio:
-                    status,message = self.asr(search_audio)
-                    if not status:
+                    status,message = self.asr(chat=chat,search_audio=search_audio,history=history)
+                    if status:
                         return jsonify({
-                            "status": 1 if status else 0,
+                            "status": status,
                             "message": 'asr失败' if status else "asr成功",
                             "result": [
                                 {
@@ -204,9 +217,9 @@ class Chat_View(MyappModelRestApi):
                             ]
                         })
                     status,message = self.chatglm(chat=chat, search_text=message, history=history)
-                    if not status:
+                    if status:
                         return jsonify({
-                            "status": 1 if status else 0,
+                            "status": status,
                             "message": 'chatglm失败' if status else "chatglm成功",
                             "result": [
                                 {
@@ -216,7 +229,7 @@ class Chat_View(MyappModelRestApi):
                         })
                     status,audio = self.tts(chat=chat, search_text=message, history=history)
                     return jsonify({
-                        "status":1 if status else 0,
+                        "status":status,
                         "message":'tts失败' if status else "tts成功",
                         "result":[
                             {
@@ -228,7 +241,7 @@ class Chat_View(MyappModelRestApi):
 
 
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def chatgpt(self,chat,search_text,history=[]):
         try:
             url = json.loads(chat.service_config).get("chatgpt_url", '')
@@ -251,28 +264,35 @@ class Chat_View(MyappModelRestApi):
                 headers=headers,
                 json=data
             )
-            mes = res.json().get("msgContent", '')
-            mes = mes[:mes.index('\n')]
-            return True,mes
+            if res.status_code == 200:
+                mes = res.json().get("msgContent", '')
+                mes = mes[:mes.index('\n')]
+                return 0,mes
+            else:
+                return 1, f'请求{url}失败'
         except Exception as e:
-            return False,"聊天报错："+str(e)
+            return 1,"chatgpt报错："+str(e)
 
 
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def chatglm(self,chat,search_text,history=[]):
         try:
             query={
                 "query":chat.pre_question+search_text
             }
-            res = requests.post(json.loads(chat.service_config).get("chatglm_url",''),json=query)
-            result = res.json().get("result", [])
-            if result:
-                result = result[0]['markdown']
-                return True,result
-            return False,res.json().get("message", [])
+            url = json.loads(chat.service_config).get("chatglm_url",'')
+            res = requests.post(url,json=query)
+            if res.status_code==200:
+                result = res.json().get("result", [])
+                if result:
+                    result = result[0]['markdown']
+                    return 0,result
+                return 1,res.json().get("message", [])
+            else:
+                return 1, f'请求{url}失败'
         except Exception as e:
-            return False,str(e)
+            return 1,'chatglm报错：'+str(e)
 
 
     @pysnooper.snoop()
@@ -288,39 +308,46 @@ class Chat_View(MyappModelRestApi):
                                 headers=headers,
                                 json=data
                                 )
-            result = res.json().get("result", [])
-            if result:
-                audio = result[0]['audio']
-                if 'http:' not in audio and 'https://' not in audio:
-                    audio = urllib.parse.urljoin(url, audio)
-                return True,audio
-
-            return False,result.get('message')
+            if res.status_code==200:
+                result = res.json().get("result", [])
+                print(result)
+                if result:
+                    audio = result[0]['audio']
+                    if 'http:' not in audio and 'https://' not in audio:
+                        audio = urllib.parse.urljoin(url, audio)
+                    return 0,audio
+                return 1,result.get('message')
+            else:
+                return 1, f'请求{url}失败'
         except Exception as e:
-            return False,str(e)
+            return 1,'tts报错：'+str(e)
 
     @pysnooper.snoop()
     def asr(self, chat, search_audio, history=[]):
+        return 0,'北京在哪里？'
         try:
             url = json.loads(chat.service_config).get("asr_url", '')
             headers = json.loads(chat.service_config).get("asr_headers", {})
             data = {
-                "audio": search_audio
+                "voice_file_path": search_audio
             }
             data.update(json.loads(chat.service_config).get("asr_data", {}))
             res = requests.post(url,
                                 headers=headers,
                                 json=data
                                 )
-            result = res.json().get("result", [])
-            if result:
-                result = result[0]['text']
-                return True,result
-            return False,res.json().get("message", [])
+            if res.status_code==200:
+                result = res.json().get("result", [])
+                if result:
+                    result = result[0]['text']
+                    return 0,result
+                return 1,res.json().get("message", [])
+            else:
+                return 1, f'请求{url}失败'
         except Exception as e:
-            return False,"绘制报错：" + str(e)
+            return 1,"asr报错：" + str(e)
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def aigc(self,chat,search_text,history=[]):
         try:
             url = json.loads(chat.service_config).get("aigc_url",'')
@@ -335,13 +362,16 @@ class Chat_View(MyappModelRestApi):
                 headers=headers,
                 json=data
             )
-            result = res.json().get("result", [])
-            if result:
-                image = result[0]['image']
-                return True,image
-            return False,result.get("message")
+            if res.status_code==200:
+                result = res.json().get("result", [])
+                if result:
+                    image = result[0]['image']
+                    return 0,image
+                return 1,result.get("message")
+            else:
+                return 1, f'请求{url}失败'
         except Exception as e:
-            return False,str(e)
+            return 1,'aigc报错：'+str(e)
 
 appbuilder.add_api(Chat_View)
 
