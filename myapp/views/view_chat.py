@@ -228,6 +228,7 @@ class Chat_View(MyappModelRestApi):
                             ]
                         })
                     status,audio = self.tts(chat=chat, search_text=message, history=history)
+                    print(audio)
                     return jsonify({
                         "status":status,
                         "message":'tts失败' if status else "tts成功",
@@ -315,6 +316,7 @@ class Chat_View(MyappModelRestApi):
                     audio = result[0]['audio']
                     if 'http:' not in audio and 'https://' not in audio:
                         audio = urllib.parse.urljoin(url, audio)
+                        print(audio)
                     return 0,audio
                 return 1,result.get('message')
             else:
@@ -324,7 +326,7 @@ class Chat_View(MyappModelRestApi):
 
     @pysnooper.snoop()
     def asr(self, chat, search_audio, history=[]):
-        return 0,'北京在哪里？'
+        # return 0,'北京在哪里？'
         try:
             url = json.loads(chat.service_config).get("asr_url", '')
             headers = json.loads(chat.service_config).get("asr_headers", {})
