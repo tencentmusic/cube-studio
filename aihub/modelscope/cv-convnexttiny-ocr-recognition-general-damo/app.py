@@ -72,6 +72,6 @@ model=CV_CONVNEXTTINY_OCR_RECOGNITION_GENERAL_DAMO_Model()
 # 测试后打开此部分
 if __name__=='__main__':
      model.run()
-#模型大小为74M,运行内存占用为511M,没有GPU
+#模型大小为74M,运行内存占用为511M,响应速度在两秒以内,没有GPU
 #运行环境为腾讯云服务器	标准型S6 - 2核 4G,操作系统TencentOS Server 3.1 (TK4)
 #模型只能指标图片中一段文字,太长有识别缺失的情况,英文识别有单词缺少字母的情况,对于字体有要求
