@@ -109,7 +109,7 @@ const ConfigFormData = React.forwardRef((props: IProps, ref) => {
                 onChange={() => {
                     props.onChange && props.onChange(form.getFieldsValue())
                 }}
-                options={inputSelectOption} placeholder="应用组" width={'400px'} />
+                options={inputSelectOption} width={'500px'} />
         </Form.Item>
     }
 

@@ -51,6 +51,7 @@
     "d3-tip": "^0.9.1",
     "dotenv": "^10.0.0",
     "dotenv-expand": "^5.1.0",
+    "echarts": "^5.4.2",
     "enquire-js": "^0.2.1",
     "eslint": "^8.3.0",
     "eslint-config-react-app": "^7.0.0",
