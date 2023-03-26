@@ -49,11 +49,11 @@ class Myapp(BaseMyappView):
             # {
             #     "text": "",
             #     "icon": '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">   <metadata><?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?> <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c140 79.160451, 2017/05/06-01:08:21        ">    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">       <rdf:Description rdf:about=""/>    </rdf:RDF> </x:xmpmeta>                 <?xpacket end="w"?></metadata> <image id="图层_0" data-name="图层 0" x="6" width="52" height="64" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAABACAMAAABiFaQOAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABXFBMVEUAAADXHgXXHgXXHgXYHgXYHgXYHgbZHgbYHgbYHgXWHQbPIADXHgfYHgbYHgbWHQbYHgaqAADXHwTYHgbYHwjbHQfYHwfZHgbYHgbXHwfXHQfeIQvZHgXYHwXXHgfXHgbYHwbZHgjbHwXZHgbbHgbXHgbYHgbZHwfYHgbYHwbYHQXYHgbXHwbYHgfYHgbXHQfYHgbXHgbZHgbYHQXMMwDQHAnYHgbXIAjWHAfVIAXXHwTWHgfYHQbZHQXXHwbYHgbXHgXWHgfYHgbXHQbXHwfXHwbYHwXZHQbXHgfYHQfXHQbYHwbYHgTXHgXYIQfYHgbcGgnXHgbZGgDYHgbMGgDYHgbXHgbYHgbXHgbYHwbXHQbZHgbYHgbZHgbYHwfXHQXYHQbYHgbXHwXZHgXYHgfYHwbYHwbYHgbYHgbXHQbYHgbYHgXYHwfXHgbTIQvYHgbYHwbcIwzYHgYAAACjlaAKAAAAcnRSTlMAM2aSvenz3MWPUBCZ3VYsigM52kJG6veidEYXumNN+9lDMX8qubJrsFthxqfE+EftgNS/BRvfICUwOkWdk1qJZXB2emyFYliaTqWvO7onzx3aFOQK7/ru29HHs6mfloyCiI2SmH2do6iuuL51zhes4RYaP3bpAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB+YJGhAsAvVkLkcAAAJjSURBVEjHlZbnVxNREMUfJgpJbBRLAEUDShHQJfTee0+oIRB6F3z//wfvvE1c3JNy33zY+5i9vxPO7uROlMpXZc8CwecvyitC4Ygiq+yl/levXlPImyeI1NvK0kxVtfZXTSnm3XuxffgYra2rq43Wu9Sn4sznBjF9+Zr7O9ZoqKai0DexfH/aaZZOSzGmVRzB/3tt0iv2DH/gfrW/2Y5mR2EmgNudP/3dml9oB3xNp0tbVJdjoLgNo3VcmG47RutuQBFbSGa4B9rbJ5/ZVOA9ev2+Xpx6cOiH1rt35Wa+p+r1Za76oQPeGy8NteA0AB2EtrOQvOhB6BB0mIWGcRqChqEjLDSCUxg6Ch1joTGcRqHjUIeFHJzGoRPQSZUbqHg+yOtPwjwBnYJO50Y3O46+8vrTME9BZ6CziqxZmGegIegcC83BHILOQxdYaAHmeehi9n1RJZOwCF2CLrPQMsxL0BVojIViMK9AO6CrLLSaTaY16DoLrcO8Bt2AbrLQJswb0AQ0yUJJmBPQrQJTmr9g3oJsI1V5qFPrbTf2dnhoxwRfJPtfkpUwwSext8tDuyb4JPb2eGjPBJ/E3j4P7Zvgk9gL8lDQBJ8Me4qHUuaLJLF3wEMHJvgk9tI8lDbBJ7F3yEOHJvgk9o546MgEn8RehocyJvgytttTPuPYHjpWJ/bQiTq1h07VGa7n/IM4h/1MXeAa5aEo7BfqEtdmHpKff5fqymbTuLvmSl3bbBp311ybWac3jbtrUurGZtO4u+ZG3eJ6x0N3sN+aL4hlpVWjPeSo5L0tc4918fvh0QZ5fPij/gJTBPTTrMeWfgAAAABJRU5ErkJggg=="/> </svg> ',
-            #     "link": "%s/frontend/aihub/model_market/model_all"%request.host_url.strip('/')
+            #     "link": "%s/frontend/ai_hub/model_market/model_all"%request.host_url.strip('/')
             # },
             {
                 "pic_url": '%s/static/assets/images/tip.gif'%request.host_url.strip('/'),
-                "link": "%s/frontend/aihub/model_market/model_visual"%request.host_url.strip('/')
+                "link": "%s/frontend/ai_hub/model_market/model_visual"%request.host_url.strip('/')
             },
             {
                 "text":"帮助文档",
@@ -563,10 +563,10 @@ class Myapp(BaseMyappView):
             },
             # 应用市场
             {
-                "name": 'aihub',
+                "name": 'ai_hub',
                 "title": 'AIHub',
                 "isMenu": True,
-                'hidden': 0,
+                'hidden': 1,
                 "isExpand": True,
                 "icon": '<svg t="1660895494223" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2520" width="200" height="200"><path d="M735.9 66.5H288.1C176.4 66.5 85.5 157.3 85.5 269v486c0 111.7 90.9 202.6 202.6 202.6H736c111.7 0 202.6-90.9 202.6-202.6V269c-0.1-111.7-91-202.5-202.7-202.5zM884.8 755c0 82.1-66.8 148.9-148.9 148.9H288.1C206 903.8 139.2 837 139.2 755V269c0-82.1 66.8-148.9 148.9-148.9H736c82.1 0 148.9 66.8 148.9 148.9v486z" fill="#494949" p-id="2521"></path><path d="M651.2 344.5c-18.5 0-33.6 15-33.6 33.6 0 58.3-47.4 105.7-105.7 105.7-58.3 0-105.7-47.4-105.7-105.7 0-18.5-15-33.6-33.6-33.6-18.5 0-33.6 15-33.6 33.6 0 95.3 77.5 172.8 172.8 172.8s172.8-77.5 172.8-172.8c0.2-18.6-14.8-33.6-33.4-33.6z" fill="#494949" p-id="2522"></path></svg>',
                 "children": [
@@ -581,9 +581,6 @@ class Myapp(BaseMyappView):
                         "name": 'model_market',
                         "title": '模型市场',
                         "icon": '<svg t="1664182396322" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3003" width="64" height="64"><path d="M891.821291 547.404654l0.039999-0.099999 0.03-0.109999c5.999941-24.019765 5.789943-47.799533-0.639994-67.029345C856.901632 397.756116 751.182664 206.087987 511.995 206.087987c-239.317663 0-345.186629 192.268122-379.626293 275.007315-6.369938 19.049814-6.249939 43.059579 0.339997 62.749387 34.389664 82.409195 140.198631 274.097323 379.286296 274.097323 224.037812 0.02 334.136737-169.498345 379.826291-270.537358zM511.995 737.502798c-198.068066 0-283.65723-164.488394-305.287019-215.257898l-0.859991-16.069843c14.589858-36.409644 96.759055-214.407906 306.14701-214.407906 198.118065 0 283.65723 164.578393 305.277019 215.367897l0.849992 10.699895C803.142157 555.164578 719.272976 737.502798 511.995 737.502798z" fill="#2c2c2c" p-id="3004"></path><path d="M511.995 365.516431c-82.139198 0-146.47857 64.339372-146.478569 146.478569 0 82.159198 64.339372 146.518569 146.478569 146.518569 82.139198 0 146.47857-64.359371 146.47857-146.518569 0-82.139198-64.339372-146.47857-146.47857-146.478569z m0 212.577924c-35.229656 0-66.139354-30.889698-66.139354-66.099355 0-35.209656 30.909698-66.099354 66.139354-66.099354 35.209656 0 66.099354 30.889698 66.099355 66.099354 0 35.209656-30.889698 66.099354-66.099355 66.099355zM246.187596 938.170838H105.46897c-10.839894 0-19.659808-8.809914-19.659808-19.639808V777.812404c0-23.659769-19.239812-42.909581-42.889581-42.909581C19.259812 734.892823 0 754.142635 0 777.812404v140.718626c0 57.739436 46.649544 104.798977 104.238982 105.44897v0.02h141.948614c23.659769 0 42.909581-19.249812 42.909581-42.909581 0.01-23.669769-19.239812-42.919581-42.909581-42.919581zM981.080419 734.892823c-23.649769 0-42.889581 19.249812-42.889581 42.909581v140.708626c0 10.829894-8.819914 19.639808-19.659808 19.639808H777.812404c-23.659769 0-42.909581 19.249812-42.909581 42.909581 0 23.659769 19.249812 42.909581 42.909581 42.909581h140.728626c58.149432 0 105.44897-47.309538 105.44897-105.44897V777.812404c0-23.669769-19.249812-42.919581-42.909581-42.919581zM777.812404 85.819162h140.698626c10.839894 0 19.659808 8.809914 19.659808 19.639808v140.718626c0 23.659769 19.249812 42.909581 42.909581 42.909581 23.659769 0 42.909581-19.249812 42.909581-42.909581V105.45897C1023.99 47.309538 976.670462 0 918.51103 0h-140.698626c-23.659769 0-42.909581 19.249812-42.909581 42.899581-0.01 23.669769 19.239812 42.919581 42.909581 42.919581zM42.919581 289.097177c23.649769 0 42.879581-19.249812 42.879581-42.899581V105.46897c0-10.829894 8.819914-19.639808 19.659808-19.639808h140.718626c23.659769 0 42.909581-19.249812 42.909581-42.909581C289.097177 19.259812 269.847365 0 246.177596 0H105.45897C47.309538 0 0 47.309538 0 105.45897v140.718626c0 23.669769 19.259812 42.919581 42.919581 42.919581z" fill="#2c2c2c" p-id="3005"></path></svg>',
-                        # "menu_type": "api",
-                        # "url": "/aihub/api/"
-
                         "isMenu": True,
                         'hidden': 0,
                         "isExpand": True,
@@ -610,11 +607,11 @@ class Myapp(BaseMyappView):
                                 "url": "/model_market/language/api/"
                             },
                             {
-                                "name": 'model_reinforcement',
-                                "title": '强化学习',
+                                "name": 'model_multimodal',
+                                "title": '多模态',
                                 "icon": '<svg t="1664182563495" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4370" width="64" height="64"><path d="M77.052 500.449c1.986 1.731 4.348 3.061 6.638 4.407 63.842 37.536 127.699 75.046 191.548 112.57 45.053 26.478 90.093 52.976 135.146 79.454 11.153 6.555 22.178 7.912 34.583 2.149 60.935-28.307 122.102-56.113 183.185-84.102 106.592-48.842 213.183-97.685 319.765-146.547 2.503-1.147 5.802-1.8 5.953-5.293 0.148-3.4-2.561-5.206-5.041-6.94a20.009 20.009 0 0 0-2.578-1.519c-22.502-11.156-45.011-22.299-67.517-33.448-1.345-0.667-2.517-1.19-4.158-0.325-17.448 9.199-34.947 18.3-53.044 27.748l23.55 11.819c-2.081 1.013-3.557 1.769-5.063 2.459-134.875 61.776-269.76 123.529-404.587 185.411-3.772 1.731-6.482 1.621-10.032-0.471-81.006-47.747-162.085-95.368-243.13-143.048-1.513-0.89-3.449-1.342-4.37-3.448l29.19-12.792c-17.216-9.806-33.879-19.185-50.395-28.817-2.802-1.634-4.973-1.694-7.825-0.432-17.032 7.535-34.133 14.914-51.211 22.345-6.404 2.787-12.862 5.458-19.198 8.392-5.434 2.518-5.964 6.459-1.409 10.428z" p-id="4371"></path><path d="M949.521 579.958a22.083 22.083 0 0 0-2.58-1.516c-22.358-11.074-44.725-22.129-67.077-33.215-1.552-0.77-2.862-1.146-4.618-0.219-17.343 9.154-34.739 18.208-52.718 27.602l23.52 11.779c-1.937 0.969-3.398 1.755-4.902 2.445-134.876 61.774-269.765 123.518-404.583 185.417-4.022 1.847-6.807 1.547-10.475-0.615-80.862-47.662-161.799-95.197-242.703-142.788-1.524-0.897-3.398-1.409-4.546-3.489l29.243-12.814c-17.689-10.089-34.894-19.835-52.005-29.741-2.391-1.384-4.127-0.341-6.053 0.492-13.889 6.008-27.764 12.047-41.64 18.084-9.607 4.18-19.249 8.281-28.797 12.592-5.526 2.495-6.125 6.401-1.635 10.381 1.969 1.746 4.332 3.084 6.62 4.429 73.455 43.187 146.924 86.349 220.386 129.522 35.583 20.912 71.129 41.889 106.757 62.725 9.873 5.774 20.099 8.321 31.339 3.167 168.56-77.292 337.158-154.501 505.737-231.751 2.501-1.146 5.843-1.786 6.064-5.22 0.233-3.626-2.691-5.474-5.334-7.267z" p-id="4372"></path><path d="M83.448 381.08c35.858 21.107 71.734 42.184 107.603 63.271 73.461 43.187 146.919 86.379 220.383 129.56 11.16 6.56 22.17 7.8 34.586 2.091 150.657-69.276 301.449-138.258 452.205-207.318 17.389-7.966 34.793-15.899 52.151-23.932 5.669-2.623 6.14-6.184 1.352-10.139-1.9-1.569-4.129-2.808-6.352-3.908-116.886-57.835-233.787-115.638-350.684-173.45-5.301-2.622-10.881-4.084-18.184-4.326-2.907-0.256-6.78 1.115-10.65 2.796-160.462 69.718-320.939 139.4-481.389 209.144-3.632 1.579-8.985 1.94-9.247 7.122-0.258 5.089 4.538 6.917 8.226 9.089z m100.644-5.054c129.953-56.432 259.914-112.846 389.836-169.35 3.021-1.314 5.34-1.316 8.308 0.154 86.441 42.826 172.93 85.554 259.407 128.306 1.331 0.658 2.614 1.411 4.428 2.396-14.621 6.696-28.788 13.181-42.953 19.671-122.315 56.033-244.639 112.048-366.904 168.191-3.612 1.659-6.198 1.555-9.589-0.444-81.005-47.738-162.078-95.363-243.134-143.016-1.543-0.907-3.033-1.904-5.111-3.214 2.281-1.08 3.974-1.939 5.712-2.694z" p-id="4373"></path></svg>',
                                 "menu_type": "api",
-                                "url": "/model_market/reinforcement/api/"
+                                "url": "/model_market/multimodal/api/"
                             },
                             {
                                 "name": 'model_graph',
@@ -703,11 +700,9 @@ class Myapp(BaseMyappView):
         return jsonify(menu)
 
     @expose('/feature/check')
-    # @trace(tracer,depth=1,trace_content='line')
-    # @pysnooper.snoop()
     def featureCheck(self):
         url = request.values.get("url", type=str, default=None)
-        print(conf.get('alert_config',{}))
+        # print(conf.get('alert_config',{}))
         for route in conf.get('alert_config',{}):
             # 用户自定义目录
             if url.replace("/frontend",'') == route.replace("/frontend",''):
