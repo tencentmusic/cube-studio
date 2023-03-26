@@ -21,6 +21,8 @@ export interface IRouterConfigPlusItem extends Omit<RouteObject, 'children' | 'i
     isCloseSide?: boolean
     isExpand?: boolean
     index?: boolean
+    isSingleModule?: boolean
+    isDropdown?: boolean
 }
 
 

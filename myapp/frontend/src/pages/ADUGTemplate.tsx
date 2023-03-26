@@ -16,6 +16,7 @@ import { ColumnsType } from 'antd/lib/table';
 import MixSearch, { IMixSearchParamItem } from '../components/MixSearch/MixSearch';
 import DynamicForm, { calculateId, IDynamicFormConfigItem, IDynamicFormGroupConfigItem, ILinkageConfig, TDynamicFormType } from '../components/DynamicForm/DynamicForm';
 import { columnConfig } from './columnConfig';
+import ChartOptionTempalte from './ChartOptionTempalte';
 
 interface fatchDataParams {
     pageConf: TablePaginationConfig
@@ -41,6 +42,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
     const [visableUpdate, setVisableUpdate] = useState(false)
     const [loadingDetail, setLoadingDetail] = useState(false)
     const [visableDetail, setVisableDetail] = useState(false)
+    const [isEchartShow, setIsEchartShow] = useState(false)
     const [selectedRowKeys, setSelectedRowKeys] = useState<ReactText[]>([])
     const [dateInfo, setDateInfo] = useState<{
         startTime: string,
@@ -215,6 +217,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 download_data,
                 list_ui_type,
                 list_ui_args,
+                echart
             } = res.data
             const actionwidth = 80 || [props?.related, permissions.includes('can_show'), permissions.includes('can_edit'), permissions.includes('can_delete')].filter(item => !!item).length * 60
             const hasAction = props?.related || permissions.includes('can_show') || permissions.includes('can_edit') || permissions.includes('can_delete')
@@ -525,6 +528,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 currentFilterValues = localFilter
             }
 
+            setIsEchartShow(echart)
             setListColumns(list_columns)
             setList_ui_type(list_ui_type)
             setList_ui_args(list_ui_args)
@@ -970,13 +974,11 @@ export default function TaskListManager(props?: IAppMenuItem) {
                         });
                     }} />
                 }
-                {/* {
-                    tips.length ? <div className="bg-module mlr24 p16">
-                        {tips.map((item, index) => {
-                            return <div key={`ADUGTemplate_tips_${index}`}><span>{labelMapRef.current[item.label] || item.label}：</span><span>{item.value}</span></div>
-                        })}
-                    </div> : null
-                } */}
+
+                {
+                    isEchartShow ? <ChartOptionTempalte url={baseUrl} /> : null
+                }
+
                 <div className="m16">
                     {
                         list_ui_type !== 'card' ? <TableBox
@@ -1066,37 +1068,37 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             }}
                             scroll={{ x: tableWidth, y: scrollY }}
                         /> : <div className="bg-w p16">
-                                <div className="d-f fw">
-                                    {
-                                        dataList.map((row, rowIndex) => {
-                                            return <div style={{ overflowY: 'auto', width: list_ui_args?.card_width, height: list_ui_args?.card_height }} key={`card${rowIndex}`} className="card-row mr16 mb16" >
-                                                {
-                                                    Object.keys(row).map((key, itemIndex) => {
-                                                        if (listColumns.includes(key)) {
-                                                            return <div style={{ wordBreak: 'break-all' }} key={`row${rowIndex}${itemIndex}`} dangerouslySetInnerHTML={{ __html: row[key] }}></div>
-                                                        }
-                                                        return null
-                                                    })
-                                                }
-                                            </div>
-                                        })
-                                    }
-                                </div>
-                                <div className="ta-r">
-                                    <Pagination {...pageInfo} onChange={(page, pageSize) => {
-                                        fetchData({
-                                            ...fetchDataParams,
-                                            pageConf: {
-                                                ...pageInfo,
-                                                current: page,
-                                                pageSize
-                                            },
-                                            params: filterValues,
-                                            paramsMap: filterParamsMap,
-                                        });
-                                    }} />
-                                </div>
+                            <div className="d-f fw">
+                                {
+                                    dataList.map((row, rowIndex) => {
+                                        return <div style={{ overflowY: 'auto', width: list_ui_args?.card_width, height: list_ui_args?.card_height }} key={`card${rowIndex}`} className="card-row mr16 mb16" >
+                                            {
+                                                Object.keys(row).map((key, itemIndex) => {
+                                                    if (listColumns.includes(key)) {
+                                                        return <div style={{ wordBreak: 'break-all' }} key={`row${rowIndex}${itemIndex}`} dangerouslySetInnerHTML={{ __html: row[key] }}></div>
+                                                    }
+                                                    return null
+                                                })
+                                            }
+                                        </div>
+                                    })
+                                }
                             </div>
+                            <div className="ta-r">
+                                <Pagination {...pageInfo} onChange={(page, pageSize) => {
+                                    fetchData({
+                                        ...fetchDataParams,
+                                        pageConf: {
+                                            ...pageInfo,
+                                            current: page,
+                                            pageSize
+                                        },
+                                        params: filterValues,
+                                        paramsMap: filterParamsMap,
+                                    });
+                                }} />
+                            </div>
+                        </div>
                     }
 
                 </div>
