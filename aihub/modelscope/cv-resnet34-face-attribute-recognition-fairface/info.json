@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnet34-face-attribute-recognition-fairface",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-resnet34-face-attribute-recognition-fairface",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-resnet34-face-attribute-recognition-fairface-v20221001",
+    "label": "人脸属性识别模型FairFace",
+    "describe": "给定一张带人脸的图片，返回其性别和年龄范围。",
+    "pic": "examples.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

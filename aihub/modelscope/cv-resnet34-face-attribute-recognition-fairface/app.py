@@ -1,10 +1,11 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy
 import pysnooper
 import os
-
+import cv2
+import json
 class CV_RESNET34_FACE_ATTRIBUTE_RECOGNITION_FAIRFACE_Model(Model):
     # 模型基础信息定义
     name='cv-resnet34-face-attribute-recognition-fairface'   # 该名称与目录名必须一样，小写
@@ -14,7 +15,7 @@ class CV_RESNET34_FACE_ATTRIBUTE_RECOGNITION_FAIRFACE_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='examples.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "1839"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_resnet34_face-attribute-recognition_fairface/summary"
@@ -61,17 +62,32 @@ class CV_RESNET34_FACE_ATTRIBUTE_RECOGNITION_FAIRFACE_Model(Model):
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
-        result = self.p(image)
 
-        # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
-        # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
+
+        # result = self.p(image)
+        img = cv2.imread(image)
+        height, width, _ = img.shape
+        if height > width:
+            new_height = 1024
+            new_width = int(width * new_height / height)
+        else:
+            new_width = 1024
+            new_height = int(height * new_width / width)
+        resized_img = cv2.resize(img, (new_width, new_height))
+        result = self.p(resized_img)
+
+        index_gender = result["scores"][0].index(max(result["scores"][0]))
+        index_age = result["scores"][1].index(max(result["scores"][1]))
+
+        # data = {
+        #     "gender": result['labels'][0][index_gender],
+        #     "age_range ": result['labels'][1][index_age]
+        # }
+        # json_str = json.dumps(data)
+        res = '性别: %s, 年龄范围: %s'%(result['labels'][0][index_gender], result['labels'][1][index_age])
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": res
             }
         ]
         return back
@@ -84,10 +100,14 @@ model=CV_RESNET34_FACE_ATTRIBUTE_RECOGNITION_FAIRFACE_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='test-james.jpg')  # 测试
+# print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+#1. cpu推理单次耗时约2.7秒
+#2. 模型占用内存648MiB
+#3. 模型大小：82M
