@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/multi-modal-chinese-stable-diffusion-v1.0",
+    "field": "强化学习",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "multi-modal-chinese-stable-diffusion-v1.0",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "multi-modal-chinese-stable-diffusion-v1.0-v20221001",
+    "label": "中文StableDiffusion-通用领域",
+    "describe": "",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}
