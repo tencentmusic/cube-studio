@@ -70,7 +70,7 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
         # print(im.size)
         if max(w,h)>1200:
             ratio = max(w,h)/1200
-            reim=im.resize(int(w/ratio),int(h/ratio))#宽*高
+            reim=im.resize((int(w/ratio),int(h/ratio)))#宽*高
             os.remove(content)
             reim.save(content)
         
@@ -79,7 +79,7 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
         # print(im.size)
         if max(w,h)>1200:
             ratio = max(w,h)/1200
-            reim=im.resize(int(w/ratio),int(h/ratio))#宽*高
+            reim=im.resize((int(w/ratio),int(h/ratio)))#宽*高
             os.remove(style)
             reim.save(style)
 
