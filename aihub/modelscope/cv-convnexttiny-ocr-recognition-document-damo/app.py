@@ -33,7 +33,7 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_DOCUMENT_DAMO_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "image": "http://duguang-labelling.oss-cn-shanghai.aliyuncs.com/mass_img_tmp_20220922/ocr_recognition_document.png"
+                "image": "test.jpg"
             }
         }
     ]
@@ -49,18 +49,14 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_DOCUMENT_DAMO_Model(Model):
         from modelscope.utils.constant import Tasks
         
         self.p = pipeline('ocr-recognition', 'damo/cv_convnextTiny_ocr-recognition-document_damo')
-
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result =  self.p(image)
+        text=result.get('text')
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -68,10 +64,14 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_DOCUMENT_DAMO_Model(Model):
 model=CV_CONVNEXTTINY_OCR_RECOGNITION_DOCUMENT_DAMO_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(image='http://duguang-labelling.oss-cn-shanghai.aliyuncs.com/mass_img_tmp_20220922/ocr_recognition_document.png')  # 测试
-print(result)
+#model.load_model()
+#result = model.inference(image='test.jpg')  # 测试
+#print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+
+#模型大小74M,内存占用544M,识别图片响应在2秒内
+#模型识别的图片中只能有一行文字,多行不能识别,识别英文有单词缺少字母的情况,
+#对于有些字体的汉字识别会有识别错误或识别缺失的情况
