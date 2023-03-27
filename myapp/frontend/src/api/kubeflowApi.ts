@@ -67,3 +67,7 @@ export const actionADUGTemplateDownData = (url: string): AxiosResFormat<any> => 
 export const actionADUGTemplateRetryInfo = (url: string, params: any): Promise<AxiosResponse<IADUGTemplateInfo>> => {
     return axios.get(url, { params })
 }
+
+export const actionADUGTemplateChartOption = (url?: string, params?: {}): Promise<any> => {
+    return axios.get(url || '', { params })
+}

@@ -1,9 +1,9 @@
 @import '~antd/dist/antd.variable.less';
 @import './atom.less';
 
-@custom-theme             : #1672fa;
+@custom-theme             : #1e1653;
 @primary-color            : @custom-theme; // 全局主色
-@link-color               : #1672fa; // 链接色
+@link-color               : #1e1653; // 链接色
 // Background color for `<body>`
 @body-background          : #fff;
 // Base background color for most components
@@ -586,6 +586,91 @@ svg {
 
 .react-draggable {
   transform: none !important;
+}
+
+.star-topmenu {
+  display      : flex;
+  list-style   : none;
+  margin       : 0;
+  padding      : 0;
+  height       : 100%;
+  width        : 100%;
+  // max-width : 1300px;
+  overflow-x   : auto;
+
+  .ant-menu {
+    width: 100%;
+  }
+
+  .star-topnav-submenu {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+  }
+
+  .ant-menu-title-content {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+  }
+
+  >ul>.ant-menu-overflow-item::after {
+    left  : 0;
+    right : 0;
+    top   : 0;
+    bottom: unset;
+  }
+
+  >ul>li {
+    cursor           : pointer;
+    transition       : all .3s;
+    display          : flex !important;
+    // flex-direction: column;
+    align-items      : center !important;
+    justify-content  : center !important;
+    padding          : 0 !important;
+    margin           : 0 8px;
+    height           : 100%;
+    min-width        : 130px;
+
+    >.ant-menu-submenu-title {
+      width            : 100%;
+      height           : 100%;
+      display          : flex !important;
+      // flex-direction: column;
+      align-items      : center !important;
+      justify-content  : center !important;
+    }
+
+    &:hover {
+      // background: #0084F6;
+      background: @primary-1;
+      color     : @custom-theme;
+    }
+
+    .mainapp-topmenu-icon {
+      display  : block;
+      margin   : 5px auto;
+      font-size: 24px;
+      // color: #fcfcfc;
+    }
+
+    .mainapp-topmenu-name {
+      display     : flex;
+      align-items : center;
+      text-align  : center;
+      // color: rgba(255, 255, 255, 0.84);
+      font-size   : 14px;
+      font-weight : 400;
+      line-height : 22px;
+      padding-left: 8px;
+    }
+  }
+
+  .mainapp-item-active {
+    color     : #1e1653;
+    border-top: 2px solid #1e1653;
+  }
 }
 
 @import './theme.less';

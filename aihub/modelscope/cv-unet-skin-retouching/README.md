@@ -5,11 +5,11 @@
 
 人像美肤模型可用于对图像中的人体皮肤进行处理，实现匀肤（处理痘印、肤色不均等）、去瑕疵（脂肪粒、斑点、痣等）以及美白等功能。模型仅对裸露的皮肤进行修饰美化，不影响其他区域。
 
-![内容图像](images/examples.jpg)
+![内容图像](https://modelscope.cn/api/v1/models/damo/cv_unet_skin-retouching/repo?Revision=master&FilePath=images/examples.jpg&View=true)
 
 ## 修图系列模型
 
-| [<img src="images/skin_retouching_examples_3.jpg" height="200px">](https://modelscope.cn/models/damo/cv_unet_skin-retouching/summary) | [<img src="images/body_reshaping_results.jpg" height="200px">](https://modelscope.cn/models/damo/cv_flow-based-body-reshaping_damo/summary) |
+| [<img src="https://modelscope.cn/api/v1/models/damo/cv_unet_skin-retouching/repo?Revision=master&FilePath=images/skin_retouching_examples_3.jpg&View=true" height="200px">](https://modelscope.cn/models/damo/cv_unet_skin-retouching/summary) | [<img src="images/body_reshaping_results.jpg" height="200px">](https://modelscope.cn/models/damo/cv_flow-based-body-reshaping_damo/summary) |
 |:--:|:--:| 
 | [ABPN人像美肤](https://modelscope.cn/models/damo/cv_unet_skin-retouching/summary) | [FBBR人体美型](https://modelscope.cn/models/damo/cv_flow-based-body-reshaping_damo/summary) |
 
@@ -24,7 +24,7 @@
 
 我们将匀肤模型中的blend layer概念进行拓展，提出基于自适应混合图层的局部修饰网络[ABPN](https://openaccess.thecvf.com/content/CVPR2022/papers/Lei_ABPN_Adaptive_Blend_Pyramid_Network_for_Real-Time_Local_Retouching_of_CVPR_2022_paper.pdf) （如下图） ，实现了端到端的局部修饰（美肤、服饰去皱等），但考虑到输入图像的分辨率、人像占比以及不同瑕疵的分布差异等问题，这里我们采用了多模型的方法以实现更精准、更鲁棒的美肤效果。
 
-![内容图像](images/ABPN_framework.jpg)
+![内容图像](https://modelscope.cn/api/v1/models/damo/cv_unet_skin-retouching/repo?Revision=master&FilePath=images/ABPN_framework.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 

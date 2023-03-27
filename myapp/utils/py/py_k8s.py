@@ -27,7 +27,7 @@ class K8s():
         self.v1 = client.CoreV1Api()
         self.v1beta1 = client.ExtensionsV1beta1Api()
         self.AppsV1Api = client.AppsV1Api()
-        self.crd = client.CustomObjectsApi()
+        self.CustomObjectsApi = client.CustomObjectsApi()
         self.v1.api_client.configuration.verify_ssl = False  # 只能设置 /usr/local/lib/python3.6/dist-packages/kubernetes/client/configuration.py:   self.verify_ssl= True ---> False
 
     # 获取指定范围的pod
@@ -357,8 +357,7 @@ class K8s():
     # @pysnooper.snoop(watch_explode=('ya_str',))
     def get_one_crd_yaml(self, group, version, plural, namespace, name):
         try:
-            self.crd = client.CustomObjectsApi()
-            crd_object = self.crd.get_namespaced_custom_object(group=group, version=version, namespace=namespace,
+            crd_object = self.CustomObjectsApi.get_namespaced_custom_object(group=group, version=version, namespace=namespace,
                                                                plural=plural, name=name)
             ya = yaml.load(json.dumps(crd_object))
             ya_str = yaml.safe_dump(ya,default_flow_style=False)
@@ -371,8 +370,7 @@ class K8s():
     # @pysnooper.snoop(watch_explode=('crd_object'))
     def get_one_crd(self, group, version, plural, namespace, name):
         try:
-            self.crd = client.CustomObjectsApi()
-            crd_object = self.crd.get_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural,name=name)
+            crd_object = self.CustomObjectsApi.get_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural,name=name)
             if not crd_object:
                 return {}
 
@@ -403,11 +401,10 @@ class K8s():
 
     # @pysnooper.snoop(watch_explode=())
     def get_crd(self,group,version,plural,namespace,label_selector=None,return_dict=None):
-        self.crd = client.CustomObjectsApi()
         if label_selector:
-            crd_objects = self.crd.list_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,label_selector=label_selector)['items']
+            crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,label_selector=label_selector)['items']
         else:
-            crd_objects = self.crd.list_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural)['items']
+            crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural)['items']
         back_objects=[]
         for crd_object in crd_objects:
             # print(crd_object['status']['conditions'][-1]['type'])
@@ -450,7 +447,6 @@ class K8s():
 
     # @pysnooper.snoop(watch_explode=())
     def get_crd_all_namespaces(self,group,version,plural,pool=False):
-        self.crd = client.CustomObjectsApi()
         all_namespace = self.v1.list_namespace().items
         all_namespace=[namespace.metadata.name for namespace in all_namespace]
         back_objects = []
@@ -482,9 +478,8 @@ class K8s():
     def delete_crd(self,group,version,plural,namespace,name='',labels=None):
         if name:
             try:
-                self.crd = client.CustomObjectsApi()
                 delete_body = client.V1DeleteOptions(grace_period_seconds=0)
-                self.crd.delete_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,name=name,body=delete_body)
+                self.CustomObjectsApi.delete_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,name=name,body=delete_body)
             except Exception as e:
                 print(e)
             return [name]
@@ -497,9 +492,8 @@ class K8s():
                     for key in labels:
                         if key in crd_labels and labels[key]==crd_labels[key]:
                             try:
-                                self.crd = client.CustomObjectsApi()
                                 delete_body = client.V1DeleteOptions(grace_period_seconds=0)
-                                self.crd.delete_namespaced_custom_object(group=group, version=version, namespace=namespace,plural=plural, name=crd['name'], body=delete_body)
+                                self.CustomObjectsApi.delete_namespaced_custom_object(group=group, version=version, namespace=namespace,plural=plural, name=crd['name'], body=delete_body)
                             except Exception as e:
                                 print(e)
                             back_name.append(crd['name'])
@@ -917,7 +911,7 @@ class K8s():
             if health[0:health.index(":")]=='shell':
                 command = health.replace("shell:").split(' ')
                 command = [c for c in command if c]
-                readiness_probe = client.V1Probe(_exec=client.V1ExecAction(command=command),failure_threshold=1,period_seconds=60,timeout_seconds=30)
+                readiness_probe = client.V1Probe(_exec=client.V1ExecAction(command=command),failure_threshold=1,period_seconds=60,timeout_seconds=30,initial_delay_seconds=60)
             else:
                 port = health[0:health.index(":")]  # 健康检查的port
                 path = health[health.index(":")+1:]
@@ -926,9 +920,9 @@ class K8s():
                 if int(port) not in ports:
                     ports_k8s.append(client.V1ContainerPort(name=port_name, protocol='TCP', container_port=port))
 
-                readiness_probe = client.V1Probe(http_get=client.V1HTTPGetAction(path=path,port=port_name),failure_threshold=1,period_seconds=60,timeout_seconds=30)
+                readiness_probe = client.V1Probe(http_get=client.V1HTTPGetAction(path=path,port=port_name),failure_threshold=1,period_seconds=60,timeout_seconds=30,initial_delay_seconds=60)
 
-            print(readiness_probe)
+            # print(readiness_probe)
         container = client.V1Container(
             name=name,
             command=command,
@@ -1178,11 +1172,12 @@ class K8s():
         #     print(e)
 
         try:
-            client.AppsV1Api().read_namespaced_deployment(name=name,namespace=namespace)
-            client.AppsV1Api().patch_namespaced_deployment(name=name, namespace=namespace, body=dp)
+            self.AppsV1Api.read_namespaced_deployment(name=name,namespace=namespace)
+            # self.AppsV1Api.patch_namespaced_deployment(name=name, namespace=namespace, body=dp)
+            self.AppsV1Api.replace_namespaced_deployment(name=name, namespace=namespace, body=dp)
         except ApiException as e:
             if e.status == 404:
-                dp = client.AppsV1Api().create_namespaced_deployment(namespace, dp)
+                dp = self.AppsV1Api.create_namespaced_deployment(namespace, dp)
 
 
 
@@ -1280,14 +1275,23 @@ class K8s():
 
         service = client.V1Service(api_version='v1', kind='Service', metadata=svc_metadata, spec=svc_spec)
         # print(service.to_dict())
+        # try:
+        #     self.v1.delete_namespaced_service(name, namespace)
+        # except Exception as e:
+        #     print(e)
+        # try:
+        #     service = self.v1.create_namespaced_service(namespace, service)
+        # except Exception as e:
+        #     print(e)
+
         try:
-            self.v1.delete_namespaced_service(name, namespace)
-        except Exception as e:
-            print(e)
-        try:
-            service = self.v1.create_namespaced_service(namespace, service)
-        except Exception as e:
-            print(e)
+            self.v1.read_namespaced_service(name=name,namespace=namespace)
+            self.v1.replace_namespaced_service(name=name, namespace=namespace, body=service)
+        except ApiException as e:
+            if e.status == 404:
+                print(service)
+                service = self.v1.create_namespaced_service(namespace, body=service)
+
 
 
     # @pysnooper.snoop()
@@ -1364,15 +1368,12 @@ class K8s():
             "timeout": 60 * 60 * 24 * 1
         }
 
-        crd_list = self.get_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
-                               namespace=namespace)
-        for vs_obj in crd_list:
-            if vs_obj['name'] == name or vs_obj['name']== name+"-8080":
-                self.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
-                               namespace=namespace, name=vs_obj['name'])
-                time.sleep(1)
-
-
+        crd_list = self.get_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace)
+        # for vs_obj in crd_list:
+        #     if vs_obj['name'] == name or vs_obj['name']== name+"-8080":
+        #         self.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
+        #                        namespace=namespace, name=vs_obj['name'])
+        #         time.sleep(1)
 
         if len(ports)>0:
             crd_json = {
@@ -1459,8 +1460,31 @@ class K8s():
 
 
 
-            print(crd_json)
-            self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+            try:
+                client.CustomObjectsApi().get_namespaced_custom_object(
+                    group=crd_info['group'],
+                    version=crd_info['version'],
+                    plural=crd_info['plural'],
+                    name=name,
+                    namespace=namespace
+                )
+                crd_objects = client.CustomObjectsApi().replace_namespaced_custom_object(
+                    group=crd_info['group'],
+                    version=crd_info['version'],
+                    namespace=namespace,
+                    plural=crd_info['plural'],
+                    name=name,
+                    body=crd_json
+                )
+            except ApiException as e:
+                if e.status == 404:
+                    crd_objects = client.CustomObjectsApi().create_namespaced_custom_object(
+                        group=crd_info['group'],
+                        version=crd_info['version'],
+                        namespace=namespace,
+                        plural=crd_info['plural'],
+                        body=crd_json)
+
 
         if len(ports)>1:
             crd_json = {
@@ -1494,7 +1518,31 @@ class K8s():
                     ]
                 }
             }
-            self.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+
+            try:
+                client.CustomObjectsApi().get_namespaced_custom_object(
+                    group=crd_info['group'],
+                    version=crd_info['version'],
+                    plural=crd_info['plural'],
+                    name=name+'-8080',
+                    namespace=namespace
+                )
+                crd_objects = client.CustomObjectsApi().replace_namespaced_custom_object(
+                    group=crd_info['group'],
+                    version=crd_info['version'],
+                    namespace=namespace,
+                    plural=crd_info['plural'],
+                    name=name+'-8080',
+                    body=crd_json
+                )
+            except ApiException as e:
+                if e.status == 404:
+                    crd_objects = client.CustomObjectsApi().create_namespaced_custom_object(
+                        group=crd_info['group'],
+                        version=crd_info['version'],
+                        namespace=namespace,
+                        plural=crd_info['plural'],
+                        body=crd_json)
 
 
 

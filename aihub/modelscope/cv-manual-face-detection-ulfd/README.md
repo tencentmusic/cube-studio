@@ -14,7 +14,7 @@ ULFD([代码地址](https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Det
 
 模型结构与SSD一致，backbone为作者自己设计的结构，包含13个模块，主要由depth-wise卷积组成，分类回归的计算共有4个分支，前3个分支分别以backbone的第8，11，13个模块的输出作为输入；在backbone之后跟一个附加模块，其输出接入第4个分支。
 
-![模型结构](ssd.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_manual_face-detection_ulfd/repo?Revision=master&FilePath=ssd.jpg&View=true)
 
 ## 模型使用方式和使用范围
 本模型可以检测输入图片中人脸的位置。

@@ -16,7 +16,7 @@ MTCNN是工业界广泛应用的检测关键点二合一模型, ([论文地址](
 
 MTCNN的结构如下：
 
-![MTCNN网络结构](MTCNN.jpg)
+![MTCNN网络结构](https://modelscope.cn/api/v1/models/damo/cv_manual_face-detection_mtcnn/repo?Revision=master&FilePath=MTCNN.jpg&View=true)
 
 ## 模型效果
 ![MTCNN模型效果](result.png)

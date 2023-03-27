@@ -91,19 +91,3 @@ class COS_client(Store_client):
 
 
 
-# if __name__ == '__main__':
-#     STORE_CONFIG = {
-#         "appid": "1252405198",
-#         "secret_id": "AKIDRj1IZggXIuNlASixHjIwkhXJ5kJoi5ls",
-#         "secret_key": "Ex3Yb0l4TsZK8utBVp5M8Tkx6SwQp7Nb",
-#         "region": "ap-nanjing",
-#
-#         "bucket_name": "cube-studio-1252405198",
-#         "root": "/dataset"
-#     }
-#
-#     cos_client = COS_client(**STORE_CONFIG)
-#     # cos_client.uploadfile('train-images-idx3-ubyte.gz','dataset/train-images-idx3-ubyte.gz')
-#     cos_client.uploadfile('data.txt','dataset/data.txt')
-
-

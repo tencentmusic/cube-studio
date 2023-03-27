@@ -657,7 +657,7 @@ def get_run_time(workflow):
         print(e)
         finish_time=datetime.datetime.now()
 
-    return round((finish_time-start_time).days*24+(finish_time-start_time).seconds/60/60,2)
+    return round((finish_time-start_time).total_seconds()//3600,2)
 
 # 检查pipeline的运行时长
 # @pysnooper.snoop()
@@ -883,16 +883,16 @@ def watch_pod_utilization(task=None):
             prometheus = Prometheus(conf.get('PROMETHEUS', 'prometheus-k8s.monitoring:9090'))
 
             service_pods = k8s_client.get_pods(namespace='service')
-            service_pods_metrics = prometheus.get_resource_metric(namespace="service")
+            service_pods_metrics = prometheus.get_namespace_resource_metric(namespace="service")
             for pod in service_pods:
                 if pod['start_time'] > (datetime.datetime.now() - datetime.timedelta(days=2)) and pod['name'] in service_pods_metrics and pod['username']:
                     try:
                         if pod['cpu'] > 5 and service_pods_metrics[pod['name']]['cpu'] < pod['cpu'] / 5:
-                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源cpu使用率过低，最新2天平均使用率为{round(service_pods_metrics[pod["name"]]["cpu"],2)}，但申请值为{pod["cpu"]}，请及时清理或修改申请值')
+                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源cpu使用率过低，最新2天最大使用率为{round(service_pods_metrics[pod["name"]]["cpu"],2)}，但申请值为{pod["cpu"]}，请及时清理或修改申请值')
 
                         # 虚拟gpu服务不考虑
                         if int(pod.get('gpu', 0)) >= 1 and service_pods_metrics[pod['name']]['gpu'] < 0.15:
-                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源gpu使用率过低，最新2天平均使用率为{round(service_pods_metrics[pod["name"]]["gpu"],2)}，但申请值为{pod["gpu"]}，请及时清理或修改申请值')
+                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源gpu使用率过低，最新2天最大使用率为{round(service_pods_metrics[pod["name"]]["gpu"],2)}，但申请值为{pod["gpu"]}，请及时清理或修改申请值')
                             pass
                     except Exception as e:
                         print(e)
@@ -936,7 +936,7 @@ def adjust_node_resource(task):
                     all_node_json[pod['host_ip']]['used_gpu'].append(pod['gpu'])
                     # print(all_node_json[pod['host_ip']])
                 # 有挂起等待超过5分钟的情况，立刻划资源过去，并推送通知，因为挂起不一定是因为资源。
-                if pod['status']=='Pending' and (datetime.datetime.now()-pod['start_time']).seconds>300:
+                if pod['status']=='Pending' and (datetime.datetime.now()-pod['start_time']).total_seconds()>300:
                     # 如果因为资源不足就通过资源调度解决
                     containers = pod['status_more'].get('conditions', [])
                     messages = ','.join([container['message'] if container['message'] else '' for container in containers])

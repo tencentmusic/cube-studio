@@ -30,12 +30,15 @@ class Speech_Tts_Model(Model):
 
     inference_inputs = [
         Field(type=Field_type.text, name='text', label='语音转文本',
-              describe='输入文本', default='cube studio 是个云原生一站式机器学习平台，欢迎大家体验！'),
+              describe='输入文本', default='这里是个云原生一站式机器学习平台，欢迎大家体验！'),
+        Field(type=Field_type.text_select, name='model_', label='选择模型', default='中文模型',
+              choices=['中文模型', '中文 + 英文 模型'], describe='中文模型不可选择说话人，中文+英文模型可有多达280种说话人选择！'),
         # Field(type=Field_type.text, name='spk_id', label='说话人ID',
         #       describe='0-283可选，不一样的ID会带来不一样的声音', default=0),
         Field(type=Field_type.text_select, name='spk_id', label='说话人', default='1',
-              choices=[str(x) for x in range(1,281)])
+               choices=[str(x) for x in range(1,281)]),
     ]
+
     web_examples = [
         {
             "label": "示例1",
@@ -49,19 +52,31 @@ class Speech_Tts_Model(Model):
     # 加载模型
     # @pysnooper.snoop()
     def load_model(self,save_model_dir=None,**kwargs):
-        self.tts = TTSExecutor()  # 语音合成
+        self.tts_chinese = TTSExecutor()  # 语音合成
+        self.tts_chinese_or_english = TTSExecutor()  # 语音合成
 
     # 推理
     @pysnooper.snoop()
-    def inference(self, text, spk_id=0):
-        tts = self.tts
+    def inference(self, text, model_, spk_id=0):
+        tts_chinese = self.tts_chinese
+        tts_chinese_or_english = self.tts_chinese_or_english
         os.makedirs('result', exist_ok=True)
+        file_name = f"result/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-output.wav"
         if spk_id:
             spk_id = int(spk_id) - 1 if int(spk_id) > 0 else int(spk_id)
         else:
             spk_id = 0
-        file_name = f"result/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-output.wav"
-        tts(text=text, output=file_name, am='fastspeech2_csmsc', voc='hifigan_csmsc', lang='zh', spk_id=spk_id)
+        if model_ == '中文模型':
+            am = 'fastspeech2_csmsc'
+            voc = 'hifigan_csmsc'
+            lang = 'zh'
+            tts_chinese(text=text, output=file_name, am=am, voc=voc, lang=lang, spk_id=spk_id)
+        else:
+            am = 'fastspeech2_mix'
+            voc = 'pwgan_aishell3'
+            lang = 'mix'
+            tts_chinese_or_english(text=text, output=file_name, am=am, voc=voc, lang=lang, spk_id=spk_id)
+        # tts(text=text, output=file_name, am=am, voc=voc, lang=lang, spk_id=spk_id)
         back = [
             {
                 'text': text,
@@ -69,6 +84,7 @@ class Speech_Tts_Model(Model):
             }
         ]
         return back
+
 
 
 model = Speech_Tts_Model()
@@ -81,3 +97,4 @@ if __name__=='__main__':
     # python app.py inference --arg1 xx --arg2 xx
     # python app.py web
     model.run()
+

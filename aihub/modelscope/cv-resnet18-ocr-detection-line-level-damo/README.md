@@ -1,25 +1,37 @@
 
-# SegLink++文字检测行检测模型介绍
-文字检测，即给定一张图片，检测出图中所含文字的外接框的端点的坐标值。文字行检测即检测给定图片中文字行的外接框。
+# 读光文字检测
+## News
+- 2023年3月：
+    - 新增DBNet训练/微调流程，支持自定义参数及数据集，详见代码示例。
+- 2023年2月：
+    - 新增业界主流[DBNet-通用场景](https://www.modelscope.cn/models/damo/cv_resnet18_ocr-detection-db-line-level_damo/summary)模型。
 
-本模型用于通用场景的行检测，我们还有下列用于其他场景的模型：
-- [通用场景单词检测](https://modelscope.cn/models/damo/cv_resnet18_ocr-detection-word-level_damo/summary)
+## 传送门
+各场景文本检测模型：
+- [SegLink++-通用场景行检测](https://modelscope.cn/models/damo/cv_resnet18_ocr-detection-line-level_damo/summary)
+- [SegLink++-通用场景单词检测](https://modelscope.cn/models/damo/cv_resnet18_ocr-detection-word-level_damo/summary)
+- [DBNet-通用场景行检测](https://www.modelscope.cn/models/damo/cv_resnet18_ocr-detection-db-line-level_damo/summary)
 
-文本识别模型：
-- [通用场景](https://modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-general_damo/summary)
-- [手写场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-handwritten_damo/summary)
-- [文档印刷场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-document_damo/summary)
-- [自然场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-scene_damo/summary)
-- [车牌场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-licenseplate_damo/summary)
+各场景文本识别模型：
+- [ConvNextViT-手写场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-handwritten_damo/summary)
+- [ConvNextViT-手写场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-handwritten_damo/summary)
+- [ConvNextViT-文档印刷场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-document_damo/summary)
+- [ConvNextViT-自然场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-scene_damo/summary)
+- [ConvNextViT-车牌场景](https://www.modelscope.cn/models/damo/cv_convnextTiny_ocr-recognition-licenseplate_damo/summary)
+- [CRNN-通用场景](https://www.modelscope.cn/models/damo/cv_crnn_ocr-recognition-general_damo/summary)
 
-以及对整图中文字进行检测识别的完整OCR能力：
-- [通用场景整图检测识别](https://modelscope.cn/studios/damo/cv_ocr-text-spotting/summary)
+整图OCR能力：
+- [整图OCR-多场景](https://modelscope.cn/studios/damo/cv_ocr-text-spotting/summary)
+
+欢迎使用！
 
 ## 模型描述
 
 本模型是以自底向上的方式，先检测文本块和文字行之间的吸引排斥关系，然后对文本块聚类成行，最终输出文字行的外接框的坐标值。SegLink++模型介绍，详见：[Seglink++: Detecting dense and arbitrary-shaped scene text by instance-aware component grouping](https://www.researchgate.net/profile/Xiang-Bai/publication/334015431_Detecting_Dense_and_Arbitrary-shaped_Scene_Text_by_Instance-aware_Component_Grouping/links/5d2d79c9458515c11c337789/Detecting-Dense-and-Arbitrary-shaped-Scene-Text-by-Instance-aware-Component-Grouping.pdf)
 
-![pipeline-icgn](./resources/pipeline-icgn.jpg)
+<p align="center">
+    <img src="https://modelscope.cn/api/v1/models/damo/cv_resnet18_ocr-detection-line-level_damo/repo?Revision=master&FilePath=./resources/pipeline-icgn.jpg&View=true" width="2000"/> 
+</p>
 
 
 ## 期望模型使用方式以及适用范围
@@ -51,7 +63,9 @@ print(result)
 
 以下为模型的一些可视化文字检测效果，检测框用绿色框表示。
 
-![det-result-visu](./resources/det_result_visu.jpg)
+<p align="center">
+    <img src="https://modelscope.cn/api/v1/models/damo/cv_resnet18_ocr-detection-line-level_damo/repo?Revision=master&FilePath=./resources/det_result_visu.jpg&View=true"/> 
+</p>
 
 ### 完整OCR能力体验
 如果想体验完整的OCR能力，对整图中的文字进行检测识别，可以体验[创空间应用](https://modelscope.cn/studios/damo/cv_ocr-text-spotting/summary)。对于文字检测模型和文字识别模型的串联，可以参考[说明文档](https://modelscope.cn/dynamic/article/42)。
@@ -60,12 +74,16 @@ print(result)
 - 模型是在特定中英文数据集上训练的，在其他场景和语言的数据上有可能产生一定偏差，请用户自行评测后决定如何使用。
 - 当前版本在python3.7环境CPU和单GPU环境测试通过，其他环境下可用性待测试
 
-## 训练数据介绍
+## 模型训练
+
+### 训练数据介绍
 本模型行检测模型训练数据集是MTWI/ReCTS/SROIE/LSVT，训练数据数量约53K。
 
-## 模型训练流程
+### 模型训练流程
 本模型利用imagenet预训练参数进行初始化，然后在训练数据集上进行训练，先利用512x512尺度训练100epoch，然后在768x768尺度下finetune训练50epoch。
 
+### 自定义微调训练
+本模型暂不支持自定义微调训练。若想用自定义数据进行微调训练，可以尝试[DBNet-通用](https://www.modelscope.cn/models/damo/cv_resnet18_ocr-detection-db-line-level_damo/summary)模型
 
 ### 相关论文以及引用信息
 如果我们的模型对您有帮助，请您引用我们的文章：

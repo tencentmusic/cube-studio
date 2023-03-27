@@ -7,7 +7,7 @@
 ## 模型描述
 该模型以ViT作为主干网络，使用PASS方法进行自监督预训练，并在下游数据集上finetune。之前的重识别自监督工作，已经证明了在无标签的图片数据上预训练的效果优于直接使用通用分类的预训练模型，但是之前的重识别自监督工作并没有对自监督方法做针对性的改进，而本模型提出的PASS方法结合重识别任务的特点，将人体局部特征引入到自监督的过程中，更加适合重识别任务，最终也达到更好的效果。相应的论文发表于ECCV 2022，在多个数据集上达到SOTA。PASS的整体流程如下图所示：
 
-![PASS流程图](assets/PASS_overview.jpg)
+![PASS流程图](https://modelscope.cn/api/v1/models/damo/cv_passvitb_image-reid-person_market/repo?Revision=master&FilePath=assets/PASS_overview.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 该模型适用于行人重识别场景，输入包含人的图像，输出图像的特征表示，可利用该特征表示进行后续的相似度计算和图像排序。

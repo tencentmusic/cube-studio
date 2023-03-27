@@ -314,7 +314,7 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
         return total_count,lst
 
     # @pysnooper.snoop()
-    def echart_option(self):
+    def echart_option(self,filters=None):
         global global_cluster_load
 
         if not global_cluster_load:
@@ -391,9 +391,9 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                     "name":username,
                     "value":value
                 })
-        print(data1)
-        print(data2)
-        print(data3)
+        # print(data1)
+        # print(data2)
+        # print(data3)
 
         option = '''
         {

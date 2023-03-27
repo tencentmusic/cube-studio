@@ -10,7 +10,7 @@ YOLOX-PAI是阿里云机器学习平台PAI的开源计算机视觉代码库[Easy
 
 下图为检测效果样例图：
 
-<img src="res/demo_res.jpg" width="600">
+<img src="https://modelscope.cn/api/v1/models/damo/cv_yolox_image-object-detection-auto/repo?Revision=master&FilePath=res/demo_res.jpg&View=true" width="600">
 
 ## 期望模型使用方式以及适用范围
 

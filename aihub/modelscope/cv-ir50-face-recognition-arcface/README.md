@@ -10,7 +10,7 @@
 ArcFace为近几年人脸识别领域的代表性工作，被CVPR2019录取([论文地址](https://openaccess.thecvf.com/content_CVPR_2019/papers/Deng_ArcFace_Additive_Angular_Margin_Loss_for_Deep_Face_Recognition_CVPR_2019_paper.pdf)), [代码地址](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch))，该方法主要贡献是提出了ArcFace loss, 在$x_i$和$W_{ji}$之间的θ上加上角度间隔m（注意是加在了角θ上），以加法的方式惩罚深度特征与其相应权重之间的角度，从而同时增强了类内紧度和类间差异。由于提出的加性角度间隔(additive angular margin)惩罚与测地线距离间隔(geodesic distance margin)惩罚在归一化的超球面上相等，因此作者将该方法命名为ArcFace。此外作者在之后的几年内持续优化该算法，使其一直保持在sota性能。
 
 ## 模型结构
-![模型结构](arcface.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_ir50_face-recognition_arcface/repo?Revision=master&FilePath=arcface.jpg&View=true)
 
 ## 模型使用方式和使用范围
 本模型可以检测输入图片中人脸的特征

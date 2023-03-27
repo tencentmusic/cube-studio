@@ -95,6 +95,11 @@ export const innerDynamicRouterConfig: IRouterConfigPlusItem[] = [
         isCollapsed: true,
         element: lazy2Compont(() => import("./pages/DataSearch/DataSearch"))
     },
+    {
+        path: '/commonRelation',
+        title: '通用关系图',
+        element: lazy2Compont(() => import("./pages/CommonPipeline/DWStandard") as any)
+    },
 ]
 
 const innerDynamicRouterConfigMap = innerDynamicRouterConfig.reduce((pre, next) => ({

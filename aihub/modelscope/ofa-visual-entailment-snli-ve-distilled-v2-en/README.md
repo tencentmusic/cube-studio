@@ -9,7 +9,7 @@
 玩转OFA只需区区以下数行代码，就是如此轻松！如果你觉得还不够方便，请点击右上角`Notebook`按钮，我们为你提供了配备了GPU的环境，你只需要在notebook里输入提供的代码，就可以把OFA玩起来了！
 
 <p align="center">
-    <img src="resources/visual_entailment.jpg" alt="dogs" width="200" />
+    <img src="https://modelscope.cn/api/v1/models/damo/ofa_visual-entailment_snli-ve_distilled_v2_en/repo?Revision=master&FilePath=resources/visual_entailment.jpg&View=true" alt="dogs" width="200" />
 
 ```python
 from modelscope.pipelines import pipeline

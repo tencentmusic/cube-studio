@@ -3,7 +3,7 @@
 
 中文Stable Diffusion文生图模型, 输入描述文本，返回符合文本描述的2D图像。
 
-<img src="gen_images/csd_demo.jpg"
+<img src="https://modelscope.cn/api/v1/models/damo/multi-modal_chinese_stable_diffusion_v1.0/repo?Revision=master&FilePath=gen_images/csd_demo.jpg&View=true"
      alt="More samples."
      style="width: 1000px;" />
 

@@ -10,7 +10,7 @@
 MossFormer语音分离模型是基于带卷积增强联合注意力(convolution-augmented joint self-attentions）的门控单头自注意力机制的架构（gated single-head transformer architecture ）开发出来的，通过采用联合局部和全局自注意力架构，同时对局部段执行完整自注意力运算和对全局执行线性化低成本自注意力运算，有效提升当前双路径（Dual-path） Transformer 模型在远程元素交互和局部特征模式的建模能力。除了强大的远程建模能力外，我们还通过使用卷积运算来增强 MossFormer 在局部位置模式的建模能力。因此，MossFormer 的性能明显优于之前的模型，并在 WSJ0-2/3mix 和 WHAM!/WHAMR! 上取得了最先进的结果。
 
 <div align=center>
-<img width="640" src="description/model.jpg"/>
+<img width="640" src="https://modelscope.cn/api/v1/models/damo/speech_mossformer_separation_temporal_8k/repo?Revision=master&FilePath=description/model.jpg&View=true"/>
 </div>
 <center>图1 MossFormer模型架构图</center>
 
@@ -154,7 +154,7 @@ print(trainer.evaluate(None))
 MossFormer模型与其它SOTA模型在公开数据集WSJ0-2mix/3mix和WHAM！/WHAMR！上的对比结果如下：
 
 <div align=center>
-<img width="640" src="description/matrix.jpg"/>
+<img width="640" src="https://modelscope.cn/api/v1/models/damo/speech_mossformer_separation_temporal_8k/repo?Revision=master&FilePath=description/matrix.jpg&View=true"/>
 </div>
 <center>图2 各模型评估结果</center>
 

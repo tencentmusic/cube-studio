@@ -7,10 +7,10 @@
 在实人认证、文档电子化等场景中需要自动化提取卡证的信息，以便进一步做录入处理。这类场景通常存在两类问题，一是识别卡证类型时易受背景干扰，二是卡证拍摄角度造成的文字畸变影响OCR准确率。鉴于证件类数据的敏感性，我们采用大量合成卡证数据做训练(参见：[SyntheticCards](https://modelscope.cn/datasets/shaoxuan/SyntheticCards)), 并改造人脸检测SOTA方法SCRFD([论文地址](https://arxiv.org/abs/2105.04714), [代码地址](https://github.com/deepinsight/insightface/tree/master/detection/scrfd))训练了卡证检测矫正模型，可以对各类国际常见卡证（如，身份证、护照、驾照等）进行检测、定位及矫正，得到去除背景的正视角卡证图像，便于后续卡证分类或OCR内容提取。 
 
 ### 训练数据：
-![训练数据](description/traindata.jpg)
+![训练数据](https://modelscope.cn/api/v1/models/damo/cv_resnet_carddetection_scrfd34gkps/repo?Revision=master&FilePath=description/traindata.jpg&View=true)
 
 ### 效果展示：
-![效果展示](description/card_detect.jpg)
+![效果展示](https://modelscope.cn/api/v1/models/damo/cv_resnet_carddetection_scrfd34gkps/repo?Revision=master&FilePath=description/card_detect.jpg&View=true)
 
 ## 使用方式和范围
 

@@ -6,7 +6,7 @@
 ## 模型结构信息
 - 模型结构为Lseg结构，视觉encoder采用vit-large-patch16结构。
 - 参考：https://github.com/isl-org/lang-seg
-<img src="langseg.jpg"
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vitl16_segmentation_text-driven-seg/repo?Revision=master&FilePath=langseg.jpg&View=true"
      alt="framework"
      style="width: 600px;" />
 
@@ -37,12 +37,12 @@ cv2.imwrite('demo_textdrivenseg.jpg', result[OutputKeys.MASKS])
 
 ```
 - 输入图像：
-<img src="demo.jpg"
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vitl16_segmentation_text-driven-seg/repo?Revision=master&FilePath=demo.jpg&View=true"
      alt="input"
      style="width: 600px;" />
 - 输入英文文本：bear
 - 输出图像：
-<img src="demo_textdrivenseg.jpg"
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vitl16_segmentation_text-driven-seg/repo?Revision=master&FilePath=demo_textdrivenseg.jpg&View=true"
      alt="output"
      style="width: 600px;" />
 

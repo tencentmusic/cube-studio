@@ -6,7 +6,7 @@
 ## 模型结构信息
 - 模型结构为Denseclip结构，视觉encoder采用vit-base-patch16结构。
 - 参考：https://github.com/raoyongming/DenseCLIP
-<img src="denseclip.jpg"
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vitb16_segmentation_shop-seg/repo?Revision=master&FilePath=denseclip.jpg&View=true"
      alt="framework"
      style="width: 600px;" />
 
@@ -33,11 +33,11 @@ import cv2
 cv2.imwrite('demo_shopseg.jpg', result[OutputKeys.MASKS])
 ```
 - 输入图像：
-<img src="demo.jpg"
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vitb16_segmentation_shop-seg/repo?Revision=master&FilePath=demo.jpg&View=true"
      alt="input"
      style="width: 600px;" />
 - 输出图像：
-<img src="demo_shopseg.jpg"
+<img src="https://modelscope.cn/api/v1/models/damo/cv_vitb16_segmentation_shop-seg/repo?Revision=master&FilePath=demo_shopseg.jpg&View=true"
      alt="output"
      style="width: 600px;" />
 

@@ -2,7 +2,7 @@
 # 生活垃圾分类模型介
 自建265类常见的生活垃圾标签体系，15w张图片数据，包含可回收垃圾、厨余垃圾、有害垃圾、其他垃圾4个标准垃圾大类，覆盖常见的食品，厨房用品，家具，家电等生活垃圾小类共265个，标签从海量中文互联网社区语料进行提取，整理出频率较高的常见生活垃圾名称。模型结构采用ConvNeXt-Base结构, 先在大规模数据集ImageNet-22K上预训练，后在数据集上进行微调，最终垃圾分类验证集上top-1精度为92.23%。  
 垃圾分类:  
-<img src="./resources/trash.jpg" width = "640" height = "512" alt="垃圾分类"/>  
+<img src="https://modelscope.cn/api/v1/models/damo/cv_convnext-base_image-classification_garbage/repo?Revision=master&FilePath=./resources/trash.jpg&View=true" width = "640" height = "512" alt="垃圾分类"/>  
   
 本系列还有如下模型，欢迎试用:  
 - [ViT图像分类-中文-日常物品](https://modelscope.cn/models/damo/cv_vit-base_image-classification_Dailylife-labels/summary)
