@@ -2,9 +2,10 @@ import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
+import numpy
 import pysnooper
 import os
-
+import cv2
 class CV_RESNET50_OCR_DETECTION_VLPT_Model(Model):
     # 模型基础信息定义
     name='cv-resnet50-ocr-detection-vlpt'   # 该名称与目录名必须一样，小写
@@ -35,7 +36,7 @@ class CV_RESNET50_OCR_DETECTION_VLPT_Model(Model):
         {
             "label": "示例0",
             "input": {
-                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/ocr_detection_vlpt.jpg"
+                "image": "test.jpg"
             }
         }
     ]
@@ -62,16 +63,38 @@ class CV_RESNET50_OCR_DETECTION_VLPT_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
-
+        text = result.get("polygons")
+        #处理图片大小
+        def resize_image(image):
+            height, width = image.shape[:2]
+            max_size = 1280
+            print(height)
+            print(width)
+            if max(height, width) > max_size:
+               if height > width:
+                  ratio = max_size / height
+               else:
+                  ratio = max_size / width
+               image = cv2.resize(image, (int(width * ratio), int(height * ratio)))
+            return image
+        #给图片中识别出的单词画框
+        img = cv2.imread(image)
+        for index in text :
+            
+            pts = numpy.array(index, numpy.int32)
+            img = resize_image(img)
+            canvas = cv2.polylines(img, [pts], True, (0, 0, 255), 1)
+        #创建文件保存目录
+        os.makedirs('result',exist_ok=True)
+        save_path = os.path.join('result',os.path.basename(image))
+        # 写到另外的图片文件中即可
+        cv2.imwrite(save_path, canvas)
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path,
+                "text": str(text),
             }
         ]
         return back
@@ -84,10 +107,13 @@ model=CV_RESNET50_OCR_DETECTION_VLPT_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/ocr_detection_vlpt.jpg')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(image='test.jpg')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小98M,内存占用1.22G,识别图片响应在4秒左右,没有GPU
+#运行环境为腾讯云服务器	标准型S6 - 2核 4G,操作系统TencentOS Server 3.1 (TK4)
+#识别结果比较准确
