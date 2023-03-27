@@ -218,7 +218,7 @@ def dag_to_pipeline(pipeline,dbsession,workflow_label=None,**kwargs):
         container_envs.append(("KFJ_TASK_RESOURCE_MEMORY", str(task.resource_memory)))
         container_envs.append(("KFJ_TASK_RESOURCE_GPU", str(task.resource_gpu.replace("+",''))))
         container_envs.append(("KFJ_TASK_PROJECT_NAME", str(pipeline.project.name)))
-        container_envs.append(("GPU_TYPE", os.environ.get("GPU_TYPE", "NVIDIA")))
+        container_envs.append(("GPU_TYPE", 'NVIDIA'))
         container_envs.append(("USERNAME", pipeline.created_by.username))
 
 

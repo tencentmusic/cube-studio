@@ -216,7 +216,7 @@ def push_task_time(workflow,dbsession):
                 task_name = pods[pod_name]['displayName']
                 finishedAt = datetime.datetime.strptime(pods[pod_name]['finishedAt'].replace('T',' ').replace('Z',''),'%Y-%m-%d %H:%M:%S')
                 startAt = datetime.datetime.strptime(pods[pod_name]['startedAt'].replace('T', ' ').replace('Z', ''),'%Y-%m-%d %H:%M:%S')
-                run_time= round((finishedAt-startAt).days*24+(finishedAt-startAt).seconds/60/60,2)
+                run_time= round((finishedAt-startAt).total_seconds()//3600,2)
                 db_task_name = task_name[:task_name.index('(')] if '(' in task_name else task_name
                 task = dbsession.query(Task).filter(Task.pipeline_id == int(pipeline_id)).filter(Task.name == db_task_name).first()
                 if startAt in task_pod_time and task_pod_time[startAt]:

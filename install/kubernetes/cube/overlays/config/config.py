@@ -1,5 +1,4 @@
 
-
 import imp
 import json
 import os
@@ -22,7 +21,7 @@ else:
 
 APP_THEME = "readable.css"
 
-FAB_UPDATE_PERMS=True
+FAB_UPDATE_PERM S =True
 FAB_STATIC_FOLDER = BASE_DIR + "/static/appbuilder/"
 
 MYAPP_WORKERS = 2  # deprecated
@@ -100,9 +99,9 @@ AUTH_USER_REGISTRATION_ROLE = "Gamma"
 # RECAPTCHA_PUBLIC_KEY = 'GOOGLE PUBLIC KEY FOR RECAPTCHA'
 # RECAPTCHA_PRIVATE_KEY = 'GOOGLE PRIVATE KEY FOR RECAPTCHA'
 
-OAUTH_PROVIDERS=[]
+OAUTH_PROVIDER S =[]
 
-#LDAP认证时, ldap server
+# LDAP认证时, ldap server
 # AUTH_LDAP_SERVER = "ldap://ldapserver.new"
 
 # OpenID认证的提供方
@@ -170,7 +169,7 @@ IMG_UPLOAD_URL = "/static/file/uploads/"
 
 # CORS Options
 ENABLE_CORS = True
-CORS_OPTIONS = {"supports_credentials":True}
+CORS_OPTIONS = {"supports_credentials" :True}
 
 # Chrome allows up to 6 open connections per domain at a time. When there are more
 # than 6 slices in dashboard, a lot of time fetch requests are queued up and wait for
@@ -248,9 +247,9 @@ from werkzeug.contrib.cache import RedisCache
 
 # 自动添加到响应头的配置
 HTTP_HEADERS = {
-    "Access-Control-Allow-Origin":"*",
-    "Access-Control-Allow-Methods":"*",
-    "Access-Control-Allow-Headers":"*",
+    "Access-Control-Allow-Origin" :"*",
+    "Access-Control-Allow-Methods" :"*",
+    "Access-Control-Allow-Headers" :"*",
 }
 
 
@@ -393,7 +392,7 @@ TALISMAN_CONFIG = {
     "force_https_permanent": False,
 }
 # 前端静态文件的默认缓存时间
-SEND_FILE_MAX_AGE_DEFAULT=300
+SEND_FILE_MAX_AGE_DEFAUL T =300
 
 try:
     if CONFIG_PATH_ENV_VAR in os.environ:
@@ -435,22 +434,23 @@ def get_env_variable(var_name, default=None):
             raise EnvironmentError(error_msg)
 
 # 当前控制器所在的集群
-ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV').lower()
+ENVIRONMEN T =get_env_variable('ENVIRONMENT' ,'DEV').lower()
 
 SQLALCHEMY_POOL_SIZE = 300
 SQLALCHEMY_POOL_RECYCLE = 300  # 超时重连， 必须小于数据库的超时终端时间
 SQLALCHEMY_MAX_OVERFLOW = 800
-SQLALCHEMY_TRACK_MODIFICATIONS=False
+SQLALCHEMY_TRACK_MODIFICATION S =False
 
 
 # redis的配置
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'admin')   # default must set None
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
-SOCKETIO_MESSAGE_QUEUE = 'redis://:%s@%s:%s/2'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))
+SOCKETIO_MESSAGE_QUEUE = 'redis://:%s@%s:%s/2 ' % \
+(REDIS_PASSWORD ,REDIS_HOST ,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1 ' %(REDIS_HOST ,str(REDIS_PORT))
 
 # 数据库配置地址
-SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')
+SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE' ,'mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')
 SQLALCHEMY_BINDS = {}
 from celery.schedules import crontab
 from werkzeug.contrib.cache import RedisCache
@@ -462,22 +462,28 @@ CACHE_CONFIG = {
     'CACHE_TYPE': 'redis', # 使用 Redis
     'CACHE_REDIS_HOST': REDIS_HOST, # 配置域名
     'CACHE_REDIS_PORT': int(REDIS_PORT), # 配置端口号
-    'CACHE_REDIS_URL':'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
+    'CACHE_REDIS_URL' :'redis://:%s@%s:%s/0 ' %
+    (REDIS_PASSWORD ,REDIS_HOST ,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1 ' %
+    (REDIS_HOST ,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
 }
 
 
 RESULTS_BACKEND = RedisCache(
-    host=REDIS_HOST, port=int(REDIS_PORT), key_prefix='myapp_results',password=REDIS_PASSWORD)
+    host=REDIS_HOST, port=int(REDIS_PORT), key_prefix='myapp_results' ,password=REDIS_PASSWORD)
 
 class CeleryConfig(object):
     # 任务队列
-    broker_url =  'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
+    broker_url =  'redis://:%s@%s:%s/0 ' % \
+    (REDIS_PASSWORD ,REDIS_HOST ,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0 ' % \
+    (REDIS_HOST ,str(REDIS_PORT))
     # celery_task的定义模块
     imports = (
         'myapp.tasks',
     )
     # 结果存储
-    result_backend = 'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
+    result_backend = 'redis://:%s@%s:%s/0 ' % \
+    (REDIS_PASSWORD ,REDIS_HOST ,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0 ' % \
+    (REDIS_HOST ,str(REDIS_PORT))
     worker_redirect_stdouts_level = 'DEBUG'
     # celery worker每次去redis取任务的数量
     worker_prefetch_multiplier = 10
@@ -527,7 +533,7 @@ class CeleryConfig(object):
             'max_retries': 0,
             "reject_on_worker_lost": False
         },
-		# 异步升级服务
+        # 异步升级服务
         'task.upgrade_service': {
             'rate_limit': '1/s',
             'soft_time_limit': 3600,
@@ -535,14 +541,22 @@ class CeleryConfig(object):
             'max_retries': 0,
             "reject_on_worker_lost": False
         },
-		# 上传workflow信息
+        # 上传workflow信息
         'task.upload_workflow': {
             'rate_limit': '10/s',
             'soft_time_limit': 600,
             "expires": 600,
             'max_retries': 0,
             "reject_on_worker_lost": False
+        },
+        'task.check_pod_terminating' :{
+            'rate_limit': '1/s',
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         }
+
 
     }
 
@@ -570,8 +584,8 @@ class CeleryConfig(object):
         #     # 'schedule': 10.0,
         #     'schedule': crontab(minute='10', hour='10'),
         # },
-        'task_check_pipeline_run':{
-            'task':"task.check_pipeline_run",   # 定时检查pipeline的运行时长
+        'task_check_pipeline_run' :{
+            'task' :"task.check_pipeline_run",   # 定时检查pipeline的运行时长
             'schedule': crontab(minute='10', hour='11'),
         },
         'task_delete_debug_docker': {
@@ -581,47 +595,50 @@ class CeleryConfig(object):
         },
         'task_watch_gpu': {
             'task': 'task.watch_gpu',   # 定时推送gpu的使用情况
-            'schedule': crontab(minute='10',hour='8-23/2'),
+            'schedule': crontab(minute='10' ,hour='8-23/2'),
         },
-		'task_adjust_node_resource': {
+        'task_adjust_node_resource': {
             'task': 'task.adjust_node_resource',  # 定时在多项目组间进行资源均衡
             'schedule': crontab(minute='*/10'),
         },
-		'task_watch_pod_utilization': {
+        'task_watch_pod_utilization': {
             'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
-            'schedule': crontab(minute='10',hour='11'),
+            'schedule': crontab(minute='10' ,hour='11'),
         },
-        
-        'task_update_aihub': {
-            'task': 'task.update_aihub',  # 更新aihub
-            'schedule': crontab(minute='30', hour='4'),
-        },
+        # 'task_update_aihub': {
+        #     'task': 'task.update_aihub',  # 更新aihub
+        #     'schedule': crontab(minute='30', hour='4'),
+        # },
+        "task_check_pod_terminating": {
+            "task": "task.check_pod_terminating",
+            'schedule': crontab(minute='*/10'),
+        }
     }
 
- # 帮助文档地址，显示在web导航栏
-DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/wiki'
+# 帮助文档地址，显示在web导航栏
+DOCUMENTATION_UR L ='https://github.com/tencentmusic/cube-studio/wiki'
 BUG_REPORT_URL = 'https://github.com/tencentmusic/cube-studio/issues/new'
 
 
-ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
+ROBOT_PERMISSION_ROLE S =[]   # 角色黑名单
 
-FAB_API_MAX_PAGE_SIZE=1000    # 最大翻页数目，不设置的话就会是20
+FAB_API_MAX_PAGE_SIZ E =1000    # 最大翻页数目，不设置的话就会是20
 
 CELERY_CONFIG = CeleryConfig
 
-REMEMBER_COOKIE_NAME="remember_token"   # 使用cookie认证用户的方式
+REMEMBER_COOKIE_NAM E ="remember_token"   # 使用cookie认证用户的方式
 # api方式访问认证header头
 AUTH_HEADER_NAME = 'Authorization'   # header方式认证的header 头
 
 # k8s中用到的各种自动自定义资源
 # timeout为自定义资源需要定期删除时，设置的过期时长。创建timeout秒的实例会被认为是太久远的实例，方便及时清理过期任务
-CRD_INFO={
-    "workflow":{
-        "group":"argoproj.io",
-        "version":"v1alpha1",
-        "plural":"workflows",
-        'kind':'Workflow',
-        "timeout": 60*60*24*2
+CRD_INF O ={
+    "workflow" :{
+        "group" :"argoproj.io",
+        "version" :"v1alpha1",
+        "plural" :"workflows",
+        'kind' :'Workflow',
+        "timeout": 6 0 *6 0 *2 4 *2
     },
     "mpijob": {
         "group": "kubeflow.org",
@@ -634,42 +651,28 @@ CRD_INFO={
         "group": "kubeflow.org",
         "version": "v1",
         "plural": "tfjobs",
-        'kind':'TFJob',
-        "timeout": 60*60*24*2
+        'kind' :'TFJob',
+        "timeout": 6 0 *6 0 *2 4 *2
     },
     "xgbjob": {
         "group": "xgboostjob.kubeflow.org",
         "version": "v1alpha1",
         "plural": "xgboostjobs",
-        "timeout": 60*60*24*2
+        "timeout": 6 0 *6 0 *2 4 *2
     },
-    "experiment":{
+    "experiment" :{
         "group": "kubeflow.org",
         "version": 'v1alpha3',  # "v1alpha3",
         "plural": "experiments",
-        'kind':'Experiment',
+        'kind' :'Experiment',
         "timeout": 60 * 60 * 24 * 2
     },
     "pytorchjob": {
         "group": "kubeflow.org",
         "version": "v1",
-        'kind':'PyTorchJob',
+        'kind' :'PyTorchJob',
         "plural": "pytorchjobs",
         "timeout": 60 * 60 * 24 * 2
-    },
-    "notebook": {
-        "group": "kubeflow.org",
-        "version": "v1",
-        "plural": "notebooks",
-        'kind':'Notebook',
-        "timeout": 60 * 60 * 24 * 2
-    },
-    "inferenceservice": {
-        "group": "serving.kserve.io",
-        "version": "v1beta1",
-        "plural": "inferenceservices",
-        'kind':'InferenceService',
-        "timeout": 60 * 60 * 24 * 1
     },
     "virtualservice": {
         "group": "networking.istio.io",
@@ -699,14 +702,14 @@ CRD_INFO={
         "plural": "sparkapplications",
         "timeout": 60 * 60 * 24 * 2
     },
-    "paddlejob":{
+    "paddlejob" :{
         "group": "batch.paddlepaddle.org",
         "version": "v1",
         'kind': 'PaddleJob',
         "plural": "paddlejobs",
         "timeout": 60 * 60 * 24 * 2
     },
-    "mxjob":{
+    "mxjob" :{
         "group": "kubeflow.org",
         "version": "v1",
         'kind': 'MXJob',
@@ -716,20 +719,20 @@ CRD_INFO={
 }
 
 # 每个task都会携带的任务环境变量，{{}}模板变量会在插入前进行渲染
-GLOBAL_ENV={
-    "KFJ_PIPELINE_ID":"{{pipeline_id}}",
-    "KFJ_RUN_ID":"{{uuid.uuid4().hex}}",
-    "KFJ_CREATOR":"{{creator}}",
-    "KFJ_RUNNER":"{{runner}}",
-    "KFJ_MODEL_REPO_API_URL":"http://kubeflow-dashboard.infra",
-    "KFJ_ARCHIVE_BASE_PATH":"/archives",
-    "KFJ_PIPELINE_NAME":"{{pipeline_name}}",
-    "KFJ_NAMESPACE":"pipeline",
-    "KFJ_GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
-    "GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
-    "KFJ_GPU_MEM_MIN":"13G",
-    "KFJ_GPU_MEM_MAX":"13G",
-    "KFJ_ENVIRONMENT":"{{cluster_name}}",
+GLOBAL_EN V ={
+    "KFJ_PIPELINE_ID" :"{{pipeline_id}}",
+    "KFJ_RUN_ID" :"{{uuid.uuid4().hex}}",
+    "KFJ_CREATOR" :"{{creator}}",
+    "KFJ_RUNNER" :"{{runner}}",
+    "KFJ_MODEL_REPO_API_URL" :"http://kubeflow-dashboard.infra",
+    "KFJ_ARCHIVE_BASE_PATH" :"/archives",
+    "KFJ_PIPELINE_NAME" :"{{pipeline_name}}",
+    "KFJ_NAMESPACE" :"pipeline",
+    "KFJ_GPU_TYPE": 'NVIDIA',
+    "GPU_TYPE": 'NVIDIA',
+    "KFJ_GPU_MEM_MIN" :"13G",
+    "KFJ_GPU_MEM_MAX" :"13G",
+    "KFJ_ENVIRONMENT" :"{{cluster_name}}",
 }
 
 # 各种环节使用的gpu驱动类型
@@ -739,27 +742,27 @@ GPU_DRIVE_TYPE = "NVIDIA"
 VGPU_DRIVE_TYPE = "TENCENT"   # tke gpumanager的方式
 
 # 各类model list界面的帮助文档
-HELP_URL={
-    "pipeline":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "job_template":"https://github.com/tencentmusic/cube-studio/tree/master/job-template",
-    "task":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "nni":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "images":"https://github.com/tencentmusic/cube-studio/tree/master/images",
-    "notebook":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "service":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "inferenceservice":"https://github.com/tencentmusic/cube-studio/tree/master/images/serving",
-    "run":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "docker":"https://github.com/tencentmusic/cube-studio/tree/master/images"
+HELP_UR L ={
+    "pipeline" :"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "job_template" :"https://github.com/tencentmusic/cube-studio/tree/master/job-template",
+    "task" :"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "nni" :"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "images" :"https://github.com/tencentmusic/cube-studio/tree/master/images",
+    "notebook" :"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "service" :"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "inferenceservice" :"https://github.com/tencentmusic/cube-studio/tree/master/images/serving",
+    "run" :"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
+    "docker" :"https://github.com/tencentmusic/cube-studio/tree/master/images"
 }
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
-CUSTOMIZE_JOB='自定义镜像'
+CUSTOMIZE_JO B ='自定义镜像'
 # admin管理员用户
-ADMIN_USER='admin'
+ADMIN_USE R ='admin'
 # pipeline任务的运行空间，目前必填pipeline
 PIPELINE_NAMESPACE = 'pipeline'
 # 服务pipeline运行的空间，必填service
-SERVICE_PIPELINE_NAMESPACE='service'
+SERVICE_PIPELINE_NAMESPAC E ='service'
 # 超参搜索命名空间，必填automl
 AUTOML_NAMESPACE = 'automl'
 # notebook必填空间，必填jupyter
@@ -767,28 +770,24 @@ NOTEBOOK_NAMESPACE = 'jupyter'
 # 内部服务命名空间，必填service
 SERVICE_NAMESPACE = 'service'
 # 服务链路追踪地址
-SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
-SERVICE_PIPELINE_JAEGER='tracing.service'
-# automl任务默认镜像
-AUTOML_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/automl'
-# automl的tfjob任务默认镜像
-AUTOML_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
-# automl的pytorchjob任务默认镜像
-AUTOML_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
+SERVICE_PIPELINE_ZIPKI N ='http://xx.xx.xx.xx:9401'
+SERVICE_PIPELINE_JAEGE R ='tracing.service'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
 # 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
-REPOSITORY_ORG='ccr.ccs.tencentyun.com/cube-studio/'
+REPOSITORY_OR G ='ccr.ccs.tencentyun.com/cube-studio/'
 # notebook每个pod使用的用户账号
-JUPYTER_ACCOUNTS='jupyter-user'
-HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,AUTOML_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE]
+JUPYTER_ACCOUNT S ='jupyter-user'
+HUBSECRET_NAMESPAC E =[PIPELINE_NAMESPACE ,AUTOML_NAMESPACE ,NOTEBOOK_NAMESPACE ,SERVICE_NAMESPACE]
 
 # notebook使用的镜像
-NOTEBOOK_IMAGES=[
+NOTEBOOK_IMAGE S =[
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base', 'vscode（cpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base', 'vscode（gpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base', 'jupyter（cpu）'],
-    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-gpu-base','jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-gpu-base' ,'jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04', 'jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04-cuda11.8.0-cudnn8' ,'jupyter（gpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-bigdata', 'jupyter（bigdata）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning', 'jupyter（machinelearning）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-deeplearning', 'jupyter（deeplearning）'],
@@ -812,11 +811,11 @@ ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 # prometheus地址
 PROMETHEUS = 'prometheus-k8s.monitoring:9090'
 # nni默认镜像
-NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
+NNI_IMAGE S ='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
 
 # 数据集的存储地址
 DATASET_SAVEPATH = '/dataset/'
-STORE_TYPE="cos"
+STORE_TYP E ="cos"
 STORE_CONFIG = {
     "appid": "xx",
     "secret_id": "xx",
@@ -824,101 +823,119 @@ STORE_CONFIG = {
     "region": "ap-nanjing",
     "bucket_name": "xx",
     "root": "/dataset",
-    "download_host":"https://xx.cos.ap-nanjing.myqcloud.com/"
+    "download_host" :"https://xx.cos.ap-nanjing.myqcloud.com/"
 }
 
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
 
 
 # 多行分割内网特定host
-HOSTALIASES='''
+HOSTALIASE S ='''
 127.0.0.1 localhost
 '''
 # 默认服务代理的ip
-SERVICE_EXTERNAL_IP=[]
+SERVICE_EXTERNAL_I P =[]
 
 # json响应是否按字母顺序排序
-JSON_SORT_KEYS=False
+JSON_SORT_KEY S =False
 # 链接菜单
-ALL_LINKS=[
-    {
-        "label":"Minio",
-        "name":"minio",
-        "url":"/minio/public/"
-    },
+ALL_LINK S =[
     {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
         "url": "/k8s/dashboard/cluster/#/pod?namespace=infra"
     },
     {
-        "label":"Grafana",
-        "name":"grafana",
+        "label" :"Grafana",
+        "name" :"grafana",
         "url": '/grafana/d/pod-info/pod-info?orgId=1&refresh=5s&from=now-15m&to=now'  # 访问grafana的域名地址
     }
 ]
 
 # 推理服务的各种配置
-TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0-gpu']
-TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu']
-ONNXRUNTIME_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda']
-TRITONSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.09-py3']
+TFSERVING_IMAGE S =['ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0-gpu'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0-gpu'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4-gpu'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3-gpu'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4-gpu'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3-gpu'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2-gpu'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0'
+                    ,'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0-gpu']
+TORCHSERVER_IMAGE S =['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-cpu'
+                      ,'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-gpu'
+                      ,'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-cpu'
+                      ,'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-gpu'
+                      ,'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu'
+                      ,'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu']
+ONNXRUNTIME_IMAGE S =['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest'
+                      ,'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda']
+TRITONSERVER_IMAGE S =['ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3'
+                       ,'ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3'
+                       ,'ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.09-py3']
 
-INFERNENCE_IMAGES={
-    "tfserving":TFSERVING_IMAGES,
-    'torch-server':TORCHSERVER_IMAGES,
-    'onnxruntime':ONNXRUNTIME_IMAGES,
-    'triton-server':TRITONSERVER_IMAGES
+INFERNENCE_IMAGE S ={
+    "tfserving" :TFSERVING_IMAGES,
+    'torch-server' :TORCHSERVER_IMAGES,
+    'onnxruntime' :ONNXRUNTIME_IMAGES,
+    'triton-server' :TRITONSERVER_IMAGES
 }
 
-INFERNENCE_COMMAND={
-    "tfserving":"/usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
-    "torch-server":"torchserve --start --model-store /models/$model_name/ --models $model_name=$model_name.mar --foreground --log-config /config/log4j2.xml",
-    "onnxruntime":"onnxruntime_server --model_path /models/",
-    "triton-server":'tritonserver --model-repository=/models/ --strict-model-config=true --log-verbose=1'
+INFERNENCE_COMMAN D ={
+    "tfserving" :"/usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
+    "torch-server" :"torchserve --start --model-store /models/$model_name/ --models $model_name=$model_name.mar --foreground --log-config /config/log4j2.xml",
+    "onnxruntime" :"onnxruntime_server --model_path /models/",
+    "triton-server" :'tritonserver --model-repository=/models/ --strict-model-config=true --log-verbose=1'
 }
-INFERNENCE_ENV={
-    "tfserving":['TF_CPP_VMODULE=http_server=1','TZ=Asia/Shanghai'],
+INFERNENCE_EN V ={
+    "tfserving" :['TF_CPP_VMODULE=http_server=1' ,'TZ=Asia/Shanghai'],
 }
-INFERNENCE_PORTS={
-    "tfserving":'8501',
-    "torch-server":"8080,8081",
-    "onnxruntime":"8001",
-    "triton-server":"8000,8002"
+INFERNENCE_PORT S ={
+    "tfserving" :'8501',
+    "torch-server" :"8080,8081",
+    "onnxruntime" :"8001",
+    "triton-server" :"8000,8002"
 }
-INFERNENCE_METRICS={
-    "tfserving":'8501:/metrics',
-    "torch-server":"8082:/metrics",
-    "triton-server":"8002:/metrics"
+INFERNENCE_METRIC S ={
+    "tfserving" :'8501:/metrics',
+    "torch-server" :"8082:/metrics",
+    "triton-server" :"8002:/metrics"
 }
-INFERNENCE_HEALTH={
-    "tfserving":'8501:/v1/models/$model_name/versions/$model_version/metadata',
-    "torch-server":"8080:/ping",
-    "triton-server":"8000:/v2/health/ready"
+INFERNENCE_HEALT H ={
+    "tfserving" :'8501:/v1/models/$model_name/versions/$model_version/metadata',
+    "torch-server" :"8080:/ping",
+    "triton-server" :"8000:/v2/health/ready"
 }
-DOCKER_IMAGES='ccr.ccs.tencentyun.com/cube-studio/docker'
+DOCKER_IMAGE S ='ccr.ccs.tencentyun.com/cube-studio/docker'
 # notebook，pipeline镜像拉取策略
-IMAGE_PULL_POLICY='Always'    # IfNotPresent   Always
+IMAGE_PULL_POLIC Y ='Always'    # IfNotPresent   Always
 
 # 任务资源使用情况地址
-GRAFANA_TASK_PATH='/grafana/d/pod-info/pod-info?var-pod='
+GRAFANA_TASK_PAT H ='/grafana/d/pod-info/pod-info?var-pod='
 # 推理服务监控地址
-GRAFANA_SERVICE_PATH="/grafana/d/istio-service/istio-service?var-namespace=service&var-service="
+GRAFANA_SERVICE_PAT H ="/grafana/d/istio-service/istio-service?var-namespace=service&var-service="
 # 集群资源监控地址
-GRAFANA_CLUSTER_PATH="/grafana/d/all-node/all-node?var-org="
+GRAFANA_CLUSTER_PAT H ="/grafana/d/all-node/all-node?var-org="
 # 节点资源监控地址
-GRAFANA_NODE_PATH="/grafana/d/node/node?var-node="
+GRAFANA_NODE_PAT H ="/grafana/d/node/node?var-node="
 # GPU资源监控地址
-GRAFANA_GPU_PATH="/grafana/d/dcgm/gpu"
+GRAFANA_GPU_PAT H ="/grafana/d/dcgm/gpu"
 
 MODEL_URLS = {
-    "metadata_table":"/frontend/data/metadata/metadata_table",
-    "metadata_metric":"/frontend/data/metadata/metadata_metric",
+    "metadata_table" :"/frontend/data/metadata/metadata_table",
+    "metadata_metric" :"/frontend/data/metadata/metadata_metric",
     "dimension": "/frontend/data/metadata/metadata_dimension",
-    "sqllab":"/frontend/data_model/data_sql_select/data_search",
-    "etl_pipeline":"/frontend/dev/data_pipeline/etl_pipeline",
-    "etl_task":"/frontend/dev/data_pipeline/task_manager",
-    "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
+    "sqllab" :"/frontend/data_model/data_sql_select/data_search",
+    "etl_pipeline" :"/frontend/dev/data_pipeline/etl_pipeline",
+    "etl_task" :"/frontend/dev/data_pipeline/task_manager",
+    "etl_task_instance" :"/frontend/dev/data_pipeline/instance_manager",
     "total_resource": "/frontend/train/total_resource",
     "notebook": "/frontend/dev/dev_online/notebook",
     "docker": "/frontend/dev/images/docker",
@@ -932,37 +949,27 @@ MODEL_URLS = {
     "service": "/frontend/service/k8s_service",
     "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
     "train_model": "/frontend/service/inferenceservice/model_manager",
-    "dataset":"/frontend/dataleap/media_data/dataset",
-	"model_market_visual": "/frontend/aihub/model_market/model_visual",
+    "dataset" :"/frontend/dataleap/media_data/dataset",
+    "model_market_visual": "/frontend/aihub/model_market/model_visual",
     "model_market_voice": "/frontend/aihub/model_market/model_voice",
     "model_market_language": "/frontend/aihub/model_market/model_language",
 }
- # 可以跨域分享cookie的子域名，例如.local.com
+# 可以跨域分享cookie的子域名，例如.local.com
 COOKIE_DOMAIN = ''
-SERVICE_DOMAIN='service.local.com'
-#
-# # 所有训练集群的信息
-CLUSTERS={
-    # 和project expand里面的名称一致
-    "dev":{
-        "NAME":"dev",
-        "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
-        # "SERVICE_DOMAIN": 'service.local.com',
-    }
-}
+SERVICE_DOMAI N ='service.local.com'
+
 
 
 # 所有训练集群的信息
-# CLUSTERS={
-#     # 和project expand里面的名称一致
-#     "dev":{
-#         "NAME":"dev",
-#         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-#         "K8S_DASHBOARD_CLUSTER":'http://9.135.92.226/k8s/dashboard/cluster/',
-#         # "SERVICE_DOMAIN": 'service.local.com',
-#     }
-# }
+CLUSTER S ={
+    # 和project expand里面的名称一致
+    "dev" :{
+        "NAME" :"dev",
+        "KUBECONFIG" :'/home/myapp/kubeconfig/dev-kubeconfig',
+        # "HOST":"9.135.92.226",
+        # "SERVICE_DOMAIN": 'service.local.com',
+    }
+}
 
 
 

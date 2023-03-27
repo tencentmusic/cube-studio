@@ -138,7 +138,7 @@ def monitoring(crd_k8s,name,namespace):
             # pods = crd_k8s.get_pods(namespace=namespace,labels=labels)
 
         # 因为stern 过几个小时就会崩溃，日志不再跟踪，但不报错，所以这里主动kill
-        if (datetime.datetime.now()-check_time).seconds>3600:
+        if (datetime.datetime.now()-check_time).total_seconds()>3600:
             pids = get_pid("stern")
             if pids:
                 for pid in pids:
