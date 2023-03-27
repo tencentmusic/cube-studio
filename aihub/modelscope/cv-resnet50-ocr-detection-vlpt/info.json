@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnet50-ocr-detection-vlpt",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-resnet50-ocr-detection-vlpt",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-resnet50-ocr-detection-vlpt-v20221001",
+    "label": "读光-文字检测-单词检测模型-英文-VLPT预训练",
+    "describe": "给定一张图片，检测出图内文字并给出多边形包围框。检测模型使用DB，backbone初始化参数基于多模态交互预训练方法VLPT。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

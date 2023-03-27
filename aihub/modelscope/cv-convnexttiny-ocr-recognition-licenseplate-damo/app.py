@@ -33,7 +33,7 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_LICENSEPLATE_DAMO_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "image": "http://duguang-labelling.oss-cn-shanghai.aliyuncs.com/mass_img_licenseplate//ocr_recognition_licenseplate.jpg"
+                "image": "test.jpg"
             }
         }
     ]
@@ -54,13 +54,10 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_LICENSEPLATE_DAMO_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
+        text = result.get('text')
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -68,10 +65,13 @@ class CV_CONVNEXTTINY_OCR_RECOGNITION_LICENSEPLATE_DAMO_Model(Model):
 model=CV_CONVNEXTTINY_OCR_RECOGNITION_LICENSEPLATE_DAMO_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(image='http://duguang-labelling.oss-cn-shanghai.aliyuncs.com/mass_img_licenseplate//ocr_recognition_licenseplate.jpg')  # 测试
-print(result)
+#model.load_model()
+#result = model.inference(image='test.jpg')  # 测试
+#print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小为74M,运行内存占用为500M,响应速度在两秒以内,没有GPU
+#运行环境为腾讯云服务器	标准型S6 - 2核 4G,操作系统TencentOS Server 3.1 (TK4)
+#识别车厢上号码中有英文字母和数字像的图片,会识别错误.
