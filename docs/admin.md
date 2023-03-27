@@ -40,8 +40,9 @@ expand字段
 管理标注哪些机器属于哪些项目后，可通过项目组的expand字段控制项目组的调度机器
 	
 	{
-		"node_selector": "org=public"
+		"org": "public"
 	}
+
 管理该项目自动挂载什么pvc，可通过项目组的expand字段控制项目组的调度机器
 	{
 		"volume_mount": "kubeflow-user-workspace(pvc):/mnt"
