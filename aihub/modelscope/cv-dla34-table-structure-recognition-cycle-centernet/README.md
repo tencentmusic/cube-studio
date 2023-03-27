@@ -6,7 +6,7 @@
 
 本模型是以自底向上的方式: 1）基于单元格中心点回归出到4个顶点的距离，解码出单元格bbox；同时基于单元格顶点，回归出到共用该顶点的单元格的中心点距离，解码出gbox。2）基于gbox(group box)，将离散的bbox拼接起来得到精准完整的电子表格；3）第二步的拼接将单元格从“离散”变为“连续”，因此用后处理算法获得单元格的行列信息。目前上线模型实现前两步的功能，第三步暂时未提供。Cycle-CenterNet模型介绍，详见：[Parsing Table Structures in the Wild](https://openaccess.thecvf.com/content/ICCV2021/papers/Long_Parsing_Table_Structures_in_the_Wild_ICCV_2021_paper.pdf) 。
 
-![pipeline](./description/Pipeline.jpg)
+![pipeline](https://modelscope.cn/api/v1/models/damo/cv_dla34_table-structure-recognition_cycle-centernet/repo?Revision=master&FilePath=./description/Pipeline.jpg&View=true)
 
 
 ## 期望模型使用方式以及适用范围

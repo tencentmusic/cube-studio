@@ -12,11 +12,11 @@ SCRFD为当前SOTA的人脸检测方法，该方法的主要贡献是从两处�
 
 SCRFD famlity在WIDERFace-Hard的指标如下：
 
-![模型结构](description/SCRFD-sota.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_resnet_facedetection_scrfd10gkps/repo?Revision=master&FilePath=description/SCRFD-sota.jpg&View=true)
 
 SCRFD方法强化了小目标的检测，但对超大脸(如，部分超出画面)会产生漏检或关键点不准，同时对旋转人脸的效果也未做优化。因此我们使用更大算力的网络，有针对性的优化上述缺点，训练了V2模型(34g_gnkps_v2),相比原模型(10g_bnkps)有了显著提升，使模型可覆盖更多的应用场景。
 
-![对比](description/compare.jpg)
+![对比](https://modelscope.cn/api/v1/models/damo/cv_resnet_facedetection_scrfd10gkps/repo?Revision=master&FilePath=description/compare.jpg&View=true)
 
 
 ## 使用方式和范围

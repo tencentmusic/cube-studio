@@ -13,7 +13,7 @@
 该模型采用自顶向下的Heatmap手部关键点检测框架，通过端对端的快速推理可以得到图像中的全部手部关键点。
 本模型基于HRNetv2和DarkPose方法，架构如下：
 <div align="center">
-  <img src="./assets/DarkPose1.jpg" width="800" />
+  <img src="https://modelscope.cn/api/v1/models/damo/cv_hrnetw18_hand-pose-keypoints_coco-wholebody/repo?Revision=master&FilePath=./assets/DarkPose1.jpg&View=true" width="800" />
   <center>DarkPose</center>
 </div>
 
@@ -170,8 +170,8 @@ COCO-Wholebody数据集上模型指标：
 | ------------ | ------------ | ------------ | ------------ | ------------ |
 | litehrnet_w18 | 256x256 | 0.8161 | 0.8393 | 4.3899 |
 
-![input](assets/hand.jpg)
-![output](assets/hand_result.jpg)
+![input](https://modelscope.cn/api/v1/models/damo/cv_hrnetw18_hand-pose-keypoints_coco-wholebody/repo?Revision=master&FilePath=assets/hand.jpg&View=true)
+![output](https://modelscope.cn/api/v1/models/damo/cv_hrnetw18_hand-pose-keypoints_coco-wholebody/repo?Revision=master&FilePath=assets/hand_result.jpg&View=true)
 
 ### 相关论文以及引用信息
 

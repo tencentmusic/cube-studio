@@ -13,11 +13,11 @@ VGG19是Oxford的Visual Geometry Group的组提出的,该网络是在ILSVRC 2014
 
 VGG19:
 
-![模型结构](vgg_19.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_vgg19_facial-expression-recognition_fer/repo?Revision=master&FilePath=vgg_19.jpg&View=true)
 
 Fer Demo：
 
-![模型效果](fer.jpg)
+![模型效果](https://modelscope.cn/api/v1/models/damo/cv_vgg19_facial-expression-recognition_fer/repo?Revision=master&FilePath=fer.jpg&View=true)
 
 
 ## 模型使用方式和使用范围

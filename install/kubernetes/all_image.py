@@ -142,7 +142,7 @@ images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio + vo
 images = list(set(images))
 
 # 通过私有仓库，将公有镜像下发到内网每台机器上，例如内网docker.oa.com的仓库
-HOST = 'mirrors.tencent.com/tmedi/'
+HOST = 'ccr.ccs.tencentyun.com/cube-studio/'
 for image in images:
     # print(image)
     if 'gpu' in image:
@@ -157,12 +157,12 @@ for image in images:
     # print('docker push %s' % (image_name))
 
     # 内网机器上拉取私有仓库镜像
-    image=image.replace('@sha256','')
-    print("docker pull %s" % image_name)
-    print("docker tag %s %s"%(image_name,image))
-
     # image=image.replace('@sha256','')
-    # print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
+    # print("docker pull %s" % image_name)
+    # print("docker tag %s %s"%(image_name,image))
+
+    image=image.replace('@sha256','')
+    print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
 
 
 print('')

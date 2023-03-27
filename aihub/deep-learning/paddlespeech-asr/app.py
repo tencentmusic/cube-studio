@@ -44,7 +44,7 @@ class Speech_Asr_Model(Model):
     @pysnooper.snoop()
     def inference(self, voice_file_path):
         asr = self.asr
-        result = '语音识别结果： '
+        result = ''
         result += asr(audio_file=voice_file_path)
         back = [
             {

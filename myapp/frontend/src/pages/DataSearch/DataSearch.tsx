@@ -389,7 +389,7 @@ export default function DataSearch() {
 
         let timer = setInterval(() => {
             fetchData(task_id)
-        }, 10000)
+        }, 5000)
 
         setEditorState({
             taskMap: {

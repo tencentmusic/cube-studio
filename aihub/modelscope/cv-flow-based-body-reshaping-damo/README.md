@@ -14,7 +14,7 @@
 
 该任务借助于人体姿态识别模型提取的骨骼结构信息，对输入图像提取与结构耦合的深度特征，预测出光流形变场，并映射回原始图像，最终实现了业内首个端到端的自适应美型功能。
 
-![模型结构](description/framework.jpg)
+![模型结构](https://modelscope.cn/api/v1/models/damo/cv_flow-based-body-reshaping_damo/repo?Revision=master&FilePath=description/framework.jpg&View=true)
 
 ## 使用方式和范围
 

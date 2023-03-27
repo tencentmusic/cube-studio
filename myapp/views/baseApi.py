@@ -1364,7 +1364,7 @@ class MyappModelRestApi(ModelRestApi):
 
         if self.echart_option:
             try:
-                option = self.echart_option()
+                option = self.echart_option(filters)
                 if option:
                     return jsonify({
                         "message":"success",

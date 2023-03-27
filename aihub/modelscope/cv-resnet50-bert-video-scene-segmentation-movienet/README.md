@@ -12,7 +12,7 @@
 在预训练阶段中，整个模型在四个上游任务上进行联合训练，通过这四个任务的联合训练，模型可以在不需要任何人工标注的标签的情况下得到较好的shot encoder。
 在微调阶段中，冻结shot encoder的参数，并且利用视频场景分割的数据和标签训练CRN，最终模型可以在MovieNet视频场景分割数据集上达到SOTA性能。
 
-![BaSSL模型训练流程](data/bassl-schema.jpg)
+![BaSSL模型训练流程](https://modelscope.cn/api/v1/models/damo/cv_resnet50-bert_video-scene-segmentation_movienet/repo?Revision=master&FilePath=data/bassl-schema.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 本模型主要应用于长视频场景分割领域。

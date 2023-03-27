@@ -67,6 +67,7 @@ export interface IADUGTemplateInfo {
         card_width: string
         card_height: string
     }
+    echart: boolean
 }
 
 export interface IColumnRelateItem {
@@ -94,5 +95,6 @@ export interface ICustomDialog {
     title: string
     type: string
     hit: boolean
+    style: Record<string, any>
 }
 

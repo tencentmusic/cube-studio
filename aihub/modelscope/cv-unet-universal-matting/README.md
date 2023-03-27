@@ -8,7 +8,7 @@
 
 ## 抠图系列模型
 
-| [<img src="description/human.png" width="280px">](https://modelscope.cn/models/damo/cv_unet_image-matting/summary) | [<img src="description/universal.png" width="280px">](https://modelscope.cn/models/damo/cv_unet_universal-matting/summary) | [<img src="description/video.png" width="280px">](https://modelscope.cn/models/damo/cv_effnetv2_video-human-matting/summary) |[<img src="description/sky.png" width="280px">](https://modelscope.cn/models/damo/cv_hrnetocr_skychange/summary)|
+| [<img src="description/human.png" width="200px">](https://modelscope.cn/models/damo/cv_unet_image-matting/summary) | [<img src="description/universal.png" width="200px">](https://modelscope.cn/models/damo/cv_unet_universal-matting/summary) | [<img src="description/video.png" width="200px">](https://modelscope.cn/models/damo/cv_effnetv2_video-human-matting/summary) |[<img src="description/sky.png" width="200px">](https://modelscope.cn/models/damo/cv_hrnetocr_skychange/summary)|
 |:--:|:--:|:--:|:--:| 
 | [图像人像抠图](https://modelscope.cn/models/damo/cv_unet_image-matting/summary) | [通用抠图(支持商品、动物、植物、汽车等抠图)](https://modelscope.cn/models/damo/cv_unet_universal-matting/summary) | [视频人像抠图](https://modelscope.cn/models/damo/cv_effnetv2_video-human-matting/summary) | [天空替换(一键实现魔法换天空)](https://modelscope.cn/models/damo/cv_hrnetocr_skychange/summary) |
 

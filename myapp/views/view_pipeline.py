@@ -218,7 +218,7 @@ def dag_to_pipeline(pipeline,dbsession,workflow_label=None,**kwargs):
         container_envs.append(("KFJ_TASK_RESOURCE_MEMORY", str(task.resource_memory)))
         container_envs.append(("KFJ_TASK_RESOURCE_GPU", str(task.resource_gpu.replace("+",''))))
         container_envs.append(("KFJ_TASK_PROJECT_NAME", str(pipeline.project.name)))
-        container_envs.append(("GPU_TYPE", os.environ.get("GPU_TYPE", "NVIDIA")))
+        container_envs.append(("GPU_TYPE", 'NVIDIA'))
         container_envs.append(("USERNAME", pipeline.created_by.username))
 
 
@@ -446,6 +446,7 @@ def dag_to_pipeline(pipeline,dbsession,workflow_label=None,**kwargs):
     workflow_label['pipeline-rtx'] = pipeline.created_by.username
     workflow_label['save-time'] = datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
     workflow_label['pipeline-id'] = str(pipeline.id)
+    workflow_label['pipeline-name'] = str(pipeline.name)
     workflow_label['run-id'] = global_envs.get('KFJ_RUN_ID','')   # 以此来绑定运行时id，不能用kfp的run—id。那个是传到kfp以后才产生的。
     workflow_label['cluster'] = pipeline.project.cluster['NAME']
 
@@ -957,7 +958,8 @@ class Pipeline_ModelView_Base():
         time.sleep(1)
 
         back_crds = pipeline.get_workflow()
-        # self.save_workflow(back_crds)
+        # if back_crds:
+        #     self.save_workflow(back_crds)
         # 这里直接删除所有的历史任务流，正在运行的也删除掉
         # not_running_crds = back_crds  # [crd for crd in back_crds if 'running' not in crd['status'].lower()]
         self.delete_bind_crd(back_crds)
@@ -976,7 +978,8 @@ class Pipeline_ModelView_Base():
         pipeline.pipeline_argo_id = crd_name
         db.session.commit()  # 更新
         back_crds = pipeline.get_workflow()
-        # self.save_workflow(back_crds)
+        if back_crds:
+            self.save_workflow(back_crds)
 
         return redirect("/pipeline_modelview/web/log/%s"%pipeline_id)
         # return redirect(run_url)

@@ -542,7 +542,15 @@ class CeleryConfig(object):
             "expires": 600,
             'max_retries': 0,
             "reject_on_worker_lost": False
+		},
+        'task.check_pod_terminating':{
+            'rate_limit': '1/s',
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         }
+        
 
     }
 
@@ -591,11 +599,14 @@ class CeleryConfig(object):
             'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
             'schedule': crontab(minute='10',hour='11'),
         },
-        
-        'task_update_aihub': {
-            'task': 'task.update_aihub',  # 更新aihub
-            'schedule': crontab(minute='30', hour='4'),
-        },
+        # 'task_update_aihub': {
+        #     'task': 'task.update_aihub',  # 更新aihub
+        #     'schedule': crontab(minute='30', hour='4'),
+        # },
+		"task_check_pod_terminating": {
+            "task": "task.check_pod_terminating",
+            'schedule': crontab(minute='*/10'),
+        }
     }
 
  # 帮助文档地址，显示在web导航栏
@@ -657,20 +668,6 @@ CRD_INFO={
         "plural": "pytorchjobs",
         "timeout": 60 * 60 * 24 * 2
     },
-    "notebook": {
-        "group": "kubeflow.org",
-        "version": "v1",
-        "plural": "notebooks",
-        'kind':'Notebook',
-        "timeout": 60 * 60 * 24 * 2
-    },
-    "inferenceservice": {
-        "group": "serving.kserve.io",
-        "version": "v1beta1",
-        "plural": "inferenceservices",
-        'kind':'InferenceService',
-        "timeout": 60 * 60 * 24 * 1
-    },
     "virtualservice": {
         "group": "networking.istio.io",
         "version": "v1alpha3",
@@ -725,8 +722,8 @@ GLOBAL_ENV={
     "KFJ_ARCHIVE_BASE_PATH":"/archives",
     "KFJ_PIPELINE_NAME":"{{pipeline_name}}",
     "KFJ_NAMESPACE":"pipeline",
-    "KFJ_GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
-    "GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
+    "KFJ_GPU_TYPE": 'NVIDIA',
+    "GPU_TYPE": 'NVIDIA',
     "KFJ_GPU_MEM_MIN":"13G",
     "KFJ_GPU_MEM_MAX":"13G",
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
@@ -769,12 +766,6 @@ SERVICE_NAMESPACE = 'service'
 # 服务链路追踪地址
 SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
-# automl任务默认镜像
-AUTOML_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/automl'
-# automl的tfjob任务默认镜像
-AUTOML_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
-# automl的pytorchjob任务默认镜像
-AUTOML_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
 # 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
@@ -916,7 +907,7 @@ MODEL_URLS = {
     "etl_pipeline":"/frontend/dev/data_pipeline/etl_pipeline",
     "etl_task":"/frontend/dev/data_pipeline/task_manager",
     "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
-    "total_resource": "/frontend/train/total_resource",
+    "total_resource": "/frontend/service/total_resource",
     "notebook": "/frontend/dev/dev_online/notebook",
     "docker": "/frontend/dev/images/docker",
     "repository": "/frontend/dev/images/docker_repository",
@@ -939,18 +930,45 @@ COOKIE_DOMAIN = ''
 SERVICE_DOMAIN='service.local.com'
 
 
+# # 所有训练集群的信息
+# CLUSTERS={
+#     # 和project expand里面的名称一致
+#     "dev":{
+#         "NAME":"dev",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
+#         # "HOST":"9.135.92.226",
+#         # "SERVICE_DOMAIN": 'service.local.com',
+#     }
+# }
 
-# 所有训练集群的信息
+
+
 CLUSTERS={
+    # # 至少要有一个这个
+    "tke":{
+        "NAME":"tke",
+        "KUBECONFIG":'/home/myapp/kubeconfig/tke-kubeconfig',
+        "SERVICE_DOMAIN": 'service.kfserving.woa.com'
+    },
+    "shanghai":{
+        "NAME":"shanghai",
+        "KUBECONFIG":'/home/myapp/kubeconfig/shanghai-kubeconfig',
+        "HOST":'home.star.woa.com',
+        "SERVICE_DOMAIN": 'service.star.woa.com'
+    },
+    "idc": {
+        "NAME": "idc",
+        "KUBECONFIG": '/home/myapp/kubeconfig/idc-kubeconfig',
+        "HOST":'kubeflow.cube.woa.com',
+        "SERVICE_DOMAIN": 'service.cube.woa.com'
+    },
     # 和project expand里面的名称一致
-    "dev":{
-        "NAME":"dev",
-        "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        # "HOST":"9.135.92.226",
+    "dev": {
+        "NAME": "dev",
+        "KUBECONFIG": '/home/myapp/kubeconfig/dev-kubeconfig',
+        "HOST":"9.135.92.226",
         # "SERVICE_DOMAIN": 'service.local.com',
     }
 }
-
-
 
 

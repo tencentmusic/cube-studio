@@ -5,7 +5,7 @@ from sqlalchemy import Text
 from myapp.utils import core
 
 from myapp.models.helpers import AuditMixinNullable
-from flask import request
+from flask import request,g
 from .model_team import Project
 
 from myapp import app
@@ -16,7 +16,6 @@ from flask import Markup
 import datetime
 metadata = Model.metadata
 conf = app.config
-
 
 
 class service_common():

@@ -262,6 +262,9 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         "change_time": {"type": "ellip2", "width": 200},
         "final_status":{"type": "ellip1", "width": 250},
     }
+    spec_label_columns = {
+        "final_status": "删除前状态",
+    }
     show_columns = ['name', 'namespace', 'create_time', 'status','task_status', 'annotations_html', 'labels_html', 'spec_html','status_more_html', 'info_json_html']
     crd_name = 'workflow'
 
@@ -276,7 +279,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             if workflow_model:
                 workflow_obj=workflow_model.to_json()
             else:
-                return {},{},{}
+                return {},{},{},None
 
         # print(workflow_obj)
         labels = json.loads(workflow_obj.get('labels',"{}"))
@@ -342,7 +345,9 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             {
                 "label": "Terminate",
                 "url": f"/workflow_modelview/api/stop/{workflow_model.id}"
-            },
+            }
+        )
+        layout_config['right_button'].append(
             {
                 "label": "pipeline",
                 "url": f'/pipeline_modelview/web/{pipeline.id}'
@@ -506,7 +511,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 print(e)
 
         fill_child(self,dag_config,workflow_name)
-        return layout_config,dag_config,self.node_detail_config
+        return layout_config,dag_config,self.node_detail_config,workflow_obj
 
     @expose("/web/log/<cluster_name>/<namespace>/<workflow_name>/<pod_name>", methods=["GET", ])
     @expose("/web/log_node/<cluster_name>/<namespace>/<workflow_name>/<pod_name>", methods=["GET", ])
@@ -571,7 +576,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
     @expose("/web/node_detail/<cluster_name>/<namespace>/<workflow_name>/<node_name>", methods=["GET",])
     # @pysnooper.snoop()
     def web_node_detail(self,cluster_name,namespace,workflow_name,node_name):
-        layout_config, dag_config,node_detail_config = self.get_dag(cluster_name, namespace, workflow_name,node_name)
+        layout_config, dag_config,node_detail_config,workflow = self.get_dag(cluster_name, namespace, workflow_name,node_name)
         # print(node_detail_config)
         if not node_detail_config:
             return jsonify({})
@@ -603,7 +608,9 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         offline_pod_log_url = f'/workflow_modelview/api/web/log/{cluster_name}/{namespace}/{workflow_name}/{pod_name}'
         debug_online_url=host_url+conf.get('K8S_DASHBOARD_CLUSTER') + f"#/shell/{namespace}/{pod_name}/main?namespace={namespace}"
         grafana_pod_url = host_url+conf.get('GRAFANA_TASK_PATH','/grafana/d/pod-info/pod-info?var-pod=')+pod_name
-        bind_pod_url=host_url+f"/k8s/dashboard/cluster/#/search?namespace={namespace}&q={workflow_name}"
+        labels = json.loads(workflow.get('labels', "{}"))
+        pipeline_name = labels.get('pipeline-name',workflow_name)
+        bind_pod_url=host_url+f"/k8s/dashboard/cluster/#/search?namespace={namespace}&q={pipeline_name}"
 
         echart_option = '''
 {
@@ -880,7 +887,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
     @expose("/web/dag/<cluster_name>/<namespace>/<workflow_name>", methods=["GET",])
     def web_dag(self,cluster_name,namespace,workflow_name):
-        layout_config, dag_config,node_detail_config = self.get_dag(cluster_name,namespace,workflow_name)
+        layout_config, dag_config,node_detail_config,workflow = self.get_dag(cluster_name,namespace,workflow_name)
         back = {
             "control":{
                 "node_ops":["detail","explore"],   # 节点可进行的操作  详情查看/节点上下链路探索，以后才有功能再加
@@ -899,7 +906,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
     @expose("/web/layout/<cluster_name>/<namespace>/<workflow_name>", methods=["GET",])
     def web_layout(self,cluster_name,namespace,workflow_name):
-        layout_config, dag_config,node_detail_config = self.get_dag(cluster_name,namespace,workflow_name)
+        layout_config, dag_config,node_detail_config,workflow = self.get_dag(cluster_name,namespace,workflow_name)
         layout_config['title']=f"{cluster_name} {namespace} {workflow_name} {layout_config['start_time']} {layout_config['finish_time']}"
         return jsonify(
             {

@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkkubeflow_frontend=self.webpackChunkkubeflow_frontend||[]).push([[254],{7254:function(e,n,t){t.r(n),t.d(n,{default:function(){return s}});var u=t(9439),f=t(4519),r=t(2556);function s(){var e=(0,f.useState)(""),n=(0,u.Z)(e,2),t=n[0];n[1];return(0,f.useEffect)((function(){}),[]),(0,r.jsx)("div",{className:"fade-in",dangerouslySetInnerHTML:{__html:t}})}}}]);
-//# sourceMappingURL=254.cb8a2509.chunk.js.map

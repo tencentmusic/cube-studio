@@ -8,7 +8,7 @@
 
 DEPE模型以PETRv2([论文](https://arxiv.org/abs/2206.01256), [代码](https://github.com/megvii-research/PETR))方法为基础，该方法的核心思路是将图片在depth方向采样并结合相机参数生成3D坐标，将3D的位置编码与2D特征结合(3DPE)，从而进行3D检测。DEPE方法扩展了预测图片像素depth的方式，借鉴BEVDepth([论文](https://arxiv.org/abs/2206.10092), [代码](https://github.com/Megvii-BaseDetection/BEVDepth))提出的方法，借助LiDAR点云数据对图片depth的预测进行监督，将depthmap编码后与3DPE结合，以提升目标在3D场景的感知精度。该方式简洁有效，在nuScenes-val数据集上，输入分辨率800x320时，NDS指标相比PETRV2有0.52%的提升（**51.07%-->51.59%**）。DEPE方法的整体框架如下图所示：
 
-![depe](description/depe.jpg)
+![depe](https://modelscope.cn/api/v1/models/damo/cv_object-detection-3d_depe/repo?Revision=master&FilePath=description/depe.jpg&View=true)
 
 ## 期望模型使用方式以及适用范围
 
@@ -42,7 +42,7 @@ result = depe(input_dict)
 rst_img = result[OutputKeys.OUTPUT_IMG]
 if result is not None:
     cv2.imwrite('result.jpg', rst_img)
-    print(f'Output written to {osp.abspath("result.jpg")}')
+    print(f'Output written to {osp.abspath("https://modelscope.cn/api/v1/models/damo/cv_object-detection-3d_depe/repo?Revision=master&FilePath=result.jpg&View=true")}')
 # if you want to show the result, you can run
 import matplotlib.pyplot as plt
 plt.axis('off')

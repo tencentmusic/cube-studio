@@ -13,7 +13,7 @@
 
 
 ## 模型原理
-![FLXC模型原理](algo.jpg)
+![FLXC模型原理](https://modelscope.cn/api/v1/models/damo/cv_manual_face-liveness_flxc/repo?Revision=master&FilePath=algo.jpg&View=true)
 
 ## 模型效果
 ![FLIR模型效果](result.png)

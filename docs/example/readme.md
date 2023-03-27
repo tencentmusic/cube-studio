@@ -45,7 +45,7 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 调度机器可以是不同项目组，不同机型，不同区域等划分方式
 	
 	{
-		"node_selector": "org=public"
+		"org": "public"
 	}
 
 ### 项目组控制挂载volume_mount（管理员学习）
@@ -68,7 +68,9 @@ __notebook__：开启一个jupyter-notebook，自动挂载个人工作目录。�
 
 ```
 	{
-		"SERVICE_EXTERNAL_IP":"xx.xx.xx.xx"
+	    "SERVICE_EXTERNAL_IP":"内网ip"
+		"SERVICE_EXTERNAL_IP":"内网ip|公网ip或公网域名"
+		
 	}
 ```
 

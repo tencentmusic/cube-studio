@@ -20,7 +20,7 @@
 注：因为本模型参数量大小6B，所以需要显存大于40G的GPU机器。
 
 <p align="center">
-    <img src="resources/donuts.jpg" alt="donuts" width="200" />
+    <img src="https://modelscope.cn/api/v1/models/damo/ofa_image-caption_coco_6b_en/repo?Revision=master&FilePath=resources/donuts.jpg&View=true" alt="donuts" width="200" />
 
 ```python
 from modelscope.pipelines import pipeline

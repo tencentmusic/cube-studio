@@ -8,7 +8,7 @@
 
 
 ## 模型描述
-<img src="resources/intro.jpg" width="800" >
+<img src="https://modelscope.cn/api/v1/models/damo/cv_alex_video-single-object-tracking_siamfc/repo?Revision=master&FilePath=resources/intro.jpg&View=true" width="800" >
 
 本模型是基于Siamfc方案的单目标跟踪框架，使用AlexNet作为主干网络进行训练，是One-Stream单目标跟踪算法。
 

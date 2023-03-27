@@ -23,11 +23,11 @@
 ## 模型描述
 本模型为实时人头检测模型，基于检测框架[DAMOYOLO-S模型](https://modelscope.cn/models/damo/cv_tinynas_object-detection_damoyolo/summary)，DAMO-YOLO是一个面向工业落地的目标检测框架，兼顾模型速度与精度，其训练的模型效果超越了目前的一众YOLO系列方法，并且仍然保持极高的推理速度。DAMOYOLO与YOLO系列其它经典工作的性能对比如下图所示：
 
-<div align="center"><img src="assets/DAMOYOLO_performance.jpg" width="500"></div>
+<div align="center"><img src="https://modelscope.cn/api/v1/models/damo/cv_tinynas_head-detection_damoyolo/repo?Revision=master&FilePath=assets/DAMOYOLO_performance.jpg&View=true" width="500"></div>
 
 DAMOYOLO整体网络结构如下，整体由backbone (MAE-NAS), neck (GFPN), head (ZeroHead)三部分组成，基于"large neck, small head"的设计思想，对低层空间信息和高层语义信息进行更加充分的融合，从而提升模型最终的检测效果。
 
-<div align="center"><img src="assets/DAMOYOLO_architecture.jpg" width="2000"></div>
+<div align="center"><img src="https://modelscope.cn/api/v1/models/damo/cv_tinynas_head-detection_damoyolo/repo?Revision=master&FilePath=assets/DAMOYOLO_architecture.jpg&View=true" width="2000"></div>
 
 
 ## 期望模型使用方式以及适用范围

@@ -262,7 +262,7 @@ class Project_ModelView_org_Api(Project_ModelView_Base,MyappModelRestApi):
         ),
         'expand': StringField(
             _(datamodel.obj.lab('expand')),
-            description='扩展参数。示例参数：<br>"cluster": "dev"<br>"node_selector": "org=public"<br>"volume_mount": "kubeflow-user-workspace(pvc):/mnt/;/data/k8s/../group1(hostpath):/mnt1"<br>"SERVICE_EXTERNAL_IP":"xx.xx.xx.xx"',
+            description='扩展参数。示例参数：<br>"cluster": "dev"<br>"org": "public"<br>"volume_mount": "kubeflow-user-workspace(pvc):/mnt/;/data/k8s/../group1(hostpath):/mnt1"<br>"SERVICE_EXTERNAL_IP":"xx.内网.xx.xx|xx.公网.xx.xx"',
             widget=MyBS3TextAreaFieldWidget(),
             default=json.dumps({"cluster": "dev"},indent=4,ensure_ascii=False),
         )
