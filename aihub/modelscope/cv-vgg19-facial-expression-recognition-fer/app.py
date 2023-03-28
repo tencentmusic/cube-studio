@@ -83,10 +83,13 @@ model=CV_VGG19_FACIAL_EXPRESSION_RECOGNITION_FER_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-# model.load_model(save_model_dir=None)
-# result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/facial_expression_recognition.jpg')  # 测试
-# print(result)
+model.load_model(save_model_dir=None)
+result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/facial_expression_recognition.jpg')  # 测试
+print(result)
 
 # 模型启动web时使用
-if __name__=='__main__':
-    model.run()
+# if __name__=='__main__':
+#     model.run()
+
+# 模型大小 180M
+# cpu运行，运行时长 0.7s
