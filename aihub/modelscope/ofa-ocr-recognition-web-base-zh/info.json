@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/ofa-ocr-recognition-web-base-zh",
+    "field": "多模态",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "ofa-ocr-recognition-web-base-zh",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "ofa-ocr-recognition-web-base-zh-v20221001",
+    "label": "OFA文字识别-中文-网络场景-base",
+    "describe": "基于OFA模型的finetune后的OCR文字识别任务，可有效识别网络场景的文字内容。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

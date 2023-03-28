@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import numpy
 
 class OFA_OCR_RECOGNITION_HANDWRITING_BASE_ZH_Model(Model):
     # 模型基础信息定义
@@ -35,7 +36,7 @@ class OFA_OCR_RECOGNITION_HANDWRITING_BASE_ZH_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "image": "https://xingchen-data.oss-cn-zhangjiakou.aliyuncs.com/maas/ocr/ocr_handwriting_demo.png"
+                "image": "test.jpg"
             }
         }
     ]
@@ -62,16 +63,12 @@ class OFA_OCR_RECOGNITION_HANDWRITING_BASE_ZH_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
-
+        text = result.get("text")
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -84,10 +81,13 @@ model=OFA_OCR_RECOGNITION_HANDWRITING_BASE_ZH_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://xingchen-data.oss-cn-zhangjiakou.aliyuncs.com/maas/ocr/ocr_handwriting_demo.png')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(image='test.jpg')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小679M,内存占用2.39G,识别图片响应在12秒左右,没有GPU
+#运行环境为腾讯云服务器	标准型S6 - 2核 4G,操作系统TencentOS Server 3.1 (TK4)
+#能够识别手写楷书\行楷\行书,识别效果比较准确.只能识别一行

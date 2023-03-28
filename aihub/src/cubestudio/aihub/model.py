@@ -143,8 +143,8 @@ class Model():
     def __init__(self):
 
         # 校验字段
-        if self.field not in ['机器视觉','听觉','自然语言','强化学习','图论','通用']:
-            raise "field not valid，one of ['机器视觉','听觉','自然语言','强化学习','图论','通用']"
+        if self.field not in ['机器视觉','听觉','自然语言','多模态','强化学习','图论','通用']:
+            raise "field not valid，one of ['机器视觉','听觉','自然语言','多模态','强化学习','图论','通用']"
 
         self.doc = 'https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/%s'%self.name
         # 生成info.json文件
