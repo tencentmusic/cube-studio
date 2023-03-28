@@ -624,6 +624,7 @@ class Server():
             cap.start()
             return Response(gen(cap),mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
         @app.route(f'/wechat/jsapi')
         def wechat():
             return jsonify({
