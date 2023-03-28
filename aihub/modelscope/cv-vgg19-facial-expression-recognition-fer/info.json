@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-vgg19-facial-expression-recognition-fer",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-vgg19-facial-expression-recognition-fer",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-vgg19-facial-expression-recognition-fer-v20221001",
+    "label": "人脸表情识别模型FER",
+    "describe": "给定一张带人脸的图片，返回图片中人脸的表情。目前支持7种表情：愤怒，厌恶，恐惧，快乐，悲伤，惊讶，中立。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}
