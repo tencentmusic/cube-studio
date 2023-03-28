@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnexttiny-ocr-recognition-scene-damo",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-convnexttiny-ocr-recognition-scene-damo",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-convnexttiny-ocr-recognition-scene-damo-v20221001",
+    "label": "读光-文字识别-行识别模型-中英-自然场景文本领域",
+    "describe": "给定一张自然场景图片，识别出图中所含文字并输出字符串。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}
