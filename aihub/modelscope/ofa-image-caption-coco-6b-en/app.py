@@ -87,7 +87,7 @@ class OFA_IMAGE_CAPTION_COCO_6B_EN_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
-        result = result['caption']
+        result = result.get('caption')
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
