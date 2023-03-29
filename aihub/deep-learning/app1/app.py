@@ -40,7 +40,9 @@ class APP1_Model(Model):
               default=['choice1'],validators=Validator(max=3)),
         Field(type=Field_type.image_select, name='arg8', label='图片 选项类输入',
               describe='用于在界面展示,多选组件，max控制多选', choices=['风格1.jpg', '风格2.jpg'],
-              default=['风格1.jpg','风格2.jpg'],validators=Validator(max=2))
+              default=['风格1.jpg','风格2.jpg'],validators=Validator(max=2)),
+        Field(type=Field_type.capture, name='arg8', label='摄像头作为输入',
+              describe='摄像头采样图片作为输入，max控制每秒采样帧数，例如10，表示每秒采样10帧', validators=Validator(max=10))
     ]
 
     # 会显示在web界面上，让用户作为示例输入

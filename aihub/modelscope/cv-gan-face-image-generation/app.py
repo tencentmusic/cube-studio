@@ -4,7 +4,10 @@ from cubestudio.aihub.model import Model, Validator, Field_type, Field
 import time
 import pysnooper
 import os
-
+import cv2
+from modelscope.outputs import OutputKeys
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
 
 class CV_GAN_FACE_IMAGE_GENERATION_Model(Model):
     # 模型基础信息定义
@@ -15,7 +18,7 @@ class CV_GAN_FACE_IMAGE_GENERATION_Model(Model):
     scenes = ""
     status = 'online'
     version = 'v20221001'
-    pic = 'result.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic = 'example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     hot = "10633"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_gan_face-image-generation/summary"
@@ -42,13 +45,12 @@ class CV_GAN_FACE_IMAGE_GENERATION_Model(Model):
     def inference(self, **kwargs):
         seed = int(time.time()*1000)
         result = self.p(seed)
+        save_path = 'result/result-%s.jpg'%seed
+        os.makedirs('result',exist_ok=True)
+        cv2.imwrite(save_path, result[OutputKeys.OUTPUT_IMG])
         back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown": ''
+                "image": save_path
             }
         ]
         return back
@@ -57,10 +59,14 @@ class CV_GAN_FACE_IMAGE_GENERATION_Model(Model):
 model = CV_GAN_FACE_IMAGE_GENERATION_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference()  # 测试
-print(result)
+# model.load_model()
+# result = model.inference()  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+
+# 模型大小128M
+# cpu模型推理时长  1.5s
