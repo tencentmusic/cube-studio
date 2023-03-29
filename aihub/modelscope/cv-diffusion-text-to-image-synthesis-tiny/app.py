@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import time,cv2,numpy
 import pysnooper
 import os
 
@@ -47,14 +47,15 @@ class CV_DIFFUSION_TEXT_TO_IMAGE_SYNTHESIS_TINY_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,text,**kwargs):
         result = self.p({'text': '中国山水画'})
-        cv2.imwrite('result.png', result['output_imgs'][0])
+        savePath = 'result/result_' + str(int(1000*time.time())) + '.jpg'
+        os.makedirs(os.path.dirname(savePath), exist_ok=True)
+        if os.path.exists(savePath):
+            os.remove(savePath)
+
+        cv2.imwrite(savePath, result['output_imgs'][0])
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": savePath
             }
         ]
         return back
@@ -62,10 +63,13 @@ class CV_DIFFUSION_TEXT_TO_IMAGE_SYNTHESIS_TINY_Model(Model):
 model=CV_DIFFUSION_TEXT_TO_IMAGE_SYNTHESIS_TINY_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(text='中国山水画')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(text='中国山水画')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+# 小模型 4G
+# cpu推理速度 时间太久
