@@ -23,7 +23,7 @@ class CV_CONVNEXT_BASE_IMAGE_CLASSIFICATION_GARBAGE_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='image', label='',describe='上传一张需要分类的垃圾的图片',default='',validators=None)
     ]
 
     inference_resource = {

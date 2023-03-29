@@ -89,6 +89,7 @@ model=CV_RESNEST101_ANIMAL_RECOGNITION_Model()
 # result = model.inference(arg0='https://mmsearch.oss-cn-zhangjiakou.aliyuncs.com/maas_test_img/bailing.png')  # 测试
 # print(result)
 
+# 1. 不知道rstp流的推理相比普通推理有什么优势，下次可以试试
 # # 模型启动web时使用
 if __name__=='__main__':
     model.run()
