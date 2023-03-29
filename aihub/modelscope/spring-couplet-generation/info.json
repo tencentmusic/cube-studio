@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/spring-couplet-generation",
+    "field": "自然语言",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "spring-couplet-generation",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "spring-couplet-generation-v20221001",
+    "label": "春联生成模型-中文-base",
+    "describe": "春联生成模型是达摩院AliceMind团队利用基础生成大模型在春联场景的应用，该模型可以通过输入两字随机祝福词，生成和祝福词相关的春联。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

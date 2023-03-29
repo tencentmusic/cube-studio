@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/ofa-text-classification-mnli-large-en",
+    "field": "多模态",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "ofa-text-classification-mnli-large-en",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "ofa-text-classification-mnli-large-en-v20221001",
+    "label": "OFA自然语言推理模型-英文-数据集MNLI-large",
+    "describe": "给定一个前提句和一个假设句，任务是预测前提是否包含假设（蕴含），与假设相矛盾（矛盾），或者两者都不包含（中性）。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

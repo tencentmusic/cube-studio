@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/ofa-summarization-gigaword-large-en",
+    "field": "多模态",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "ofa-summarization-gigaword-large-en",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "ofa-summarization-gigaword-large-en-v20221001",
+    "label": "OFA文本摘要-英文-数据集gigaword-large",
+    "describe": "gigaword摘要任务：给定长文本，输出文本摘要。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import numpy
 
 class OFA_SUMMARIZATION_GIGAWORD_LARGE_EN_Model(Model):
     # 模型基础信息定义
@@ -24,7 +25,7 @@ class OFA_SUMMARIZATION_GIGAWORD_LARGE_EN_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.text, name='text', label='',describe='',default='',validators=None)
+        Field(type=Field_type.text, name='text', label='长文本内容',describe='长文本内容',default='',validators=None)
     ]
 
     inference_resource = {
@@ -62,16 +63,12 @@ class OFA_SUMMARIZATION_GIGAWORD_LARGE_EN_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,text,**kwargs):
         result = self.p(text)
-
+        text = result.get("text")
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -84,10 +81,13 @@ model=OFA_SUMMARIZATION_GIGAWORD_LARGE_EN_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(text='five-time world champion michelle kwan withdrew from the us figure skating championships on wednesday , but will petition us skating officials for the chance to compete at the turin olympics .')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(text='five-time world champion michelle kwan withdrew from the us figure skating championships on wednesday , but will petition us skating officials for the chance to compete at the turin olympics .')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小为1.9G,运行内存占用为3.78G,响应速度在10秒以内,没有GPU
+#运行环境为腾讯云服务器	标准型SA3 - 4核 8G,操作系统TencentOS Server 3.1 (TK4)
+#文本中心意思较明确的总结摘要很准确,如果语义不明摘要会不正确

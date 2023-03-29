@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import numpy
 
 class OFA_TEXT_CLASSIFICATION_MNLI_LARGE_EN_Model(Model):
     # 模型基础信息定义
@@ -64,16 +65,12 @@ class OFA_TEXT_CLASSIFICATION_MNLI_LARGE_EN_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,text,text2,**kwargs):
         result = self.p({"text": text, "text2": text2})
-
+        text = result.get("labels")
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -86,10 +83,12 @@ model=OFA_TEXT_CLASSIFICATION_MNLI_LARGE_EN_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(text='One of our number will carry out your instructions minutely.',text2='A member of my team will execute your orders with immense precision.')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(text='One of our number will carry out your instructions minutely.',text2='A member of my team will execute your orders with immense precision.')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小为1.9G,运行内存占用为3.89G,响应速度在10秒左右,没有GPU,模型预测比较准确
+#运行环境为腾讯云服务器	标准型SA3 - 4核 8G,操作系统TencentOS Server 3.1 (TK4)
