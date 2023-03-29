@@ -1,5 +1,6 @@
 import base64
 import io,sys,os
+import numpy as np
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
@@ -79,23 +80,19 @@ class OFA_IMAGE_CAPTION_COCO_6B_EN_Model(Model):
         self.p = pipeline('image-captioning', 'damo/ofa_image-caption_coco_6b_en')
 
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
-    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
+    def rtsp_inference(self,img:np.ndarray,**kwargs)->np.ndarray:
         return img
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
-
+        result = result['caption']
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(result)
             }
         ]
         return back
@@ -108,10 +105,21 @@ model=OFA_IMAGE_CAPTION_COCO_6B_EN_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://shuangqing-public.oss-cn-zhangjiakou.aliyuncs.com/donuts.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='https://shuangqing-public.oss-cn-zhangjiakou.aliyuncs.com/donuts.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+'''
+Date: 2023-03-26
+Tested by: 秋水泡茶
+模型大小：22.4G
+模型效果：MS COCO Caption训练的通用根据图片生成文本算法模型，模型文件较大，容器启动较慢，占用显存较高。
+推理性能：以1920*1080分辨率图像为例，平均推理时间在20s左右。
+测试环境：CPU：Intel(R) Xeon(R) Gold 5118 CPU @ 2.30GHz, GPU：Tesla V100 32G
+占用GPU显存：正常运行状态下，占用显存26145M，每次运行单卡功耗160W左右，单卡占用率70%左右。
+巧妙使用方法：
+'''
