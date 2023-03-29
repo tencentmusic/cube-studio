@@ -1,7 +1,11 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import cv2
+from modelscope.outputs import OutputKeys
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+import time
 import pysnooper
 import os
 
@@ -24,10 +28,6 @@ class CV_DDCOLOR_IMAGE_COLORIZATION_Model(Model):
     inference_inputs = [
         Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
     ]
-
-    inference_resource = {
-        "resource_gpu": "1"
-    }
 
     web_examples=[
         {
@@ -66,13 +66,14 @@ class CV_DDCOLOR_IMAGE_COLORIZATION_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
+        savePath = 'result/result_' + str(int(1000*time.time())) + '.jpg'
+        os.makedirs(os.path.dirname(savePath), exist_ok=True)
+        if os.path.exists(savePath):
+            os.remove(savePath)
+        cv2.imwrite(savePath, result[OutputKeys.OUTPUT_IMG])
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": savePath
             }
         ]
         return back
@@ -80,10 +81,14 @@ class CV_DDCOLOR_IMAGE_COLORIZATION_Model(Model):
 model=CV_DDCOLOR_IMAGE_COLORIZATION_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_ddcolor_image-colorization/resources/demo.jpg')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_ddcolor_image-colorization/resources/demo.jpg')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+
+# 模型大小 9000M
+# cpu运行时长 3s钟
