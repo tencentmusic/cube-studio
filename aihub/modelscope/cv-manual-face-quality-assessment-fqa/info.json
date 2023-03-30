@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-manual-face-quality-assessment-fqa",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-manual-face-quality-assessment-fqa",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-manual-face-quality-assessment-fqa-v20221001",
+    "label": "人脸质量模型FQA",
+    "describe": "人脸质量模型FQA",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

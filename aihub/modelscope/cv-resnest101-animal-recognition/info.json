@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnest101-animal-recognition",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-resnest101-animal-recognition",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-resnest101-animal-recognition-v20221001",
+    "label": "动物识别-中文-通用领域",
+    "describe": "本模型是对含有动物的图像进行标签识别，无需任何额外输入，输出动物的类别标签，目前已经覆盖了8K多类的细粒度的动物类别。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

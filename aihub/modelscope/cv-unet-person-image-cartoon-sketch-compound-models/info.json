@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-sketch-compound-models",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-unet-person-image-cartoon-sketch-compound-models",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-unet-person-image-cartoon-sketch-compound-models-v20221001",
+    "label": "DCT-Net人像卡通化-素描",
+    "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像素描风格转换模型。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,cv2,random
 import pysnooper
 import os
 
@@ -63,15 +63,18 @@ class CV_UNET_VIDEO_COLORIZATION_Model(Model):
     def inference(self,video,**kwargs):
         result = self.p(video)
 
+        print(result)
+        save_path = f'result/result{random.randint(1, 1000)}.mp4'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, result['output_img'])
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "video": save_path
             }
         ]
         return back
@@ -91,3 +94,6 @@ print(result)
 # # 模型启动web时使用
 # if __name__=='__main__':
 #     model.run()
+
+# 模型大小
+# 模型推理速度 cpu 13s视频，耗时

@@ -3,7 +3,8 @@ import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
-import os
+import os,numpy
+import pandas as pd
 
 class CV_RESNEST101_ANIMAL_RECOGNITION_Model(Model):
     # 模型基础信息定义
@@ -24,7 +25,7 @@ class CV_RESNEST101_ANIMAL_RECOGNITION_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='arg0', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='arg0', label='',describe='输入需要识别的小动物的图片，动物占比不要太小',default='',validators=None)
     ]
 
     inference_resource = {
@@ -62,16 +63,16 @@ class CV_RESNEST101_ANIMAL_RECOGNITION_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
+        # print(result,type(result))
+        result = pd.DataFrame(result)
+        result.columns = ['得分','类别']
+        result = result[['类别','得分']]
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "markdown":result.to_markdown()
             }
         ]
         return back
@@ -84,10 +85,11 @@ model=CV_RESNEST101_ANIMAL_RECOGNITION_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='https://mmsearch.oss-cn-zhangjiakou.aliyuncs.com/maas_test_img/bailing.png')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(arg0='https://mmsearch.oss-cn-zhangjiakou.aliyuncs.com/maas_test_img/bailing.png')  # 测试
+# print(result)
 
+# 1. 不知道rstp流的推理相比普通推理有什么优势，下次可以试试
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()

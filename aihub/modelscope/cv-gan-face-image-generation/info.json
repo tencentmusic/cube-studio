@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-gan-face-image-generation",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-gan-face-image-generation",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-gan-face-image-generation-v20221001",
+    "label": "StyleGAN2人脸生成",
+    "describe": "StyleGAN是图像生成领域的代表性工作，StyleGAN2在StyleGAN的基础上，采用Weight Demodulation取代AdaIN等改进极大的减少了water droplet artifacts等，生成结果有了质的提升，甚至能达到以假乱真的程度。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}
