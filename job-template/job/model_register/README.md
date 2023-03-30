@@ -21,7 +21,7 @@
         "--model_name": {
             "type": "str",
             "item_type": "str",
-            "label": "模型名",
+            "label": "模型名(a-z0-9-字符组成，最长54个字符)",
             "require": 1,
             "choice": [],
             "range": "",
