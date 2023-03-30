@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-video-colorization",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-unet-video-colorization",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-unet-video-colorization-v20221001",
+    "label": "DeOldify视频上色",
+    "describe": "DeOldify 是上色领域比较有名的开源算法，模型利用 ResNet 作为 encoder 构建一个 UNet 结构的网络，并提出了多个不同的训练版本，本模型是用于视频上色的版本。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}
