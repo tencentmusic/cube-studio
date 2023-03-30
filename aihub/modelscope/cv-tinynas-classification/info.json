@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-classification",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-tinynas-classification",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-tinynas-classification-v20221001",
+    "label": "TinyNAS高性能图像分类网络结构模型",
+    "describe": "ZenNet 是基于 Tiny-NAS (Zen-NAS) 算法设计出的高效的卷积网络结构。 本 demo 只提供 zennet_imagenet1k_latency12ms_res22 backbone，其它网络结构可以从README 中获取。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}
