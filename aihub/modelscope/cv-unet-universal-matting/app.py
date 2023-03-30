@@ -27,11 +27,14 @@ class CV_UNET_UNIVERSAL_MATTING_Model(Model):
         Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
     ]
 
-    inference_resource = {
-        "resource_gpu": "1"
-    }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
+        {
+            "label": "示例0",
+            "input": {
+                "image": "test1.jpeg"
+            }
+        }
     ]
 
     # 训练的入口函数，此函数会自动对接pipeline，将用户在web界面填写的参数传递给该方法
@@ -82,7 +85,7 @@ model=CV_UNET_UNIVERSAL_MATTING_Model()
 
 # 容器中运行调试推理时
 # model.load_model(save_model_dir=None)
-# result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_unet_universal-matting/description/demo1.jpg')  # 测试
+# result = model.inference(image='test1.jpeg')  # 测试
 # print(result)
 
 # 模型启动web时使用 
@@ -91,3 +94,4 @@ if __name__=='__main__':
 
 # 模型大小 200M
 # 模型cpu推理速度 0.5s
+# 构图效果一般
