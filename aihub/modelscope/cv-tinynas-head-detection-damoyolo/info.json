@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-head-detection-damoyolo",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-tinynas-head-detection-damoyolo",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-tinynas-head-detection-damoyolo-v20221001",
+    "label": "实时人头检测-通用",
+    "describe": "本模型为高性能热门应用系列检测模型中的实时人头检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人头的坐标信息，并可用于行人计数等后续应用场景。更多具体信息请参考Model card。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}
