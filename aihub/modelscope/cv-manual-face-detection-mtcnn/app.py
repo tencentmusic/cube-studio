@@ -99,4 +99,5 @@ model=CV_MANUAL_FACE_DETECTION_MTCNN_Model()
 if __name__=='__main__':
     model.run()
 
-# 模型大小
+# 模型大小 4.5M
+# 推理速度 gpu v100 0.1s 显存占用2G
