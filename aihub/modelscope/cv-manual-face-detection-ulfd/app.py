@@ -67,9 +67,6 @@ class CV_MANUAL_FACE_DETECTION_ULFD_Model(Model):
 
         for index, face in enumerate(result['boxes']):
             boxs = face
-            keypoints = result['keypoints'][index]
-            for i in range(5):
-                cv2.circle(img, (int(keypoints[i * 2]), int(keypoints[i * 2 + 1])), 3, (0, 0, 255), -1)
             cv2.rectangle(img, (int(boxs[0]), int(boxs[1])), (int(boxs[2]), int(boxs[3])), (0, 0, 255), 2)
 
         savePath = 'result/result_' + str(int(1000 * time.time())) + '.jpg'
@@ -102,3 +99,6 @@ model=CV_MANUAL_FACE_DETECTION_ULFD_Model()
 # 模型启动web时使用
 if __name__=='__main__':
     model.run()
+
+# 模型大小 1M
+# gpu v100 推理速度 0.1s
