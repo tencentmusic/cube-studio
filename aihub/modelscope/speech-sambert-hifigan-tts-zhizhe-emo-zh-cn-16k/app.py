@@ -54,24 +54,28 @@ class SPEECH_SAMBERT_HIFIGAN_TTS_ZHIZHE_EMO_ZH_CN_16K_Model(Model):
         
         self.p = pipeline('text-to-speech', 'damo/speech_sambert-hifigan_tts_zhizhe_emo_zh-cn_16k')
 
-    # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
-    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
-        return img
-
     # web每次用户请求推理，用于对接web界面请求
-    @pysnooper.snoop(watch_explode=('result'))
+    @pysnooper.snoop()
     def inference(self,input,**kwargs):
         result = self.p(input)
 
+        from modelscope.outputs import OutputKeys
+        import random
+
+        save_path = f'result/result{random.randint(1, 1000)}.wav'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+
+        wav = result[OutputKeys.OUTPUT_WAV]
+        with open(save_path, 'wb') as f:
+            f.write(wav)
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "audio": save_path
             }
         ]
         return back
@@ -84,10 +88,13 @@ model=SPEECH_SAMBERT_HIFIGAN_TTS_ZHIZHE_EMO_ZH_CN_16K_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(input='北京今天天气怎么样')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(input='北京今天天气怎么样')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 900M
+# 模型运行速度  v100 gpu  占用1.5G 显存, 示例输入，耗时0.6s
