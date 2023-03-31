@@ -96,5 +96,5 @@ model=SPEECH_SAMBERT_HIFIGAN_TTS_EN_GB_16K_Model()
 if __name__=='__main__':
     model.run()
 
-# 模型大小 900M
+# 模型大小 1.1G
 # 模型运行速度  v100 gpu  占用1.5G 显存, 示例输入，耗时0.6s

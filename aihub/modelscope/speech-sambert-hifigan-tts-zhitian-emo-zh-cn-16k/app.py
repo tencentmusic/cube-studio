@@ -35,7 +35,7 @@ class SPEECH_SAMBERT_HIFIGAN_TTS_ZHITIAN_EMO_ZH_CN_16K_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "input": "北京今天天气怎么样"
+                "input": "北京今天天气怎么样?"
             }
         }
     ]
@@ -89,7 +89,7 @@ model=SPEECH_SAMBERT_HIFIGAN_TTS_ZHITIAN_EMO_ZH_CN_16K_Model()
 
 # 容器中运行调试推理时
 # model.load_model(save_model_dir=None)
-# result = model.inference(input='北京今天天气怎么样')  # 测试
+# result = model.inference(input='北京今天天气怎么样?')  # 测试
 # print(result)
 
 # 模型启动web时使用
@@ -97,4 +97,4 @@ if __name__=='__main__':
     model.run()
 
 # 模型大小 900M
-# 模型运行速度  v100 gpu  占用1.5G 显存, 示例输入，耗时0.6s
+# 模型运行速度  v100 gpu  占用1.5G 显存, 示例输入，耗时1s

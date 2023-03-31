@@ -25,7 +25,7 @@ class SPEECH_SAMBERT_HIFIGAN_TTS_ZH_CN_16K_Model(Model):
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
         Field(type=Field_type.text, name='input', label='文本',describe='文本',default='',validators=Validator(max=300)),
-        Field(type=Field_type.text_select, name='voice', label='音色',describe='音色',choices=['zhitian_emo','zhiyan_emo','zhizhe_emo','zhibei_emo'],default='',validators=Validator(max=300)),
+        Field(type=Field_type.text_select, name='voice', label='音色',describe='音色',choices=['zhitian_emo','zhiyan_emo','zhizhe_emo','zhibei_emo'],default='zhitian_emo',validators=Validator(max=300)),
     ]
 
     inference_resource = {
@@ -36,7 +36,7 @@ class SPEECH_SAMBERT_HIFIGAN_TTS_ZH_CN_16K_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "input": "北京今天天气怎么样"
+                "input": "北京今天天气怎么样?"
             }
         }
     ]
@@ -90,12 +90,12 @@ model=SPEECH_SAMBERT_HIFIGAN_TTS_ZH_CN_16K_Model()
 
 # 容器中运行调试推理时
 # model.load_model(save_model_dir=None)
-# result = model.inference(input='北京今天天气怎么样')  # 测试
+# result = model.inference(input='北京今天天气怎么样?')  # 测试
 # print(result)
 
 # 模型启动web时使用
 if __name__=='__main__':
     model.run()
 
-# 模型大小 900M
+# 模型大小 1.5G
 # 模型运行速度  v100 gpu  占用1.5G 显存, 示例输入，耗时0.6s
