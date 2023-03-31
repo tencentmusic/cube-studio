@@ -77,10 +77,14 @@ model=SPEECH_UNIASR_ASR_2PASS_EN_16K_COMMON_VOCAB1080_TENSORFLOW1_ONLINE_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(input='/mnt/workspace/.cache/modelscope/damo/speech_UniASR_asr_2pass-en-16k-common-vocab1080-tensorflow1-online/example/asr_example.wav')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(input='/mnt/workspace/.cache/modelscope/damo/speech_UniASR_asr_2pass-en-16k-common-vocab1080-tensorflow1-online/example/asr_example.wav')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 450M
+# 模型推理：  10s wav，gpu v100 推理耗时 3.8s
+# 推理运行时gpu 显存占用2G

@@ -24,8 +24,8 @@ class SPEECH_XVECTOR_SV_ZH_CN_CNCELEB_16K_SPK3465_PYTORCH_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.audio, name='audio', label='音频',describe='音频',default='',validators=None),
-        Field(type=Field_type.audio, name='audio', label='音频',describe='音频',default='',validators=None)
+        Field(type=Field_type.audio, name='enroll', label='说话人音频',describe='如果仅有此输入，则输出embedding',default='',validators=None),
+        Field(type=Field_type.audio, name='input', label='说话人音频',describe='如果同时包含此输入，则输出两音频是同一个人的概率',default='',validators=None)
     ]
 
     inference_resource = {
@@ -63,26 +63,24 @@ class SPEECH_XVECTOR_SV_ZH_CN_CNCELEB_16K_SPK3465_PYTORCH_Model(Model):
         
         self.p = pipeline('speaker-verification', 'damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch')
 
-    # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
-    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
-        return img
-
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,audio,audio,**kwargs):
-        result = self.p({"audio": audio})
-
-        # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
-        # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
-            {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
-            }
-        ]
+    def inference(self,enroll,input=None,**kwargs):
+        if input:
+            result = self.p(audio_in=(enroll,input))
+            back = [
+                {
+                    "text": str(result["test1"])+"%"
+                }
+            ]
+        else:
+            file_name = os.path.basename(enroll)
+            result = self.p(audio_in=enroll)
+            back = [
+                {
+                    "text": str(result[file_name].tolist())   # 获取声纹数组
+                }
+            ]
         return back
 
 model=SPEECH_XVECTOR_SV_ZH_CN_CNCELEB_16K_SPK3465_PYTORCH_Model()
@@ -93,10 +91,16 @@ model=SPEECH_XVECTOR_SV_ZH_CN_CNCELEB_16K_SPK3465_PYTORCH_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(enroll='/mnt/workspace/.cache/modelscope/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/example/sv_example_enroll.wav',input='/mnt/workspace/.cache/modelscope/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/example/sv_example_different.wav')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# # result = model.inference(enroll='/mnt/workspace/.cache/modelscope/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/example/sv_example_enroll.wav',input='/mnt/workspace/.cache/modelscope/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/example/sv_example_same.wav')  # 测试
+# result = model.inference(enroll='/mnt/workspace/.cache/modelscope/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/example/sv_example_enroll.wav')  # 测试
+#
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 72M
+# 两个人声计算相似度 v100 gpu上  0.3s 占用显存2G
+# 一个人声计算相似度 v100 gpu上  0.3s 占用显存2G

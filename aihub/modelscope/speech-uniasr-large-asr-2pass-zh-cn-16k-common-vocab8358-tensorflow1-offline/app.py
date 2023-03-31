@@ -76,10 +76,14 @@ model=SPEECH_UNIASR_LARGE_ASR_2PASS_ZH_CN_16K_COMMON_VOCAB8358_TENSORFLOW1_OFFLI
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(input='/mnt/workspace/.cache/modelscope/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/example/asr_example.wav')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(input='/mnt/workspace/.cache/modelscope/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/example/asr_example.wav')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 1.1G
+# 模型推理：  5s wav，gpu v100 推理耗时 2.1s
+# 推理运行时gpu 显存占用4G
