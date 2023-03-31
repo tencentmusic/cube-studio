@@ -22,9 +22,9 @@ class CV_DAFLOW_VIRTUAL_TRY_ON_BASE_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.image, name='Image1', label='图片',describe='图片',default='',validators=None),
-        Field(type=Field_type.image, name='Image2', label='图片',describe='图片',default='',validators=None),
-        Field(type=Field_type.image, name='Image3', label='图片',describe='图片',default='',validators=None)
+        Field(type=Field_type.image, name='masked_model', label='模特图',describe='模特图，',default='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_model.jpg',validators=None),
+        Field(type=Field_type.image, name='pose', label='骨架图',describe='图片',default='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_pose.jpg',validators=None),
+        Field(type=Field_type.image, name='cloth', label='衣服平铺图',describe='图片',default='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_cloth.jpg',validators=None)
     ]
 
     inference_resource = {
@@ -35,9 +35,9 @@ class CV_DAFLOW_VIRTUAL_TRY_ON_BASE_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "Image1": "https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_model.jpg",
-                "Image2": "https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_pose.jpg",
-                "Image3": "https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_cloth.jpg"
+                "masked_model": "https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_model.jpg",
+                "pose": "https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_pose.jpg",
+                "cloth": "https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_cloth.jpg"
             }
         }
     ]
@@ -56,22 +56,29 @@ class CV_DAFLOW_VIRTUAL_TRY_ON_BASE_Model(Model):
 
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,Image1,Image2,Image3,**kwargs):
+    def inference(self,masked_model,pose,cloth,**kwargs):
+        import cv2,time
+        from modelscope.outputs import OutputKeys
+        from modelscope.pipelines import pipeline
+        from modelscope.utils.constant import Tasks
+
         input_imgs = {
-            'masked_model': Image1,
-            'pose': Image2,
-            'cloth': Image3
+            'masked_model': masked_model,
+            'pose': pose,
+            'cloth': cloth
         }
         img = self.p(input_imgs)[OutputKeys.OUTPUT_IMG]
-        cv2.imwrite('demo.jpg', img[:, :, ::-1])
+
+        savePath = 'result/result_' + str(int(1000 * time.time())) + '.jpg'
+        os.makedirs(os.path.dirname(savePath), exist_ok=True)
+        if os.path.exists(savePath):
+            os.remove(savePath)
+
+        cv2.imwrite(savePath, img[:, :, ::-1])
         
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": savePath
             }
         ]
         return back
@@ -79,10 +86,15 @@ class CV_DAFLOW_VIRTUAL_TRY_ON_BASE_Model(Model):
 model=CV_DAFLOW_VIRTUAL_TRY_ON_BASE_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(Image1='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_model.jpg',Image2='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_pose.jpg',Image3='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_cloth.jpg')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(masked_model='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_model.jpg',pose='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_pose.jpg',cloth='https://m6-public.oss-cn-hangzhou.aliyuncs.com/demo/virtual_tryon_cloth.jpg')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+# 模型大小160M
+# 模型输入太限定，需要结合其他模型一起使用，比如姿态识别，关键点识别
+# 而且图片非常容易出错，
+# v100 gpu推理 耗时1.2s
