@@ -1,10 +1,23 @@
-import base64
-import io,sys,os
+from typing import List
+from pydantic import BaseModel
+import numpy
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
 import pysnooper
-import os
 
+class Box(BaseModel):
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+class Action(BaseModel):
+    label: str
+    score: float
+    box: Box
+    timestamp: int
+
+class ActionDetectionResult(BaseModel):
+    actions: List[Action]
 class CV_RESNETC3D_ACTION_DETECTION_DETECTION2D_Model(Model):
     # 模型基础信息定义
     name='cv-resnetc3d-action-detection-detection2d'   # 该名称与目录名必须一样，小写
@@ -14,7 +27,7 @@ class CV_RESNETC3D_ACTION_DETECTION_DETECTION2D_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "6875"
     frameworks = "ONNX"
     doc = "https://modelscope.cn/models/damo/cv_ResNetC3D_action-detection_detection2d/summary"
@@ -28,7 +41,7 @@ class CV_RESNETC3D_ACTION_DETECTION_DETECTION2D_Model(Model):
     ]
 
     inference_resource = {
-        "resource_gpu": "1"
+        "resource_gpu": "0"
     }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
@@ -57,27 +70,31 @@ class CV_RESNETC3D_ACTION_DETECTION_DETECTION2D_Model(Model):
     def load_model(self,save_model_dir=None,**kwargs):
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
-        
-        self.p = pipeline('action-detection', 'damo/cv_ResNetC3D_action-detection_detection2d')
+
+        self.p = pipeline('action-detection', 'damo/cv_ResNetC3D_action-detection_detection2d',
+                                             pre_nms_thresh=[0.3, 0.3, 0.45, 0.45, 0.45, 0.45, 0.45, 0.45, 0.45],
+                                             video_length_limit=10, op_num_threads=0)
 
     # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
-    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
+    def rtsp_inference(self,img:numpy.ndarray,**kwargs) -> numpy.ndarray:
         return img
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,video,**kwargs):
+    def inference(self, video, **kwargs):
         result = self.p(video)
-
-        # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
-        # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        print(str(result))
+        actions = []
+        for idx in range(len(result['scores'])):
+            timestamp = result['timestamps'][idx]
+            label = result['labels'][idx]
+            score = result['scores'][idx]
+            (x1, y1, x2, y2) = result['boxes'][idx]
+            box = Box(x1=x1, y1=y1, x2=x2, y2=y2)
+            actions.append(Action(label=label, score=score, box=box, timestamp=timestamp))
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(actions),
             }
         ]
         return back
@@ -90,10 +107,16 @@ model=CV_RESNETC3D_ACTION_DETECTION_DETECTION2D_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(video='https://modelscope.oss-cn-beijing.aliyuncs.com/test/videos/action_detection_test_video.mp4')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(video='https://modelscope.oss-cn-beijing.aliyuncs.com/test/videos/action_detection_test_video.mp4')  # 测试
+# print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+# 模型大小：99MB
+# 模型效果：近距离识别率较高
+# 推理性能: 5s内
+# 模型占用内存/推理服务占用内存/gpu占用显存：7MB/1GB/0GB
+# 巧妙使用方法：chrom/safari PC验证通过、IOS失败

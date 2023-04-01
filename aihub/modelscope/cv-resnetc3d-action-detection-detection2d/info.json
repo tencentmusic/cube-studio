@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnetc3d-action-detection-detection2d",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-resnetc3d-action-detection-detection2d",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-resnetc3d-action-detection-detection2d-v20221001",
+    "label": "日常动作检测",
+    "describe": "输入视频文件，输出该段时间内视频所包含的动作，当前支持9中常见动作识别",
+    "pic": "example.png",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}
