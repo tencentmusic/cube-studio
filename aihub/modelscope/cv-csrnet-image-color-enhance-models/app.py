@@ -1,9 +1,12 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import time,cv2,numpy
 import pysnooper
 import os
+from modelscope.outputs import OutputKeys
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
 
 class CV_CSRNET_IMAGE_COLOR_ENHANCE_MODELS_Model(Model):
     # 模型基础信息定义
@@ -54,13 +57,14 @@ class CV_CSRNET_IMAGE_COLOR_ENHANCE_MODELS_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
+        savePath = 'result/result_' + str(int(1000*time.time())) + '.jpg'
+        os.makedirs(os.path.dirname(savePath), exist_ok=True)
+        if os.path.exists(savePath):
+            os.remove(savePath)
+        cv2.imwrite(savePath, result[OutputKeys.OUTPUT_IMG])
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": savePath
             }
         ]
         return back
@@ -68,10 +72,13 @@ class CV_CSRNET_IMAGE_COLOR_ENHANCE_MODELS_Model(Model):
 model=CV_CSRNET_IMAGE_COLOR_ENHANCE_MODELS_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_csrnet_image-color-enhance-models/data/1.png')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_csrnet_image-color-enhance-models/data/1.png')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 1.9M
+# 运行速度 0.1s

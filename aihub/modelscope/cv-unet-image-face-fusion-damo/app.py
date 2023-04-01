@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,cv2,random
 import pysnooper
 import os
 
@@ -24,13 +24,9 @@ class CV_UNET_IMAGE_FACE_FUSION_DAMO_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='template', label='',describe='',default='',validators=None),
-        Field(type=Field_type.image, name='user', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='template', label='模板图片',describe='模板图片，结果会包含该图片的整体信息',default='',validators=None),
+        Field(type=Field_type.image, name='user', label='用户图片',describe='用户图片，结果会包含该图片的人脸特征',default='',validators=None)
     ]
-
-    inference_resource = {
-        "resource_gpu": "1"
-    }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
@@ -65,15 +61,18 @@ class CV_UNET_IMAGE_FACE_FUSION_DAMO_Model(Model):
     def inference(self,template,user,**kwargs):
         result = self.p({"template": template, "user": user})
 
+        print(result)
+        save_path = f'result/result{random.randint(1, 1000)}.jpg'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, result['output_img'])
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
@@ -86,10 +85,13 @@ model=CV_UNET_IMAGE_FACE_FUSION_DAMO_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(template='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/facefusion_template.jpg',user='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/facefusion_user.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(template='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/facefusion_template.jpg',user='user.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 1.4G
+# 模型cpu运行速度 2s

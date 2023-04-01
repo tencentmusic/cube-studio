@@ -12,7 +12,7 @@ from ..utils import py_shell
 import enum
 import pysnooper
 import os, sys
-Field_type = enum.Enum('Field_type', ('int','double','json','text', 'image', 'audio', 'video', 'stream', 'text_select', 'image_select','audio_select','video_select'))
+Field_type = enum.Enum('Field_type', ('int','double','json','text', 'image', 'audio', 'video', 'stream', 'text_select', 'image_select','audio_select','video_select','capture'))
 
 class Validator():
     def __init__(self,regex='',min=1,max=1,required=True):

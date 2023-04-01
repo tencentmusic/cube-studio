@@ -17,11 +17,16 @@
         "jupyter": [],
         "appendix": []
     },
+<<<<<<< HEAD
     "train": {
         "resource_gpu": "1"
     },
     "inference": {
         "resource_gpu": "1"
     },
+=======
+    "train": {},
+    "inference": {},
+>>>>>>> upstream/tme-dev
     "images": ""
 }

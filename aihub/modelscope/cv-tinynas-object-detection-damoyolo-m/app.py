@@ -1,11 +1,9 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,cv2,random,time
 import pysnooper
 import os
-import numpy
-import cv2
 class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_M_Model(Model):
     # 模型基础信息定义
     name='cv-tinynas-object-detection-damoyolo-m'   # 该名称与目录名必须一样，小写
@@ -25,18 +23,14 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_M_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='arg0', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
     ]
-
-    inference_resource = {
-        "resource_gpu": "1"
-    }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
             "label": "示例0",
             "input": {
-                "arg0": "https:test.jpg"
+                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/image_detection.jpg"
             }
         }
     ]
@@ -61,54 +55,24 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_M_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,arg0,**kwargs):
-        result = self.p(arg0)
-        txts = result.get("labels")
-        #处理图片大小
-        def resize_image(image):
-            height, width = image.shape[:2]
-            max_size = 1280)
-            if max(height, width) > max_size:
-               if height > width:
-                  ratio = max_size / height
-               else:
-                  ratio = max_size / width
-               image = cv2.resize(image, (int(width * ratio), int(height * ratio)))
-            return image
-        #给图片画框
-        def box_label(input_path, res):
-            def get_color(idx):
-                idx = (idx + 1) * 3
-                color = ((10 * idx) % 255, (20 * idx) % 255, (30 * idx) % 255)
-                return color
-            img = cv2.imread(input_path)
-            unique_label = list(set(res['labels']))
-            for idx in range(len(res['scores'])):
-                x1, y1, x2, y2 = res['boxes'][idx]
-                score = str("%.2f"%res['scores'][idx])
-                label = str(res['labels'][idx])
-                color = get_color(unique_label.index(label))
-                line_width = int(0.001 * (img.shape[0] + img.shape[1]) / 2) + 1
-                text_size = 0.001 * (img.shape[0] + img.shape[1]) / 2 + 0.3
-                cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), color, line_width)
-                cv2.putText(img, label, (int(x1), int(y1) - 10),
-                    cv2.FONT_HERSHEY_PLAIN, text_size, color, line_width)
-                cv2.putText(img, score, (int(x1), int(y2) + 10 + int(text_size*5)),
-                    cv2.FONT_HERSHEY_PLAIN, text_size, color, line_width)
-            
-            image = resize_image(img)
-            return image
-        #图片存储路径
-        os.makedirs('result',exist_ok=True)
-        save_path = os.path.join('result',os.path.basename(arg0))
-        # 写到另外的图片文件中即可
-        cv2.imwrite(save_path, box_label(arg0,result))
+        print(result)
+        img = cv2.imread(image)
+        for index, box in enumerate(result['boxes'].tolist()):
+            label = result['labels'][index]
+            cv2.rectangle(img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 255), 2)
+            cv2.putText(img, str(label), (int(box[0]), int(box[1] - 10)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        save_path = f'result/result{random.randint(1, 1000)}.jpg'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, img)
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
                 "image": save_path,
-                "text": str(txts),
+                "text": '得分：'+str(result['scores'].tolist())
             }
         ]
         return back
@@ -121,13 +85,15 @@ model=CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_M_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-#model.load_model(save_model_dir=None)
-#result = model.inference(arg0='test.jpg')  # 测试
-#print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='image_detection.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
+# 模型启动web时使用
 if __name__=='__main__':
-     model.run()
-#模型大小230M,内存占用1.2G,识别图片响应在4秒左右,没有GPU
-#运行环境为腾讯云服务器	标准型SA3 - 4核 8G,操作系统TencentOS Server 3.1 (TK4)
-#识别生活场景比较准确,识别动物有错误的情况
+    model.run()
+
+# 模型大小 230M
+# 模型cpu推理速度 0.23s
+# 模型效果 可以多目标检测
+

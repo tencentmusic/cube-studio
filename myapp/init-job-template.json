@@ -1868,7 +1868,7 @@
                     "range": "",
                     "default": "",
                     "placeholder": "",
-                    "describe": "模型名",
+                    "describe": "模型名(a-z0-9-字符组成，最长54个字符)",
                     "editable": 1,
                     "condition": "",
                     "sub_args": {}

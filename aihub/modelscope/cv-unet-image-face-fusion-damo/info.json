@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-image-face-fusion-damo",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-unet-image-face-fusion-damo",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-unet-image-face-fusion-damo-v20221001",
+    "label": "图像人脸融合",
+    "describe": "给定一张模板图像和一张用户图像，图像人脸融合模型能够自动地将用户图中的人脸融合到模板人脸图像中，生成一张包含用户图人脸特征的新图像。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,random,cv2
 import pysnooper
 import os
 
@@ -14,7 +14,7 @@ class CV_UNET_UNIVERSAL_MATTING_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "466"
     frameworks = "tensorflow"
     doc = "https://modelscope.cn/models/damo/cv_unet_universal-matting/summary"
@@ -27,21 +27,12 @@ class CV_UNET_UNIVERSAL_MATTING_Model(Model):
         Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
     ]
 
-    inference_resource = {
-        "resource_gpu": "1"
-    }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
             "label": "示例0",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_unet_universal-matting/description/demo1.jpg"
-            }
-        },
-        {
-            "label": "示例1",
-            "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_unet_universal-matting/description/demo2.jpg"
+                "image": "test1.jpeg"
             }
         }
     ]
@@ -69,15 +60,18 @@ class CV_UNET_UNIVERSAL_MATTING_Model(Model):
     def inference(self,image,**kwargs):
         result = self.p(image)
 
+        print(result)
+        save_path = f'result/result{random.randint(1, 1000)}.jpg'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, result['output_img'])
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
@@ -90,10 +84,14 @@ model=CV_UNET_UNIVERSAL_MATTING_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_unet_universal-matting/description/demo1.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='test1.jpeg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用 
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 200M
+# 模型cpu推理速度 0.5s
+# 构图效果一般
