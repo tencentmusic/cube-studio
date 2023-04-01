@@ -83,7 +83,6 @@ class CV_RESNETC3D_ACTION_DETECTION_DETECTION2D_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self, video, **kwargs):
         result = self.p(video)
-        print(str(result))
         actions = []
         for idx in range(len(result['scores'])):
             timestamp = result['timestamps'][idx]
