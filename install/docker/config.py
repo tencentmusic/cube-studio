@@ -930,45 +930,45 @@ COOKIE_DOMAIN = ''
 SERVICE_DOMAIN='service.local.com'
 
 
-# # 所有训练集群的信息
-# CLUSTERS={
-#     # 和project expand里面的名称一致
-#     "dev":{
-#         "NAME":"dev",
-#         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-#         # "HOST":"9.135.92.226",
-#         # "SERVICE_DOMAIN": 'service.local.com',
-#     }
-# }
-
-
-
+# 所有训练集群的信息
 CLUSTERS={
-    # # 至少要有一个这个
-    "tke":{
-        "NAME":"tke",
-        "KUBECONFIG":'/home/myapp/kubeconfig/tke-kubeconfig',
-        "SERVICE_DOMAIN": 'service.kfserving.woa.com'
-    },
-    "shanghai":{
-        "NAME":"shanghai",
-        "KUBECONFIG":'/home/myapp/kubeconfig/shanghai-kubeconfig',
-        "HOST":'home.star.woa.com',
-        "SERVICE_DOMAIN": 'service.star.woa.com'
-    },
-    "idc": {
-        "NAME": "idc",
-        "KUBECONFIG": '/home/myapp/kubeconfig/idc-kubeconfig',
-        "HOST":'kubeflow.cube.woa.com',
-        "SERVICE_DOMAIN": 'service.cube.woa.com'
-    },
     # 和project expand里面的名称一致
-    "dev": {
-        "NAME": "dev",
-        "KUBECONFIG": '/home/myapp/kubeconfig/dev-kubeconfig',
-        "HOST":"9.135.92.226",
+    "dev":{
+        "NAME":"dev",
+        "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
+        # "HOST":"9.135.92.226",
         # "SERVICE_DOMAIN": 'service.local.com',
     }
 }
+
+
+#
+# CLUSTERS={
+#     # # 至少要有一个这个
+#     "tke":{
+#         "NAME":"tke",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/tke-kubeconfig',
+#         "SERVICE_DOMAIN": 'service.kfserving.woa.com'
+#     },
+#     "shanghai":{
+#         "NAME":"shanghai",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/shanghai-kubeconfig',
+#         "HOST":'home.star.woa.com',
+#         "SERVICE_DOMAIN": 'service.star.woa.com'
+#     },
+#     "idc": {
+#         "NAME": "idc",
+#         "KUBECONFIG": '/home/myapp/kubeconfig/idc-kubeconfig',
+#         "HOST":'kubeflow.cube.woa.com',
+#         "SERVICE_DOMAIN": 'service.cube.woa.com'
+#     },
+#     # 和project expand里面的名称一致
+#     "dev": {
+#         "NAME": "dev",
+#         "KUBECONFIG": '/home/myapp/kubeconfig/dev-kubeconfig',
+#         "HOST":"9.135.92.226",
+#         # "SERVICE_DOMAIN": 'service.local.com',
+#     }
+# }
 
 

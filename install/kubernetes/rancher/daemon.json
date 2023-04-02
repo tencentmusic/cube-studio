@@ -1,0 +1,11 @@
+{
+    "insecure-registries":["docker.oa.com:8080"],
+    "default-runtime": "nvidia",
+    "data-root": "/data/docker",
+    "runtimes": {
+        "nvidia": {
+            "path": "/usr/bin/nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    }
+}
