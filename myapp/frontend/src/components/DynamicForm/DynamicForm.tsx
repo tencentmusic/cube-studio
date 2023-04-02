@@ -1,10 +1,12 @@
-import { Button, Col, Collapse, DatePicker, Form, FormInstance, Input, message, Radio, Row, Steps } from 'antd'
+import { Button, Col, Collapse, DatePicker, Form, FormInstance, Input, message, Radio, Row, Space, Steps, Tooltip } from 'antd'
 import { Rule, RuleObject } from 'antd/lib/form'
 import Select, { LabeledValue } from 'antd/lib/select'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import moment from "moment";
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, QuestionCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import InputSearch from '../InputSearch/InputSearch';
+import 'moment/locale/zh-cn';
+import locale from 'antd/es/date-picker/locale/zh_CN';
 
 interface IProps {
     primaryKey?: string
@@ -13,7 +15,7 @@ interface IProps {
     configGroup?: IDynamicFormGroupConfigItem[]
     formChangeRes?: IFormChangeRes
     linkageConfig?: ILinkageConfig[]
-    onRetryInfoChange?: (value: string) => void
+    onRetryInfoChange?: (value?: string) => void
 }
 
 export interface ILinkageConfig {
@@ -154,7 +156,6 @@ export default function DynamicForm(props: IProps) {
                 resetFieldProps(key, props.linkageConfig || [])
             }
         })
-
     }, [props.configGroup, props.config])
 
     const next = () => {
@@ -170,16 +171,31 @@ export default function DynamicForm(props: IProps) {
         //     { required: config.required, message: `请输入${config.label}` },
         //     config.rule ? { pattern: new RegExp(`/^${config.rule}$/`), message: '请按正确的规则输入' } : undefined,
         // ].filter(item => !!item) as Rule[]
+
+        let extraContent: any = null
+
         return <Form.Item
             key={`dynamicForm_${config.name}`}
             label={config.label}
             name={config.name}
             rules={config.rules}
             initialValue={config.defaultValue}
-            extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">详情</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
             {...itemProps}
         >
-            <Input disabled={config.disable} placeholder={`请输入${config.label}`} />
+            <Input disabled={config.disable} placeholder={config.placeHolder || `请选择${config.label}`} />
         </Form.Item>
     }
 
@@ -214,7 +230,19 @@ export default function DynamicForm(props: IProps) {
                         label={config.label}
                         name={config.name}
                         rules={config.rules}
-                        extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+                        extra={<>
+                            {config.data.tips ? <Tooltip
+                                className="mr8"
+                                placement="bottom"
+                                title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                            >
+                                <div className="cp d-il">
+                                    <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                                    <span className="pl4 c-theme">详情</span>
+                                </div>
+                            </Tooltip> : null}
+                            {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+                        </>}
                         {...itemProps}
                     >
                         <Input disabled={true} />
@@ -235,10 +263,29 @@ export default function DynamicForm(props: IProps) {
             name={config.name}
             rules={config.rules}
             initialValue={config.defaultValue}
-            extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">详情</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
             {...itemProps}
         >
-            <InputSearch isOpenSearchMatch={true} disabled={config.disable} placeholder={`请选择${config.label}`} options={options} />
+            <InputSearch
+                onClick={(value) => {
+                    !!config.data.retry_info && props.onRetryInfoChange && props.onRetryInfoChange(value)
+                }}
+                isOpenSearchMatch={true}
+                disabled={config.disable}
+                placeholder={`请选择${config.label}`}
+                options={options} />
         </Form.Item>
     }
 
@@ -249,10 +296,22 @@ export default function DynamicForm(props: IProps) {
             name={config.name}
             rules={config.rules}
             initialValue={config.defaultValue}
-            extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">详情</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
             {...itemProps}
         >
-            <Input.TextArea autoSize={{ minRows: 4 }} disabled={config.disable} placeholder={`请输入${config.label}`} />
+            <Input.TextArea autoSize={{ minRows: 4 }} disabled={config.disable} placeholder={config.placeHolder || `请选择${config.label}`} />
         </Form.Item>
     }
     const renderSelect = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
@@ -266,14 +325,30 @@ export default function DynamicForm(props: IProps) {
             name={config.name}
             rules={config.rules}
             initialValue={config.defaultValue}
-            extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">详情</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span className="pr4" dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+                {
+                    config.data.isRefresh ? <div className="cp d-il" onClick={() => {
+                        props.onRetryInfoChange && props.onRetryInfoChange()
+                    }}>
+                        <SyncOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">刷新列表</span>
+                    </div> : null
+                }
+            </>}
             {...itemProps}
         >
             <Select
-                onClick={() => {
-                    console.log('click', props.form?.getFieldsValue())
-                    // props.form?.setFieldsValue({ app_group: "g_other_tme_infrastructure_tme_central_kuwo" })
-                }}
                 style={{ width: '100%' }}
                 mode={config.multiple ? 'multiple' : undefined}
                 onChange={(value) => {
@@ -282,7 +357,7 @@ export default function DynamicForm(props: IProps) {
                 showSearch
                 disabled={config.disable}
                 optionFilterProp="label"
-                placeholder={`请选择${config.label}`}
+                placeholder={config.placeHolder || `请选择${config.label}`}
                 options={options} />
         </Form.Item>
     }
@@ -306,11 +381,11 @@ export default function DynamicForm(props: IProps) {
         return <Form.Item
             key={`dynamicForm_${config.name}`}
             label={config.label}
-            name="fromDate"
+            name={config.name}
             rules={[{ required: true, message: '请选择时间' }]}
             {...itemProps}
         >
-            <DatePicker showTime disabledDate={(current) => {
+            <DatePicker style={{ width: '100%' }} locale={locale} showTime={!!config.data.showTime} disabledDate={(current) => {
                 return current && current > moment().endOf('day');
             }} />
         </Form.Item>
@@ -319,11 +394,11 @@ export default function DynamicForm(props: IProps) {
         return <Form.Item
             key={`dynamicForm_${config.name}`}
             label={config.label}
-            name="fromDate"
-            rules={[{ required: true, message: '请选择时间' }]}
+            name={config.name}
+            rules={[{ required: true, message: '请选择时间范围' }]}
             {...itemProps}
         >
-            <DatePicker showTime disabledDate={(current) => {
+            <DatePicker style={{ width: '100%' }} locale={locale} showTime={!!config.data.showTime} disabledDate={(current) => {
                 return current && current > moment().endOf('day');
             }} />
         </Form.Item>
@@ -360,24 +435,46 @@ export default function DynamicForm(props: IProps) {
                     {(fields, { add, remove }) => (
                         <>
                             {fields.map(({ key, name, ...restField }) => (
-                                <div key={key} className="bor b-side pt32 plr16 mb16">
+                                // <Space key={key} style={{ display: 'flex', marginBottom: 8 }}
+                                //     align='baseline'
+                                // >
+                                //     {
+                                //         item.list && item.list.map(listItem => {
+                                //             return dispatchRenderFormItem(listItem, {
+                                //                 ...restField,
+                                //                 name: [name, listItem.name],
+                                //                 // style: { flexDirection: 'column' }
+                                //             })
+                                //         })
+                                //     }
+                                //     {/* <MinusCircleOutlined onClick={() => remove(name)} /> */}
+                                //     <Form.Item wrapperCol={{ offset: 5 }}>
+                                //         <Button danger onClick={() => remove(name)} block icon={<MinusCircleOutlined />}>
+                                //             删除该项
+                                //         </Button>
+                                //     </Form.Item>
+                                // </Space>
+                                <div key={key} className="bor b-side pt8 plr16 mb8 d-f" style={{ alignItems: 'start', minWidth: 1600 }}>
                                     {
                                         item.list && item.list.map(listItem => {
                                             return dispatchRenderFormItem(listItem, {
                                                 ...restField,
-                                                name: [name, listItem.name]
+                                                name: [name, listItem.name],
+                                                labelAlign: 'left',
+                                                labelCol: 24,
+                                                style: { flexDirection: 'column', flex: 1, marginBottom: 8 },
                                             })
                                         })
                                     }
                                     {/* <MinusCircleOutlined onClick={() => remove(name)} /> */}
-                                    <Form.Item wrapperCol={{ offset: 5 }}>
-                                        <Button danger onClick={() => remove(name)} block icon={<MinusCircleOutlined />}>
+                                    <Form.Item >
+                                        <Button danger onClick={() => remove(name)} block icon={<MinusCircleOutlined />} style={{ width: 120 }}>
                                             删除该项
                                         </Button>
                                     </Form.Item>
                                 </div>
                             ))}
-                            <Form.Item noStyle className="w100">
+                            <Form.Item noStyle className="w100" label="">
                                 <Button type="dashed" className="w100" onClick={() => add()} block icon={<PlusOutlined />}>
                                     增加一项
                                 </Button>
@@ -387,7 +484,9 @@ export default function DynamicForm(props: IProps) {
                 </Form.List>
                 return formList
             } else {
-                return dispatchRenderFormItem(item)
+                return <div style={{ width: 680 }}>
+                    {dispatchRenderFormItem(item)}
+                </div>
             }
         })
     }
@@ -402,15 +501,7 @@ export default function DynamicForm(props: IProps) {
             >
                 <Input />
             </Form.Item>
-            {/* {
-                props.configGroup && props.configGroup.length ?
-                    (props.configGroup || []).map(item => {
-                        return <div className="pb16">
-                            <Row className="strong fs16 mb16 bg-module"><Col ><span className="d-il pl4 bor-l b-theme ptb4">{item.group}</span></Col></Row>
-                            {renderFormItem(item.config)}
-                        </div>
-                    }) : renderFormItem(props.config || [])
-            } */}
+
             {
                 currentConfigGroup && currentConfigGroup.length ? <>
                     <Steps current={current}>
@@ -457,24 +548,12 @@ export default function DynamicForm(props: IProps) {
                             )}
                         </div>
                     </div>
-                </> : renderFormItem(currentConfig || [])
-            }
-
-            {/* {
-                props.configGroup && props.configGroup.length ?
-                    <Collapse defaultActiveKey={(props.configGroup || []).map((item, idx) => idx)} ghost expandIconPosition='right'>
+                </> : <div style={{ width: 680 }}>
                         {
-                            (props.configGroup || []).map((item, index) => {
-                                return <Collapse.Panel key={index} header={<span className="strong fs16 pl8 bor-l b-theme">{item.group}</span>}>
-                                    <div className="pb16">
-                                        {renderFormItem(item.config)}
-                                    </div>
-                                </Collapse.Panel>
-                            })
+                            renderFormItem(currentConfig || [])
                         }
-                    </Collapse> : renderFormItem(props.config || [])
-            } */}
-
+                    </div>
+            }
         </>
     )
 }

@@ -239,7 +239,7 @@ class Notebook_ModelView_Base():
         db.session.commit()
 
     def post_list(self,items):
-        flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/%s/下'%g.user.username,category='info')
+        flash('注意：个人重要文件本地git保存，notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/%s/下'%g.user.username,category='info')
         return items
 
     # @event_logger.log_this

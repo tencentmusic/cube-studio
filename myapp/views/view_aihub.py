@@ -750,7 +750,6 @@ def aihub_demo():
         from myapp.models.model_aihub import Aihub
         conf.all_model = db.session.query(Aihub).all()
 
-
     try:
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s()
