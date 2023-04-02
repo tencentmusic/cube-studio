@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tadaconv-action-recognition",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-tadaconv-action-recognition",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-tadaconv-action-recognition-v20221001",
+    "label": "TAdaConv动作识别模型-英文-通用领域",
+    "describe": "TAdaConv是一种在动作识别模型中即插即用的时序自适应卷积（Temporally-Adaptive Convolutions）。可以明显提升SlowFast、R2D和R3D等模型性能。",
+    "pic": "example.png",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}
