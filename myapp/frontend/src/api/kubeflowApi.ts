@@ -71,3 +71,11 @@ export const actionADUGTemplateRetryInfo = (url: string, params: any): Promise<A
 export const actionADUGTemplateChartOption = (url?: string, params?: {}): Promise<any> => {
     return axios.get(url || '', { params })
 }
+
+export const actionADUGTemplateFavorite = (url?: string, params?: {}): AxiosResFormat<any> => {
+    return axios.post(url || '', params)
+}
+
+export const actionADUGTemplateCancelFavorite = (url?: string, params?: {}): AxiosResFormat<any> => {
+    return axios.delete(url || '', { params })
+}
