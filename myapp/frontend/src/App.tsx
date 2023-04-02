@@ -14,9 +14,8 @@ import SubMenu from 'antd/lib/menu/SubMenu';
 import { clearWaterNow, drawWater, drawWaterNow, getParam, obj2UrlParam, parseParam2Obj } from './util'
 import { getAppHeaderConfig, getAppMenu, getCustomDialog, userLogout } from './api/kubeflowApi';
 import { IAppHeaderItem, IAppMenuItem, ICustomDialog } from './api/interface/kubeflowInterface';
-import { AlignRightOutlined, AppstoreOutlined, DownOutlined, GithubOutlined, LeftOutlined, QuestionCircleOutlined, RightOutlined, SlidersOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, DownOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie'
-import { changeTheme } from './theme';
 import { handleTips } from './api';
 const userName = Cookies.get('myapp_username')
 
@@ -93,7 +92,6 @@ const AppWrapper = (props: IProps) => {
         drawWaterNow()
       }
       handleCurrentRoute(sourceAppMap, getValidAppList(sourceAppList))
-      handleChangePageTitle(pathname, sourceAppList)
     }
   }, [location, sourceAppList, sourceAppMap])
 
@@ -110,7 +108,6 @@ const AppWrapper = (props: IProps) => {
   const handleCurrentRoute = (appMap: Record<string, IRouterConfigPlusItem>, appList: IRouterConfigPlusItem[]) => {
     const { pathname } = location
     const [_, stLevel, edLevel] = pathname.split('/')
-    const currentApp = appMap[pathname]
     const stLevelApp = appMap[`/${stLevel}`]
     let currentNavKey = ""
     if (stLevelApp && stLevelApp.isSingleModule) {
@@ -118,8 +115,6 @@ const AppWrapper = (props: IProps) => {
     } else {
       currentNavKey = `/${stLevel}`
     }
-
-    console.log('stLevelApp', stLevelApp);
 
     let topNavAppList = appList
     if (stLevelApp && stLevelApp.isSingleModule) {
@@ -132,12 +127,9 @@ const AppWrapper = (props: IProps) => {
   }
 
   const handleClickNav = (app: IRouterConfigPlusItem, subPath?: string) => {
-    console.log('app', app)
     if (app.path === '/') {
-      commitUrlChange('/')
       navigate(app.path || '/')
     } else if (app.menu_type === 'iframe' && app.path) {
-      commitUrlChange(app.path)
       navigate(app.path)
     } else if (app.menu_type === 'out_link' && app.url) {
       window.open(app.url, 'blank')
@@ -153,35 +145,8 @@ const AppWrapper = (props: IProps) => {
 
       if (currentItem) {
         let appMenuPath = currentItem.path || ''
-        commitUrlChange(appMenuPath)
         navigate(appMenuPath)
       }
-    }
-  }
-
-  const handleChangePageTitle = (pathname: string, currnetRouteConfig: IRouterConfigPlusItem[]) => {
-    const currentAppName = '/' + pathname.substring(1).split('/')[0] || ''
-    const routerMap: Record<string, IRouterConfigPlusItem> = currnetRouteConfig.reduce((pre: any, next) => ({ ...pre, [`${next.path || ''}`]: next }), {})
-    const currentRoute = routerMap[currentAppName]
-    if (currentRoute && currentRoute.title) {
-      document.title = `星云 - ${currentRoute.title}`
-    } else {
-      document.title = '星云数据平台'
-    }
-  }
-
-  const commitUrlChange = (key: string) => {
-    if (window !== window.top) {
-      const locationTop = (window as any).top.location
-      const href = locationTop.href
-      const path = locationTop.origin + locationTop.pathname
-      const search = href.split('?').slice(1).join('?')
-      const paramObj = parseParam2Obj(search)
-      paramObj['pathUrl'] = key;
-      const paramStr = obj2UrlParam(paramObj);
-      const currentUrl = path + '#/?' + paramStr;
-
-      (window as any).top.location.href = currentUrl
     }
   }
 
@@ -218,7 +183,6 @@ const AppWrapper = (props: IProps) => {
                               {
                                 Object.prototype.toString.call(thr.icon) === '[object String]' ? <div className="icon-custom svg16 mr8" dangerouslySetInnerHTML={{ __html: thr.icon }}></div> : sub.icon
                               }
-                              {/* <div className="icon-custom svg16 mr8" dangerouslySetInnerHTML={{ __html: thr.icon }}></div> */}
                               {thr.title}
                             </div>
                           </Menu.Item>
@@ -277,7 +241,6 @@ const AppWrapper = (props: IProps) => {
               }}
               onSelect={(info) => {
                 const key = info.key
-                commitUrlChange(key)
               }}
             >
               {menuContent}
@@ -294,17 +257,6 @@ const AppWrapper = (props: IProps) => {
               </div>
             </div>
           </div>
-
-          {/* <div className="menu-collapsed cp">
-            <span className="w100 h100 d-f jc ac p-a" onClick={() => {
-              setIsMenuCollapsed(!isMenuCollapsed)
-            }}>{
-                isMenuCollapsed ? <RightOutlined style={{ color: '#d9d9d9' }} /> : <LeftOutlined style={{ color: '#d9d9d9' }} />
-              }</span>
-            <img src={require('./images/sideLeft.png')} alt="" />
-          </div> */}
-
-
         </div>
       }
     }
@@ -395,34 +347,6 @@ const AppWrapper = (props: IProps) => {
           </div>
 
           <div className="d-f ac plr16 h100">
-
-            {/* <div className="mr16">
-            <Select
-              bordered={false}
-              defaultValue="star"
-              options={[
-                { label: '无垠星空主题', value: 'star' },
-                { label: '清新蓝调主题', value: 'blue' },
-              ]}
-              onChange={(value: any) => {
-                changeTheme(value)
-              }}
-            />
-          </div> */}
-
-            {/* <a
-              href="https://doc.weixin.qq.com/doc/w3_AGMAOAb-ACMUD0tIlQfR4u1BIj2nc?scode=AJEAIQdfAAoC8AWAeuAfoApAY1AC8"
-              target="_blank"
-              className="mr12 d-f ac"
-            >
-              <span className="pr4">平台文档</span><QuestionCircleOutlined style={{ fontSize: 20, color: "#1672fa" }} />
-            </a>
-
-
-            <GithubOutlined className="mr24" style={{ fontSize: 20, color: "#1672fa" }} onClick={() => {
-              window.open('https://github.com/tencentmusic/cube-studio', '_bank')
-            }} /> */}
-
             {
               headerConfig.map(config => {
                 if (config.icon) {
@@ -463,38 +387,7 @@ const AppWrapper = (props: IProps) => {
         </div>
       }
 
-
-      {/* Document */}
       <div className="main-content-container">
-        {/* <a
-          href="https://github.com/tencentmusic/cube-studio/tree/master/docs/example"
-          target="_blank"
-          className="helpDoc"
-        >
-          平<br />台<br />文<br />档<br />
-          <img src={require('./images/right.png')} />
-        </a> */}
-
-        {/* old side nav */}
-        {/* {
-          currentAppList.filter(app => !!app.hidden).length ? <ul className="mainapp-sidemenu">
-            {
-              currentAppList.filter(app => !!app.hidden).map((app) => {
-                const currentAppName = '/' + currentRoute.substring(1).split('/')[0] || ''
-                return <li
-                  onClick={() => handleClickNav(app, app.appIndex || 0)}
-                  key={`appList${app.appIndex}`}
-                  style={
-                    currentAppName === app.path ? { background: "#fcfcfc", color: '#1e1653' } : {}
-                  }
-                >
-                  <div className="icon-custom" dangerouslySetInnerHTML={{ __html: app.icon }}></div>
-                  <div className="mainapp-sidemenu-name">{app.title}</div>
-                </li>
-              })
-            }
-          </ul> : null
-        } */}
         {isShowSlideMenu ? renderMenu() : null}
 
         <div className="ov-a w100 bg-title p-r" id="componentContainer">
@@ -514,7 +407,6 @@ const AppWrapper = (props: IProps) => {
           {
             CurrentRouteComponent && <CurrentRouteComponent />
           }
-          {/* <div className="ta-c ptb16">©2023 by Data Leap All Rights Reserved</div> */}
         </div>
 
         {
