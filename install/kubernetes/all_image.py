@@ -145,24 +145,20 @@ images = list(set(images))
 HOST = 'ccr.ccs.tencentyun.com/cube-studio/'
 for image in images:
     # print(image)
-    if 'gpu' in image:
-        continue
-
+    # print(image)
     image = image.replace('<none>', '')
-    image_name = HOST + image.replace(HOST,'').replace('/', '-').replace('@sha256', '')
+    image_name = HOST + image.replace(HOST, '').replace('/', '-').replace('@sha256', '')
 
     # 可联网机器上拉取公有镜像并推送到私有仓库
-    # print('docker pull %s' % image)
-    # print('docker tag %s %s' % (image, image_name))
-    # print('docker push %s' % (image_name))
+    # print('docker pull %s && docker tag %s %s && docker push %s &' % (image,image,image_name,image_name))
 
-    # 内网机器上拉取私有仓库镜像
+    # # # 内网机器上拉取私有仓库镜像
     # image=image.replace('@sha256','')
-    # print("docker pull %s" % image_name)
-    # print("docker tag %s %s"%(image_name,image))
+    # print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
 
-    image=image.replace('@sha256','')
-    print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
+    # # 拉取公有镜像
+    image = image.replace('@sha256', '')
+    print("docker pull %s &" % (image,))
 
 
 print('')
