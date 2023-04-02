@@ -62,12 +62,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
     };
     const [pageInfo, setPageInfo] = useState<TablePaginationConfig>(pageInfoInit);
     const [currentColumns, setCurrentColumns] = useState<ColumnsType<any>>([])
-    // const customFilter: IMixSearchParamItem[] = [
-    //     { name: 'test1', type: 'input' },
-    //     { name: 'test2', type: 'select', option: [{ label: 'title1', value: 'value1' }, { label: 'title2', value: 'value2' }] },
-    //     { name: 'test3', type: 'input' },
-    //     { name: 'test4', type: 'select' },
-    // ]
     const [filterParams, setFilterParams] = useState<IMixSearchParamItem[]>([])
     const [filterValues, _setFilterValues] = useState<Array<{ key: ReactText | undefined, value: ReactText | undefined }>>([])
     const filterValuesRef = useRef(filterValues);
@@ -602,20 +596,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             break
                         }
                     }
-                    // if (!isNaN(+param.value) && paramsMap[param.key] && !(paramsMap[param.key].type === 'Related' || paramsMap[param.key].type === 'QuerySelect')) {
-                    //     opr = 'eq'
-                    // } else {
-                    //     const oprList = ['rel_o_m', 'ct', 'eq']
-                    //     const sourceOprList: string[] = paramsMap[param.key].filter.map((item: any) => item.operator) || []
-
-                    //     for (let i = 0; i < oprList.length; i++) {
-                    //         const currentOpr = oprList[i];
-                    //         if (sourceOprList.includes(currentOpr)) {
-                    //             opr = currentOpr
-                    //             break
-                    //         }
-                    //     }
-                    // }
 
                     return {
                         "col": param.key,
@@ -727,9 +707,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
             return isCSV || Upload.LIST_IGNORE;
         },
         onChange(info) {
-            // if (info.file.status !== 'uploading') {
-            //     console.log(info.file, info.fileList);
-            // }
             if (info.file.status === 'done') {
                 // message.success(`${info.file.name}，${info.file.response.message}`);
                 notification['success']({
@@ -957,29 +934,26 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     }}>帮助链接</span><QuestionCircleOutlined /></div> : null
                 }
             </TitleHeader>
-            <Content className="appmgmt-content bg-title">
-                {/* <div>
-                    <img className="m32" style={{ height: 42 }} src={require('../images/star2.svg').default} alt="" />
-                </div> */}
-                {
-                    !!filterParams.length && <MixSearch values={filterValues} params={filterParams} onChange={(values) => {
-                        localStorage.setItem(`filter_${location.pathname}${location.search}`, JSON.stringify(values))
-                        setFilterValues(values)
-                        fetchData({
-                            ...fetchDataParams,
-                            pageConf: pageInfoInit,
-                            params: values,
-                            sorter: sorterParam,
-                            paramsMap: filterParamsMap
-                        });
-                    }} />
-                }
+            <Content className="appmgmt-content bg-title h100 d-f fd-c">
+                <div className="mlr16 mb16 flex1 bg-w">
+                    {
+                        !!filterParams.length && <MixSearch values={filterValues} params={filterParams} onChange={(values) => {
+                            localStorage.setItem(`filter_${location.pathname}${location.search}`, JSON.stringify(values))
+                            setFilterValues(values)
+                            fetchData({
+                                ...fetchDataParams,
+                                pageConf: pageInfoInit,
+                                params: values,
+                                sorter: sorterParam,
+                                paramsMap: filterParamsMap
+                            });
+                        }} />
+                    }
 
-                {
-                    isEchartShow ? <ChartOptionTempalte url={baseUrl} /> : null
-                }
+                    {
+                        isEchartShow ? <ChartOptionTempalte url={baseUrl} /> : null
+                    }
 
-                <div className="m16">
                     {
                         list_ui_type !== 'card' ? <TableBox
                             cancelExportData={true}
@@ -1100,8 +1074,8 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             </div>
                         </div>
                     }
-
                 </div>
+
             </Content>
         </div >
     );
