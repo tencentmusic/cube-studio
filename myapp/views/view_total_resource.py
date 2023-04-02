@@ -147,6 +147,9 @@ def node_traffic():
         'hit': True,
         'target': conf.get('MODEL_URLS', {}).get('total_resource', ''),
         'title': '机器负载',
+        'style': {
+            'height': '600px'
+        },
         'type': 'html',
     }
     # 返回模板
