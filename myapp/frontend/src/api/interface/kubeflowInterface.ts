@@ -67,7 +67,13 @@ export interface IADUGTemplateInfo {
         card_width: string
         card_height: string
     }
+    ops_link: Array<{
+        text: string
+        url: string
+    }>
+    enable_favorite: boolean
     echart: boolean
+    page_size: number
 }
 
 export interface IColumnRelateItem {
