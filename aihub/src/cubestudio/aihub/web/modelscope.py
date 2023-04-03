@@ -17,11 +17,22 @@ def draw_image(input_path, result):
         img = cv2.imread(save_path)
     else:
         img = cv2.imread(input_path)
-    for idx, score in enumerate(result['scores']):
+
+    rows = []
+    if result.get('scores', []):
+        rows = result['scores']
+    elif result.get('boxes',[]):
+        rows=result['boxes']
+    elif result.get('keypoints', []):
+        rows = result['keypoints']
+    elif result.get('labels', []):
+        rows = result['labels']
+
+    for idx, row in enumerate(rows):
+        score = round(result['score'][idx] if result.get('score', '') else 0,2)
         box = result['boxes'][idx] if result.get('boxes', []) else []
         keypoint = result['keypoints'][idx] if result.get('keypoints', []) else []
         label = result['labels'][idx] if result.get('labels', '') else ''
-        score = round(score, 2)
         color = get_color(idx)
         text_size = 0.001 * (img.shape[0] + img.shape[1]) / 2 + 0.3
         line_width = int(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1
