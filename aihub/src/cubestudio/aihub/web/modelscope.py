@@ -31,7 +31,11 @@ def draw_image(input_path, result):
     for idx, row in enumerate(rows):
         score = round(result['score'][idx] if result.get('score', '') else 0,2)
         box = result['boxes'][idx] if result.get('boxes', []) else []
+        if type(box) is numpy.ndarray:
+            box = box.tolist()
         keypoint = result['keypoints'][idx] if result.get('keypoints', []) else []
+        if type(keypoint) is numpy.ndarray:
+            keypoint = keypoint.tolist()
         label = result['labels'][idx] if result.get('labels', '') else ''
         color = get_color(idx)
         text_size = 0.001 * (img.shape[0] + img.shape[1]) / 2 + 0.3
@@ -43,10 +47,20 @@ def draw_image(input_path, result):
             cv2.putText(img, text, (int(box[0]), int(box[1]) + 10), cv2.FONT_HERSHEY_PLAIN, text_size, color,
                         line_width)
         if keypoint:
-            x = [keypoint[index] for index in range(len(keypoint) // 2)]
-            y = [keypoint[index + 1] for index in range(len(keypoint) // 2)]
-            radius = max(1, (max(x) - min(x)) // 50, (max(y) - min(y)) // 50)
-            for index, dot in enumerate(x):
-                cv2.circle(img, (int(x[index]), int(y[index])), radius, (0, 0, 255), -1)
+            point = keypoint[0]
+            if type(point)==list: # 如果x，y放在一起
+                x = [point[0] for point in keypoint]
+                y = [point[1] for point in keypoint]
+                radius = int(max(1, (max(x) - min(x)) // 50, (max(y) - min(y)) // 50))
+                for index, dot in enumerate(x):
+                    cv2.circle(img, (int(x[index]), int(y[index])), radius, (0, 0, 255), -1)
+
+            # 如果x，y并列排放
+            else:
+                x = [keypoint[index] for index in range(len(keypoint) // 2)]
+                y = [keypoint[index + 1] for index in range(len(keypoint) // 2)]
+                radius = int(max(1, (max(x) - min(x)) // 50, (max(y) - min(y)) // 50))
+                for index, dot in enumerate(x):
+                    cv2.circle(img, (int(x[index]), int(y[index])), radius, (0, 0, 255), -1)
 
     return img
