@@ -1,8 +1,8 @@
-import os
+import os,pysnooper
 
 import numpy,cv2,time,random
 
-
+@pysnooper.snoop()
 def draw_image(input_path, result):
     def get_color(idx):
         idx = (idx + 1) * 3
