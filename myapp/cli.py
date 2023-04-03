@@ -67,21 +67,23 @@ def init():
         add_project('job-template', '基础命令', 'python/bash等直接在服务器命令行中执行命令的模板',{"index":1})
         add_project('job-template', '数据导入导出', '集群与用户机器或其他集群之间的数据迁移',{"index":2})
         add_project('job-template', '数据处理', '数据的单机或分布式处理任务,ray/spark/hadoop/volcanojob',{"index":3})
-        add_project('job-template', '机器学习', '传统机器学习，lr/决策树/gbdt/xgb/fm等', {"index": 4})
-        add_project('job-template', '深度学习', '深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等', {"index": 5})
-        add_project('job-template', '分布式框架', 'tf相关的训练，模型校验，离线预测等功能', {"index": 6})
-        add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 7})
-        add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 8})
-        add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 9})
-        add_project('job-template', '模型处理', '模型服务化部署相关的组件模板', {"index": 10})
-        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 11})
-        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 12})
-        add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 13})
-        add_project('job-template', '广告类模板', '推荐领域常用的任务模板', {"index": 14})
-        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 15})
-        add_project('job-template', '机器视觉', '视觉类相关模板', {"index": 16})
-        add_project('job-template', '听觉', '听觉类相关模板', {"index": 17})
-        add_project('job-template', '自然语言', '自然语言类相关模板', {"index": 18})
+        add_project('job-template', '机器学习框架', '传统机器学习框架，sklearn', {"index": 4})
+        add_project('job-template', '机器学习算法', '传统机器学习，lr/决策树/gbdt/xgb/fm等', {"index": 5})
+        add_project('job-template', '深度学习', '深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等', {"index": 6})
+        add_project('job-template', '分布式框架', 'tf相关的训练，模型校验，离线预测等功能', {"index": 7})
+        add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 8})
+        add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 9})
+        add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 10})
+        add_project('job-template', '模型处理', '模型服务化部署相关的组件模板', {"index": 11})
+        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 12})
+        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 13})
+        add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 14})
+        add_project('job-template', '广告类模板', '推荐领域常用的任务模板', {"index": 15})
+        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 16})
+        add_project('job-template', '机器视觉', '视觉类相关模板', {"index": 17})
+        add_project('job-template', '听觉', '听觉类相关模板', {"index": 18})
+        add_project('job-template', '自然语言', '自然语言类相关模板', {"index": 19})
+        add_project('job-template', '大模型', '大模型相关模板', {"index": 20})
 
     except Exception as e:
         print(e)
@@ -499,7 +501,6 @@ def init():
     except Exception as e:
         print(e)
 
-
     def add_aihub(info_path):
         from myapp.models.model_aihub import Aihub
         if not os.path.exists(info_path):
@@ -535,8 +536,7 @@ def init():
                         aihub.dataset = json.dumps(data.get('dataset', {}), indent=4, ensure_ascii=False)
                         aihub.notebook = json.dumps(data.get('notebook', {}), indent=4, ensure_ascii=False)
                         aihub.job_template = json.dumps(data.get('train', {}), indent=4, ensure_ascii=False)
-                        aihub.pre_train_model = json.dumps(data.get('pre_train_model', {}), indent=4,
-                                                           ensure_ascii=False)
+                        aihub.pre_train_model = json.dumps(data.get('pre_train_model', {}), indent=4,ensure_ascii=False)
                         aihub.inference = json.dumps(data.get('inference', {}), indent=4, ensure_ascii=False)
                         aihub.service = json.dumps(data.get('service', {}), indent=4, ensure_ascii=False)
                         aihub.hot = int(data.get('hot', '0'))
@@ -551,7 +551,7 @@ def init():
     # 添加aihub
     try:
         print('begin add aihub')
-        info_path='init-aihub.json'
+        info_path='myapp/init-aihub.json'
         add_aihub(info_path)
     except Exception as e:
         print(e)
