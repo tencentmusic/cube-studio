@@ -59,13 +59,13 @@ python3 all_image.py > pull_rancher_images.sh
 sh pull_rancher_images.sh
 
 export RANCHER_CONTAINER_TAG=v2.5.2
-sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --privileged --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
+sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
 
 ```
 
 执行完毕后，进去rancher server的https://xx.xx.xx.xx/ 的web界面，这里的xx取决于你服务器的IP地址，之后选择添加集群->选择自定义集群->填写集群名称
 
-然后选择kubernetes的版本，目前最高支持到1.18（注意：这个版本在第一次打开选择页面时可能刷新不出来，需要等待1~2分钟再刷新才能显示）
+然后选择kubernetes的版本（注意：这个版本在第一次打开选择页面时可能刷新不出来，需要等待1~2分钟再刷新才能显示）
 
 之后选择编辑yaml文件。
 
@@ -99,7 +99,7 @@ services部分的示例（注意缩进对齐）
       service_node_port_range: 10-32767
       # 服务的ip范围
       service_cluster_ip_range: 172.16.0.0/16
-      # 证书 部署isito需要
+      # 证书 https版本isito需要
       extra_args:     
         service-account-issuer: kubernetes.default.svc
         service-account-signing-key-file: /etc/kubernetes/ssl/kube-service-account-token-key.pem

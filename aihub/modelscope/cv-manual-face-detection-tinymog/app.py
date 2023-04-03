@@ -68,8 +68,13 @@ class CV_MANUAL_FACE_DETECTION_TINYMOG_Model(Model):
         for index, face in enumerate(result['boxes']):
             boxs = face
             keypoints = result['keypoints'][index]
+            x = [keypoints[x*2] for x in range(5)]
+            y = [keypoints[y*2+1] for y in range(5)]
+
+            radius = int(max(3,(max(y)-min(y))//10,(max(x)-min(x))//10))
+
             for i in range(5):
-                cv2.circle(img, (int(keypoints[i * 2]), int(keypoints[i * 2 + 1])), 3, (0, 0, 255), -1)
+                cv2.circle(img, (int(keypoints[i * 2]), int(keypoints[i * 2 + 1])), radius, (0, 0, 255), -1)
             cv2.rectangle(img, (int(boxs[0]), int(boxs[1])), (int(boxs[2]), int(boxs[3])), (0, 0, 255), 2)
 
         savePath = 'result/result_' + str(int(1000 * time.time())) + '.jpg'

@@ -1,4 +1,4 @@
-import { DashboardOutlined, DatabaseOutlined, ExperimentOutlined, HomeOutlined, InboxOutlined, ProfileOutlined, SearchOutlined, SettingOutlined, ToolOutlined, UserOutlined } from '@ant-design/icons';
+import { SettingOutlined, UserOutlined } from '@ant-design/icons';
 import React from 'react';
 import { IRouterConfigPlusItem } from './api/interface/baseInterface';
 import { IAppMenuItem } from './api/interface/kubeflowInterface';
@@ -113,11 +113,6 @@ export const routerConfigPlus: IRouterConfigPlusItem[] = [
         index: true,
         element: lazy2Compont(() => import("./pages/IframeTemplate"), { url: '/myapp/home' })
     },
-    // {
-    //     path: '/dataSearch',
-    //     index: true,
-    //     element: lazy2Compont(() => import("./pages/DataSearch/DataSearch"))
-    // },
     {
         path: '/showData',
         title: '数据展示',
@@ -133,15 +128,6 @@ export const routerConfigPlus: IRouterConfigPlusItem[] = [
         path: '/user',
         icon: <UserOutlined style={{ fontSize: 18 }} />,
         element: lazy2Compont(() => import("./pages/IframeTemplate"), { url: '/users/userinfo/' })
-        // children: [
-        //     {
-        //         path: '/user/message',
-        //         title: '用户信息',
-        //         menu_type: 'iframe',
-        //         icon: <ProfileOutlined style={{ marginRight: 8 }} />,
-        //         element: lazy2Compont(() => import("./pages/IframeTemplate"), { url: '/users/userinfo/' })
-        //     }
-        // ]
     },
     { path: '*', element: <Page404 /> },
 ]
