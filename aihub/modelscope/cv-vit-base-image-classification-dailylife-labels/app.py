@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import numpy
 
 class CV_VIT_BASE_IMAGE_CLASSIFICATION_DAILYLIFE_LABELS_Model(Model):
     # 模型基础信息定义
@@ -35,7 +36,7 @@ class CV_VIT_BASE_IMAGE_CLASSIFICATION_DAILYLIFE_LABELS_Model(Model):
         {
             "label": "示例0",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_vit-base_image-classification_Dailylife-labels/resources/test.jpg"
+                "image": "test.jpg"
             }
         }
     ]
@@ -62,16 +63,19 @@ class CV_VIT_BASE_IMAGE_CLASSIFICATION_DAILYLIFE_LABELS_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
+        labels = result.get("labels")
+        scores = result.get("scores")
+        text = []
+        
+        for i in range(len(labels)):
+            txt = labels[i]+"的概率:"+str(scores[i])
+            text.append(txt)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -84,10 +88,12 @@ model=CV_VIT_BASE_IMAGE_CLASSIFICATION_DAILYLIFE_LABELS_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_vit-base_image-classification_Dailylife-labels/resources/test.jpg')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(image='test.jpg')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小332M,内存占用1.148G,识别图片响应在3秒内,没有GPU
+#运行环境为腾讯云服务器	标准型SA3 - 4核 8G,操作系统TencentOS Server 3.1 (TK4)

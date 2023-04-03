@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import numpy
 
 class MPLUG_IMAGE_TEXT_RETRIEVAL_FLICKR30K_LARGE_EN_Model(Model):
     # 模型基础信息定义
@@ -36,8 +37,8 @@ class MPLUG_IMAGE_TEXT_RETRIEVAL_FLICKR30K_LARGE_EN_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "image": "http://ait-public.oss-cn-hangzhou-zmf.aliyuncs.com/hemu.zp/image-text-retrieval.jpg",
-                "text": "Two young guys with shaggy hair look at their hands while hanging out in the yard."
+                "image": "test.jpg",
+                "text": "A red panda stands on the grass."
             }
         }
     ]
@@ -64,16 +65,12 @@ class MPLUG_IMAGE_TEXT_RETRIEVAL_FLICKR30K_LARGE_EN_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,text,**kwargs):
         result = self.p({"image": image, "text": text})
-
+        text = result.get("scores")
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -86,10 +83,12 @@ model=MPLUG_IMAGE_TEXT_RETRIEVAL_FLICKR30K_LARGE_EN_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='http://ait-public.oss-cn-hangzhou-zmf.aliyuncs.com/hemu.zp/image-text-retrieval.jpg',text='Two young guys with shaggy hair look at their hands while hanging out in the yard.')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(image='test.jpg',text='A red panda stands on the grass.')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小4.9G,内存占用10.68G,识别图片响应在4秒左右,没有GPU
+#占用内存较高,需至少16G内存

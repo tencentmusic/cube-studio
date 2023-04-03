@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/mplug-image-captioning-coco-base-en",
+    "field": "多模态",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "mplug-image-captioning-coco-base-en",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "mplug-image-captioning-coco-base-en-v20221001",
+    "label": "mPLUG图像描述模型-英文-base",
+    "describe": "达摩MPLUG英文图像描述base模型",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

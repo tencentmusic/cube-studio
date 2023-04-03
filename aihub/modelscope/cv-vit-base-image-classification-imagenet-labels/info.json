@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-vit-base-image-classification-imagenet-labels",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-vit-base-image-classification-imagenet-labels",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-vit-base-image-classification-imagenet-labels-v20221001",
+    "label": "ViT图像分类-通用",
+    "describe": "本模型适用范围较广，支持ImageNet 1000类物体识别，也可作为下游任务的预训练backbone。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

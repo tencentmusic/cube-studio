@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-vit-base-image-classification-dailylife-labels",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-vit-base-image-classification-dailylife-labels",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-vit-base-image-classification-dailylife-labels-v20221001",
+    "label": "ViT图像分类-中文-日常物品",
+    "describe": "自建1300类常见物体标签体系，覆盖常见的日用品，动物，植物，家具，设备，食物等物体，标签从海量中文互联网社区语料进行提取，保留了出现频率较高的常见物体名称。模型结构采用最新的ViT-Base结构。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

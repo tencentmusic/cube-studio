@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-yolox-pai-hand-detection",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-yolox-pai-hand-detection",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-yolox-pai-hand-detection-v20221001",
+    "label": "YOLOX-PAI手部检测模型",
+    "describe": "输入一张图像，并对其中手部区域进行检测，输出所有手部区域检测框、置信度和标签。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

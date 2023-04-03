@@ -4,7 +4,8 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
-
+import numpy
+import cv2
 class CV_UHDM_IMAGE_DEMOIREING_Model(Model):
     # 模型基础信息定义
     name='cv-uhdm-image-demoireing'   # 该名称与目录名必须一样，小写
@@ -35,21 +36,9 @@ class CV_UHDM_IMAGE_DEMOIREING_Model(Model):
         {
             "label": "示例0",
             "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_uhdm_image-demoireing/resources/test_moire_0.jpg"
+                "image": "test.jpg"
             }
         },
-        {
-            "label": "示例1",
-            "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_uhdm_image-demoireing/resources/test_moire_1.jpg"
-            }
-        },
-        {
-            "label": "示例2",
-            "input": {
-                "image": "/mnt/workspace/.cache/modelscope/damo/cv_uhdm_image-demoireing/resources/test_moire_2.jpg"
-            }
-        }
     ]
 
     # 训练的入口函数，此函数会自动对接pipeline，将用户在web界面填写的参数传递给该方法
@@ -73,17 +62,27 @@ class CV_UHDM_IMAGE_DEMOIREING_Model(Model):
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
-        result = self.p(image)
-
+        #处理图片大小
+        def resize_image(image):
+            img = cv2.imread(image)
+            height, width = img.shape[:2]
+            max_size = 1280
+            if max(height, width) > max_size:
+               if height > width:
+                  ratio = max_size / height
+               else:
+                  ratio = max_size / width
+               image = cv2.resize(img, (int(width * ratio), int(height * ratio)))
+            return image
+        result = self.p(resize_image(image))
+        os.makedirs('result',exist_ok=True)
+        save_path = os.path.join('result',os.path.basename(image))
+        cv2.imwrite(save_path, result.get("output_img"))
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path,
             }
         ]
         return back
@@ -96,10 +95,13 @@ model=CV_UHDM_IMAGE_DEMOIREING_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_uhdm_image-demoireing/resources/test_moire_0.jpg')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(image='test.jpg')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小44M,内存占用844.5M,识别图片响应在10秒内,没有GPU
+#运行环境为腾讯云服务器	标准型S6 - 2核 4G,操作系统TencentOS Server 3.1 (TK4)
+#可以去除摩尔纹
