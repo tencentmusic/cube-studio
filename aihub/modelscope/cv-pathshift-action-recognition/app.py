@@ -1,9 +1,10 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy
 import pysnooper
 import os
+
 
 class CV_PATHSHIFT_ACTION_RECOGNITION_Model(Model):
     # 模型基础信息定义
@@ -14,7 +15,7 @@ class CV_PATHSHIFT_ACTION_RECOGNITION_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "5270"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_pathshift_action-recognition/summary"
@@ -28,7 +29,7 @@ class CV_PATHSHIFT_ACTION_RECOGNITION_Model(Model):
     ]
 
     inference_resource = {
-        "resource_gpu": "1"
+        "resource_gpu": "0"
     }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
@@ -63,15 +64,9 @@ class CV_PATHSHIFT_ACTION_RECOGNITION_Model(Model):
     def inference(self,video,**kwargs):
         result = self.p(video)
 
-        # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
-        # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(result['labels']),
             }
         ]
         return back
@@ -84,10 +79,16 @@ model=CV_PATHSHIFT_ACTION_RECOGNITION_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(video='/mnt/workspace/.cache/modelscope/damo/cv_pathshift_action-recognition/description/smoking.mp4')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(video='/mnt/workspace/.cache/modelscope/damo/cv_pathshift_action-recognition/description/smoking.mp4')  # 测试
+# print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+# 模型大小：338MB
+# 模型效果：近距离识别率较高
+# 推理性能: 3s内
+# 模型占用内存/推理服务占用内存/gpu占用显存：7MB/3GB/0GB
+# 巧妙使用方法：chrom/safari PC验证通过、IOS失败

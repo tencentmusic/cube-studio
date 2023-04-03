@@ -1,21 +1,19 @@
 import React, { ReactText, useEffect, useRef, useState } from 'react';
-import { Button, Col, Input, DatePicker, TablePaginationConfig, Row, message, Space, Menu, Dropdown, Modal, Spin, Form, Tag, Popover, Tooltip, Select, FormInstance, Upload, UploadProps, Drawer, notification, Pagination } from 'antd';
+import { Button, Col, Input, DatePicker, TablePaginationConfig, Row, message, Space, Menu, Dropdown, Modal, Spin, Form, Tag, Popover, Tooltip, Select, FormInstance, Upload, UploadProps, Drawer, notification, Pagination, Switch } from 'antd';
 import { Content } from 'antd/lib/layout/layout';
 import TitleHeader from '../components/TitleHeader/TitleHeader';
 import TableBox from '../components/TableBox/TableBox';
 import moment from "moment";
 import { CopyOutlined, DownOutlined, ExclamationCircleOutlined, ExportOutlined, PlusOutlined, QuestionCircleOutlined, RollbackOutlined, UploadOutlined } from '@ant-design/icons'
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getParam, getTableScroll } from '../util';
 import ModalForm from '../components/ModalForm/ModalForm';
 import cookies from 'js-cookie';
 import { IADUGTemplateActionItem, IAppMenuItem } from '../api/interface/kubeflowInterface';
-import { getADUGTemplateList, getADUGTemplateApiInfo, actionADUGTemplateDelete, getADUGTemplateDetail, actionADUGTemplateAdd, actionADUGTemplateUpdate, actionADUGTemplateSingle, actionADUGTemplateMuliple, getCustomDialog, actionADUGTemplateDownData, actionADUGTemplateRetryInfo } from '../api/kubeflowApi';
+import { getADUGTemplateList, getADUGTemplateApiInfo, actionADUGTemplateDelete, getADUGTemplateDetail, actionADUGTemplateAdd, actionADUGTemplateUpdate, actionADUGTemplateSingle, actionADUGTemplateMuliple, actionADUGTemplateRetryInfo, actionADUGTemplateFavorite, actionADUGTemplateCancelFavorite, actionADUGTemplateChartOption } from '../api/kubeflowApi';
 import { ColumnsType } from 'antd/lib/table';
 import MixSearch, { IMixSearchParamItem } from '../components/MixSearch/MixSearch';
-import DynamicForm, { calculateId, IDynamicFormConfigItem, IDynamicFormGroupConfigItem, ILinkageConfig, TDynamicFormType } from '../components/DynamicForm/DynamicForm';
-import { columnConfig } from './columnConfig';
+import DynamicForm, { calculateId, IDynamicFormConfigItem, IDynamicFormGroupConfigItem, ILinkageConfig } from '../components/DynamicForm/DynamicForm';
 import ChartOptionTempalte from './ChartOptionTempalte';
 
 interface fatchDataParams {
@@ -23,6 +21,7 @@ interface fatchDataParams {
     params: any[]
     paramsMap: Record<string, any>
     sorter?: ISorterParam
+    only_favorite?: boolean
 }
 
 interface ISorterParam {
@@ -42,15 +41,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
     const [visableUpdate, setVisableUpdate] = useState(false)
     const [loadingDetail, setLoadingDetail] = useState(false)
     const [visableDetail, setVisableDetail] = useState(false)
-    const [isEchartShow, setIsEchartShow] = useState(false)
     const [selectedRowKeys, setSelectedRowKeys] = useState<ReactText[]>([])
-    const [dateInfo, setDateInfo] = useState<{
-        startTime: string,
-        endTime: string
-    }>({
-        startTime: moment().subtract(1, 'd').startOf('day').format('YYYY-MM-DD HH:mm:ss'),
-        endTime: moment().subtract(1, 'd').endOf('day').format('YYYY-MM-DD HH:mm:ss')
-    })
     const pageInfoInit: TablePaginationConfig = {
         current: 1,
         pageSize: PAGE_SIZE,
@@ -62,12 +53,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
     };
     const [pageInfo, setPageInfo] = useState<TablePaginationConfig>(pageInfoInit);
     const [currentColumns, setCurrentColumns] = useState<ColumnsType<any>>([])
-    // const customFilter: IMixSearchParamItem[] = [
-    //     { name: 'test1', type: 'input' },
-    //     { name: 'test2', type: 'select', option: [{ label: 'title1', value: 'value1' }, { label: 'title2', value: 'value2' }] },
-    //     { name: 'test3', type: 'input' },
-    //     { name: 'test4', type: 'select' },
-    // ]
     const [filterParams, setFilterParams] = useState<IMixSearchParamItem[]>([])
     const [filterValues, _setFilterValues] = useState<Array<{ key: ReactText | undefined, value: ReactText | undefined }>>([])
     const filterValuesRef = useRef(filterValues);
@@ -120,8 +105,27 @@ export default function TaskListManager(props?: IAppMenuItem) {
         card_width: string
         card_height: string
     }>()
-    const [isTqAuth, setIsTqAuth] = useState(false)
+    const [opsLink, setOpsLink] = useState<Array<{
+        text: string
+        url: string
+    }>>([])
     const [listColumns, setListColumns] = useState<string[]>([])
+    const [isAllDataList, _setIsAllDataList] = useState(true)
+    const isAllDataListRef = useRef(isAllDataList);
+    const setIsAllDataList = (data: boolean): void => {
+        isAllDataListRef.current = data;
+        _setIsAllDataList(data);
+    };
+    const [isShowCollect, _setIsShowCollect] = useState(false)
+    const isShowCollectRef = useRef(isShowCollect);
+    const setIsShowCollect = (data: boolean): void => {
+        isShowCollectRef.current = data;
+        _setIsShowCollect(data);
+    };
+    const [isEchartShow, setIsEchartShow] = useState(false)
+    const [pageSize, setPageSize] = useState(PAGE_SIZE)
+    const [listTitle, setListTitle] = useState<string>()
+
 
     const [scrollY, setScrollY] = useState("")
 
@@ -133,6 +137,10 @@ export default function TaskListManager(props?: IAppMenuItem) {
     }
 
     useEffect(() => {
+
+    }, [pageSize])
+
+    useEffect(() => {
         setScrollY(getTableScroll())
     }, [])
 
@@ -142,7 +150,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
         }
     }, [])
 
-    // 表单字段处理
     const createDyFormConfig = (data: Record<string, any>[], label_columns: Record<string, any>, description_columns: Record<string, any>): IDynamicFormConfigItem[] => {
         return data.map((item, index) => {
             let type = item['ui-type'] || 'input'
@@ -217,7 +224,11 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 download_data,
                 list_ui_type,
                 list_ui_args,
-                echart
+                ops_link,
+                enable_favorite,
+                echart,
+                page_size,
+                list_title
             } = res.data
             const actionwidth = 80 || [props?.related, permissions.includes('can_show'), permissions.includes('can_edit'), permissions.includes('can_delete')].filter(item => !!item).length * 60
             const hasAction = props?.related || permissions.includes('can_show') || permissions.includes('can_edit') || permissions.includes('can_delete')
@@ -231,7 +242,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     effectOption: value.related.reduce((ePre: any, eNext) => ({ ...ePre, [calculateId(eNext.src_value)]: eNext.des_value.map(item => ({ label: item, value: item })) }), {})
                 }]), [])
 
-            // 表格字段处理
             const listColumns = list_columns.map(column => {
                 return {
                     title: label_columns[column] || column,
@@ -283,6 +293,76 @@ export default function TaskListManager(props?: IAppMenuItem) {
                         <Space size="middle">
                             {
                                 hasAction ? <Dropdown overlay={<Menu>
+                                    {
+                                        isShowCollectRef.current && isAllDataListRef.current ? <Menu.Item><div className="link" onClick={() => {
+                                            Modal.confirm({
+                                                title: '收藏',
+                                                icon: <ExclamationCircleOutlined />,
+                                                content: '确定收藏?',
+                                                okText: '确认收藏',
+                                                cancelText: '取消',
+                                                onOk() {
+                                                    return new Promise((resolve, reject) => {
+                                                        actionADUGTemplateFavorite(`${route_base}favorite/${record[primary_key]}`)
+                                                            .then((res) => {
+                                                                resolve('');
+                                                            })
+                                                            .catch((err) => {
+                                                                reject();
+                                                            });
+                                                    })
+                                                        .then((res) => {
+                                                            message.success('收藏成功');
+                                                            fetchData({
+                                                                ...fetchDataParams,
+                                                                pageConf: pageInfo,
+                                                                params: filterValuesRef.current,
+                                                                paramsMap: filters
+                                                            });
+                                                        })
+                                                        .catch(() => {
+                                                            message.error('收藏失败');
+                                                        });
+                                                },
+                                                onCancel() { },
+                                            });
+                                        }}>收藏</div></Menu.Item> : null
+                                    }
+                                    {
+                                        isShowCollectRef.current && !isAllDataListRef.current ? <Menu.Item><div className="link" onClick={() => {
+                                            Modal.confirm({
+                                                title: '取消收藏',
+                                                icon: <ExclamationCircleOutlined />,
+                                                content: '确定取消收藏?',
+                                                okText: '确认取消收藏',
+                                                cancelText: '取消',
+                                                onOk() {
+                                                    return new Promise((resolve, reject) => {
+                                                        actionADUGTemplateCancelFavorite(`${route_base}favorite/${record[primary_key]}`)
+                                                            .then((res) => {
+                                                                resolve('');
+                                                            })
+                                                            .catch((err) => {
+                                                                reject();
+                                                            });
+                                                    })
+                                                        .then((res) => {
+                                                            message.success('操作成功');
+                                                            fetchData({
+                                                                ...fetchDataParams,
+                                                                pageConf: pageInfo,
+                                                                params: filterValuesRef.current,
+                                                                paramsMap: filters
+                                                            });
+                                                        })
+                                                        .catch(() => {
+                                                            message.error('操作失败');
+                                                        });
+                                                },
+                                                onCancel() { },
+                                            });
+                                        }}>取消收藏</div></Menu.Item> : null
+                                    }
                                     {
                                         permissions.includes('can_show') ? <Menu.Item><div className="link" onClick={() => {
                                             setVisableDetail(true)
@@ -423,7 +503,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
             }
 
             const addColumnsMap = add_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
-            // 联动字段处理
             if (customFormData && Object.keys(customFormData).length) {
                 const reTryInfoQuene = (Object.keys(customFormData) || []).filter(key => customFormData[key] && addColumnsMap[key] && addColumnsMap[key].retry_info)
                 let reTryInfoFlag = reTryInfoQuene.length
@@ -528,7 +607,11 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 currentFilterValues = localFilter
             }
 
+            setListTitle(list_title)
+            setPageSize(page_size)
             setIsEchartShow(echart)
+            setIsShowCollect(enable_favorite)
+            setOpsLink(ops_link)
             setListColumns(list_columns)
             setList_ui_type(list_ui_type)
             setList_ui_args(list_ui_args)
@@ -552,8 +635,12 @@ export default function TaskListManager(props?: IAppMenuItem) {
             setTableWidth(currentTableWidth)
             setHelpUrl(help_url)
             setFilterValues(currentFilterValues)
+
             fetchData({
-                pageConf: pageInfoInit,
+                pageConf: {
+                    ...pageInfoInit,
+                    pageSize: page_size
+                },
                 params: currentFilterValues,
                 paramsMap: filters,
                 sorter: undefined
@@ -567,28 +654,16 @@ export default function TaskListManager(props?: IAppMenuItem) {
         })
     }, []);
 
-    const fetchData = ({
-        pageConf,
-        params,
-        paramsMap,
-        sorter
-    }: fatchDataParams = {
-            pageConf: pageInfoInit,
-            params: filterValues,
-            paramsMap: filterParamsMap,
-            sorter: undefined
-        }) => {
-        setLoading(true);
-        let form_data = undefined
+    const formatFilterParams = (params: any[], paramsMap: Record<string, any>) => {
+        let formatData = undefined
         const temlateId = getParam('id')
 
-        form_data = JSON.stringify({
-            str_related: 1,
-            "filters": [
+        formatData = {
+            filters: [
                 temlateId ? {
-                    "col": props?.model_name,
-                    "opr": "rel_o_m",
-                    "value": +temlateId
+                    col: props?.model_name,
+                    opr: "rel_o_m",
+                    value: +temlateId
                 } : undefined,
                 ...params.filter(param => param.value !== undefined).map((param: any) => {
                     let opr = ''
@@ -602,28 +677,37 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             break
                         }
                     }
-                    // if (!isNaN(+param.value) && paramsMap[param.key] && !(paramsMap[param.key].type === 'Related' || paramsMap[param.key].type === 'QuerySelect')) {
-                    //     opr = 'eq'
-                    // } else {
-                    //     const oprList = ['rel_o_m', 'ct', 'eq']
-                    //     const sourceOprList: string[] = paramsMap[param.key].filter.map((item: any) => item.operator) || []
-
-                    //     for (let i = 0; i < oprList.length; i++) {
-                    //         const currentOpr = oprList[i];
-                    //         if (sourceOprList.includes(currentOpr)) {
-                    //             opr = currentOpr
-                    //             break
-                    //         }
-                    //     }
-                    // }
 
                     return {
-                        "col": param.key,
-                        "opr": opr,
-                        "value": param.value
+                        col: param.key,
+                        opr: opr,
+                        value: param.value
                     }
                 })
             ].filter(item => !!item),
+        }
+        return formatData
+    }
+
+    const fetchData = ({
+        pageConf,
+        params,
+        paramsMap,
+        sorter,
+        only_favorite
+    }: fatchDataParams = {
+            pageConf: pageInfoInit,
+            params: filterValues,
+            paramsMap: filterParamsMap,
+            sorter: undefined,
+            only_favorite: false
+        }) => {
+        setLoading(true);
+
+        const form_data = JSON.stringify({
+            ...formatFilterParams(params, paramsMap),
+            only_favorite,
+            str_related: 1,
             page: (pageConf.current || 1) - 1,
             page_size: pageConf.pageSize || 10,
             ...sorter
@@ -727,17 +811,12 @@ export default function TaskListManager(props?: IAppMenuItem) {
             return isCSV || Upload.LIST_IGNORE;
         },
         onChange(info) {
-            // if (info.file.status !== 'uploading') {
-            //     console.log(info.file, info.fileList);
-            // }
             if (info.file.status === 'done') {
-                // message.success(`${info.file.name}，${info.file.response.message}`);
                 notification['success']({
                     message: '导入成功',
                     description: JSON.stringify(info.file.response),
                 });
             } else if (info.file.status === 'error') {
-                // message.error(`${info.file.name} 数据导入失败`);
                 notification['error']({
                     message: '导入失败',
                     description: JSON.stringify(info.file.response),
@@ -747,11 +826,11 @@ export default function TaskListManager(props?: IAppMenuItem) {
     };
 
     return (
-        <div className="fade-in">
+        <div className="fade-in h100 d-f fd-c">
             {/* 添加 */}
             <ModalForm
                 title={`添加${labelTitle}`}
-                width={1500}
+                // width={1000}
                 formData={dynamicFormDataAdd}
                 loading={loadingAdd}
                 visible={visableAdd}
@@ -832,7 +911,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
             {/* 修改 */}
             <ModalForm
                 title={`修改${labelTitle}`}
-                width={1500}
+                // width={1500}
                 formData={dataDetail.reduce((pre, next) => {
                     if ((updateColumnsMap[next.key] || {})['ui-type'] === 'select') {
                         let value = next.value
@@ -940,6 +1019,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     </div>
                 </Spin>
             </Modal>
+
             <TitleHeader title={<>
                 {
                     (props?.isSubRoute || getParam('targetId')) ? <Button className="mr16" onClick={() => {
@@ -949,7 +1029,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 }
                 <span>{labelTitle}</span>
             </>} breadcrumbs={(props?.breadcrumbs || []).map((crumbs, idx) => {
-                return <span key={`templateTitle_${props?.name}_${idx}`} className="c-hint-b fs12">/<span className="plr2">{crumbs}</span></span>
+                return <span key={`templateTitle_${props?.name}_${idx}`} className="c-icon-b fs12">/<span className="plr2">{crumbs}</span></span>
             })} >
                 {
                     helpUrl ? <div className="link"><span className="pr4" onClick={() => {
@@ -957,35 +1037,58 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     }}>帮助链接</span><QuestionCircleOutlined /></div> : null
                 }
             </TitleHeader>
-            <Content className="appmgmt-content bg-title">
-                {/* <div>
-                    <img className="m32" style={{ height: 42 }} src={require('../images/star2.svg').default} alt="" />
-                </div> */}
-                {
-                    !!filterParams.length && <MixSearch values={filterValues} params={filterParams} onChange={(values) => {
-                        localStorage.setItem(`filter_${location.pathname}${location.search}`, JSON.stringify(values))
-                        setFilterValues(values)
-                        fetchData({
-                            ...fetchDataParams,
-                            pageConf: pageInfoInit,
-                            params: values,
-                            sorter: sorterParam,
-                            paramsMap: filterParamsMap
-                        });
-                    }} />
-                }
+            <Content className="appmgmt-content bg-title h100 d-f fd-c">
+                <div className="mlr16 mb16 flex1 bg-w">
+                    {
+                        !!filterParams.length && <MixSearch values={filterValues} params={filterParams} onChange={(values) => {
+                            localStorage.setItem(`filter_${location.pathname}${location.search}`, JSON.stringify(values))
+                            setFilterValues(values)
+                            fetchData({
+                                ...fetchDataParams,
+                                pageConf: pageInfoInit,
+                                params: values,
+                                sorter: sorterParam,
+                                paramsMap: filterParamsMap
+                            });
+                        }} />
+                    }
 
-                {
-                    isEchartShow ? <ChartOptionTempalte url={baseUrl} /> : null
-                }
+                    {
+                        isEchartShow ? <ChartOptionTempalte url={baseUrl} /> : null
+                    }
 
-                <div className="m16">
                     {
                         list_ui_type !== 'card' ? <TableBox
                             cancelExportData={true}
                             tableKey={`tablebox_${location.pathname}`}
-                            titleNode={<Col className="tablebox-title">{labelTitle}列表</Col>}
+                            titleNode={<Col className="tablebox-title">
+                                <div className="d-f ac">
+                                    <div className="mr8">{listTitle || ''}</div>
+                                    {
+                                        isShowCollect ? <div className="pb2">
+                                            <Switch checked={isAllDataList} checkedChildren="全部" unCheckedChildren="我的收藏" defaultChecked onChange={(checked) => {
+                                                setIsAllDataList(checked)
+                                                fetchData({
+                                                    ...fetchDataParams,
+                                                    pageConf: pageInfoInit,
+                                                    params: filterValues,
+                                                    sorter: sorterParam,
+                                                    paramsMap: filterParamsMap,
+                                                    only_favorite: !checked
+                                                });
+                                            }} />
+                                        </div> : null
+                                    }
+                                </div>
+                            </Col>}
                             buttonNode={<div className="d-f ac">
+                                {
+                                    opsLink && opsLink.length ? opsLink.map(config => {
+                                        return <Button type="primary" className="mr16" onClick={() => {
+                                            window.open(config.url, 'bank')
+                                        }}>{config.text}</Button>
+                                    }) : null
+                                }
 
                                 {
                                     permissions.includes('can_add') ? <Button className="mr16" type="primary" onClick={() => setVisableAdd(true)}>添加{labelTitle}<PlusOutlined /></Button> : null
@@ -1008,9 +1111,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                 </div>
                                 {
                                     isImportData ? <div className="d-f ml16">
-                                        <Tooltip color="#fff" title={<span className="tips-content-b">注意：csv逗号分隔，第一行为列的英文名 <span className="link" onClick={() => {
+                                        <Tooltip color="#fff" title={<span className="tips-content-b"><div>注意：csv逗号分隔，</div><div>第一行为列的英文名</div> <div className="link" onClick={() => {
                                             window.open(`${window.location.origin}${baseUrlRef.current}download_template`)
-                                        }}>下载导入模板</span></span>} placement="topLeft">
+                                        }}>下载导入模板</div></span>} placement="topLeft">
                                             <Upload {...uploadConfig}>
                                                 <Button className="" icon={<UploadOutlined />}>批量导入数据</Button>
                                             </Upload>
@@ -1026,7 +1129,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                             okText: '确认导出数据',
                                             cancelText: '取消',
                                             onOk() {
-                                                window.open(`${window.location.origin}${baseUrlRef.current}download`)
+                                                const formatData = formatFilterParams(filterValues, filterParamsMap)
+                                                const form_data = JSON.stringify(formatData)
+                                                window.open(`${window.location.origin}${baseUrlRef.current}download?form_data=${form_data}`)
                                                 message.success('导出成功');
                                             },
                                             onCancel() { },
@@ -1055,12 +1160,11 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                     paramsMap: filterParamsMap,
                                     sorter: tarSorter
                                 });
-                                // setPageInfo(pageInfo)
                             }}
                             rowSelection={{
                                 type: 'checkbox',
                                 fixed: 'left',
-                                columnWidth: 80,
+                                columnWidth: 32,
                                 selectedRowKeys,
                                 onChange: (selectedRowKeys) => {
                                     setSelectedRowKeys(selectedRowKeys)
@@ -1100,7 +1204,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             </div>
                         </div>
                     }
-
                 </div>
             </Content>
         </div >

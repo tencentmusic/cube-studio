@@ -1,44 +1,13 @@
-from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask_babel import gettext as __
-from flask_babel import lazy_gettext as _
-import uuid
-import pysnooper
-import urllib.parse
+
 import math
 from flask import Markup
-from sqlalchemy.exc import InvalidRequestError
-import importlib
 from jinja2 import Environment, BaseLoader, DebugUndefined
-from myapp.models.model_etl_pipeline import ETL_Pipeline,ETL_Task
-from myapp.views.view_team import Project_Join_Filter
-from flask_appbuilder.actions import action
-from flask import jsonify
-from flask_appbuilder.forms import GeneralModelConverter
-from myapp.utils import core
 from myapp import app, appbuilder,db
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import DataRequired, Length, Regexp
-from sqlalchemy import or_
-from wtforms import StringField, SelectField
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget, MySelect2Widget
-import copy
-from .baseApi import MyappModelRestApi
-from flask import (
-    flash,
-    g,
-    make_response,
-    redirect,
-    request,
-)
-from myapp import security_manager
-from myapp.views.view_team import filter_join_org_project
-
+from flask import request
 from .baseFormApi import (
     MyappFormRestApi
 )
 
-from flask_appbuilder import expose
 import datetime,time,json
 
 from ..utils.py.py_k8s import K8s
@@ -65,20 +34,24 @@ def node_traffic():
         all_node_json={}
         clusters = conf.get('CLUSTERS', {})
         for cluster_name in clusters:
-            cluster = clusters[cluster_name]
-            k8s_client = K8s(cluster.get('KUBECONFIG', ''))
+            try:
+                cluster = clusters[cluster_name]
+                k8s_client = K8s(cluster.get('KUBECONFIG', ''))
 
-            all_node = k8s_client.get_node()
-            all_node_resource = k8s_client.get_all_node_allocated_resources()
-            all_node_json[cluster_name]={}
-            for node in all_node:
-                all_node_json[cluster_name][node['hostip']]=node
-                node_allocated_resources=all_node_resource.get(node['name'],{
-                    "used_cpu":0,
-                    "used_memory":0,
-                    "used_gpu":0
-                })
-                all_node_json[cluster_name][node['hostip']].update(node_allocated_resources)
+                all_node = k8s_client.get_node()
+                all_node_resource = k8s_client.get_all_node_allocated_resources()
+                all_node_json[cluster_name]={}
+                for node in all_node:
+                    all_node_json[cluster_name][node['hostip']]=node
+                    node_allocated_resources=all_node_resource.get(node['name'],{
+                        "used_cpu":0,
+                        "used_memory":0,
+                        "used_gpu":0
+                    })
+                    all_node_json[cluster_name][node['hostip']].update(node_allocated_resources)
+            except Exception as e:
+                print(e)
+
         node_resource_used['data']=all_node_json
         node_resource_used['check_time'] = datetime.datetime.now()
 
@@ -174,6 +147,9 @@ def node_traffic():
         'hit': True,
         'target': conf.get('MODEL_URLS', {}).get('total_resource', ''),
         'title': '机器负载',
+        'style': {
+            'height': '600px'
+        },
         'type': 'html',
     }
     # 返回模板

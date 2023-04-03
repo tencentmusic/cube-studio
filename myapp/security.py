@@ -211,6 +211,22 @@ class MyUserRemoteUserModelView_Base():
             user.roles.append(gamma_role)
             db.session.commit()
 
+        # 添加到public项目组
+        try:
+            from myapp.models.model_team import Project_User, Project
+            public_project = db.session.query(Project).filter(Project.name == "public").filter(Project.type == "org").first()
+            if public_project:
+                project_user = Project_User()
+                project_user.project = public_project
+                project_user.role = 'dev'
+                project_user.user_id = user.id
+                db.session.add(project_user)
+                db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+
+
 class MyUserRemoteUserModelView(MyUserRemoteUserModelView_Base,UserModelView):
     datamodel = SQLAInterface(MyUser)
 

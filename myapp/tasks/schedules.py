@@ -1167,55 +1167,6 @@ def adjust_service_resource(task):
         except Exception as e:
             print(e)
 
-
-from myapp.models.model_aihub import Aihub
-def add_aihub(info_path):
-    if not os.path.exists(info_path):
-        return
-    aihubs = json.load(open(info_path, mode='r'))
-    with session_scope(nullpool=True) as dbsession:
-        try:
-            if len(aihubs)>0:
-                # dbsession.query(Aihub).delete()
-                # dbsession.commit()
-                for data in aihubs:
-                    print(data)
-                    name = data.get('name','')
-                    label = data.get('label','')
-                    describe = data.get('describe','')
-                    uuid = data.get('uuid', '')
-                    if name and label and describe and uuid:
-                        aihub = dbsession.query(Aihub).filter_by(uuid=uuid).first()
-                        if not aihub:
-                            aihub=Aihub()
-                        aihub.doc=data.get('doc','')
-                        aihub.name=name
-                        aihub.label=label
-                        aihub.describe=describe
-                        aihub.field=data.get('field','')
-                        aihub.scenes=data.get('scenes','')
-                        aihub.type=data.get('type','')
-                        aihub.pic=data.get('pic','')
-                        aihub.status=data.get('status', '')
-                        aihub.uuid=uuid
-                        aihub.images = data.get('images', '')
-                        aihub.version=data.get('version', '')
-                        aihub.dataset=json.dumps(data.get('dataset', {}),indent=4,ensure_ascii=False)
-                        aihub.notebook=json.dumps(data.get('notebook', {}),indent=4,ensure_ascii=False)
-                        aihub.job_template=json.dumps(data.get('train', {}),indent=4,ensure_ascii=False)
-                        aihub.pre_train_model=json.dumps(data.get('pre_train_model', {}),indent=4,ensure_ascii=False)
-                        aihub.inference=json.dumps(data.get('inference', {}),indent=4,ensure_ascii=False)
-                        aihub.service=json.dumps(data.get('service', {}),indent=4,ensure_ascii=False)
-                        aihub.hot=int(data.get('hot', '0'))
-                        aihub.price=int(data.get('price', '0'))
-                        aihub.source=data.get('source', '')
-                        if not aihub.id:
-                            dbsession.add(aihub)
-                        dbsession.commit()
-        except Exception as e:
-            print(e)
-
-
 def cp_cubestudio():
     # 复制cube-studio代码
     import os
@@ -1227,26 +1178,8 @@ def cp_cubestudio():
     except Exception as e:
         print(e)
 
-@celery_app.task(name="task.update_aihub", bind=True)
-def update_aihub(task):
-    import random
-    time.sleep(random.randint(10,600))
-    from myapp.utils.core import run_shell
-
-    # 更新git
-    info_path='info.json'
-    status = run_shell('rm -rf /cube-studio && cd / && git clone https://github.com/tencentmusic/cube-studio.git')
-    if status:
-        print('clone fail')
-        return
-    else:
-        if os.path.exists(info_path):
-            info_path = '/cube-studio/aihub/info.json'
-            cp_cubestudio()
-    add_aihub(info_path)
-
 if __name__=="__main__":
-    add_aihub('info.json')
+    pass
 
 
 
