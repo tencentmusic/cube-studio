@@ -54,10 +54,6 @@ class SPEECH_PARAFORMER_ASR_NAT_ZH_CN_16K_AISHELL1_VOCAB4234_PYTORCH_Model(Model
         
         self.p = pipeline('auto-speech-recognition', 'damo/speech_paraformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch')
 
-    # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
-    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
-        return img
-
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,input,**kwargs):
@@ -65,13 +61,9 @@ class SPEECH_PARAFORMER_ASR_NAT_ZH_CN_16K_AISHELL1_VOCAB4234_PYTORCH_Model(Model
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": result['text']
             }
         ]
         return back
@@ -84,10 +76,10 @@ model=SPEECH_PARAFORMER_ASR_NAT_ZH_CN_16K_AISHELL1_VOCAB4234_PYTORCH_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(input='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(input='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()

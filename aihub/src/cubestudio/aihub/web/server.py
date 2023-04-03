@@ -46,9 +46,6 @@ from flask import Flask
 user_history={
 }
 
-
-
-
 class Server():
 
     web_examples=[]

@@ -261,7 +261,8 @@ class Model():
             save_model_dir = input.get('save_model_dir',self.config('save_model_dir'))
 
             self.load_model(save_model_dir)
-            del kwargs['save_model_dir']
+            if save_model_dir in kwargs:
+                del kwargs['save_model_dir']
             result = self.inference(**kwargs)  # 测试
             print(result)
         else:
