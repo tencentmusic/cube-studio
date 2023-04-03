@@ -599,10 +599,6 @@ class CeleryConfig(object):
             'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
             'schedule': crontab(minute='10',hour='11'),
         },
-        # 'task_update_aihub': {
-        #     'task': 'task.update_aihub',  # 更新aihub
-        #     'schedule': crontab(minute='30', hour='4'),
-        # },
 		"task_check_pod_terminating": {
             "task": "task.check_pod_terminating",
             'schedule': crontab(minute='*/10'),

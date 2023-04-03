@@ -73,7 +73,6 @@ class APP1_Model(Model):
     def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
         return img
 
-
     # web每次用户请求推理，用于对接web界面请求
     # @pysnooper.snoop()
     def inference(self,arg1,arg2=None,arg3=None,arg4=None,arg5=None,arg6=None,arg7=None,**kwargs):
