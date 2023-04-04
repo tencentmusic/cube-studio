@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,cv2,time,random
 import pysnooper
 import os
 
@@ -62,16 +62,16 @@ class CV_RESNEST101_GENERAL_RECOGNITION_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
+        import pandas
+        result = pandas.DataFrame(result)
+        result.columns = ['得分', '类别']
+        result = result[['类别', '得分']]
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "markdown": result.to_markdown()
             }
         ]
         return back
@@ -84,10 +84,10 @@ model=CV_RESNEST101_GENERAL_RECOGNITION_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='https://mmsearch.oss-cn-zhangjiakou.aliyuncs.com/maas_test_img/bailing.png')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(arg0='https://mmsearch.oss-cn-zhangjiakou.aliyuncs.com/maas_test_img/bailing.png')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
