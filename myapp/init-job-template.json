@@ -1137,7 +1137,7 @@
         }
     },
     "xgb":{
-        "project_name":"机器学习算法",
+        "project_name":"机器学习框架",
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/xgb_train_and_predict:v1",
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/xgb_train_and_predict",
         "image_describe":"xgb算法单机",
