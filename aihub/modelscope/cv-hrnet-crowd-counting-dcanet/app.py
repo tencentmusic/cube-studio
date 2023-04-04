@@ -17,7 +17,7 @@ class CV_HRNET_CROWD_COUNTING_DCANET_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpeg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "7294"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_hrnet_crowd-counting_dcanet/summary"
