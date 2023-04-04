@@ -113,10 +113,11 @@ class CV_MOBILENET_FACE_2D_KEYPOINTS_ALIGNMENT_Model(Model):
         if os.path.exists(save_path):
             os.remove(save_path)
         cv2.imwrite(save_path, img)
+        poses = [[str(round(x,2)) for x in pose] for pose in result['poses']]
         back=[
             {
                 "image":save_path,
-                # "text":json.dumps(result,indent=4,ensure_ascii=False),
+                "text":poses
             }
         ]
         return back
@@ -124,10 +125,13 @@ class CV_MOBILENET_FACE_2D_KEYPOINTS_ALIGNMENT_Model(Model):
 model=CV_MOBILENET_FACE_2D_KEYPOINTS_ALIGNMENT_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/2.jpg')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_mobilenet_face-2d-keypoints_alignment/resources/2.jpg')  # 测试
+# print(result)
 
 # 测试后打开此部分
 if __name__=='__main__':
     model.run()
+
+
+# 重启两次load model会报错

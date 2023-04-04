@@ -3309,6 +3309,23 @@
         },
         "job_template_args":{
             "模型信息":{
+                "--project_name":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"项目组名称",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"public",
+                    "placeholder":"",
+                    "describe":"项目组名称",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
                 "--label":{
                     "type":"str",
                     "item_type":"str",

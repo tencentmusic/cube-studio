@@ -68,7 +68,7 @@ class CV_RESNET101_IMAGE_MULTIPLE_HUMAN_PARSING_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
-
+        print(result)
         from cubestudio.aihub.web.modelscope import draw_image
         img = draw_image(arg0, result)
 
