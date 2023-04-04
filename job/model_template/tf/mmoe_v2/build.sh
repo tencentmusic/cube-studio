@@ -1,0 +1,2 @@
+docker build -t csighub.tencentyun.com/tme-kubeflow/tf2.3_model_template_mmoe_v2:20210701 -f job/model_template/tf/mmoe_v2/Dockerfile .
+docker push csighub.tencentyun.com/tme-kubeflow/tf2.3_model_template_mmoe_v2:20210701

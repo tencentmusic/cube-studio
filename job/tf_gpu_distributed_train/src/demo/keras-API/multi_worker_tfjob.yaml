@@ -1,0 +1,34 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  name: multi-worker
+  namespace: pipeline
+spec:
+  cleanPodPolicy: None
+  tfReplicaSpecs:
+    Worker:
+      replicas: 3
+      restartPolicy: Never
+      template:
+        spec:
+          imagePullSecrets:
+            - name: csig-hubsecret
+          containers:
+            - name: tensorflow
+              image:  csighub.tencentyun.com/tme-kubeflow/gpu-tf2.1-dist-demo
+              imagePullPolicy: Always
+#              command: ["sleep","100000"]
+              workingDir: /mnt/pengluan/keras
+              command: ["bash","-c", "python3 multi_worker_strategy-with-keras.py --saved_model_dir /mnt/pengluan/keras/saved_model/ --checkpoint_dir /mnt/pengluan/keras/checkpoint"]
+              volumeMounts:
+                - mountPath: /mnt/pengluan
+                  name: data
+                  subPath: pengluan
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: kubeflow-user-workspace

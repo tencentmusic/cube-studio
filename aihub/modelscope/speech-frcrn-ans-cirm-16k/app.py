@@ -14,7 +14,7 @@ class SPEECH_FRCRN_ANS_CIRM_16K_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "25277"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/speech_frcrn_ans_cirm_16k/summary"
