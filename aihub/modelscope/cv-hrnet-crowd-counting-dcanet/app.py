@@ -77,7 +77,6 @@ class CV_HRNET_CROWD_COUNTING_DCANET_Model(Model):
     def inference(self,image,**kwargs):
         result = self.p(image)
         scores = result[OutputKeys.SCORES]
-        print('scores:', scores)
         vis_img = result[OutputKeys.OUTPUT_IMG]
         vis_img = numpy_to_cv2img(vis_img)
         save_path = f'result/result{random.randint(1, 1000)}.jpg'
