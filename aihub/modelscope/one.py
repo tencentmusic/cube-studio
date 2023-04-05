@@ -57,7 +57,7 @@ def make_aihub():
         model_name = model.get("Name", '')
         model_path = model.get('Path', '') + '/' + model.get("Name", '')
 
-        # # 还在集成的不需要
+        # 还在集成的不需要
         # if model['Integrating']<2:
         #     print(model_path,'集成中')
         #     continue
