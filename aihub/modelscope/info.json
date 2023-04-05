@@ -31,6 +31,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-news",
+        "label": "RaNER命名实体识别-中文-新闻领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文MSRA数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 430178,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-news",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-resnet-carddetection-scrfd34gkps",
         "label": "卡证检测矫正模型",
         "describe": "输入一张图片，检测其中是否出现卡证，如有则返回卡证的矩形框和角点，以及矫正后的卡证图像。",
@@ -131,6 +141,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-csanmt-translation-en2zh",
+        "label": "CSANMT连续语义增强机器翻译-英中-通用领域-large",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 54870,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-en2zh",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-paraformer-large-vad-punc-asr-nat-zh-cn-16k-common-vocab8404-pytorch",
         "label": "Paraformer语音识别-中文-通用-16k-离线-large-长音频版",
         "describe": "Paraformer-large长音频模型集成VAD、ASR、标点与时间戳功能，可直接对时长为数小时音频进行识别，并输出带标点文字与时间戳",
@@ -161,12 +181,32 @@
     },
     {
         "price": "1",
+        "name": "nlp-csanmt-translation-zh2en",
+        "label": "CSANMT连续语义增强机器翻译-中英-通用领域-large",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 42621,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-zh2en",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "mgeo-geographic-entity-alignment-chinese-base",
         "label": "MGeo地址相似度匹配实体对齐-中文-地址领域-base",
         "describe": "模型判断两条地址是否指代同一道路、村庄、POI等。将两条地址的关系分为完全对齐、部分对齐、不对齐。该任务是构建地理信息知识库的核心技术。",
         "hot": 40346,
         "pic": "example.jpg",
         "uuid": "mgeo-geographic-entity-alignment-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-zero-shot-classification-chinese-base",
+        "label": "StructBERT零样本分类-中文-base",
+        "describe": "该模型使用StructBERT-base在xnli_zh数据集(将英文数据集重新翻译得到中文数据集)上面进行了训练得到。",
+        "hot": 38763,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-zero-shot-classification-chinese-base",
         "field": "自然语言"
     },
     {
@@ -201,6 +241,26 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-sentiment-classification-chinese-base",
+        "label": "StructBERT情感分类-中文-通用-base",
+        "describe": "StructBERT情感分类-中文-通用-base是基于bdci、dianping、jd binary、waimai-10k四个数据集（11.5w条数据）训练出来的情感分类模型。",
+        "hot": 35606,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentiment-classification-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-word-segmentation-chinese-base",
+        "label": "BAStructBERT分词-中文-新闻领域-base",
+        "describe": "基于预训练语言模型的新闻领域中文分词模型，根据用户输入的中文句子产出分词结果。",
+        "hot": 32804,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-word-segmentation-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-paraformer-asr-nat-zh-cn-16k-common-vocab8358-tensorflow1",
         "label": "Paraformer语音识别-中文-通用-16k-离线",
         "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
@@ -208,6 +268,16 @@
         "pic": "example.jpg",
         "uuid": "speech-paraformer-asr-nat-zh-cn-16k-common-vocab8358-tensorflow1",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-ecom-50cls",
+        "label": "RaNER命名实体识别-中文-电商领域-细粒度-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文细粒度电商数据集训练的模型。本方法采用Transformer-CRF模型，使用sbert-base作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 31989,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-ecom-50cls",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -278,6 +348,16 @@
         "pic": "example.jpg",
         "uuid": "speech-sambert-hifigan-tts-zhiyan-emo-zh-cn-16k",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-cmeee",
+        "label": "RaNER命名实体识别-中文-医疗领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文CMeEE数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 21419,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-cmeee",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -441,6 +521,26 @@
     },
     {
         "price": "1",
+        "name": "nlp-gpt3-text-generation-13b",
+        "label": "GPT-3预训练生成模型-中文-13B",
+        "describe": "13B参数量的中文GPT-3文本生成模型",
+        "hot": 13548,
+        "pic": "example.jpg",
+        "uuid": "nlp-gpt3-text-generation-13b",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-gpt3-text-generation-chinese-base",
+        "label": "GPT-3预训练生成模型-中文-base",
+        "describe": "1亿参数量的中文GPT-3文本生成模型",
+        "hot": 13437,
+        "pic": "example.jpg",
+        "uuid": "nlp-gpt3-text-generation-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-convnexttiny-ocr-recognition-document-damo",
         "label": "读光-文字识别-行识别模型-中英-文档印刷体文本领域",
         "describe": "给定一张文档印刷体图片，识别出图中所含文字并输出字符串。",
@@ -448,6 +548,16 @@
         "pic": "example.jpg",
         "uuid": "cv-convnexttiny-ocr-recognition-document-damo",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-gpt3-poetry-generation-chinese-large",
+        "label": "GPT-3诗词生成模型-中文-large",
+        "describe": "3亿参数量的中文GPT-3诗词生成模型",
+        "hot": 13044,
+        "pic": "example.jpeg",
+        "uuid": "nlp-gpt3-poetry-generation-chinese-large",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -481,12 +591,32 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-word-segmentation-chinese-base-ecommerce",
+        "label": "BAStructBERT分词-中文-电商领域-base",
+        "describe": "基于预训练语言模型的电商领域中文分词模型，根据用户输入的中文句子产出分词结果。",
+        "hot": 12527,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-word-segmentation-chinese-base-ecommerce",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "nlp-bart-text-error-correction-chinese",
         "label": "BART文本纠错-中文-通用领域-large",
         "describe": "我们采用seq2seq方法建模文本纠错任务。模型训练上，我们使用中文BART作为预训练模型，然后在Lang8和HSK训练数据上进行finetune。不引入额外资源的情况下，本模型在NLPCC18测试集上达到了SOTA。",
         "hot": 12507,
         "pic": "example.png",
         "uuid": "nlp-bart-text-error-correction-chinese",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-rom-passage-ranking-chinese-base",
+        "label": "ROM语义相关性-中文-通用领域-base",
+        "describe": "基于ROM-Base预训练模型的通用领域中文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 12092,
+        "pic": "example.png",
+        "uuid": "nlp-rom-passage-ranking-chinese-base",
         "field": "自然语言"
     },
     {
@@ -528,6 +658,16 @@
         "pic": "example.jpg",
         "uuid": "ofa-visual-grounding-refcoco-large-en",
         "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-word-segmentation-chinese-lite",
+        "label": "BAStructBERT分词-中文-新闻领域-lite",
+        "describe": "基于预训练语言模型的新闻领域中文分词模型，根据用户输入的中文句子产出分词结果。",
+        "hot": 11194,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-word-segmentation-chinese-lite",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -581,6 +721,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-mt5-zero-shot-augment-chinese-base",
+        "label": "全任务零样本学习-mT5分类增强版-中文-base",
+        "describe": "该模型在mt5模型基础上使用了大量中文数据进行训练，并引入了零样本分类增强的技术，使模型输出稳定性大幅提升。支持任务包含：分类、摘要、翻译、阅读理解、问题生成等等。",
+        "hot": 9844,
+        "pic": "example.jpg",
+        "uuid": "nlp-mt5-zero-shot-augment-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-swin-b-image-instance-segmentation-coco",
         "label": "CascadeMaskRCNN-SwinB图像实例分割",
         "describe": "基于Cascade mask rcnn架构，backbone为swin transformer模型。",
@@ -588,6 +738,16 @@
         "pic": "example.jpeg",
         "uuid": "cv-swin-b-image-instance-segmentation-coco",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-word-segmentation-chinese-lite-ecommerce",
+        "label": "BAStructBERT分词-中文-电商领域-lite",
+        "describe": "基于预训练语言模型的电商领域中文分词模型，根据用户输入的中文句子产出分词结果。",
+        "hot": 9787,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-word-segmentation-chinese-lite-ecommerce",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -711,12 +871,32 @@
     },
     {
         "price": "1",
+        "name": "nlp-csanmt-translation-en2zh-base",
+        "label": "CSANMT连续语义增强机器翻译-英中-通用领域-base",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 8747,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-en2zh-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "nlp-corom-passage-ranking-chinese-base-ecom",
         "label": "CoROM语义相关性-中文-电商领域-base",
         "describe": "基于ROM-Base预训练模型的电商领域中文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
         "hot": 8688,
         "pic": "example.jpg",
         "uuid": "nlp-corom-passage-ranking-chinese-base-ecom",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-ecom",
+        "label": "RaNER命名实体识别-中文-电商领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文电商数据集训练的模型。本方法采用Transformer-CRF模型，使用sbert-base作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 8067,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-ecom",
         "field": "自然语言"
     },
     {
@@ -741,6 +921,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-sentiment-classification-chinese-ecommerce-base",
+        "label": "StructBERT情感分类-中文-电商-base",
+        "describe": "StructBERT中文情感分类模型是基于百万电商评价数据训练出来的情感分类模型",
+        "hot": 7699,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentiment-classification-chinese-ecommerce-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "ofa-ocr-recognition-general-base-zh",
         "label": "OFA文字识别-中文-通用场景-base",
         "describe": "基于OFA模型的finetune后的OCR文字识别任务，基于通用数据集训练，比特定数据集finetune效果相差不大。",
@@ -748,6 +938,16 @@
         "pic": "example.jpg",
         "uuid": "ofa-ocr-recognition-general-base-zh",
         "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-plug-text-generation-27b",
+        "label": "PLUG预训练生成模型-中文-27B",
+        "describe": "PLUG是一个270亿参数的大规模中文理解和生成联合预训练模型，由海量高质量中文文本预训练得到，在中文的多个下游理解和生成任务上，该模型效果达到state-of-the-art水平，且具有零样本生成能力。",
+        "hot": 7561,
+        "pic": "example.jpg",
+        "uuid": "nlp-plug-text-generation-27b",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -761,6 +961,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-lstmcrf-word-segmentation-chinese-news",
+        "label": "LSTM分词-中文-新闻领域",
+        "describe": "char-BiLSTM-CRF中文新闻领域分词模型",
+        "hot": 7474,
+        "pic": "example.jpg",
+        "uuid": "nlp-lstmcrf-word-segmentation-chinese-news",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "punc-ct-transformer-zh-cn-common-vocab272727-pytorch",
         "label": "CT-Transformer标点-中文-通用-pytorch",
         "describe": "中文标点通用模型：可用于语音识别模型输出文本的标点预测。",
@@ -768,6 +978,16 @@
         "pic": "example.jpg",
         "uuid": "punc-ct-transformer-zh-cn-common-vocab272727-pytorch",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-sentence-similarity-chinese-base",
+        "label": "StructBERT文本相似度-中文-通用-base",
+        "describe": "StructBERT文本相似度-中文-通用-base是在structbert-base-chinese预训练模型的基础上，用atec、bq_corpus、chineseSTS、lcqmc、paws-x-zh五个数据集（52.5w条数据，正负比例0.48:0.52）训练出来的相似度匹配模型。由于license权限问题，目前只上传了BQ_Corpus、chineseSTS、LCQMC这三个数据集。",
+        "hot": 7436,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentence-similarity-chinese-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -788,6 +1008,26 @@
         "pic": "example.jpeg",
         "uuid": "cv-hrnet-crowd-counting-dcanet",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-csanmt-translation-en2fr",
+        "label": "CSANMT连续语义增强机器翻译-英法-通用领域-base",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 7192,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-en2fr",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-lstmcrf-word-segmentation-chinese-ecommerce",
+        "label": "LSTM分词-中文-电商领域",
+        "describe": "char-biLSTM-CRF中文电商领域分词模型",
+        "hot": 7188,
+        "pic": "example.jpg",
+        "uuid": "nlp-lstmcrf-word-segmentation-chinese-ecommerce",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -818,6 +1058,26 @@
         "pic": "example.gif",
         "uuid": "cv-vitb-video-single-object-tracking-ostrack",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-sentence-similarity-chinese-large",
+        "label": "StructBERT文本相似度-中文-通用-large",
+        "describe": "StructBERT文本相似度-中文-通用-large是在structbert-large-chinese预训练模型的基础上，用atec、bq_corpus、chineseSTS、lcqmc、paws-x-zh五个数据集（52.5w条数据，正负比例0.48:0.52）训练出来的相似度匹配模型。",
+        "hot": 7123,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentence-similarity-chinese-large",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-gpt3-kuakua-robot-chinese-large",
+        "label": "GPT-3夸夸机器人-中文-large",
+        "describe": "GPT-3夸夸机器人，主要用于夸夸场景，我们训练的机器人可以针对用户的不同输入进行全方位无死角的夸，同时针对相同的输入重复调用模型会得到不同的夸奖词",
+        "hot": 7110,
+        "pic": "example.jpg",
+        "uuid": "nlp-gpt3-kuakua-robot-chinese-large",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -898,6 +1158,16 @@
         "pic": "example.jpg",
         "uuid": "speech-uniasr-asr-2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-generic",
+        "label": "RaNER命名实体识别-中文-通用领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文Ontonotes4.0数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 6428,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-generic",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1021,6 +1291,26 @@
     },
     {
         "price": "1",
+        "name": "nlp-gpt3-text-generation-chinese-large",
+        "label": "GPT-3预训练生成模型-中文-large",
+        "describe": "3亿参数量的中文GPT-3文本生成模型",
+        "hot": 5375,
+        "pic": "example.jpg",
+        "uuid": "nlp-gpt3-text-generation-chinese-large",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-sentiment-classification-chinese-large",
+        "label": "StructBERT情感分类-中文-通用-large",
+        "describe": "StructBERT情感分类-中文-通用-large是基于bdci、dianping、jd binary、waimai-10k四个数据集（11.5w条数据）训练出来的情感分类模型",
+        "hot": 5353,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentiment-classification-chinese-large",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-nextvit-small-image-classification-dailylife-labels",
         "label": "NextViT实时图像分类-中文-日常物品",
         "describe": "采用基于Transformer的第一个实现工业TensorRT实时落地的Next-ViT模型结构，对自建1300类常见物体标签体系进行分类。",
@@ -1028,6 +1318,16 @@
         "pic": "example.jpg",
         "uuid": "cv-nextvit-small-image-classification-dailylife-labels",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-csanmt-translation-en2es",
+        "label": "CSANMT连续语义增强机器翻译-英西-通用领域-base",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 5260,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-en2es",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1058,6 +1358,16 @@
         "pic": "example.jpg",
         "uuid": "speech-dfsmn-kws-char-farfield-16k-nihaomiya",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-large-generic",
+        "label": "RaNER命名实体识别-中文-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文数据集MultiCoNER-ZH-Chinese训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 5159,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-large-generic",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1161,6 +1471,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-ecom",
+        "label": "RaNER命名实体识别-英语-电商领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英语电商query和商品标题数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 4824,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-ecom",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-vit-object-detection-coco",
         "label": "VitDet图像目标检测",
         "describe": "输入一张图片，输出图像中较通用目标（COCO-80类范围）的位置及类别。",
@@ -1168,6 +1488,16 @@
         "pic": "example.jpg",
         "uuid": "cv-vit-object-detection-coco",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-book",
+        "label": "RaNER命名实体识别-中文-小说领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文Book9小说领域数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 4755,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-book",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1191,6 +1521,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-outbound-intention-chinese-tiny",
+        "label": "StructBERT意图识别-中文-外呼-tiny",
+        "describe": "本模型基于StructBERT-tiny模型，使用外呼场景下的对话意图识别数据进行微调得到的。",
+        "hot": 4619,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-outbound-intention-chinese-tiny",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-canonical-body-3d-keypoints-video",
         "label": "人体关键点检测-通用领域-3D",
         "describe": "输入一段单人视频，实现端到端的3D人体关键点检测，输出视频中每一帧的3D人体关键点坐标。",
@@ -1208,6 +1548,16 @@
         "pic": "example.jpg",
         "uuid": "ofa-mmspeech-asr-aishell1-large-zh",
         "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-lstm-named-entity-recognition-chinese-generic",
+        "label": "LSTM命名实体识别-中文-通用领域",
+        "describe": "本方法采用char-BiLSTM-CRF模型",
+        "hot": 4508,
+        "pic": "example.jpg",
+        "uuid": "nlp-lstm-named-entity-recognition-chinese-generic",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1238,6 +1588,26 @@
         "pic": "example.jpg",
         "uuid": "speech-uniasr-asr-2pass-ja-16k-common-vocab93-tensorflow1-offline",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-faq-question-answering-chinese-base",
+        "label": "StructBERT FAQ问答-中文-通用领域-base",
+        "describe": "FAQ问答模型以StructBERT预训练模型-中文-base为基础，使用简单的原型网络，通过小样本meta-learning的方式在海量业务数据预训练(亿级)、微调(百万级)，在多个公开数据上取得了非常好的效果，适用于FAQ问答任务和小样本分类任务；",
+        "hot": 4140,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-faq-question-answering-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-abuse-detect-chinese-tiny",
+        "label": "StructBERT辱骂风险识别-中文-外呼-tiny",
+        "describe": "本模型基于StructBERT-tiny模型，使用外呼场景下的辱骂风险识别数据集训练得到。",
+        "hot": 4140,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-abuse-detect-chinese-tiny",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1391,6 +1761,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-resume",
+        "label": "RaNER命名实体识别-中文-简历领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文Resume数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 3513,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-resume",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "erlangshen-roberta-110m-sentiment",
         "label": "二郎神-RoBERTa-110M-情感分类",
         "describe": "",
@@ -1428,6 +1808,16 @@
         "pic": "example.jpeg",
         "uuid": "cv-yolopv2-image-driving-perception-bdd100k",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-lstm-named-entity-recognition-chinese-resume",
+        "label": "LSTM命名实体识别-中文-简历领域",
+        "describe": "本方法采用char-BiLSTM-CRF模型",
+        "hot": 3384,
+        "pic": "example.jpg",
+        "uuid": "nlp-lstm-named-entity-recognition-chinese-resume",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1491,6 +1881,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-generic",
+        "label": "RaNER命名实体识别-英语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在MultiCoNER领域数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 3272,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-uniasr-asr-2pass-id-16k-common-vocab1067-tensorflow1-online",
         "label": "UniASR语音识别-印尼语-通用-16k-实时",
         "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
@@ -1511,6 +1911,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-social-media",
+        "label": "RaNER命名实体识别-中文-社交媒体领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文Weibo数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 3183,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-social-media",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-uniasr-asr-2pass-ru-16k-common-vocab1664-tensorflow1-online",
         "label": "UniASR语音识别-俄语-通用-16k-实时",
         "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
@@ -1518,6 +1928,16 @@
         "pic": "example.jpg",
         "uuid": "speech-uniasr-asr-2pass-ru-16k-common-vocab1664-tensorflow1-online",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-multilingual-large-generic",
+        "label": "RaNER命名实体识别-多语言统一-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在多语言数据集MultiCoNER-MULTI-Multilingual训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 3154,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-multilingual-large-generic",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1541,6 +1961,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-mt5-dialogue-rewriting-chinese-base",
+        "label": "MT5开放域多轮对话改写-中文-通用-base",
+        "describe": "开放域多轮对话改写模型主要解决开放域对话中的指代和省略问题，输入对话上下文，输出改写后的语义完整的问题。该模型基于google/mt5-base基座在公开数据和业务数据集上finetune而得，适用于开放域对话场景。",
+        "hot": 3077,
+        "pic": "example.jpg",
+        "uuid": "nlp-mt5-dialogue-rewriting-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-hrnetw18-hand-pose-keypoints-coco-wholebody",
         "label": "手部关键点检测-通用领域-2D",
         "describe": "该模型采用自顶向下的Heatmap手部关键点检测框架，通过端对端的快速推理可以得到图像中的全部手部关键点。",
@@ -1558,6 +1988,16 @@
         "pic": "example.jpg",
         "uuid": "cv-dla34-table-structure-recognition-cycle-centernet",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-game",
+        "label": "RaNER命名实体识别-中文-游戏领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文游戏领域数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 3020,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-game",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1631,6 +2071,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-part-of-speech-chinese-base",
+        "label": "BAStructBERT词性标注-中文-新闻领域-base",
+        "describe": "基于预训练语言模型的新闻领域中文词性标注模型，根据用户输入的中文句子产出词性标注结果。",
+        "hot": 2918,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-part-of-speech-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-mossformer-separation-temporal-8k",
         "label": "MossFormer语音分离-单麦-8k",
         "describe": "基于MossFormer的语音分离模型，可以把混杂在一起的两人语音分离开来，输入为一路混合音频，输出为两路分离后的音频，格式均为8000Hz单通道。",
@@ -1701,6 +2151,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-literature",
+        "label": "RaNER命名实体识别-中文-文学领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文Literature数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2789,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-literature",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-segformer-b4-image-semantic-segmentation-coco-stuff164k",
         "label": "Segformer-B4实时语义分割",
         "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的语义分割框架。网络模型结构的具体超参数为论文中的B4配置。在CoCo-Stuff-164的数据集上进行了172类的分类",
@@ -1708,6 +2168,16 @@
         "pic": "example.jpg",
         "uuid": "cv-segformer-b4-image-semantic-segmentation-coco-stuff164k",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-news",
+        "label": "RaNER命名实体识别-英文-新闻领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英文conll03/conllpp领域数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2781,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-news",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1721,6 +2191,26 @@
     },
     {
         "price": "1",
+        "name": "nlp-lstm-named-entity-recognition-chinese-news",
+        "label": "LSTM命名实体识别-中文-新闻领域",
+        "describe": "本方法采用char-BiLSTM-CRF模型",
+        "hot": 2748,
+        "pic": "example.jpg",
+        "uuid": "nlp-lstm-named-entity-recognition-chinese-news",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-bank",
+        "label": "RaNER命名实体识别-中文-银行领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在中文Bank数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2747,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-bank",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-sambert-hifigan-tts-en-us-16k",
         "label": "语音合成-美式英文-通用领域-16k-多发音人",
         "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
@@ -1728,6 +2218,26 @@
         "pic": "example.jpg",
         "uuid": "speech-sambert-hifigan-tts-en-us-16k",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-chinese-base-finance",
+        "label": "RaNER命名实体识别-中文-金融领域-base",
+        "describe": "该模型是基于检索增强(RaNer)方法在CCKS2021中文金融案件要素抽取数据训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2686,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-chinese-base-finance",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-csanmt-translation-en2ru-base",
+        "label": "CSANMT连续语义增强机器翻译-英俄-通用领域-base",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 2640,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-en2ru-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1781,6 +2291,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-sentiment-classification-chinese-tiny",
+        "label": "StructBERT情感分类-中文-通用-tiny",
+        "describe": "StructBERT情感分类-中文-通用-tiny是基于bdci、dianping、jd binary、waimai-10k四个数据集（11.5w条数据）训练出来的情感分类模型。",
+        "hot": 2482,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentiment-classification-chinese-tiny",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-uniasr-asr-2pass-cantonese-chs-16k-common-vocab1468-tensorflow1-online",
         "label": "UniASR语音识别-粤语简体-通用-16k-实时",
         "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
@@ -1788,6 +2308,26 @@
         "pic": "example.jpg",
         "uuid": "speech-uniasr-asr-2pass-cantonese-chs-16k-common-vocab1468-tensorflow1-online",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-part-of-speech-chinese-lite",
+        "label": "BAStructBERT词性标注-中文-新闻领域-lite",
+        "describe": "基于预训练语言模型的新闻领域中文词性标注模型，根据用户输入的中文句子产出词性标注结果。",
+        "hot": 2444,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-part-of-speech-chinese-lite",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-turkish-large-generic",
+        "label": "RaNER命名实体识别-土耳其语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在土耳其语数据集MultiCoNER-TR-Turkish训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2426,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-turkish-large-generic",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1811,6 +2351,36 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-korean-large-generic",
+        "label": "RaNER命名实体识别-韩语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在韩语数据集MultiCoNER-KO-Korean训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2351,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-korean-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-lstm-named-entity-recognition-chinese-social-media",
+        "label": "LSTM命名实体识别-中文-社交媒体领域",
+        "describe": "本方法采用char-BiLSTM-CRF模型。",
+        "hot": 2328,
+        "pic": "example.jpg",
+        "uuid": "nlp-lstm-named-entity-recognition-chinese-social-media",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-dutch-large-generic",
+        "label": "RaNER命名实体识别-荷兰语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在荷兰语数据集MultiCoNER-NL-Dutch训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2325,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-dutch-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-sambert-hifigan-tts-en-gb-16k",
         "label": "语音合成-英式英文-通用领域-16k-多发音人",
         "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
@@ -1821,6 +2391,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-russian-large-generic",
+        "label": "RaNER命名实体识别-俄语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在俄语数据集MultiCoNER-RU-Russian训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2309,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-russian-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-diffusion-text-to-image-synthesis-tiny",
         "label": "文本到图像生成扩散模型-中英文-通用领域-tiny",
         "describe": "文本到图像生成扩散模型-中英文-通用领域-tiny",
@@ -1828,6 +2408,16 @@
         "pic": "example.jpg",
         "uuid": "cv-diffusion-text-to-image-synthesis-tiny",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-ai",
+        "label": "RaNER命名实体识别-英文-人工智能领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英文AI数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2296,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-ai",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1851,6 +2441,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-hindi-large-generic",
+        "label": "RaNER命名实体识别-印地语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在MultiCoNER领域数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2281,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-hindi-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-uniasr-asr-2pass-es-16k-common-vocab3445-tensorflow1-online",
         "label": "UniASR语音识别-西班牙语-通用-16k-实时",
         "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
@@ -1858,6 +2458,36 @@
         "pic": "example.jpg",
         "uuid": "speech-uniasr-asr-2pass-es-16k-common-vocab3445-tensorflow1-online",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-music",
+        "label": "RaNER命名实体识别-英文-音乐领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英文Music数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2240,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-music",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-lstmcrf-part-of-speech-chinese-news",
+        "label": "LSTM词性标注-中文-新闻领域",
+        "describe": "",
+        "hot": 2238,
+        "pic": "example.jpg",
+        "uuid": "nlp-lstmcrf-part-of-speech-chinese-news",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-farsi-large-generic",
+        "label": "RaNER命名实体识别-波斯语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在波斯语数据集MultiCoNER-FA-Farsi训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2211,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-farsi-large-generic",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1891,6 +2521,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-csanmt-translation-fr2en",
+        "label": "CSANMT连续语义增强机器翻译-法英-通用领域-base",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 2178,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-fr2en",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "mplug-image-captioning-coco-base-zh",
         "label": "mPLUG图像描述模型-中文-base",
         "describe": "mPLUG中文图像描述base模型",
@@ -1911,6 +2551,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-german-large-generic",
+        "label": "RaNER命名实体识别-德语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在德语数据集MultiCoNER-DE-German训练的模型。本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2126,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-german-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-segformer-b1-image-semantic-segmentation-coco-stuff164k",
         "label": "Segformer-B1实时语义分割",
         "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的实时语义分割框架。网络模型结构的具体超参数为论文中的B1配置。在CoCo-Stuff-164的数据集上进行了172类的分类",
@@ -1918,6 +2568,46 @@
         "pic": "example.jpg",
         "uuid": "cv-segformer-b1-image-semantic-segmentation-coco-stuff164k",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-literature",
+        "label": "RaNER命名实体识别-英文-文学领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英文Literature数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2095,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-literature",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-sentence-similarity-chinese-tiny",
+        "label": "StructBERT文本相似度-中文-通用-tiny",
+        "describe": "StructBERT文本相似度-中文-通用-tiny是在structbert-tiny-chinese预训练模型的基础上，用atec、bq_corpus、chineseSTS、lcqmc、paws-x-zh五个数据集（52.5w条数据，正负比例0.48:0.52）训练出来的相似度匹配模型",
+        "hot": 2085,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentence-similarity-chinese-tiny",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-wiki",
+        "label": "RaNER命名实体识别-英语-wiki领域-large",
+        "describe": "本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2083,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-wiki",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-social-media",
+        "label": "RaNER命名实体识别-英文-社交媒体领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英文wnut17领域数据集训练的模型。本方法采用Transformer-CRF模型，使用StructBERT作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2046,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-social-media",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1938,6 +2628,36 @@
         "pic": "example.jpg",
         "uuid": "ofa-mmspeech-asr-aishell1-base-zh",
         "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-spanish-large-generic",
+        "label": "RaNER命名实体识别-西班牙语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在西班牙语数据集MultiCoNER-ES-Spanish训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 2005,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-spanish-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-bangla-large-generic",
+        "label": "RaNER命名实体识别-孟加拉语-通用领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在孟加拉语数据集MultiCoNER-BN-Bangla训练的模型。 本方法采用Transformer-CRF模型，使用XLM-RoBERTa作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 1992,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-bangla-large-generic",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-ponet-fill-mask-chinese-base",
+        "label": "PoNet预训练模型-中文-base",
+        "describe": "nlp_ponet_fill-mask_chinese-base是用中文wiki训练的预训练PoNet模型。",
+        "hot": 1921,
+        "pic": "example.jpg",
+        "uuid": "nlp-ponet-fill-mask-chinese-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -1971,6 +2691,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-russian-large-ecom",
+        "label": "RaNER命名实体识别-俄语-电商领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在俄语电商query数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 1888,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-russian-large-ecom",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-uniasr-asr-2pass-es-16k-common-vocab3445-tensorflow1-offline",
         "label": "UniASR语音识别-西班牙语-通用-16k-离线",
         "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
@@ -1988,6 +2718,16 @@
         "pic": "example.jpg",
         "uuid": "speech-paraformer-asr-nat-zh-cn-8k-common-vocab3444-tensorflow1-online",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-politics",
+        "label": "RaNER命名实体识别-英文-政治领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英文Politics数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 1877,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-politics",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2031,6 +2771,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-raner-named-entity-recognition-spanish-large-ecom",
+        "label": "RaNER命名实体识别-西班牙语-电商领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在西班牙语电商query数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 1792,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-spanish-large-ecom",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-vitb16-classification-vision-efficient-tuning-lora",
         "label": "基础视觉模型高效调优-LoRA",
         "describe": "",
@@ -2038,6 +2788,16 @@
         "pic": "example.jpg",
         "uuid": "cv-vitb16-classification-vision-efficient-tuning-lora",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-english-large-science",
+        "label": "RaNER命名实体识别-英文-科学领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在英文Science数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 1740,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-english-large-science",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2057,6 +2817,26 @@
         "hot": 1693,
         "pic": "example.jpg",
         "uuid": "mgeo-geographic-composition-analysis-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-masts-sentence-similarity-clue-chinese-large",
+        "label": "MaSTS文本相似度-中文-搜索-CLUE语义匹配-large",
+        "describe": "MaSTS中文文本相似度-CLUE语义匹配模型是在MaSTS预训练模型-CLUE语义匹配的基础上，在QBQTC数据集上训练出来的相似度匹配模型。在CLUE语义匹配榜上通过集成此模型获得了第一名的成绩。",
+        "hot": 1656,
+        "pic": "example.jpg",
+        "uuid": "nlp-masts-sentence-similarity-clue-chinese-large",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-raner-named-entity-recognition-french-large-ecom",
+        "label": "RaNER命名实体识别-法语-电商领域-large",
+        "describe": "该模型是基于检索增强(RaNer)方法在法语电商query数据集训练的模型。本方法采用Transformer-CRF模型，使用xlm-roberta-large作为预训练模型底座，结合使用外部工具召回的相关句子作为额外上下文，使用Multi-view Training方式进行训练。",
+        "hot": 1635,
+        "pic": "example.jpg",
+        "uuid": "nlp-raner-named-entity-recognition-french-large-ecom",
         "field": "自然语言"
     },
     {
@@ -2151,6 +2931,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-csanmt-translation-es2en",
+        "label": "CSANMT连续语义增强机器翻译-西英-通用领域-base",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 1483,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-es2en",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-paraformerbert-asr-nat-zh-cn-16k-aishell1-vocab4234-pytorch",
         "label": "ParaformerBert语音识别-中文-aishell1-16k-离线-pytorch",
         "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
@@ -2211,6 +3001,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-zero-shot-classification-chinese-large",
+        "label": "StructBERT零样本分类-中文-large",
+        "describe": "该模型使用StructBERT-large在xnli_zh数据集(将英文数据集重新翻译得到中文数据集)上面进行了训练得到。",
+        "hot": 1285,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-zero-shot-classification-chinese-large",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "multilingual-glm-summarization-zh",
         "label": "mGLM多语言大模型-生成式摘要-中文",
         "describe": "mGLM多语言大模型可从大段文本中提取关键信息，为你生成简短的中文摘要，支持多种语言输入",
@@ -2258,6 +3058,16 @@
         "pic": "example.png",
         "uuid": "cv-tadaconv-action-recognition",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-nli-chinese-base",
+        "label": "StructBERT自然语言推理-中文-通用-base",
+        "describe": "StructBERT自然语言推理-中文-通用-base是在structbert-base-chinese预训练模型的基础上，用CMNLI、OCNLI两个数据集（45.8w条数据）训练出来的自然语言推理模型。",
+        "hot": 1141,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-nli-chinese-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2321,6 +3131,26 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-fact-checking-chinese-base",
+        "label": "StructBERT事实准确性检测-中文-电商-base",
+        "describe": "StructBERT事实准确性检测-中文-电商-base是在structbert-base-chinese预训练模型的基础上，使用业务数据训练出的自然语言推理模型，用于事实准确性检测，输入两个句子，判断两个句子描述的事实是否一致。",
+        "hot": 1036,
+        "pic": "example.jpeg",
+        "uuid": "nlp-structbert-fact-checking-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-sentence-similarity-chinese-retail-base",
+        "label": "StructBERT文本相似度-中文-电商-base",
+        "describe": "StructBERT中文电商域文本相似度模型是在structbert-base-chinese预训练模型的基础上，用电商域标注数据训练出来的相似度匹配模型。",
+        "hot": 1009,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-sentence-similarity-chinese-retail-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-inverse-text-processing-fun-text-processing-itn-en",
         "label": "语音识别-英语-后处理- ITN模型",
         "describe": "英语文本反正则化。Inverse Text Processing for English.",
@@ -2361,6 +3191,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-zero-shot-classification-chinese-tiny",
+        "label": "StructBERT零样本分类-中文-tiny",
+        "describe": "该模型使用StructBERT-base在xnli_zh数据集(将英文数据集重新翻译得到中文数据集)上面进行了训练得到。",
+        "hot": 983,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-zero-shot-classification-chinese-tiny",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-xvector-sv-zh-cn-cnceleb-16k-spk3465-pytorch",
         "label": "xvector说话人确认-中文-cnceleb-16k-离线-pytorch",
         "describe": "该模型是使用CN-Celeb 1&2以及AliMeeting数据集预训练得到的说话人嵌入码（speaker embedding）提取模型。可以直接用于通用和会议场景的说话人确认和说话人日志等任务。在CN-Celeb语音测试集上EER为9.00%，在AliMeeting测试集上的EER为1.45%。",
@@ -2388,6 +3228,16 @@
         "pic": "example.jpg",
         "uuid": "cv-resnet50-ocr-detection-vlpt",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-nli-chinese-large",
+        "label": "StructBERT自然语言推理-中文-通用-large",
+        "describe": "StructBERT自然语言推理-中文-通用-large是在structbert-large-chinese预训练模型的基础上，用CMNLI、OCNLI两个数据集（45.8w条数据）训练出来的自然语言推理模型。",
+        "hot": 910,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-nli-chinese-large",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2428,6 +3278,16 @@
         "pic": "example.jpg",
         "uuid": "cv-ir50-face-recognition-arcface",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-gpt3-text-generation-30b",
+        "label": "GPT-3预训练生成模型-中文-30B",
+        "describe": "",
+        "hot": 873,
+        "pic": "example.jpg",
+        "uuid": "nlp-gpt3-text-generation-30b",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2481,6 +3341,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-star-conversational-text-to-sql",
+        "label": "SPACE-T表格问答预训练模型-英文-通用领域-Large",
+        "describe": "本项目是多轮Text-to-SQL模型，可针对不同领域数据库和用户直接进行多轮对话，生成相应的SQL查询语句。用户可以在对话过程中表达自己对数据库模式的查询要求，并在系统的帮助下生成符合要求的SQL查询语句。",
+        "hot": 806,
+        "pic": "example.jpg",
+        "uuid": "nlp-star-conversational-text-to-sql",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-paraformer-tiny-commandword-asr-nat-zh-cn-16k-vocab544-pytorch",
         "label": "Paraformer语音识别-中文-端上指令词-16k-离线-tiny",
         "describe": "轻量化小词表Paraformer中文指令词识别模型，参数量控制在5M左右，支持通用智能家居交互等常规指令词，并且使用share embedding策略进一步缩小参数量。",
@@ -2531,6 +3401,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-ponet-extractive-summarization-topic-level-chinese-base",
+        "label": "PoNet抽取式话题摘要模型-中文-base-ICASSP2023-MUG-Track2",
+        "describe": "该模型基于PoNet模型架构，在AliMeeting4MUG Corpus训练，进行抽取式话题摘要任务。",
+        "hot": 719,
+        "pic": "example.jpg",
+        "uuid": "nlp-ponet-extractive-summarization-topic-level-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-controlnet-controllable-image-generation-nine-annotators",
         "label": "ControlNet可控图像生成",
         "describe": "输入一张图像，指定控制类别并提供期望生成图像的描述prompt，模型会根据输入图像抽取相应的控制信息并生成精美图像。",
@@ -2571,6 +3451,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-xlmr-named-entity-recognition-indo-ecommerce-title",
+        "label": "XLM-R命名实体识别-印尼语-电商领域(商品标题)-base",
+        "describe": "XLM-R命名实体识别-印尼语-电商领域(商品标题)-base是基于20K电商领域商品标题数据训练得到的印尼语命名实体识别模型，可根据用户输入的印尼语商品标题文本产出命名实体识别结果。",
+        "hot": 655,
+        "pic": "example.png",
+        "uuid": "nlp-xlmr-named-entity-recognition-indo-ecommerce-title",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-paraformer-large-asr-nat-zh-cn-16k-aishell1-vocab8404-pytorch",
         "label": "Paraformer语音识别-中文-aishell1-16k-离线-large-pytorch",
         "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
@@ -2588,6 +3478,16 @@
         "pic": "example.jpg",
         "uuid": "speech-inverse-text-processing-fun-text-processing-itn-ru",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-nli-chinese-tiny",
+        "label": "StructBERT自然语言推理-中文-通用-tiny",
+        "describe": "StructBERT自然语言推理-中文-通用-tiny是在structbert-tiny-chinese预训练模型的基础上，用CMNLI、OCNLI两个数据集（45.8w条数据）训练出来的自然语言推理模型",
+        "hot": 630,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-nli-chinese-tiny",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2641,6 +3541,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-domain-classification-chinese",
+        "label": "FastText文本领域分类-中文-国民经济行业18大类",
+        "describe": "用于中文的文本领域分类，分类依据为国民经济行业分类（GB/T 4754—2017），原分类标准有20大类，目前支持18个行业的分类：交通运输仓储邮政\\住宿餐饮\\信息软件\\农业\\制造业\\卫生医疗\\国际组织\\建筑\\房地产\\政府组织\\教育\\文体娱乐\\水利环境\\电力燃气水生产\\科学技术\\租赁法律\\采矿\\金融。",
+        "hot": 599,
+        "pic": "example.jpg",
+        "uuid": "nlp-domain-classification-chinese",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
         "name": "speech-inverse-text-processing-fun-text-processing-itn-fr",
         "label": "语音识别-法语-后处理- ITN模型",
         "describe": "法语文本反正则化。Inverse Text Processing for French.",
@@ -2648,6 +3558,16 @@
         "pic": "example.jpg",
         "uuid": "speech-inverse-text-processing-fun-text-processing-itn-fr",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-faq-question-answering-chinese-finance-base",
+        "label": "StructBERT FAQ问答-中文-金融领域-base",
+        "describe": "金融领域FAQ问答模型以StructBERT FAQ问答-中文-通用领域-base模型为基础，在金融领域数据上微调得到，适用于金融领域FAQ问答任务，包括但不局限于：银行、保险等场景；",
+        "hot": 592,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-faq-question-answering-chinese-finance-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2668,6 +3588,16 @@
         "pic": "example.jpg",
         "uuid": "cv-daflow-virtual-try-on-base",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-xlmr-word-segmentation-thai",
+        "label": "XLM-R分词-泰语-通用领域-base",
+        "describe": "XLM-R分词-泰语-通用领域-base是基于BEST-2010数据训练得到的泰语分词模型，可根据用户输入的泰语文本产出分词结果。",
+        "hot": 543,
+        "pic": "example.png",
+        "uuid": "nlp-xlmr-word-segmentation-thai",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2761,6 +3691,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-keyphrase-extraction-base-icassp2023-mug-track4-baseline",
+        "label": "StructBert关键词抽取-中文-base-ICASSP2023-MUG-Track4",
+        "describe": "ICASSP2023 MUG Track4 关键词抽取Baseline",
+        "hot": 489,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-keyphrase-extraction-base-icassp2023-mug-track4-baseline",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "nlp-corom-sentence-embedding-chinese-tiny",
         "label": "CoROM文本向量-中文-通用领域-tiny",
         "describe": "基于CoROM-base预训练语言模型的通用领域中文文本表示模型，基于输入的句子产出对应的文本向量，文本向量可以使用在下游的文本检索、句子相似度计算、文本聚类等任务中。",
@@ -2831,6 +3771,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-faq-question-answering-chinese-gov-base",
+        "label": "StructBERT FAQ问答-中文-政务领域-base",
+        "describe": "政务领域FAQ问答模型以StructBERT FAQ问答-中文-通用领域-base模型为基础，在政务领域数据上微调得到，适用于政务领域FAQ问答任务，包括但不局限于社保、公积金等场景；",
+        "hot": 445,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-faq-question-answering-chinese-gov-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-unet-person-image-cartoon-sd-illustration-compound-models",
         "label": "DCT-Net人像卡通化-扩散模型-漫画",
         "describe": "",
@@ -2881,6 +3831,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-user-satisfaction-estimation-chinese",
+        "label": "HiTransUSE用户满意度估计-中文-电商-base",
+        "describe": "支持对话级的用户满意度分析，输出（不满意，中立，满意）三种标签",
+        "hot": 410,
+        "pic": "example.png",
+        "uuid": "nlp-user-satisfaction-estimation-chinese",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-video-inpainting",
         "label": "视频编辑-通用领域",
         "describe": "视频inpainting模型，输入视频和mask，可实现对指定帧范围内的video inpainting",
@@ -2898,6 +3858,16 @@
         "pic": "example.jpg",
         "uuid": "cv-ir-face-recognition-ood-rts",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-ponet-extractive-summarization-doc-level-chinese-base",
+        "label": "PoNet抽取式篇章摘要模型-中文-base-ICASSP2023-MUG-Track2",
+        "describe": "该模型基于PoNet模型架构，在AliMeeting4MUG Corpus训练，进行抽取式篇章摘要任务。",
+        "hot": 401,
+        "pic": "example.jpg",
+        "uuid": "nlp-ponet-extractive-summarization-doc-level-chinese-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -2931,6 +3901,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-nested-ner-named-entity-recognition-chinese-base-med",
+        "label": "NestedNER命名实体识别-中文-医疗领域-base",
+        "describe": "",
+        "hot": 367,
+        "pic": "example.jpeg",
+        "uuid": "nlp-nested-ner-named-entity-recognition-chinese-base-med",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-sambert-hifigan-tts-masha-russian-16k",
         "label": "语音合成-俄语-通用领域-16k-发音人masha",
         "describe": "俄语语音合成女声16k模型，本模型使用Sambert-hifigan网络结构。其中后端声学模型的SAM-BERT，将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
@@ -2938,6 +3918,16 @@
         "pic": "example.jpg",
         "uuid": "speech-sambert-hifigan-tts-masha-russian-16k",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-ponet-document-segmentation-topic-level-chinese-base",
+        "label": "PoNet文本话题分割模型-中文-base-ICASSP2023-MUG-Track1",
+        "describe": "该模型基于PoNet模型架构，在AliMeeting4MUG Corpus训练，对带段落的长文本进行中文话题分割。",
+        "hot": 365,
+        "pic": "example.png",
+        "uuid": "nlp-ponet-document-segmentation-topic-level-chinese-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -3001,6 +3991,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-structbert-siamese-uie-chinese-base",
+        "label": "SiameseUIE通用信息抽取-中文-base",
+        "describe": "",
+        "hot": 337,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-siamese-uie-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "ofa-pretrain-base-en",
         "label": "OFA预训练模型-英文-通用领域-base",
         "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
@@ -3031,6 +4031,26 @@
     },
     {
         "price": "1",
+        "name": "nlp-xlmr-named-entity-recognition-viet-ecommerce-title",
+        "label": "XLM-R命名实体识别-越南语-电商领域(商品标题)-base",
+        "describe": "XLM-R命名实体识别-越南语-电商领域(商品标题)-base是基于20K电商领域商品标题数据训练得到的越南语命名实体识别模型，可根据用户输入的越南语商品标题文本产出命名实体识别结果。",
+        "hot": 302,
+        "pic": "example.png",
+        "uuid": "nlp-xlmr-named-entity-recognition-viet-ecommerce-title",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-fill-mask-chinese-large",
+        "label": "StructBERT完形填空模型-中文-large",
+        "describe": "nlp_structbert_fill-mask_chinese-large是海量中文数据训练的自然语言理解预训练模型。",
+        "hot": 299,
+        "pic": "example.png",
+        "uuid": "nlp-structbert-fill-mask-chinese-large",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-hdformer-body-3d-keypoints-video",
         "label": "HDFormer人体关键点-通用领域-3D",
         "describe": "输入一段单人视频，实现端到端的3D人体关键点检测，输出视频中每一帧的3D人体关键点坐标。",
@@ -3038,6 +4058,16 @@
         "pic": "example.jpg",
         "uuid": "cv-hdformer-body-3d-keypoints-video",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-csanmt-translation-ru2en-base",
+        "label": "CSANMT连续语义增强机器翻译-俄英-通用领域-base",
+        "describe": "基于连续语义增强的神经机器翻译模型以有限的训练样本为锚点，学习连续语义分布以建模全局的句子空间，并据此构建神经机器翻译引擎，有效提升数据的利用效率，显著改善模型的泛化能力和鲁棒性。",
+        "hot": 288,
+        "pic": "example.jpg",
+        "uuid": "nlp-csanmt-translation-ru2en-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -3061,6 +4091,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-xlmr-named-entity-recognition-eng-ecommerce-title",
+        "label": "XLM-R命名实体识别-英语-电商领域(商品标题)-base",
+        "describe": "XLM-R命名实体识别-英语-电商领域(商品标题)-base是基于20K电商领域商品标题数据训练得到的英语命名实体识别模型，可根据用户输入的英语商品标题文本产出命名实体识别结果。",
+        "hot": 270,
+        "pic": "example.png",
+        "uuid": "nlp-xlmr-named-entity-recognition-eng-ecommerce-title",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "speech-mfcca-asr-zh-cn-16k-alimeeting-vocab4950",
         "label": "MFCCA多通道多说话人语音识别-中文-AliMeeting-16k-离线",
         "describe": "考虑到麦克风阵列不同麦克风接收信号的差异，该模型采用了一种多帧跨通道注意力机制，该方法对相邻帧之间的跨通道信息进行建模，以利用帧级和通道级信息的互补性。此外，还引入了一种多层卷积模块以融合多通道输出和一种通道掩码策略以解决训练和推理之间的音频通道数量不匹配的问题。在ICASSP2022 M2MeT竞赛上发布的真实会议场景语料库AliMeeting上进行了相关实验，该多通道模型在Eval和Test集上比单通道模型CER分别相对降低了39.9%和37.0%。此外，在同等的模型参数和训练数据下，本文提出的模型获得的识别性能超越竞赛期间最佳结果，在AliMeeting上实现了目前最新的SOTA性能。",
@@ -3068,6 +4108,16 @@
         "pic": "example.jpg",
         "uuid": "speech-mfcca-asr-zh-cn-16k-alimeeting-vocab4950",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-veco-fill-mask-large",
+        "label": "VECO完形填空模型-多语言-large",
+        "describe": "nlp_veco_fill-mask-large是CommonCrawl Corpus训练的自然语言理解多语言预训练模型。",
+        "hot": 266,
+        "pic": "example.png",
+        "uuid": "nlp-veco-fill-mask-large",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -3141,6 +4191,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-mgimn-faq-question-answering-chinese-base",
+        "label": "MGIMN FAQ问答-中文-通用领域-base",
+        "describe": "MGIMN FAQ问答模型以StructBERT预训练模型为底座，采用多维度交互式匹配模型网络结构，通过小样本meta-learning的方式在海量业务数据预训练(亿级)、微调(百万级)得到，相对于StructBERT模型效果更优，适用于FAQ问答任务和通用小样本分类任务；",
+        "hot": 236,
+        "pic": "example.png",
+        "uuid": "nlp-mgimn-faq-question-answering-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-manual-face-liveness-flir",
         "label": "人脸活体检测模型-IR",
         "describe": "",
@@ -3181,6 +4241,16 @@
     },
     {
         "price": "1",
+        "name": "nlp-unite-mup-translation-evaluation-multilingual-large",
+        "label": "统一的翻译质量评价模型-多语言-新闻领域-large",
+        "describe": "Kendall's Tau on WMT'19 Metrics Shared Task dataset",
+        "hot": 217,
+        "pic": "example.jpg",
+        "uuid": "nlp-unite-mup-translation-evaluation-multilingual-large",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "cv-dro-resnet18-video-depth-estimation-indoor",
         "label": "循环神经优化器-视频流深度和相机轨迹估计",
         "describe": "我们提出zero-order的循环神经网络优化器（DRO）, 不需要求解梯度, 直接利用神经网络来预测下次更新的方向和步长。将优化目标cost，放入到神经网络中，每次迭代都会参考之前尝试的历史信息，从而给出更加精准的预测。也就是说，如果错误的预测值，就会使得cost变大，正确的预测值会使得cost变小，在不断尝试中，神经网络学习到了如何使得cost变小。",
@@ -3201,6 +4271,36 @@
     },
     {
         "price": "1",
+        "name": "nlp-space-dialog-state-tracking",
+        "label": "SPACE对话状态追踪-英文-base",
+        "describe": "该模型是 SPACE 基于一个对话状态跟踪数据集 MultiWOZ2.2 微调后的下游模型，称作 space_dialog-state-tracking，可专门用来做旅游、餐馆等领域的对话状态跟踪任务。",
+        "hot": 204,
+        "pic": "example.jpg",
+        "uuid": "nlp-space-dialog-state-tracking",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-mgimn-faq-question-answering-chinese-finance-base",
+        "label": "MGIMN FAQ问答-中文-金融领域-base",
+        "describe": "金融领域MGIMN FAQ问答模型以MGIMN FAQ问答-中文-通用领域-base模型为基础，在金融领域数据上微调得到，适用于金融领域FAQ问答任务，包括但不局限于：银行、保险等场景；MGIMN系列模型相对于StructBERT FAQ系列模型效果更优；",
+        "hot": 185,
+        "pic": "example.png",
+        "uuid": "nlp-mgimn-faq-question-answering-chinese-finance-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-structbert-emotion-classification-chinese-base",
+        "label": "StructBERT情绪分类-中文-七分类-base",
+        "describe": "",
+        "hot": 183,
+        "pic": "example.jpg",
+        "uuid": "nlp-structbert-emotion-classification-chinese-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
         "name": "ofa-image-caption-meme-large-zh",
         "label": "OFA表情包文本生成器",
         "describe": "",
@@ -3218,6 +4318,16 @@
         "pic": "example.jpg",
         "uuid": "speech-uniasr-asr-2pass-fa-16k-common-vocab1257-pytorch-online",
         "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-unite-up-translation-evaluation-english-large",
+        "label": "统一的翻译质量评价模型-英语-新闻领域-large",
+        "describe": "翻译质量评价，即对翻译文本进行质量评估，在给定源端输入、目标端参考答案、或两者均有提供的情况下，算法用于评估所生成文本的质量。本单一模型可同时支持提供源端输入（src-only）、目标端参考译文（ref-only）、或者两者均有（src-ref-combined）三种评价场景。 模型由一个预训练语言模型（Pretrained Language Model）和一个前馈神经网络（Feedforward Network）组成。模型首先在伪语料上进行继续预训练，而后在WMT'17-18 Metrics Shared Task数据集上进行微调。 此模型为目标语为英语的large版本。",
+        "hot": 170,
+        "pic": "example.jpg",
+        "uuid": "nlp-unite-up-translation-evaluation-english-large",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -3308,6 +4418,16 @@
         "pic": "example.jpg",
         "uuid": "cv-quadtree-attention-image-matching-outdoor",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-translation-quality-estimation-multilingual",
+        "label": "QEMind翻译质量评估-多语言-通用领域",
+        "describe": "对翻译质量进行打分评估的模型，支持多个语向，获WMT 2021世界机器翻译大赛质量评估DA子任务冠军",
+        "hot": 137,
+        "pic": "example.jpg",
+        "uuid": "nlp-translation-quality-estimation-multilingual",
+        "field": "自然语言"
     },
     {
         "price": "1",
@@ -3458,6 +4578,26 @@
         "pic": "example.jpg",
         "uuid": "cv-stable-diffusion-paint-by-example",
         "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-ponet-fill-mask-english-base",
+        "label": "PoNet预训练模型-英文-base",
+        "describe": "nlp_ponet_fill-mask_english-base是用bookcorpus/wikitext训练的预训练PoNet模型。",
+        "hot": 104,
+        "pic": "example.jpg",
+        "uuid": "nlp-ponet-fill-mask-english-base",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-medical-structbert-backbone-base",
+        "label": "StructBERT预训练模型-中文-医疗领域-base",
+        "describe": "医疗StructBERT预训练模型",
+        "hot": 104,
+        "pic": "example.jpg",
+        "uuid": "nlp-medical-structbert-backbone-base",
+        "field": "自然语言"
     },
     {
         "price": "1",
