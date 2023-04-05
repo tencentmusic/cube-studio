@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,random,cv2,time
 import pysnooper
 import os
 
@@ -63,15 +63,25 @@ class CV_MANUAL_FACE_LIVENESS_FLXC_Model(Model):
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
 
+        img = cv2.imread(arg0)
+        for index, box in enumerate(result['boxes']):
+            label = round(result['scores'][index], 2)
+            cv2.rectangle(img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 255), 2)
+            # 得分越高，假体可能性越高，但是并没有具体的数字说中间值是多少
+            cv2.putText(img, 'dummy score:' + str(label), (int(box[0]), int(box[1] - 10)), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 0, 255), 2)
+
+        savePath = 'result/result_' + str(int(1000 * time.time())) + '.jpg'
+        os.makedirs(os.path.dirname(savePath), exist_ok=True)
+        if os.path.exists(savePath):
+            os.remove(savePath)
+        cv2.imwrite(savePath, img)
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": savePath
             }
         ]
         return back
@@ -84,10 +94,13 @@ model=CV_MANUAL_FACE_LIVENESS_FLXC_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/retina_face_detection.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(arg0='retina_face_detection.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 1.6M+100M
+# 模型gpu运行速度  v100 3s  显存占用4G

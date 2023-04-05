@@ -599,10 +599,6 @@ class CeleryConfig(object):
             'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
             'schedule': crontab(minute='10',hour='11'),
         },
-        # 'task_update_aihub': {
-        #     'task': 'task.update_aihub',  # 更新aihub
-        #     'schedule': crontab(minute='30', hour='4'),
-        # },
 		"task_check_pod_terminating": {
             "task": "task.check_pod_terminating",
             'schedule': crontab(minute='*/10'),
@@ -900,75 +896,82 @@ GRAFANA_NODE_PATH="/grafana/d/node/node?var-node="
 GRAFANA_GPU_PATH="/grafana/d/dcgm/gpu"
 
 MODEL_URLS = {
+    "sqllab":"/frontend/data/datasearch/data_search",
     "metadata_table":"/frontend/data/metadata/metadata_table",
+    "data_blood":"/frontend/data/metadata/data_blood",
     "metadata_metric":"/frontend/data/metadata/metadata_metric",
     "dimension": "/frontend/data/metadata/metadata_dimension",
-    "sqllab":"/frontend/data_model/data_sql_select/data_search",
+    "feast":"/frontend/data/feast/feast",
+    "dataset":"/frontend/data/media_data/dataset",
+    "label_platform":"/frontend/data/media_data/label_platform",
+
+    "repository": "/frontend/dev/images/docker_repository",
+    "docker": "/frontend/dev/images/docker",
+    "template_images": "/frontend/dev/images/template_images",
+    "notebook": "/frontend/dev/dev_online/notebook",
     "etl_pipeline":"/frontend/dev/data_pipeline/etl_pipeline",
     "etl_task":"/frontend/dev/data_pipeline/task_manager",
     "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
-    "total_resource": "/frontend/service/total_resource",
-    "notebook": "/frontend/dev/dev_online/notebook",
-    "docker": "/frontend/dev/images/docker",
-    "repository": "/frontend/dev/images/docker_repository",
-    "template_images": "/frontend/dev/images/template_images",
+
     "job_template": "/frontend/train/train_template/job_template",
     "pipeline": "/frontend/train/train_task/pipeline",
     "runhistory": "/frontend/train/train_task/runhistory",
     "workflow": "/frontend/train/train_task/workflow",
     "nni": "/frontend/train/train_hyperparameter/nni",
+
+    "total_resource": "/frontend/service/total_resource",
     "service": "/frontend/service/k8s_service",
-    "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
     "train_model": "/frontend/service/inferenceservice/model_manager",
-    "dataset":"/frontend/dataleap/media_data/dataset",
-	"model_market_visual": "/frontend/aihub/model_market/model_visual",
-    "model_market_voice": "/frontend/aihub/model_market/model_voice",
-    "model_market_language": "/frontend/aihub/model_market/model_language",
+    "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
+
+	"model_market_visual": "/frontend/ai_hub/model_market/model_visual",
+    "model_market_voice": "/frontend/ai_hub/model_market/model_voice",
+    "model_market_language": "/frontend/ai_hub/model_market/model_language",
 }
  # 可以跨域分享cookie的子域名，例如.local.com
 COOKIE_DOMAIN = ''
 SERVICE_DOMAIN='service.local.com'
 
 
-# # 所有训练集群的信息
-# CLUSTERS={
-#     # 和project expand里面的名称一致
-#     "dev":{
-#         "NAME":"dev",
-#         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-#         # "HOST":"9.135.92.226",
-#         # "SERVICE_DOMAIN": 'service.local.com',
-#     }
-# }
-
-
-
+# 所有训练集群的信息
 CLUSTERS={
-    # # 至少要有一个这个
-    "tke":{
-        "NAME":"tke",
-        "KUBECONFIG":'/home/myapp/kubeconfig/tke-kubeconfig',
-        "SERVICE_DOMAIN": 'service.kfserving.woa.com'
-    },
-    "shanghai":{
-        "NAME":"shanghai",
-        "KUBECONFIG":'/home/myapp/kubeconfig/shanghai-kubeconfig',
-        "HOST":'home.star.woa.com',
-        "SERVICE_DOMAIN": 'service.star.woa.com'
-    },
-    "idc": {
-        "NAME": "idc",
-        "KUBECONFIG": '/home/myapp/kubeconfig/idc-kubeconfig',
-        "HOST":'kubeflow.cube.woa.com',
-        "SERVICE_DOMAIN": 'service.cube.woa.com'
-    },
     # 和project expand里面的名称一致
-    "dev": {
-        "NAME": "dev",
-        "KUBECONFIG": '/home/myapp/kubeconfig/dev-kubeconfig',
-        "HOST":"9.135.92.226",
+    "dev":{
+        "NAME":"dev",
+        "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
+        # "HOST":"9.135.92.226",
         # "SERVICE_DOMAIN": 'service.local.com',
     }
 }
+
+
+#
+# CLUSTERS={
+#     # # 至少要有一个这个
+#     "tke":{
+#         "NAME":"tke",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/tke-kubeconfig',
+#         "SERVICE_DOMAIN": 'service.kfserving.woa.com'
+#     },
+#     "shanghai":{
+#         "NAME":"shanghai",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/shanghai-kubeconfig',
+#         "HOST":'home.star.woa.com',
+#         "SERVICE_DOMAIN": 'service.star.woa.com'
+#     },
+#     "idc": {
+#         "NAME": "idc",
+#         "KUBECONFIG": '/home/myapp/kubeconfig/idc-kubeconfig',
+#         "HOST":'kubeflow.cube.woa.com',
+#         "SERVICE_DOMAIN": 'service.cube.woa.com'
+#     },
+#     # 和project expand里面的名称一致
+#     "dev": {
+#         "NAME": "dev",
+#         "KUBECONFIG": '/home/myapp/kubeconfig/dev-kubeconfig',
+#         "HOST":"9.135.92.226",
+#         # "SERVICE_DOMAIN": 'service.local.com',
+#     }
+# }
 
 

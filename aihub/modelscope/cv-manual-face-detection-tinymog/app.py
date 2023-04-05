@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,random,cv2
 import pysnooper
 import os
 
@@ -35,7 +35,7 @@ class CV_MANUAL_FACE_DETECTION_TINYMOG_Model(Model):
         {
             "label": "示例0",
             "input": {
-                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg"
+                "image": "mog_face_detection.jpg"
             }
         }
     ]
@@ -63,15 +63,31 @@ class CV_MANUAL_FACE_DETECTION_TINYMOG_Model(Model):
     def inference(self,image,**kwargs):
         result = self.p(image)
 
+        img = cv2.imread(image)  # 读取图片
+
+        for index, face in enumerate(result['boxes']):
+            boxs = face
+            keypoints = result['keypoints'][index]
+            x = [keypoints[x*2] for x in range(5)]
+            y = [keypoints[y*2+1] for y in range(5)]
+
+            radius = int(max(3,(max(y)-min(y))//10,(max(x)-min(x))//10))
+
+            for i in range(5):
+                cv2.circle(img, (int(keypoints[i * 2]), int(keypoints[i * 2 + 1])), radius, (0, 0, 255), -1)
+            cv2.rectangle(img, (int(boxs[0]), int(boxs[1])), (int(boxs[2]), int(boxs[3])), (0, 0, 255), 2)
+
+        savePath = 'result/result_' + str(int(1000 * time.time())) + '.jpg'
+        os.makedirs(os.path.dirname(savePath), exist_ok=True)
+        if os.path.exists(savePath):
+            os.remove(savePath)
+        cv2.imwrite(savePath, img)
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": savePath
             }
         ]
         return back
@@ -84,10 +100,14 @@ model=CV_MANUAL_FACE_DETECTION_TINYMOG_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='mog_face_detection.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 2.6M
+# v100 gpu 推理0.5s
+

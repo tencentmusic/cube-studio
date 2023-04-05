@@ -1,0 +1,28 @@
+{
+    "num_workers": 1,
+    "node_affin": "only_cpu",
+    "pod_affin": "spread",
+    "timeout": "100d",
+    "trainer": "runner",
+    "job_detail": {
+        "train_data": "/mnt/kalenchen/mmoe/data/census-income/census-income.data.new",
+        "test_data": "/mnt/kalenchen/mmoe/data/census-income/census-income.test.new",
+        "model_input_config_file": "/mnt/kalenchen/mmoe/data/census-income/model_input_config_file.json",
+        "model_path": "/mnt/kalenchen/mmoe/",
+        "model_args": {
+            "expert_units": 8,
+            "num_experts": 8,
+            "tower_units": 10,
+            "tower_activation": "relu"
+        },
+        "train_args": {
+            "epochs": 50,
+            "optimizer": {
+                "type": "adam",
+                "args": {
+                    "learning_rate": 0.001
+                }
+            }
+        }
+    }
+}

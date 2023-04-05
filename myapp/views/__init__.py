@@ -29,6 +29,6 @@ from . import view_dataset
 from . import view_sqllab
 from . import view_aihub
 from . import view_total_resource
-from . import view_chat
+# from . import view_chat
 
 

@@ -11,4 +11,3 @@ export const submitData = (url: string, data: Record<any, any>): Promise<AxiosRe
 }>> => {
     return axios.post(url, data)
 }
-

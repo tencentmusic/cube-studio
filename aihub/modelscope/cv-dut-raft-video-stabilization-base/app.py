@@ -14,7 +14,7 @@ class CV_DUT_RAFT_VIDEO_STABILIZATION_BASE_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='example.gif'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     hot = "1757"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_dut-raft_video-stabilization_base/summary"

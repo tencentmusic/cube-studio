@@ -51,9 +51,13 @@ class Myapp(BaseMyappView):
             #     "icon": '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">   <metadata><?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?> <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c140 79.160451, 2017/05/06-01:08:21        ">    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">       <rdf:Description rdf:about=""/>    </rdf:RDF> </x:xmpmeta>                 <?xpacket end="w"?></metadata> <image id="图层_0" data-name="图层 0" x="6" width="52" height="64" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAABACAMAAABiFaQOAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABXFBMVEUAAADXHgXXHgXXHgXYHgXYHgXYHgbZHgbYHgbYHgXWHQbPIADXHgfYHgbYHgbWHQbYHgaqAADXHwTYHgbYHwjbHQfYHwfZHgbYHgbXHwfXHQfeIQvZHgXYHwXXHgfXHgbYHwbZHgjbHwXZHgbbHgbXHgbYHgbZHwfYHgbYHwbYHQXYHgbXHwbYHgfYHgbXHQfYHgbXHgbZHgbYHQXMMwDQHAnYHgbXIAjWHAfVIAXXHwTWHgfYHQbZHQXXHwbYHgbXHgXWHgfYHgbXHQbXHwfXHwbYHwXZHQbXHgfYHQfXHQbYHwbYHgTXHgXYIQfYHgbcGgnXHgbZGgDYHgbMGgDYHgbXHgbYHgbXHgbYHwbXHQbZHgbYHgbZHgbYHwfXHQXYHQbYHgbXHwXZHgXYHgfYHwbYHwbYHgbYHgbXHQbYHgbYHgXYHwfXHgbTIQvYHgbYHwbcIwzYHgYAAACjlaAKAAAAcnRSTlMAM2aSvenz3MWPUBCZ3VYsigM52kJG6veidEYXumNN+9lDMX8qubJrsFthxqfE+EftgNS/BRvfICUwOkWdk1qJZXB2emyFYliaTqWvO7onzx3aFOQK7/ru29HHs6mfloyCiI2SmH2do6iuuL51zhes4RYaP3bpAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB+YJGhAsAvVkLkcAAAJjSURBVEjHlZbnVxNREMUfJgpJbBRLAEUDShHQJfTee0+oIRB6F3z//wfvvE1c3JNy33zY+5i9vxPO7uROlMpXZc8CwecvyitC4Ygiq+yl/levXlPImyeI1NvK0kxVtfZXTSnm3XuxffgYra2rq43Wu9Sn4sznBjF9+Zr7O9ZoqKai0DexfH/aaZZOSzGmVRzB/3tt0iv2DH/gfrW/2Y5mR2EmgNudP/3dml9oB3xNp0tbVJdjoLgNo3VcmG47RutuQBFbSGa4B9rbJ5/ZVOA9ev2+Xpx6cOiH1rt35Wa+p+r1Za76oQPeGy8NteA0AB2EtrOQvOhB6BB0mIWGcRqChqEjLDSCUxg6Ch1joTGcRqHjUIeFHJzGoRPQSZUbqHg+yOtPwjwBnYJO50Y3O46+8vrTME9BZ6CziqxZmGegIegcC83BHILOQxdYaAHmeehi9n1RJZOwCF2CLrPQMsxL0BVojIViMK9AO6CrLLSaTaY16DoLrcO8Bt2AbrLQJswb0AQ0yUJJmBPQrQJTmr9g3oJsI1V5qFPrbTf2dnhoxwRfJPtfkpUwwSext8tDuyb4JPb2eGjPBJ/E3j4P7Zvgk9gL8lDQBJ8Me4qHUuaLJLF3wEMHJvgk9tI8lDbBJ7F3yEOHJvgk9o546MgEn8RehocyJvgytttTPuPYHjpWJ/bQiTq1h07VGa7n/IM4h/1MXeAa5aEo7BfqEtdmHpKff5fqymbTuLvmSl3bbBp311ybWac3jbtrUurGZtO4u+ZG3eJ6x0N3sN+aL4hlpVWjPeSo5L0tc4918fvh0QZ5fPij/gJTBPTTrMeWfgAAAABJRU5ErkJggg=="/> </svg> ',
             #     "link": "%s/frontend/ai_hub/model_market/model_all"%request.host_url.strip('/')
             # },
+            # {
+            #     "pic_url": '%s/static/assets/images/tip.gif'%request.host_url.strip('/'),
+            #     "link": "%s/frontend/ai_hub/model_market/model_visual"%request.host_url.strip('/')
+            # },
             {
-                "pic_url": '%s/static/assets/images/tip.gif'%request.host_url.strip('/'),
-                "link": "%s/frontend/ai_hub/model_market/model_visual"%request.host_url.strip('/')
+                "icon": '<svg t="1680597486865" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3768" width="200" height="200"><path d="M579.632 560.915c0.287-1.062 0.592-2.143 0.914-3.239l-10.295 18.072c4.26-2.854 7.454-7.699 9.381-14.833z" fill="#666666" p-id="3769"></path><path d="M652.975 409.125C750.171 237.13 884.544 26.196 703.003 121.95c-245.272 129.368-439.311 0-439.311 0-129.613-73.778-17.551 128.675 107.949 287.378-154.999 37.509-265.539 135.359-265.539 250.154C106.101 806.672 287.828 926 512 926s405.899-119.508 405.899-266.7c0-114.642-110.25-212.557-264.924-250.175zM600 630v25h-74v25h74v25h-74v57h-30v-57h-73v-25h73v-25h-73v-25h60.124L412.28 505h34.898l50.603 90.079c5.698 10.237 10.121 19.215 13.261 26.893 2.675-6.165 7.443-15.634 14.308-28.432l11.428-21.141c-41.175-20.406-104.691-86.64-165.107-163.035 0.058-0.014 0.117-0.038 0.175-0.052 60.364 76.302 123.796 142.669 164.932 163.055L573.162 505h37.342l-29.957 52.634a157.544 157.544 0 0 0-0.914 3.26c-1.928 7.134-5.121 12.416-9.381 15.27L539.834 630H600z" fill="#666666" p-id="3770"></path></svg>',
+                "link": "%s/frontend/ai_hub/model_market/model_visual" % request.host_url.strip('/')
             },
             {
                 "text":"帮助文档",
@@ -165,7 +169,7 @@ class Myapp(BaseMyappView):
             },
             # 数据
             {
-                "name": 'dataleap',
+                "name": 'data',
                 "title": '数据资产',
                 'hidden': 0,
                 "isMenu": True,
@@ -250,7 +254,7 @@ class Myapp(BaseMyappView):
                         ]
                     },
                     {
-                        "name": 'etl',
+                        "name": 'feast',
                         "title": '特征平台',
                         "isMenu": True,
                         "isExpand": True,
@@ -261,7 +265,7 @@ class Myapp(BaseMyappView):
                                 "icon": '<svg t="1658320572989" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4843" width="200" height="200"><path d="M959.063415 831.188293c0 17.655758-14.313022 31.96878-31.968781 31.96878H95.906341c-17.655758 0-31.96878-14.313022-31.96878-31.96878V191.812683c0-17.655758 14.313022-31.96878 31.96878-31.968781h831.188293c17.655758 0 31.96878 14.313022 31.968781 31.968781v639.37561z m-71.929756-447.562927H135.867317v407.601951h751.266342V383.625366z m-603.127009 60.225186l146.934509 146.934509a7.992195 7.992195 0 0 1 0 11.302962l-39.205713 39.206713-0.007992 0.006993-107.720804 107.720804a7.992195 7.992195 0 0 1-11.301963 0l-33.908886-33.906888a7.992195 7.992195 0 0 1 0-11.302962l107.375141-107.375142-107.375141-107.375141a7.992195 7.992195 0 0 1 0-11.303961l33.908886-33.906888a7.992195 7.992195 0 0 1 11.301963 0zM823.196098 575.438049a7.992195 7.992195 0 0 1 7.992195 7.992195v47.953171a7.992195 7.992195 0 0 1-7.992195 7.992195H583.430244a7.992195 7.992195 0 0 1-7.992195-7.992195v-47.953171a7.992195 7.992195 0 0 1 7.992195-7.992195h239.765854z m63.937561-343.66439H135.867317v87.914146h751.266342v-87.914146z" p-id="4844"></path></svg>',
                                 "menu_type": "api",
                                 "disable": True,
-                                "url": "/metadata_metric_modelview/api/"
+                                "url": "/feast_modelview/api/"
                             }
                         ]
                     },
@@ -498,7 +502,7 @@ class Myapp(BaseMyappView):
                     },
                     {
                         "name": 'inferenceservice',
-                        "title": '推理服务',
+                        "title": '模型服务',
                         "isMenu": True,
                         "isExpand": True,
                         "children": [
@@ -511,21 +515,12 @@ class Myapp(BaseMyappView):
                             },
                             {
                                 "name": 'inferenceservice_manager',
-                                "title": '服务上线',
+                                "title": '推理服务',
                                 "icon": '<svg t="1647603468955" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8582" width="128" height="128"><path d="M512 170.666667H398.222222v682.666666h56.888889V512h56.888889c91.022222 0 170.666667-73.955556 170.666667-170.666667s-73.955556-170.666667-170.666667-170.666666z m113.777778 170.666666c0 62.577778-51.2 113.777778-113.777778 113.777778H455.111111V227.555556h56.888889c62.577778 0 113.777778 51.2 113.777778 113.777777zM910.222222 227.555556V170.666667h-170.666666v56.888889h56.888888v568.888888h-56.888888v56.888889h170.666666v-56.888889h-56.888889V227.555556zM199.111111 170.666667C119.466667 170.666667 56.888889 233.244444 56.888889 312.888889V853.333333h56.888889V512h170.666666v341.333333h56.888889V312.888889C341.333333 233.244444 278.755556 170.666667 199.111111 170.666667zM284.444444 455.111111H113.777778V312.888889C113.777778 267.377778 153.6 227.555556 199.111111 227.555556h5.688889C244.622222 227.555556 284.444444 267.377778 284.444444 312.888889V455.111111z" fill="#333333" p-id="8583"></path></svg>',
                                 "menu_type": "api",
                                 "url": "/inferenceservice_modelview/api/"
                             },
                         ]
-                    },
-
-                    {
-                        "name": 'inferenceservice_pipeline',
-                        "title": '服务pipeline',
-                        "icon": '<svg t="1646708148024" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="32938" width="128" height="128"><path d="M576.364 706c59.702 0 108.1 48.398 108.1 108.1 0 59.702-48.398 108.1-108.1 108.1h-179.4c-59.702 0-108.1-48.398-108.1-108.1 0-59.702 48.398-108.1 108.1-108.1h179.4z m196.737-188.572c78.348 3.4 140.802 68.833 151.318 148.04 11.261 84.825-39.41 157.519-138.707 179.422l1.457 41.706a6.9 6.9 0 0 1-11.165 5.662l-82.04-64.617a6.9 6.9 0 0 1-0.367-10.53l77.321-70.17a6.9 6.9 0 0 1 11.533 4.869l1.123 32.004c61.365-17.221 88.357-59.32 81.565-110.477-6.833-51.47-46.297-93.259-93.207-96.091l-1.424-0.074-0.715-0.04c-16.15-1.081-28.566-14.87-27.86-31.128 0.716-16.498 14.67-29.292 31.168-28.576zM576.364 765.8h-179.4c-26.675 0-48.3 21.625-48.3 48.3 0 26.406 21.19 47.863 47.493 48.293l0.807 0.007h179.4c26.676 0 48.3-21.625 48.3-48.3 0-26.406-21.19-47.863-47.493-48.293l-0.807-0.007z m0-326.6c59.702 0 108.1 48.398 108.1 108.1 0 59.702-48.398 108.1-108.1 108.1h-179.4c-59.702 0-108.1-48.398-108.1-108.1 0-59.702 48.398-108.1 108.1-108.1h179.4zM261.236 260.804c0.706 16.258-11.71 30.047-27.86 31.128l-0.715 0.04c-47.534 2.063-87.729 44.175-94.631 96.165-5.815 43.8 13.134 80.958 57.218 101.55l1.02-29.118a6.9 6.9 0 0 1 11.532-4.868l77.321 70.169a6.9 6.9 0 0 1-0.367 10.53l-82.04 64.617a6.9 6.9 0 0 1-11.164-5.662l1.48-42.383C109.937 525.25 68.453 457.83 78.75 380.267c10.515-79.206 72.97-144.639 151.318-148.039 16.498-0.716 30.452 12.078 31.168 28.576zM576.364 499h-179.4c-26.675 0-48.3 21.625-48.3 48.3 0 26.406 21.19 47.863 47.493 48.293l0.807 0.007h179.4c26.676 0 48.3-21.625 48.3-48.3 0-26.406-21.19-47.863-47.493-48.293l-0.807-0.007z m0-345c59.702 0 108.1 48.398 108.1 108.1 0 59.702-48.398 108.1-108.1 108.1h-179.4c-59.702 0-108.1-48.398-108.1-108.1 0-59.702 48.398-108.1 108.1-108.1h179.4z m0 59.8h-179.4c-26.675 0-48.3 21.625-48.3 48.3 0 26.406 21.19 47.863 47.493 48.293l0.807 0.007h179.4c26.676 0 48.3-21.625 48.3-48.3 0-26.406-21.19-47.863-47.493-48.293l-0.807-0.007z" fill="#333333" p-id="32939"></path></svg>',
-                        "menu_type": "api",
-                        "disable":True,
-                        "url": "/service_pipeline_modelview/api/"
                     },
                     {
                         "name": 'model_observability',

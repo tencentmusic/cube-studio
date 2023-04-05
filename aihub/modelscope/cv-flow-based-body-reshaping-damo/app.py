@@ -3,7 +3,7 @@ import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
-import os,cv2
+import os,cv2,random
 
 class CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model(Model):
     # 模型基础信息定义
@@ -14,7 +14,7 @@ class CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='example.gif'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     hot = "7195"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_flow-based-body-reshaping_damo/summary"
@@ -22,7 +22,8 @@ class CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None),
+        Field(type=Field_type.text_select, name='number', label='',describe='控制瘦身程度的参数，越大瘦身越狠',choices=['1','2','3','4','5','6','7'],default='1',validators=None)
     ]
 
     inference_resource = {
@@ -52,18 +53,33 @@ class CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model(Model):
 
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,image,**kwargs):
+    def inference(self,image,number,**kwargs):
         from modelscope.outputs import OutputKeys
+
+        number = int(number)
+
         result = self.p(image)
-        cv2.imwrite('result.jpg', result[OutputKeys.OUTPUT_IMG])
+
+        save_path = f'result/result{random.randint(1, 1000)}.jpg'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, result[OutputKeys.OUTPUT_IMG])
+
+        while number>1:
+            result = self.p(save_path)
+
+            save_path = f'result/result{random.randint(1, 1000)}.jpg'
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            if os.path.exists(save_path):
+                os.remove(save_path)
+            cv2.imwrite(save_path, result[OutputKeys.OUTPUT_IMG])
+
+            number = number-1
 
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
@@ -71,10 +87,11 @@ class CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model(Model):
 model=CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/image_body_reshaping.jpg')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/image_body_reshaping.jpg')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+# 此模型只瘦身，不瘦脸！！
+if __name__=='__main__':
+    model.run()
