@@ -1,9 +1,13 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy
 import pysnooper
+import random
 import os
+from modelscope.utils.constant import Tasks
+from modelscope.models.cv.video_multi_object_tracking.utils.visualization import show_multi_object_tracking_result
+from modelscope.outputs import OutputKeys
 
 class CV_YOLOV5_VIDEO_MULTI_OBJECT_TRACKING_FAIRMOT_Model(Model):
     # 模型基础信息定义
@@ -62,16 +66,15 @@ class CV_YOLOV5_VIDEO_MULTI_OBJECT_TRACKING_FAIRMOT_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,video,**kwargs):
         result = self.p(video)
-
-        # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
-        # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
+        save_path = f'result/result{random.randint(1, 1000)}.mp4'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        show_multi_object_tracking_result(video, result[OutputKeys.BOXES], result[OutputKeys.LABELS], save_path)
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                #"text": str(result),
+                "video": save_path,
             }
         ]
         return back
@@ -84,10 +87,16 @@ model=CV_YOLOV5_VIDEO_MULTI_OBJECT_TRACKING_FAIRMOT_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(video='http://dmshared.oss-cn-hangzhou.aliyuncs.com/ljp/maas/mot_demo_resource/MOT17-03-partial.mp4?OSSAccessKeyId=LTAI5tC7NViXtQKpxFUpxd3a&Expires=2032715547&Signature=ROPQRkeOJqE3j8cBC0PEtkgdlzs%3D')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(video='http://dmshared.oss-cn-hangzhou.aliyuncs.com/ljp/maas/mot_demo_resource/MOT17-03-partial.mp4?OSSAccessKeyId=LTAI5tC7NViXtQKpxFUpxd3a&Expires=2032715547&Signature=ROPQRkeOJqE3j8cBC0PEtkgdlzs%3D')  # 测试
+# print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()
+
+# 模型大小：160MB
+# 模型效果：近距离识别率较高
+# 推理性能: 4s以内
+# 模型占用内存/推理服务占用内存/gpu占用显存：10MB/2.5G/1.4GB
+# 巧妙使用方法：第一次调用后，后面推理速度会加快
