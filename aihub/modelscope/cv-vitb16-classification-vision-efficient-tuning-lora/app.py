@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,random,cv2
 import pysnooper
 import os
 
@@ -78,7 +78,7 @@ model=CV_VITB16_CLASSIFICATION_VISION_EFFICIENT_TUNING_LORA_Model()
 
 # 容器中运行调试推理时
 model.load_model(save_model_dir=None)
-result = model.inference()  # 测试
+result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/vision_efficient_tuning_test_sunflower.jpg')  # 测试
 print(result)
 
 # # 模型启动web时使用

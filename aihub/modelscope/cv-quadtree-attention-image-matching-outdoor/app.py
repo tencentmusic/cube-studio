@@ -8,8 +8,8 @@ import os
 class CV_QUADTREE_ATTENTION_IMAGE_MATCHING_OUTDOOR_Model(Model):
     # 模型基础信息定义
     name='cv-quadtree-attention-image-matching-outdoor'   # 该名称与目录名必须一样，小写
-    label=''
-    describe=""
+    label='图像匹配算法介绍'
+    describe="输入一对图片，图像匹配算法将输出图片间对应像素的位置。"
     field="机器视觉"    # [机器视觉，听觉，自然语言，多模态，强化学习，图论]
     scenes=""
     status='online'

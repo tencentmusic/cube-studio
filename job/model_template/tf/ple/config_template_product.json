@@ -1,0 +1,114 @@
+{
+    "num_workers": 2,
+    "node_affin": "only_cpu",
+    "pod_affin": "spread",
+    "timeout": "100d",
+    "trainer": "runner",
+    "job_detail": {
+        "model_input_config_file": "${PACK_PATH}$/pr_new.json",
+        "model_args": {
+            "ordered_task_names": [
+                "cvr_label",
+                "like_label"
+            ],
+            "layer_number": 2,
+            "ple_dict": {
+                "cvr_label": {
+                    "0": "PersonalRadioExpertV1",
+                    "1": "PersonalRadioExpertV1"
+                },
+                "like_label": {
+                    "0": "PersonalRadioExpertV1",
+                    "1": "PersonalRadioExpertV1"
+                },
+                "shared_experts": {
+                    "0": "PersonalRadioExpertV1",
+                    "1": "PersonalRadioExpertV1"
+                }
+            },
+            "tower_dict": {
+                "cvr_label": "PersonalRadioTowerV1",
+                "like_label": "PersonalRadioTowerV1"
+            },
+            "name": "ple"
+        },
+        "train_data_args": {
+            "data_file": "${DATA_PATH}$/PLE/train/part*",
+            "file_type": "CSV",
+            "batch_size": 1024,
+            "field_delim": ",",
+            "with_headers": true,
+            "shuffle_buffer_size": 2048,
+            "shuffle": false,
+            "model_input_config_file": "${PACK_PATH}$/pr_new.json"
+        },
+        "test_data_args": {
+            "data_file": "${DATA_PATH}$/PLE/test/part*",
+            "file_type": "CSV",
+            "batch_size": 1024,
+            "field_delim": ",",
+            "with_headers": true,
+            "shuffle_buffer_size": 2048,
+            "shuffle": false,
+            "model_input_config_file": "${PACK_PATH}$/pr_new.json"
+        },
+        "val_data_args": {
+            "data_file": "${DATA_PATH}$/PLE/val/part*",
+            "file_type": "CSV",
+            "batch_size": 1024,
+            "field_delim": ",",
+            "with_headers": true,
+            "shuffle_buffer_size": 2048,
+            "shuffle": false,
+            "model_input_config_file": "${PACK_PATH}$/pr_gauc_new.json"
+        },
+        "train_args": {
+            "mw_com": "RING",
+            "train_type": "compile_fit",
+            "batch_size": 1024,
+            "epochs": 1,
+            "num_samples": 10000000,
+            "num_val_samples": 1000000,
+            "optimizer": {
+                "type": "adam",
+                "args": {
+                    "learning_rate": 0.001
+                }
+            },
+            "losses": [
+                "bce",
+                "bce"
+            ],
+            "metrics": {
+                "cvr_label": "auc",
+                "like_label": "auc"
+            }
+        },
+        "early_stopping": {
+            "monitor": "cvr_label",
+            "mode": "max",
+            "patience": 1,
+            "min_delta": 0.001
+        },
+        "eval_args": {
+            "batch_size": 1024,
+            "model_call_exclude_input_index": "uin",
+            "metrics": {
+                "cvr_label": {
+                    "type": "gauc",
+                    "args": {
+                        "user_id_index": "uin",
+                        "from_logits": false
+                    }
+                },
+                "like_label": {
+                    "type": "gauc",
+                    "args": {
+                        "user_id_index": "uin",
+                        "from_logits": false
+                    }
+                }
+            }
+        }
+    }
+}

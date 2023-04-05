@@ -14,7 +14,7 @@ class MPLUG_IMAGE_CAPTIONING_COCO_BASE_ZH_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "2161"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/mplug_image-captioning_coco_base_zh/summary"

@@ -14,7 +14,7 @@ class CV_MDM_MOTION_GENERATION_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.gif'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "162"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_mdm_motion-generation/summary"

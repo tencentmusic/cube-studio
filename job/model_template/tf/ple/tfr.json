@@ -1,0 +1,1317 @@
+[{
+	"name": "total_listen",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "total_like",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "total_comment",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_6",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_7",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_8",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_9",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_10",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_12",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_14",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_18",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_24",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "language_2500",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_1977",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_1978",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_1979",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_1989",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_1990",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_1996",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2000",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2002",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2004",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2006",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2007",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2010",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2011",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2012",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2013",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2014",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2015",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2016",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2017",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2018",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2019",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2020",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_2021",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "public_year_202200",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "singer_fans_num",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "singer_song_num",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_10",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_13",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_14",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_15",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_16",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_17",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_18",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_19",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_20",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_21",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_22",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_23",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_24",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_25",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_26",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_27",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_37",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_40",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_42",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_44",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_46",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_47",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_50",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "age_5100",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "sex_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "sex_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "sex_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "sex_2100",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_6",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_7",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_8",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "education_8100",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_11",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_21",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_22",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_31",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_41",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_51",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "city_level_6100",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "singer_sim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang6",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang7",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "like_sim_by_lang8",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_dis_like",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_dis_3d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_dis_7d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_dis_15d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "year_dis_like",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "year_dis_3d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "year_dis_7d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "year_dis_15d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "lang_dis_like",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "lang_dis_3d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "lang_dis_7d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "lang_dis_15d",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "eagleScore",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dusAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dusMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favDusMaxSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favDusAvgSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cutAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cutMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favCutMaxSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favCutAvgSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisCutMaxSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisCutAvgSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisDusMaxSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisDusAvgSimGap",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "fav2Singer",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dus2Singer",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cut2Singer",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favTrackNum",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cutTrackNum",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dusTrackNum",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisTrackNum",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favSingerMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favSingerAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cutSingerMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cutSingerAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dusSingerMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dusSingerAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisSingerMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisSingerAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "proSingerMaxSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "proSingerAvgSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "languageScore",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "languageRank",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "singerScore",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "singerRank",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genreScore",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genreRank",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_6",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_7",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_8",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_9",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_10",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_11",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_12",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_13",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_14",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_15",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_16",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_17",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "recSrc_1800",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_6",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_7",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_8",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_9",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_10",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_11",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_12",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_13",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_14",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_15",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_16",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_17",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_18",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_19",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_20",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_21",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_22",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_23",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_24",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_25",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_26",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_27",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_28",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "version_2900",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_6",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_7",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_8",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_9",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_10",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_11",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_12",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_13",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_14",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_15",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_16",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_17",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_18",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_19",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_20",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_21",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_22",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_23",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_24",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_25",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_26",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_27",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_28",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_29",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_30",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_31",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_32",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_33",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_34",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_35",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_36",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_37",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_38",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_39",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_40",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_41",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_42",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_43",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_44",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_45",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_46",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_47",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_48",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_49",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_50",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_51",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_52",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_53",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_54",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_55",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_56",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_57",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_58",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_59",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_60",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_61",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_62",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_63",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_64",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_65",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "genre_6600",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "area_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "area_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "area_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "area_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "area_4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "area_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "area_6000",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "ostype_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "ostype_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "ostype_11",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "ostype_18",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "ostype_1900",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_2",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_4",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_6",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_7",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_8",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_9",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_10",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_11",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_12",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_13",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_14",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_15",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_16",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_17",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_18",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_19",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_20",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_21",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_22",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_23",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_24",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "tHour_2500",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "srcWei",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "needNum_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "needNum_3",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "needNum_5",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "needNum_6000",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "isAddDiversity_0",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "isAddDiversity_1",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "isAddDiversity_2000",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favSingerAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cutSingerAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dusSingerAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "lisSingerAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisSingerAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "favAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cutAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "dusAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "lisAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "flisAttSim",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "newSongBias",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "albumHash",
+	"ftype": "fixlen",
+	"dtype": "int64"
+}, {
+	"name": "ctr_label",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}, {
+	"name": "cvr_label",
+	"ftype": "fixlen",
+	"dtype": "float32"
+}]

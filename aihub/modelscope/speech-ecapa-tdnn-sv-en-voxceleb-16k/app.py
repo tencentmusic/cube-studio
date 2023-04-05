@@ -14,7 +14,7 @@ class SPEECH_ECAPA_TDNN_SV_EN_VOXCELEB_16K_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "125"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/speech_ecapa-tdnn_sv_en_voxceleb_16k/summary"
