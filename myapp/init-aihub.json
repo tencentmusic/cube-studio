@@ -405,1359 +405,3199 @@
     },
     "inference": {}
   },
-
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-crnn-ocr-recognition-general-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-crnn-ocr-recognition-general-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-crnn-ocr-recognition-general-damo-v20221001",
-        "label": "读光-文字识别-CRNN模型-中英-通用领域",
-        "describe": "",
+{
+        "price": "1",
+        "name": "speech-paraformer-large-asr-nat-zh-cn-16k-common-vocab8404-pytorch",
+        "label": "Paraformer语音识别-中文-通用-16k-离线-large-pytorch",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 8974116,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
+        "field": "听觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-cartoon-stable-diffusion-watercolor",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-cartoon-stable-diffusion-watercolor",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-cartoon-stable-diffusion-watercolor-v20221001",
-        "label": "卡通系列文生图模型-水彩风",
-        "describe": "",
+        "price": "1",
+        "name": "cv-fft-inpainting-lama",
+        "label": "LaMa图像填充",
+        "describe": "针对自然图片进行填充恢复，支持高分辨率图像的输入，同时支持在线refinement，使得高分辨率图片恢复出更加真实的内容细节",
+        "hot": 992812,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnexttiny-ocr-recognition-scene-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-convnexttiny-ocr-recognition-scene-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-convnexttiny-ocr-recognition-scene-damo-v20221001",
-        "label": "读光-文字识别-行识别模型-中英-自然场景文本领域",
-        "describe": "给定一张自然场景图片，识别出图中所含文字并输出字符串。",
-        "pic": "example.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-canonical-body-3d-keypoints-video",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-canonical-body-3d-keypoints-video",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-canonical-body-3d-keypoints-video-v20221001",
-        "label": "人体关键点检测-通用领域-3D",
-        "describe": "输入一段单人视频，实现端到端的3D人体关键点检测，输出视频中每一帧的3D人体关键点坐标。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnet50-ocr-detection-vlpt",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-resnet50-ocr-detection-vlpt",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-resnet50-ocr-detection-vlpt-v20221001",
-        "label": "读光-文字检测-单词检测模型-英文-VLPT预训练",
-        "describe": "给定一张图片，检测出图内文字并给出多边形包围框。检测模型使用DB，backbone初始化参数基于多模态交互预训练方法VLPT。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo-m",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo-m",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-m-v20221001",
-        "label": "DAMOYOLO-高性能通用检测模型-M",
-        "describe": "DAMOYOLO是一款面向工业落地的高性能检测框架，精度和速度超越当前的一众典型YOLO框架（YOLOE、YOLOv6、YOLOv7）。基于TinyNAS技术，DAMOYOLO能够针对不同的硬件算力，进行低成本的模型定制化搜索。这里仅提供DAMOYOLO-M模型，更多模型请参考README。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnexttiny-ocr-recognition-document-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-convnexttiny-ocr-recognition-document-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-convnexttiny-ocr-recognition-document-damo-v20221001",
-        "label": "读光-文字识别-行识别模型-中英-文档印刷体文本领域",
-        "describe": "给定一张文档印刷体图片，识别出图中所含文字并输出字符串。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-cartoon-stable-diffusion-flat",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-cartoon-stable-diffusion-flat",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-cartoon-stable-diffusion-flat-v20221001",
-        "label": "卡通系列文生图模型-扁平风",
-        "describe": "",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo-cigarette",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo-cigarette",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-cigarette-v20221001",
-        "label": "实时香烟检测-通用",
-        "describe": "本模型为高性能热门应用系列检测模型中的实时香烟检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有香烟的坐标信息，并可用于吸烟检测等后续应用场景。更多具体信息请参考Model card。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-csrnet-image-color-enhance-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-csrnet-image-color-enhance-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-csrnet-image-color-enhance-models-v20221001",
-        "label": "CSRNet图像调色",
-        "describe": "基于CSRNet实现的图像色彩增强算法，输入待增强图像，输出色彩增强后的图像。CSRNet通过计算全局调整参数并将之作用于条件网络得到的特征，保证效果的基础之上实现轻便高效的训练和推理。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnest101-animal-recognition",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-resnest101-animal-recognition",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-resnest101-animal-recognition-v20221001",
-        "label": "动物识别-中文-通用领域",
-        "describe": "本模型是对含有动物的图像进行标签识别，无需任何额外输入，输出动物的类别标签，目前已经覆盖了8K多类的细粒度的动物类别。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tadaconv-action-recognition",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tadaconv-action-recognition",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tadaconv-action-recognition-v20221001",
-        "label": "TAdaConv动作识别模型-英文-通用领域",
-        "describe": "TAdaConv是一种在动作识别模型中即插即用的时序自适应卷积（Temporally-Adaptive Convolutions）。可以明显提升SlowFast、R2D和R3D等模型性能。",
-        "pic": "example.png",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-manual-face-quality-assessment-fqa",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-manual-face-quality-assessment-fqa",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-manual-face-quality-assessment-fqa-v20221001",
-        "label": "人脸质量模型FQA",
-        "describe": "人脸质量模型FQA",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo-safety-helmet",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo-safety-helmet",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-safety-helmet-v20221001",
-        "label": "实时安全帽检测-通用",
-        "describe": "本模型为高性能热门应用系列检测模型中的实时安全帽（头盔）检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人头的坐标信息，以及是否佩戴安全帽（头盔）。更多具体信息请参考Model card。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-sketch-compound-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-person-image-cartoon-sketch-compound-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-person-image-cartoon-sketch-compound-models-v20221001",
-        "label": "DCT-Net人像卡通化-素描",
-        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像素描风格转换模型。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-classification",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-classification",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-classification-v20221001",
-        "label": "TinyNAS高性能图像分类网络结构模型",
-        "describe": "ZenNet 是基于 Tiny-NAS (Zen-NAS) 算法设计出的高效的卷积网络结构。 本 demo 只提供 zennet_imagenet1k_latency12ms_res22 backbone，其它网络结构可以从README 中获取。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnetc3d-action-detection-detection2d",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-resnetc3d-action-detection-detection2d",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-resnetc3d-action-detection-detection2d-v20221001",
-        "label": "日常动作检测",
-        "describe": "输入视频文件，输出该段时间内视频所包含的动作，当前支持9中常见动作识别",
-        "pic": "example.png",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-v20221001",
-        "label": "DAMOYOLO-高性能通用检测模型-S",
-        "describe": "DAMOYOLO是一款面向工业落地的高性能检测框架，精度和速度超越当前的一众典型YOLO框架（YOLOE、YOLOv6、YOLOv7）。基于TinyNAS技术，DAMOYOLO能够针对不同的硬件算力，进行低成本的模型定制化搜索。这里仅提供DAMOYOLO-S模型，更多模型请参考README。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/multi-modal-chinese-stable-diffusion-v1.0",
-        "field": "强化学习",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "multi-modal-chinese-stable-diffusion-v1.0",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "multi-modal-chinese-stable-diffusion-v1.0-v20221001",
-        "label": "中文StableDiffusion-通用领域",
-        "describe": "",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-artstyle-compound-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-person-image-cartoon-artstyle-compound-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-person-image-cartoon-artstyle-compound-models-v20221001",
-        "label": "DCT-Net人像卡通化-艺术",
-        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像艺术风格转换模型。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnexttiny-ocr-recognition-handwritten-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-convnexttiny-ocr-recognition-handwritten-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-convnexttiny-ocr-recognition-handwritten-damo-v20221001",
-        "label": "读光-文字识别-行识别模型-中英-手写文本领域",
-        "describe": "给定一张手写体图片，识别出图中所含文字并输出字符串。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-universal-matting",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-universal-matting",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-universal-matting-v20221001",
-        "label": "BSHM通用抠图",
-        "describe": "",
-        "pic": "example.png",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-skin-retouching",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-skin-retouching",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-skin-retouching-v20221001",
-        "label": "ABPN人像美肤",
-        "describe": "人像美肤模型对输入含有人像的图像进行处理，无需任何额外输入，实现脸部皮肤区域匀肤（处理痘印、肤色不均等）、去瑕疵（脂肪粒、斑点、痣等）及全身皮肤区域美白。模型仅对皮肤区域进行处理，不影响其他区域。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-human-detection-damoyolo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-human-detection-damoyolo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-human-detection-damoyolo-v20221001",
-        "label": "实时人体检测-通用",
-        "describe": "本模型为高性能热门应用系列检测模型中的实时人体检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人体的坐标信息。更多具体信息请参考Model card。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-sd-illustration-compound-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-person-image-cartoon-sd-illustration-compound-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-person-image-cartoon-sd-illustration-compound-models-v20221001",
-        "label": "DCT-Net人像卡通化-扩散模型-漫画",
-        "describe": "",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo-t",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo-t",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-t-v20221001",
-        "label": "DAMOYOLO-高性能通用检测模型-T",
-        "describe": "DAMOYOLO是一款面向工业落地的高性能检测框架，精度和速度超越当前的一众典型YOLO框架（YOLOE、YOLOv6、YOLOv7）。基于TinyNAS技术，DAMOYOLO能够针对不同的硬件算力，进行低成本的模型定制化搜索。这里仅提供DAMOYOLO-T模型，更多模型请参考README。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo-phone",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo-phone",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-phone-v20221001",
-        "label": "实时手机检测-通用",
-        "describe": "本模型为高性能热门应用系列检测模型中的实时手机检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有手机的坐标信息，并可用于打电话检测等后续应用场景。更多具体信息请参考Model card。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-image-colorization",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-image-colorization",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-image-colorization-v20221001",
-        "label": "DeOldify图像上色",
-        "describe": "DeOldify是图像上色领域比较有名的开源算法，模型利用resnet作为encoder构建一个unet结构的网络，并提出了多个不同的训练版本，在效果、效率、鲁棒性等等方面有良好的综合表现。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-vgg19-facial-expression-recognition-fer",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-vgg19-facial-expression-recognition-fer",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-vgg19-facial-expression-recognition-fer-v20221001",
-        "label": "人脸表情识别模型FER",
-        "describe": "给定一张带人脸的图片，返回图片中人脸的表情。目前支持7种表情：愤怒，厌恶，恐惧，快乐，悲伤，惊讶，中立。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-detection",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-detection",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-detection-v20221001",
-        "label": "AIRDet-高性能检测模型-S",
-        "describe": "AIRDet高性能检测模型是基于Tiny-NAS技术设计出的卷积神经网络，具有精度高、速度快的特点，这里只提供S模型。借助Tiny-NAS技术能够实现针对硬件算力的最优模型搜索能力，更多模型请参考README获取。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-diffusion-text-to-image-synthesis-tiny",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-diffusion-text-to-image-synthesis-tiny",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-diffusion-text-to-image-synthesis-tiny-v20221001",
-        "label": "文本到图像生成扩散模型-中英文-通用领域-tiny",
-        "describe": "文本到图像生成扩散模型-中英文-通用领域-tiny",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-hrnetw48-human-wholebody-keypoint-image",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-hrnetw48-human-wholebody-keypoint-image",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-hrnetw48-human-wholebody-keypoint-image-v20221001",
-        "label": "全身关键点检测-通用领域-2D",
-        "describe": "输入一张人物图像，端到端检测全身133点关键点，输出人体框和对应的全身关键点，包含68个人脸关键点、42个手势关键点、17个骨骼关键点和6个脚步关键点。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-compound-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
         "name": "cv-unet-person-image-cartoon-compound-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-person-image-cartoon-compound-models-v20221001",
         "label": "DCT-Net人像卡通化",
         "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像风格转换模型。",
+        "hot": 436349,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-cartoon-stable-diffusion-design",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-cartoon-stable-diffusion-design",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-cartoon-stable-diffusion-design-v20221001",
-        "label": "卡通系列文生图模型-插画风",
-        "describe": "",
-        "pic": "example.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "name": "cv-resnet-carddetection-scrfd34gkps",
+        "label": "卡证检测矫正模型",
+        "describe": "输入一张图片，检测其中是否出现卡证，如有则返回卡证的矩形框和角点，以及矫正后的卡证图像。",
+        "hot": 236712,
+        "pic": "example.jpg",
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-cartoon-stable-diffusion-illustration",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-cartoon-stable-diffusion-illustration",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-cartoon-stable-diffusion-illustration-v20221001",
-        "label": "卡通系列文生图模型-漫画风",
-        "describe": "",
-        "pic": "example.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "name": "cv-resnet18-human-detection",
+        "label": "人体检测-通用-Base",
+        "describe": "给定一张输入图像，输出图像中人体的坐标。",
+        "hot": 217521,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-head-detection-damoyolo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-head-detection-damoyolo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-head-detection-damoyolo-v20221001",
-        "label": "实时人头检测-通用",
-        "describe": "本模型为高性能热门应用系列检测模型中的实时人头检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人头的坐标信息，并可用于行人计数等后续应用场景。更多具体信息请参考Model card。",
-        "pic": "example.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
+        "name": "cv-resnet50-face-detection-retinaface",
+        "label": "RetinaFace人脸检测关键点模型",
+        "describe": "给定一张图片，返回图片中人脸区域的位置和五点关键点。RetinaFace为当前学术界和工业界精度较高的人脸检测和人脸关键点定位二合一的方法，被CVPR 2020 录取。该方法的主要贡献是: 引入关键点分支，可以在训练阶段引入关键点预测分支进行多任务学习，提供额外的互补特征，inference去掉关键点分支即可，并不会引入额外的计算量。",
+        "hot": 121884,
+        "pic": "example.png",
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-resnet18-license-plate-detection-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-resnet18-license-plate-detection-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-resnet18-license-plate-detection-damo-v20221001",
-        "label": "读光-车牌检测-通用",
-        "describe": "",
-        "pic": "example.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-3d-compound-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-person-image-cartoon-3d-compound-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-person-image-cartoon-3d-compound-models-v20221001",
-        "label": "DCT-Net人像卡通化-3D",
-        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像3D风格转换模型。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo-traffic-sign",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo-traffic-sign",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-traffic-sign-v20221001",
-        "label": "实时交通标识检测-自动驾驶领域",
-        "describe": "本模型为高性能热门应用系列检测模型中的交通标识检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有交通标识的坐标信息。更多具体信息请参考Model card。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo-facemask",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-tinynas-object-detection-damoyolo-facemask",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-tinynas-object-detection-damoyolo-facemask-v20221001",
-        "label": "实时口罩检测-通用",
-        "describe": "本模型为高性能热门应用系列检测模型中的实时口罩检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人脸的坐标信息，以及是否佩戴口罩。更多具体信息请参考Model card。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-video-colorization",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-video-colorization",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-video-colorization-v20221001",
-        "label": "DeOldify视频上色",
-        "describe": "DeOldify 是上色领域比较有名的开源算法，模型利用 ResNet 作为 encoder 构建一个 UNet 结构的网络，并提出了多个不同的训练版本，本模型是用于视频上色的版本。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-handdrawn-compound-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
         "name": "cv-unet-person-image-cartoon-handdrawn-compound-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-person-image-cartoon-handdrawn-compound-models-v20221001",
         "label": "DCT-Net人像卡通化-手绘",
         "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像手绘风格转换模型。",
+        "hot": 91642,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-cartoon-stable-diffusion-clipart",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-cartoon-stable-diffusion-clipart",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-cartoon-stable-diffusion-clipart-v20221001",
-        "label": "卡通系列文生图模型-剪贴画",
+        "price": "1",
+        "name": "cv-resnet-face-recognition-facemask",
+        "label": "口罩人脸识别模型FaceMask",
         "describe": "",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnext-base-image-classification-garbage",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-convnext-base-image-classification-garbage",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-convnext-base-image-classification-garbage-v20221001",
-        "label": "ConvNeXt图像分类-中文-垃圾分类",
-        "describe": "自建265类常见的生活垃圾标签体系，15w张图片数据，包含可回收垃圾、厨余垃圾、有害垃圾、其他垃圾4个标准垃圾大类，覆盖常见的食品，厨房用品，家具，家电等生活垃圾，标签从海量中文互联网社区语料进行提取，整理出了频率较高的常见生活垃圾名称。模型结构采用ConvNeXt-Base结构, 经过大规模数据集ImageNet-22K预训练后，在数据集上进行微调。",
-        "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-pathshift-action-recognition",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-pathshift-action-recognition",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-pathshift-action-recognition-v20221001",
-        "label": "PST动作识别模型-tiny",
-        "describe": "Patch Shift Transformer（PST）是把2D Transformer 模型在不增加参数量的情况下转换成适应视频多帧输入的动作识别模型",
+        "hot": 73319,
         "pic": "example.png",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-sd-design-compound-models",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-person-image-cartoon-sd-design-compound-models",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-person-image-cartoon-sd-design-compound-models-v20221001",
-        "label": "DCT-Net人像卡通化-扩散模型-插画",
-        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，结合Stable-Diffusion模型进行小样本风格数据生成，从而训练得到高保真、强鲁棒、易拓展的人像风格转换模型。",
+        "price": "1",
+        "name": "cv-unet-person-image-cartoon-3d-compound-models",
+        "label": "DCT-Net人像卡通化-3D",
+        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像3D风格转换模型。",
+        "hot": 70318,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-aams-style-transfer-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-aams-style-transfer-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-aams-style-transfer-damo-v20221001",
-        "label": "AAMS图像风格迁移",
-        "describe": "给定内容图像和风格图像作为输入，风格迁移模型会自动地将内容图像的风格、纹理特征变换为风格图像的类型，同时保证图像的内容特征不变",
-        "pic": "background.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "name": "cv-tinynas-object-detection-damoyolo",
+        "label": "DAMOYOLO-高性能通用检测模型-S",
+        "describe": "DAMOYOLO是一款面向工业落地的高性能检测框架，精度和速度超越当前的一众典型YOLO框架（YOLOE、YOLOv6、YOLOv7）。基于TinyNAS技术，DAMOYOLO能够针对不同的硬件算力，进行低成本的模型定制化搜索。这里仅提供DAMOYOLO-S模型，更多模型请参考README。",
+        "hot": 63355,
+        "pic": "example.jpg",
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-image-matting",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
+        "price": "1",
+        "name": "cv-unet-person-image-cartoon-artstyle-compound-models",
+        "label": "DCT-Net人像卡通化-艺术",
+        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像艺术风格转换模型。",
+        "hot": 60447,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-person-image-cartoon-sketch-compound-models",
+        "label": "DCT-Net人像卡通化-素描",
+        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，利用小样本的风格数据，即可得到高保真、强鲁棒、易拓展的人像素描风格转换模型。",
+        "hot": 60445,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-image-caption-coco-large-en",
+        "label": "OFA图像描述-英文-通用领域-large",
+        "describe": "根据用户输入的任意图片，AI智能创作模型3秒内快速写出“一句话描述”，可用于图像标签和图像简介。",
+        "hot": 55949,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-large-vad-punc-asr-nat-zh-cn-16k-common-vocab8404-pytorch",
+        "label": "Paraformer语音识别-中文-通用-16k-离线-large-长音频版",
+        "describe": "Paraformer-large长音频模型集成VAD、ASR、标点与时间戳功能，可直接对时长为数小时音频进行识别，并输出带标点文字与时间戳",
+        "hot": 53171,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
         "name": "cv-unet-image-matting",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-image-matting-v20221001",
         "label": "BSHM人像抠图",
         "describe": "人像抠图对输入含有人像的图像进行处理，无需任何额外输入，实现端到端人像抠图，输出四通道人像抠图结果。",
+        "hot": 52602,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-unet-image-face-fusion-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-unet-image-face-fusion-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-unet-image-face-fusion-damo-v20221001",
-        "label": "图像人脸融合",
-        "describe": "给定一张模板图像和一张用户图像，图像人脸融合模型能够自动地将用户图中的人脸融合到模板人脸图像中，生成一张包含用户图人脸特征的新图像。",
-        "pic": "example.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
+        "name": "cv-unet-skin-retouching",
+        "label": "ABPN人像美肤",
+        "describe": "人像美肤模型对输入含有人像的图像进行处理，无需任何额外输入，实现脸部皮肤区域匀肤（处理痘印、肤色不均等）、去瑕疵（脂肪粒、斑点、痣等）及全身皮肤区域美白。模型仅对皮肤区域进行处理，不影响其他区域。",
+        "hot": 44330,
+        "pic": "example.jpg",
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnexttiny-ocr-recognition-licenseplate-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-convnexttiny-ocr-recognition-licenseplate-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-convnexttiny-ocr-recognition-licenseplate-damo-v20221001",
-        "label": "读光-文字识别-行识别模型-中英-车牌文本领域",
-        "describe": "给定一张车牌图片，识别出图中所含文字并输出字符串。",
-        "pic": "example.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
+        "name": "mgeo-geographic-entity-alignment-chinese-base",
+        "label": "MGeo地址相似度匹配实体对齐-中文-地址领域-base",
+        "describe": "模型判断两条地址是否指代同一道路、村庄、POI等。将两条地址的关系分为完全对齐、部分对齐、不对齐。该任务是构建地理信息知识库的核心技术。",
+        "hot": 40346,
+        "pic": "example.jpg",
+        "field": "自然语言"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnexttiny-ocr-recognition-general-damo",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
+        "price": "1",
+        "name": "cv-f3net-product-segmentation",
+        "label": "图像分割-商品展示图场景的商品分割-电商领域",
+        "describe": "通用商品分割模型，适用于商品展示图场景",
+        "hot": 38288,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
         "name": "cv-convnexttiny-ocr-recognition-general-damo",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-convnexttiny-ocr-recognition-general-damo-v20221001",
         "label": "读光-文字识别-行识别模型-中英-通用领域",
         "describe": "给定一张图片，识别出图中所含文字并输出字符串。",
+        "hot": 37298,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-mobilenet-face-2d-keypoints-alignment",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-mobilenet-face-2d-keypoints-alignment",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-mobilenet-face-2d-keypoints-alignment-v20221001",
-        "label": "106点人脸关键点-通用领域-2D",
-        "describe": "人脸2d关键点对齐模型",
-        "pic": "result.jpg",
-        "hot": "1",
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {},
-        "inference": {},
-        "images": ""
-    },
-    {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-gan-face-image-generation",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
-        "name": "cv-gan-face-image-generation",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-gan-face-image-generation-v20221001",
-        "label": "StyleGAN2人脸生成",
-        "describe": "StyleGAN是图像生成领域的代表性工作，StyleGAN2在StyleGAN的基础上，采用Weight Demodulation取代AdaIN等改进极大的减少了water droplet artifacts等，生成结果有了质的提升，甚至能达到以假乱真的程度。",
+        "name": "cv-resnet18-ocr-detection-line-level-damo",
+        "label": "读光-文字检测-行检测模型-中英-通用领域",
+        "describe": "本模型是以自底向上的方式，先检测文本块，然后对文本块聚类成行，最终输出文字行的外接框的坐标值。给定一张图片，检测出图中所含文字的外接框的端点的坐标值。",
+        "hot": 36901,
         "pic": "example.jpg",
-        "hot": "1",
-        "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "field": "机器视觉"
     },
     {
-        "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-ddcolor-image-colorization",
-        "field": "机器视觉",
-        "scenes": "",
-        "type": "dateset,notebook,train,inference",
+        "price": "1",
+        "name": "speech-paraformer-asr-nat-zh-cn-16k-common-vocab8358-tensorflow1",
+        "label": "Paraformer语音识别-中文-通用-16k-离线",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 32743,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-swinl-panoptic-segmentation-cocopan",
+        "label": "Mask2Former-SwinL全景分割",
+        "describe": "基于Mask2Former架构，SwinL为backbone的全景分割模型。训练数据库为COCO-Panoptic",
+        "hot": 26904,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "promptclue",
+        "label": "全中文任务支持零样本学习模型",
+        "describe": "支持近20中文任务，并具有零样本学习能力。 针对理解类任务，如分类、情感分析、抽取等，可以自定义标签体系；针对生成任务，可以进行采样自由生成。使用1000亿中文token（字词级别）进行大规模预训练，累计学习1.5万亿中文token，并且在100+任务上进行多任务学习获得。",
+        "hot": 25435,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-frcrn-ans-cirm-16k",
+        "label": "FRCRN语音降噪-单麦-16k",
+        "describe": "支持音频通话场景和各种噪声环境下语音音频录音的单通道语音智能降噪模型算法。模型输入和输出均为16kHz采样率单通道语音时域波形信号，输入信号可有单通道麦克风直接进行录制，输出为噪声抑制后的语音音频信号[1]。",
+        "hot": 25103,
+        "pic": "example.png",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-gpen-image-portrait-enhancement",
+        "label": "GPEN人像修复增强",
+        "describe": "GPEN将预训练好的StyleGAN2网络作为decoder嵌入到人像修复模型中，并通过finetune的方式最终实现修复功能，在多项指标上达到行业领先的效果。",
+        "hot": 24391,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-image-caption-muge-base-zh",
+        "label": "OFA图像描述-中文-电商领域-base",
+        "describe": "根据用户输入的任意商品图片，AI智能创作模型3秒内快速写出“商品描述”。",
+        "hot": 24077,
+        "pic": "example.png",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "mplug-image-captioning-coco-base-en",
+        "label": "mPLUG图像描述模型-英文-base",
+        "describe": "达摩MPLUG英文图像描述base模型",
+        "hot": 23202,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-zhiyan-emo-zh-cn-16k",
+        "label": "语音合成-中文-多情感领域-16k-发音人Zhiyan",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 22395,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "mgeo-geographic-elements-tagging-chinese-base",
+        "label": "MGeo门址地址结构化要素解析-中文-地址领域-base",
+        "describe": "模型用于识别门址地址中的常见要素，例如：行政区划信息、路网信息、POI (兴趣点)、楼栋号、户室号等。",
+        "hot": 20385,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-convai-text2sql-pretrain-cn",
+        "label": "SPACE-T表格问答预训练模型-中文-通用领域-base",
+        "describe": "SPACE-T表格问答预训练模型-中文-通用领域-base大规模预训练模型，基于transformers架构，在千万级中文表格，亿级中文表格训练数据上进行预训练，在中文跨领域、多轮、Text-to-SQL语义解析等任务上能取得很好的效果。",
+        "hot": 19380,
+        "pic": "example.jpeg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "multi-modal-clip-vit-large-patch14-336-zh",
+        "label": "CLIP模型-中文-通用领域-large-336分辨率",
+        "describe": "本项目为CLIP模型的中文版本，使用大规模中文数据进行训练（~2亿图文对），旨在帮助用户实现中文领域的跨模态检索、图像表示等。视觉encoder采用vit结构，文本encoder采用roberta结构。 模型在多个中文图文检索数据集上进行了效果测试。",
+        "hot": 19183,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "mplug-visual-question-answering-coco-large-en",
+        "label": "mPLUG视觉问答模型-英文-large",
+        "describe": "本任务是mPLUG，在英文VQA数据集进行finetune的视觉问答下游任务。给定一个问题和图片，通过图片信息来给出答案。",
+        "hot": 19029,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet50-video-category",
+        "label": "短视频内容分类模型-中文-通用领域",
+        "describe": "本模型采用ResNet-50网络结构提取视觉特征，并利用NextVLAD网络对连续视频帧进行特征聚合。本模型是对短视频进行内容分类，输入视频片段，输出视频内容分类，目前已经覆盖了23个一级类目/160个二级类目。",
+        "hot": 18915,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet-facedetection-scrfd10gkps",
+        "label": "SCRFD人脸检测关键点模型",
+        "describe": "输入图片，检测其中的人脸区域及5点关键点，支持检测极大/极小脸和任意角度人脸。",
+        "hot": 18748,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "chatyuan-large",
+        "label": "元语功能型对话大模型",
+        "describe": "元语功能型对话大模型这个模型可以用于问答、结合上下文做对话、做各种生成任务，包括创意性写作，也能回答一些像法律、新冠等领域问题。它基于PromptCLUE-large结合数亿条功能对话多轮对话数据进一步训练得到。",
+        "hot": 17718,
+        "pic": "example.jpeg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-nafnet-image-denoise-sidd",
+        "label": "NAFNet图像去噪",
+        "describe": "NAFNet（Nonlinear Activation Free Network）提出了一个简单的基线，计算效率高。其不需要使用非线性激活函数（Sigmoid、ReLU、GELU、Softmax等），可以达到SOTA性能。",
+        "hot": 17656,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vit-base-image-classification-dailylife-labels",
+        "label": "ViT图像分类-中文-日常物品",
+        "describe": "自建1300类常见物体标签体系，覆盖常见的日用品，动物，植物，家具，设备，食物等物体，标签从海量中文互联网社区语料进行提取，保留了出现频率较高的常见物体名称。模型结构采用最新的ViT-Base结构。",
+        "hot": 17634,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-visual-grounding-refcoco-large-zh",
+        "label": "OFA通过描述定位图像物体-中文-通用领域-large",
+        "describe": "中文视觉定位任务：给定一张图片，一段描述，通过描述找到图片对应的物体。",
+        "hot": 15586,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-zh-cn-16k",
+        "label": "语音合成-中文-多情感领域-16k-多发音人",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 15432,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "mplug-image-captioning-coco-large-en",
+        "label": "mPLUG图像描述模型-英文-large",
+        "describe": "达摩MPLUG英文图像描述large模型",
+        "hot": 15361,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-nanodet-face-human-hand-detection",
+        "label": "目标检测-人脸人体人手-通用领域",
+        "describe": "通用场景下的，人脸-人体-人手三合一目标检测",
+        "hot": 14603,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
         "name": "cv-ddcolor-image-colorization",
-        "status": "online",
-        "version": "v20221001",
-        "uuid": "cv-ddcolor-image-colorization-v20221001",
         "label": "DDColor图像上色",
         "describe": "DDColor 是最新的图像上色算法，输入一张黑白图像，返回上色处理后的彩色图像，并能够实现自然生动的上色效果。",
+        "hot": 14464,
         "pic": "example.jpg",
-        "hot": "1",
+        "field": "机器视觉"
+    },
+    {
         "price": "1",
-        "dataset": {},
-        "notebook": {
-            "jupyter": [],
-            "appendix": []
-        },
-        "train": {
-            "resource_gpu": "1"
-        },
-        "inference": {
-            "resource_gpu": "1"
-        },
-        "images": ""
+        "name": "cv-hrnetv2w32-body-2d-keypoints-image",
+        "label": "HRNet人体关键点-2D",
+        "describe": "输入一张人物图像，实现端到端的人体关键点检测，输出图像中所有人体的15点人体关键点、点位置信度和人体检测框。",
+        "hot": 13870,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnest101-general-recognition",
+        "label": "万物识别-中文-通用领域",
+        "describe": "本模型是对包含主体物体的图像进行标签识别，无需任何额外输入，输出主体物体的类别标签，目前已经覆盖了5W多类的物体类别，几乎囊括了日常所有物体。",
+        "hot": 13859,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-convnexttiny-ocr-recognition-document-damo",
+        "label": "读光-文字识别-行识别模型-中英-文档印刷体文本领域",
+        "describe": "给定一张文档印刷体图片，识别出图中所含文字并输出字符串。",
+        "hot": 13100,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "spring-couplet-generation",
+        "label": "春联生成模型-中文-base",
+        "describe": "春联生成模型是达摩院AliceMind团队利用基础生成大模型在春联场景的应用，该模型可以通过输入两字随机祝福词，生成和祝福词相关的春联。",
+        "hot": 12802,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "promptclue-base-v1-5",
+        "label": "全中文任务支持零样本学习模型v1.5",
+        "describe": "支持近20中文任务，并具有零样本学习能力。 针对理解类任务，如分类、情感分析、抽取等，可以自定义标签体系；针对生成任务，可以进行采样自由生成。使用1000亿中文token（字词级别）进行大规模预训练，累计学习1.5万亿中文token，并且在100+任务上进行多任务学习获得。",
+        "hot": 12727,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-zhitian-emo-zh-cn-16k",
+        "label": "语音合成-中文-多情感领域-16k-发音人Zhitian",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 12545,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bart-text-error-correction-chinese",
+        "label": "BART文本纠错-中文-通用领域-large",
+        "describe": "我们采用seq2seq方法建模文本纠错任务。模型训练上，我们使用中文BART作为预训练模型，然后在Lang8和HSK训练数据上进行finetune。不引入额外资源的情况下，本模型在NLPCC18测试集上达到了SOTA。",
+        "hot": 12507,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-csrnet-image-color-enhance-models",
+        "label": "CSRNet图像调色",
+        "describe": "基于CSRNet实现的图像色彩增强算法，输入待增强图像，输出色彩增强后的图像。CSRNet通过计算全局调整参数并将之作用于条件网络得到的特征，保证效果的基础之上实现轻便高效的训练和推理。",
+        "hot": 11995,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-googlenet-pgl-video-summarization",
+        "label": "PGL_SUM视频摘要-Web视频领域",
+        "describe": "视频摘要，输入一段长视频，算法对视频进行镜头切割得到视频片段，评估视频帧的重要性，输出重要视频帧的帧号，根据帧号可以合成一段短视频（摘要视频）。",
+        "hot": 11751,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-visual-question-answering-pretrain-large-en",
+        "label": "OFA视觉问答-英文-通用领域-large",
+        "describe": "视觉问答任务：给定一张图片和一个关于图片的问题，要求模型正确作答。",
+        "hot": 11503,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "ofa-visual-grounding-refcoco-large-en",
+        "label": "OFA通过描述定位图像物体-英文-通用领域-large",
+        "describe": "视觉定位任务：给定一张图片，一段描述，通过描述找到图片对应的物体。",
+        "hot": 11295,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-aams-style-transfer-damo",
+        "label": "AAMS图像风格迁移",
+        "describe": "给定内容图像和风格图像作为输入，风格迁移模型会自动地将内容图像的风格、纹理特征变换为风格图像的类型，同时保证图像的内容特征不变",
+        "hot": 11150,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-r50-panoptic-segmentation-cocopan",
+        "label": "Mask2Former-R50全景分割",
+        "describe": "基于Mask2Former架构，resnet50为backbone的全景分割模型。训练数据库为COCO-Panoptic。支持finetune。",
+        "hot": 11013,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-gan-face-image-generation",
+        "label": "StyleGAN2人脸生成",
+        "describe": "StyleGAN是图像生成领域的代表性工作，StyleGAN2在StyleGAN的基础上，采用Weight Demodulation取代AdaIN等改进极大的减少了water droplet artifacts等，生成结果有了质的提升，甚至能达到以假乱真的程度。",
+        "hot": 10540,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-convnexttiny-ocr-recognition-handwritten-damo",
+        "label": "读光-文字识别-行识别模型-中英-手写文本领域",
+        "describe": "给定一张手写体图片，识别出图中所含文字并输出字符串。",
+        "hot": 10331,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-object-detection-damoyolo-m",
+        "label": "DAMOYOLO-高性能通用检测模型-M",
+        "describe": "DAMOYOLO是一款面向工业落地的高性能检测框架，精度和速度超越当前的一众典型YOLO框架（YOLOE、YOLOv6、YOLOv7）。基于TinyNAS技术，DAMOYOLO能够针对不同的硬件算力，进行低成本的模型定制化搜索。这里仅提供DAMOYOLO-M模型，更多模型请参考README。",
+        "hot": 10068,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-swin-b-image-instance-segmentation-coco",
+        "label": "CascadeMaskRCNN-SwinB图像实例分割",
+        "describe": "基于Cascade mask rcnn架构，backbone为swin transformer模型。",
+        "hot": 9835,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-charctc-kws-phone-xiaoyun",
+        "label": "CTC语音唤醒-移动端-单麦-16k-小云小云",
+        "describe": "移动端语音唤醒模型，检测关键词为“小云小云”。模型主体为4层FSMN结构，使用CTC训练准则，参数量750K，适用于移动端设备运行。",
+        "hot": 9785,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-ocr-recognition-scene-base-zh",
+        "label": "OFA文字识别-中文-日常场景-base",
+        "describe": "基于OFA模型的finetune后的OCR文字识别任务，可有效识别日常场景的文字内容，比如广告牌、店铺名等等",
+        "hot": 9400,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-rrdb-image-super-resolution",
+        "label": "RealESRGAN图像超分辨率-x4",
+        "describe": "RealESRGAN提出了通过多次降质的方式来模拟真实复杂降质，相比较于之前的简单下采样，能够更好处理真实的低分辨率场景。",
+        "hot": 9287,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-convnexttiny-ocr-recognition-licenseplate-damo",
+        "label": "读光-文字识别-行识别模型-中英-车牌文本领域",
+        "describe": "给定一张车牌图片，识别出图中所含文字并输出字符串。",
+        "hot": 9204,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-large-asr-nat-zh-cn-16k-common-vocab8358-tensorflow1",
+        "label": "Paraformer语音识别-中文-通用-16k-离线-large",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 9080,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-fsmn-vad-zh-cn-16k-common-pytorch",
+        "label": "FSMN语音端点检测-中文-通用-16k",
+        "describe": "FSMN-Monophone VAD模型，可用于检测长语音片段中有效语音的起止时间点。",
+        "hot": 9041,
+        "pic": "example.png",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-convnexttiny-ocr-recognition-scene-damo",
+        "label": "读光-文字识别-行识别模型-中英-自然场景文本领域",
+        "describe": "给定一张自然场景图片，识别出图中所含文字并输出字符串。",
+        "hot": 8934,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-zhibei-emo-zh-cn-16k",
+        "label": "语音合成-中文-多情感领域-16k-发音人Zhibei",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 8918,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-chinese-base",
+        "label": "CoROM文本向量-中文-通用领域-base",
+        "describe": "基于CoROM-base预训练语言模型的通用领域中文文本表示模型，基于输入的句子产出对应的文本向量，文本向量可以使用在下游的文本检索、句子相似度计算、文本聚类等任务中。",
+        "hot": 8901,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-chinese-base-ecom",
+        "label": "CoROM文本向量-中文-电商领域-base",
+        "describe": "基于CoROM-base预训练语言模型的电商领域中文文本表示模型，基于输入的句子产出对应的文本向量，文本向量可以使用在下游的文本检索、句子相似度计算、文本聚类等任务中。",
+        "hot": 8861,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-zh-cn-multisp-pretrain-16k",
+        "label": "SambertHifigan语音合成-中文-多人预训练-16k",
+        "describe": "中文语音合成16k采样率多人预训练模型",
+        "hot": 8852,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-image-caption-coco-huge-en",
+        "label": "OFA图像描述-英文-通用领域-huge",
+        "describe": "根据用户输入的任意图片，AI智能创作模型3秒内快速写出“一句话描述”，可用于图像标签和图像简介。",
+        "hot": 8804,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-passage-ranking-chinese-base-ecom",
+        "label": "CoROM语义相关性-中文-电商领域-base",
+        "describe": "基于ROM-Base预训练模型的电商领域中文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 8688,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-classification",
+        "label": "TinyNAS高性能图像分类网络结构模型",
+        "describe": "ZenNet 是基于 Tiny-NAS (Zen-NAS) 算法设计出的高效的卷积网络结构。 本 demo 只提供 zennet_imagenet1k_latency12ms_res22 backbone，其它网络结构可以从README 中获取。",
+        "hot": 8029,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitb16-segmentation-shop-seg",
+        "label": "商品显著性图像分割-电商领域",
+        "describe": "商品显著性分割模型，对商品图像提取显著性区域mask",
+        "hot": 7781,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-ocr-recognition-general-base-zh",
+        "label": "OFA文字识别-中文-通用场景-base",
+        "describe": "基于OFA模型的finetune后的OCR文字识别任务，基于通用数据集训练，比特定数据集finetune效果相差不大。",
+        "hot": 7659,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-image-colorization",
+        "label": "DeOldify图像上色",
+        "describe": "DeOldify是图像上色领域比较有名的开源算法，模型利用resnet作为encoder构建一个unet结构的网络，并提出了多个不同的训练版本，在效果、效率、鲁棒性等等方面有良好的综合表现。",
+        "hot": 7548,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "punc-ct-transformer-zh-cn-common-vocab272727-pytorch",
+        "label": "CT-Transformer标点-中文-通用-pytorch",
+        "describe": "中文标点通用模型：可用于语音识别模型输出文本的标点预测。",
+        "hot": 7462,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-passvitb-image-reid-person-market",
+        "label": "行人图像特征表示提取-Market1501",
+        "describe": "基于图片的行人图像特征表示（image embedding）提取模型。输入图像，可提取并输出图像的特征表示，后续能够利用该特征表示进行后续的相似度计算和图像排序。",
+        "hot": 7313,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-hrnet-crowd-counting-dcanet",
+        "label": "DCANet人群密度估计-多域",
+        "describe": "采用单一模型就可以同时针对多个不同域的数据进行精确预测，是multidomain crowd counting中经典的方法",
+        "hot": 7243,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-passage-ranking-english-base",
+        "label": "CoROM语义相关性-英文-通用领域-base",
+        "describe": "基于CoROM-Base预训练模型的通用领域英文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 7176,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-flow-based-body-reshaping-damo",
+        "label": "FBBR人体美型",
+        "describe": "给定一张单个人物图像（半身或全身），无需任何额外输入，人体美型模型能够端到端地实现对人物身体区域（肩部，腰部，腿部等）的自动化美型处理。",
+        "hot": 7161,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitb-video-single-object-tracking-ostrack",
+        "label": "视频单目标跟踪-通用领域",
+        "describe": "该模型采用基于Transformer的方案，输入视频和对应第一帧的待跟踪目标物体矩形框，可端对端推理得到待跟踪目标物体在每一帧图片的跟踪矩形框。",
+        "hot": 7153,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "u2pp-conformer-asr-cn-16k-online",
+        "label": "WeNet-U2pp_Conformer-语音识别-中文-16k-实时",
+        "describe": "WeNet 是一款面向工业落地应用的语音识别工具包，提供了从语音识别模型的训练到部署的一条龙服务。我们使用 conformer 网络结构和 CTC/attention loss 联合优化方法，统一的流式/非流式语音识别方案，具有业界一流的识别效果；提供云上和端上直接部署的方案，最小化模型训练和产品落地之间的工程工作；框架简洁，模型训练部分完全基于 pytorch 生态，不依赖于 kaldi 等复杂的工具。 详细的注释和文档，非常适合用于学习端到端语音识别的基础知识和实现细节。 支持时间戳，对齐，端点检测，语言模型等相关功能。",
+        "hot": 7070,
+        "pic": "example.png",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cspnet-image-object-detection-yolox",
+        "label": "实时目标检测-通用领域",
+        "describe": "基于yolox小模型的通用检测模型",
+        "hot": 6898,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-u2net-salient-detection",
+        "label": "U2Net图像显著性检测",
+        "describe": "给定一张输入图像，输出视觉显著注意力程度图（归一化至0~255）。",
+        "hot": 6846,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitb16-classification-vision-efficient-tuning-adapter",
+        "label": "基础视觉模型高效调优-Adapter",
+        "describe": "",
+        "hot": 6800,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnetc3d-action-detection-detection2d",
+        "label": "日常动作检测",
+        "describe": "输入视频文件，输出该段时间内视频所包含的动作，当前支持9中常见动作识别",
+        "hot": 6799,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-zhizhe-emo-zh-cn-16k",
+        "label": "语音合成-中文-多情感领域-16k-发音人Zhizhe",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 6687,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-document-segmentation-chinese-base",
+        "label": "BERT文本分割-中文-通用领域",
+        "describe": "该模型基于wiki-zh公开语料训练，对未分割的长文本进行段落分割。提升未分割文本的可读性以及下游NLP任务的性能。",
+        "hot": 6644,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline",
+        "label": "UniASR语音识别-中文-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 6603,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-english-base",
+        "label": "CoROM文本向量-英文-通用领域-base",
+        "describe": "基于CoROM-Base预训练语言模型的通用领域英文文本表示模型，基于输入的句子产出对应的连续文本向量，改文本向量可以使用在下游的文本检索、句子相似度计算、文本聚类等任务中。",
+        "hot": 6315,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-vit-b32-retrieval-vop",
+        "label": "VoP: 通用跨模态视频检索模型",
+        "describe": "VoP是基于CLIP的快速跨模态检索微调框架，可以适用于任何需要做视频文本跨模态检索的“视频-文本对”数据当中。",
+        "hot": 6249,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-dfsmn-aec-psm-16k",
+        "label": "DFSMN回声消除-单麦单参考-16k",
+        "describe": "支持音频通话场景的单通道回声消除模型算法。模型接受单通道麦克风信号和单通道参考信号作为输入，输出回声消除和残余抑制后的音频信号[1]。模型采用Deep FSMN结构，提取原始观测信号以及线性滤波后信号的Fbank特征作为输入，预测输出目标语音的Phase senstive mask。",
+        "hot": 6240,
+        "pic": "example.png",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vit-base-image-classification-imagenet-labels",
+        "label": "ViT图像分类-通用",
+        "describe": "本模型适用范围较广，支持ImageNet 1000类物体识别，也可作为下游任务的预训练backbone。",
+        "hot": 6148,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-mobilenet-face-2d-keypoints-alignment",
+        "label": "106点人脸关键点-通用领域-2D",
+        "describe": "人脸2d关键点对齐模型",
+        "hot": 6123,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet101-face-detection-cvpr22papermogface",
+        "label": "MogFace人脸检测模型-large",
+        "describe": "Wider Face榜单冠军模型。给定一张图片，检测图片中的人脸区域，支持小脸检测。",
+        "hot": 6073,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "erlangshen-roberta-330m-sentiment",
+        "label": "二郎神-RoBERTa-330M-情感分类",
+        "describe": "二郎神-RoBERTa-330M-情感分类",
+        "hot": 6050,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "ofa-image-caption-coco-distilled-en",
+        "label": "OFA图像描述-英文-通用领域-蒸馏33M",
+        "describe": "根据用户输入的任意图片，AI智能创作模型3秒内快速写出“一句话描述”，可用于图像标签和图像简介。",
+        "hot": 5866,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "ofa-ocr-recognition-handwriting-base-zh",
+        "label": "OFA文字识别-中文-手写体-base",
+        "describe": "基于OFA模型的finetune后的OCR文字识别任务，可有效识别手写体文字。",
+        "hot": 5851,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-chinese-base-medical",
+        "label": "CoROM文本向量-中文-医疗领域-base",
+        "describe": "基于ROM-Base预训练模型的医疗领域中文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 5769,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "multi-modal-clip-vit-base-patch16-zh",
+        "label": "CLIP模型-中文-通用领域-base",
+        "describe": "本项目为CLIP模型的中文版本，使用大规模中文数据进行训练（~2亿图文对），旨在帮助用户实现中文领域的跨模态检索、图像表示等。视觉encoder采用vit结构，文本encoder采用roberta结构。 模型在多个中文图文检索数据集上进行了效果测试。",
+        "hot": 5736,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-cn-en-moe-16k-vocab8358-tensorflow1-offline",
+        "label": "UniASR语音识别-中文英文混-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 5493,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-nextvit-small-image-classification-dailylife-labels",
+        "label": "NextViT实时图像分类-中文-日常物品",
+        "describe": "采用基于Transformer的第一个实现工业TensorRT实时落地的Next-ViT模型结构，对自建1300类常见物体标签体系进行分类。",
+        "hot": 5284,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-pathshift-action-recognition",
+        "label": "PST动作识别模型-tiny",
+        "describe": "Patch Shift Transformer（PST）是把2D Transformer 模型在不增加参数量的情况下转换成适应视频多帧输入的动作识别模型",
+        "hot": 5260,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnest101-animal-recognition",
+        "label": "动物识别-中文-通用领域",
+        "describe": "本模型是对含有动物的图像进行标签识别，无需任何额外输入，输出动物的类别标签，目前已经覆盖了8K多类的细粒度的动物类别。",
+        "hot": 5250,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-dfsmn-kws-char-farfield-16k-nihaomiya",
+        "label": "FSMN远场唤醒-双麦-16k-你好米雅",
+        "describe": "远场唤醒模型，输入为双麦克风阵列的双通道音频加一路音箱播放的参考音频，适用于智能音箱、故事机等智能设备场景。此demo使用开源数据训练，唤醒词为“你好米雅”，用户可使用我们提供的训练套件基于自有数据训练新唤醒词。",
+        "hot": 5179,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-zh-cn-16k-common-vocab8358-tensorflow1-online",
+        "label": "UniASR语音识别-中文-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 5115,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-large-asr-2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline",
+        "label": "UniASR语音识别-中文-通用-16k-离线-large",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 5106,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-visual-question-answering-pretrain-huge-en",
+        "label": "OFA视觉问答模型-英文-通用领域-huge",
+        "describe": "视觉问答任务：给定一张图片和一个关于图片的问题，要求模型正确作答。",
+        "hot": 5055,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-swinl-semantic-segmentation-cocopanmerge",
+        "label": "Mask2Former-SwinL语义分割",
+        "describe": "基于Mask2Former架构，SwinL为backbone的语义分割模型",
+        "hot": 5045,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-cn-dialect-16k-vocab8358-tensorflow1-offline",
+        "label": "UniASR语音识别-中文方言-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 5026,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-asr-nat-aishell1-pytorch",
+        "label": "Paraformer语音识别-中文-aishell1-16k-离线",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 4932,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-detection-mtcnn",
+        "label": "Mtcnn人脸检测关键点模型",
+        "describe": "给定一张图片，返回图片中人脸区域的位置和五点关键点。MTCNN是工业界广泛应用的检测关键点二合一模型。",
+        "hot": 4923,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cspnet-video-object-detection-streamyolo",
+        "label": "StreamYOLO实时视频目标检测-自动驾驶领域",
+        "describe": "实时视频目标检测模型",
+        "hot": 4900,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-newcrfs-image-depth-estimation-indoor",
+        "label": "基于神经窗口全连接CRFs的单目深度估计",
+        "describe": "单目深度估计是从单张RGB图预测场景深度，是一个很具有挑战性的任务。现在做这个任务的方法大都是设计越来越复杂的网络来简单粗暴地回归深度图，但我们采取了一个更具可解释性的路子，就是使用优化方法中的条件随机场（CRFs）。由于CRFs的计算量很大，通常只会用于计算相邻节点的能量，而很难用于计算整个图模型中所有节点之间的能量。为了借助这种全连接CRFs的强大表征力，我们采取了一种折中的方法，即将整个图模型划分为一个个小窗口，在每个窗口里面进行全连接CRFs的计算，这样就可以大大减少计算量，使全连接CRFs在深度估计这一任务上成为了可能。同时，为了更好地在节点之间进行信息传递，我们利用多头注意力机制计算了多头能量函数，然后用网络将这个能量函数优化到一个精确的深度图。基于此，我们用视觉transformer作为encoder，神经窗口全连接条件随机场作为decoder，构建了一个bottom-up-top-down的网络架构，这个网络在KITTI、NYUv2上都取得了SOTA的性能，同时可以应用于全景图深度估计任务，在MatterPort3D上也取得了SOTA的性能。",
+        "hot": 4875,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-ocr-recognition-document-base-zh",
+        "label": "OFA文字识别-中文-印刷体-base",
+        "describe": "基于OFA模型的finetune后的OCR文字识别任务，可有效识别印刷体文字。",
+        "hot": 4834,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-vit-object-detection-coco",
+        "label": "VitDet图像目标检测",
+        "describe": "输入一张图片，输出图像中较通用目标（COCO-80类范围）的位置及类别。",
+        "hot": 4759,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-zh-cn-multisp-pretrain-24k",
+        "label": "SambertHifigan语音合成-中文-多人预训练-24k",
+        "describe": "语音合成中文24k采样率多人预训练模型",
+        "hot": 4688,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-detection-ulfd",
+        "label": "ULFD人脸检测模型-tiny",
+        "describe": "1M轻量级人脸检测模型。给定一张图片，返回图片中人脸位置的坐标。ULFD为轻量级人脸检测算法, 基于SSD框架手工设计了backbone结构，是业界开源的第一个1M人脸检测模型。当输入320x240分辨率的图片且未使用onnxruntime加速时，在CPU上跑需要50-60ms，当使用onnxruntime加速后，在CPU上仅需要8-11ms。",
+        "hot": 4648,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-canonical-body-3d-keypoints-video",
+        "label": "人体关键点检测-通用领域-3D",
+        "describe": "输入一段单人视频，实现端到端的3D人体关键点检测，输出视频中每一帧的3D人体关键点坐标。",
+        "hot": 4603,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-mmspeech-asr-aishell1-large-zh",
+        "label": "OFA-MMSpeech语音识别-中文-aishell1-large",
+        "describe": "对比SOTA，MMSpeech字错误率降低了48.3%/42.4%，效果达到1.6%/1.9%，远超SOTA 3.1%/3.3%（benchmark为AIShell1 dev/test）。",
+        "hot": 4597,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitb16-classification-vision-efficient-tuning-prompt",
+        "label": "基础视觉模型高效调优-Prompt",
+        "describe": "",
+        "hot": 4480,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-ja-16k-common-vocab93-tensorflow1-online",
+        "label": "UniASR语音识别-日语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 4359,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-ja-16k-common-vocab93-tensorflow1-offline",
+        "label": "UniASR语音识别-日语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 4265,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "mplug-visual-question-answering-coco-base-zh",
+        "label": "mPLUG视觉问答模型-中文-base",
+        "describe": "本任务是mPLUG在中文VQA进行finetune的视觉问答下游任务，给定一个问题和图片，通过图片信息来给出答案。",
+        "hot": 4068,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-andy-en-us-16k",
+        "label": "语音合成-美式英文-通用领域-16k-发音人Andy",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 4039,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-en-16k-common-vocab1080-tensorflow1-offline",
+        "label": "UniASR语音识别-英语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 3965,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cspnet-image-object-detection-yolox-nano-coco",
+        "label": "实时目标检测-通用领域-移动端",
+        "describe": "通用实时检测超轻量级模型",
+        "hot": 3929,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-passage-ranking-chinese-base-medical",
+        "label": "CoROM语义相关性-中文-医疗领域-base",
+        "describe": "基于CoROM-Base预训练模型的医疗领域中文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 3899,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-detection",
+        "label": "AIRDet-高性能检测模型-S",
+        "describe": "AIRDet高性能检测模型是基于Tiny-NAS技术设计出的卷积神经网络，具有精度高、速度快的特点，这里只提供S模型。借助Tiny-NAS技术能够实现针对硬件算力的最优模型搜索能力，更多模型请参考README获取。",
+        "hot": 3849,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-segformer-b0-image-semantic-segmentation-coco-stuff164k",
+        "label": "Segformer-B0实时语义分割",
+        "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的实时语义分割框架。使用了一个GPU上实时运行的配置结构。在CoCo-Stuff-164的数据集上进行了172类的分类",
+        "hot": 3792,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-image-classification-imagenet-large-en",
+        "label": "OFA图像分类-数据集imagenet1k-large",
+        "describe": "ImageNet-1K图片分类任务：给定一张图片，要求模型从1K个候选类别中正确给出图片分类标签。",
+        "hot": 3731,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-cn-en-moe-16k-vocab8358-tensorflow1-online",
+        "label": "UniASR语音识别-中文英文混-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 3725,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-sentiment-analysis-english-base",
+        "label": "BERT情感分析-英文-base-TweetEval数据集",
+        "describe": "该模型基于bert-base-uncased，在TweetEval数据集上fine-tune得到",
+        "hot": 3700,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitl16-segmentation-text-driven-seg",
+        "label": "文本指导的图像分割-英文-通用领域",
+        "describe": "vitl backbone，输入英文文本描述和图像，根据英文描述对图像进行语义分割",
+        "hot": 3690,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-yolox-image-object-detection-auto",
+        "label": "实时目标检测-自动驾驶领域",
+        "describe": "检测自动驾驶场景图片的目标，支持车辆检测。",
+        "hot": 3600,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-cn-dialect-16k-vocab8358-tensorflow1-online",
+        "label": "UniASR语音识别-中文方言-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 3596,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-luna-en-gb-16k",
+        "label": "语音合成-英式英文-通用领域-16k-发音人Luna",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 3541,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet50-bert-video-scene-segmentation-movienet",
+        "label": "BaSSL视频场景分割-长视频领域",
+        "describe": "针对长视频进行场景分割，也可按照镜头进行分割，有助于进行视频拆条和视频理解等。该模型支持分割结果的本地保存，同时可以支持微调操作。",
+        "hot": 3532,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "erlangshen-roberta-110m-sentiment",
+        "label": "二郎神-RoBERTa-110M-情感分类",
+        "describe": "",
+        "hot": 3499,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-id-16k-common-vocab1067-tensorflow1-offline",
+        "label": "UniASR语音识别-印尼语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 3407,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-stable-diffusion-v2-image-inpainting-base",
+        "label": "StableDiffusionV2图像填充",
+        "describe": "借助Stable Diffusion强大的生成能力，StableDiffusionv2图像填充模型能够补全缺失的图像区域，生成效果自然而真实；不仅如此，除了自适应填充背景内容外，用户还可以通过指定引导文字在缺失区域生成指定内容，畅享AI生成的乐趣。",
+        "hot": 3401,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-yolopv2-image-driving-perception-bdd100k",
+        "label": "YOLOPV2车辆检测车道线分割-自动驾驶领域",
+        "describe": "YOLOPv2 适用于自动驾驶场景下的实时全景驾驶感知, 同时执行三种不同的任务，分别为车辆检测，可行驶区域分割以及车道线分割。",
+        "hot": 3390,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-object-detection-damoyolo-t",
+        "label": "DAMOYOLO-高性能通用检测模型-T",
+        "describe": "DAMOYOLO是一款面向工业落地的高性能检测框架，精度和速度超越当前的一众典型YOLO框架（YOLOE、YOLOv6、YOLOv7）。基于TinyNAS技术，DAMOYOLO能够针对不同的硬件算力，进行低成本的模型定制化搜索。这里仅提供DAMOYOLO-T模型，更多模型请参考README。",
+        "hot": 3365,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-hrnetw48-human-wholebody-keypoint-image",
+        "label": "全身关键点检测-通用领域-2D",
+        "describe": "输入一张人物图像，端到端检测全身133点关键点，输出人体框和对应的全身关键点，包含68个人脸关键点、42个手势关键点、17个骨骼关键点和6个脚步关键点。",
+        "hot": 3362,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-asr-nat-zh-cn-8k-common-vocab8358-tensorflow1",
+        "label": "Paraformer语音识别-中文-通用-8k-离线",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 3342,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-realbasicvsr-video-super-resolution-videolq",
+        "label": "RealBasicVSR视频超分辨率",
+        "describe": "长期传播会在轻度退化的情况下提高性能，但严重的退化可能会通过传播被放大，从而损害输出视频的质量。为了平衡细节合成和退化抑制之间的权衡，RealBasicVSR引入了图像预清理模块，在质量和效率上都优于现有方法。",
+        "hot": 3298,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-human-detection-damoyolo",
+        "label": "实时人体检测-通用",
+        "describe": "本模型为高性能热门应用系列检测模型中的实时人体检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人体的坐标信息。更多具体信息请参考Model card。",
+        "hot": 3285,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-zh-cn-8k-common-vocab3445-pytorch-online",
+        "label": "UniASR语音识别-中文-通用-8k-实时-pytorch",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 3274,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-id-16k-common-vocab1067-tensorflow1-online",
+        "label": "UniASR语音识别-印尼语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 3242,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-large-contextual-asr-nat-zh-cn-16k-common-vocab8404",
+        "label": "Paraformer语音识别-中文-通用-16k-离线-large-热词版",
+        "describe": "基于Paraformer-large的热词版本模型，可实现对热词的定制化，基于提供的热词列表对热词进行激励增强，提升模型对热词的召回",
+        "hot": 3188,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-ru-16k-common-vocab1664-tensorflow1-online",
+        "label": "UniASR语音识别-俄语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 3172,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet18-ocr-detection-word-level-damo",
+        "label": "读光-文字检测-单词检测模型-英文-通用领域",
+        "describe": "本模型是以自底向上的方式，先检测文本块和文字行之间的吸引排斥关系，然后对文本块聚类成行，最终输出单词的外接框的坐标值。",
+        "hot": 3110,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-annie-en-us-16k",
+        "label": "语音合成-美式英文-通用领域-16k-发音人Annie",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 3098,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-hrnetw18-hand-pose-keypoints-coco-wholebody",
+        "label": "手部关键点检测-通用领域-2D",
+        "describe": "该模型采用自顶向下的Heatmap手部关键点检测框架，通过端对端的快速推理可以得到图像中的全部手部关键点。",
+        "hot": 3054,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-dla34-table-structure-recognition-cycle-centernet",
+        "label": "读光-表格结构识别-有线表格",
+        "describe": "有线表格结构识别，输入图像，检测出单元格bbox并将其拼接起来得到精准而完整的表格。",
+        "hot": 3054,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-res2net-salient-detection",
+        "label": "图像显著性目标检测",
+        "describe": "给定一张输入图像，输出视觉显著注意力程度图。",
+        "hot": 3006,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-ir101-facerecognition-cfglint",
+        "label": "CurricularFace人脸识别模型",
+        "describe": "输入一张图片，检测矫正人脸区域后提取特征，两个人脸特征可用于人脸比对，多个人脸特征可用于人脸检索。",
+        "hot": 2981,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-ocr-recognition-web-base-zh",
+        "label": "OFA文字识别-中文-网络场景-base",
+        "describe": "基于OFA模型的finetune后的OCR文字识别任务，可有效识别网络场景的文字内容。",
+        "hot": 2959,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-luca-en-gb-16k",
+        "label": "语音合成-英式英文-通用领域-16k-发音人Luca",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 2949,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-convnext-base-image-classification-garbage",
+        "label": "ConvNeXt图像分类-中文-垃圾分类",
+        "describe": "自建265类常见的生活垃圾标签体系，15w张图片数据，包含可回收垃圾、厨余垃圾、有害垃圾、其他垃圾4个标准垃圾大类，覆盖常见的食品，厨房用品，家具，家电等生活垃圾，标签从海量中文互联网社区语料进行提取，整理出了频率较高的常见生活垃圾名称。模型结构采用ConvNeXt-Base结构, 经过大规模数据集ImageNet-22K预训练后，在数据集上进行微调。",
+        "hot": 2947,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-ru-16k-common-vocab1664-tensorflow1-offline",
+        "label": "UniASR语音识别-俄语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2943,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-segformer-b5-image-semantic-segmentation-coco-stuff164k",
+        "label": "Segformer-B5实时语义分割",
+        "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的实时语义分割框架。使用了一个GPU上运行精度最高的配置结构。在CoCo-Stuff-164的数据集上进行了172类的分类",
+        "hot": 2942,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-mossformer-separation-temporal-8k",
+        "label": "MossFormer语音分离-单麦-8k",
+        "describe": "基于MossFormer的语音分离模型，可以把混杂在一起的两人语音分离开来，输入为一路混合音频，输出为两路分离后的音频，格式均为8000Hz单通道。",
+        "hot": 2918,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-asr-nat-zh-cn-16k-common-vocab3444-tensorflow1-online",
+        "label": "Paraformer语音识别-中文-通用-16k-实时",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 2902,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "erlangshen-roberta-110m-similarity",
+        "label": "二郎神-RoBERTa-110M-文本相似度",
+        "describe": "",
+        "hot": 2900,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-ko-16k-common-vocab6400-tensorflow1-online",
+        "label": "UniASR语音识别-韩语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2843,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-facial-landmark-confidence-flcm",
+        "label": "FLCM人脸关键点置信度模型",
+        "describe": "",
+        "hot": 2821,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-visual-grounding-refcoco-distilled-en",
+        "label": "OFA通过描述定位图像物体-英文-通用领域-蒸馏33M",
+        "describe": "视觉定位任务：给定一张图片，一段描述，通过描述找到图片对应的物体。",
+        "hot": 2807,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-en-16k-common-vocab1080-tensorflow1-online",
+        "label": "UniASR语音识别-英语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2801,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-segformer-b4-image-semantic-segmentation-coco-stuff164k",
+        "label": "Segformer-B4实时语义分割",
+        "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的语义分割框架。网络模型结构的具体超参数为论文中的B4配置。在CoCo-Stuff-164的数据集上进行了172类的分类",
+        "hot": 2782,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-zh-cn-8k-common-vocab8358-tensorflow1-offline",
+        "label": "UniASR语音识别-中文-通用-8k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2752,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-en-us-16k",
+        "label": "语音合成-美式英文-通用领域-16k-多发音人",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 2745,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-zh-cn-8k-common-vocab8358-tensorflow1-online",
+        "label": "UniASR语音识别-中文-通用-8k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2617,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-fa-16k-common-vocab1257-pytorch-offline",
+        "label": "UniASR语音识别-波斯语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2551,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-detection-tinymog",
+        "label": "TinyMog人脸检测器-tiny",
+        "describe": "",
+        "hot": 2530,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-clip-it-video-summarization-language-guided-en",
+        "label": "CLIP_It自然语言引导的视频摘要-Web视频领域-英文",
+        "describe": "自然语言引导的视频摘要，用户根据自己的需求输入一段自然语言和一个长视频，算法根据用户输入自然语言的内容对输入视频进行自适应的视频摘要。",
+        "hot": 2525,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-fsmn-vad-zh-cn-8k-common",
+        "label": "FSMN语音端点检测-中文-通用-8k",
+        "describe": "FSMN-Monophone VAD模型，可用于检测长语音片段中有效语音的起止时间点。",
+        "hot": 2489,
+        "pic": "example.png",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-cantonese-chs-16k-common-vocab1468-tensorflow1-online",
+        "label": "UniASR语音识别-粤语简体-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2454,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-cantonese-chs-16k-common-vocab1468-tensorflow1-offline",
+        "label": "UniASR语音识别-粤语简体-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2410,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-hrnetocr-skychange",
+        "label": "图像天空替换模型",
+        "describe": "",
+        "hot": 2371,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-en-gb-16k",
+        "label": "语音合成-英式英文-通用领域-16k-多发音人",
+        "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 2319,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-diffusion-text-to-image-synthesis-tiny",
+        "label": "文本到图像生成扩散模型-中英文-通用领域-tiny",
+        "describe": "文本到图像生成扩散模型-中英文-通用领域-tiny",
+        "hot": 2297,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-res2net-camouflaged-detection",
+        "label": "图像伪装色目标检测",
+        "describe": "给定一张输入图像，输出视觉显著注意力程度图（归一化至0~255）。",
+        "hot": 2292,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-segformer-b2-image-semantic-segmentation-coco-stuff164k",
+        "label": "Segformer-B2实时语义分割",
+        "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的语义分割框架。网络模型结构的具体超参数为论文中的B2配置。在CoCo-Stuff-164的数据集上进行了172类的分类",
+        "hot": 2292,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-es-16k-common-vocab3445-tensorflow1-online",
+        "label": "UniASR语音识别-西班牙语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2271,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-ko-16k-common-vocab6400-tensorflow1-offline",
+        "label": "UniASR语音识别-韩语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 2197,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-segformer-b3-image-semantic-segmentation-coco-stuff164k",
+        "label": "Segformer-B3实时语义分割",
+        "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的语义分割框架。网络模型结构的具体超参数为论文中的B3配置。在CoCo-Stuff-164的数据集上进行了172类的分类",
+        "hot": 2194,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet18-license-plate-detection-damo",
+        "label": "读光-车牌检测-通用",
+        "describe": "",
+        "hot": 2193,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "mplug-image-captioning-coco-base-zh",
+        "label": "mPLUG图像描述模型-中文-base",
+        "describe": "mPLUG中文图像描述base模型",
+        "hot": 2161,
+        "pic": "example.png",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-nafnet-image-deblur-gopro",
+        "label": "NAFNet图像去模糊",
+        "describe": "NAFNet（Nonlinear Activation Free Network）提出了一个简单的基线，计算效率高。其不需要使用非线性激活函数（Sigmoid、ReLU、GELU、Softmax等），可以达到SOTA性能。",
+        "hot": 2134,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-segformer-b1-image-semantic-segmentation-coco-stuff164k",
+        "label": "Segformer-B1实时语义分割",
+        "describe": "Neurips2021文章SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers在COCO_Stuff164K数据集上的复现。官方源码暂没有提供COCO_Stuff164K的相关实现。本模型基于Segformer分割框架所配置训练的实时语义分割框架。网络模型结构的具体超参数为论文中的B1配置。在CoCo-Stuff-164的数据集上进行了172类的分类",
+        "hot": 2099,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-text-to-image-synthesis-coco-large-en",
+        "label": "OFA文生图模型-英文-通用领域-large",
+        "describe": "文本到图像生成任务：输入一句英文描述文本，模型会返回一张符合文本描述的256*256分辨率图像。",
+        "hot": 2041,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "ofa-mmspeech-asr-aishell1-base-zh",
+        "label": "OFA-MMSpeech语音识别-中文-aishell1-base",
+        "describe": "对比SOTA，MMSpeech字错误率降低了48.3%/42.4%，效果达到1.6%/1.9%，远超SOTA 3.1%/3.3%（benchmark为AIShell1 dev/test）。",
+        "hot": 2038,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-asr-nat-zh-cn-16k-aishell1-vocab4234-pytorch",
+        "label": "Paraformer语音识别-中文-aishell1-16k-离线-pytorch",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 1915,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-mmspeech-pretrain-base-zh",
+        "label": "OFA-MMSpeech语音识别预训练-中文-通用领域-base",
+        "describe": "对比SOTA，MMSpeech字错误率降低了48.3%/42.4%，效果达到1.6%/1.9%，远超SOTA 3.1%/3.3%（benchmark为AIShell1 dev/test）。",
+        "hot": 1897,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "ofa-mmspeech-pretrain-large-zh",
+        "label": "OFA-MMSpeech语音识别预训练-中文-通用领域-large",
+        "describe": "对比SOTA，MMSpeech字错误率降低了48.3%/42.4%，效果达到1.6%/1.9%，远超SOTA 3.1%/3.3%（benchmark为AIShell1 dev/test）。",
+        "hot": 1888,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-es-16k-common-vocab3445-tensorflow1-offline",
+        "label": "UniASR语音识别-西班牙语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 1884,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-asr-nat-zh-cn-8k-common-vocab3444-tensorflow1-online",
+        "label": "Paraformer语音识别-中文-通用-8k-实时",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 1882,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitb16-classification-vision-efficient-tuning-prefix",
+        "label": "基础视觉模型高效调优-Prefix",
+        "describe": "",
+        "hot": 1852,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-yolox-pai-hand-detection",
+        "label": "YOLOX-PAI手部检测模型",
+        "describe": "输入一张图像，并对其中手部区域进行检测，输出所有手部区域检测框、置信度和标签。",
+        "hot": 1842,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-image-face-fusion-damo",
+        "label": "图像人脸融合",
+        "describe": "给定一张模板图像和一张用户图像，图像人脸融合模型能够自动地将用户图中的人脸融合到模板人脸图像中，生成一张包含用户图人脸特征的新图像。",
+        "hot": 1841,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet34-face-attribute-recognition-fairface",
+        "label": "人脸属性识别模型FairFace",
+        "describe": "给定一张带人脸的图片，返回其性别和年龄范围。",
+        "hot": 1833,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitb16-classification-vision-efficient-tuning-lora",
+        "label": "基础视觉模型高效调优-LoRA",
+        "describe": "",
+        "hot": 1744,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-dut-raft-video-stabilization-base",
+        "label": "DUT-RAFT视频稳像",
+        "describe": "",
+        "hot": 1735,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "mgeo-geographic-composition-analysis-chinese-base",
+        "label": "MGeo地址Query成分分析要素识别-中文-地址领域-base",
+        "describe": "模型用于识别地址query中的区划、路网、POI、户室号、公交地铁、品牌商圈等元素。",
+        "hot": 1693,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-raft-video-frame-interpolation",
+        "label": "VFI-RAFT视频插帧",
+        "describe": "给定一段低帧率视频，模型通过对帧间的光流和运动估计生成中间帧，最终输出一段高帧率视频，从而提升视频的流畅度。",
+        "hot": 1603,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "mgeo-geographic-textual-similarity-rerank-chinese-base",
+        "label": "MGeo地址QueryPOI相关性排序-中文-地址领域-base",
+        "describe": "模型对用户输入的地址query以及候选POI列表（包括每个POI包括POI的地址描述以及POI位置）进行相关性排序。",
+        "hot": 1590,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformerbert-asr-nat-zh-cn-16k-aishell2-vocab5212-pytorch",
+        "label": "ParaformerBert语音识别-中文-aishell2-16k-离线-pytorch",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 1589,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-conformer-asr-nat-zh-cn-16k-aishell2-vocab5212-pytorch",
+        "label": "Conformer语音识别-中文-aishell2-16k-离线-pytorch",
+        "describe": "Conformer模型通过在self-attenion基础上叠加卷积模块来加强模型的局部信息建模能力，进一步提升了模型的效果。Conformer已经在AISHELL-1、AISHELL-2、LibriSpeech等多个开源数据上取得SOTA结果。",
+        "hot": 1568,
+        "pic": "example.jpeg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-object-detection-damoyolo-cigarette",
+        "label": "实时香烟检测-通用",
+        "describe": "本模型为高性能热门应用系列检测模型中的实时香烟检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有香烟的坐标信息，并可用于吸烟检测等后续应用场景。更多具体信息请参考Model card。",
+        "hot": 1551,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-zh-cn-8k-common-vocab3445-pytorch-offline",
+        "label": "UniASR语音识别-中文-通用-8k-离线-pytorch",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 1540,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "multi-modal-clip-vit-large-patch14-zh",
+        "label": "CLIP模型-中文-通用领域-large",
+        "describe": "本项目为CLIP模型的中文版本，使用大规模中文数据进行训练（~2亿图文对），旨在帮助用户实现中文领域的跨模态检索、图像表示等。视觉encoder采用vit结构，文本encoder采用roberta结构。 模型在多个中文图文检索数据集上进行了效果测试。",
+        "hot": 1536,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-object-detection-damoyolo-facemask",
+        "label": "实时口罩检测-通用",
+        "describe": "本模型为高性能热门应用系列检测模型中的实时口罩检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人脸的坐标信息，以及是否佩戴口罩。更多具体信息请参考Model card。",
+        "hot": 1531,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-effnetv2-video-human-matting",
+        "label": "视频人像抠图模型-通用领域",
+        "describe": "输入一段视频，返回视频中人像的alpha序列",
+        "hot": 1485,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformerbert-asr-nat-zh-cn-16k-aishell1-vocab4234-pytorch",
+        "label": "ParaformerBert语音识别-中文-aishell1-16k-离线-pytorch",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 1454,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-crnn-ocr-recognition-general-damo",
+        "label": "读光-文字识别-CRNN模型-中英-通用领域",
+        "describe": "",
+        "hot": 1350,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-asr-nat-zh-cn-16k-aishell2-vocab5212-pytorch",
+        "label": "Paraformer语音识别-中文-aishell2-16k-离线-pytorch",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 1335,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "mgeo-geographic-where-what-cut-chinese-base",
+        "label": "MGeo地址地点WhereWhat切分-中文-地址领域-base",
+        "describe": "模型提供将一条地址切分为门址+POI描述的功能。当一条地址包含多个地点描述时，通常需要对其进行切分，将原始地址切为where和what两部分。",
+        "hot": 1332,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "multi-modal-clip-vit-huge-patch14-zh",
+        "label": "CLIP模型-中文-通用领域-huge",
+        "describe": "本项目为CLIP模型的中文版本，使用大规模中文数据进行训练（~2亿图文对），旨在帮助用户实现中文领域的跨模态检索、图像表示等。视觉encoder采用vit结构，文本encoder采用roberta结构。 模型在多个中文图文检索数据集上进行了效果测试。",
+        "hot": 1313,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-chuangirl-sichuan-16k",
+        "label": "语音合成-四川话-通用领域-16k-发音人chuangirl",
+        "describe": "四川话语音合成女声16k模型，本模型使用Sambert-hifigan网络结构。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 1307,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "multilingual-glm-summarization-zh",
+        "label": "mGLM多语言大模型-生成式摘要-中文",
+        "describe": "mGLM多语言大模型可从大段文本中提取关键信息，为你生成简短的中文摘要，支持多种语言输入",
+        "hot": 1223,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bart-text-error-correction-chinese-law",
+        "label": "BART文本纠错-中文-法律领域-large",
+        "describe": "法研杯2022文书校对赛道冠军纠错模型（单模型）。",
+        "hot": 1222,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitadapter-semantic-segmentation-cocostuff164k",
+        "label": "Mask2Former-ViTAdapter语义分割",
+        "describe": "该语义分割模型基于Mask2Former架构，ViTAdapter为backbone，训练数据库为COCO-Stuff164k。",
+        "hot": 1221,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-nafnet-image-deblur-reds",
+        "label": "NAFNet图像去模糊压缩",
+        "describe": "NAFNet（Nonlinear Activation Free Network）提出了一个简单的基线，计算效率高。其不需要使用非线性激活函数（Sigmoid、ReLU、GELU、Softmax等），可以达到SOTA性能。",
+        "hot": 1160,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tadaconv-action-recognition",
+        "label": "TAdaConv动作识别模型-英文-通用领域",
+        "describe": "TAdaConv是一种在动作识别模型中即插即用的时序自适应卷积（Temporally-Adaptive Convolutions）。可以明显提升SlowFast、R2D和R3D等模型性能。",
+        "hot": 1148,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-maskdino-swin-l-image-instance-segmentation-coco",
+        "label": "MaskDINO-SwinL图像实例分割",
+        "describe": "SOTA通用目标检测和实例分割模型，backbone使用Swin transformer large。",
+        "hot": 1137,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-ja",
+        "label": "语音识别-日语-后处理- ITN模型",
+        "describe": "日语文本反正则化。Inverse Text Processing for Japanese.",
+        "hot": 1131,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-pretrain-base-zh",
+        "label": "OFA预训练模型-中文-通用领域-base",
+        "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
+        "hot": 1118,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-relation-extraction-chinese-base",
+        "label": "RoBERTa关系抽取-中文-通用-base",
+        "describe": "百科关系抽取模型是在hfl/chinese-roberta-wwm-ext预训练模型的基础上，用duie数据集训练出来的关系抽取模型。",
+        "hot": 1078,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-charctc-kws-phone-xiaoyun-commands",
+        "label": "CTC语音唤醒-移动端-单麦-16k-小云-多命令词",
+        "describe": "移动端语音多命令词模型，我们根据以往项目积累，挑选了多个场景常用命令词数据进行模型迭代，所得单一模型支持30+关键词的快速检测。",
+        "hot": 1048,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-object-detection-damoyolo-safety-helmet",
+        "label": "实时安全帽检测-通用",
+        "describe": "本模型为高性能热门应用系列检测模型中的实时安全帽（头盔）检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人头的坐标信息，以及是否佩戴安全帽（头盔）。更多具体信息请参考Model card。",
+        "hot": 1035,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-en",
+        "label": "语音识别-英语-后处理- ITN模型",
+        "describe": "英语文本反正则化。Inverse Text Processing for English.",
+        "hot": 1005,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-document-segmentation-english-base",
+        "label": "BERT文本分割-英文-通用领域",
+        "describe": "该模型基于wiki-en公开语料训练，对未分割的长文本进行段落分割。提升未分割文本的可读性以及下游NLP任务的性能。",
+        "hot": 1002,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-swin-t-referring-video-object-segmentation",
+        "label": "MTTR文本指导的视频目标分割-英文",
+        "describe": "",
+        "hot": 995,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet18-ocr-detection-db-line-level-damo",
+        "label": "读光-文字检测-DB行检测模型-中英-通用领域",
+        "describe": "",
+        "hot": 992,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-xvector-sv-zh-cn-cnceleb-16k-spk3465-pytorch",
+        "label": "xvector说话人确认-中文-cnceleb-16k-离线-pytorch",
+        "describe": "该模型是使用CN-Celeb 1&2以及AliMeeting数据集预训练得到的说话人嵌入码（speaker embedding）提取模型。可以直接用于通用和会议场景的说话人确认和说话人日志等任务。在CN-Celeb语音测试集上EER为9.00%，在AliMeeting测试集上的EER为1.45%。",
+        "hot": 979,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-head-detection-damoyolo",
+        "label": "实时人头检测-通用",
+        "describe": "本模型为高性能热门应用系列检测模型中的实时人头检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有人头的坐标信息，并可用于行人计数等后续应用场景。更多具体信息请参考Model card。",
+        "hot": 963,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet50-ocr-detection-vlpt",
+        "label": "读光-文字检测-单词检测模型-英文-VLPT预训练",
+        "describe": "给定一张图片，检测出图内文字并给出多边形包围框。检测模型使用DB，backbone初始化参数基于多模态交互预训练方法VLPT。",
+        "hot": 914,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-person-image-cartoon-sd-design-compound-models",
+        "label": "DCT-Net人像卡通化-扩散模型-插画",
+        "describe": "该模型采用全新的DCT-Net（Domain-Calibrated Translation） 域校准图像翻译模型，结合Stable-Diffusion模型进行小样本风格数据生成，从而训练得到高保真、强鲁棒、易拓展的人像风格转换模型。",
+        "hot": 892,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-gpen-image-portrait-enhancement-hires",
+        "label": "GPEN人像增强修复-大分辨率人脸",
+        "describe": "GPEN通过将预训练的人像生成网络嵌入到Unet网络中联合微调的方式在人像修复任务的多项指标中上达到了sota的结果。",
+        "hot": 889,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "multi-modal-clip-vtretrival-msrvtt-53",
+        "label": "视频文本表征模型-英文-通用领域",
+        "describe": "该模型是在10亿公开英文图文数据训练的多模态模型。视觉encoder采用vit-large结构，文本encoder采用bert-base结构。 模型在视频文本检索等数据集上进行了zero-shot和finetune效果测试，能够在msrvtt上达到sota结果。",
+        "hot": 886,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-ir50-face-recognition-arcface",
+        "label": "ArcFace人脸识别模型",
+        "describe": "输入一张图片，检测矫正人脸区域后提取特征，两个人脸特征可用于人脸比对，多个人脸特征可用于人脸检索。",
+        "hot": 882,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-video-colorization",
+        "label": "DeOldify视频上色",
+        "describe": "DeOldify 是上色领域比较有名的开源算法，模型利用 ResNet 作为 encoder 构建一个 UNet 结构的网络，并提出了多个不同的训练版本，本模型是用于视频上色的版本。",
+        "hot": 869,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-kyong-korean-16k",
+        "label": "语音合成-韩语-通用领域-16k-发音人kyong",
+        "describe": "韩语语音合成女声16k模型，本模型使用Sambert-hifigan网络结构。其中后端声学模型的SAM-BERT，将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 857,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet101-image-multiple-human-parsing",
+        "label": "M2FP多人人体解析",
+        "describe": "",
+        "hot": 824,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-de",
+        "label": "语音识别-德语-后处理- ITN模型",
+        "describe": "德语文本反正则化。Inverse Text Processing for German.",
+        "hot": 811,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-jiajia-cantonese-16k",
+        "label": "语音合成-广东粤语-通用领域-16k-发音人jiajia",
+        "describe": "广东粤语语音合成女声16k模型，本模型使用Sambert-hifigan网络结构。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 809,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-tiny-commandword-asr-nat-zh-cn-16k-vocab544-pytorch",
+        "label": "Paraformer语音识别-中文-端上指令词-16k-离线-tiny",
+        "describe": "轻量化小词表Paraformer中文指令词识别模型，参数量控制在5M左右，支持通用智能家居交互等常规指令词，并且使用share embedding策略进一步缩小参数量。",
+        "hot": 798,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-swinl-image-object-detection-dino",
+        "label": "DINO-高精度目标检测模型",
+        "describe": "本模型是DINO高精度目标检测模型，采用SwinL主干网络，在COCO验证集精度可达63.39%。",
+        "hot": 792,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-data2vec-pretrain-zh-cn-aishell2-16k-pytorch",
+        "label": "Data2vec语音识别-预训练-中文-aishell2-16k-pytorch",
+        "describe": "近年来，随着预训练的流行，许多研究致力于利用预训练的方式来充分利用大量的无监督数据，帮助提升在有监督语音数据有限情况下的语音识别的性能。wav2vec，HuBERT，WavLM等方法，都通过无监督预训练的方式在语音识别任务上取得了不错的识别率。2022年，Meta AI在ICML上提出了data2vec，具体结构如下图琐事，其能同时应用于语音、视觉、自然语言处理等不同模态，且都取得了不错的性能。",
+        "hot": 773,
+        "pic": "example.jpeg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet50-face-reconstruction",
+        "label": "人脸重建模型",
+        "describe": "",
+        "hot": 735,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet-image-quality-assessment-mos-youtubeugc",
+        "label": "图像质量MOS评估",
+        "describe": "通过模型预测图像MOS分",
+        "hot": 724,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-controlnet-controllable-image-generation-nine-annotators",
+        "label": "ControlNet可控图像生成",
+        "describe": "输入一张图像，指定控制类别并提供期望生成图像的描述prompt，模型会根据输入图像抽取相应的控制信息并生成精美图像。",
+        "hot": 708,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-uhdm-image-demoireing",
+        "label": "uhdm图像去摩尔纹",
+        "describe": "图像去摩尔纹",
+        "hot": 703,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "guohua-diffusion",
+        "label": "国画Diffusion模型",
+        "describe": "这是在国画上训练的微调Stable Diffusion模型",
+        "hot": 700,
+        "pic": "example.jpg",
+        "field": "未知"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-xiaoda-wuushanghai-16k",
+        "label": "语音合成-上海话-通用领域-16k-发音人xiaoda",
+        "describe": "上海话语音合成女声16k模型，本模型使用Sambert-hifigan网络结构。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 700,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-large-asr-nat-zh-cn-16k-aishell1-vocab8404-pytorch",
+        "label": "Paraformer语音识别-中文-aishell1-16k-离线-large-pytorch",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 642,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-ru",
+        "label": "语音识别-俄语-后处理- ITN模型",
+        "describe": "俄语文本反正则化。Inverse Text Processing for Russian.",
+        "hot": 631,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet50-product-bag-embedding-models",
+        "label": "商品图像同款特征",
+        "describe": "本模型是对商品图像进行表征向量提取，用户可基于表征向量进行大规模的同款/相似款商品搜索；无需额外输入，模型可自动进行箱包商品的主体抠图，并基于主体提取结果完成表征向量提取。",
+        "hot": 630,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-pt",
+        "label": "语音识别-葡萄牙语-后处理- ITN模型",
+        "describe": "葡萄语文本反正则化。Inverse Text Processing for Portuguese.",
+        "hot": 628,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-mobilenet-v2-bad-image-detecting",
+        "label": "异常图像检测",
+        "describe": "基于mobilenet-v2的简化版网络，检测图像是否为花屏、绿屏或者正常图像。",
+        "hot": 618,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-sentence-similarity-english-base",
+        "label": "BERT文本相似度-英文-base-学术数据集paws",
+        "describe": "该模型是在bert-base-uncased预训练模型的基础上，用paws数据集训练出来的文本相似度匹配模型。",
+        "hot": 616,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-vi",
+        "label": "语音识别-越南语-后处理- ITN模型",
+        "describe": "越南语文本反正则化。Inverse Text Processing for Vietnamese.",
+        "hot": 601,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-fr",
+        "label": "语音识别-法语-后处理- ITN模型",
+        "describe": "法语文本反正则化。Inverse Text Processing for French.",
+        "hot": 593,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-es",
+        "label": "语音识别-西班牙-后处理- ITN模型",
+        "describe": "西班牙文本反正则化。Inverse Text Processing for Spanish.",
+        "hot": 588,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-daflow-virtual-try-on-base",
+        "label": "DAFlow虚拟试衣模型-VITON数据",
+        "describe": "DAFlow是一种单阶段虚拟试衣框架，无需中间分割结果作为label，直接用模特上身图作为监督。同时本工作提出一种新的空间变换结构，在虚拟试衣和一些变换任务上达到SOTA.",
+        "hot": 554,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet101-image-single-human-parsing",
+        "label": "M2FP单人人体解析",
+        "describe": "",
+        "hot": 540,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-id",
+        "label": "语音识别-印尼语-后处理- ITN模型",
+        "describe": "印尼语文本反正则化。Inverse Text Processing for Indonesian.",
+        "hot": 535,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-passage-ranking-chinese-tiny",
+        "label": "CoROM语义相关性-中文-通用领域-tiny",
+        "describe": "基于ROM-tiny预训练模型的通用领域中文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 529,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-chinese-tiny-medical",
+        "label": "CoROM文本向量-中文-医疗领域-tiny",
+        "describe": "基于CoROM-tiny预训练语言模型的电商领域中文文本表示模型，基于输入的句子产出对应的文本向量，文本向量可以使用在下游的文本检索、句子相似度计算、文本聚类等任务中。",
+        "hot": 528,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-zero-shot-english-base",
+        "label": "BERT零样本分类-英文-base-学术数据集mnli",
+        "describe": "该模型使用bert-base-uncased在multi_nli数据集(将英文数据集重新翻译得到中文数据集)上面进行了训练得到。",
+        "hot": 522,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet50-image-quality-assessment-degradation",
+        "label": "图像画质损伤分析",
+        "describe": "",
+        "hot": 519,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-yolov5-video-multi-object-tracking-fairmot",
+        "label": "视频多目标跟踪-行人",
+        "describe": "该模型采用基于FairMOT的方案，输入待跟踪视频，可端对端推理得到视频中的所有行人的运动轨迹。",
+        "hot": 516,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-ko",
+        "label": "语音识别-韩语-后处理- ITN模型",
+        "describe": "韩语文本反正则化。Inverse Text Processing for Korean.",
+        "hot": 510,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-inverse-text-processing-fun-text-processing-itn-tl",
+        "label": "语音识别-菲律宾语-后处理- ITN模型",
+        "describe": "菲律宾语文本反正则化。Inverse Text Processing for Tagalog.",
+        "hot": 490,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-chinese-tiny",
+        "label": "CoROM文本向量-中文-通用领域-tiny",
+        "describe": "基于CoROM-base预训练语言模型的通用领域中文文本表示模型，基于输入的句子产出对应的文本向量，文本向量可以使用在下游的文本检索、句子相似度计算、文本聚类等任务中。",
+        "hot": 481,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-chinese-tiny-ecom",
+        "label": "CoROM文本向量-中文-电商领域-tiny",
+        "describe": "基于CoROM-tiny预训练语言模型的电商领域中文文本表示模型，基于输入的句子产出对应的文本向量，文本向量可以使用在下游的文本检索、句子相似度计算、文本聚类等任务中。",
+        "hot": 480,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "mgeo-backbone-chinese-base",
+        "label": "MGeo多任务多模态地址预训练底座-中文-base",
+        "describe": "MGeo是适用于多种地址任务的预训练底座模型，该模型基于地图-文本多模态架构，使用多任务预训练（MOMETAS）技术融合了注意力对抗预训练（ASA）、句子对预训练（MaSTS）、多模态预训练，训练得到适合于多类地址任务的预训练底座，能够下游广泛的地址处理任务带来性能提升。",
+        "hot": 477,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-sentence-embedding-english-tiny",
+        "label": "CoROM文本向量-英文-通用领域-tiny",
+        "describe": "基于CoROM-Base预训练模型的通用领域英文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 474,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "ofa-text-classification-mnli-large-en",
+        "label": "OFA自然语言推理模型-英文-数据集MNLI-large",
+        "describe": "给定一个前提句和一个假设句，任务是预测前提是否包含假设（蕴含），与假设相矛盾（矛盾），或者两者都不包含（中性）。",
+        "hot": 466,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-universal-matting",
+        "label": "BSHM通用抠图",
+        "describe": "",
+        "hot": 458,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vgg19-facial-expression-recognition-fer",
+        "label": "人脸表情识别模型FER",
+        "describe": "给定一张带人脸的图片，返回图片中人脸的表情。目前支持7种表情：愤怒，厌恶，恐惧，快乐，悲伤，惊讶，中立。",
+        "hot": 445,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-person-image-cartoon-sd-illustration-compound-models",
+        "label": "DCT-Net人像卡通化-扩散模型-漫画",
+        "describe": "",
+        "hot": 436,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-raft-video-frame-interpolation-practical",
+        "label": "VFI-RAFT视频插帧-应用型",
+        "describe": "偏实际应用的视频插帧模型，相较原版模型，该模型能支持任意倍率的帧率转换，同时在各种困难场景下如大运动、重复纹理、台标字幕等有更好更稳定的插帧效果。",
+        "hot": 425,
+        "pic": "example.jpeg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-entity-embedding-chinese-base",
+        "label": "Bert实体向量-中文-通用领域-base",
+        "describe": "",
+        "hot": 423,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-conformer-asr-nat-zh-cn-16k-aishell1-vocab4234-pytorch",
+        "label": "Conformer语音识别-中文-aishell1-16k-离线-pytorch",
+        "describe": "Conformer模型通过在self-attenion基础上叠加卷积模块来加强模型的局部信息建模能力，进一步提升了模型的效果。Conformer已经在AISHELL-1、AISHELL-2、LibriSpeech等多个开源数据上取得SOTA结果。",
+        "hot": 422,
+        "pic": "example.jpeg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-pretrain-tiny-en",
+        "label": "OFA预训练模型-英文-通用领域-tiny",
+        "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
+        "hot": 421,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-video-inpainting",
+        "label": "视频编辑-通用领域",
+        "describe": "视频inpainting模型，输入视频和mask，可实现对指定帧范围内的video inpainting",
+        "hot": 409,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-ir-face-recognition-ood-rts",
+        "label": "人脸识别OOD模型",
+        "describe": "",
+        "hot": 403,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet101-detection-fewshot-defrcn",
+        "label": "defrcn少样本目标检测",
+        "describe": "",
+        "hot": 392,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-entity-matching-chinese-base",
+        "label": "Bert实体相关性-中文-通用领域-base",
+        "describe": "输入带实体标记的句子A，以及一个候选句子列表，模型输出句子A中的实体与列表中每个候选句子的相关性得分（0-1，分数越高代表两者越相关），",
+        "hot": 385,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "speech-paraformer-large-asr-nat-zh-cn-16k-aishell2-vocab8404-pytorch",
+        "label": "Paraformer语音识别-中文-aishell2-16k-离线-large-pytorch",
+        "describe": "Paraformer是一种非自回归端到端语音识别模型。非自回归模型相比于目前主流的自回归模型，可以并行的对整条句子输出目标文字，特别适合利用GPU进行并行推理。Paraformer是目前已知的首个在工业大数据上可以获得和自回归端到端模型相同性能的非自回归模型。配合GPU推理，可以将推理效率提升10倍，从而将语音识别云服务的机器成本降低接近10倍。",
+        "hot": 370,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-masha-russian-16k",
+        "label": "语音合成-俄语-通用领域-16k-发音人masha",
+        "describe": "俄语语音合成女声16k模型，本模型使用Sambert-hifigan网络结构。其中后端声学模型的SAM-BERT，将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 366,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-liveness-flxc",
+        "label": "静默人脸活体检测模型-炫彩",
+        "describe": "静默人脸活体检测模型-炫彩",
+        "hot": 364,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-corom-passage-ranking-chinese-tiny-ecom",
+        "label": "CoROM语义相关性-中文-电商领域-tiny",
+        "describe": "基于CoROM-Base预训练模型的电商领域中文语义相关性模型，模型以一个source sentence以及一个句子列表作为输入，最终输出source sentence与列表中每个句子的相关性得分（0-1，分数越高代表两者越相关）。",
+        "hot": 362,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "ofa-summarization-gigaword-large-en",
+        "label": "OFA文本摘要-英文-数据集gigaword-large",
+        "describe": "gigaword摘要任务：给定长文本，输出文本摘要。",
+        "hot": 360,
+        "pic": "example.png",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-object-detection-3d-depe",
+        "label": "DEPE-3D目标检测-自动驾驶领域",
+        "describe": "DEPE是基于Transformer的纯视觉3D目标检测模型，在PETRV2基础上，使用LiDAR点云监督depth训练并提升3DPE的准确度，推理阶段只依赖视觉信息，相比原PETRv2方法在nuScenes-val上有0.52%的提升。",
+        "hot": 349,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-object-detection-damoyolo-traffic-sign",
+        "label": "实时交通标识检测-自动驾驶领域",
+        "describe": "本模型为高性能热门应用系列检测模型中的交通标识检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有交通标识的坐标信息。更多具体信息请参考Model card。",
+        "hot": 348,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-relation-extraction-chinese-base-commerce",
+        "label": "DIRECT商品评价解析-中文-电商-base",
+        "describe": "",
+        "hot": 338,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "ofa-pretrain-base-en",
+        "label": "OFA预训练模型-英文-通用领域-base",
+        "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
+        "hot": 331,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-tinynas-object-detection-damoyolo-phone",
+        "label": "实时手机检测-通用",
+        "describe": "本模型为高性能热门应用系列检测模型中的实时手机检测模型，基于面向工业落地的高性能检测框架DAMOYOLO，其精度和速度超越当前经典的YOLO系列方法。用户使用的时候，仅需要输入一张图像，便可以获得图像中所有手机的坐标信息，并可用于打电话检测等后续应用场景。更多具体信息请参考Model card。",
+        "hot": 316,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-resnet50-live-category",
+        "label": "直播商品类目识别模型-中文-电商领域",
+        "describe": "本模型采用ResNet-50网络结构，对直播视频进行商品类目识别，输入视频片段，输出直播商品类目标签，目前已经覆盖了8K多类的细粒度的商品类别。",
+        "hot": 315,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-hdformer-body-3d-keypoints-video",
+        "label": "HDFormer人体关键点-通用领域-3D",
+        "describe": "输入一段单人视频，实现端到端的3D人体关键点检测，输出视频中每一帧的3D人体关键点坐标。",
+        "hot": 299,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "uni-fold-monomer",
+        "label": "Uni-Fold-Monomer 开源的蛋白质单体结构预测模型",
+        "describe": "开源的蛋白质单体结构预测模型，输入蛋白质单体的一级结构（1D序列），预测蛋白质的三级结构（3D位置），同时给出预测结果的置信度。本模型主要用于蛋白质单体的预测。",
+        "hot": 277,
+        "pic": "example.jpg",
+        "field": "未知"
+    },
+    {
+        "price": "1",
+        "name": "cv-r2p1d-video-embedding",
+        "label": "CMD视频表征模型",
+        "describe": "一种自监督视频表征学习方案，通过在代理任务中显式地解耦场景与运动信息（context and motion decoupling），强制视频模型同时捕捉静态背景与动态行为两方面特征。",
+        "hot": 275,
+        "pic": "example.png",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-mfcca-asr-zh-cn-16k-alimeeting-vocab4950",
+        "label": "MFCCA多通道多说话人语音识别-中文-AliMeeting-16k-离线",
+        "describe": "考虑到麦克风阵列不同麦克风接收信号的差异，该模型采用了一种多帧跨通道注意力机制，该方法对相邻帧之间的跨通道信息进行建模，以利用帧级和通道级信息的互补性。此外，还引入了一种多层卷积模块以融合多通道输出和一种通道掩码策略以解决训练和推理之间的音频通道数量不匹配的问题。在ICASSP2022 M2MeT竞赛上发布的真实会议场景语料库AliMeeting上进行了相关实验，该多通道模型在Eval和Test集上比单通道模型CER分别相对降低了39.9%和37.0%。此外，在同等的模型参数和训练数据下，本文提出的模型获得的识别性能超越竞赛期间最佳结果，在AliMeeting上实现了目前最新的SOTA性能。",
+        "hot": 267,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-visual-entailment-snli-ve-distilled-v2-en",
+        "label": "OFA视觉语义蕴含-英文-通用领域-蒸馏33M",
+        "describe": "视觉蕴含任务：给定一个图像作为前提，一个自然语言句子作为假设，要求模型正确分配图像和文本三个标签（蕴含、中性和矛盾）。",
+        "hot": 262,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-liveness-flrgb",
+        "label": "人脸活体检测模型-RGB",
+        "describe": "",
+        "hot": 262,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "nlp-bert-fill-mask-chinese-base",
+        "label": "BERT完形填空模型-中文-base",
+        "describe": "nlp_bert_fill-mask_chinese-base 是wikipedia_zh/baike/news训练的自然语言理解预训练模型。",
+        "hot": 254,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "ofa-visual-entailment-snli-ve-large-en",
+        "label": "OFA图像语义蕴含-英文-通用领域-large",
+        "describe": "图文蕴含任务：给定图片和文本a（对图片的陈述），文本b（可选），判断文本c是否成立。",
+        "hot": 247,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "glm130b",
+        "label": "GLM130B-中英大模型",
+        "describe": "模型集成中",
+        "hot": 243,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "cv-bilibili-image-super-resolution",
+        "label": "RealCUGAN图像超分辨率",
+        "describe": "todo",
+        "hot": 242,
+        "pic": "example.jpg",
+        "field": "未知"
+    },
+    {
+        "price": "1",
+        "name": "cv-nerf-3d-reconstruction-accelerate-damo",
+        "label": "NeRF快速三维重建模型",
+        "describe": "输入一段环绕物体一周的视频，基于隐式神经辐射场（NeRF），对该物体进行快速3d重建渲染。",
+        "hot": 240,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-liveness-flir",
+        "label": "人脸活体检测模型-IR",
+        "describe": "",
+        "hot": 235,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-pt-16k-common-vocab1617-tensorflow1-online",
+        "label": "UniASR语音识别-葡萄牙语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 235,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-pt-16k-common-vocab1617-tensorflow1-offline",
+        "label": "UniASR语音识别-葡萄牙语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 235,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-ecbsr-image-super-resolution-mobile",
+        "label": "ECBSR端上图像超分模型",
+        "describe": "ECBSR模型基于Edgeoriented Convolution Block (ECB)模块构建，完整模型可导出为简洁的CNN网络结构，适用于移动端、嵌入式等严格限制算力的场景。",
+        "hot": 227,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-dro-resnet18-video-depth-estimation-indoor",
+        "label": "循环神经优化器-视频流深度和相机轨迹估计",
+        "describe": "我们提出zero-order的循环神经网络优化器（DRO）, 不需要求解梯度, 直接利用神经网络来预测下次更新的方向和步长。将优化目标cost，放入到神经网络中，每次迭代都会参考之前尝试的历史信息，从而给出更加精准的预测。也就是说，如果错误的预测值，就会使得cost变大，正确的预测值会使得cost变小，在不断尝试中，神经网络学习到了如何使得cost变小。",
+        "hot": 215,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-quality-assessment-fqa",
+        "label": "人脸质量模型FQA",
+        "describe": "人脸质量模型FQA",
+        "hot": 215,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-image-caption-meme-large-zh",
+        "label": "OFA表情包文本生成器",
+        "describe": "",
+        "hot": 176,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-fa-16k-common-vocab1257-pytorch-online",
+        "label": "UniASR语音识别-波斯语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 175,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-vi-16k-common-vocab1001-pytorch-online",
+        "label": "UniASR语音识别-越南语-通用-16k-实时",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 168,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cartoon-stable-diffusion-design",
+        "label": "卡通系列文生图模型",
+        "describe": "",
+        "hot": 164,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-mdm-motion-generation",
+        "label": "运动生成-人体运动-英文",
+        "describe": "根据文本描述，生成对应的人体运动数据",
+        "hot": 161,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cartoon-stable-diffusion-clipart",
+        "label": "卡通系列文生图模型-剪贴画",
+        "describe": "",
+        "hot": 158,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-uniasr-asr-2pass-vi-16k-common-vocab1001-pytorch-offline",
+        "label": "UniASR语音识别-越南语-通用-16k-离线",
+        "describe": "UniASR是离线流式一体化语音识别系统。UniASR同时具有高精度和低延时的特点，不仅能够实时输出语音识别结果，而且能够在说话句尾用高精度的解码结果修正输出，与此同时，UniASR采用动态延时训练的方式，替代了之前维护多套延时流式系统的做法。",
+        "hot": 158,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-sambert-hifigan-tts-ainan-zh-cn-16k",
+        "label": "语音合成-中文-通用领域-16k-发音人ainan",
+        "describe": "中文语音合成男声16k模型，本模型使用Sambert-hifigan网络结构。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
+        "hot": 148,
+        "pic": "example.jpg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-image-caption-coco-6b-en",
+        "label": "OFA图像描述-英文-通用领域-6B",
+        "describe": "根据用户输入的任意图片，AI智能创作模型写出“一句话描述”，可用于图像标签和图像简介。",
+        "hot": 145,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "ofa-pretrain-large-en",
+        "label": "OFA预训练模型-英文-通用领域-large",
+        "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
+        "hot": 141,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-quadtree-attention-image-matching-outdoor",
+        "label": "",
+        "describe": "",
+        "hot": 139,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "codegeex-code-translation-13b",
+        "label": "CodeGeeX-代码翻译-13B",
+        "describe": "CodeGeeX是一个具有130亿参数的多编程语言代码生成预训练模型，在20多种编程语言的代码语料库（>8500亿Token）上经过历时两个月预训练得到。CodeGeeX采用华为MindSpore框架实现，在鹏城实验室的“鹏城云脑ll”平台上训练而成。",
+        "hot": 133,
+        "pic": "example.jpg",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "uni-fold-multimer",
+        "label": "Uni-Fold-Multimer 开源的蛋白质复合物结构预测模型",
+        "describe": "一个开源的蛋白质复合物结构预测模型。",
+        "hot": 131,
+        "pic": "example.jpg",
+        "field": "未知"
+    },
+    {
+        "price": "1",
+        "name": "multi-modal-gridvlp-classification-chinese-base-ecom-cate",
+        "label": "GridVLP多模态类目预测-中文-电商领域-base",
+        "describe": "",
+        "hot": 131,
+        "pic": "example.jpeg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "multilingual-glm-summarization-en",
+        "label": "mGLM多语言大模型-生成式摘要-英文",
+        "describe": "mGLM多语言大模型可从大段文本中提取关键信息，为你生成简短的英文摘要，支持多种语言输入",
+        "hot": 130,
+        "pic": "example.png",
+        "field": "自然语言"
+    },
+    {
+        "price": "1",
+        "name": "ofa-pretrain-huge-en",
+        "label": "OFA预训练模型-英文-通用领域-huge",
+        "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
+        "hot": 129,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "mplug-image-text-retrieval-flickr30k-large-en",
+        "label": "mPLUG图文检索模型-英文-large",
+        "describe": "达摩MPLUG英文图文检索large模型",
+        "hot": 128,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-unet-video-deinterlace",
+        "label": "视频去场纹",
+        "describe": "视频去场纹，相比较于yadif、DIN等SOTA方法，对于大运动和低画质场景下的场纹有较好的场纹去除能力",
+        "hot": 127,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-ecapa-tdnn-sv-en-voxceleb-16k",
+        "label": "ECAPATDNN说话人确认-英文-VoxCeleb-16k",
+        "describe": "ECAPA TDNN模型是说话人识别领域的常用模型之一，该模型在公开数据集VoxCeleb2上进行训练，VoxCeleb-O上的EER指标为0.862。该模型适用于16k英文测试数据，可以用于说话人确认、说话人日志等任务。",
+        "hot": 125,
+        "pic": "example.png",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "mo-di-diffusion",
+        "label": "迪士尼风格扩散生成模型",
+        "describe": "在迪士尼动画电影截图上finetune的Stable Diffusion模型",
+        "hot": 124,
+        "pic": "example.jpg",
+        "field": "未知"
+    },
+    {
+        "price": "1",
+        "name": "analog-diffusion",
+        "label": "胶片质感扩散生成模型",
+        "describe": "输出胶片摄影质感的图像；微调自Stable Diffusion",
+        "hot": 124,
+        "pic": "example.jpg",
+        "field": "未知"
+    },
+    {
+        "price": "1",
+        "name": "ofa-pretrain-large-zh",
+        "label": "OFA预训练模型-中文-通用领域-large",
+        "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
+        "hot": 115,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-swinb-video-panoptic-segmentation-vipseg",
+        "label": "视频全景分割-VideoKNet-SwinB",
+        "describe": "基于Video-K-Net架构，SwinB作为backbone的视频全景分割模型。",
+        "hot": 115,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-unifuse-panorama-depth-estimation",
+        "label": "基于单向融合的全景图深度估计",
+        "describe": "单目全景图的深度估计",
+        "hot": 109,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "ofa-pretrain-medium-en",
+        "label": "OFA预训练模型-英文-通用领域-medium",
+        "describe": "OFA的预训练ckpt，能够在完全不改变模型结构的情况下进行下游任务的finetune，是finetune的基础ckpt。",
+        "hot": 106,
+        "pic": "example.jpg",
+        "field": "多模态"
+    },
+    {
+        "price": "1",
+        "name": "cv-stable-diffusion-paint-by-example",
+        "label": "图像示例替换",
+        "describe": "给定一张原图和对应的mask区域，将给定的参考图自适应地替换上去",
+        "hot": 105,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-rdevos-video-object-segmentation",
+        "label": "基于循环动态编码的视频目标分割",
+        "describe": "给定一个视频帧序列，和视频第一帧中想要分割的不同物体的掩码(mask)，模型会预测视频后续帧中对应物体的掩码(mask)",
+        "hot": 104,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "speech-ptts-autolabel-16k",
+        "label": "个性化语音合成-自动标注模型-16k",
+        "describe": "用于训练个性化语音合成模型的自动标注工具依赖的模型资源",
+        "hot": 103,
+        "pic": "example.jpeg",
+        "field": "听觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-vitb-video-single-object-tracking-procontext",
+        "label": "ProContEXT视频单目标跟踪-通用领域",
+        "describe": "该模型是基于Transformer的单目标跟踪网络，在开源数据集GOT-10k, TrackingNet上均达到SOTA精度。",
+        "hot": 100,
+        "pic": "example.gif",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-recognition-frir",
+        "label": "IR人脸识别模型FRIR",
+        "describe": "IR人脸识别模型FRIR",
+        "hot": 98,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-manual-face-recognition-frfm",
+        "label": "口罩人脸识别模型FRFM-large",
+        "describe": "口罩人脸识别模型FRFM-large",
+        "hot": 91,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cartoon-stable-diffusion-flat",
+        "label": "卡通系列文生图模型-扁平风",
+        "describe": "",
+        "hot": 91,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cartoon-stable-diffusion-illustration",
+        "label": "卡通系列文生图模型-漫画风",
+        "describe": "",
+        "hot": 87,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-cartoon-stable-diffusion-watercolor",
+        "label": "卡通系列文生图模型-水彩风",
+        "describe": "",
+        "hot": 84,
+        "pic": "example.jpg",
+        "field": "机器视觉"
+    },
+    {
+        "price": "1",
+        "name": "cv-adaint-image-color-enhance-models",
+        "label": "Adaptive-Interval-3DLUT图像调色",
+        "describe": "",
+        "hot": 69,
+        "pic": "example.jpg",
+        "field": "机器视觉"
     }
 ]
