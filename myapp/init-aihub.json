@@ -4491,7 +4491,7 @@
         "label": "CMD视频表征模型",
         "describe": "一种自监督视频表征学习方案，通过在代理任务中显式地解耦场景与运动信息（context and motion decoupling），强制视频模型同时捕捉静态背景与动态行为两方面特征。",
         "hot": 275,
-        "pic": "example.png",
+        "pic": "example.jpg",
         "uuid": "cv-r2p1d-video-embedding",
         "field": "机器视觉"
     },

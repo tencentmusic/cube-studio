@@ -14,7 +14,7 @@ class CV_R2P1D_VIDEO_EMBEDDING_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "276"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_r2p1d_video_embedding/summary"
