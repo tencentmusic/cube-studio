@@ -3,7 +3,7 @@ import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
-import os
+import os,cv2
 
 class CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model(Model):
     # 模型基础信息定义
@@ -53,7 +53,10 @@ class CV_FLOW_BASED_BODY_RESHAPING_DAMO_Model(Model):
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
+        from modelscope.outputs import OutputKeys
         result = self.p(image)
+        cv2.imwrite('result.jpg', result[OutputKeys.OUTPUT_IMG])
+
         back=[
             {
                 "image": 'result/aa.jpg',
