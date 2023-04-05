@@ -17,7 +17,8 @@ def make_aihub_info():
                 "label":model['ChineseName'],
                 "describe":model['Description'],
                 "hot":model['Downloads'],
-                "pic":"example.jpg"
+                "pic":"example.jpg",
+                "uuid":model_name
             }
             field = ' '.join(model['Domain'])
             field = '自然语言' if 'nlp' in field else '机器视觉' if 'cv' in field else '听觉' if 'audio' in field else '多模态' if 'multi-modal' in field else "未知"
