@@ -561,4 +561,46 @@ def init():
     cp_cubestudio()
 
 
+    def add_chat(chat_path):
+        from myapp.models.model_chat import Chat
+        if not os.path.exists(chat_path):
+            return
+        chats = json.load(open(chat_path, mode='r'))
+
+        try:
+            if len(chats) > 0:
+                for data in chats:
+                    print(data)
+                    name = data.get('name', '')
+                    label = data.get('label', '')
+                    if name and label:
+                        chat = db.session.query(Chat).filter_by(name=name).first()
+                        if not chat:
+                            chat = Chat()
+                            chat.doc = data.get('doc', '')
+                            chat.name = name
+                            chat.label = label
+                            chat.icon = data.get('icon', '')
+                            chat.session_num = int(data.get('session_num', '0'))
+                            chat.chat_type = data.get('chat_type', 'text')
+                            chat.hello = data.get('hello', '这里是cube-studio开源社区，请问有什么可以帮你的么？')
+                            chat.tips = data.get('tips', '')
+                            chat.knowledge = data.get('knowledge', '')
+                            chat.service_type = data.get('service_type', 'chatgpt3.5')
+                            chat.service_config = json.dumps(data.get('service_config', {}),indent=4,ensure_ascii=False)
+                            chat.owner = data.get('owner', 'admin')
+
+                            if not chat.id:
+                                db.session.add(chat)
+                            db.session.commit()
+        except Exception as e:
+            print(e)
+
+    # 添加aihub
+    try:
+        print('begin add chat')
+        chat_path='myapp/init-chat.json'
+        add_chat(chat_path)
+    except Exception as e:
+        print(e)
 
