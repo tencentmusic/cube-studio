@@ -186,7 +186,7 @@ class Chat_View(MyappModelRestApi):
             default='',
             description='先验知识配置。如果先验字符串少于1800个字符，可以直接填写字符串，否则需要使用json配置',
             widget=MyBS3TextAreaFieldWidget(rows=5,tips=Markup('<pre><code>'+knowledge_config+"</code></pre>")),
-            validators=[DataRequired()]
+            validators=[]
         ),
         "tips": StringField(
             label=_(datamodel.obj.lab('tips')),
