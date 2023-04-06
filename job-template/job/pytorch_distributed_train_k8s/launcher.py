@@ -67,8 +67,6 @@ def default_job_name():
     return name[0:54]
 
 
-
-
 import subprocess
 # @pysnooper.snoop()
 def run_shell(shell):
@@ -120,6 +118,8 @@ def monitoring(crd_k8s,name,namespace):
             print('pytorchjob status %s'%pytorchjob['status'], flush=True)
         else:
             print('pytorchjob not exist', flush=True)
+
+        # 如果结束就kill stern，主进程继续
         if pytorchjob and (pytorchjob['status']=="Succeeded" or pytorchjob['status']=="Failed"):    # Created, Running, Restarting, Succeeded, or Failed
             pids = get_pid("stern")
             if pids:
@@ -128,7 +128,17 @@ def monitoring(crd_k8s,name,namespace):
                     pro.terminate()
                     print('kill process %s'%pid, flush=True)
             break
-        if (datetime.datetime.now()-check_time).seconds>3600:
+        else:
+
+            labels={
+                "pipeline-id": KFJ_PIPELINE_ID,
+                "task-id": KFJ_TASK_ID,
+                "run-id": KFJ_RUN_ID,
+            }
+            # pods = crd_k8s.get_pods(namespace=namespace,labels=labels)
+
+        # 因为stern 过几个小时就会崩溃，日志不再跟踪，但不报错，所以这里主动kill
+        if (datetime.datetime.now()-check_time).total_seconds()>3600:
             pids = get_pid("stern")
             if pids:
                 for pid in pids:
@@ -249,8 +259,9 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
 
 
     if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        pod_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        pod_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
+        gpu_num,gpu_type=k8s_client.get_gpu(GPU_RESOURCE)
+        pod_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = gpu_num
+        pod_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = gpu_num
 
     worker_pod_spec = copy.deepcopy(pod_spec)
     worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker
@@ -284,6 +295,10 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
 
     return pytorch_deploy
 
+
+# 获取分布式任务每个pod的情况，获取更多状态信息
+def get_pytorchjob_pod():
+    pass
 
 # @pysnooper.snoop()
 def launch_pytorchjob(name, num_workers, image,working_dir, worker_command):
