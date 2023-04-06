@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: metadata-grpc-configmap
-  labels:
-    component: metadata-grpc-server
-data:
-  METADATA_GRPC_SERVICE_HOST: "metadata-grpc-service"
-  METADATA_GRPC_SERVICE_PORT: "8080"
