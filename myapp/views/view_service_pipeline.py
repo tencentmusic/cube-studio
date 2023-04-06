@@ -409,29 +409,13 @@ class Service_Pipeline_ModelView_Base():
     # # @event_logger.log_this
     @expose("/web/log/<service_pipeline_id>", methods=["GET"])
     def web_log(self,service_pipeline_id):
-        service_pipeline = db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
-        if service_pipeline.run_id:
-            data = {
-                "url": service_pipeline.project.cluster.get('PIPELINE_URL') + "runs/details/" + service_pipeline.run_id,
-                "target": "div.page_f1flacxk:nth-of-type(0)",   # "div.page_f1flacxk:nth-of-type(0)",
-                "delay":500,
-                "loading": True
-            }
-            # 返回模板
-            if service_pipeline.project.cluster['NAME']==conf.get('ENVIRONMENT'):
-                return self.render_template('link.html', data=data)
-            else:
-                return self.render_template('external_link.html', data=data)
-        else:
-            flash('no running instance','warning')
-            return redirect('/service_pipeline_modelview/web/%s'%service_pipeline.id)
-
+        pass
     # 链路跟踪
     @expose("/web/monitoring/<service_pipeline_id>", methods=["GET"])
     def web_monitoring(self,service_pipeline_id):
         service_pipeline = db.session.query(Service_Pipeline).filter_by(id=int(service_pipeline_id)).first()
         if service_pipeline.run_id:
-            url = service_pipeline.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_TASK_PATH')+ service_pipeline.name
+            url = "http://"+service_pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+ service_pipeline.name
             return redirect(url)
         else:
             flash('no running instance','warning')
@@ -442,7 +426,7 @@ class Service_Pipeline_ModelView_Base():
     def web_pod(self,service_pipeline_id):
         service_pipeline = db.session.query(Service_Pipeline).filter_by(id=service_pipeline_id).first()
         data = {
-            "url": service_pipeline.project.cluster.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_PIPELINE_NAMESPACE'), service_pipeline.name.replace('_', '-')),
+            "url": "http://" + service_pipeline.project.cluster.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_PIPELINE_NAMESPACE'), service_pipeline.name.replace('_', '-')),
             "target":"div.kd-chrome-container.kd-bg-background",
             "delay":500,
             "loading": True

@@ -114,12 +114,24 @@ class Docker_ModelView_Base():
     pre_update_web=pre_add_web
 
     def pre_add(self,item):
-        image_org=conf.get('REPOSITORY_ORG')+g.user.username+":"
-        if image_org not in item.target_image or item.target_image==image_org:
-            flash('目标镜像名称不符合规范','warning')
+        if '/' not in item.target_image:
+            flash('目标镜像名称不符合规范，未发现目标所属仓库的配置', 'warning')
+        else:
+            repository_host = item.target_image[:item.target_image.index('/')]
+            repository = db.session.query(Repository).filter_by(server=repository_host).first()
+            if repository:
+                flash('目标镜像名称不符合规范，未发现目标所属仓库的配置', 'warning')
+
+        # image_org=conf.get('REPOSITORY_ORG')+g.user.username+":"
+        # if image_org not in item.target_image or item.target_image==image_org:
+        #     flash('目标镜像名称不符合规范','warning')
 
         if item.expand:
-            item.expand = json.dumps(json.loads(item.expand),indent=4,ensure_ascii=False)
+            expand = json.loads(item.expand)
+            expand['namespace'] = json.loads(item.project.expand).get('NOTEBOOK_NAMESPACE', conf.get('NOTEBOOK_NAMESPACE'))
+            item.expand = json.dumps(expand,indent=4,ensure_ascii=False)
+
+
 
     def pre_update(self,item):
         self.pre_add(item)
@@ -137,7 +149,7 @@ class Docker_ModelView_Base():
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = json.loads(docker.expand).get("namespace",conf.get('NOTEBOOK_NAMESPACE'))
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         pod = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
         if pod:
@@ -191,8 +203,11 @@ class Docker_ModelView_Base():
             try_num=try_num-1
             time.sleep(2)
         if try_num==0:
-            message='拉取镜像时间过长，一分钟后刷新此页面'
+            pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (namespace, pod_name)
+
+            message='拉取镜像时间过长，一分钟后刷新此页面，或者打开链接：%s，查看pod信息'%pod_url
             flash(message,'warning')
+
             return self.response(400,**{"message":message,"status":1,"result":pod['status_more']})
             # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
@@ -207,8 +222,10 @@ class Docker_ModelView_Base():
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = json.loads(docker.expand).get("namespace",conf.get('NOTEBOOK_NAMESPACE'))
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
+        k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
+        pod_name="docker-commit-%s-%s"%(docker.created_by.username,str(docker.id))
         k8s_client.delete_pods(namespace=namespace,pod_name=pod_name)
         flash('清理结束，可重新进行调试','success')
         return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
@@ -217,9 +234,10 @@ class Docker_ModelView_Base():
     @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>", methods=["GET", "POST"])
     # @pysnooper.snoop()
     def web_debug(self,cluster_name,namespace,pod_name):
-        cluster=conf.get('CLUSTERS',{})
-        if cluster_name in cluster:
-            pod_url = cluster[cluster_name].get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,pod_name, namespace)
+        from flask import request
+        clusters=conf.get('CLUSTERS',{})
+        if cluster_name in clusters:
+            pod_url = "http://" + clusters[cluster_name].get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name,pod_name, namespace)
         else:
             pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, pod_name, namespace)
         print(pod_url)
@@ -245,7 +263,7 @@ class Docker_ModelView_Base():
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = json.loads(docker.expand).get("namespace",conf.get('NOTEBOOK_NAMESPACE'))
         pod_name="docker-%s-%s"%(docker.created_by.username,str(docker.id))
         pod = k8s_client.v1.read_namespaced_pod(name=pod_name, namespace=namespace)
         node_name=''
@@ -308,7 +326,7 @@ class Docker_ModelView_Base():
         }
         check_docker_commit.apply_async(kwargs=kwargs)
 
-        return redirect("/myapp/web/log/%s/%s/%s" % (conf.get('ENVIRONMENT'),namespace, pod_name))
+        return redirect("/k8s/web/log/%s/%s/%s" % (conf.get('ENVIRONMENT'),namespace, pod_name))
 
 
 

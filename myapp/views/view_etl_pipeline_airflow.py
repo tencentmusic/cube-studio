@@ -1093,7 +1093,7 @@ class AIRFLOW_ETL_PIPELINE():
     def submit_pipeline(self):
         # todo 检查任务是否存在，提交创建新的任务或修改旧任务，或者删除任务
         # todo 保存到调度平台，并发起远程调度
-        return self.host+"/code?dag_id=%s"%self.pipeline.name
+        return "", self.host+"/code?dag_id=%s"%self.pipeline.name
 
     # todo: 删除前先把下面的task删除了
     # @pysnooper.snoop()

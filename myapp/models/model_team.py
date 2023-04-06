@@ -50,6 +50,9 @@ class Project(Model,AuditMixinNullable,MyappModelBase):
         try:
             expand = json.loads(self.expand) if self.expand else {}
             node_selector = expand.get('node_selector', '')
+            if 'org' in expand:
+                node_selector+=',org='+expand['org']
+            node_selector = ','.join(list(set([x for x in node_selector.split(',') if x])))
             return node_selector
         except Exception as e:
             print(e)
