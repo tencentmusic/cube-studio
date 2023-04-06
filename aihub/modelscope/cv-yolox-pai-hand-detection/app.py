@@ -15,7 +15,7 @@ class CV_YOLOX_PAI_HAND_DETECTION_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.jpeg'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "1859"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_yolox-pai_hand-detection/summary"

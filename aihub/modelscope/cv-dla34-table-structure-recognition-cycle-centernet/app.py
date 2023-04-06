@@ -4,6 +4,8 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 class CV_DLA34_TABLE_STRUCTURE_RECOGNITION_CYCLE_CENTERNET_Model(Model):
     # 模型基础信息定义
@@ -50,17 +52,17 @@ class CV_DLA34_TABLE_STRUCTURE_RECOGNITION_CYCLE_CENTERNET_Model(Model):
         
         self.p = pipeline('table-recognition', 'damo/cv_dla34_table-structure-recognition_cycle-centernet')
 
+
+
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
+
+
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(result)
             }
         ]
         return back
@@ -68,10 +70,11 @@ class CV_DLA34_TABLE_STRUCTURE_RECOGNITION_CYCLE_CENTERNET_Model(Model):
 model=CV_DLA34_TABLE_STRUCTURE_RECOGNITION_CYCLE_CENTERNET_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/table_recognition.jpg')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/table_recognition.jpg')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+# 此模型输出结果为表格框的四个点的坐标，没有画出图
+if __name__=='__main__':
+    model.run()

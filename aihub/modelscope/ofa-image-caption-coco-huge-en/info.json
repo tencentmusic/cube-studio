@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/ofa-image-caption-coco-huge-en",
+    "field": "多模态",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "ofa-image-caption-coco-huge-en",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "ofa-image-caption-coco-huge-en-v20221001",
+    "label": "OFA图像描述-英文-通用领域-huge",
+    "describe": "根据用户输入的任意图片，AI智能创作模型3秒内快速写出“一句话描述”，可用于图像标签和图像简介。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

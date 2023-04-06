@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,random,cv2
 import pysnooper
 import os
 
@@ -67,17 +67,24 @@ class CV_VITB16_CLASSIFICATION_VISION_EFFICIENT_TUNING_ADAPTER_Model(Model):
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
+        os.makedirs('result', exist_ok=True)
+        save_path = 'result/' + str(random.randint(1, 10000)) + ".jpg"
+        if 'http' in image:
+            import requests
+            open(save_path, 'wb').write(requests.get(image).content)
+            image = cv2.imread(save_path)
+        else:
+            image = cv2.imread(image)
+        image = cv2.resize(image, (224, 224))
         result = self.p(image)
+        text = [(result['labels'][index]+":"+str(round(result['scores'][index],2))) for index in range(len(result['labels']))]
+        text = '，\r\n'.join(text)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "markdown": text
             }
         ]
         return back
@@ -94,6 +101,6 @@ model.load_model(save_model_dir=None)
 result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/vision_efficient_tuning_test_sunflower.jpg')  # 测试
 print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()

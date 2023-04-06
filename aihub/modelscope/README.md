@@ -97,8 +97,9 @@ sudo docker run --name ${aiapp} --privileged -d -e APPNAME=$aiapp -v $cube_dir/s
 
 # 部分常用代码
 
-1.输入与输出的图片，按比例缩小到最大边不大于1280。
+1）基础函数示例
 ```python
+1.输入与输出的图片，按比例缩小到最大边不大于1280。
 import cv2
 
 def resize_image(image):
@@ -111,6 +112,42 @@ def resize_image(image):
             ratio = max_size / width
         image = cv2.resize(image, (int(width * ratio), int(height * ratio)))
     return image
+
+# 画圆点
+def draw_keypoint(img,keypoint):
+    x = [keypoint[index] for index in range(len(keypoint)//2)]
+    y = [keypoint[index+1] for index in range(len(keypoint)//2)]
+
+    max_x, min_x, max_y, min_y = max(x), min(x), max(y), min(y)
+    # print(max_x,max_y,min_x,min_y)
+    radius = max(1,(max(x)-min(x))//50,(max(y)-min(y))//50)
+    for index,dot in enumerate(x):
+        cv2.circle(img, (int(x[index]), int(y[index])), radius, (0, 0, 255), -1)
+    return img
+
+# 画框+写字
+def draw_boxs(img,box,label=None):
+    cv2.rectangle(img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 255), 2)
+    # 得分越高，假体可能性越高，但是并没有具体的数字说中间值是多少
+    cv2.putText(img, str(label), (int(box[0]), int(box[1] - 10)), cv2.FONT_HERSHEY_SIMPLEX, 1,(0, 0, 255), 2)
+    return img
+
+
+# 保存图片
+save_path = f'result/result{random.randint(1, 1000)}.jpg'
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+if os.path.exists(save_path):
+    os.remove(save_path)
+cv2.imwrite(save_path, result['output_img'])
+
+# 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
+# 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
+back = [
+    {
+        "image": save_path
+    }
+]
+return back
 ```
 
 
@@ -118,77 +155,33 @@ def resize_image(image):
 ```bash
 import cv2
 
-def box_label(self, input_path, res):
+def draw_image(self,input_path, result):
     def get_color(idx):
         idx = (idx + 1) * 3
         color = ((10 * idx) % 255, (20 * idx) % 255, (30 * idx) % 255)
         return color
+
     img = cv2.imread(input_path)
-    unique_label = list(set(res['labels']))
-    for idx in range(len(res['scores'])):
-        x1, y1, x2, y2 = res['boxes'][idx]
-        score = str("%.2f"%res['scores'][idx])
-        label = str(res['labels'][idx])
+    unique_label = list(set(result['labels']))
+    for idx,score in enumerate(result['scores']):
+        box = result['boxes'][idx] if 'boxes' in result else []
+        keypoint = result['keypoints'][idx] if 'keypoints' in result else []
+        label = result['labels'][idx] if 'labels' in result else []
+        score = round(score,2)
         color = get_color(unique_label.index(label))
-        line_width = int(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1
         text_size = 0.001 * (img.shape[0] + img.shape[1]) / 2 + 0.3
-        cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), color, line_width)
-        cv2.putText(img, label, (int(x1), int(y1) - 10),
-                    cv2.FONT_HERSHEY_PLAIN, text_size, color, line_width)
-        cv2.putText(img, score, (int(x1), int(y2) + 10 + int(text_size*5)),
-                    cv2.FONT_HERSHEY_PLAIN, text_size, color, line_width)
+        line_width = int(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1
+        if box:
+            cv2.rectangle(img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color, line_width)
+        if box and (label or score):
+            text = label+str(score)
+            cv2.putText(img, text, (int(box[0]), int(box[1]) + 10),cv2.FONT_HERSHEY_PLAIN, text_size, color, line_width)
+        if keypoint:
+            x = [keypoint[index] for index in range(len(keypoint) // 2)]
+            y = [keypoint[index + 1] for index in range(len(keypoint) // 2)]
+            radius = max(1, (max(x) - min(x)) // 50, (max(y) - min(y)) // 50)
+            for index, dot in enumerate(x):
+                cv2.circle(img, (int(x[index]), int(y[index])), radius, (0, 0, 255), -1)
+
     return img
 ```
-
-
-3.若遇到了需要自己去修改图像的场景，可用以下方法修改：
-
-1）画框
-```python
-cv2.rectangle(img, pt1, pt2, color, thickness, lineType, shift )
-参数表示依次为： （图片，长方形框左上角坐标, 长方形框右下角坐标， 字体颜色，字体粗细）
-使用方法：
-import cv2
-
-cv2.rectangle(frame,                         # 加载的图片
-              (int(bbox[0]), int(bbox[1])),  # 左上角坐标
-              (int(bbox[2]), int(bbox[3])),  # 右上角坐标
-               color,                        # 颜色
-               2)                            # 粗细
-
-```
-
- 2）画圆
-```python
-	cv2.circle(img, center, radius, color, thickness=None, lineType=None, shift=None): 
-	参数表示依次为：图片，中心点，半径，颜色，圆轮廓粗细，在中心坐标和半径值中的小数位数。
-       使用方法：
-import cv2
-
-cv2.circle(img,      # 图像
-           (447,63), # 中心点位置
-           63,       # 半径
-           (0,0,255),# 颜色 
-           -1)       # 粗细  -1表示填充
-
-```
-
- 3）写字
-```bash
-	cv2.putText(image, text, org, font, fontScale, color, thickness, lineType, bottomLeftOrigin)
-参数表示依次为：图片，要添加的文字，文字添加到图片上的位置，字体的类型，字体大小，字体颜色，字体粗细
-使用方法：
-import cv2
-
-cv2.putText(img,                # 图像
-            'OpenCV',           # 添加的文字
-            (10, 500),          # 位置
-            font,               # 字体
-            4,                  # 字体大小
-            (255, 255, 255),    # 颜色
-            2)                  # 粗细
-
-	
-```
-
-

@@ -28,7 +28,7 @@ class CV_UNET_VIDEO_DEINTERLACE_Model(Model):
     ]
 
     inference_resource = {
-        "resource_gpu": "0"
+        "resource_gpu": "1"
     }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[

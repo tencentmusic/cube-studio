@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/mplug-visual-question-answering-coco-large-en",
+    "field": "多模态",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "mplug-visual-question-answering-coco-large-en",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "mplug-visual-question-answering-coco-large-en-v20221001",
+    "label": "mPLUG视觉问答模型-英文-large",
+    "describe": "本任务是mPLUG，在英文VQA数据集进行finetune的视觉问答下游任务。给定一个问题和图片，通过图片信息来给出答案。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

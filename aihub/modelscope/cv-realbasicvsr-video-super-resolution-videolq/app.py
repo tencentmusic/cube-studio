@@ -14,7 +14,7 @@ class CV_REALBASICVSR_VIDEO_SUPER_RESOLUTION_VIDEOLQ_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.png'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "3301"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_realbasicvsr_video-super-resolution_videolq/summary"

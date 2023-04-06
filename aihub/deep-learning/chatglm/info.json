@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/chatglm",
+    "field": "自然语言",
+    "scenes": "聊天机器人",
+    "type": "dateset,notebook,train,inference",
+    "name": "chatglm",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "chatglm-v20221001",
+    "label": "中文大模型chatglm",
+    "describe": "中文大模型chatglm",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-yolov5-video-multi-object-tracking-fairmot",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-yolov5-video-multi-object-tracking-fairmot",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-yolov5-video-multi-object-tracking-fairmot-v20221001",
+    "label": "视频多目标跟踪-行人",
+    "describe": "该模型采用基于FairMOT的方案，输入待跟踪视频，可端对端推理得到视频中的所有行人的运动轨迹。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}
