@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kubernetes Web log</title>
+</head>
+{#<style>#}
+{#    .code-div {#}
+{#        background-color: #000000;#}
+{#        padding: 10px;#}
+{#    }#}
+{#    #terminal {#}
+{#        background-color: #000000;#}
+{#        color: #FFFFFF;#}
+        {#overflow-y:scroll;#}
+        {#overflow-x:scroll;#}
+{#        font-family:courier-new, courier, monospace;#}
+{##}
+{#        font-feature-settings: "liga" 0;#}
+{#        line-height: 30px;#}
+{#    }#}
+{#</style>#}
+<body>
+<div class="code-div"><pre><code id="terminal"></code></pre></div>
+
+<script src="{{ url_for('static', filename='appbuilder/terminal/static/js/jquery-1.12.4.js') }}"></script>
+<script src="{{ url_for('static', filename='appbuilder/terminal/static/js/socket.io.min.js') }}"></script>
+
+<script>
+    document.getElementById('terminal').style.height = window.innerHeight + 'px';
+    document.getElementById('terminal').style.width = window.innerWidth + 'px';
+    let ws_url = 'http://' + `${window.location.host}` + '{{ data.url }}'
+    console.log(ws_url);
+    var socket = io.connect(ws_url);
+    socket.on('{{ data.user_event_name }}',function(message){
+        console.log(message)
+        document.getElementById("terminal").innerHTML += '<p>'+message+'</p>';
+    })
+    req_data={
+        "cluster_name": '{{ data.cluster_name }}',
+        "namespace_name": '{{ data.namespace_name }}',
+        "pod_name": '{{ data.pod_name }}',
+        "container_name": '{{ data.container_name }}',
+        "user_event_name": '{{ data.user_event_name }}',
+        "server_event_name": '{{ data.server_event_name }}'
+    }
+    console.log(req_data)
+    socket.emit('{{ data.server_event_name }}', req_data);
+    console.log('begin')
+
+
+</script>
+</body>
+</html>
