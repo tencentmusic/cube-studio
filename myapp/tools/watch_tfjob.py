@@ -172,7 +172,7 @@ def save_monitoring(tfjob,dbsession):
             task_id = json.loads(tfjob.labels).get('task-id','')
             if task_id:
                 task = dbsession.query(Task).filter_by(id=int(task_id)).first()
-                metrics = prometheus.get_resource_metric(tfjob.name, namespace='pipeline')
+                metrics = prometheus.get_pod_resource_metric(tfjob.name, namespace='pipeline')
                 monitoring = json.loads(task.monitoring) if task and task.monitoring else {}
 
                 tfjob_monitoring = monitoring.get('tfjob', [])
