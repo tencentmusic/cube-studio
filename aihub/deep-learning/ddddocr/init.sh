@@ -1,2 +1,0 @@
-
-pip install ddddocr Pillow
