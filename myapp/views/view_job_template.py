@@ -380,7 +380,7 @@ class Job_Template_ModelView_Base():
                                  resource_memory=resource_memory,
                                  resource_gpu=0,
                                  image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
-                                 image_pull_secrets=[job_template.images.repository.hubsecret],
+                                 image_pull_secrets=[job_template.images.repository.hubsecret]+conf.get('HUBSECRET', []),
                                  image=job_template.images.name,
                                  hostAliases=hostAliases,
                                  env=env,
@@ -403,10 +403,7 @@ class Job_Template_ModelView_Base():
             return response
 
         user_roles = [role.name.lower() for role in list(g.user.roles)]
-        if "admin" in user_roles:
-            pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
-        else:
-            pod_url = conf.get('K8S_DASHBOARD_PIPELINE') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
+        pod_url = request.host_url.rstrip('/')+conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, pod_name)
         print(pod_url)
         response = make_response("启动成功，日志地址: %s"%pod_url)
         response.status_code = 200
@@ -474,6 +471,7 @@ class Job_Template_ModelView_Base():
 # 添加api
 class Job_Template_ModelView_Api(Job_Template_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Job_Template)
+    page_size = 1000
     route_base = '/job_template_modelview/api'
     # add_columns = ['project', 'images', 'name', 'version', 'describe', 'args', 'env','hostAliases', 'privileged','accounts', 'demo','expand']
     add_columns = ['project', 'images', 'name', 'version', 'describe', 'workdir', 'entrypoint', 'volume_mount','args', 'env', 'hostAliases', 'privileged', 'accounts', 'expand']
@@ -491,7 +489,7 @@ class Job_Template_fab_ModelView_Api(Job_Template_ModelView_Base,MyappModelRestA
     route_base = '/job_template_fab_modelview/api'
     # add_columns = ['project', 'images', 'name', 'version', 'describe', 'args', 'env','hostAliases', 'privileged','accounts', 'demo','expand']
     add_columns = ['project', 'images', 'name', 'version', 'describe', 'workdir', 'entrypoint', 'volume_mount','args', 'env', 'hostAliases', 'privileged', 'accounts', 'expand']
-
+    page_size = 1000
     edit_columns = add_columns
     list_columns = ['project','name','version','creator','modified']
     show_columns = ['project', 'images', 'name', 'version', 'describe', 'workdir', 'entrypoint', 'volume_mount','args', 'env', 'hostAliases', 'privileged', 'accounts', 'expand']
