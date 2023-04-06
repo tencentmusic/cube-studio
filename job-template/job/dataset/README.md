@@ -10,7 +10,7 @@
             "item_type": "str",
             "label": "数据集的来源",
             "require": 1,
-            "choice": ["当前平台","huggingface","魔塔"],
+            "choice": ["当前平台","huggingface"],
             "range": "",
             "default": "当前平台",
             "placeholder": "",
