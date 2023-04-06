@@ -8,6 +8,7 @@ from myapp.models.model_dataset import Dataset
 from myapp.models.model_serving import Service,InferenceService
 from myapp.models.model_train_model import Training_Model
 import uuid
+import os
 conf = app.config
 
 def create_app(script_info=None):
@@ -21,12 +22,16 @@ def make_shell_context():
 @app.cli.command('init')
 # @pysnooper.snoop()
 def init():
-
-    # 初始化创建项目组
     try:
         """Inits the Myapp application"""
         appbuilder.add_permissions(update_perms=True)   # update_perms为true才会检测新权限
         security_manager.sync_role_definitions()
+    except Exception as e:
+        print(e)
+
+    # 初始化创建项目组
+    try:
+
         def add_project(project_type,name,describe,expand={}):
             project = db.session.query(Project).filter_by(name=name).filter_by(type=project_type).first()
             if project is None:
@@ -52,24 +57,33 @@ def init():
 
 
         # 添加一些默认的记录
+        add_project('org', 'public', '公共项目组')
         add_project('org','推荐中心','推荐项目组')
-        add_project('org', '多媒体中心', '多媒体项目组')
         add_project('org', '搜索中心', '搜索项目组')
         add_project('org', '广告中心', '广告项目组')
-        add_project('org', 'public', '公共项目组')
+        add_project('org', '安全中心', '安全项目组')
+        add_project('org', '多媒体中心', '多媒体项目组')
 
         add_project('job-template', '基础命令', 'python/bash等直接在服务器命令行中执行命令的模板',{"index":1})
         add_project('job-template', '数据导入导出', '集群与用户机器或其他集群之间的数据迁移',{"index":2})
         add_project('job-template', '数据处理', '数据的单机或分布式处理任务,ray/spark/hadoop/volcanojob',{"index":3})
-        add_project('job-template', '机器学习', '传统机器学习，lr/决策树/gbdt/xgb/fm等', {"index": 4})
-        add_project('job-template', '深度学习', '深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等', {"index": 5})
-        add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 6})
-        add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 7})
-        add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 8})
-        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 9})
-        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 10})
-        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 11})
-        add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 12})
+        add_project('job-template', '机器学习框架', '传统机器学习框架，sklearn', {"index": 4})
+        add_project('job-template', '机器学习算法', '传统机器学习，lr/决策树/gbdt/xgb/fm等', {"index": 5})
+        add_project('job-template', '深度学习', '深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等', {"index": 6})
+        add_project('job-template', '分布式框架', 'tf相关的训练，模型校验，离线预测等功能', {"index": 7})
+        add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 8})
+        add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 9})
+        add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 10})
+        add_project('job-template', '模型处理', '模型服务化部署相关的组件模板', {"index": 11})
+        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 12})
+        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 13})
+        add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 14})
+        add_project('job-template', '广告类模板', '推荐领域常用的任务模板', {"index": 15})
+        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 16})
+        add_project('job-template', '机器视觉', '视觉类相关模板', {"index": 17})
+        add_project('job-template', '听觉', '听觉类相关模板', {"index": 18})
+        add_project('job-template', '自然语言', '自然语言类相关模板', {"index": 19})
+        add_project('job-template', '大模型', '大模型相关模板', {"index": 20})
 
     except Exception as e:
         print(e)
@@ -309,6 +323,7 @@ def init():
                 dataset = Dataset()
                 dataset.name = kwargs['name']
                 dataset.field=kwargs.get('field','')
+                dataset.version = 'latest'
                 dataset.label=kwargs.get('label','')
                 dataset.status=kwargs.get('status','')
                 dataset.describe=kwargs.get('describe','')
@@ -486,16 +501,63 @@ def init():
     except Exception as e:
         print(e)
 
+    def add_aihub(info_path):
+        from myapp.models.model_aihub import Aihub
+        if not os.path.exists(info_path):
+            return
+        aihubs = json.load(open(info_path, mode='r'))
+
+        try:
+            if len(aihubs) > 0:
+                # dbsession.query(Aihub).delete()
+                # dbsession.commit()
+                for data in aihubs:
+                    print(data)
+                    name = data.get('name', '')
+                    label = data.get('label', '')
+                    describe = data.get('describe', '')
+                    uuid = data.get('uuid', '')
+                    if name and label and describe and uuid:
+                        aihub = db.session.query(Aihub).filter_by(uuid=uuid).first()
+                        if not aihub:
+                            aihub = Aihub()
+                        aihub.doc = data.get('doc', '')
+                        aihub.name = name
+                        aihub.label = label
+                        aihub.describe = describe
+                        aihub.field = data.get('field', '')
+                        aihub.scenes = data.get('scenes', '')
+                        aihub.type = data.get('type', '')
+                        aihub.pic = data.get('pic', '')
+                        aihub.status = data.get('status', '')
+                        aihub.uuid = uuid
+                        aihub.images = data.get('images', '')
+                        aihub.version = data.get('version', '')
+                        aihub.dataset = json.dumps(data.get('dataset', {}), indent=4, ensure_ascii=False)
+                        aihub.notebook = json.dumps(data.get('notebook', {}), indent=4, ensure_ascii=False)
+                        aihub.job_template = json.dumps(data.get('train', {}), indent=4, ensure_ascii=False)
+                        aihub.pre_train_model = json.dumps(data.get('pre_train_model', {}), indent=4,ensure_ascii=False)
+                        aihub.inference = json.dumps(data.get('inference', {}), indent=4, ensure_ascii=False)
+                        aihub.service = json.dumps(data.get('service', {}), indent=4, ensure_ascii=False)
+                        aihub.hot = int(data.get('hot', '0'))
+                        aihub.price = int(data.get('price', '0'))
+                        aihub.source = data.get('source', '')
+                        if not aihub.id:
+                            db.session.add(aihub)
+                        db.session.commit()
+        except Exception as e:
+            print(e)
+
     # 添加aihub
     try:
         print('begin add aihub')
-        info_path='/home/myapp/myapp/tasks/info.json'
-        from myapp.tasks.schedules import add_aihub
+        info_path='myapp/init-aihub.json'
         add_aihub(info_path)
     except Exception as e:
         print(e)
 
-
-
+    # 复制cube-studio代码（aihub和sdk）
+    from myapp.tasks.schedules import cp_cubestudio
+    cp_cubestudio()
 
 

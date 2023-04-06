@@ -21,7 +21,7 @@ def check_tables():
         print(results)
         for table_name in ['ab_permission','ab_permission_view','ab_permission_view_role','ab_register_user','ab_role','ab_user','ab_user_role','ab_view_menu','alembic_version','dimension','docker','images','inferenceservice','job_template','logs','metadata_metric','model','nni','notebook','pipeline','project','project_user','pytorchjob','repository','run','service','service_pipeline','task','metadata_table','tfjob','workflow','xgbjob']:
             if table_name not in results:
-                print('kubeflow db下，table %s不完整，请\n1、mysql: drop database kubeflow\n2、重启当前pod'%table_name)
+                print('kubeflow db下，table %s不完整，请\n1、mysql: drop dabatase kubeflow\n2、重启当前pod'%table_name)
                 exit(1)
 
 check_tables()
