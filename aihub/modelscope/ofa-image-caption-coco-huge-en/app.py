@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import numpy
 
 class OFA_IMAGE_CAPTION_COCO_HUGE_EN_Model(Model):
     # 模型基础信息定义
@@ -35,33 +36,9 @@ class OFA_IMAGE_CAPTION_COCO_HUGE_EN_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "image": "https://shuangqing-public.oss-cn-zhangjiakou.aliyuncs.com/donuts.jpg"
+                "image": "test.jpg"
             }
         },
-        {
-            "label": "示例2",
-            "input": {
-                "image": "https://xingchen-data.oss-cn-zhangjiakou.aliyuncs.com/maas/visual-question-answering/vqa2.jpg"
-            }
-        },
-        {
-            "label": "示例3",
-            "input": {
-                "image": "https://xingchen-data.oss-cn-zhangjiakou.aliyuncs.com/maas/visual-question-answering/vqa1.jpg"
-            }
-        },
-        {
-            "label": "示例4",
-            "input": {
-                "image": "https://xingchen-data.oss-cn-zhangjiakou.aliyuncs.com/maas/visual-question-answering/vqa3.jpg"
-            }
-        },
-        {
-            "label": "示例5",
-            "input": {
-                "image": "https://xingchen-data.oss-cn-zhangjiakou.aliyuncs.com/maas/visual-question-answering/vqa4.jpeg"
-            }
-        }
     ]
 
     # 训练的入口函数，此函数会自动对接pipeline，将用户在web界面填写的参数传递给该方法
@@ -86,16 +63,12 @@ class OFA_IMAGE_CAPTION_COCO_HUGE_EN_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
         result = self.p(image)
-
+        text = result.get("caption")
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -108,10 +81,12 @@ model=OFA_IMAGE_CAPTION_COCO_HUGE_EN_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://shuangqing-public.oss-cn-zhangjiakou.aliyuncs.com/donuts.jpg')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(image='test.jpg')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小3.6G,内存占用11.01G,识别图片响应在15秒左右,具体根据图片内容复杂程度而定,没有GPU
+#识别结果比较准确

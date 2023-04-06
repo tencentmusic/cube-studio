@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import numpy
 
 class MPLUG_VISUAL_QUESTION_ANSWERING_COCO_LARGE_EN_Model(Model):
     # 模型基础信息定义
@@ -36,45 +37,10 @@ class MPLUG_VISUAL_QUESTION_ANSWERING_COCO_LARGE_EN_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "image": "https://alice-open.oss-cn-zhangjiakou.aliyuncs.com/mPLUG/image_mplug_vqa_5.jpg",
-                "question": "what name is this guy?"
+                "image": "test.jpg",
+                "question": "What is the name of this animal?"
             }
         },
-        {
-            "label": "示例2",
-            "input": {
-                "image": "https://alice-open.oss-cn-zhangjiakou.aliyuncs.com/mPLUG/image_mplug_vqa_4.jpg",
-                "question": "what is the name of the planet?"
-            }
-        },
-        {
-            "label": "示例3",
-            "input": {
-                "image": "https://alice-open.oss-cn-zhangjiakou.aliyuncs.com/mPLUG/image_mplug_vqa_1.jpg",
-                "question": "what airline owns this plane?"
-            }
-        },
-        {
-            "label": "示例4",
-            "input": {
-                "image": "http://xingchen-data.oss-cn-zhangjiakou.aliyuncs.com/maas/visual-question-answering/visual_question_answering.png",
-                "question": "what is grown on the plant?"
-            }
-        },
-        {
-            "label": "示例5",
-            "input": {
-                "image": "https://alice-open.oss-cn-zhangjiakou.aliyuncs.com/mPLUG/image_mplug_vqa_3.jpg",
-                "question": "What do you call the devices on top of the pole?"
-            }
-        },
-        {
-            "label": "示例6",
-            "input": {
-                "image": "https://alice-open.oss-cn-zhangjiakou.aliyuncs.com/mPLUG/image_mplug_vqa_2.jpg",
-                "question": "what does this machine do?"
-            }
-        }
     ]
 
     # 训练的入口函数，此函数会自动对接pipeline，将用户在web界面填写的参数传递给该方法
@@ -99,16 +65,12 @@ class MPLUG_VISUAL_QUESTION_ANSWERING_COCO_LARGE_EN_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,question,**kwargs):
         result = self.p({"image": image, "question": question})
-
+        text = result.get("text")
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text),
             }
         ]
         return back
@@ -121,10 +83,12 @@ model=MPLUG_VISUAL_QUESTION_ANSWERING_COCO_LARGE_EN_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://alice-open.oss-cn-zhangjiakou.aliyuncs.com/mPLUG/image_mplug_vqa_5.jpg',question='what name is this guy?')  # 测试
-print(result)
+#model.load_model(save_model_dir=None)
+#result = model.inference(image='test.jpg',question='What is the name of this animal?')  # 测试
+#print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+     model.run()
+#模型大小2.8G,内存占用9.21G,识别图片响应在4秒左右,没有GPU
+#识别比较准确,内存占用高
