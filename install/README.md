@@ -11,42 +11,36 @@
 
 # 组件说明
 
-| 命名空间 | 组件名 | 组件说明 |
-| :-----| :---- | :---- |
-| infra | kubeflow-dashboard | cube-studio平台的web前后端 |
-| infra | kubeflow-dashboard-init  | cube-studio平台初始化任务，用来创建数据库，初始化表和记录 |
-| infra | kubeflow-dashboard-schedule  | 用来调度cube-studio系统自带的调度任务，比如定时清理 |
-| infra | kubeflow-dashboard-worker  | 用来执行cube-studio系统自带的调度任务，比如定时清理 |
-| infra | 	kubeflow-watch  | 用来监控cube-studio平台中的任务，发起通知和信息更新 |
-| infra | 	mysql  | 平台元数据的存储 |
-| infra | 	redis  | 平台缓存，和异步任务对接 |
-| kube-system | kubernetes-dashboard-cluster | k8s中pod的管理界面 |
-| kube-system | dashboard-cluster-metrics-scraper | k8s中pod的管理界面上的pod资源使用情况的插件 |
-| kube-system | nvidia-device-plugin-daemonset | k8s中使用机器gpu驱动和设备的插件 |
-| kube-system | kube-batch | 批调度插件，在同时调度多个pod时必须要同时满足所有pod资源需求才进行调度的组件 |
-| kube-system | metrics-server | 集群资源使用情况的指标采集，用来在hpa时使用 |
-| kube-system | kubeflow-prometheus-adapter | 用来将prometheus采集的指标转化为可以用来控制hpa的指标 |
-| kubeflow |  frameworkcontroller  | nni超参搜索需要的分布式组件 |
-| kubeflow |  	metadata-* 和	ml-pipeline-* | pipeline跟踪调试组件 |
-| kubeflow |   minio | 对象存储 |
-| kubeflow |   mpi-operator | mpi分布式训练 |
-| kubeflow |   mxnet-operator | mxnet分布式训练 |
-| kubeflow |  pytorch-operator | pytorch分布式训练 |
-| kubeflow |  tf-job-operator | tf分布式训练 |
-| kubeflow |  workflow-controller | argo 云原生调度 |
-| istio-system |  istio-ingressgateway  | 入口网关，用来代理所有外部访问 |
-| istio-system |  cluster-local-gateway  | 入口网关，用来代理所有内部访问 |
-| istio-system |  其他  | istio基础组件 |
-| monitoring |  dcgm-exporter | gpu机器资源监控 |
-| monitoring |  node-exporter | cpu机器资源监控 |
-| monitoring |  prometheus-k8s | 监控数据存储服务 |
-| monitoring |  grafana | 监控数据可视化 |
-| volcano-system |  全部 | volcano分布式和批调度 |
-| jupyter |  docker-*  | 用户创建的在线构建镜像的pod |
-| jupyter |  其他  | 用户创建的在线notebook |
-| service |  全部  | 用户创建的内部服务和推理服务 |
-| pipeline |  全部  | 用户创建的pipeline任务 |
-
+| 命名空间           | 组件名                               | 组件说明                              |
+|:---------------|:----------------------------------|:----------------------------------|
+| infra          | kubeflow-dashboard-frontend       | cube-studio平台的web前端               |
+| infra          | kubeflow-dashboard                | cube-studio平台的web后端               |
+| infra          | kubeflow-dashboard-schedule       | 用来调度cube-studio系统自带的调度任务，比如定时清理   |
+| infra          | kubeflow-dashboard-worker         | 用来执行cube-studio系统自带的调度任务，比如定时清理   |
+| infra          | 	kubeflow-watch                   | 用来监控cube-studio平台中的任务，发起通知和信息更新   |
+| infra          | 	mysql                            | 平台元数据的存储                          |
+| infra          | 	redis                            | 平台缓存，和异步任务对接                      |
+| kube-system    | kubernetes-dashboard-cluster      | k8s中pod的管理界面                      |
+| kube-system    | dashboard-cluster-metrics-scraper | k8s中pod的管理界面上的pod资源使用情况的插件        |
+| kube-system    | nvidia-device-plugin-daemonset    | k8s中使用机器gpu驱动和设备的插件               |
+| kube-system    | metrics-server                    | 集群资源使用情况的指标采集，用来在hpa时使用           |
+| kube-system    | kubeflow-prometheus-adapter       | 用来将prometheus采集的指标转化为可以用来控制hpa的指标 |
+| kubeflow       | frameworkcontroller               | nni超参搜索需要的分布式组件                   |
+| kubeflow       | minio                             | 对象存储                              |
+| kubeflow       | train-operator                    | 分布式训练                             |
+| kubeflow       | workflow-controller               | argo 云原生调度                        |
+| istio-system   | istio-ingressgateway              | 入口网关，用来代理所有外部访问                   |
+| istio-system   | 其他                                | istio基础组件                         |
+| monitoring     | dcgm-exporter                     | gpu机器资源监控                         |
+| monitoring     | node-exporter                     | cpu机器资源监控                         |
+| monitoring     | prometheus-k8s                    | 监控数据存储服务                          |
+| monitoring     | grafana                           | 监控数据可视化                           |
+| volcano-system | 全部                                | volcano分布式和批调度                    |
+| jupyter        | docker-*                          | 用户创建的在线构建镜像的pod                   |
+| jupyter        | 其他                                | 用户创建的在线notebook                   |
+| service        | 全部                                | 用户创建的内部服务和推理服务                    |
+| pipeline       | 全部                                | 用户创建的pipeline任务                   |
+| automl         | 全部                                | 用户创建的超参搜索任务                       |
 
 # 平台部署流程
 
