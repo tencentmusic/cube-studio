@@ -16,7 +16,7 @@ KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '0')
 host = os.getenv('HOST',os.getenv('KFJ_MODEL_REPO_API_URL','http://kubeflow-dashboard.infra')).strip('/')
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def deploy(**kwargs):
     # print(kwargs)
     headers = {
