@@ -4,8 +4,14 @@ set -ex
 
 rm -rf /home/myapp/myapp/static/assets
 ln -s /home/myapp/myapp/assets /home/myapp/myapp/static/
-rm -rf /home/myapp/myapp/static/mnt
+rm -f /home/myapp/myapp/static/mnt
+mkdir -p /data/k8s/kubeflow/pipeline/workspace
 ln -s /data/k8s/kubeflow/pipeline/workspace /home/myapp/myapp/static/mnt
+rm -f /home/myapp/myapp/static/dataset
+mkdir -p /data/k8s/kubeflow/dataset
+ln -s /data/k8s/kubeflow/dataset /home/myapp/myapp/static/
+rm -f /home/myapp/myapp/static/aihub
+ln -s /cube-studio/aihub /home/myapp/myapp/static/
 
 export FLASK_APP=myapp:app
 python myapp/create_db.py
@@ -19,6 +25,7 @@ myapp init
 if [ "$STAGE" = "build" ]; then
 #  cd /home/myapp/myapp/vision && yarn && yarn build
   cd /home/myapp/myapp/vision && npm install && yarn build
+  cd /home/myapp/myapp/frontend && npm install && yarn build
 
 elif [ "$STAGE" = "dev" ]; then
   export FLASK_APP=myapp:app
