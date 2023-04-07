@@ -87,7 +87,6 @@ cd ../
 
 # 部署gpu的监控
 kubectl apply -f gpu/nvidia-device-plugin.yml
-kubectl apply -f gpu/tke-gpu-manager.yaml
 kubectl apply -f gpu/dcgm-exporter.yaml
 kubectl apply -f gpu/dcgm-exporter-sm.yaml
 

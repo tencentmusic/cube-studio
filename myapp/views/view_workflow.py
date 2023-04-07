@@ -329,13 +329,13 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 "label": "Retry",
                 "url": f"/workflow_modelview/api/retry/{cluster_name}/{namespace}/{workflow_name}"
             })
-
-        layout_config["right_button"].append(
-            {
-                "label": "Terminate",
-                "url": f"/workflow_modelview/api/stop/{workflow_model.id}"
-            }
-        )
+        if workflow_model:
+            layout_config["right_button"].append(
+                {
+                    "label": "Terminate",
+                    "url": f"/workflow_modelview/api/stop/{workflow_model.id}"
+                }
+            )
         layout_config['right_button'].append(
             {
                 "label": "pipeline",

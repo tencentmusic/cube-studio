@@ -48,7 +48,7 @@ spec:
           image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always  # IfNotPresent
           workingDir: /home/myapp/myapp/tools
-          command: ["bash","start.sh"]
+          command: ["python","watch_workflow.py"]
           env:
           - name: REDIS_HOST
             valueFrom:
