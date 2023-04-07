@@ -9,7 +9,7 @@
             "item_type": "str",
             "label": "模型来源地",
             "require": 1,
-            "choice": ["模型管理","推理服务","huggingface","魔塔"],
+            "choice": ["模型管理","推理服务","huggingface"],
             "range": "",
             "default": "模型管理",
             "placeholder": "",
