@@ -192,9 +192,12 @@ def init():
         print('begin init job_templates')
         job_templates = json.load(open('myapp/init-job-template.json',mode='r'))
         for job_template_name in job_templates:
-            job_template = job_templates[job_template_name]
-            job_template['repository_id']=repository.id
-            create_template(**job_template)
+            try:
+                job_template = job_templates[job_template_name]
+                job_template['repository_id']=repository.id
+                create_template(**job_template)
+            except Exception as e1:
+                print(e1)
 
     except Exception as e:
         print(e)
@@ -308,9 +311,13 @@ def init():
         print('begin init pipeline')
         pipelines = json.load(open('myapp/init-pipeline.json',mode='r'))
         for pipeline_name in pipelines:
-            pipeline = pipelines[pipeline_name]['pipeline']
-            tasks = pipelines[pipeline_name]['tasks']
-            create_pipeline(pipeline=pipeline,tasks=tasks)
+            try:
+                pipeline = pipelines[pipeline_name]['pipeline']
+                tasks = pipelines[pipeline_name]['tasks']
+                create_pipeline(pipeline=pipeline,tasks=tasks)
+                print('add pipeline %s' % pipeline_name)
+            except Exception as e1:
+                print(e1)
     except Exception as e:
         print(e)
 
@@ -402,8 +409,11 @@ def init():
         print('begin init train_models')
         train_models = json.load(open('myapp/init-train-model.json',mode='r'))
         for train_model_name in train_models:
-            train_model = train_models[train_model_name]
-            create_train_model(**train_model)
+            try:
+                train_model = train_models[train_model_name]
+                create_train_model(**train_model)
+            except Exception as e1:
+                print(e1)
     except Exception as e:
         print(e)
 
@@ -442,8 +452,11 @@ def init():
         print('begin init services')
         services = json.load(open('myapp/init-service.json',mode='r'))
         for service_name in services:
-            service = services[service_name]
-            create_service(**service)
+            try:
+                service = services[service_name]
+                create_service(**service)
+            except Exception as e1:
+                print(e1)
     except Exception as e:
         print(e)
 
@@ -496,8 +509,12 @@ def init():
         print('begin init inferences')
         inferences = json.load(open('myapp/init-inference.json',mode='r'))
         for inference_name in inferences:
-            inference = inferences[inference_name]
-            create_inference(**inference)
+            try:
+                inference = inferences[inference_name]
+                create_inference(**inference)
+                print('add inference %s' % inference_name)
+            except Exception as e1:
+                print(e1)
     except Exception as e:
         print(e)
 
@@ -511,9 +528,10 @@ def init():
             if len(aihubs) > 0:
                 # dbsession.query(Aihub).delete()
                 # dbsession.commit()
+                print('add aihub ',end=' ')
                 for data in aihubs:
-                    print(data)
                     name = data.get('name', '')
+                    print(name,end=' ')
                     label = data.get('label', '')
                     describe = data.get('describe', '')
                     uuid = data.get('uuid', '')
