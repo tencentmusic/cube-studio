@@ -1,7 +1,6 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
 import pysnooper
 import os
 
@@ -54,10 +53,6 @@ class SPEECH_UNIASR_ASR_2PASS_CANTONESE_CHS_16K_COMMON_VOCAB1468_TENSORFLOW1_OFF
         
         self.p = pipeline('auto-speech-recognition', 'damo/speech_UniASR_asr_2pass-cantonese-CHS-16k-common-vocab1468-tensorflow1-offline')
 
-    # rtsp流的推理,输入为cv2 img,输出也为处理后的cv2 img
-    def rtsp_inference(self,img:numpy.ndarray,**kwargs)->numpy.ndarray:
-        return img
-
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,input,**kwargs):
@@ -67,11 +62,7 @@ class SPEECH_UNIASR_ASR_2PASS_CANTONESE_CHS_16K_COMMON_VOCAB1468_TENSORFLOW1_OFF
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": result['text']
             }
         ]
         return back
@@ -84,10 +75,14 @@ model=SPEECH_UNIASR_ASR_2PASS_CANTONESE_CHS_16K_COMMON_VOCAB1468_TENSORFLOW1_OFF
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(input='/mnt/workspace/.cache/modelscope/damo/speech_UniASR_asr_2pass-cantonese-CHS-16k-common-vocab1468-tensorflow1-offline/example/asr_example.wav')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(input='/mnt/workspace/.cache/modelscope/damo/speech_UniASR_asr_2pass-cantonese-CHS-16k-common-vocab1468-tensorflow1-offline/example/asr_example.wav')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 400M
+# 模型运行速度 cpu 7s wav音频 asr解析耗时 3s
+# 运行占用2G显存，利用率很低

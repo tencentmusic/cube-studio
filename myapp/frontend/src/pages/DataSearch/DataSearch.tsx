@@ -389,7 +389,7 @@ export default function DataSearch() {
 
         let timer = setInterval(() => {
             fetchData(task_id)
-        }, 10000)
+        }, 5000)
 
         setEditorState({
             taskMap: {
@@ -411,36 +411,32 @@ export default function DataSearch() {
     }
 
     const runTask = () => {
-        if (editorStore[activeKey].appGroup) {
-            setEditorState({ status: 'running' })
-            const customParams = configOption.map(item => item.id).reduce((pre: any, next: any) => ({ ...pre, [next]: editorStore[activeKey][next] }), {})
-            // 运行子任务
-            actionRun({
-                sql: editorStore[activeKey]?.content || '',
-                ...customParams
-            }).then(res => {
-                const { err_msg, task_id } = res.data
-                if (err_msg) {
-                    setEditorState({
-                        status: 'failure',
-                    })
-                    Modal.error({
-                        title: '运行失败',
-                        icon: <ExclamationCircleOutlined />,
-                        width: 1000,
-                        content: err_msg,
-                        okText: '关闭',
-                        // maskClosable: true
-                    });
-                } else if (task_id) {
-                    pollGetRes(task_id)
-                }
-            }).catch(err => {
-                setEditorState({ status: 'failure' })
-            })
-        } else {
-            message.warning('请先选择应用组')
-        }
+        setEditorState({ status: 'running' })
+        const customParams = configOption.map(item => item.id).reduce((pre: any, next: any) => ({ ...pre, [next]: editorStore[activeKey][next] }), {})
+        // 运行子任务
+        actionRun({
+            sql: editorStore[activeKey]?.content || '',
+            ...customParams
+        }).then(res => {
+            const { err_msg, task_id } = res.data
+            if (err_msg) {
+                setEditorState({
+                    status: 'failure',
+                })
+                Modal.error({
+                    title: '运行失败',
+                    icon: <ExclamationCircleOutlined />,
+                    width: 1000,
+                    content: err_msg,
+                    okText: '关闭',
+                    // maskClosable: true
+                });
+            } else if (task_id) {
+                pollGetRes(task_id)
+            }
+        }).catch(err => {
+            setEditorState({ status: 'failure' })
+        })
     }
 
     return (
@@ -457,7 +453,7 @@ export default function DataSearch() {
                                                 <LoadingStar />
                                                 <div>
                                                     结果生成中
-                                            </div>
+                                                </div>
                                             </div>
                                         </div> : null
                                     }

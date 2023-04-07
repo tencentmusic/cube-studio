@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,random,cv2
 import pysnooper
 import os
 
@@ -24,7 +24,7 @@ class CV_TINYNAS_CLASSIFICATION_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='arg0', label='输入图片',describe='输入图片',default='',validators=None)
+        Field(type=Field_type.image, name='image', label='输入图片',describe='输入图片',default='',validators=None)
     ]
 
     inference_resource = {
@@ -35,7 +35,7 @@ class CV_TINYNAS_CLASSIFICATION_Model(Model):
         {
             "label": "示例1",
             "input": {
-                "arg0": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_classification/misc/image_wolf.jpeg"
+                "image": "/mnt/workspace/.cache/modelscope/damo/cv_tinynas_classification/misc/image_wolf.jpeg"
             }
         }
     ]
@@ -60,18 +60,17 @@ class CV_TINYNAS_CLASSIFICATION_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,arg0,**kwargs):
-        result = self.p(arg0)
+    def inference(self,image,**kwargs):
+        result = self.p(image)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": result['labels']
+            },
+            {
+                "text": result['scores']
             }
         ]
         return back
@@ -84,10 +83,15 @@ model=CV_TINYNAS_CLASSIFICATION_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='/mnt/workspace/.cache/modelscope/damo/cv_tinynas_classification/misc/image_wolf.jpeg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_tinynas_classification/misc/image_wolf.jpeg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+
+# 模型大小 700M
+# 模型cpu推理速度 0.2s
+# 图片特征提取，识别图片的重点内容

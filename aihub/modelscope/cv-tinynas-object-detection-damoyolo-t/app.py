@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,random,time,cv2
 import pysnooper
 import os
 
@@ -24,7 +24,7 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_T_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='arg0', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
     ]
 
     inference_resource = {
@@ -35,7 +35,7 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_T_Model(Model):
         {
             "label": "示例0",
             "input": {
-                "arg0": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/image_detection.jpg"
+                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/image_detection.jpg"
             }
         }
     ]
@@ -60,18 +60,26 @@ class CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_T_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,arg0,**kwargs):
-        result = self.p(arg0)
+    def inference(self,image,**kwargs):
+        result = self.p(image)
+        print(result)
+        img = cv2.imread(image)
+        for index, box in enumerate(result['boxes'].tolist()):
+            label = result['labels'][index]
+            cv2.rectangle(img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 0, 255), 2)
+            cv2.putText(img, str(label), (int(box[0]), int(box[1] - 10)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        save_path = f'result/result{random.randint(1, 1000)}.jpg'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, img)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path,
+                "text": '得分：'+str(result['scores'].tolist())
             }
         ]
         return back
@@ -84,10 +92,14 @@ model=CV_TINYNAS_OBJECT_DETECTION_DAMOYOLO_T_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/image_detection.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='image_detection.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 72M
+# 模型cpu 推理速度 0.1s
+

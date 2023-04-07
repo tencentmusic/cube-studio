@@ -128,7 +128,7 @@ def monitoring(crd_k8s,name,namespace):
                     pro.terminate()
                     print('kill process %s'%pid, flush=True)
             break
-        if (datetime.datetime.now()-check_time).seconds>3600:
+        if (datetime.datetime.now()-check_time).total_seconds()>3600:
             pids = get_pid("stern")
             if pids:
                 for pid in pids:

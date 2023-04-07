@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,cv2,random
 import pysnooper
 import os
 
@@ -62,16 +62,12 @@ class CV_UNET_VIDEO_COLORIZATION_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,video,**kwargs):
         result = self.p(video)
-
+        print(result)
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "video": result['output_video']
             }
         ]
         return back
@@ -84,10 +80,14 @@ model=CV_UNET_VIDEO_COLORIZATION_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(video='https://vigen-video.oss-cn-shanghai.aliyuncs.com/ModelScope/test/videos/gray.mp4?OSSAccessKeyId=LTAI4Ffgrqm3FbDKBTk4ddwe&Expires=1992428169&Signature=%2Fm9PPYwGln%2BivRXbw9TMft4tkGY%3D')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(video='https://vigen-video.oss-cn-shanghai.aliyuncs.com/ModelScope/test/videos/gray.mp4?OSSAccessKeyId=LTAI4Ffgrqm3FbDKBTk4ddwe&Expires=1992428169&Signature=%2Fm9PPYwGln%2BivRXbw9TMft4tkGY%3D')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 900M
+# 模型推理速度 gpu v100，13s视频，耗时 9s
+# 运行时显存占用2G

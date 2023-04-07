@@ -16,7 +16,7 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='background.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
+    pic='example.jpg'  # https://应用描述的缩略图/可以直接使用应用内的图片文件地址
     hot = "11162"
     frameworks = "tensorflow"
     doc = "https://modelscope.cn/models/damo/cv_aams_style-transfer_damo/summary"
@@ -70,7 +70,7 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
         # print(im.size)
         if max(w,h)>1200:
             ratio = max(w,h)/1200
-            reim=im.resize(int(w/ratio),int(h/ratio))#宽*高
+            reim=im.resize((int(w/ratio),int(h/ratio)))#宽*高
             os.remove(content)
             reim.save(content)
         
@@ -79,7 +79,7 @@ class CV_AAMS_STYLE_TRANSFER_DAMO_Model(Model):
         # print(im.size)
         if max(w,h)>1200:
             ratio = max(w,h)/1200
-            reim=im.resize(int(w/ratio),int(h/ratio))#宽*高
+            reim=im.resize((int(w/ratio),int(h/ratio)))#宽*高
             os.remove(style)
             reim.save(style)
 

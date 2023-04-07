@@ -542,7 +542,15 @@ class CeleryConfig(object):
             "expires": 600,
             'max_retries': 0,
             "reject_on_worker_lost": False
+		},
+        'task.check_pod_terminating':{
+            'rate_limit': '1/s',
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         }
+        
 
     }
 
@@ -591,11 +599,14 @@ class CeleryConfig(object):
             'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
             'schedule': crontab(minute='10',hour='11'),
         },
-        
-        'task_update_aihub': {
-            'task': 'task.update_aihub',  # 更新aihub
-            'schedule': crontab(minute='30', hour='4'),
-        },
+        # 'task_update_aihub': {
+        #     'task': 'task.update_aihub',  # 更新aihub
+        #     'schedule': crontab(minute='30', hour='4'),
+        # },
+		"task_check_pod_terminating": {
+            "task": "task.check_pod_terminating",
+            'schedule': crontab(minute='*/10'),
+        }
     }
 
  # 帮助文档地址，显示在web导航栏
@@ -657,20 +668,6 @@ CRD_INFO={
         "plural": "pytorchjobs",
         "timeout": 60 * 60 * 24 * 2
     },
-    "notebook": {
-        "group": "kubeflow.org",
-        "version": "v1",
-        "plural": "notebooks",
-        'kind':'Notebook',
-        "timeout": 60 * 60 * 24 * 2
-    },
-    "inferenceservice": {
-        "group": "serving.kserve.io",
-        "version": "v1beta1",
-        "plural": "inferenceservices",
-        'kind':'InferenceService',
-        "timeout": 60 * 60 * 24 * 1
-    },
     "virtualservice": {
         "group": "networking.istio.io",
         "version": "v1alpha3",
@@ -725,8 +722,8 @@ GLOBAL_ENV={
     "KFJ_ARCHIVE_BASE_PATH":"/archives",
     "KFJ_PIPELINE_NAME":"{{pipeline_name}}",
     "KFJ_NAMESPACE":"pipeline",
-    "KFJ_GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
-    "GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
+    "KFJ_GPU_TYPE": 'NVIDIA',
+    "GPU_TYPE": 'NVIDIA',
     "KFJ_GPU_MEM_MIN":"13G",
     "KFJ_GPU_MEM_MAX":"13G",
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
@@ -769,12 +766,6 @@ SERVICE_NAMESPACE = 'service'
 # 服务链路追踪地址
 SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
-# automl任务默认镜像
-AUTOML_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/automl'
-# automl的tfjob任务默认镜像
-AUTOML_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
-# automl的pytorchjob任务默认镜像
-AUTOML_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
 # 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
@@ -789,6 +780,8 @@ NOTEBOOK_IMAGES=[
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base', 'vscode（gpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base', 'jupyter（cpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-gpu-base','jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04', 'jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04-cuda11.8.0-cudnn8','jupyter（gpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-bigdata', 'jupyter（bigdata）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning', 'jupyter（machinelearning）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-deeplearning', 'jupyter（deeplearning）'],
@@ -841,11 +834,6 @@ SERVICE_EXTERNAL_IP=[]
 JSON_SORT_KEYS=False
 # 链接菜单
 ALL_LINKS=[
-    {
-        "label":"Minio",
-        "name":"minio",
-        "url":"/minio/public/"
-    },
     {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
@@ -912,58 +900,82 @@ GRAFANA_NODE_PATH="/grafana/d/node/node?var-node="
 GRAFANA_GPU_PATH="/grafana/d/dcgm/gpu"
 
 MODEL_URLS = {
+    "sqllab":"/frontend/data/datasearch/data_search",
     "metadata_table":"/frontend/data/metadata/metadata_table",
+    "data_blood":"/frontend/data/metadata/data_blood",
     "metadata_metric":"/frontend/data/metadata/metadata_metric",
     "dimension": "/frontend/data/metadata/metadata_dimension",
-    "sqllab":"/frontend/data_model/data_sql_select/data_search",
+    "feast":"/frontend/data/feast/feast",
+    "dataset":"/frontend/data/media_data/dataset",
+    "label_platform":"/frontend/data/media_data/label_platform",
+
+    "repository": "/frontend/dev/images/docker_repository",
+    "docker": "/frontend/dev/images/docker",
+    "template_images": "/frontend/dev/images/template_images",
+    "notebook": "/frontend/dev/dev_online/notebook",
     "etl_pipeline":"/frontend/dev/data_pipeline/etl_pipeline",
     "etl_task":"/frontend/dev/data_pipeline/task_manager",
     "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
-    "total_resource": "/frontend/train/total_resource",
-    "notebook": "/frontend/dev/dev_online/notebook",
-    "docker": "/frontend/dev/images/docker",
-    "repository": "/frontend/dev/images/docker_repository",
-    "template_images": "/frontend/dev/images/template_images",
+
     "job_template": "/frontend/train/train_template/job_template",
     "pipeline": "/frontend/train/train_task/pipeline",
     "runhistory": "/frontend/train/train_task/runhistory",
     "workflow": "/frontend/train/train_task/workflow",
     "nni": "/frontend/train/train_hyperparameter/nni",
+
+    "total_resource": "/frontend/service/total_resource",
     "service": "/frontend/service/k8s_service",
-    "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
     "train_model": "/frontend/service/inferenceservice/model_manager",
-    "dataset":"/frontend/dataleap/media_data/dataset",
-	"model_market_visual": "/frontend/aihub/model_market/model_visual",
-    "model_market_voice": "/frontend/aihub/model_market/model_voice",
-    "model_market_language": "/frontend/aihub/model_market/model_language",
+    "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
+
+	"model_market_visual": "/frontend/ai_hub/model_market/model_visual",
+    "model_market_voice": "/frontend/ai_hub/model_market/model_voice",
+    "model_market_language": "/frontend/ai_hub/model_market/model_language",
 }
  # 可以跨域分享cookie的子域名，例如.local.com
 COOKIE_DOMAIN = ''
 SERVICE_DOMAIN='service.local.com'
-#
-# # 所有训练集群的信息
+
+
+# 所有训练集群的信息
 CLUSTERS={
     # 和project expand里面的名称一致
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
+        # "HOST":"9.135.92.226",
         # "SERVICE_DOMAIN": 'service.local.com',
     }
 }
 
 
-# 所有训练集群的信息
+#
 # CLUSTERS={
+#     # # 至少要有一个这个
+#     "tke":{
+#         "NAME":"tke",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/tke-kubeconfig',
+#         "SERVICE_DOMAIN": 'service.kfserving.woa.com'
+#     },
+#     "shanghai":{
+#         "NAME":"shanghai",
+#         "KUBECONFIG":'/home/myapp/kubeconfig/shanghai-kubeconfig',
+#         "HOST":'home.star.woa.com',
+#         "SERVICE_DOMAIN": 'service.star.woa.com'
+#     },
+#     "idc": {
+#         "NAME": "idc",
+#         "KUBECONFIG": '/home/myapp/kubeconfig/idc-kubeconfig',
+#         "HOST":'kubeflow.cube.woa.com',
+#         "SERVICE_DOMAIN": 'service.cube.woa.com'
+#     },
 #     # 和project expand里面的名称一致
-#     "dev":{
-#         "NAME":"dev",
-#         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-#         "K8S_DASHBOARD_CLUSTER":'http://9.135.92.226/k8s/dashboard/cluster/',
+#     "dev": {
+#         "NAME": "dev",
+#         "KUBECONFIG": '/home/myapp/kubeconfig/dev-kubeconfig',
+#         "HOST":"9.135.92.226",
 #         # "SERVICE_DOMAIN": 'service.local.com',
 #     }
 # }
-
-
 
 

@@ -14,7 +14,7 @@ class SPEECH_PTTS_AUTOLABEL_16K_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.jpeg'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "103"
     frameworks = "onnx"
     doc = "https://modelscope.cn/models/damo/speech_ptts_autolabel_16k/summary"

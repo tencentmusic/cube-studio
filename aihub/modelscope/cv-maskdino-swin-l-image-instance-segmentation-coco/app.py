@@ -14,7 +14,7 @@ class CV_MASKDINO_SWIN_L_IMAGE_INSTANCE_SEGMENTATION_COCO_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.jpeg'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "1139"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_maskdino-swin-l_image-instance-segmentation_coco/summary"

@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,cv2,time,random
 import pysnooper
 import os
 
@@ -28,7 +28,7 @@ class CV_UNET_VIDEO_DEINTERLACE_Model(Model):
     ]
 
     inference_resource = {
-        "resource_gpu": "0"
+        "resource_gpu": "1"
     }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
@@ -62,16 +62,12 @@ class CV_UNET_VIDEO_DEINTERLACE_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
-
+        print(result)
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "video": result['output_video']
             }
         ]
         return back
@@ -91,3 +87,7 @@ print(result)
 # # 模型启动web时使用
 # if __name__=='__main__':
 #     model.run()
+
+# 模型大小 70M,
+# 模型推理速度  gpu v100上 1s视频，推理耗时30s
+# 运行时显存占用10G

@@ -148,7 +148,7 @@ def monitoring(crd_k8s,name,namespace):
             break
 
         # 定期杀死stern 进程，不然日志追踪有bug，但是不能退出此线程，
-        if (datetime.datetime.now()-check_time).seconds>3600:
+        if (datetime.datetime.now()-check_time).total_seconds()>3600:
             kill_stern()
 
         # 根据队列消费剩余情况监控任务是否该结束

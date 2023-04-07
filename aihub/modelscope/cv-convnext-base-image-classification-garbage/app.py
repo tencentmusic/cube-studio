@@ -4,6 +4,7 @@ from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
 import os
+import pandas as pd
 
 class CV_CONVNEXT_BASE_IMAGE_CLASSIFICATION_GARBAGE_Model(Model):
     # 模型基础信息定义
@@ -22,7 +23,7 @@ class CV_CONVNEXT_BASE_IMAGE_CLASSIFICATION_GARBAGE_Model(Model):
     train_inputs = []
 
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='image', label='',describe='上传一张需要分类的垃圾的图片',default='',validators=None)
     ]
 
     inference_resource = {
@@ -53,25 +54,29 @@ class CV_CONVNEXT_BASE_IMAGE_CLASSIFICATION_GARBAGE_Model(Model):
     # 推理
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,image,**kwargs):
-         = self.p(image)
+
+        result = pd.DataFrame(self.p(image))
+        result['scores'] = result['scores'].apply(lambda x:' {:.4%}'.format(x))
+        result = result[['labels','scores']]
+        result.columns = [['分类','可能性']]
+
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "markdown": result.to_markdown()
             }
         ]
         return back
 
+
+
+
 model=CV_CONVNEXT_BASE_IMAGE_CLASSIFICATION_GARBAGE_Model()
 
 # 测试后将此部分注释
-model.load_model()
-result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_convnext-base_image-classification_garbage/resources/test.jpg')  # 测试
-print(result)
+# model.load_model()
+# result = model.inference(image='/mnt/workspace/.cache/modelscope/damo/cv_convnext-base_image-classification_garbage/resources/test.jpg')  # 测试
+# print(result)
 
 # 测试后打开此部分
-# if __name__=='__main__':
-#     model.run()
+if __name__=='__main__':
+    model.run()

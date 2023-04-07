@@ -1,18 +1,19 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01 -f install/docker/Dockerfile .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01 -f install/docker/Dockerfile .
 
 FROM ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9
 
-COPY install/docker/docker-add-file/rest.py /usr/local/lib/python3.6/dist-packages/kubernetes/client/rest.py
-COPY install/docker/docker-add-file/__init__.py /usr/local/lib/python3.6/dist-packages/marshmallow_enum/__init__.py
+COPY install/docker/docker-add-file/rest.py /usr/local/lib/python3.9/dist-packages/kubernetes/client/rest.py
+COPY install/docker/docker-add-file/__init__.py /usr/local/lib/python3.9/dist-packages/marshmallow_enum/__init__.py
 
-RUN pip3 install Pillow
+# 下载知识库embedding模型
+RUN apt install -y unzip && wget -O /text2vec-base-chinese.zip https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/chat/text2vec-base-chinese.zip && cd / && unzip /text2vec-base-chinese.zip && rm /text2vec-base-chinese.zip
 
+RUN pip3 install Pillow elasticsearch==7.12.1 jieba==0.42.1 sseclient-py==1.7.2 torch similarities==1.0.4
 COPY myapp /home/myapp/myapp
 COPY myapp/static/appbuilder/frontend /data/web/frontend
 COPY aihub /cube-studio/aihub
 ENV PATH=/home/myapp/myapp/bin:$PATH
 ENV PYTHONPATH=/home/myapp:$PYTHONPATH
-
 
 COPY install/docker/entrypoint.sh /entrypoint.sh
 

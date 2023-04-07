@@ -46,9 +46,6 @@ from flask import Flask
 user_history={
 }
 
-
-
-
 class Server():
 
     web_examples=[]
@@ -623,6 +620,7 @@ class Server():
             cap = RtspCapture(url=rtsp_url)
             cap.start()
             return Response(gen(cap),mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
         @app.route(f'/wechat/jsapi')
         def wechat():

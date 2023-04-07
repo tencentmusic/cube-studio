@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask_appbuilder import Model
 
@@ -63,6 +64,10 @@ class Aihub(Model,MyappModelBase):
             link = f'/aihub/{self.name}/'
 
         pic_url = '/static/aihub/deep-learning/'+self.name+'/'+self.pic
+        pic_path = os.path.join('/home/myapp/myapp/',pic_url.strip('/'))
+        if not os.path.exists(pic_path):
+            print(pic_path)
+            pic_url = '/static/aihub/modelscope/'+self.name+'/'+self.pic
         if 'http://' in self.pic or "https://" in self.pic:
             pic_url=self.pic
 
@@ -73,7 +78,7 @@ class Aihub(Model,MyappModelBase):
         '''
         if self.price and int(self.price)>0:
             ops_html = f'''
-            <a class="flex1 ta-c" style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">收费模型</a>
+            <a class="flex1 ta-c" style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">企业版</a>
             '''
 
         return Markup(f'''
@@ -85,7 +90,7 @@ class Aihub(Model,MyappModelBase):
     <div>
         <div class="p16" alt="{self.describe}">
             <div class="p-r card-popup ellip1">
-                { self.name+": "+self.describe }
+                { self.label }
                 <div class="p-a card-popup-target d-n" style="top:100%;left:0;background:rgba(0,0,0,0.5);color:#fff;border-radius:3px;">{self.describe}</div>
             </div>
         </div>

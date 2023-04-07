@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,random,cv2
 import pysnooper
 import os
 
@@ -63,15 +63,18 @@ class CV_UNET_PERSON_IMAGE_CARTOON_COMPOUND_MODELS_Model(Model):
     def inference(self,image,**kwargs):
         result = self.p(image)
 
+        print(result)
+        save_path = f'result/result{random.randint(1, 1000)}.jpg'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, result['output_img'])
+
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
@@ -84,10 +87,15 @@ model=CV_UNET_PERSON_IMAGE_CARTOON_COMPOUND_MODELS_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-cartoon/cartoon.png')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/demo/image-cartoon/cartoon.png')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+
+
+# 模型大小 200M
+# 模型cpu运行时长 1.3s

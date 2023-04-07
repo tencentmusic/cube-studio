@@ -114,9 +114,17 @@ class Docker_ModelView_Base():
     pre_update_web=pre_add_web
 
     def pre_add(self,item):
-        image_org=conf.get('REPOSITORY_ORG')+g.user.username+":"
-        if image_org not in item.target_image or item.target_image==image_org:
-            flash('目标镜像名称不符合规范','warning')
+        if '/' not in item.target_image:
+            flash('目标镜像名称不符合规范，未发现目标所属仓库的配置', 'warning')
+        else:
+            repository_host = item.target_image[:item.target_image.index('/')]
+            repository = db.session.query(Repository).filter_by(server=repository_host).first()
+            if repository:
+                flash('目标镜像名称不符合规范，未发现目标所属仓库的配置', 'warning')
+
+        # image_org=conf.get('REPOSITORY_ORG')+g.user.username+":"
+        # if image_org not in item.target_image or item.target_image==image_org:
+        #     flash('目标镜像名称不符合规范','warning')
 
         if item.expand:
             expand = json.loads(item.expand)
@@ -195,8 +203,11 @@ class Docker_ModelView_Base():
             try_num=try_num-1
             time.sleep(2)
         if try_num==0:
-            message='拉取镜像时间过长，一分钟后刷新此页面'
+            pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (namespace, pod_name)
+
+            message='拉取镜像时间过长，一分钟后刷新此页面，或者打开链接：%s，查看pod信息'%pod_url
             flash(message,'warning')
+
             return self.response(400,**{"message":message,"status":1,"result":pod['status_more']})
             # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 

@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-convnext-base-image-classification-garbage",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-convnext-base-image-classification-garbage",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-convnext-base-image-classification-garbage-v20221001",
+    "label": "ConvNeXt图像分类-中文-垃圾分类",
+    "describe": "自建265类常见的生活垃圾标签体系，15w张图片数据，包含可回收垃圾、厨余垃圾、有害垃圾、其他垃圾4个标准垃圾大类，覆盖常见的食品，厨房用品，家具，家电等生活垃圾，标签从海量中文互联网社区语料进行提取，整理出了频率较高的常见生活垃圾名称。模型结构采用ConvNeXt-Base结构, 经过大规模数据集ImageNet-22K预训练后，在数据集上进行微调。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

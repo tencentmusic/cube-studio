@@ -298,7 +298,7 @@ class Aihub_base():
 
 
     def post_list(self,items):
-        flash('AIHub内容同步于github，<a target="_blank" href="https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning">参与贡献</a>',category='success')
+        flash('AIHub内容使用，请购买<a target="_blank" href="https://github.com/tencentmusic/cube-studio/blob/master/README_CN.md">企业版</a>',category='success')
         return items
 
     # @event_logger.log_this
@@ -749,7 +749,6 @@ def aihub_demo():
         from myapp import db
         from myapp.models.model_aihub import Aihub
         conf.all_model = db.session.query(Aihub).all()
-
 
     try:
         from myapp.utils.py.py_k8s import K8s

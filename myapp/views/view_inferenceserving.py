@@ -1266,7 +1266,7 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base,MyappModelR
     route_base = '/inferenceservice_modelview/api'
 
     def add_more_info(self,response,**kwargs):
-        online_services = db.session.query(InferenceService).filter(InferenceService.model_statue=='online').filter(InferenceService.gpu!='0').all()
+        online_services = db.session.query(InferenceService).filter(InferenceService.model_status=='online').filter(InferenceService.resource_gpu!='0').all()
         if len(online_services)>0:
             response['echart']=True
         else:

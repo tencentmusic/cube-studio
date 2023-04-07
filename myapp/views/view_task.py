@@ -453,7 +453,7 @@ class Task_ModelView_Base():
         task_env += 'KFJ_RUNNER=' + str(g.user.username) + "\n"
         task_env += 'KFJ_PIPELINE_NAME=' + str(task.pipeline.name) + "\n"
         task_env += 'KFJ_NAMESPACE=pipeline' + "\n"
-        task_env += 'GPU_TYPE=%s' % os.environ.get("GPU_TYPE", "NVIDIA") + "\n"
+        task_env += 'GPU_TYPE=NVIDIA' + "\n"
 
         def template_str(src_str):
             rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(src_str)

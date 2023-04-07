@@ -242,7 +242,7 @@ class SD_Model(Model):
                     "image": img_path
                 } for img_path in image_paths
             ]
-            print('花费时长:', (datetime.datetime.now() - begin_time).seconds)
+            print('花费时长:', (datetime.datetime.now() - begin_time).total_seconds())
             return back
         except Exception as ex:
             print(ex)

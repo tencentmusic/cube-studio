@@ -1,0 +1,35 @@
+{
+  "job":{
+    "name":"tf_model_train",
+    "label":"tf模型训练",
+    "describe": "tf模型训练",
+    "image":"csighub.tencentyun.com/tme-kubeflow/tf_model_train:20200826"
+  },
+  "args":{
+    "shell":{
+      "script_name":{
+        "type":"str",
+        "label":"脚本名称",
+        "require":1,
+        "default":"",
+        "placeholder":"脚本名称",
+        "describe":"脚本名称",
+        "editable":1
+      },
+      "additional_params":{
+        "type":"list",
+        "label":"参数列表",
+        "item_type": "str"
+      },
+      "save_path_param_name":{
+        "type":"str",
+        "label":"模型的保存路径",
+        "require":1,
+        "default":"",
+        "placeholder":"模型的保存路径",
+        "describe":"模型的保存路径",
+        "editable":1
+      }
+    }
+  }
+}

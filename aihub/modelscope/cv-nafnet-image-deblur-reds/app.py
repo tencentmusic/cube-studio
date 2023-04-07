@@ -3,7 +3,7 @@ import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
 
 import pysnooper
-import os
+import os,cv2,random,numpy
 
 class CV_NAFNET_IMAGE_DEBLUR_REDS_Model(Model):
     # 模型基础信息定义
@@ -14,7 +14,7 @@ class CV_NAFNET_IMAGE_DEBLUR_REDS_Model(Model):
     scenes=""
     status='online'
     version='v20221001'
-    pic='example.jpg'  # 离线图片，作为模型的样式图，330*180尺寸比例
+    pic='example.gif'  # 离线图片，作为模型的样式图，330*180尺寸比例
     hot = "1189"
     frameworks = "pytorch"
     doc = "https://modelscope.cn/models/damo/cv_nafnet_image-deblur_reds/summary"
@@ -61,17 +61,20 @@ class CV_NAFNET_IMAGE_DEBLUR_REDS_Model(Model):
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
+        from modelscope.outputs import OutputKeys
         result = self.p(arg0)
+
+        save_path = f'result/result{random.randint(1, 1000)}.jpg'
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        cv2.imwrite(save_path, result[OutputKeys.OUTPUT_IMG])
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": save_path
             }
         ]
         return back
@@ -84,10 +87,11 @@ model=CV_NAFNET_IMAGE_DEBLUR_REDS_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/blurry.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/blurry.jpg')  # 测试
+# print(result)
 
 # # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+#这个模型比cv-nafnet-image-deblur-gopro效果更好，能用于更多的模糊图像，对原图要求没有那么高，多次优化没有明显的作用
+if __name__=='__main__':
+    model.run()

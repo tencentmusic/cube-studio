@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-hrnet-crowd-counting-dcanet",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-hrnet-crowd-counting-dcanet",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-hrnet-crowd-counting-dcanet-v20221001",
+    "label": "DCANet人群密度估计-多域",
+    "describe": "采用单一模型就可以同时针对多个不同域的数据进行精确预测，是multidomain crowd counting中经典的方法",
+    "pic": "example.jpeg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

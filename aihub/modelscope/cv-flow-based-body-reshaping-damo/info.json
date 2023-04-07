@@ -1,0 +1,27 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-flow-based-body-reshaping-damo",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-flow-based-body-reshaping-damo",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-flow-based-body-reshaping-damo-v20221001",
+    "label": "FBBR人体美型",
+    "describe": "给定一张单个人物图像（半身或全身），无需任何额外输入，人体美型模型能够端到端地实现对人物身体区域（肩部，腰部，腿部等）的自动化美型处理。",
+    "pic": "example.gif",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {
+        "resource_gpu": "1"
+    },
+    "inference": {
+        "resource_gpu": "1"
+    },
+    "images": ""
+}

@@ -1,0 +1,23 @@
+{
+    "doc": "https://github.com/tencentmusic/cube-studio/tree/master/aihub/deep-learning/cv-hrnetw48-human-wholebody-keypoint-image",
+    "field": "机器视觉",
+    "scenes": "",
+    "type": "dateset,notebook,train,inference",
+    "name": "cv-hrnetw48-human-wholebody-keypoint-image",
+    "status": "online",
+    "version": "v20221001",
+    "uuid": "cv-hrnetw48-human-wholebody-keypoint-image-v20221001",
+    "label": "全身关键点检测-通用领域-2D",
+    "describe": "输入一张人物图像，端到端检测全身133点关键点，输出人体框和对应的全身关键点，包含68个人脸关键点、42个手势关键点、17个骨骼关键点和6个脚步关键点。",
+    "pic": "example.jpg",
+    "hot": "1",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+        "jupyter": [],
+        "appendix": []
+    },
+    "train": {},
+    "inference": {},
+    "images": ""
+}

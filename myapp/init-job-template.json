@@ -151,7 +151,7 @@
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dataset",
         "image_describe":"数据集导入",
         "job_template_name":"dataset",
-        "job_template_describe":"数据集导入(todo)",
+        "job_template_describe":"数据集导入",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"",
@@ -161,24 +161,80 @@
             "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dataset"
         },
         "job_template_args":{
-            "参数":{
-                "--dataset":{
-                    "type":"str",
-                    "item_type":"str",
-                    "label":"数据集名称",
-                    "require":1,
-                    "choice":[
-
+            "参数": {
+                "--src_type": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "数据集的来源",
+                    "require": 1,
+                    "choice": [
+                        "当前平台",
+                        "hugging-face",
+                        "魔塔"
                     ],
-                    "range":"",
-                    "default":"",
-                    "placeholder":"",
-                    "describe":"数据集名称",
-                    "editable":1,
-                    "condition":"",
-                    "sub_args":{
-
-                    }
+                    "range": "",
+                    "default": "当前平台",
+                    "placeholder": "",
+                    "describe": "数据集的来源",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--name": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "数据集的名称",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "数据集的名称",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--version": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "数据集的版本",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "latest",
+                    "placeholder": "",
+                    "describe": "数据集的版本",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--partition": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "数据集的分区，或者子数据集",
+                    "require": 0,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "数据集的分区，或者子数据集",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--save_dir": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "数据集的保存地址",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "",
+                    "placeholder": "",
+                    "describe": "数据集的保存地址",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
                 }
             }
         }
@@ -519,7 +575,7 @@
     },
 
     "ray-sklearn":{
-        "project_name":"机器学习",
+        "project_name":"机器学习框架",
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/sklearn_estimator:v1",
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray_sklearn",
         "image_describe":"sklearn基于ray的分布式",
@@ -682,8 +738,406 @@
             }
         }
     },
+
+
+    "adaboost":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/adaboost:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/adaboost",
+        "image_describe":"adaboost算法",
+        "job_template_name":"adaboost",
+        "job_template_describe":"adaboost算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/adaboost"
+        },
+        "job_template_args":{
+        }
+    },
+    "bayesian":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/bayesian:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/bayesian",
+        "image_describe":"bayesian算法",
+        "job_template_name":"bayesian",
+        "job_template_describe":"bayesian算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/bayesian"
+        },
+        "job_template_args":{
+        }
+    },
+    "crf":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/crf:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/crf",
+        "image_describe":"crf算法",
+        "job_template_name":"crf",
+        "job_template_describe":"crf算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/crf"
+        },
+        "job_template_args":{
+        }
+    },
+    "catboost":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/catboost:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/catboost",
+        "image_describe":"catboost算法",
+        "job_template_name":"catboost",
+        "job_template_describe":"catboost算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/catboost"
+        },
+        "job_template_args":{
+        }
+    },
+    "fm":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/fm:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/fm",
+        "image_describe":"fm算法",
+        "job_template_name":"fm",
+        "job_template_describe":"fm算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/fm"
+        },
+        "job_template_args":{
+        }
+    },
+    "hmm":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/hmm:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hmm",
+        "image_describe":"hmm算法",
+        "job_template_name":"hmm",
+        "job_template_describe":"hmm算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hmm"
+        },
+        "job_template_args":{
+        }
+    },
+    "lda":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/lda:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lda",
+        "image_describe":"lda算法",
+        "job_template_name":"lda",
+        "job_template_describe":"lda算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lda"
+        },
+        "job_template_args":{
+        }
+    },
+    "mcmc":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/mcmc:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mcmc",
+        "image_describe":"mcmc算法",
+        "job_template_name":"mcmc",
+        "job_template_describe":"mcmc算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mcmc"
+        },
+        "job_template_args":{
+        }
+    },
+    "mem":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/mem:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mem",
+        "image_describe":"mem算法",
+        "job_template_name":"mem",
+        "job_template_describe":"mem算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mem"
+        },
+        "job_template_args":{
+        }
+    },
+    "pca":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/pca:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/pca",
+        "image_describe":"pca算法",
+        "job_template_name":"pca",
+        "job_template_describe":"pca算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/pca"
+        },
+        "job_template_args":{
+        }
+    },
+    "svd":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/svd:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/svd",
+        "image_describe":"svd算法",
+        "job_template_name":"svd",
+        "job_template_describe":"svd算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/svd"
+        },
+        "job_template_args":{
+        }
+    },
+    "svm":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/svm:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/svm",
+        "image_describe":"svm算法",
+        "job_template_name":"svm",
+        "job_template_describe":"svm算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/svm"
+        },
+        "job_template_args":{
+        }
+    },
+    "decision-tree":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/decision-tree:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/decision-tree",
+        "image_describe":"decision-tree算法",
+        "job_template_name":"decision-tree",
+        "job_template_describe":"decision-tree算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/decision-tree"
+        },
+        "job_template_args":{
+        }
+    },
+    "gbdt":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/gbdt:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/gbdt",
+        "image_describe":"gbdt算法",
+        "job_template_name":"gbdt",
+        "job_template_describe":"gbdt算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/gbdt"
+        },
+        "job_template_args":{
+        }
+    },
+    "kmean":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/kmean:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/kmean",
+        "image_describe":"kmean算法",
+        "job_template_name":"kmean",
+        "job_template_describe":"kmean算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/kmean"
+        },
+        "job_template_args":{
+        }
+    },
+    "knn":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/knn:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/knn",
+        "image_describe":"knn算法",
+        "job_template_name":"knn",
+        "job_template_describe":"knn算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/knn"
+        },
+        "job_template_args":{
+        }
+    },
+    "lightgbm":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/lightgbm:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lightgbm",
+        "image_describe":"lightgbm算法",
+        "job_template_name":"lightgbm",
+        "job_template_describe":"lightgbm算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lightgbm"
+        },
+        "job_template_args":{
+        }
+    },
+    "lr":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/lr:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lr",
+        "image_describe":"lr算法",
+        "job_template_name":"lr",
+        "job_template_describe":"lr算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lr"
+        },
+        "job_template_args":{
+        }
+    },
+    "random-forest":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/random-forest:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/random-forest",
+        "image_describe":"random-forest算法",
+        "job_template_name":"random-forest",
+        "job_template_describe":"random-forest算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/random-forest"
+        },
+        "job_template_args":{
+        }
+    },
+    "apriori":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/apriori:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/apriori",
+        "image_describe":"apriori算法",
+        "job_template_name":"apriori",
+        "job_template_describe":"apriori算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/apriori"
+        },
+        "job_template_args":{
+        }
+    },
+    "mst":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/mst:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mst",
+        "image_describe":"mst算法",
+        "job_template_name":"mst",
+        "job_template_describe":"mst算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mst"
+        },
+        "job_template_args":{
+        }
+    },
+    "clustering":{
+        "project_name":"机器学习算法",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/clustering:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/clustering",
+        "image_describe":"clustering算法",
+        "job_template_name":"clustering",
+        "job_template_describe":"clustering算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/clustering"
+        },
+        "job_template_args":{
+        }
+    },
     "xgb":{
-        "project_name":"机器学习",
+        "project_name":"机器学习框架",
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/xgb_train_and_predict:v1",
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/xgb_train_and_predict",
         "image_describe":"xgb算法单机",
@@ -882,7 +1336,7 @@
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf_distributed_train_k8s",
         "image_describe":"tf 分布式训练",
         "job_template_name":"tfjob",
-        "job_template_describe":"tf 分布式训练",
+        "job_template_describe":"tf 分布式训练（企业版）",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"kubeflow-pipeline",
@@ -959,7 +1413,7 @@
         "image_describe":"pytorch分布式训练",
         "job_template_name":"pytorchjob",
         "job_template_old_names": ["pytorchjob-train"],
-        "job_template_describe":"pytorch 分布式训练",
+        "job_template_describe":"pytorch 分布式训练（企业版）",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"kubeflow-pipeline",
@@ -1043,91 +1497,14 @@
             }
         }
     },
-    "horovod":{
-        "project_name":"深度学习",
-        "image_name":"ccr.ccs.tencentyun.com/cube-studio/horovod:20210401",
-        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/horovod",
-        "image_describe":"horovod 分布式训练",
-        "job_template_name":"horovod",
-        "job_template_describe":"horovod 分布式训练",
-        "job_template_command":"",
-        "job_template_volume":"",
-        "job_template_account":"kubeflow-pipeline",
-        "job_template_env":"",
-        "job_template_expand":{
-            "index":3,
-            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/horovod"
-        },
-        "job_template_args":{
-            "参数": {
-                "--work_images": {
-                    "type": "str",
-                    "item_type": "str",
-                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
-                    "require": 1,
-                    "choice": [],
-                    "range": "",
-                    "default": "ccr.ccs.tencentyun.com/cube-studio/horovod:20210401",
-                    "placeholder": "",
-                    "describe": "worker的运行镜像",
-                    "editable": 1,
-                    "condition": "",
-                    "sub_args": {}
-                },
-                "--working_dir":{
-                    "type":"str",
-                    "item_type":"str",
-                    "label":"命令的启动目录",
-                    "require":1,
-                    "choice":[
-                    ],
-                    "range":"",
-                    "default":"/mnt/xxx/horovod/",
-                    "placeholder":"",
-                    "describe":"命令的启动目录",
-                    "editable":1,
-                    "condition":"",
-                    "sub_args":{
-                    }
-                },
-                 "--command": {
-                    "type": "str",
-                    "item_type": "str",
-                    "label": "训练启动命令",
-                    "require": 1,
-                    "choice": [],
-                    "range": "",
-                    "default": "python /mnt/admin/demo.py",
-                    "placeholder": "",
-                    "describe": "训练启动命令",
-                    "editable": 1,
-                    "condition": "",
-                    "sub_args": {}
-                },
-                "--num_worker": {
-                    "type": "str",
-                    "item_type": "str",
-                    "label": "分布式worker的数目",
-                    "require": 1,
-                    "choice": [],
-                    "range": "",
-                    "default": 2,
-                    "placeholder": "",
-                    "describe": "分布式worker的数目",
-                    "editable": 1,
-                    "condition": "",
-                    "sub_args": {}
-                }
-            }
-        }
-    },
+
     "paddlejob":{
         "project_name":"深度学习",
         "image_name":"ccr.ccs.tencentyun.com/cube-studio/paddle:20221010",
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/paddle",
         "image_describe":"paddle分布式训练",
         "job_template_name":"paddlejob",
-        "job_template_describe":"paddle 分布式训练",
+        "job_template_describe":"paddle 分布式训练（企业版）",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"kubeflow-pipeline",
@@ -1217,7 +1594,7 @@
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mxnet",
         "image_describe":"mxnet分布式训练",
         "job_template_name":"mxnet",
-        "job_template_describe":"mxnet 分布式训练",
+        "job_template_describe":"mxnet 分布式训练（企业版）",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"kubeflow-pipeline",
@@ -1308,7 +1685,7 @@
         "image_describe":"kaldi音频分布式",
         "job_template_name":"kaldi",
         "job_template_old_names": ["kaldi-distributed-on-volcanojob"],
-        "job_template_describe":"kaldi音频分布式训练",
+        "job_template_describe":"kaldi音频分布式训练（企业版）",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"kubeflow-pipeline",
@@ -1392,6 +1769,872 @@
                     }
                 }
             }
+        }
+    },
+
+    "horovod":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/horovod:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/horovod",
+        "image_describe":"horovod 分布式训练",
+        "job_template_name":"horovod",
+        "job_template_describe":"horovod 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/horovod"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/horovod:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/horovod/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "megatron-lm":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/megatron-lm:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/megatron-lm",
+        "image_describe":"megatron-lm 分布式训练",
+        "job_template_name":"megatron-lm",
+        "job_template_describe":"megatron-lm 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/megatron-lm"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/megatron-lm:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/megatron-lm/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "deepspeed":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/deepspeed:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deepspeed",
+        "image_describe":"deepspeed 分布式训练",
+        "job_template_name":"deepspeed",
+        "job_template_describe":"deepspeed 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deepspeed"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/deepspeed:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/deepspeed/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "fairscale":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/fairscale:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/fairscale",
+        "image_describe":"fairscale 分布式训练",
+        "job_template_name":"fairscale",
+        "job_template_describe":"fairscale 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/fairscale"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/fairscale:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/fairscale/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "parallel-formers":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/parallel-formers:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/parallel-formers",
+        "image_describe":"parallel-formers 分布式训练",
+        "job_template_name":"parallel-formers",
+        "job_template_describe":"parallel-formers 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/parallel-formers"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/parallel-formers:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/parallel-formers/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "colossalai":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/colossalai:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/colossalai",
+        "image_describe":"colossalai 分布式训练",
+        "job_template_name":"colossalai",
+        "job_template_describe":"colossalai 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/colossalai"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/colossalai:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/colossalai/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "alpa":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/alpa:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/alpa",
+        "image_describe":"alpa 分布式训练",
+        "job_template_name":"alpa",
+        "job_template_describe":"alpa 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/alpa"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/alpa:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/alpa/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "hivemind":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/hivemind:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hivemind",
+        "image_describe":"hivemind 分布式训练",
+        "job_template_name":"hivemind",
+        "job_template_describe":"hivemind 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hivemind"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/hivemind:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/hivemind/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+    "oneflow":{
+        "project_name":"分布式框架",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/oneflow:20210401",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/oneflow",
+        "image_describe":"oneflow 分布式训练",
+        "job_template_name":"oneflow",
+        "job_template_describe":"oneflow 分布式训练（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"kubeflow-pipeline",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":3,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/oneflow"
+        },
+        "job_template_args":{
+            "参数": {
+                "--work_images": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "worker的运行镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "ccr.ccs.tencentyun.com/cube-studio/oneflow:20210401",
+                    "placeholder": "",
+                    "describe": "worker的运行镜像",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--working_dir":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"命令的启动目录",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"/mnt/xxx/oneflow/",
+                    "placeholder":"",
+                    "describe":"命令的启动目录",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+                    }
+                },
+                 "--command": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "训练启动命令",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": "python /mnt/admin/demo.py",
+                    "placeholder": "",
+                    "describe": "训练启动命令",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                },
+                "--num_worker": {
+                    "type": "str",
+                    "item_type": "str",
+                    "label": "分布式worker的数目",
+                    "require": 1,
+                    "choice": [],
+                    "range": "",
+                    "default": 2,
+                    "placeholder": "",
+                    "describe": "分布式worker的数目",
+                    "editable": 1,
+                    "condition": "",
+                    "sub_args": {}
+                }
+            }
+        }
+    },
+
+    "din":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/din:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/din",
+        "image_describe":"din算法",
+        "job_template_name":"din",
+        "job_template_describe":"din算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/din"
+        },
+        "job_template_args":{
+        }
+    },
+    "comirec":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/comirec:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/comirec",
+        "image_describe":"comirec算法",
+        "job_template_name":"comirec",
+        "job_template_describe":"comirec算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/comirec"
+        },
+        "job_template_args":{
+        }
+    },
+    "mind":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/mind:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mind",
+        "image_describe":"mind 算法",
+        "job_template_name":"mind",
+        "job_template_describe":"mind 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mind"
+        },
+        "job_template_args":{
+        }
+    },
+    "mmoe":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/mmoe:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mmoe",
+        "image_describe":"mmoe 算法",
+        "job_template_name":"mmoe",
+        "job_template_describe":"mmoe 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mmoe"
+        },
+        "job_template_args":{
+        }
+    },
+    "ple":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/ple:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ple",
+        "image_describe":"ple 算法",
+        "job_template_name":"ple",
+        "job_template_describe":"ple 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ple"
+        },
+        "job_template_args":{
+        }
+    },
+    "esmm":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/esmm:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/esmm",
+        "image_describe":"esmm 算法",
+        "job_template_name":"esmm",
+        "job_template_describe":"esmm 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/esmm"
+        },
+        "job_template_args":{
+        }
+    },
+    "dtower":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/dtower:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dtower",
+        "image_describe":"dtower 算法",
+        "job_template_name":"dtower",
+        "job_template_describe":"dtower 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dtower"
+        },
+        "job_template_args":{
+        }
+    },
+    "deepfm":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/deepfm:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deepfm",
+        "image_describe":"deepfm 算法",
+        "job_template_name":"deepfm",
+        "job_template_describe":"deepfm 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deepfm"
+        },
+        "job_template_args":{
+        }
+    },
+    "youtube":{
+        "project_name":"推荐类模板",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/youtube:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/youtube",
+        "image_describe":"youtube 算法",
+        "job_template_name":"youtube",
+        "job_template_describe":"youtube 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/youtube"
+        },
+        "job_template_args":{
         }
     },
 
@@ -1737,7 +2980,7 @@
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_convert",
         "image_describe":"模型转换",
         "job_template_name":"model-convert",
-        "job_template_describe":"模型转换(todo)",
+        "job_template_describe":"模型转换（企业版）",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"",
@@ -1785,7 +3028,7 @@
         "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_compression",
         "image_describe":"模型压缩",
         "job_template_name":"model-compression",
-        "job_template_describe":"模型压缩(todo)",
+        "job_template_describe":"模型压缩（企业版）",
         "job_template_command":"",
         "job_template_volume":"",
         "job_template_account":"",
@@ -1868,7 +3111,7 @@
                     "range": "",
                     "default": "",
                     "placeholder": "",
-                    "describe": "模型名",
+                    "describe": "模型名(a-z0-9-字符组成，最长54个字符)",
                     "editable": 1,
                     "condition": "",
                     "sub_args": {}
@@ -2066,6 +3309,23 @@
         },
         "job_template_args":{
             "模型信息":{
+                "--project_name":{
+                    "type":"str",
+                    "item_type":"str",
+                    "label":"项目组名称",
+                    "require":1,
+                    "choice":[
+                    ],
+                    "range":"",
+                    "default":"public",
+                    "placeholder":"",
+                    "describe":"项目组名称",
+                    "editable":1,
+                    "condition":"",
+                    "sub_args":{
+
+                    }
+                },
                 "--label":{
                     "type":"str",
                     "item_type":"str",
@@ -2701,6 +3961,43 @@
                    "sub_args": {}
                }
            }
+        }
+    },
+
+    "aigc":{
+        "project_name":"大模型",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/aigc:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/aigc",
+        "image_describe":"aigc 算法",
+        "job_template_name":"aigc",
+        "job_template_describe":"aigc 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/aigc"
+        },
+        "job_template_args":{
+        }
+    },
+    "chatgpt":{
+        "project_name":"大模型",
+        "image_name":"ccr.ccs.tencentyun.com/cube-studio/chatgpt:v1",
+        "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatgpt",
+        "image_describe":"chatgpt 算法",
+        "job_template_name":"chatgpt",
+        "job_template_describe":"chatgpt 算法（企业版）",
+        "job_template_command":"",
+        "job_template_volume":"",
+        "job_template_account":"",
+        "job_template_env":"",
+        "job_template_expand":{
+            "index":2,
+            "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatgpt"
+        },
+        "job_template_args":{
         }
     }
 }

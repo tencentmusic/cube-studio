@@ -1,0 +1,109 @@
+{
+    "num_workers": 1,
+    "node_affin": "only_cpu",
+    "pod_affin": "spread",
+    "timeout": "100d",
+    "trainer": "runner",
+    "job_detail": {
+        "model_input_config_file": "/Users/jurluo/tme-kubeflow/job-template/job/model_template/tf/ple/pr.json",
+        "model_args": {
+            "custom_layer_file_path": "/Users/jurluo/tme-kubeflow/job-template/job/model_template/tf/ple/custom/custom_layers.py",
+            "ordered_task_names": ["ctr_label", "cvr_label"],
+            "layer_number": 2,
+            "ple_dict": {
+                "ctr_label": {
+                    "0": "PersonalRadioExpertV1",
+                    "1": "PersonalRadioExpertV1"
+                },
+                "cvr_label": {
+                    "0": "PersonalRadioExpertV1",
+                    "1": "PersonalRadioExpertV1"
+                },
+                "shared_experts": {
+                    "0": "PersonalRadioExpertV1",
+                    "1": "PersonalRadioExpertV1"
+                }
+            },
+            "tower_dict": {
+                "ctr_label": "PersonalRadioTowerV1",
+                "cvr_label": "PersonalRadioTowerV1"
+            },
+            "name": "ple"
+        },
+        "train_data_args": {
+            "data_file": "/Users/jurluo/myJob/ml/personal_radio/data/train1.csv",
+            "file_type": "CSV",
+            "field_delim": " ",
+            "with_headers": false,
+            "headers": "uin,songid,ctr_label,cvr_label,like_label,total_listen,total_like,total_comment,language_0,language_1,language_2,language_3,language_4,language_5,language_6,language_7,language_8,language_9,language_10,language_12,language_14,language_18,language_24,language_2500,public_year_1977,public_year_1978,public_year_1979,public_year_1989,public_year_1990,public_year_1996,public_year_2000,public_year_2002,public_year_2004,public_year_2006,public_year_2007,public_year_2010,public_year_2011,public_year_2012,public_year_2013,public_year_2014,public_year_2015,public_year_2016,public_year_2017,public_year_2018,public_year_2019,public_year_2020,public_year_2021,public_year_202200,singer_fans_num,singer_song_num,age_0,age_10,age_13,age_14,age_15,age_16,age_17,age_18,age_19,age_20,age_21,age_22,age_23,age_24,age_25,age_26,age_27,age_37,age_40,age_42,age_44,age_46,age_47,age_50,age_5100,sex_0,sex_1,sex_2,sex_2100,education_0,education_1,education_2,education_3,education_4,education_5,education_6,education_7,education_8,education_8100,city_level_0,city_level_11,city_level_21,city_level_22,city_level_31,city_level_41,city_level_51,city_level_6100,singer_sim,like_sim_by_lang1,like_sim_by_lang2,like_sim_by_lang3,like_sim_by_lang4,like_sim_by_lang5,like_sim_by_lang6,like_sim_by_lang7,like_sim_by_lang8,genre_dis_like,genre_dis_3d,genre_dis_7d,genre_dis_15d,year_dis_like,year_dis_3d,year_dis_7d,year_dis_15d,lang_dis_like,lang_dis_3d,lang_dis_7d,lang_dis_15d,eagleScore,favAvgSim,favMaxSim,dusAvgSim,dusMaxSim,favDusMaxSimGap,favDusAvgSimGap,flisAvgSim,flisMaxSim,cutAvgSim,cutMaxSim,favCutMaxSimGap,favCutAvgSimGap,flisCutMaxSimGap,flisCutAvgSimGap,flisDusMaxSimGap,flisDusAvgSimGap,fav2Singer,dus2Singer,cut2Singer,favTrackNum,cutTrackNum,dusTrackNum,flisTrackNum,favSingerMaxSim,favSingerAvgSim,cutSingerMaxSim,cutSingerAvgSim,dusSingerMaxSim,dusSingerAvgSim,flisSingerMaxSim,flisSingerAvgSim,proSingerMaxSim,proSingerAvgSim,languageScore,languageRank,singerScore,singerRank,genreScore,genreRank,recSrc_0,recSrc_1,recSrc_2,recSrc_3,recSrc_4,recSrc_5,recSrc_6,recSrc_7,recSrc_8,recSrc_9,recSrc_10,recSrc_11,recSrc_12,recSrc_13,recSrc_14,recSrc_15,recSrc_16,recSrc_17,recSrc_1800,version_0,version_1,version_2,version_3,version_4,version_5,version_6,version_7,version_8,version_9,version_10,version_11,version_12,version_13,version_14,version_15,version_16,version_17,version_18,version_19,version_20,version_21,version_22,version_23,version_24,version_25,version_26,version_27,version_28,version_2900,genre_0,genre_1,genre_2,genre_3,genre_4,genre_5,genre_6,genre_7,genre_8,genre_9,genre_10,genre_11,genre_12,genre_13,genre_14,genre_15,genre_16,genre_17,genre_18,genre_19,genre_20,genre_21,genre_22,genre_23,genre_24,genre_25,genre_26,genre_27,genre_28,genre_29,genre_30,genre_31,genre_32,genre_33,genre_34,genre_35,genre_36,genre_37,genre_38,genre_39,genre_40,genre_41,genre_42,genre_43,genre_44,genre_45,genre_46,genre_47,genre_48,genre_49,genre_50,genre_51,genre_52,genre_53,genre_54,genre_55,genre_56,genre_57,genre_58,genre_59,genre_60,genre_61,genre_62,genre_63,genre_64,genre_65,genre_6600,area_0,area_1,area_2,area_3,area_4,area_5,area_6000,ostype_0,ostype_1,ostype_11,ostype_18,ostype_1900,tHour_0,tHour_1,tHour_2,tHour_3,tHour_4,tHour_5,tHour_6,tHour_7,tHour_8,tHour_9,tHour_10,tHour_11,tHour_12,tHour_13,tHour_14,tHour_15,tHour_16,tHour_17,tHour_18,tHour_19,tHour_20,tHour_21,tHour_22,tHour_23,tHour_24,tHour_2500,srcWei,needNum_1,needNum_3,needNum_5,needNum_6000,isAddDiversity_0,isAddDiversity_1,isAddDiversity_2000,albumHash,favSingerAttSim,cutSingerAttSim,dusSingerAttSim,lisSingerAttSim,flisSingerAttSim,favAttSim,cutAttSim,dusAttSim,lisAttSim,flisAttSim,newSongBias,nsaBias,singerNoFocusBias,lowSongBias,singerHash",
+            "shuffle_buffer_size": 10240,
+            "shuffle": false,
+            "model_input_config_file": "/Users/jurluo/tme-kubeflow/job-template/job/model_template/tf/ple/pr.json"
+        },
+        "val_data_args": {
+            "data_file": "/Users/jurluo/myJob/ml/personal_radio/data/test.dat.norm.shuf.s1w",
+            "file_type": "CSV",
+            "field_delim": " ",
+            "with_headers": false,
+            "headers": "uin,songid,ctr_label,cvr_label,like_label,total_listen,total_like,total_comment,language_0,language_1,language_2,language_3,language_4,language_5,language_6,language_7,language_8,language_9,language_10,language_12,language_14,language_18,language_24,language_2500,public_year_1977,public_year_1978,public_year_1979,public_year_1989,public_year_1990,public_year_1996,public_year_2000,public_year_2002,public_year_2004,public_year_2006,public_year_2007,public_year_2010,public_year_2011,public_year_2012,public_year_2013,public_year_2014,public_year_2015,public_year_2016,public_year_2017,public_year_2018,public_year_2019,public_year_2020,public_year_2021,public_year_202200,singer_fans_num,singer_song_num,age_0,age_10,age_13,age_14,age_15,age_16,age_17,age_18,age_19,age_20,age_21,age_22,age_23,age_24,age_25,age_26,age_27,age_37,age_40,age_42,age_44,age_46,age_47,age_50,age_5100,sex_0,sex_1,sex_2,sex_2100,education_0,education_1,education_2,education_3,education_4,education_5,education_6,education_7,education_8,education_8100,city_level_0,city_level_11,city_level_21,city_level_22,city_level_31,city_level_41,city_level_51,city_level_6100,singer_sim,like_sim_by_lang1,like_sim_by_lang2,like_sim_by_lang3,like_sim_by_lang4,like_sim_by_lang5,like_sim_by_lang6,like_sim_by_lang7,like_sim_by_lang8,genre_dis_like,genre_dis_3d,genre_dis_7d,genre_dis_15d,year_dis_like,year_dis_3d,year_dis_7d,year_dis_15d,lang_dis_like,lang_dis_3d,lang_dis_7d,lang_dis_15d,eagleScore,favAvgSim,favMaxSim,dusAvgSim,dusMaxSim,favDusMaxSimGap,favDusAvgSimGap,flisAvgSim,flisMaxSim,cutAvgSim,cutMaxSim,favCutMaxSimGap,favCutAvgSimGap,flisCutMaxSimGap,flisCutAvgSimGap,flisDusMaxSimGap,flisDusAvgSimGap,fav2Singer,dus2Singer,cut2Singer,favTrackNum,cutTrackNum,dusTrackNum,flisTrackNum,favSingerMaxSim,favSingerAvgSim,cutSingerMaxSim,cutSingerAvgSim,dusSingerMaxSim,dusSingerAvgSim,flisSingerMaxSim,flisSingerAvgSim,proSingerMaxSim,proSingerAvgSim,languageScore,languageRank,singerScore,singerRank,genreScore,genreRank,recSrc_0,recSrc_1,recSrc_2,recSrc_3,recSrc_4,recSrc_5,recSrc_6,recSrc_7,recSrc_8,recSrc_9,recSrc_10,recSrc_11,recSrc_12,recSrc_13,recSrc_14,recSrc_15,recSrc_16,recSrc_17,recSrc_1800,version_0,version_1,version_2,version_3,version_4,version_5,version_6,version_7,version_8,version_9,version_10,version_11,version_12,version_13,version_14,version_15,version_16,version_17,version_18,version_19,version_20,version_21,version_22,version_23,version_24,version_25,version_26,version_27,version_28,version_2900,genre_0,genre_1,genre_2,genre_3,genre_4,genre_5,genre_6,genre_7,genre_8,genre_9,genre_10,genre_11,genre_12,genre_13,genre_14,genre_15,genre_16,genre_17,genre_18,genre_19,genre_20,genre_21,genre_22,genre_23,genre_24,genre_25,genre_26,genre_27,genre_28,genre_29,genre_30,genre_31,genre_32,genre_33,genre_34,genre_35,genre_36,genre_37,genre_38,genre_39,genre_40,genre_41,genre_42,genre_43,genre_44,genre_45,genre_46,genre_47,genre_48,genre_49,genre_50,genre_51,genre_52,genre_53,genre_54,genre_55,genre_56,genre_57,genre_58,genre_59,genre_60,genre_61,genre_62,genre_63,genre_64,genre_65,genre_6600,area_0,area_1,area_2,area_3,area_4,area_5,area_6000,ostype_0,ostype_1,ostype_11,ostype_18,ostype_1900,tHour_0,tHour_1,tHour_2,tHour_3,tHour_4,tHour_5,tHour_6,tHour_7,tHour_8,tHour_9,tHour_10,tHour_11,tHour_12,tHour_13,tHour_14,tHour_15,tHour_16,tHour_17,tHour_18,tHour_19,tHour_20,tHour_21,tHour_22,tHour_23,tHour_24,tHour_2500,srcWei,needNum_1,needNum_3,needNum_5,needNum_6000,isAddDiversity_0,isAddDiversity_1,isAddDiversity_2000,albumHash,favSingerAttSim,cutSingerAttSim,dusSingerAttSim,lisSingerAttSim,flisSingerAttSim,favAttSim,cutAttSim,dusAttSim,lisAttSim,flisAttSim,newSongBias,nsaBias,singerNoFocusBias,lowSongBias,singerHash",
+            "shuffle_buffer_size": 10240,
+            "shuffle": false,
+            "model_input_config_file": "/Users/jurluo/tme-kubeflow/job-template/job/model_template/tf/ple/pr.json"
+        },
+        "test_data_args": {
+            "data_file": "/Users/jurluo/myJob/ml/personal_radio/data/test.dat.norm.shuf.s1w",
+            "file_type": "CSV",
+            "field_delim": " ",
+            "with_headers": false,
+            "headers": "uin,songid,ctr_label,cvr_label,like_label,total_listen,total_like,total_comment,language_0,language_1,language_2,language_3,language_4,language_5,language_6,language_7,language_8,language_9,language_10,language_12,language_14,language_18,language_24,language_2500,public_year_1977,public_year_1978,public_year_1979,public_year_1989,public_year_1990,public_year_1996,public_year_2000,public_year_2002,public_year_2004,public_year_2006,public_year_2007,public_year_2010,public_year_2011,public_year_2012,public_year_2013,public_year_2014,public_year_2015,public_year_2016,public_year_2017,public_year_2018,public_year_2019,public_year_2020,public_year_2021,public_year_202200,singer_fans_num,singer_song_num,age_0,age_10,age_13,age_14,age_15,age_16,age_17,age_18,age_19,age_20,age_21,age_22,age_23,age_24,age_25,age_26,age_27,age_37,age_40,age_42,age_44,age_46,age_47,age_50,age_5100,sex_0,sex_1,sex_2,sex_2100,education_0,education_1,education_2,education_3,education_4,education_5,education_6,education_7,education_8,education_8100,city_level_0,city_level_11,city_level_21,city_level_22,city_level_31,city_level_41,city_level_51,city_level_6100,singer_sim,like_sim_by_lang1,like_sim_by_lang2,like_sim_by_lang3,like_sim_by_lang4,like_sim_by_lang5,like_sim_by_lang6,like_sim_by_lang7,like_sim_by_lang8,genre_dis_like,genre_dis_3d,genre_dis_7d,genre_dis_15d,year_dis_like,year_dis_3d,year_dis_7d,year_dis_15d,lang_dis_like,lang_dis_3d,lang_dis_7d,lang_dis_15d,eagleScore,favAvgSim,favMaxSim,dusAvgSim,dusMaxSim,favDusMaxSimGap,favDusAvgSimGap,flisAvgSim,flisMaxSim,cutAvgSim,cutMaxSim,favCutMaxSimGap,favCutAvgSimGap,flisCutMaxSimGap,flisCutAvgSimGap,flisDusMaxSimGap,flisDusAvgSimGap,fav2Singer,dus2Singer,cut2Singer,favTrackNum,cutTrackNum,dusTrackNum,flisTrackNum,favSingerMaxSim,favSingerAvgSim,cutSingerMaxSim,cutSingerAvgSim,dusSingerMaxSim,dusSingerAvgSim,flisSingerMaxSim,flisSingerAvgSim,proSingerMaxSim,proSingerAvgSim,languageScore,languageRank,singerScore,singerRank,genreScore,genreRank,recSrc_0,recSrc_1,recSrc_2,recSrc_3,recSrc_4,recSrc_5,recSrc_6,recSrc_7,recSrc_8,recSrc_9,recSrc_10,recSrc_11,recSrc_12,recSrc_13,recSrc_14,recSrc_15,recSrc_16,recSrc_17,recSrc_1800,version_0,version_1,version_2,version_3,version_4,version_5,version_6,version_7,version_8,version_9,version_10,version_11,version_12,version_13,version_14,version_15,version_16,version_17,version_18,version_19,version_20,version_21,version_22,version_23,version_24,version_25,version_26,version_27,version_28,version_2900,genre_0,genre_1,genre_2,genre_3,genre_4,genre_5,genre_6,genre_7,genre_8,genre_9,genre_10,genre_11,genre_12,genre_13,genre_14,genre_15,genre_16,genre_17,genre_18,genre_19,genre_20,genre_21,genre_22,genre_23,genre_24,genre_25,genre_26,genre_27,genre_28,genre_29,genre_30,genre_31,genre_32,genre_33,genre_34,genre_35,genre_36,genre_37,genre_38,genre_39,genre_40,genre_41,genre_42,genre_43,genre_44,genre_45,genre_46,genre_47,genre_48,genre_49,genre_50,genre_51,genre_52,genre_53,genre_54,genre_55,genre_56,genre_57,genre_58,genre_59,genre_60,genre_61,genre_62,genre_63,genre_64,genre_65,genre_6600,area_0,area_1,area_2,area_3,area_4,area_5,area_6000,ostype_0,ostype_1,ostype_11,ostype_18,ostype_1900,tHour_0,tHour_1,tHour_2,tHour_3,tHour_4,tHour_5,tHour_6,tHour_7,tHour_8,tHour_9,tHour_10,tHour_11,tHour_12,tHour_13,tHour_14,tHour_15,tHour_16,tHour_17,tHour_18,tHour_19,tHour_20,tHour_21,tHour_22,tHour_23,tHour_24,tHour_2500,srcWei,needNum_1,needNum_3,needNum_5,needNum_6000,isAddDiversity_0,isAddDiversity_1,isAddDiversity_2000,albumHash,favSingerAttSim,cutSingerAttSim,dusSingerAttSim,lisSingerAttSim,flisSingerAttSim,favAttSim,cutAttSim,dusAttSim,lisAttSim,flisAttSim,newSongBias,nsaBias,singerNoFocusBias,lowSongBias,singerHash",
+            "shuffle_buffer_size": 10240,
+            "shuffle": false,
+            "model_input_config_file": "/Users/jurluo/tme-kubeflow/job-template/job/model_template/tf/ple/pr_gauc.json"
+        },
+        "train_args": {
+            "mw_com": "RING",
+            "train_type": "compile_fit",
+            "batch_size": 1024,
+            "epochs":1,
+            "num_samples": 17200000,
+            "num_val_samples": 100000,
+            "optimizer": {
+                "type": "adam",
+                "args": {
+                    "learning_rate": 0.001
+                }
+            },
+            "losses": ["bce", "bce"],
+            "metrics": {
+                "ctr_label": "auc",
+                "cvr_label": "auc"
+            }
+        },
+        "early_stopping": {
+            "monitor": "ctr_label",
+            "mode": "max",
+            "patience": 1,
+            "min_delta": 0.001
+        },
+        "eval_args": {
+            "batch_size": 1024,
+            "model_call_exclude_input_index": "uin",
+            "metrics": {
+                "ctr_label": {
+                    "type": "gauc",
+                    "args": {
+                        "user_id_index": "uin",
+                        "from_logits": false
+                    }
+                },
+                "cvr_label": {
+                    "type": "gauc",
+                    "args": {
+                        "user_id_index": "uin",
+                        "from_logits": false
+                    }
+                }
+            }
+        }
+    }
+}

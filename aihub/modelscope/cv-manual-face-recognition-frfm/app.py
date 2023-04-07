@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,cv2,time,random
 import pysnooper
 import os
 
@@ -24,7 +24,8 @@ class CV_MANUAL_FACE_RECOGNITION_FRFM_Model(Model):
 
     # 和inference函数的输入参数对应，并且会对接显示到web界面上
     inference_inputs = [
-        Field(type=Field_type.image, name='image', label='',describe='',default='',validators=None)
+        Field(type=Field_type.image, name='arg0', label='人脸图片', describe='将计算出512维人脸特征向量', default='', validators=None),
+        Field(type=Field_type.image, name='arg1', label='人脸图片', describe='输入两张图片，则计算两张图片是否是同一个人', default='',validators=None)
     ]
 
     inference_resource = {
@@ -35,7 +36,8 @@ class CV_MANUAL_FACE_RECOGNITION_FRFM_Model(Model):
         {
             "label": "示例0",
             "input": {
-                "image": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg"
+                "arg0": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/face_recognition_1.png",
+                "arg1": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/face_recognition_2.png"
             }
         }
     ]
@@ -60,18 +62,21 @@ class CV_MANUAL_FACE_RECOGNITION_FRFM_Model(Model):
 
     # web每次用户请求推理，用于对接web界面请求
     @pysnooper.snoop(watch_explode=('result'))
-    def inference(self,image,**kwargs):
-        result = self.p(image)
+    def inference(self,arg0,arg1=None,**kwargs):
+
+        from modelscope.outputs import OutputKeys
+        face1 = self.p(arg0)[OutputKeys.IMG_EMBEDDING]
+        text = face1.tolist()
+        if arg1:
+            face2 = self.p(arg1)[OutputKeys.IMG_EMBEDDING]
+            sim = numpy.dot(face1[0], face2[0])
+            text = round(sim, 3)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
-        back=[
+        back = [
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "text": str(text)
             }
         ]
         return back
@@ -84,10 +89,13 @@ model=CV_MANUAL_FACE_RECOGNITION_FRFM_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(image='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mog_face_detection.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/face_recognition_1.png')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 700M
+# 模型推理速度 gpu v100 0.6s,显存占用4G

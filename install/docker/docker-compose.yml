@@ -22,7 +22,7 @@ services:
 #      - ./docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
 
   frontend:
-    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.01.01
+    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.04.01
     restart: unless-stopped
     ports:
       - '80:80'
@@ -33,9 +33,9 @@ services:
       - ../../install/docker/dockerFrontend/nginx.80.conf:/etc/nginx/conf.d/default.conf
 
   myapp:
-    image:  ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
+    image:  ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01
     restart: unless-stopped
-    command: ['bash','-c','sleep 100000000 && /entrypoint.sh']
+    command: ['bash','-c','sleep 10000000 && /entrypoint.sh']
     environment:
       STAGE: 'dev'
       REDIS_HOST: 'redis'
@@ -57,9 +57,9 @@ services:
       - ./config.py:/home/myapp/myapp/config.py
       - ./kubeconfig:/home/myapp/kubeconfig
 
-
+#
 #  beat:
-#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
+#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01
 #    restart: "no"
 #    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app beat --loglevel=info"]
 #    shm_size: '100gb'
@@ -80,7 +80,7 @@ services:
 ##
 #
 #  worker:
-#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.01.01
+#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01
 #    restart: unless-stopped
 #    # 默认的prefork池针对长时间的任务支持不是很好，如果任务运行时间有数分钟/小时，建议启用 Celery 的 -Ofair 命令参数
 #    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app worker --loglevel=info --pool=prefork -Ofair -c 2 -n worker@%h"]
@@ -88,7 +88,7 @@ services:
 #      REDIS_HOST: 'redis'
 #      REDIS_PORT: '6379'
 #      REDIS_PASSWORD: admin
-#      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow1?charset=utf8'
+#      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
 #      ENVIRONMENT: DEV
 #    depends_on:
 #      - redis

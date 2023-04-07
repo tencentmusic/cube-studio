@@ -157,6 +157,12 @@ export default function TaskList(props: IProps) {
                         <Select style={{ width: 256 }} value={separatorRef.current} options={[{
                             label: '|',
                             value: '|'
+                        }, {
+                            label: ',',
+                            value: ','
+                        }, {
+                            label: 'TAB',
+                            value: 'TAB'
                         }]} onChange={(value) => {
                             setSeparator(value)
                         }} />

@@ -1,7 +1,7 @@
 import base64
 import io,sys,os
 from cubestudio.aihub.model import Model,Validator,Field_type,Field
-
+import numpy,time,cv2,random
 import pysnooper
 import os
 
@@ -27,15 +27,12 @@ class CV_MANUAL_FACE_DETECTION_MTCNN_Model(Model):
         Field(type=Field_type.image, name='arg0', label='',describe='',default='',validators=None)
     ]
 
-    inference_resource = {
-        "resource_gpu": "1"
-    }
     # 会显示在web界面上，让用户作为示例输入
     web_examples=[
         {
             "label": "示例0",
             "input": {
-                "arg0": "https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mtcnn_face_detection.jpg"
+                "arg0": "mtcnn_face_detection.jpg"
             }
         }
     ]
@@ -62,16 +59,26 @@ class CV_MANUAL_FACE_DETECTION_MTCNN_Model(Model):
     @pysnooper.snoop(watch_explode=('result'))
     def inference(self,arg0,**kwargs):
         result = self.p(arg0)
+        img = cv2.imread(arg0)  # 读取图片
+
+        for index,face in enumerate(result['boxes']):
+            boxs = face
+            keypoints = result['keypoints'][index]
+            for i in range(5):
+                cv2.circle(img, (int(keypoints[i*2]), int(keypoints[i*2+1])), 3, (0, 0, 255), -1)
+            cv2.rectangle(img,(int(boxs[0]),int(boxs[1])),(int(boxs[2]),int(boxs[3])),(0, 0, 255),2)
+
+        savePath = 'result/result_' + str(int(1000 * time.time())) + '.jpg'
+        os.makedirs(os.path.dirname(savePath), exist_ok=True)
+        if os.path.exists(savePath):
+            os.remove(savePath)
+        cv2.imwrite(savePath, img)
 
         # 将结果保存到result目录下面，gitignore统一进行的忽略。并且在结果中注意添加随机数，避免多人访问时，结果混乱
         # 推理的返回结果只支持image，text，video，audio，html，markdown几种类型
         back=[
             {
-                "image": 'result/aa.jpg',
-                "text": '结果文本',
-                "video": 'result/aa.mp4',
-                "audio": 'result/aa.mp3',
-                "markdown":''
+                "image": savePath
             }
         ]
         return back
@@ -84,10 +91,13 @@ model=CV_MANUAL_FACE_DETECTION_MTCNN_Model()
 # model.train(save_model_dir = save_model_dir,arg1=None,arg2=None)  # 测试
 
 # 容器中运行调试推理时
-model.load_model(save_model_dir=None)
-result = model.inference(arg0='https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/mtcnn_face_detection.jpg')  # 测试
-print(result)
+# model.load_model(save_model_dir=None)
+# result = model.inference(arg0='mtcnn_face_detection.jpg')  # 测试
+# print(result)
 
-# # 模型启动web时使用
-# if __name__=='__main__':
-#     model.run()
+# 模型启动web时使用
+if __name__=='__main__':
+    model.run()
+
+# 模型大小 4.5M
+# 推理速度 gpu v100 0.1s 显存占用2G
