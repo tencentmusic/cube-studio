@@ -55,8 +55,7 @@ https://github.com/tencentmusic/cube-studio/wiki
 | media-download | 多媒体处理 | 	分布式媒体文件下载  | 
 | video-audio | 多媒体处理 | 	分布式视频提取音频  | 
 | video-img | 多媒体处理 | 	分布式视频提取图片  | 
-| object-detection | 机器视觉 | 基于darknet yolov3 的目标识别| 
-| ner | 自然语言| 命名实体识别 | 
+| object-detection | 机器视觉 | 基于darknet yolov3 的目标识别|
  
 # 平台部署
 

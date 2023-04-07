@@ -56,8 +56,7 @@ tips:
 | media-download | multimedia data processing | 	Distributed download of media files  | 
 | video-audio | multimedia data processing | 	Distributed extraction of audio from video  | 
 | video-img | multimedia data processing | Distributed extraction of pictures from video | 
-| object-detection-on-darknet | machine vision | object-detection with darknet yolov3 | 
-| ner |natural language | Named Entity Recognition | 
+| object-detection-on-darknet | machine vision | object-detection with darknet yolov3 |
 
 # Deploy
 
