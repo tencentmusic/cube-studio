@@ -37,7 +37,7 @@ class Aihub_Filter(MyappFilter):
         # user_roles = [role.name.lower() for role in list(get_user_roles())]
         # if "admin" in user_roles:
         #     return query.filter(Project.type == value).order_by(Project.id.desc())
-        return query.filter(self.model.field==value).order_by(self.model.id.desc())
+        return query.filter(self.model.field==value)
 
 
 class Aihub_base():
