@@ -9,7 +9,7 @@ spec:
     istio: ingressgateway         # pod的label
   servers:
   - hosts:
-    - '*'
+    - '*'        # 如果使用域名为平台接入，这里要改成域名，并重新部署这个文件
     port:
       number: 80        # svc服务的外部端口，会对应在ingressgateway的容器内启动svc的目标端口，但无法启动80和443内部端口，所以要先修改svc的目标端口，再创建gateway。（也会监听svc目标端口变化进行更改）
       protocol: HTTP   # HTTP协议在第一个创建时就有端口(80端口可能受限)开启，第二个会vs才启动，
@@ -25,7 +25,7 @@ spec:
     istio: ingressgateway
   servers:
   - hosts:
-    - '*'
+    - '*'         # 如果使用域名为平台接入，这里要改成域名，并重新部署这个文件
     port:
       number: 8080
       protocol: HTTP       # TCP 协议需要vs tcp match 端口后才会开启
