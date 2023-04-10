@@ -2407,16 +2407,6 @@
     },
     {
         "price": "1",
-        "name": "cv-res2net-salient-detection",
-        "label": "图像显著性目标检测",
-        "describe": "给定一张输入图像，输出视觉显著注意力程度图。",
-        "hot": 3006,
-        "pic": "example.jpg",
-        "uuid": "cv-res2net-salient-detection",
-        "field": "机器视觉"
-    },
-    {
-        "price": "1",
         "name": "cv-ir101-facerecognition-cfglint",
         "label": "CurricularFace人脸识别模型",
         "describe": "输入一张图片，检测矫正人脸区域后提取特征，两个人脸特征可用于人脸比对，多个人脸特征可用于人脸检索。",

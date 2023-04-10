@@ -208,7 +208,8 @@ class Docker_ModelView_Base():
 
             message='拉取镜像时间过长，一分钟后刷新此页面，或者打开链接：<a href="%s">查看pod信息</a>'%pod_url
             flash(message,'warning')
-            return self.response(400, message)
+            return message,400
+            # return self.response(400, message)
             # return self.response(400,**{"message":message,"status":1,"result":pod['status_more']})
             # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 

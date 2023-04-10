@@ -119,7 +119,7 @@ spec:
     spec:
       containers:
         - name: kubernetes-dashboard-cluster
-          image: kubernetesui/dashboard:v2.2.0  
+          image: kubernetesui/dashboard:v2.6.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9090
@@ -199,7 +199,7 @@ spec:
         - name: dashboard-cluster-metrics-scraper
           securityContext:
             runAsUser: 0
-          image: kubernetesui/metrics-scraper:v1.0.6
+          image: kubernetesui/metrics-scraper:v1.0.8
           ports:
             - containerPort: 8000
               protocol: TCP

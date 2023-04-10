@@ -13,7 +13,7 @@ kubectl label node $node train=true cpu=true notebook=true service=true org=publ
 sh create_ns_secret.sh
 kubectl apply -f sa-rbac.yaml
 # 部署dashboard
-kubectl apply -f dashboard/v2.2.0-cluster.yaml
+kubectl apply -f dashboard/v2.6.1-cluster.yaml
 # 部署mysql
 kubectl create -f mysql/pv-pvc-hostpath.yaml
 kubectl create -f mysql/service.yaml
