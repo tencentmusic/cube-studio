@@ -9,8 +9,10 @@ kubeflow = [
 ]
 
 kubernetes_dashboard = [
-    'kubernetesui/dashboard:v2.6.1',  # k8s dashboard
-    'kubernetesui/metrics-scraper:v1.0.8',  # k8s dashboard 上的指标监控
+    # 'kubernetesui/dashboard:v2.6.1',  # k8s dashboard
+    # 'kubernetesui/metrics-scraper:v1.0.8',  # k8s dashboard 上的指标监控
+    'kubernetesui/dashboard:v2.2.0',  # k8s dashboard
+    'kubernetesui/metrics-scraper:v1.0.6',  # k8s dashboard 上的指标监控
 ]
 
 new_gpu = [

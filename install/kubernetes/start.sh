@@ -13,7 +13,9 @@ kubectl label node $node train=true cpu=true notebook=true service=true org=publ
 sh create_ns_secret.sh
 kubectl apply -f sa-rbac.yaml
 # 部署dashboard
-kubectl apply -f dashboard/v2.6.1-cluster.yaml
+kubectl apply -f dashboard/v2.2.0-cluster.yaml
+# 高版本k8s部署2.6.1版本
+#kubectl apply -f dashboard/v2.6.1-cluster.yaml
 # 部署mysql
 kubectl create -f mysql/pv-pvc-hostpath.yaml
 kubectl create -f mysql/service.yaml
@@ -114,8 +116,9 @@ kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 # 部署istio
 kubectl apply -f istio/install-crd.yaml
 kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --timeout=60s
+# 在k8s 1.21-部署
 kubectl apply -f istio/install.yaml
-# k8s 1.21+
+# 在k8s 1.21+部署
 # kubectl delete -f istio/install.yaml
 # kubectl apply -f istio/install-1.15.0.yaml
 
