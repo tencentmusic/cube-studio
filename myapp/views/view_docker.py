@@ -204,11 +204,12 @@ class Docker_ModelView_Base():
             time.sleep(2)
         if try_num==0:
             pod_url = conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (namespace, pod_name)
+            # event = k8s_client.get_pod_event(namespace=namespace,pod_name=pod_name)
 
-            message='拉取镜像时间过长，一分钟后刷新此页面，或者打开链接：%s，查看pod信息'%pod_url
+            message='拉取镜像时间过长，一分钟后刷新此页面，或者打开链接：<a href="%s">查看pod信息</a>'%pod_url
             flash(message,'warning')
-
-            return self.response(400,**{"message":message,"status":1,"result":pod['status_more']})
+            return self.response(400, message)
+            # return self.response(400,**{"message":message,"status":1,"result":pod['status_more']})
             # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
         flash('镜像调试只安装环境，请不要运行业务代码。当晚前请注意保存镜像','warning')

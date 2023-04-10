@@ -371,11 +371,14 @@ class ETL_Pipeline_ModelView_Base():
 
         return jsonify(config)
 
-
+    @expose("/template/list/")
     @expose("/template/list/<etl_pipeline_id>")
-    # @pysnooper.snoop()
-    def template_list(self,etl_pipeline_id):
-        pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
+    # @pysnooper.snoop(
+    def template_list(self,etl_pipeline_id=None):  # 这里根据引擎返回不同的模板列表
+        if not etl_pipeline_id:
+            pipeline = db.session.query(ETL_Pipeline).filter_by(workflow='airflow').first()
+        else:
+            pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
         params = importlib.import_module('myapp.views.view_etl_pipeline_'+pipeline.workflow)
         etl_pipeline = getattr(params, pipeline.workflow.upper() + '_ETL_PIPELINE')(pipeline)
         all_template = etl_pipeline.all_template
