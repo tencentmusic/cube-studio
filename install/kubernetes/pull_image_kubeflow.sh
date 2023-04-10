@@ -11,7 +11,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-alertmanager:v
 docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-argoproj-workflow-controller:v3.4.3 && docker tag ccr.ccs.tencentyun.com/cube-studio/quay.io-argoproj-workflow-controller:v3.4.3 quay.io/argoproj/workflow-controller:v3.4.3 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-coreos-addon-resizer:1.0 && docker tag ccr.ccs.tencentyun.com/cube-studio/quay.io-coreos-addon-resizer:1.0 quay.io/coreos/addon-resizer:1.0 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1 && docker tag ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1 ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1 &
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubernetesui-dashboard:v2.6.1 && docker tag ccr.ccs.tencentyun.com/cube-studio/kubernetesui-dashboard:v2.6.1 kubernetesui/dashboard:v2.6.1 &
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubernetesui-dashboard:v2.2.0 && docker tag ccr.ccs.tencentyun.com/cube-studio/kubernetesui-dashboard:v2.2.0 kubernetesui/dashboard:v2.2.0 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-coreos-kube-rbac-proxy:v0.3.1 && docker tag ccr.ccs.tencentyun.com/cube-studio/quay.io-coreos-kube-rbac-proxy:v0.3.1 quay.io/coreos/kube-rbac-proxy:v0.3.1 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-operator-prometheus-config-reloader:v0.46.0 && docker tag ccr.ccs.tencentyun.com/cube-studio/quay.io-prometheus-operator-prometheus-config-reloader:v0.46.0 quay.io/prometheus-operator/prometheus-config-reloader:v0.46.0 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/grafana-grafana:9.1.5 && docker tag ccr.ccs.tencentyun.com/cube-studio/grafana-grafana:9.1.5 grafana/grafana:9.1.5 &
@@ -23,7 +23,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-argoproj-workflow-control
 docker pull ccr.ccs.tencentyun.com/cube-studio/quay.io-argoproj-argocli:latest && docker tag ccr.ccs.tencentyun.com/cube-studio/quay.io-argoproj-argocli:latest quay.io/argoproj/argocli:latest &
 docker pull ccr.ccs.tencentyun.com/cube-studio/volcanosh-vc-scheduler:v1.4.0 && docker tag ccr.ccs.tencentyun.com/cube-studio/volcanosh-vc-scheduler:v1.4.0 volcanosh/vc-scheduler:v1.4.0 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/volcanosh-vc-controller-manager:v1.4.0 && docker tag ccr.ccs.tencentyun.com/cube-studio/volcanosh-vc-controller-manager:v1.4.0 volcanosh/vc-controller-manager:v1.4.0 &
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubernetesui-metrics-scraper:v1.0.8 && docker tag ccr.ccs.tencentyun.com/cube-studio/kubernetesui-metrics-scraper:v1.0.8 kubernetesui/metrics-scraper:v1.0.8 &
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubernetesui-metrics-scraper:v1.0.6 && docker tag ccr.ccs.tencentyun.com/cube-studio/kubernetesui-metrics-scraper:v1.0.6 kubernetesui/metrics-scraper:v1.0.6 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/minio-minio && docker tag ccr.ccs.tencentyun.com/cube-studio/minio-minio minio/minio &
 docker pull ccr.ccs.tencentyun.com/cube-studio/mysql:5.7 && docker tag ccr.ccs.tencentyun.com/cube-studio/mysql:5.7 mysql:5.7 &
 docker pull ccr.ccs.tencentyun.com/cube-studio/busybox && docker tag ccr.ccs.tencentyun.com/cube-studio/busybox busybox &
