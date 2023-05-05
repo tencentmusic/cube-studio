@@ -277,7 +277,7 @@ class NNI_ModelView_Base():
 
         self.edit_form_extra_fields['job_worker_image'] = StringField(
             _(self.datamodel.obj.lab('job_worker_image')),
-            default=json.loads(nni.job_json).get('job_worker_image',conf.get('NNI_JOB_DEFAULT_IMAGE','')) if nni and nni.job_json else conf.get('NNI_JOB_DEFAULT_IMAGE',''),
+            default=json.loads(nni.job_json).get('job_worker_image',conf.get('NNI_IMAGES','')) if nni and nni.job_json else conf.get('NNI_IMAGES',''),
             description='工作节点镜像',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
@@ -374,7 +374,7 @@ class NNI_ModelView_Base():
             resource_gpu='0',
             image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
             image_pull_secrets=image_secrets,
-            image=conf.get('NNI_IMAGES',json.loads(nni.job_json).get('job_worker_image')) ,
+            image=json.loads(nni.job_json).get('job_worker_image', conf.get('NNI_IMAGES', '')),
             hostAliases=conf.get('HOSTALIASES',''),
             env=None,
             privileged=False,
