@@ -62,8 +62,8 @@ class MyappModelBase():
         "pipeline_url": "任务流",
         "etl_pipeline_url": "任务流",
         "service_pipeline_url": "推理编排",
-        "run_id": "kfp运行id",
-        "run_time": "kfp运行时间",
+        "run_id": "运行id",
+        "run_time": "运行时间",
         "type": "类型",
         "reset": "重置",
         "user": "用户",
@@ -104,11 +104,11 @@ class MyappModelBase():
         "labels_html": "标签",
         "label_url": "标签",
         "add_row_time": "添加时间",
-        "experiment_id": "kfp实验id",
+        "experiment_id": "实验id",
         "pipeline_file": "workflow yaml",
         "pipeline_file_html": "workflow yaml",
-        "pipeline_argo_id": "kfp任务流id",
-        "version_id": "kfp版本id",
+        "pipeline_argo_id": "任务流id",
+        "version_id": "版本id",
         "job_template": "任务模板",
         "job_template_url": "任务模板",
         "template": "功能模板",
@@ -259,6 +259,7 @@ class MyappModelBase():
         "responsible":"责任人",
         "cycle_unit":"周期单位",
         "task_type":"任务类型",
+		"task_id": "任务 id",
         "creator": "创建者",
         "created_by": "创建者",
         "changed_by": "修改者",
@@ -280,14 +281,19 @@ class MyappModelBase():
         return _(re.sub("[._]", " ", col).title())
 
 
+
+    # 获取node选择器
     def get_default_node_selector(self,node_selector,resource_gpu,model_type):
-        # prefer already defined selectors
+        # 先使用项目中定义的选择器
         if not node_selector:
             node_selector=''
 
-        # completely determined by the platform
-        if core.get_gpu(resource_gpu)[0]:
+        # 不使用用户的填写，完全平台决定
+        gpu_num = core.get_gpu(resource_gpu)[0]
+        if gpu_num>=1:
             node_selector = node_selector.replace('cpu=true', 'gpu=true') + ",gpu=true,%s=true"%model_type
+        elif 1>gpu_num>0:
+            node_selector = node_selector.replace('cpu=true', 'vgpu=true') + ",vgpu=true,%s=true" % model_type
         else:
             node_selector = node_selector.replace('gpu=true', 'cpu=true') + ",cpu=true,%s=true"%model_type
         if 'org' not in node_selector:

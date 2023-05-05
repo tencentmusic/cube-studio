@@ -43,7 +43,7 @@ spec:
         - name: kubeflow-dashboard-schedule
           image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always
-          command: ["bash","-c",'celery beat --loglevel=info --app=myapp.tasks.celery_app:celery_app']
+          command: ["bash","-c",'celery --app=myapp.tasks.celery_app:celery_app beat --loglevel=info']
           resources:       
             limits:
               cpu: 6
@@ -86,3 +86,11 @@ spec:
               subPath: config.py
             - name: tz-config
               mountPath: /etc/localtime
+
+          readinessProbe:
+            failureThreshold: 1
+            exec:
+              command: ["bash","-c","python3 /home/myapp/myapp/tools/check_celery.py"]
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 60

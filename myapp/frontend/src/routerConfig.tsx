@@ -1,4 +1,4 @@
-import { DashboardOutlined, DatabaseOutlined, ExperimentOutlined, HomeOutlined, InboxOutlined, ProfileOutlined, SearchOutlined, SettingOutlined, ToolOutlined, UserOutlined } from '@ant-design/icons';
+import { SettingOutlined, UserOutlined } from '@ant-design/icons';
 import React from 'react';
 import { IRouterConfigPlusItem } from './api/interface/baseInterface';
 import { IAppMenuItem } from './api/interface/kubeflowInterface';
@@ -86,15 +86,20 @@ export const securitySettingConfig: IRouterConfigPlusItem[] = [
 ]
 
 export const innerDynamicRouterConfig: IRouterConfigPlusItem[] = [
-    // {
-    //     path: '/xxx',
-    //     title: 'xxx',
-    //     key: 'xxx',
-    //     icon: '',
-    //     menu_type: 'innerRouter',
-    //     isCollapsed: true,
-    //     element: lazy2Compont(() => import("./pages/xxx"))
-    // },
+    {
+        path: '/dataSearch',
+        title: '数据查询',
+        key: 'data_search',
+        icon: '',
+        menu_type: 'innerRouter',
+        isCollapsed: true,
+        element: lazy2Compont(() => import("./pages/DataSearch/DataSearch"))
+    },
+    {
+        path: '/commonRelation',
+        title: '通用关系图',
+        element: lazy2Compont(() => import("./pages/CommonPipeline/DWStandard") as any)
+    },
 ]
 
 const innerDynamicRouterConfigMap = innerDynamicRouterConfig.reduce((pre, next) => ({
@@ -111,27 +116,18 @@ export const routerConfigPlus: IRouterConfigPlusItem[] = [
     {
         path: '/showData',
         title: '数据展示',
-        element: lazy2Compont(() => import("./pages/ShowData") as any)
+        element: lazy2Compont(() => import("./pages/ShowData"))
     },
     {
         path: '/showOutLink',
         title: '外链',
-        element: lazy2Compont(() => import("./pages/IframeTemplate") as any)
+        element: lazy2Compont(() => import("./pages/IframeTemplate"))
     },
     ...innerDynamicRouterConfig,
     {
         path: '/user',
         icon: <UserOutlined style={{ fontSize: 18 }} />,
         element: lazy2Compont(() => import("./pages/IframeTemplate"), { url: '/users/userinfo/' })
-        // children: [
-        //     {
-        //         path: '/user/message',
-        //         title: '用户信息',
-        //         menu_type: 'iframe',
-        //         icon: <ProfileOutlined style={{ marginRight: 8 }} />,
-        //         element: lazy2Compont(() => import("./pages/IframeTemplate"), { url: '/users/userinfo/' })
-        //     }
-        // ]
     },
     { path: '*', element: <Page404 /> },
 ]

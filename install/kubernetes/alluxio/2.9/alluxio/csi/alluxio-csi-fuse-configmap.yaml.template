@@ -1,0 +1,76 @@
+---
+# Source: alluxio/templates/csi/fuse-configmap.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alluxio-csi-fuse-config
+  labels:
+    name: alluxio-csi-fuse-config
+    app: alluxio
+    chart: alluxio-0.6.53
+    release: alluxio
+    heritage: Helm
+data:
+  alluxio-csi-fuse-config: |
+    kind: Pod
+    apiVersion: v1
+    metadata:
+      name: alluxio-fuse
+      labels:
+        name: alluxio-fuse
+        app: alluxio
+        role: alluxio-fuse
+    spec:
+      nodeName:
+      hostNetwork: true
+      hostPID: 
+      dnsPolicy: ClusterFirstWithHostNet
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+      containers:
+        - name: alluxio-fuse
+          image: alluxio/alluxio:2.9.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 4
+              memory: 4Gi
+              cpu: 0.5
+              memory: 1Gi
+          command: [ "/entrypoint.sh" ]
+          args:
+            - fuse
+          env:
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                # SYS_ADMIN is needed for run `mount` command in the container
+                - SYS_ADMIN
+          envFrom:
+          - configMapRef:
+              name: alluxio-config
+          volumeMounts:
+            - name: pods-mount-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: "Bidirectional"
+      restartPolicy: Always
+      volumes:
+        - name: pods-mount-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+---
+# Source: alluxio/templates/csi/fuse-configmap.yaml
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='appbuilder/terminal/static/xterm/dist/xterm.css') }}">
+    <meta charset="UTF-8">
+    <title>Kubernetes Web Terminal</title>
+</head>
+<body>
+<div id="terminal"></div>
+<script src="{{ url_for('static', filename='appbuilder/terminal/static/js/jquery-1.12.4.js') }}"></script>
+<script src="{{ url_for('static', filename='appbuilder/terminal/static/xterm/dist/xterm.js') }}"></script>
+<script src="{{ url_for('static', filename='appbuilder/terminal/static/xterm/dist/addons/attach/attach.js') }}"></script>
+<script src="{{ url_for('static', filename='appbuilder/terminal/static/xterm/dist/addons/fit/fit.js') }}"></script>
+<script>
+    document.getElementById('terminal').style.height = window.innerHeight + 'px';
+    document.getElementById('terminal').style.marginTop = "-"+window.innerHeight + 'px';
+    let wsPing = null;
+    function ping(ws) {
+        console.log('in ping func', ws.state);
+        if (ws.readyState == ws.CLOSED) {
+            clearInterval(wsPing)
+        } else {
+            ws.send('__ping__');
+        }
+    }
+
+    let term = new Terminal({cursorBlink: true, focus: true});
+    term.open(document.getElementById('#terminal'));
+    // 自适应宽高
+    //let fit = require('{{ url_for('static', filename='appbuilder/terminal/static/xterm/dist/addons/fit/fit.js') }}');
+    //Terminal.applyAddon(fit);
+    term.fit();
+    console.log(term.cols, term.rows);   // 获取窗口大小
+
+    term.writeln("welcome to use docker web terminal!");
+    let ws_url = 'ws://' + `${window.location.host}` + '{{ data.ws_url }}'+"/"+term.cols+"/"+term.rows;  // 后端也需要宽高信息
+    console.log(ws_url);
+    let socket = new WebSocket(ws_url);
+    term.attach(socket);
+
+    socket.onopen = function() {
+        wsPing = setInterval(()=>{ping(socket)}, 5000);
+    };
+    socket.onclose = function () {
+        term.writeln("closed. Thank you for use!");
+    };
+
+
+</script>
+</body>
+</html>

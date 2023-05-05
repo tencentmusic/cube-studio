@@ -4,7 +4,7 @@ from myapp.models.model_job import Repository,Images
 from myapp import app, appbuilder
 from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import StringField
-
+import pysnooper
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from myapp.forms import MyBS3TextAreaFieldWidget
 
@@ -89,16 +89,18 @@ class Repository_ModelView_Base():
         all_kubeconfig = [all_cluster[cluster].get('KUBECONFIG','') for cluster in all_cluster]+['']
         all_kubeconfig = list(set(all_kubeconfig))
         for kubeconfig in all_kubeconfig:
-            k8s = K8s(kubeconfig)
-            namespaces = conf.get('HUBSECRET_NAMESPACE')
-            for namespace in namespaces:
-                k8s.apply_hubsecret(namespace=namespace,
-                                    name=hubsecret.hubsecret,
-                                    user=hubsecret.user,
-                                    password=hubsecret.password,
-                                    server=hubsecret.server
-                                    )
-
+            try:
+                k8s = K8s(kubeconfig)
+                namespaces = conf.get('HUBSECRET_NAMESPACE')
+                for namespace in namespaces:
+                    k8s.apply_hubsecret(namespace=namespace,
+                                        name=hubsecret.hubsecret,
+                                        user=hubsecret.user,
+                                        password=hubsecret.password,
+                                        server=hubsecret.server
+                                        )
+            except Exception as e:
+                print(e)
     def post_add(self, item):
         self.apply_hubsecret(item)
 

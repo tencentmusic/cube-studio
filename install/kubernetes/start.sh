@@ -1,5 +1,8 @@
 
 bash init_node.sh
+iptables -P FORWARD ACCEPT
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
 mkdir -p ~/.kube && cp config ~/.kube/config && cp ~/.kube/config /etc/kubernetes/admin.conf
 mkdir -p kubeconfig && echo "" > kubeconfig/dev-kubeconfig
 curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x kubectl  && cp kubectl /usr/bin/ && mv kubectl /usr/local/bin/
@@ -11,6 +14,8 @@ sh create_ns_secret.sh
 kubectl apply -f sa-rbac.yaml
 # 部署dashboard
 kubectl apply -f dashboard/v2.2.0-cluster.yaml
+# 高版本k8s部署2.6.1版本
+#kubectl apply -f dashboard/v2.6.1-cluster.yaml
 # 部署mysql
 kubectl create -f mysql/pv-pvc-hostpath.yaml
 kubectl create -f mysql/service.yaml
@@ -22,8 +27,6 @@ kubectl create -f redis/configmap.yaml
 kubectl create -f redis/service.yaml
 # 如果自己需要使用pv来保存redis队列数据，可以修改master.yaml
 kubectl create -f redis/master.yaml
-# 部署kube-batch
-#kubectl create -f kube-batch/deploy.yaml
 
 # 部署prometheus
 cd prometheus
@@ -113,8 +116,9 @@ kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 # 部署istio
 kubectl apply -f istio/install-crd.yaml
 kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --timeout=60s
+# 在k8s 1.21-部署
 kubectl apply -f istio/install.yaml
-# k8s 1.21+
+# 在k8s 1.21+部署
 # kubectl delete -f istio/install.yaml
 # kubectl apply -f istio/install-1.15.0.yaml
 
@@ -124,28 +128,18 @@ kubectl wait crd/gateways.networking.istio.io --for condition=established --time
 kubectl apply -f gateway.yaml
 kubectl apply -f virtual.yaml
 
-
-
-# 部署kfp pipeline
-kubectl apply -f kubeflow/sa-rbac.yaml
-kubectl create -f kubeflow/pipeline/minio-pv-hostpath.yaml
-kubectl apply -f kubeflow/pipeline/minio-artifact-secret.yaml
-sleep 5
-kubectl apply -f kubeflow/pipeline/pipeline-runner-rolebinding.yaml
-
-cd kubeflow/pipeline/1.6.0/kustomize/
-
-#kustomize build cluster-scoped-resources/ | kubectl apply -f -
-kubectl apply -k cluster-scoped-resources
-kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
-#kustomize build env/platform-agnostic/  | kubectl apply -f -
-kubectl apply -k env/platform-agnostic
-cd ../../../../
+# 部署argo
+kubectl apply -f argo/minio-pv-pvc-hostpath.yaml
+kubectl apply -f argo/pipeline-runner-rolebinding.yaml
+kubectl apply -f argo/install-3.4.3-all.yaml
 
 # 部署trainjob:tfjob/pytorchjob/mpijob/mxnetjob/xgboostjobs
+kubectl apply -f kubeflow/sa-rbac.yaml
 kubectl apply -k kubeflow/train-operator/manifests/overlays/standalone
+
 # 部署sparkjob
 kubectl apply -f spark/install.yaml
+
 # 部署paddlejob
 kubectl apply -f paddle/crd.yaml
 kubectl apply -f paddle/operator.yaml

@@ -42,7 +42,7 @@ class Dimension_table(Model,ImportMixin,MyappModelBase):
     @property
     def operate_html(self):
         url=f'''
-        <a target=_blank href="/dimension_table_modelview/api/create_external_table/%s">创建远程表</a>  | <a target=_blank href="/dimension_table_modelview/api/external/%s">建外表示例</a>
+        <a target=_blank href="/dimension_table_modelview/api/create_external_table/%s">更新远程表</a>  | <a target=_blank href="/dimension_table_modelview/api/external/%s">建外表示例</a>
         '''%(self.id,self.id)
         return Markup(url)
 

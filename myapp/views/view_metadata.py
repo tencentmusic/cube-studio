@@ -234,7 +234,7 @@ class Metadata_table_ModelView_base():
 
 
     # @event_logger.log_this
-    @action("ddl", __("更新到远程hive表"), __("ddl 保存修改"), "fa-save", multiple=False, single=True)
+    @action("ddl", __("更新到远程表"), __("ddl 保存修改"), "fa-save", multiple=False, single=True)
     def ddl(self, item):
         pass
         # 自己实现更新到hive表
@@ -267,7 +267,7 @@ class Metadata_table_ModelView_Api(Metadata_table_ModelView_base,MyappModelRestA
         pass
 
     remember_columns=['app','db']
-    label_title='hive库表'
+    label_title='库表'
 
 appbuilder.add_api(Metadata_table_ModelView_Api)
 

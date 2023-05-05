@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: minio-pvc
-spec:
-  selector:
-    matchLabels:
-      kubeflow-pvname: kubeflow-minio-pv

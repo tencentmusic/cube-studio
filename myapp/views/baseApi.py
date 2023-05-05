@@ -6,14 +6,13 @@ import re
 import traceback
 import urllib.parse
 import os
+from flask import Markup,Response,current_app, make_response,send_file,flash,g,jsonify, request
 from inspect import isfunction
+
 from sqlalchemy import create_engine
 from flask_appbuilder.actions import action
 from flask_babel import gettext as __
 from flask_appbuilder.actions import ActionItem
-from flask import jsonify, request
-from flask import flash,g
-from flask import current_app, make_response,send_file
 from flask.globals import session
 from flask_babel import lazy_gettext as _
 import jsonschema
@@ -90,6 +89,7 @@ API_IMPORT_DATA_RIS_KEY = 'import_data'
 API_DOWNLOAD_DATA_RIS_KEY = 'download_data'
 API_OPS_BUTTON_RIS_KEY = 'ops_link'
 API_ENABLE_FAVORITE_RIS_KEY = 'enable_favorite'
+API_ECHART = 'echart'
 
 
 def get_error_msg():
@@ -328,8 +328,11 @@ class MyappModelRestApi(ModelRestApi):
     import_data=False
     download_data=False
     enable_favorite=False
+    enable_echart = False
     pre_upload = None
     set_columns_related=None
+    echart_option=None
+    alert_config={}
 
     # @pysnooper.snoop()
     def csv_response(self,file_path,file_name=None):
@@ -341,6 +344,15 @@ class MyappModelRestApi(ModelRestApi):
             file_name=file_name+".csv"
         response.headers["Content-Disposition"] = f"attachment; filename={file_name}".format(file_name=file_name)
         return response
+
+    #流式读取
+    def send_file(self,store_path):
+        with open(store_path, 'rb') as targetfile:
+            while 1:
+                data = targetfile.read(20 * 1024 * 1024)   # 每次读取20M
+                if not data:
+                    break
+                yield data
 
     # 建构响应体
     @staticmethod
@@ -375,7 +387,7 @@ class MyappModelRestApi(ModelRestApi):
         super(ModelRestApi, self)._init_titles()
         class_name = self.datamodel.model_name
         if self.label_title:
-            self.list_title = "遍历 " + self.label_title
+            self.list_title = self.label_title+" 列表"
             self.add_title = "添加 " + self.label_title
             self.edit_title = "编辑 " + self.label_title
             self.show_title = "查看 " + self.label_title
@@ -396,6 +408,7 @@ class MyappModelRestApi(ModelRestApi):
             Init Properties
         """
         super(MyappModelRestApi, self)._init_properties()
+
         # 初始化action自耦段
         self.actions = {}
         for attr_name in dir(self):
@@ -424,6 +437,10 @@ class MyappModelRestApi(ModelRestApi):
 
         # 配置搜索转换器
         self._filters = self.datamodel.get_filters(self.search_columns)
+
+        if 'alert_config' not in conf:
+            conf['alert_config']={}
+        conf['alert_config'].update(self.alert_config)
 
     def _init_model_schemas(self):
         # Create Marshmalow schemas if one is not specified
@@ -500,6 +517,8 @@ class MyappModelRestApi(ModelRestApi):
         response[API_DOWNLOAD_DATA_RIS_KEY] = self.download_data
         response[API_OPS_BUTTON_RIS_KEY]=self.ops_link
         response[API_ENABLE_FAVORITE_RIS_KEY]=self.enable_favorite
+        response[API_ECHART]=self.enable_echart
+        response['page_size']=self.page_size
 
     # 重新渲染add界面
     # @pysnooper.snoop()
@@ -815,6 +834,12 @@ class MyappModelRestApi(ModelRestApi):
                     columns_info[value.key] = {
                         "type":"Relationship"
                     }
+                    class_name = value.comparator.property.argument.__class__.__name__
+                    if 'ModelDeclarativeMeta' in class_name:
+                        columns_info[value.key]['relationship'] = value.comparator.property.argument.__name__
+                    elif '_class_resolver' in class_name:
+                        columns_info[value.key]['relationship'] = value.comparator.property.argument.arg
+
         response[API_COLUMNS_INFO_RIS_KEY] = columns_info
 
     def merge_help_url_info(self, response, **kwargs):
@@ -1024,7 +1049,7 @@ class MyappModelRestApi(ModelRestApi):
 
         # handle select columns
         select_cols = _args.get(API_SELECT_COLUMNS_RIS_KEY, [])
-        _pruned_select_cols = [col for col in select_cols if col in self.list_columns]
+        _pruned_select_cols = [col for col in select_cols if col in list(set(self.list_columns+self.show_columns))]
         self.set_response_key_mappings(
             _response,
             self.get_list,
@@ -1327,6 +1352,30 @@ class MyappModelRestApi(ModelRestApi):
         response = self.csv_response(csv_file,file_name=file_name)
         return response
 
+    @expose("/echart", methods=["GET"])
+    def echart(self):
+        _args = request.json or {}
+        _args.update(json.loads(request.args.get('form_data',"{}")))
+        _args.update(request.args)
+        joined_filters = self._handle_filters_args(_args)
+        filters = {}
+        for flt, value in joined_filters.get_filters_values():
+            filters[flt.column_name] = [value] if flt.column_name not in filters else (filters[flt.column_name] + [value])
+
+        if self.echart_option:
+            try:
+                option = self.echart_option(filters)
+                if option:
+                    return jsonify({
+                        "message":"success",
+                        "status":0,
+                        "result":option
+                    })
+            except Exception as e:
+                print(e)
+
+        return jsonify({})
+
     @expose("/upload/", methods=["POST"])
     def upload(self):
         csv_file = request.files.get('csv_file')  # FileStorage
@@ -1379,7 +1428,7 @@ class MyappModelRestApi(ModelRestApi):
             except Exception as e:
                 db.session.rollback()
                 print(e)
-                result.append('fail')
+                result.append(str(e))
 
         flash('成功导入%s行，失败导入%s行'%(len([x for x in result if x=='success']),len([x for x in result if x=='fail'])), 'warning')
         back = {
@@ -1406,8 +1455,8 @@ class MyappModelRestApi(ModelRestApi):
         sql_engine = create_engine(uri)
         table_name = self.datamodel.obj.__tablename__
         # sql = 'select `%s` from %s' % ('`,`'.join(self.show_columns), table_name)
-        file_path = '%s.csv' % table_name
-        csv_file_path = os.path.abspath(file_path)
+        file_name = '%s.csv' % table_name
+        csv_file_path = os.path.abspath(file_name)
         if os.path.exists(csv_file_path):
             os.remove(csv_file_path)
 
@@ -1425,7 +1474,7 @@ class MyappModelRestApi(ModelRestApi):
                 page_size='20000',
                 select_columns=self.show_columns,
             )
-            print(count,lst)
+            # print(count,lst)
             if count>0:
                 with(open(csv_file_path,'w',newline='',encoding="utf-8-sig")) as csvfile:
                     csvwrite = csv.writer(csvfile,delimiter=',')
@@ -1436,7 +1485,9 @@ class MyappModelRestApi(ModelRestApi):
                             data.append(getattr(item,col))
                         csvwrite.writerow(data)
                     csvfile.close()
-                response = self.csv_response(csv_file_path, file_name=table_name)
+
+                response = Response(self.send_file(csv_file_path), content_type='application/octet-stream')
+                response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name  # 如果不加上这行代码，导致下图的问题
                 return response
 
         # 下载全量
@@ -1445,8 +1496,12 @@ class MyappModelRestApi(ModelRestApi):
         results = pandas.read_sql_query(sql, sql_engine)
         results.to_csv(csv_file_path, index=False, sep=",",encoding='utf-8-sig')  # index 是第几行的表示
 
-        response = self.csv_response(csv_file_path, file_name=table_name)
+        response = Response(self.send_file(csv_file_path), content_type='application/octet-stream')
+        response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name  # 如果不加上这行代码，导致下图的问题
         return response
+
+        # response = self.csv_response(csv_file_path, file_name=table_name)
+        # return response
 
 
 
@@ -1832,6 +1887,10 @@ class MyappModelRestApi(ModelRestApi):
                     if hasattr(column_field_kwargs['widget'], 'retry_info') and column_field_kwargs['widget'].retry_info:
                         ret['retry_info'] = True
 
+                    # 处理tips
+                    if hasattr(column_field_kwargs['widget'], 'tips') and column_field_kwargs['widget'].tips:
+                        ret['tips'] = column_field_kwargs['widget'].tips
+
                     # 处理选填类型
                     if hasattr(column_field_kwargs['widget'], 'can_input') and column_field_kwargs['widget'].can_input:
                         ret['ui-type'] = 'input-select'
@@ -1855,6 +1914,7 @@ class MyappModelRestApi(ModelRestApi):
                         field_contents=None
                         try:
                             field_contents = cache.get(self.datamodel.obj.__tablename__+"_"+field.name)
+                            print('从缓存中读取'+self.datamodel.obj.__tablename__+"_"+field.name)
                         except Exception as e:
                             print(e)
                         # 缓存没有数据，再从数据库中读取

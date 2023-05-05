@@ -44,7 +44,6 @@ import datetime,time,json
 conf = app.config
 logging = app.logger
 
-
 class ETL_Task_ModelView_Base():
     label_title="任务"
     datamodel = SQLAInterface(ETL_Task)
@@ -118,7 +117,7 @@ class ETL_Pipeline_ModelView_Base():
     # order_columns = ['id','changed_on']
     order_columns = ['id']
 
-    list_columns = ['project','etl_pipeline_url','workflow','creator','modified']
+    list_columns = ['id','project','etl_pipeline_url','workflow','creator','modified']
     cols_width = {
         "project":{"type": "ellip2", "width": 200},
         "etl_pipeline_url": {"type": "ellip2", "width": 400},
@@ -372,11 +371,14 @@ class ETL_Pipeline_ModelView_Base():
 
         return jsonify(config)
 
-
+    @expose("/template/list/")
     @expose("/template/list/<etl_pipeline_id>")
-    # @pysnooper.snoop()
-    def template_list(self,etl_pipeline_id):
-        pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
+    # @pysnooper.snoop(
+    def template_list(self,etl_pipeline_id=None):  # 这里根据引擎返回不同的模板列表
+        if not etl_pipeline_id:
+            pipeline = db.session.query(ETL_Pipeline).filter_by(workflow='airflow').first()
+        else:
+            pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
         params = importlib.import_module('myapp.views.view_etl_pipeline_'+pipeline.workflow)
         etl_pipeline = getattr(params, pipeline.workflow.upper() + '_ETL_PIPELINE')(pipeline)
         all_template = etl_pipeline.all_template
@@ -420,7 +422,6 @@ class ETL_Pipeline_ModelView_Base():
 
     # # @event_logger.log_this
     @expose("/submit_etl_pipeline/<etl_pipeline_id>", methods=["GET", "POST"])
-    @pysnooper.snoop()
     def submit_etl_pipeline(self,etl_pipeline_id):
         print(etl_pipeline_id)
         url = '/etl_pipeline_modelview/web/' + etl_pipeline_id
@@ -428,12 +429,19 @@ class ETL_Pipeline_ModelView_Base():
             pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
             params = importlib.import_module('myapp.views.view_etl_pipeline_' + pipeline.workflow)
             etl_pipeline = getattr(params, pipeline.workflow.upper() + '_ETL_PIPELINE')(pipeline)
-            redirect_url = etl_pipeline.submit_pipeline()
+            dag_json, redirect_url = etl_pipeline.submit_pipeline()
+            if dag_json:
+                if type(dag_json)==dict:
+                    dag_json=json.dumps(dag_json,indent=4,ensure_ascii=False)
+                pipeline.dag_json = dag_json
+                db.session.commit()
+
             if redirect_url:
                 return redirect(redirect_url)
         except Exception as e:
             flash(str(e),category='warning')
-            return self.response(400,**{"status":1,"message":str(e),"result":{}})
+            import traceback
+            return self.response(400,**{"status":1,"message":traceback.format_exc(),"result":{}})
 
         url = conf.get('MODEL_URLS', {}).get('etl_task')
         return redirect(url)
@@ -542,7 +550,7 @@ appbuilder.add_view_no_menu(ETL_Pipeline_ModelView)
 class ETL_Pipeline_ModelView_Api(ETL_Pipeline_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(ETL_Pipeline)
     route_base = '/etl_pipeline_modelview/api'
-    search_columns=['project','name','describe','dag_json','created_by']
+    search_columns=['id','project','name','describe','dag_json','created_by']
     # related_views = [ETL_Task_ModelView_Api, ]
 
     spec_label_columns = {

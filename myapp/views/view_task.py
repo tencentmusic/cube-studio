@@ -1,6 +1,9 @@
+import random
+
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 import uuid
+import pysnooper
 from myapp.models.model_job import Job_Template,Task,Pipeline
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
@@ -42,11 +45,12 @@ class Task_ModelView_Base():
     list_columns =['name', 'label','pipeline', 'job_template','volume_mount','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_on','changed_on','monitoring','expand']
     # list_columns = ['name','label','job_template_url','volume_mount','debug','run','clear','log']
     cols_width={
-        "name":{"type": "ellip2", "width": 300},
-        "label":{"type": "ellip2", "width": 300},
-        "pipeline": {"type": "ellip2", "width": 300},
-        "job_template":{"type": "ellip2", "width": 300},
+        "name":{"type": "ellip2", "width": 250},
+        "label":{"type": "ellip2", "width": 200},
+        "pipeline": {"type": "ellip2", "width": 200},
+        "job_template":{"type": "ellip2", "width": 200},
         "volume_mount":{"type": "ellip2", "width": 600},
+        "command": {"type": "ellip2", "width": 200},
         "args":{"type": "ellip2", "width": 400},
         "resource_memory": {"type": "ellip2", "width": 100},
         "resource_cpu": {"type": "ellip2", "width": 100},
@@ -56,14 +60,15 @@ class Task_ModelView_Base():
         "created_on": {"type": "ellip2", "width": 300},
         "changed_on": {"type": "ellip2", "width": 300},
         "monitoring": {"type": "ellip2", "width": 300},
+        "node_selector": {"type": "ellip2", "width": 200},
         "expand": {"type": "ellip2", "width": 300},
     }
     show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','command','overwrite_entrypoint','working_dir', 'args_html','resource_memory','resource_cpu','resource_gpu','timeout','retry','skip','created_by','changed_by','created_on','changed_on','monitoring_html']
     add_columns = ['job_template', 'name', 'label', 'pipeline', 'volume_mount','command','working_dir','skip']
-    edit_columns = add_columns
+    edit_columns = ['name', 'label', 'volume_mount','command','working_dir','skip']
     base_order = ('id','desc')
     order_columns = ['id']
-    search_columns = ['pipeline']
+    search_columns = ['pipeline','name','label']
 
     conv = GeneralModelConverter(datamodel)
 
@@ -121,7 +126,7 @@ class Task_ModelView_Base():
             label = _(datamodel.obj.lab('node_selector')),
             description='运行当前task所在的机器', widget=BS3TextFieldWidget(),
             default=Task.node_selector.default.arg,
-            validators=[DataRequired()]
+            validators=[]
         ),
         'resource_memory': StringField(
             label = _(datamodel.obj.lab('resource_memory')),
@@ -251,7 +256,32 @@ class Task_ModelView_Base():
         elif not item.args:
             item.args='{}'
 
+    # 在web界面上添加一个图标
+    # @pysnooper.snoop()
+    def post_add(self,task):
+        pipeline=task.pipeline
+        expand = json.loads(pipeline.expand) if pipeline.expand else []
+        for ui_node in expand:
+            if ui_node.get('id',0)==task.id:
+                return
+        expand.append(
+            {
+                "id": str(task.id),
+                "type": 'dataSet',
+                "position": {
+                    "x": random.randint(50,1000),
+                    "y": random.randint(50,600),
+                },
+                "data":{
+                    "name": task.name,
+                    "label": task.label
+                }
 
+            }
+        )
+        pipeline.expand = json.dumps(expand,ensure_ascii=False,indent=4)
+        db.session.commit()
+        pass
 
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_add(self, item):
@@ -274,7 +304,7 @@ class Task_ModelView_Base():
         item.create_datetime=datetime.datetime.now()
         item.change_datetime = datetime.datetime.now()
 
-        if core.get_gpu(item.resource_gpu)[0]:
+        if int(core.get_gpu(item.resource_gpu)[0]):
             item.node_selector = item.node_selector.replace('cpu=true','gpu=true')
         else:
             item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
@@ -325,7 +355,7 @@ class Task_ModelView_Base():
         item.change_datetime = datetime.datetime.now()
 
 
-        if core.get_gpu(item.resource_gpu)[0]:
+        if int(core.get_gpu(item.resource_gpu)[0]):
             item.node_selector = item.node_selector.replace('cpu=true','gpu=true')
         else:
             item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
@@ -423,7 +453,7 @@ class Task_ModelView_Base():
         task_env += 'KFJ_RUNNER=' + str(g.user.username) + "\n"
         task_env += 'KFJ_PIPELINE_NAME=' + str(task.pipeline.name) + "\n"
         task_env += 'KFJ_NAMESPACE=pipeline' + "\n"
-        task_env += 'GPU_TYPE=%s' % os.environ.get("GPU_TYPE", "NVIDIA") + "\n"
+        task_env += 'GPU_TYPE=NVIDIA' + "\n"
 
         def template_str(src_str):
             rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(src_str)
@@ -472,7 +502,7 @@ class Task_ModelView_Base():
                              node_selector=task.get_node_selector(), resource_memory=resource_memory,
                              resource_cpu=resource_cpu, resource_gpu=resource_gpu,
                              image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
-                             image_pull_secrets=[task.job_template.images.repository.hubsecret],
+                             image_pull_secrets=[task.job_template.images.repository.hubsecret]+conf.get('HUBSECRET',[]),
                              image=image,
                              hostAliases=hostAliases,
                              env=task_env, privileged=task.job_template.privileged,
@@ -535,8 +565,17 @@ class Task_ModelView_Base():
                 if pod['status'] == 'Running':
                     break
                 else:
+                    events = k8s_client.get_pod_event(namespace=namespace,pod_name=pod_name)
+                    # try:
+                    #     message = '启动时间过长，一分钟后刷新此页面'+", status:"+pod['status']+", message:"+json.dumps(pod['status_more']['conditions'],indent=4,ensure_ascii=False)
+                    # except Exception as e:
+                    #     print(e)
                     try:
-                        message = '启动时间过长，一分钟后刷新此页面'+", status:"+pod['status']+", message:"+json.dumps(pod['status_more']['conditions'],indent=4,ensure_ascii=False)
+                        # 有新消息要打印
+                        for event in events:
+                            message = f'"时间："{event["time"]} ，类型：{event["type"]} ，原因：{event["reason"]} ，消息：{event["message"]}'
+                            # print(message, flush=True)
+                            message+="\n"+message
                     except Exception as e:
                         print(e)
             try_num=try_num-1
@@ -547,7 +586,7 @@ class Task_ModelView_Base():
             # return redirect('/pipeline_modelview/web/%s'%str(task.pipeline.id))
 
 
-        return redirect("/myapp/web/debug/%s/%s/%s/%s"%(task.pipeline.project.cluster['NAME'],namespace,pod_name,pod_name))
+        return redirect("/k8s/web/debug/%s/%s/%s/%s"%(task.pipeline.project.cluster['NAME'],namespace,pod_name,pod_name))
 
 
 
@@ -576,7 +615,7 @@ class Task_ModelView_Base():
                 time.sleep(2)
                 pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
                 check_date = datetime.datetime.now()
-                if (check_date-delete_time).seconds>60:
+                if (check_date-delete_time).total_seconds()>60:
                     message="超时，请稍后重试"
                     flash(message,category='warning')
                     return self.response(400, **{"status": 1, "result": {}, "message": message})
@@ -646,7 +685,7 @@ class Task_ModelView_Base():
             return self.response(400, **{"status": 1, "result": {}, "message": message})
             # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
-        return redirect("/myapp/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
+        return redirect("/k8s/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
 
 
     def delete_task_run(self,task):
@@ -707,7 +746,7 @@ class Task_ModelView_Base():
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)
         if pod:
             pod = pod[0]
-            return redirect("/myapp/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
+            return redirect("/k8s/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'],namespace, pod_name))
 
         flash("未检测到当前task正在运行的容器",category='success')
         return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
@@ -727,7 +766,7 @@ class Task_ModelView_Api(Task_ModelView_Base,MyappModelRestApi):
     # list_columns = ['name','label','job_template_url','volume_mount','debug']
     list_columns =['name', 'label','pipeline', 'job_template','volume_mount','node_selector','command','overwrite_entrypoint','working_dir', 'args','resource_memory','resource_cpu','resource_gpu','timeout','retry','created_by','changed_by','created_on','changed_on','monitoring','expand']
     add_columns = ['name','label','job_template','pipeline','working_dir','command','args','volume_mount','node_selector','resource_memory','resource_cpu','resource_gpu','timeout','retry','skip','expand']
-    edit_columns = add_columns
+    edit_columns = ['name','label','working_dir','command','args','volume_mount','resource_memory','resource_cpu','resource_gpu','timeout','retry','skip','expand']
     show_columns = ['name', 'label','pipeline', 'job_template','volume_mount','node_selector','command','overwrite_entrypoint','working_dir', 'args','resource_memory','resource_cpu','resource_gpu','timeout','retry','skip','created_by','changed_by','created_on','changed_on','monitoring','expand']
 
 

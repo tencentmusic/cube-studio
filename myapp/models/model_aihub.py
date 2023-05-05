@@ -1,3 +1,6 @@
+import json
+import os
+
 from flask_appbuilder import Model
 
 from sqlalchemy import Text
@@ -27,6 +30,7 @@ class Aihub(Model,MyappModelBase):
     describe = Column(String(2000), nullable=True, default='')
     source = Column(String(200), nullable=True, default='')
     pic = Column(String(500), nullable=True, default='')
+    images = Column(String(200), nullable=True, default='')
     dataset = Column(Text, nullable=True, default='')
     notebook = Column(String(2000), nullable=True, default='')
     job_template = Column(Text, nullable=True, default='')
@@ -37,32 +41,43 @@ class Aihub(Model,MyappModelBase):
     version = Column(String(200), nullable=True, default='')
     hot = Column(Integer, default=1)
     price = Column(Integer, default=1)
+    expand = Column(Text, nullable=True, default='{}')
 
 
     @property
     def card(self):
-        notebook_url = "/aihub/api/notebook/"+self.uuid if self.status=='online' and self.notebook else ""
-        train_url = "/aihub/api/train/" + self.uuid if self.status == 'online' and (self.job_template or self.pipeline) else ""
-        service_url = "/aihub/api/service/" + self.uuid if self.status == 'online' and (self.service or self.inference) else ""
+
+        pic_url = '/static/aihub/deep-learning/'+self.name+'/'+self.pic
+
+        if 'http://' in self.pic or "https://" in self.pic:
+            pic_url=self.pic
+
+        ops_html=f'''
+            <a class="flex1 ta-c" target=_blank style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href='javascript:void(0)'>开发</a>
+            <a class="flex1 ta-c" target=_blank style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">训练</a>
+            <a class="flex1 ta-c" target=_blank style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href='javascript:void(0)'>部署web</a>
+        '''
+
+        if self.price and int(self.price)>0:
+            ops_html = f'''
+            <a class="flex1 ta-c" style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">企业版</a>
+            '''
 
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">
-    <a href="{self.doc if self.status=='online' else ''}">
-        <img src="{self.pic}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
-    </a>
+        <img src="{pic_url}" onerror="this.src='/static/assets/images/aihub_loading.gif'" style="height:200px;width:100%" alt="{self.describe}"/>
     <br>
     <div>
         <div class="p16" alt="{self.describe}">
             <div class="p-r card-popup ellip1">
-                { self.name+": "+self.describe }
+                { self.label }
                 <div class="p-a card-popup-target d-n" style="top:100%;left:0;background:rgba(0,0,0,0.5);color:#fff;border-radius:3px;">{self.describe}</div>
             </div>
         </div>
         <div style="border-top: 1px solid rgba(0,0,0,.06);" class="ptb8 d-f ac jc-b">
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{notebook_url}'>notebook</a>
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{train_url}'>训练</a>
-            <a class="flex1 ta-c" style="border-right: 1px solid rgba(0,0,0,.06);" href='{service_url}'>服务</a>
+{ops_html}
         </div>
+
     </div>
 </div>
 ''')

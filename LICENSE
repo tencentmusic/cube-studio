@@ -101,25 +101,15 @@ Copyright 2019 The Kubernetes Dashboard Authors
 5. kubeflow
 Copyright © 2018-2021 The Kubeflow Authors
 
-6. kubeflow-pipeline
-Copyright © 2018-2021 The Kubeflow Authors
-
-7. xgb-operator
-Copyright © 2018-2021 The Kubeflow Authors
-
-8. prometheus
+6. prometheus
 Copyright © Prometheus Authors 2014-2021
 
-9. grafana
+7. grafana
 Copyright 2021 © Grafana Labs
 
-10. volcano
+8. volcano
 Copyright 2020 Volcano Project Authors
 
-11. kube-batch
-Copyright © 2021 The Linux Foundation
-
-12. kaldi
 Each of the files comprising Kaldi v1.0 have been separately licensed by
 their respective author(s) under the terms of the Apache License v 2.0 (set
 forth below).  The source code headers for each file specifies the individual

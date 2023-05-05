@@ -8,6 +8,8 @@ class MyappException(Exception):
 class MyappTimeoutException(MyappException):
     pass
 
+class QueryClauseValidationException(MyappException):
+    status = 400
 
 class MyappSecurityException(MyappException):
     status = 401

@@ -93,8 +93,6 @@ class Service_ModelView_base():
         "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,description='访问域名，' + host_rule, widget=BS3TextFieldWidget()),
     }
 
-    gpu_type = conf.get('GPU_TYPE')
-
 
     add_form_extra_fields['resource_gpu'] = StringField(
         _(datamodel.obj.lab('resource_gpu')), default='0',
@@ -226,8 +224,12 @@ class Service_ModelView_base():
         # 使用当前ip
         if not SERVICE_EXTERNAL_IP:
             ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  # 如果捕获到端口号，要去掉
-            if core.checkip(ip):
-                SERVICE_EXTERNAL_IP=[ip]
+            if ip == '127.0.0.1':
+                host = service.project.cluster.get('HOST', '')
+                if not host:
+                    SERVICE_EXTERNAL_IP = [host]
+            elif core.checkip(ip):
+                SERVICE_EXTERNAL_IP = [ip]
 
 
 

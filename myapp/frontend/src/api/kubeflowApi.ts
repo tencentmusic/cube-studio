@@ -67,3 +67,15 @@ export const actionADUGTemplateDownData = (url: string): AxiosResFormat<any> => 
 export const actionADUGTemplateRetryInfo = (url: string, params: any): Promise<AxiosResponse<IADUGTemplateInfo>> => {
     return axios.get(url, { params })
 }
+
+export const actionADUGTemplateChartOption = (url?: string, params?: {}): Promise<any> => {
+    return axios.get(url || '', { params })
+}
+
+export const actionADUGTemplateFavorite = (url?: string, params?: {}): AxiosResFormat<any> => {
+    return axios.post(url || '', params)
+}
+
+export const actionADUGTemplateCancelFavorite = (url?: string, params?: {}): AxiosResFormat<any> => {
+    return axios.delete(url || '', { params })
+}

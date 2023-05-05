@@ -1,3 +1,5 @@
+import json
+
 from flask_appbuilder import Model
 from sqlalchemy.orm import relationship
 from sqlalchemy import Text
@@ -60,4 +62,13 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
         <a href="/training_model_modelview/deploy/{self.id}">发布</a> 
         '''
         return Markup(ops)
+
+    @property
+    def model_metric(self):
+        metric_json = json.loads(self.metrics) if self.metrics else {}
+        metric_str=''
+        for metric_name in metric_json:
+            metric_str+=metric_name+":"+metric_json[metric_name]
+
+        return metric_str
 

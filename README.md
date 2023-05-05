@@ -21,8 +21,8 @@ https://github.com/tencentmusic/cube-studio/wiki
 # WeChat group
 
  learning、deploy、consult、contribution、cooperation, join group, wechart id luanpeng1234 remark`<open source>`, [construction guide](https://github.com/tencentmusic/cube-studio/blob/master/CONTRIBUTING.md)
-
-<img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
+ 
+ <img border="0" width="20%" src="https://user-images.githubusercontent.com/20157705/219829986-66384e34-7ae9-4511-af67-771c9bbe91ce.jpg" />
  
 # Job Template
 
@@ -56,8 +56,7 @@ tips:
 | media-download | multimedia data processing | 	Distributed download of media files  | 
 | video-audio | multimedia data processing | 	Distributed extraction of audio from video  | 
 | video-img | multimedia data processing | Distributed extraction of pictures from video | 
-| object-detection-on-darknet | machine vision | object-detection with darknet yolov3 | 
-| ner |natural language | Named Entity Recognition | 
+| object-detection-on-darknet | machine vision | object-detection with darknet yolov3 |
 
 # Deploy
 
@@ -68,4 +67,4 @@ tips:
 
 # Company
 
-![image](https://user-images.githubusercontent.com/20157705/216338054-cd59d7c9-9e1a-411b-98fe-d0e41bd604a8.png)
+![图片 1](https://user-images.githubusercontent.com/20157705/223387901-1b922d96-0a79-4542-b53b-e70938404b2e.png)

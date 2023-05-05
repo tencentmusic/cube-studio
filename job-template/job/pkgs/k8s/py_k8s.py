@@ -34,6 +34,29 @@ class K8s():
         self.AppsV1Api = client.AppsV1Api()
         self.v1.api_client.configuration.verify_ssl = False  # 只能设置 /usr/local/lib/python3.6/dist-packages/kubernetes/client/configuration.py:   self.verify_ssl= True ---> False
 
+
+    # @pysnooper.snoop()
+    def get_gpu(self,resource_gpu):
+        gpu_num = 0
+        gpu_type = ''
+        try:
+            if resource_gpu:
+                if '(' in resource_gpu:
+                    gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
+                    gpu_type = gpu_type[0] if gpu_type else None
+                if '（' in resource_gpu:
+                    gpu_type = re.findall(r"（(.+?)）", resource_gpu)
+                    gpu_type = gpu_type[0] if gpu_type else None
+
+                resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
+                resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
+                gpu_num = float(resource_gpu)
+
+        except Exception as e:
+            print(e)
+        gpu_type = gpu_type.upper() if gpu_type else None
+        return gpu_num, gpu_type
+
     # 获取指定范围的pod
     # @pysnooper.snoop()
     def get_pods(self,namespace=None,service_name=None,pod_name=None,labels={}):

@@ -85,13 +85,7 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def describe_url(self):
-
-        NNI_DOMAIN = self.project.cluster.get('NNI_DOMAIN',request.host)
-        if NNI_DOMAIN:
-            host = "http://"+NNI_DOMAIN
-        else:
-            host = request.host_url.strip('/') # 使用当前域名打开
-
+        host = "http://"+self.project.cluster.get('HOST',request.host)
         return Markup(f'<a target=_blank href="{host}/nni/{self.name}/">{self.describe}</a>')
 
 

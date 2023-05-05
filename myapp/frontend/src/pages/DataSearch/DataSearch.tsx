@@ -1,124 +1,162 @@
-import Icon, { MenuOutlined, ReloadOutlined, SaveOutlined, StopOutlined } from '@ant-design/icons';
-import { Button, message, Modal, Select, Tabs, Tooltip } from 'antd'
+import Icon, { ExclamationCircleOutlined, MenuOutlined, ReloadOutlined, RightCircleOutlined, SaveOutlined, SlidersOutlined, StarOutlined, StopOutlined } from '@ant-design/icons';
+import { Button, Drawer, message, Modal, Select, Switch, Tabs, Tooltip } from 'antd'
 import React, { useEffect, useRef, useState } from 'react'
-import { actionGetDataSearchRes, actionRun, TTaskStatus } from '../../api/dataSearchApi';
+import { actionGetDataSearchRes, actionRun, getIdexFormConfig } from '../../api/dataSearchApi';
 import CodeEdit from '../../components/CodeEdit'
-import { IOptionsGroupItem } from '../../components/DataDiscoverySearch/DataDiscoverySearch';
 import InputSearch from '../../components/InputSearch/InputSearch';
-import TableBox from '../../components/TableBox/TableBox';
 import Draggable from 'react-draggable';
 import './DataSearch.less';
+import TaskList from './TaskList';
+import { IEditorTaskItem, IEditorStore, IEditorItem, IEditorItemParams } from './interface';
+import moment from 'moment'
+import { data2Time } from '../../util';
+// import LineChartTemplate from '../../components/LineChartTemplate/LineChartTemplate';
+import LoadingStar from '../../components/LoadingStar/LoadingStar';
+import cookies from 'js-cookie';
+import ConfigFormData, { IConfigFormDataOptionItem } from './ConfigFormData';
+const userName = cookies.get('myapp_username')
 
-interface IDataSearchItem {
-    tabId: string
-    title: string
-    appGroup: string
-    status: TTaskStatus
-    sqlContent?: string
-    sqlContentTemporary?: string
-    downloadUrl?: string
-    reqId?: string
-    timer?: any
-}
-interface IDataSearchItemParams {
-    tabId?: string
-    title?: string
-    appGroup?: string
-    status?: TTaskStatus
-    sqlContent?: string
-    sqlContentTemporary?: string
-    downloadUrl?: string
-    reqId?: string
-    timer?: any
+const createId = () => {
+    return Math.random().toString(36).substring(2)
 }
 
-type IDataSearchStore = {
-    [tabId: string]: IDataSearchItem
+const sqlMap: Record<string, string> = {
+    'test': `CREATE TABLE dbo.EmployeePhoto
+    (
+        EmployeeId INT NOT NULL PRIMARY KEY,
+        Photo VARBINARY(MAX) FILESTREAM NULL,
+        MyRowGuidColumn UNIQUEIDENTIFIER NOT NULL ROWGUIDCOL
+                        UNIQUE DEFAULT NEWID()
+    );
+    
+    GO
+    
+    /*
+    text_of_comment
+    /* nested comment */
+    */
+    
+    -- line comment
+    
+    CREATE NONCLUSTERED INDEX IX_WorkOrder_ProductID
+        ON Production.WorkOrder(ProductID)
+        WITH (FILLFACTOR = 80,
+            PAD_INDEX = ON,
+            DROP_EXISTING = ON);
+    GO
+    
+    WHILE (SELECT AVG(ListPrice) FROM Production.Product) < $300
+    BEGIN
+       UPDATE Production.Product
+          SET ListPrice = ListPrice * 2
+       SELECT MAX(ListPrice) FROM Production.Product
+       IF (SELECT MAX(ListPrice) FROM Production.Product) > $500
+          BREAK
+       ELSE
+          CONTINUE
+    END
+    PRINT 'Too much for the market to bear';
+    
+    MERGE INTO Sales.SalesReason AS [Target]
+    USING (VALUES ('Recommendation','Other'), ('Review', 'Marketing'), ('Internet', 'Promotion'))
+           AS [Source] ([NewName], NewReasonType)
+    ON [Target].[Name] = [Source].[NewName]
+    WHEN MATCHED
+    THEN UPDATE SET ReasonType = [Source].NewReasonType
+    WHEN NOT MATCHED BY TARGET
+    THEN INSERT ([Name], ReasonType) VALUES ([NewName], NewReasonType)
+    OUTPUT $action INTO @SummaryOfChanges;
+    
+    SELECT ProductID, OrderQty, SUM(LineTotal) AS Total
+    FROM Sales.SalesOrderDetail
+    WHERE UnitPrice < $5.00
+    GROUP BY ProductID, OrderQty
+    ORDER BY ProductID, OrderQty
+    OPTION (HASH GROUP, FAST 10);    
+`,
 }
 
 export default function DataSearch() {
-    // const [loadingSearch, setLoadingSearch] = useState(false)
-    const [errorMsg, setErrorMsg] = useState<String>()
-    const dataByCache = JSON.parse(localStorage.getItem('dataSearch') || JSON.stringify({
-        '1': {
-            tabId: '1',
-            title: '新查询 1',
-            status: 'init'
-        }
+    const initId = createId()
+    const initCurrentEditorData: IEditorItem = {
+        tabId: initId,
+        title: '新查询 1',
+        status: 'init',
+        smartShow: false,
+        smartContent: '',
+        smartCache: '',
+        smartTimer: undefined,
+        loading: false,
+        taskMap: {}
+    }
+    const initEditorData: Record<string, IEditorItem> = JSON.parse(localStorage.getItem('dataSearch2') || JSON.stringify({
+        [initCurrentEditorData.tabId]: initCurrentEditorData
     }))
-    const [columnConfig, setColumnConfig] = useState<any[]>([])
-    const [dataList, setDataList] = useState<any[]>([])
-    const [appGroup, setAppGroup] = useState<string>('')
-    const [resLog, setResLog] = useState<string>()
-    const showBoxRef: any = useRef()
+    const initEditorDataList = Object.entries(initEditorData).reduce((pre: IEditorItem[], [key, value]) => ([...pre, { ...value }]), [])
 
-    // const [runTimer, _setRunTimer] = useState<any>()
-    // const runTimerRef = useRef(runTimer);
-    // const setRunTimer = (data: any): void => {
-    //     runTimerRef.current = data;
-    //     _setRunTimer(data);
-    // };
-
-    const [inputContent, _setInputContent] = useState<IDataSearchStore>(dataByCache)
-    const inputContentRef = useRef(inputContent);
-    const setInputContent = (data: IDataSearchStore): void => {
-        inputContentRef.current = data;
-        _setInputContent(data);
-    };
-
-    const [activeKey, _setActiveKey] = useState<string>('1')
+    const [activeKey, _setActiveKey] = useState<string>(initEditorDataList[0].tabId)
     const activeKeyRef = useRef(activeKey);
     const setActiveKey = (data: string): void => {
         activeKeyRef.current = data;
         _setActiveKey(data);
     };
 
-    const initialPanes = Object.entries(inputContent).reduce((pre: IDataSearchItem[], [key, value]) => ([...pre, { ...value }]), [])
+    const [editorStore, _seteditorStore] = useState<IEditorStore>(initEditorData)
+    const editorStoreRef = useRef(editorStore);
+    const seteditorStore = (data: IEditorStore): void => {
+        editorStoreRef.current = data;
+        _seteditorStore(data);
+    };
+
+    const [configOption, _setConfigOption] = useState<IConfigFormDataOptionItem[]>([])
+    const configOptionRef = useRef(configOption);
+    const setConfigOption = (data: IConfigFormDataOptionItem[]): void => {
+        configOptionRef.current = data;
+        _setConfigOption(data);
+    };
+
+    const initialPanes = Object.entries(editorStore).reduce((pre: IEditorItem[], [key, value]) => ([...pre, { ...value }]), [])
     const [panes, setPanes] = useState(initialPanes);
-    const newTabIndex = useRef(Object.entries(inputContent).length);
+    const newTabIndex = useRef(initEditorDataList.length);
 
-    const setTabState = (currentState: IDataSearchItemParams, key?: string) => {
-        const targetRes: IDataSearchStore = {
-            ...inputContentRef.current
+    const [columnConfig, setColumnConfig] = useState<any[]>([])
+    const [dataList, setDataList] = useState<any[]>([])
+
+    const configDataComponentRefs: any = useRef(null);
+
+    const setEditorState = (currentState: IEditorItemParams, key?: string) => {
+
+        const targetRes: IEditorStore = {
+            ...editorStoreRef.current
         }
-        if (key !== undefined) {
-            targetRes[key] = {
-                tabId: currentState.tabId || '',
-                title: currentState.title || '',
-                status: currentState.status || 'init',
-                appGroup,
-                ...currentState
-            }
-        } else {
-            targetRes[activeKey] = {
-                ...targetRes[activeKey],
-                ...currentState
+        let currentTaskMap = {}
+
+        if (currentState.taskMap) {
+            currentTaskMap = {
+                taskMap: {
+                    ...editorStoreRef.current[activeKey].taskMap,
+                    ...currentState.taskMap
+                }
             }
         }
 
-        localStorage.setItem('dataSearch', JSON.stringify(targetRes))
-        inputContentRef.current = targetRes
-        setInputContent(targetRes)
+        targetRes[key || activeKey] = {
+            ...targetRes[key || activeKey],
+            ...currentState,
+            ...currentTaskMap
+        }
+
+        localStorage.setItem('dataSearch2', JSON.stringify(targetRes))
+        editorStoreRef.current = targetRes
+        seteditorStore(targetRes)
     }
 
-    const handleData = (result: (string | number)[][]) => {
-        const header = result[0] || []
-        const data = result.slice(1)
-        const targetData = data.map((row) => {
-            const rowItem = row.reduce((pre, next, index) => ({ ...pre, [header[index]]: next }), {})
-            return rowItem
+    useEffect(() => {
+        getIdexFormConfig().then(res => {
+            const option = res.data.result
+            setConfigOption(option)
         })
-        const headerConfig = header.map(item => ({
-            title: item,
-            dataIndex: item,
-            key: item,
-            width: 100,
-        }))
-        // console.log('headerConfig', headerConfig);
-        // console.log(targetData.slice(0, 10));
-        setColumnConfig(headerConfig)
-        setDataList(targetData.slice(0, 10))
-    }
+    }, [])
 
     useEffect(() => {
         const targetDom = document.getElementById("buttonDrag")
@@ -173,80 +211,95 @@ export default function DataSearch() {
         }
     }, [])
 
+    const clearEditorTaskTimerByKey = (activeKey: string) => {
+        const tagList = Object.entries(editorStoreRef.current[activeKey]).reduce((pre: IEditorItem[], [key, value]) => ([...pre, { ...value }]), [])
+        tagList.forEach(tag => {
+            clearInterval(tag.smartTimer)
+        })
+        const currentTaskList = Object.entries(editorStoreRef.current[activeKey].taskMap).reduce((pre: IEditorTaskItem[], [key, value]) => ([...pre, { ...value }]), [])
+        currentTaskList.forEach(task => {
+            clearInterval(task.timer)
+        })
+    }
+
+    const clearTaskTimer = (activeKey: string, taskId: string) => {
+        const taskMap = editorStoreRef.current[activeKey].taskMap
+        const task = taskMap[taskId]
+        if (task) {
+            clearInterval(task.timer)
+        }
+    }
+
     // 清空定时器
     useEffect(() => {
+        setEditorState({
+            loading: false
+        })
+
         return () => {
-            Object.entries(inputContent).forEach((item) => {
+            Object.entries(editorStore).forEach((item) => {
                 const [key] = item
-                clearInterval(inputContentRef.current[key].timer)
+                clearEditorTaskTimerByKey(key)
             })
         }
     }, [])
 
     useEffect(() => {
-        console.log('activeKey', activeKey);
         // 当前tab状态是runing，触发轮询
-        if (inputContent[activeKey] && inputContent[activeKey].status === 'running') {
-            pollGetRes(inputContent[activeKey].reqId || '')
-        }
-        // if (inputContent[activeKey] && inputContent[activeKey].reqId && (inputContent[activeKey].status === 'success' || inputContent[activeKey].status === 'failure')) {
-        //     setTabState({ status: 'running' })
-        //     actionGetDataSearchRes(inputContent[activeKey].reqId || '').then(res => {
-        //         const { result, err_msg, state, result_url } = res.data
-        //         if (err_msg) {
-        //             setErrorMsg(err_msg)
-        //         }
-        //         if (state === 'failure') {
-        //             setTabState({ status: state })
-        //             message.error('查询结果失败，尝试重新运行')
-        //         }
-        //         if (state === 'success') {
-        //             setTabState({ status: state, downloadUrl: result_url })
-        //             console.log('result', result);
-        //             handleData(result)
-        //         }
-        //     }).catch(() => {
-        //         setTabState({ status: 'failure' })
-        //     })
-        // }
+        const currentEditorStore = editorStore[activeKey]
+        const currentTaskList = Object.entries(currentEditorStore.taskMap).reduce((pre: IEditorTaskItem[], [key, value]) => ([...pre, { ...value }]), [])
+        currentTaskList.forEach(task => {
+            if (task.status === 'running') {
+                pollGetRes(task.reqId)
+            }
+        })
     }, [activeKey])
 
 
     const onChange = (newActiveKey: string) => {
-        Object.entries(inputContent).forEach((item) => {
+        Object.entries(editorStore).forEach((item) => {
             const [key] = item
             if (key !== newActiveKey) {
-                clearInterval(inputContent[key].timer)
+                clearEditorTaskTimerByKey(key)
             }
         })
-        setErrorMsg(undefined)
-        setResLog(undefined)
         setColumnConfig([])
         setDataList([])
         setActiveKey(newActiveKey);
     };
 
     const add = () => {
-        clearInterval(inputContentRef.current[activeKey].timer)
+        clearEditorTaskTimerByKey(activeKey)
 
-        const uniqueKey = Math.random().toString(36).substring(2);
-        const newActiveKey = uniqueKey;
-        const title = `新查询 ${++newTabIndex.current}`
-        const newPanes = [...panes];
-        newPanes.push({ title, tabId: newActiveKey, status: 'init', appGroup });
-        setPanes(newPanes);
-        setActiveKey(newActiveKey);
-
-        let res: IDataSearchStore = {
-            ...inputContent, [newActiveKey]: {
-                tabId: newActiveKey,
+        const currentIndex = ++newTabIndex.current
+        if (currentIndex > 10) {
+            message.warn('标签数目达到限制')
+        } else {
+            const newActiveKey = createId();
+            const title = `新查询 ${currentIndex}`
+            const newPanes = [...panes];
+            const initState: IEditorItem = {
                 title,
+                tabId: newActiveKey,
                 status: 'init',
-                appGroup,
+                smartShow: false,
+                smartContent: '',
+                smartTimer: undefined,
+                smartCache: '',
+                loading: false,
+                taskMap: {}
             }
+            newPanes.push(initState);
+            setPanes(newPanes);
+            setActiveKey(newActiveKey);
+
+            let res: IEditorStore = {
+                ...editorStore, [newActiveKey]: initState
+            }
+
+            seteditorStore(res)
+            localStorage.setItem('dataSearch2', JSON.stringify(res))
         }
-        setInputContent(res)
-        localStorage.setItem('dataSearch', JSON.stringify(res))
     };
 
     const remove = (targetKey: string) => {
@@ -268,10 +321,10 @@ export default function DataSearch() {
         setPanes(newPanes);
         setActiveKey(newActiveKey);
 
-        let res = { ...inputContent }
+        let res = { ...editorStore }
         delete res[targetKey]
-        setInputContent(res)
-        localStorage.setItem('dataSearch', JSON.stringify(res))
+        seteditorStore(res)
+        localStorage.setItem('dataSearch2', JSON.stringify(res))
     };
 
     const onEdit = (targetKey: any, action: 'add' | 'remove') => {
@@ -284,205 +337,265 @@ export default function DataSearch() {
 
     const fetchData = (task_id: string) => {
         actionGetDataSearchRes(task_id).then(res => {
-            console.log(res.data)
-            const { state, result, err_msg, result_url, spark_log_url } = res.data
-            if (state === 'running') {
-                setResLog(spark_log_url)
+            const { state, result, err_msg, result_url, spark_log_url, stage } = res.data
+            const task: IEditorTaskItem = {
+                ...editorStoreRef.current[activeKey].taskMap[task_id],
+                status: state,
+                step: stage,
+                log: spark_log_url,
+                downloadUrl: result_url,
+                result,
+                message: err_msg
             }
-            if (state === 'success') {
-                setTabState({ status: state, downloadUrl: result_url })
-                clearInterval(inputContentRef.current[activeKey].timer)
-                handleData(result)
-            }
-            if (state === 'failure') {
-                setTabState({ status: state })
-                clearInterval(inputContentRef.current[activeKey].timer)
-                setErrorMsg(err_msg)
+            if (state === 'success' || state === 'failure') {
+                const starTime = new Date(task.startTime || '').valueOf()
+                const nowTime = new Date().valueOf()
+                const duration = data2Time((nowTime - starTime) / 1000)
+                task.duration = duration
+
+                setEditorState({
+                    status: 'success',
+                    taskMap: {
+                        [task_id]: task
+                    }
+                })
+                clearTaskTimer(activeKey, task_id)
+            } else {
+                setEditorState({
+                    status: 'success',
+                    taskMap: {
+                        [task_id]: task
+                    }
+                })
             }
         }).catch(() => {
-            clearInterval(inputContentRef.current[activeKey].timer)
+            clearTaskTimer(activeKey, task_id)
             message.error('查询结果失败，尝试重新运行')
-            setTabState({ status: 'failure' })
+            setEditorState({
+                status: 'failure',
+                taskMap: {
+                    [task_id]: {
+                        ...editorStoreRef.current[activeKey].taskMap[task_id],
+                        status: 'failure',
+                        step: 'end',
+                    }
+                }
+            })
         })
     }
 
     const pollGetRes = (task_id: string) => {
-        if (inputContentRef.current[activeKey].timer) {
-            clearInterval(inputContentRef.current[activeKey].timer)
-        }
+        clearTaskTimer(activeKey, task_id)
+
         let timer = setInterval(() => {
             fetchData(task_id)
-        }, 10000)
-        setTabState({ reqId: task_id, status: 'running', timer })
+        }, 5000)
 
+        setEditorState({
+            taskMap: {
+                [task_id]: {
+                    reqId: task_id,
+                    status: 'init',
+                    content: editorStore[activeKey].content,
+                    name: `任务${task_id}`,
+                    step: 'start',
+                    startTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+                    database: editorStore[activeKey].database,
+                    table: editorStore[activeKey].table,
+                    timer,
+                    message: ''
+                }
+            }
+        })
         fetchData(task_id)
     }
 
+    const runTask = () => {
+        setEditorState({ status: 'running' })
+        const customParams = configOption.map(item => item.id).reduce((pre: any, next: any) => ({ ...pre, [next]: editorStore[activeKey][next] }), {})
+        // 运行子任务
+        actionRun({
+            sql: editorStore[activeKey]?.content || '',
+            ...customParams
+        }).then(res => {
+            const { err_msg, task_id } = res.data
+            if (err_msg) {
+                setEditorState({
+                    status: 'failure',
+                })
+                Modal.error({
+                    title: '运行失败',
+                    icon: <ExclamationCircleOutlined />,
+                    width: 1000,
+                    content: err_msg,
+                    okText: '关闭',
+                    // maskClosable: true
+                });
+            } else if (task_id) {
+                pollGetRes(task_id)
+            }
+        }).catch(err => {
+            setEditorState({ status: 'failure' })
+        })
+    }
+
     return (
-        <div className="datasearch-container p16 fade-in">
-            <Tabs type="editable-card" onChange={onChange} activeKey={activeKey} onEdit={onEdit}>
-                {panes.map((pane, index) => (
-                    <Tabs.TabPane tab={`新查询 ${index + 1}`} key={pane.tabId} closable={index !== 0}>
-                        <div className="d-f fd-c h100">
-                            <div className="flex2 s0 ov-a">
-                                <CodeEdit
-                                    value={inputContent[activeKey]?.sqlContent}
-                                    onSelect={(value) => {
+        <div className="datasearch-container fade-in d-f">
+            <div className="flex1 ptb16 pl16">
+                <Tabs type="editable-card" onChange={onChange} activeKey={activeKey} onEdit={onEdit}>
+                    {panes.map((pane, index) => (
+                        <Tabs.TabPane tab={`新查询 ${index + 1}`} key={pane.tabId} closable={index !== 0}>
+                            <div className="d-f fd-c h100">
+                                <div className="flex2 s0 ov-a">
+                                    {
+                                        editorStore[activeKey]?.loading ? <div className="codeedit-mark">
+                                            <div className="d-f jc ac fd-c">
+                                                <LoadingStar />
+                                                <div>
+                                                    结果生成中
+                                                </div>
+                                            </div>
+                                        </div> : null
+                                    }
 
-                                    }}
-                                    onChange={(value) => {
-                                        const res: IDataSearchStore = {
-                                            ...inputContent,
-                                            [activeKey]: {
-                                                tabId: activeKey,
-                                                sqlContent: value === '' ? undefined : value,
+                                    <CodeEdit
+                                        value={editorStore[activeKey]?.content}
+                                        onChange={(value: any) => {
+                                            setEditorState({
+                                                content: value === '' ? undefined : value,
                                                 title: pane.title,
-                                                status: inputContent[activeKey]?.status,
-                                                appGroup: inputContent[activeKey]?.appGroup
-                                            }
-                                        }
-                                        localStorage.setItem('dataSearch', JSON.stringify(res))
-                                        setInputContent(res)
-                                    }} />
-                            </div>
-
-                            <div className="ov-a" id="showBox" ref={showBoxRef} style={{ height: 500 }}>
-                                <Draggable
-                                    axis="y"
-                                    onStart={() => {}}
-                                    onDrag={(e: any) => {
-                                        const showBoxDom = document.getElementById('showBox')
-                                        if (showBoxDom) {
-                                            const res = document.body.clientHeight - e.y
-                                            showBoxDom.style.height = `${res}px`
-                                        }
-                                    }}
-                                    onStop={() => {}}>
-                                    <div className="ta-c" style={{ cursor: 'ns-resize' }}><MenuOutlined /></div>
-                                </Draggable>
-                                <div className="p8 bor-l bor-r b-side d-f ac jc-r bg-w">
-                                    {/* <Tooltip title="jupyter">
-                                        <img className="mr16 cp" src={require('../../images/jupyter.svg').default} style={{ width: 20 }} alt="" onClick={() => {
-                                            window.open(`${window.location.protocol}//${window.location.hostname}/idex/`, 'bank')
-                                        }} />
-                                    </Tooltip> */}
-                                    <Tooltip title="保存">
-                                        <SaveOutlined className="mr16 cp" style={{ fontSize: 18 }} onClick={() => {
-                                            localStorage.setItem('dataSearch', JSON.stringify(inputContent))
-                                            message.success('保存成功')
-                                        }} />
-                                    </Tooltip>
-                                    {/* <Tooltip title="刷新">
-                                    <ReloadOutlined className="mr16 cp" style={{ fontSize: 18 }} />
-                                </Tooltip> */}
-                                    <InputSearch
-                                        value={inputContent[activeKey].appGroup}
-                                        isOpenSearchMatch
-                                        onChange={(value) => {
-                                            setTabState({ appGroup: value })
-                                            // setAppGroup(value)
-                                        }} options={['队里1',
-                                            '队里2',
-                                            '队里3',
-                                            '队里4'
-                                        ]} placeholder="应用组" width={'400px'} />
-                                    <Button
-                                        type='default'
-                                        className="mlr16"
-                                        disabled={inputContent[activeKey].status !== 'success'}
-                                        onClick={() => {
-                                            window.open(inputContent[activeKey].downloadUrl, 'bank')
-                                        }}
-                                    >下载结果</Button>
-                                    <Button type="default" disabled={inputContent[activeKey].status !== 'running'} className="mr16" onClick={() => {
-                                        Modal.confirm({
-                                            title: '终止',
-                                            icon: <StopOutlined />,
-                                            content: '确定终止?',
-                                            okText: '确认终止',
-                                            cancelText: '取消',
-                                            okButtonProps: { danger: true },
-                                            onOk() {
-                                                return new Promise((resolve, reject) => {
-
-                                                    setTabState({
-                                                        status: 'init',
-                                                        reqId: undefined
-                                                    })
-                                                    clearInterval(inputContentRef.current[activeKey].timer)
-                                                    resolve('');
-                                                })
-                                                    .then((res) => {
-                                                        message.success('终止成功');
-                                                    })
-                                                    .catch(() => {
-                                                        message.error('终止失败');
-                                                    });
-                                            },
-                                            onCancel() { },
-                                        });
-                                    }}><StopOutlined /> 终止</Button>
-                                    <Button type="primary" loading={inputContent[activeKey].status === 'running'} onClick={() => {
-                                        if (inputContent[activeKey].appGroup) {
-                                            setTabState({ status: 'running' })
-                                            setErrorMsg(undefined)
-                                            setResLog(undefined)
-
-                                            actionRun({
-                                                tdw_app_group: inputContent[activeKey].appGroup,
-                                                sql: inputContent[activeKey]?.sqlContent || ''
-                                            }).then(res => {
-                                                console.log('task_id', res.data.task_id)
-                                                const { err_msg, task_id } = res.data
-                                                if (err_msg) {
-                                                    setTabState({ status: 'failure' })
-                                                    setErrorMsg(err_msg)
-                                                }
-                                                if (task_id) {
-                                                    pollGetRes(task_id)
-                                                }
-                                            }).catch(err => {
-                                                setTabState({ status: 'failure' })
                                             })
-                                        } else {
-                                            message.warning('请先选择应用组')
-                                        }
-                                    }}>运行</Button>
+                                        }} />
                                 </div>
-                                <div className="flex1 bor b-side s0 ov-a bg-w p-r h100">
-                                    <div className="pt8">
-                                        <div className="tag-result bg-theme c-text-w mr16">
-                                            结果
-                                    </div>
-                                        {
-                                            resLog ? <Button type='link' size="small" onClick={() => {
-                                                window.open(resLog, 'bank')
-                                            }}>查看日志</Button> : null
-                                        }
 
-                                    </div>
-                                    <div className="plr16 pt8">
-                                        {
-                                            errorMsg ? errorMsg : <TableBox
-                                                loading={inputContent[activeKey].status === 'running'}
-                                                cancelExportData={true}
-                                                rowKey={(record: any) => {
-                                                    return JSON.stringify(record)
+                                <div className="ov-h" id="showBox" style={{ height: 500 }}>
+                                    <Draggable
+                                        axis="y"
+                                        onStart={() => { }}
+                                        onDrag={(e: any) => {
+                                            const showBoxDom = document.getElementById('showBox')
+                                            if (showBoxDom) {
+                                                const res = document.body.clientHeight - e.y
+                                                showBoxDom.style.height = `${res}px`
+                                            }
+                                        }}
+                                        onStop={() => { }}>
+                                        <div className="ta-c" style={{ cursor: 'ns-resize' }}><MenuOutlined /></div>
+                                    </Draggable>
+                                    <div className="ptb8 plr16 bor-l bor-r b-side d-f ac jc-b bg-w">
+                                        <div className="d-f ac">
+                                            <Switch className="mr8"
+                                                checked={editorStore[activeKey].smartShow}
+                                                unCheckedChildren="正常模式"
+                                                checkedChildren="智能模式" onChange={(checked) => {
+                                                    setEditorState({ smartShow: checked })
+                                                }} />
+                                            {
+                                                editorStore[activeKey].smartShow ? <InputSearch
+                                                    value={editorStore[activeKey].smartContent}
+                                                    isOpenSearchMatch
+                                                    onChange={(value: any) => {
+                                                        setEditorState({
+                                                            smartContent: value,
+                                                        })
+                                                    }}
+                                                    onSearch={(value) => {
+                                                        setEditorState({
+                                                            smartCache: sqlMap[value],
+                                                            loading: true,
+                                                        })
+
+                                                        const timer = setInterval(() => {
+                                                            const currentContent = editorStoreRef.current[activeKey].content || ''
+                                                            if (editorStoreRef.current[activeKey].smartCache) {
+                                                                let smartCache = editorStoreRef.current[activeKey].smartCache || ''
+                                                                const tarStr = smartCache.substr(0, 20)
+                                                                smartCache = smartCache.replace(tarStr, '')
+
+                                                                setEditorState({
+                                                                    smartCache,
+                                                                    content: currentContent + tarStr
+                                                                })
+                                                            } else {
+                                                                clearInterval(editorStoreRef.current[activeKey].smartTimer)
+                                                                setEditorState({
+                                                                    smartCache: '',
+                                                                    smartTimer: undefined,
+                                                                    loading: false,
+                                                                })
+                                                            }
+                                                        }, 800)
+
+                                                        setEditorState({
+                                                            smartTimer: timer,
+                                                        })
+                                                    }}
+                                                    options={[
+                                                        'test',
+                                                    ]} placeholder="智能查询" width={'240px'} /> : null
+                                            }
+                                        </div>
+                                        <div className="d-f ac">
+                                            <ConfigFormData
+                                                ref={configDataComponentRefs}
+                                                dataValue={editorStore[activeKey]}
+                                                onChange={(dataValue) => {
+                                                    setEditorState(dataValue)
                                                 }}
-                                                columns={columnConfig}
-                                                pagination={false}
-                                                dataSource={dataList}
-                                                scroll={{ x: 1200 }}
+                                                onConfigChange={(option) => {
+                                                    setConfigOption(option)
+                                                    setEditorState({
+                                                        database: 'db'
+                                                    })
+                                                }}
+                                                option={configOptionRef.current} />
+                                            <Button className="ml16" type="primary" loading={editorStore[activeKey].status === 'running'} onClick={() => {
+                                                configDataComponentRefs.current.onSubmit().then((res: any) => {
+                                                    runTask()
+                                                })
+                                            }}>运行<RightCircleOutlined /></Button>
+                                        </div>
+                                    </div>
+                                    <div className="flex1 bor b-side s0 bg-w p-r ov-a" style={{ height: 'calc(100% - 80px)' }}>
+                                        <div className="pt8">
+                                            <div className="tag-result bg-theme c-text-w mr16">
+                                                结果
+                                            </div>
+                                        </div>
+                                        <div className="plr16 pt8">
+                                            <TaskList
+                                                option={editorStore[activeKey].taskMap}
+                                                onDelete={(id) => {
+                                                    Modal.confirm({
+                                                        title: '删除',
+                                                        icon: <ExclamationCircleOutlined />,
+                                                        content: '确定删除?',
+                                                        okText: '确认删除',
+                                                        cancelText: '取消',
+                                                        okButtonProps: { danger: true },
+                                                        onOk() {
+                                                            let taskMap = editorStore[activeKey].taskMap
+                                                            clearTaskTimer(activeKey, id)
+                                                            delete taskMap[id]
+                                                            setEditorState({
+                                                                taskMap
+                                                            })
+                                                        },
+                                                        onCancel() { },
+                                                    });
+                                                }}
+                                                onRetry={(id) => {
+                                                    pollGetRes(id)
+                                                }}
                                             />
-                                        }
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </Tabs.TabPane>
-                ))}
-            </Tabs>
+                        </Tabs.TabPane>
+                    ))}
+                </Tabs>
+            </div>
         </div>
-
     )
 }

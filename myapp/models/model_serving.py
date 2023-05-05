@@ -5,7 +5,7 @@ from sqlalchemy import Text
 from myapp.utils import core
 
 from myapp.models.helpers import AuditMixinNullable
-from flask import request
+from flask import request,g
 from .model_team import Project
 
 from myapp import app
@@ -18,12 +18,11 @@ metadata = Model.metadata
 conf = app.config
 
 
-
 class service_common():
     @property
     def monitoring_url(self):
         # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
-        url=self.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        url="http://"+self.project.cluster.get('HOST',request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
         return Markup(f'<a href="{url}">监控</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
 
@@ -62,7 +61,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def deploy(self):
-        monitoring_url = self.project.cluster.get('GRAFANA_HOST', '').rstrip('/') + conf.get('GRAFANA_SERVICE_PATH') + self.name
+        monitoring_url = "http://"+self.project.cluster.get('HOST', request.host) + conf.get('GRAFANA_SERVICE_PATH') + self.name
         help_url=''
         try:
             help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
@@ -84,9 +83,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     def name_url(self):
         # user_roles = [role.name.lower() for role in list(g.user.roles)]
         # if "admin" in user_roles:
-        url = self.project.cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
-        # else:
-        #     url = conf.get('K8S_DASHBOARD_PIPELINE', '') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
+        url = "http://"+self.project.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
 
         return Markup(f'<a target=_blank href="{url}">{self.label}</a>')
 
@@ -186,7 +183,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def model_name_url(self):
-        url = self.project.cluster['K8S_DASHBOARD_CLUSTER'] + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
+        url = "http://"+self.project.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
     @property
@@ -206,7 +203,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         except Exception as e:
             print(e)
 
-        monitoring_url=self.project.cluster.get('GRAFANA_HOST','').rstrip('/')+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        monitoring_url="http://"+self.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
         dom = f'''
                 <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
@@ -240,6 +237,9 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def ip(self):
         port = 20000+10*self.id
+
+        TKE_EXISTED_LBID = json.loads(self.project.expand).get('TKE_EXISTED_LBID', self.project.cluster.get("TKE_EXISTED_LBID",conf.get('TKE_EXISTED_LBID','')))
+
         # first, Use the proxy ip configured by the project group
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
         if not SERVICE_EXTERNAL_IP:
@@ -260,8 +260,14 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
-        else:
-            return "未开通"
+
+        elif TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')
+            if len(TKE_EXISTED_LBID)>1:
+                host = TKE_EXISTED_LBID[1] + ":" + str(port)
+                return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+
+        return "未开通"
 
 
     def __repr__(self):

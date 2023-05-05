@@ -3,31 +3,38 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
   },
   "editable": true,
-  "gnetId": null,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 17,
-  "iteration": 1657856261371,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -61,7 +68,7 @@
       },
       "paceLength": 10,
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "9.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -71,6 +78,10 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"})",
           "format": "time_series",
@@ -81,6 +92,10 @@
           "refId": "B"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "sum by (destination_workload,response_code) (irate(istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "hide": false,
@@ -90,10 +105,8 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
-      "title": "域名服务平均qps请求量(1分钟内)",
+      "title": "域名服务平均qps请求量(1分钟内平均)",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -101,9 +114,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -111,25 +122,18 @@
         {
           "$$hashKey": "object:311",
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "$$hashKey": "object:312",
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -137,10 +141,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -172,7 +175,7 @@
       },
       "paceLength": 10,
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "9.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -182,6 +185,10 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "sum by (destination_workload) (irate(istio_request_bytes_sum{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "format": "time_series",
@@ -193,9 +200,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "域名服务吞吐率（1分钟）",
       "tooltip": {
         "shared": true,
@@ -204,33 +209,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -238,114 +234,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 8
-      },
-      "hiddenSeries": false,
-      "id": 3,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": false,
-        "max": true,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "paceLength": 10,
-      "percentage": false,
-      "pluginVersion": "7.5.2",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "avg by (destination_workload) (rate(istio_request_duration_milliseconds_sum{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m])/rate(istio_request_duration_milliseconds_count{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
-          "format": "time_series",
-          "hide": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{destination_workload}}",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "域名服务 平均时延ms(1分钟平均)",
-      "tooltip": {
-        "shared": true,
-        "sort": 1,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:83",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:84",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "prometheus",
-      "decimals": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -353,7 +244,7 @@
         "h": 10,
         "w": 6,
         "x": 0,
-        "y": 16
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 6,
@@ -377,17 +268,20 @@
       },
       "paceLength": 10,
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "9.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": null,
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "sum by (pod) (container_memory_working_set_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod=~\".*$service.*\"})",
           "format": "time_series",
@@ -398,9 +292,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Memory Usage",
       "tooltip": {
         "shared": true,
@@ -409,9 +301,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -419,25 +309,20 @@
         {
           "$$hashKey": "object:204",
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "$$hashKey": "object:205",
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -445,10 +330,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -456,7 +340,7 @@
         "h": 10,
         "w": 6,
         "x": 6,
-        "y": 16
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 8,
@@ -481,17 +365,20 @@
       },
       "paceLength": 10,
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "9.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": null,
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod=~\".*$service.*\"}[5m]))",
           "format": "time_series",
@@ -502,6 +389,10 @@
           "refId": "A"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "expr": "",
           "format": "time_series",
           "intervalFactor": 1,
@@ -509,9 +400,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "CPU Usage",
       "tooltip": {
         "shared": true,
@@ -520,9 +409,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -530,25 +417,20 @@
         {
           "$$hashKey": "object:483",
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "$$hashKey": "object:484",
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -556,7 +438,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
       "fieldConfig": {
         "defaults": {
           "links": []
@@ -569,7 +454,7 @@
         "h": 10,
         "w": 6,
         "x": 12,
-        "y": 16
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 12,
@@ -595,7 +480,7 @@
       },
       "paceLength": 10,
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "9.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -605,6 +490,10 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "DCGM_FI_DEV_MEM_COPY_UTIL{exported_pod=~\".*$service.*\"}",
           "format": "time_series",
@@ -615,9 +504,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "pod GPU 显存占用率",
       "tooltip": {
         "shared": true,
@@ -626,16 +513,13 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "percent",
-          "label": null,
           "logBase": 1,
           "max": "100",
           "min": "0",
@@ -643,16 +527,12 @@
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -660,10 +540,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -671,7 +550,7 @@
         "h": 10,
         "w": 6,
         "x": 18,
-        "y": 16
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 10,
@@ -696,7 +575,7 @@
       },
       "paceLength": 10,
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "9.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -706,6 +585,10 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod=~\".*$service.*\"}",
           "format": "time_series",
@@ -717,9 +600,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "GPU 使用率",
       "tooltip": {
         "shared": true,
@@ -728,33 +609,26 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -762,10 +636,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -773,7 +646,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 18
       },
       "hiddenSeries": false,
       "id": 13,
@@ -797,7 +670,7 @@
       },
       "paceLength": 10,
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "9.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -807,6 +680,10 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
           "exemplar": true,
           "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\"})",
           "format": "time_series",
@@ -818,9 +695,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "全部域名服务监控",
       "tooltip": {
         "shared": true,
@@ -829,56 +704,46 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     }
   ],
   "refresh": false,
-  "schemaVersion": 27,
+  "schemaVersion": 37,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "service",
           "value": "service"
         },
-        "datasource": "prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "P1809F7CD0C75ACF3"
+        },
         "definition": "label_values(istio_requests_total, destination_service_namespace)",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": null,
         "multi": false,
         "name": "namespace",
         "options": [],
@@ -891,25 +756,23 @@
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
       },
       {
-        "allValue": null,
         "current": {
           "selected": false,
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "P1809F7CD0C75ACF3"
+        },
         "definition": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_service_name)",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": null,
         "multi": true,
         "name": "service",
         "options": [],
@@ -922,7 +785,6 @@
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
@@ -961,5 +823,6 @@
   "timezone": "",
   "title": "istio service",
   "uid": "istio-service",
-  "version": 42
+  "version": 1,
+  "weekStart": ""
 }

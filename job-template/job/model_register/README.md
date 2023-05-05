@@ -1,5 +1,5 @@
 # register_model 模板
-镜像：ccr.ccs.tencentyun.com/cube-studio/model:20221001
+镜像：ccr.ccs.tencentyun.com/cube-studio/model_register:20221001
 启动参数：
 ```bash
 {
@@ -21,7 +21,7 @@
         "--model_name": {
             "type": "str",
             "item_type": "str",
-            "label": "模型名",
+            "label": "模型名(a-z0-9-字符组成，最长54个字符)",
             "require": 1,
             "choice": [],
             "range": "",

@@ -5,13 +5,10 @@
 <img width="1437" alt="image" src="https://user-images.githubusercontent.com/20157705/182564530-2c965f5f-407d-4baa-8772-73cb2645901b.png">
 
 
-cube是 腾讯音乐 开源的一站式云原生机器学习平台，目前主要包含
- - 1、数据管理：特征平台，支持在/离线特征；数据源管理，支持结构数据和媒体标注数据管理；
- - 2、在线开发：在线的vscode/jupyter代码开发；在线镜像调试，支持免dockerfile，增量构建；
- - 3、训练编排：任务流编排，在线拖拉拽；开放的模板市场，支持tf/pytorch/mxnet/spark/ray/horovod/kaldi/volcano等分布式计算/训练任务；task的单节点debug，分布式任务的批量优先级调度，聚合日志；任务运行资源监控，报警；定时调度，支持补录，忽略，重试，依赖，并发限制，定时任务算力的智能修正；
- - 4、超参搜索：nni，ray的超参搜索；
- - 5、推理服务：tf/pytorch/onnx模型的推理服务，serverless流量管控，triton gpu推理加速，依据gpu利用率/qps等指标的hpa能力，虚拟化gpu，虚拟显存等服务化能力；
- - 6、资源统筹：多集群多项目组资源统筹，联邦调度，边缘计算；
+cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目前主要包含
+
+![231695906-5b1da227-8455-4274-8857-624093cf574b](https://user-images.githubusercontent.com/20157705/231781297-4eb49101-0997-4a2b-ac21-f3e92602d6ea.png)
+
 
 # 帮助文档
 
@@ -19,9 +16,9 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 # 开源共建
 
- 学习、部署、体验、开源建设 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>， [共建指南](https://github.com/tencentmusic/cube-studio/blob/master/CONTRIBUTING.md)
+ 学习、部署、体验、开源建设、商业合作 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>， [共建指南](https://github.com/tencentmusic/cube-studio/blob/master/CONTRIBUTING.md)
 
-<img border="0" width="20%" src="https://luanpeng.oss-cn-qingdao.aliyuncs.com/github/wechat.jpg" />
+ <img border="0" width="20%" src="https://user-images.githubusercontent.com/20157705/219829986-66384e34-7ae9-4511-af67-771c9bbe91ce.jpg" />
  
 # 支持模板
 
@@ -55,8 +52,7 @@ https://github.com/tencentmusic/cube-studio/wiki
 | media-download | 多媒体处理 | 	分布式媒体文件下载  | 
 | video-audio | 多媒体处理 | 	分布式视频提取音频  | 
 | video-img | 多媒体处理 | 	分布式视频提取图片  | 
-| object-detection | 机器视觉 | 基于darknet yolov3 的目标识别| 
-| ner | 自然语言| 命名实体识别 | 
+| object-detection | 机器视觉 | 基于darknet yolov3 的目标识别|
  
 # 平台部署
 
@@ -66,6 +62,6 @@ https://github.com/tencentmusic/cube-studio/wiki
 
 # 公司
 
-![image](https://user-images.githubusercontent.com/20157705/205842184-1c12c782-e560-44c7-b09f-c978a34a3613.png)
+![图片 1](https://user-images.githubusercontent.com/20157705/223387901-1b922d96-0a79-4542-b53b-e70938404b2e.png)
 
 

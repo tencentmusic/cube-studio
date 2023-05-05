@@ -1,6 +1,9 @@
+import random
+
+import requests
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import jsonify
-
+from jinja2 import Environment, BaseLoader, DebugUndefined
 from myapp.models.model_serving import InferenceService
 from myapp.utils import core
 from flask_babel import gettext as __
@@ -9,6 +12,8 @@ from flask_appbuilder.actions import action
 from myapp import app, appbuilder,db
 from flask_babel import lazy_gettext
 import re
+import pytz
+import pysnooper
 import copy
 from sqlalchemy.exc import InvalidRequestError
 from myapp.models.model_job import Repository
@@ -40,6 +45,11 @@ import datetime,time,json
 conf = app.config
 
 
+global_all_service_load = {
+    "data":None,
+    "check_time":None
+}
+
 class InferenceService_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
@@ -54,12 +64,11 @@ class InferenceService_ModelView_base():
     datamodel = SQLAInterface(InferenceService)
     check_redirect_list_url = conf.get('MODEL_URLS',{}).get('inferenceservice','')
 
-
     # add_columns = ['service_type','project','name', 'label','images','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host','hpa','metrics','health']
     add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path', 'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority', 'canary', 'shadow', 'host','inference_config',  'working_dir', 'command','volume_mount', 'env', 'ports', 'metrics', 'health','expand','sidecar']
     show_columns = ['service_type','project', 'name', 'label','model_name', 'model_version', 'images', 'model_path', 'images', 'volume_mount','sidecar','working_dir', 'command', 'env', 'resource_memory',
                     'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'inference_host_url','hpa','priority', 'canary', 'shadow', 'health','model_status','expand','metrics','deploy_history','host','inference_config']
-
+    enable_echart = True
     edit_columns = add_columns
 
     add_form_query_rel_fields = {
@@ -82,7 +91,12 @@ class InferenceService_ModelView_base():
         "resource": {"type": "ellip2", "width": 300},
     }
     search_columns = ['name','created_by','project','service_type','label','model_name','model_version','model_path','host','model_status','resource_gpu']
-
+    ops_link = [
+        {
+            "text": "服务资源监控",
+            "url": conf.get('GRAFANA_SERVICE_PATH','/grafana/d/istio-service/istio-service?var-namespace=service&var-service=')+"All"
+        }
+    ]
     label_title = '推理服务'
     base_order = ('id','desc')
     order_columns = ['id']
@@ -99,7 +113,7 @@ class InferenceService_ModelView_base():
         "replicas_html":"副本数"
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
-    host_rule=",".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
+    host_rule=",<br>".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
     add_form_extra_fields={
         "project": QuerySelectField(
             _(datamodel.obj.lab('project')),
@@ -117,7 +131,7 @@ class InferenceService_ModelView_base():
         "host": StringField(_(datamodel.obj.lab('host')), default=InferenceService.host.default.arg,description='访问域名，'+host_rule,widget=BS3TextFieldWidget()),
         "transformer":StringField(_(datamodel.obj.lab('transformer')), default=InferenceService.transformer.default.arg,description='前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架',widget=BS3TextFieldWidget()),
         'resource_gpu':StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
-                                                        description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
+                                                        description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100,或虚拟gpu，例如0.2(T4)',
                                                         widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
@@ -599,8 +613,6 @@ output %s
                     k8s_client.delete_istio_ingress(namespace=namespace, name=name)
                     k8s_client.delete_hpa(namespace=namespace, name=name)
                     k8s_client.delete_configmap(namespace=namespace, name=name)
-                    isvc_crd=conf.get('CRD_INFO')['inferenceservice']
-                    k8s_client.delete_crd(isvc_crd['group'],isvc_crd['version'],isvc_crd['plural'],namespace=namespace,name=name)
         except Exception as e:
             print(e)
 
@@ -624,6 +636,34 @@ output %s
         if self.src_item_json.get('name','') and item.name!=self.src_item_json.get('name',''):
             self.delete_old_service(self.src_item_json.get('name',''), item.project.cluster)
             flash('发现模型服务变更，启动清理服务%s:%s'%(self.src_item_json.get('model_name',''),self.src_item_json.get('model_version','')),'success')
+
+
+        src_project_id = self.src_item_json.get('project_id',0)
+        if src_project_id and src_project_id!=item.project.id:
+            try:
+                from myapp.models.model_team import Project
+                src_project = db.session.query(Project).filter_by(id=int(src_project_id)).first()
+                if src_project and src_project.cluster['NAME']!=item.project.cluster['NAME']:
+                    # 如果集群变了，原有集群的已经部署的服务要clear掉
+                    service_name = self.src_item_json.get('name','')
+                    if service_name:
+                        from myapp.utils.py.py_k8s import K8s
+                        k8s_client = K8s(src_project.cluster.get('KUBECONFIG', ''))
+                        service_namespace = conf.get('SERVICE_NAMESPACE')
+                        for namespace in [service_namespace, ]:
+                            for name in [service_name, 'debug-' + service_name, 'test-' + service_name]:
+                                service_external_name = (name + "-external").lower()[:60].strip('-')
+                                k8s_client.delete_deployment(namespace=namespace, name=name)
+                                k8s_client.delete_service(namespace=namespace, name=name)
+                                k8s_client.delete_service(namespace=namespace, name=service_external_name)
+                                k8s_client.delete_istio_ingress(namespace=namespace, name=name)
+                                k8s_client.delete_hpa(namespace=namespace, name=name)
+                                k8s_client.delete_configmap(namespace=namespace, name=name)
+                # 域名后缀如果不一样也要变了
+                if src_project and src_project.cluster['SERVICE_DOMAIN'] != item.project.cluster['SERVICE_DOMAIN']:
+                    item.host=item.host.replace(src_project.cluster['SERVICE_DOMAIN'],item.project.cluster['SERVICE_DOMAIN'])
+            except Exception as e:
+                print(e)
 
     # 事后无法读取到project属性
     def pre_delete(self, item):
@@ -863,6 +903,8 @@ output %s
         else:
             annotations={}
         print('deploy service')
+        # 端口改变才重新部署服务
+
         k8s_client.create_service(
             namespace=namespace,
             name=name,
@@ -913,7 +955,11 @@ output %s
         # 使用当前ip
         if not SERVICE_EXTERNAL_IP:
             ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host # 如果捕获到端口号，要去掉
-            if core.checkip(ip):
+            if ip=='127.0.0.1':
+                host = service.project.cluster.get('HOST','')
+                if not host:
+                    SERVICE_EXTERNAL_IP = [host]
+            elif core.checkip(ip):
                 SERVICE_EXTERNAL_IP=[ip]
 
 
@@ -934,11 +980,37 @@ output %s
             )
 
 
+        # # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
+        # ip和端口形式只定向到生产，因为不能像泛化域名一样随意添加
+        TKE_EXISTED_LBID=''
+        if service.project.expand:
+            TKE_EXISTED_LBID = json.loads(service.project.expand).get('TKE_EXISTED_LBID',"")
+        if not TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = service.project.cluster.get("TKE_EXISTED_LBID",'')
+        if not TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = conf.get('TKE_EXISTED_LBID','')
+
+        if not SERVICE_EXTERNAL_IP and TKE_EXISTED_LBID:
+            TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')[0]
+            service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
+            service_external_name = (service.name + "-external").lower()[:60].strip('-')
+            k8s_client.create_service(
+                namespace=namespace,
+                name=service_external_name,
+                username=service.created_by.username,
+                ports=service_ports,
+                selector=labels,
+                service_type='LoadBalancer',
+                annotations={
+                    "service.kubernetes.io/tke-existed-lbid":TKE_EXISTED_LBID,
+                }
+            )
+
 
         if env=='prod':
             hpas = re.split(',|;', service.hpa)
             regex = re.compile(r"\(.*\)")
-            if not int(regex.sub('', service.resource_gpu)):
+            if float(regex.sub('', service.resource_gpu))<1:
                 for hpa in copy.deepcopy(hpas):
                     if 'gpu' in hpa:
                         hpas.remove(hpa)
@@ -974,6 +1046,7 @@ output %s
         if env=='prod':
             service.model_status = 'online'
         service.deploy_history=service.deploy_history+"\n"+"deploy %s: %s %s"%(env,g.user.username,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        service.deploy_history = '\n'.join(service.deploy_history.split("\n")[-10:])
         db.session.commit()
         if env=="debug":
             time.sleep(2)
@@ -981,7 +1054,7 @@ output %s
             if pods:
                 pod = pods[0]
                 print('deploy debug success')
-                return redirect("/myapp/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
+                return redirect("/k8s/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
 
         # 生产环境才有域名代理灰度的问题
         if env=='prod':
@@ -1030,6 +1103,156 @@ output %s
         return redirect(request.referrer)
 
 
+    # @pysnooper.snoop()
+    def echart_option(self,filters=None):
+        print(filters)
+        global global_all_service_load
+        if not global_all_service_load:
+            global_all_service_load['check_time'] = None
+
+        option=global_all_service_load['data']
+        if not global_all_service_load['check_time'] or (datetime.datetime.now() - global_all_service_load['check_time']).total_seconds()>3600:
+            all_services = db.session.query(InferenceService).filter_by(model_status='online').all()
+
+            from myapp.utils.py.py_prometheus import Prometheus
+            prometheus = Prometheus(conf.get('PROMETHEUS',''))
+            # prometheus = Prometheus('10.101.142.16:8081')
+            all_services_load = prometheus.get_istio_service_metric(namespace='service')
+            services_metrics = []
+            legend=['qps','cpu','memory','gpu']
+            today_time = int(datetime.datetime.strptime(datetime.datetime.now().strftime("%Y-%m-%d"),"%Y-%m-%d").timestamp())
+            time_during = 5 * 60
+            end_point = min(int(datetime.datetime.now().timestamp() - today_time)//time_during, 60*60*24//time_during)
+            start_point = max(end_point - 60, 0)
+
+            # @pysnooper.snoop()
+            def add_metric_data(metric,metric_name,service_name):
+                if metric_name == 'qps':
+                    metric = [[date_value[0], int(float(date_value[1]))] for date_value in metric if datetime.datetime.now().timestamp() > date_value[0] > today_time]
+                if metric_name == 'memory':
+                    metric = [[date_value[0], round(float(date_value[1]) / 1024 / 1024 / 1024, 2)] for date_value in metric if datetime.datetime.now().timestamp() > date_value[0] > today_time]
+                if metric_name == 'cpu' or metric_name == 'gpu':
+                    metric = [[date_value[0], round(float(date_value[1]), 2)] for date_value in metric if datetime.datetime.now().timestamp() > date_value[0] > today_time]
+
+                if metric:
+                    # 将时间戳转化为时间段分箱，按分钟分箱
+
+                    metric_binning = [[0] for x in range(60*60*24//time_during)]  # 每5分钟一个分箱
+                    for date_value in metric:
+                        timestamp, value = date_value[0], date_value[1]
+                        metric_binning[(timestamp-today_time)//time_during].append(value)
+                    metric_binning = [int(sum(x) / len(x)) for x in metric_binning]
+
+                    # metric_binning = [[datetime.datetime.fromtimestamp(today_time+time_during*i+time_during).strftime('%Y-%m-%dT%H:%M:%S.000Z'),metric_binning[i]] for i in range(len(metric_binning)) if i<=end_point]
+                    metric_binning = [[(today_time+time_during*i+time_during)*1000,metric_binning[i]] for i in range(len(metric_binning)) if i<=end_point]
+
+                    services_metrics.append(
+                        {
+                            "name": service_name,
+                            "type": 'line',
+                            "smooth": True,
+                            "showSymbol": False,
+                            "data": metric_binning
+                        }
+                    )
+
+
+            for service in all_services:
+                # qps_metric = all_services_load['qps'].get(service.name,[])
+                # add_metric_data(qps_metric, 'qps',service.name)
+                #
+                # servie_pod_metrics = []
+                # for pod_name in all_services_load['memory']:
+                #     if service.name in pod_name:
+                #         pod_metric = all_services_load['memory'][pod_name]
+                #         servie_pod_metrics = servie_pod_metrics + pod_metric
+                # add_metric_data(servie_pod_metrics, 'memory', service.name)
+                #
+                # servie_pod_metrics = []
+                # for pod_name in all_services_load['cpu']:
+                #     if service.name in pod_name:
+                #         pod_metric = all_services_load['cpu'][pod_name]
+                #         servie_pod_metrics = servie_pod_metrics + pod_metric
+                # add_metric_data(servie_pod_metrics, 'cpu',service.name)
+
+                servie_pod_metrics = []
+                for pod_name in all_services_load['gpu']:
+                    if service.name in pod_name:
+                        pod_metric = all_services_load['gpu'][pod_name]
+                        servie_pod_metrics = servie_pod_metrics+pod_metric
+                add_metric_data(servie_pod_metrics,'gpu',service.created_by.username+":"+service.label)
+
+            # dataZoom: [
+            #     {
+            #         start: {{start_point}},
+            #         end: {{end_point}}
+            #     }
+            # ],
+            option = '''
+            {
+              "title": {
+                "text": '在线服务GPU负载监控'
+              },
+              "tooltip": {
+                "trigger": 'axis',
+                 "position": [10, 10]
+              },
+        
+              "legend": {
+                "data": {{ legend }}
+              },
+               
+              "grid": {
+                "left": '3%',
+                "right": '4%',
+                "bottom": '3%',
+                "containLabel": true
+              },
+              "xAxis": {
+                "type": "time",
+                "min": new Date('{{today}}'),
+                "max": new Date('{{tomorrow}}'),
+                "boundaryGap": false,
+                "timezone" : 'Asia/Shanghai', 
+              },
+              "yAxis": {
+                "type": "value",
+                "boundaryGap": false,
+                "axisLine":{       //y轴
+                  "show":false
+                },
+                "axisTick":{       //y轴刻度线
+                  "show":true
+                },
+                "splitLine": {     //网格线
+                  "show": true,
+                  "color": '#f1f2f6'
+                }
+              },
+              "series": {{services_metric}}
+            }
+    
+            '''
+            # print(services_metrics)
+            rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(option)
+            option = rtemplate.render(
+                legend=legend,
+                services_metric=json.dumps(services_metrics,ensure_ascii=False,indent=4),
+                start_point=start_point,
+                end_point=end_point,
+                today=datetime.datetime.now().strftime('%Y/%m/%d'),
+                tomorrow=(datetime.datetime.now()+datetime.timedelta(days=1)).strftime('%Y/%m/%d'),
+            )
+            # global_all_service_load['check_time']=datetime.datetime.now()
+
+        global_all_service_load['data']=option
+        # print(option)
+        # file = open('myapp/test.txt',mode='w')
+        # file.write(option)
+        # file.close()
+        return option
+
+
 
 class InferenceService_ModelView(InferenceService_ModelView_base,MyappModelView):
     datamodel = SQLAInterface(InferenceService)
@@ -1042,6 +1265,12 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base,MyappModelR
     datamodel = SQLAInterface(InferenceService)
     route_base = '/inferenceservice_modelview/api'
 
+    def add_more_info(self,response,**kwargs):
+        online_services = db.session.query(InferenceService).filter(InferenceService.model_status=='online').filter(InferenceService.resource_gpu!='0').all()
+        if len(online_services)>0:
+            response['echart']=True
+        else:
+            response['echart'] = False
 
     def set_columns_related(self,exist_add_args,response_add_columns):
         exist_service_type = exist_add_args.get('service_type','')

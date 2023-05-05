@@ -5,9 +5,9 @@
 
 ```
 linux
-docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -d mysql:5.7
+docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:5.7
 mac
-docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -v $PWD/mysql:/var/lib/mysql -d mysql:5.7
+docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:5.7
 
 ```
 进入mysql，创建kubeflow数据库
@@ -27,16 +27,16 @@ mysql> flush privileges;
 docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01 -f install/docker/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.04.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2022.12.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2022.09.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.04.01
 ```
 
 ## deploy myapp (docker-compose)

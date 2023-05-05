@@ -60,7 +60,7 @@ class Notebook_ModelView_Base():
     base_order = ('changed_on', 'desc')
     base_filters = [["id", Notebook_Filter, lambda: []]]
     order_columns = ['id']
-    search_columns = ['created_by']
+    search_columns = ['created_by','name']
     add_columns = ['project','name','describe','images','working_dir','volume_mount','resource_memory','resource_cpu','resource_gpu']
     list_columns = ['project','ide_type','name_url','status','describe','resource','renew','reset']
     cols_width={
@@ -188,7 +188,7 @@ class Notebook_ModelView_Base():
 
         item.resource_memory=core.check_resource_memory(item.resource_memory,self.src_item_json.get('resource_memory',None))
         item.resource_cpu = core.check_resource_cpu(item.resource_cpu,self.src_item_json.get('resource_cpu',None))
-
+        item.namespace = json.loads(item.project.expand).get('NOTEBOOK_NAMESPACE', conf.get('NOTEBOOK_NAMESPACE'))
         if 'theia' in item.images or 'vscode' in item.images:
             item.ide_type = 'theia'
         elif 'bigdata' in item.images:
@@ -239,8 +239,7 @@ class Notebook_ModelView_Base():
         db.session.commit()
 
     def post_list(self,items):
-        flash('注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/%s/下'%g.user.username,category='info')
-        # items.sort(key=lambda item:item.created_by.username==g.user.username,reverse=True)
+        flash('注意：个人重要文件本地git保存，notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/%s/下'%g.user.username,category='info')
         return items
 
     # @event_logger.log_this
@@ -281,7 +280,7 @@ class Notebook_ModelView_Base():
 
 
         k8s_client = K8s(notebook.cluster.get('KUBECONFIG',''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE')
+        namespace = notebook.namespace
         SERVICE_EXTERNAL_IP = []
         if notebook.project.expand:
             SERVICE_EXTERNAL_IP = json.loads(notebook.project.expand).get('SERVICE_EXTERNAL_IP', '')
@@ -338,8 +337,14 @@ class Notebook_ModelView_Base():
             "SSH_PORT":str(10000 + 10 * notebook.id+1),
             "PORT1":str(10000 + 10 * notebook.id+2),
             "PORT2":str(10000 + 10 * notebook.id+3),
-
         }
+        notebook_env=[]
+        if notebook.env:
+            notebook_env = [x.strip() for x in notebook.env.split('\n') if x.strip()]
+            notebook_env=[env.split("=") for env in notebook_env if '=' in env]
+            notebook_env = dict(zip([env[0] for env in notebook_env],[env[1] for env in notebook_env]))
+        if notebook_env:
+            env.update(notebook_env)
         if SERVICE_EXTERNAL_IP:
             env["SERVICE_EXTERNAL_IP"]=SERVICE_EXTERNAL_IP[0]
 
@@ -379,8 +384,7 @@ class Notebook_ModelView_Base():
             k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
             time.sleep(1)
 
-
-        host = notebook.project.cluster.get('JUPYTER_DOMAIN',request.host)
+        host = notebook.project.cluster.get('HOST',request.host)
         if not host:
             host=request.host
         if ':' in host:

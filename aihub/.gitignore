@@ -1,4 +1,5 @@
 build
+.idea
 src/cubestudio.egg-info
 deep-learning/*/cubestudio-2022.10.1-py3-none-any.whl
 deep-learning/*/result
@@ -7,4 +8,12 @@ deep-learning/*/result
 /deep-learning/test.py
 /deep-learning/*/deploy.yaml
 /deep-learning/*/upload
+/modelscope/*/upload
+/modelscope/*/result
 /deep-learning/deploy/
+/dist/
+
+/modelscope/*/.mp4
+/modelscope/*/.mp3
+/modelscope/*/result
+/modelscope/*/upload

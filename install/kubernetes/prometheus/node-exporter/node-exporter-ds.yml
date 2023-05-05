@@ -33,9 +33,6 @@ spec:
         - --path.procfs=/host/proc
         - --path.sysfs=/host/sys
         resources:
-          limits:
-            cpu: 102m
-            memory: 180Mi
           requests:
             cpu: 102m
             memory: 180Mi
@@ -56,9 +53,6 @@ spec:
           hostPort: 9100
           name: https
         resources:
-          limits:
-            cpu: 20m
-            memory: 40Mi
           requests:
             cpu: 10m
             memory: 20Mi

@@ -14,6 +14,7 @@ from myapp import app
 from sqlalchemy import Column, Integer, String, ForeignKey
 from flask import Markup
 import datetime
+import pysnooper
 metadata = Model.metadata
 conf = app.config
 from myapp.utils.py import py_k8s
@@ -33,30 +34,33 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     images=Column(String(200), nullable=True,default='')
     ide_type = Column(String(100), default='jupyter')
     working_dir = Column(String(200), default='')  # 挂载
+    env = Column(String(400),default='') # 环境变量
     volume_mount = Column(String(400), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
     node_selector = Column(String(200), default='cpu=true,notebook=true')  # 挂载
     image_pull_policy = Column(Enum('Always', 'IfNotPresent'), nullable=True, default='Always')
     resource_memory = Column(String(100), default='10G')
     resource_cpu = Column(String(100), default='10')
     resource_gpu = Column(String(100), default='0')
-    expand = Column(Text(65536), default='')
+    expand = Column(Text(65536), default='{}')
 
     def __repr__(self):
         return self.name
 
     @property
     def name_url(self):
+        expand = json.loads(self.expand) if self.expand else {}
+        root = expand.get('root','')
+
         if self.ide_type=='theia':
             url = "/notebook/"+self.namespace + "/" + self.name+"/" + "#"+self.mount
         else:
-            url = "/notebook/"+self.namespace + "/" + self.name+"/lab?#"+self.mount
+            if root:
+                url = '/notebook/jupyter/%s/lab/tree/%s' % (self.name,root.lstrip('/'))
+            else:
+                url = "/notebook/"+self.namespace + "/" + self.name+"/lab?#"+self.mount
 
         # url= url + "#"+self.mount
-        JUPYTER_DOMAIN = self.project.cluster.get('JUPYTER_DOMAIN',request.host)
-        if JUPYTER_DOMAIN:
-            host = "http://"+JUPYTER_DOMAIN
-        else:
-            host = request.host_url.strip('/') # 使用当前域名打开
+        host = "http://"+self.project.cluster.get('HOST',request.host)
 
         # 对于有边缘节点，直接使用边缘集群的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
@@ -98,7 +102,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
             status = pods[0]['status']
             if g.user.is_admin():
-                k8s_dash_url = self.cluster.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
+                k8s_dash_url = "http://"+self.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
 
                 url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
                 return url

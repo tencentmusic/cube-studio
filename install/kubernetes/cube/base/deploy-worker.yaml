@@ -6,7 +6,6 @@ metadata:
   namespace: infra
   labels:
     app: kubeflow-dashboard-worker
-
 spec:
   replicas: 1
   selector:
@@ -42,12 +41,15 @@ spec:
         - name: kubernetes-config
           configMap:
             name: kubernetes-config
+        - name: infra-kubeflow
+          persistentVolumeClaim:
+            claimName: infra-kubeflow
       serviceAccount: kubeflow-dashboard
       containers:
         - name: kubeflow-dashboard-worker
           image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always
-          command: ["bash","-c",'celery worker --app=myapp.tasks.celery_app:celery_app --loglevel=info --pool=prefork -Ofair -c 20']
+          command: ["bash","-c",'celery --app=myapp.tasks.celery_app:celery_app worker --loglevel=info --pool=prefork -Ofair -c 20 -n worker@%h']
           resources:       
             limits:
               cpu: 6
@@ -92,4 +94,13 @@ spec:
               mountPath: /etc/localtime
             - name: kubernetes-config
               mountPath: /home/myapp/kubeconfig
+            - name: infra-kubeflow
+              mountPath: /data/k8s/kubeflow/
 
+#          livenessProbe:
+#            failureThreshold: 1
+#            exec:
+#              command: ["bash","-c","hour=`date +%H`; if [ $hour -eq 03 ]; then exit 1; fi"]
+#            initialDelaySeconds: 3600
+#            periodSeconds: 3600
+#            timeoutSeconds: 3600

@@ -168,9 +168,6 @@ IMG_UPLOAD_URL = "/static/file/uploads/"
 # Setup image size default is (300, 200, True)
 # IMG_SIZE = (300, 200, True)
 
-CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24  # cache默认超时是24小时，一天才过期
-CACHE_CONFIG = {"CACHE_TYPE": "null"}    # 不使用缓存
-
 # CORS Options
 ENABLE_CORS = True
 CORS_OPTIONS = {"supports_credentials":True}
@@ -246,6 +243,9 @@ MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")
 # not the production version of the site.
 WARNING_MSG = None
 
+from celery.schedules import crontab
+from werkzeug.contrib.cache import RedisCache
+
 # 自动添加到响应头的配置
 HTTP_HEADERS = {
     "Access-Control-Allow-Origin":"*",
@@ -285,8 +285,6 @@ SMTP_PORT = 25
 SMTP_PASSWORD = ""
 SMTP_MAIL_FROM = ""
 
-if not CACHE_DEFAULT_TIMEOUT:
-    CACHE_DEFAULT_TIMEOUT = CACHE_CONFIG.get("CACHE_DEFAULT_TIMEOUT")
 
 # Whether to bump the logging level to ERROR on the flask_appbuilder package
 # Set to False if/when debugging FAB related issues like
@@ -449,6 +447,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS=False
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'admin')   # default must set None
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
+SOCKETIO_MESSAGE_QUEUE = 'redis://:%s@%s:%s/2'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))
 
 # 数据库配置地址
 SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')
@@ -456,91 +455,124 @@ SQLALCHEMY_BINDS = {}
 from celery.schedules import crontab
 from werkzeug.contrib.cache import RedisCache
 
+
+CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24  # cache默认超时是24小时，一天才过期
+
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'redis', # 使用 Redis
+    'CACHE_REDIS_HOST': REDIS_HOST, # 配置域名
+    'CACHE_REDIS_PORT': int(REDIS_PORT), # 配置端口号
+    'CACHE_REDIS_URL':'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
+}
+
+
 RESULTS_BACKEND = RedisCache(
     host=REDIS_HOST, port=int(REDIS_PORT), key_prefix='myapp_results',password=REDIS_PASSWORD)
 
 class CeleryConfig(object):
     # 任务队列
-    BROKER_URL =  'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
+    broker_url =  'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
     # celery_task的定义模块
-    CELERY_IMPORTS = (
+    imports = (
         'myapp.tasks',
     )
     # 结果存储
-    CELERY_RESULT_BACKEND = 'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
-    CELERYD_LOG_LEVEL = 'DEBUG'
+    result_backend = 'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
+    worker_redirect_stdouts_level = 'DEBUG'
     # celery worker每次去redis取任务的数量
-    CELERYD_PREFETCH_MULTIPLIER = 10
+    worker_prefetch_multiplier = 10
     # 每个worker执行了多少次任务后就会死掉，建议数量大一些
-    # CELERYD_MAX_TASKS_PER_CHILD = 200
+    worker_max_tasks_per_child = 12000
     # celery任务执行结果的超时时间
-    # CELERY_TASK_RESULT_EXPIRES = 1200
+    result_expires = 3600
     # 单个任务的运行时间限制，否则会被杀死
-    # CELERYD_TASK_TIME_LIMIT = 60
-    # 任务发送完成是否需要确认，对性能会稍有影响
-    CELERY_ACKS_LATE = True
-    CELERY_SEND_TASK_SENT_EVENT = True
+    # task_time_limit = 600
+    # 单个任务的运行时间限制，会报错，可以捕获。
+    # task_soft_time_limit=3600
+    # 任务完成前还是完成后进行确认
+    task_acks_late = True
+    task_send_sent_event = True
     # celery worker的并发数，默认是服务器的内核数目, 也是命令行 - c参数指定的数目
-    # CELERYD_CONCURRENCY = 4
-    CELERY_TIMEZONE = 'Asia/Shanghai'
-    CELERY_ENABLE_UTC = False
+    # worker_concurrency = 4
+    timezone = 'Asia/Shanghai'
+    enable_utc = False
+    # 任务失败或者超时也确认
+    task_acks_on_failure_or_timeout = True
+    # worker 将不会存储任务状态并返回此任务的值
+    task_ignore_result = True
 
     # 任务的限制，key是celery_task的name，值是限制配置
-    CELERY_ANNOTATIONS = {
+    task_annotations = {
         # 删除历史workflow，以及相关任务
         'task.delete_workflow': {
             'rate_limit': '1/h',
-            # 'time_limit': 1200,   # 就是 hard_time_limit ， 不可以catch
-            'soft_time_limit': 1200,  # 运行时长限制soft_time_limit 可以内catch
-            'ignore_result': True,
+            'soft_time_limit': 600,  # 运行时长限制soft_time_limit 可以内catch
+            "expires": 3600,   # 上一次的直接跳过
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         },
         # 检查运行定时pipeline
-        'task.run_workflow': {
-            'rate_limit': '1/s',
-            # 'time_limit': 1,
-            'soft_time_limit': 600,   # 只在 prefork pool 里支持
-            'ignore_result': True,
+        'task.make_timerun_config': {
+            'rate_limit': '1/m',
+            'soft_time_limit': 300,
+            "expires": 300,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         },
-        # 检查在线构架镜像的docker pod
+        # 异步任务，检查在线构建镜像的docker pod
         'task.check_docker_commit': {
             'rate_limit': '1/s',
-            'ignore_result': True,
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         },
 		# 异步升级服务
         'task.upgrade_service': {
             'rate_limit': '1/s',
-            'ignore_result': True,
+            'soft_time_limit': 3600,
+            "expires": 3600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         },
 		# 上传workflow信息
         'task.upload_workflow': {
             'rate_limit': '10/s',
-            'ignore_result': True,
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
+		},
+        'task.check_pod_terminating':{
+            'rate_limit': '1/s',
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         }
+
+
     }
 
-
     # 定时任务的配置项，key为celery_task的name，值是调度配置
-    CELERYBEAT_SCHEDULE = {
+    beat_schedule = {
         'task_delete_workflow': {
             'task': 'task.delete_workflow',   # 定时删除旧的workflow
-            # 'schedule': 10.0,
             'schedule': crontab(minute='1'),
         },
         'task_make_timerun_config': {
             'task': 'task.make_timerun_config',  # 定时产生定时任务的yaml信息
-            # 'schedule': 10.0,     #10s中执行一次
             'schedule': crontab(minute='*/5'),
         },
         'task_delete_old_data': {
             'task': 'task.delete_old_data',   # 定时删除旧数据
-            # 'schedule': 100.0,     #10s中执行一次
             'schedule': crontab(minute='1', hour='1'),
         },
-        'task_delete_notebook': {
-            'task': 'task.delete_notebook',  # 定时停止notebook
-            # 'schedule': 10.0,
-            'schedule': crontab(minute='1', hour='4'),
-        },
+        # 'task_delete_notebook': {
+        #     'task': 'task.delete_notebook',  # 定时停止notebook
+        #     # 'schedule': 10.0,
+        #     'schedule': crontab(minute='1', hour='4'),
+        # },
         # 'task_push_workspace_size': {
         #     'task': 'task.push_workspace_size',   # 定时推送用户文件大小
         #     # 'schedule': 10.0,
@@ -557,36 +589,30 @@ class CeleryConfig(object):
         },
         'task_watch_gpu': {
             'task': 'task.watch_gpu',   # 定时推送gpu的使用情况
-            # 'schedule': 10.0,
             'schedule': crontab(minute='10',hour='8-23/2'),
         },
-        'task_adjust_node_resource': {
+		'task_adjust_node_resource': {
             'task': 'task.adjust_node_resource',  # 定时在多项目组间进行资源均衡
-            # 'schedule': 10.0,
             'schedule': crontab(minute='*/10'),
         },
-        'task_update_aihub': {
-            'task': 'task.update_aihub',  # 更新aihub
-            # 'schedule': 10.0,
-            'schedule': crontab(minute='30', hour='4'),
+		'task_watch_pod_utilization': {
+            'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
+            'schedule': crontab(minute='10',hour='11'),
         },
+		"task_check_pod_terminating": {
+            "task": "task.check_pod_terminating",
+            'schedule': crontab(minute='*/10'),
+        }
     }
 
  # 帮助文档地址，显示在web导航栏
-BUG_REPORT_URL = 'https://github.com/tencentmusic/cube-studio/issues/new'
 DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/wiki'
+BUG_REPORT_URL = 'https://github.com/tencentmusic/cube-studio/issues/new'
+
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
 
 FAB_API_MAX_PAGE_SIZE=1000    # 最大翻页数目，不设置的话就会是20
-CACHE_DEFAULT_TIMEOUT = 10*60  # 缓存默认过期时间，10分钟才过期
-
-# CACHE_CONFIG = {
-#     'CACHE_TYPE': 'redis', # 使用 Redis
-#     'CACHE_REDIS_HOST': REDIS_HOST, # 配置域名
-#     'CACHE_REDIS_PORT': int(REDIS_PORT), # 配置端口号
-#     'CACHE_REDIS_URL':'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
-# }
 
 CELERY_CONFIG = CeleryConfig
 
@@ -637,20 +663,6 @@ CRD_INFO={
         'kind':'PyTorchJob',
         "plural": "pytorchjobs",
         "timeout": 60 * 60 * 24 * 2
-    },
-    "notebook": {
-        "group": "kubeflow.org",
-        "version": "v1",
-        "plural": "notebooks",
-        'kind':'Notebook',
-        "timeout": 60 * 60 * 24 * 2
-    },
-    "inferenceservice": {
-        "group": "serving.kserve.io",
-        "version": "v1beta1",
-        "plural": "inferenceservices",
-        'kind':'InferenceService',
-        "timeout": 60 * 60 * 24 * 1
     },
     "virtualservice": {
         "group": "networking.istio.io",
@@ -706,19 +718,18 @@ GLOBAL_ENV={
     "KFJ_ARCHIVE_BASE_PATH":"/archives",
     "KFJ_PIPELINE_NAME":"{{pipeline_name}}",
     "KFJ_NAMESPACE":"pipeline",
-    "KFJ_GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
-    "GPU_TYPE": os.environ.get("GPU_TYPE", "NVIDIA"),
+    "KFJ_GPU_TYPE": 'NVIDIA',
+    "GPU_TYPE": 'NVIDIA',
     "KFJ_GPU_MEM_MIN":"13G",
     "KFJ_GPU_MEM_MAX":"13G",
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
 }
 
 # 各种环节使用的gpu驱动类型
-GPU_TYPE = os.environ.get("GPU_TYPE", "NVIDIA")
+GPU_DRIVE_TYPE = "NVIDIA"
 
-TASK_GPU_TYPE='NVIDIA'
-SERVICE_GPU_TYPE='NVIDIA'
-NOTEBOOK_GPU_TYPE='NVIDIA'
+# vgpu的类型方式
+VGPU_DRIVE_TYPE = "TENCENT"   # tke gpumanager的方式
 
 # 各类model list界面的帮助文档
 HELP_URL={
@@ -751,12 +762,6 @@ SERVICE_NAMESPACE = 'service'
 # 服务链路追踪地址
 SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
-# automl任务默认镜像
-AUTOML_JOB_DEFAULT_IMAGE='ccr.ccs.tencentyun.com/cube-studio/automl'
-# automl的tfjob任务默认镜像
-AUTOML_TFJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0'
-# automl的pytorchjob任务默认镜像
-AUTOML_PYTORCHJOB_DEFAULT_IMAGE = 'gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
 # 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
@@ -771,6 +776,8 @@ NOTEBOOK_IMAGES=[
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base', 'vscode（gpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base', 'jupyter（cpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-gpu-base','jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04', 'jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04-cuda11.8.0-cudnn8','jupyter（gpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-bigdata', 'jupyter（bigdata）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning', 'jupyter（machinelearning）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-deeplearning', 'jupyter（deeplearning）'],
@@ -793,17 +800,23 @@ WORKSPACE_HOST_PATH = '/data/k8s/kubeflow/pipeline/workspace'
 ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 # prometheus地址
 PROMETHEUS = 'prometheus-k8s.monitoring:9090'
-# kfp地址
-KFP_HOST = "http://ml-pipeline.kubeflow:8888"
 # nni默认镜像
 NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
 
+# 数据集的存储地址
+DATASET_SAVEPATH = '/dataset/'
+STORE_TYPE="cos"
+STORE_CONFIG = {
+    "appid": "xx",
+    "secret_id": "xx",
+    "secret_key": "xx",
+    "region": "ap-nanjing",
+    "bucket_name": "xx",
+    "root": "/dataset",
+    "download_host":"https://xx.cos.ap-nanjing.myqcloud.com/"
+}
 
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
-K8S_DASHBOARD_PIPELINE = '/k8s/dashboard/pipeline/'
-
-PIPELINE_URL = '/pipeline/#/'
-
 
 
 # 多行分割内网特定host
@@ -817,11 +830,6 @@ SERVICE_EXTERNAL_IP=[]
 JSON_SORT_KEYS=False
 # 链接菜单
 ALL_LINKS=[
-    {
-        "label":"Minio",
-        "name":"minio",
-        "url":"/minio/public/"
-    },
     {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
@@ -860,7 +868,7 @@ INFERNENCE_PORTS={
     "tfserving":'8501',
     "torch-server":"8080,8081",
     "onnxruntime":"8001",
-    "triton-server":"8000"
+    "triton-server":"8000,8002"
 }
 INFERNENCE_METRICS={
     "tfserving":'8501:/metrics',
@@ -884,34 +892,46 @@ GRAFANA_SERVICE_PATH="/grafana/d/istio-service/istio-service?var-namespace=servi
 GRAFANA_CLUSTER_PATH="/grafana/d/all-node/all-node?var-org="
 # 节点资源监控地址
 GRAFANA_NODE_PATH="/grafana/d/node/node?var-node="
-
+# GPU资源监控地址
+GRAFANA_GPU_PATH="/grafana/d/dcgm/gpu"
 
 MODEL_URLS = {
-    "notebook": "/frontend/dev/dev_online/notebook",
-    "docker": "/frontend/dev/images/docker",
+    "sqllab":"/frontend/data/datasearch/data_search",
+    "metadata_table":"/frontend/data/metadata/metadata_table",
+    "data_blood":"/frontend/data/metadata/data_blood",
+    "metadata_metric":"/frontend/data/metadata/metadata_metric",
+    "dimension": "/frontend/data/metadata/metadata_dimension",
+    "feast":"/frontend/data/feast/feast",
+    "dataset":"/frontend/data/media_data/dataset",
+    "label_platform":"/frontend/data/media_data/label_platform",
+
     "repository": "/frontend/dev/images/docker_repository",
+    "docker": "/frontend/dev/images/docker",
     "template_images": "/frontend/dev/images/template_images",
+    "notebook": "/frontend/dev/dev_online/notebook",
+    "etl_pipeline":"/frontend/dev/data_pipeline/etl_pipeline",
+    "etl_task":"/frontend/dev/data_pipeline/task_manager",
+    "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
+
     "job_template": "/frontend/train/train_template/job_template",
     "pipeline": "/frontend/train/train_task/pipeline",
     "runhistory": "/frontend/train/train_task/runhistory",
     "workflow": "/frontend/train/train_task/workflow",
     "nni": "/frontend/train/train_hyperparameter/nni",
+
+    "total_resource": "/frontend/service/total_resource",
     "service": "/frontend/service/k8s_service",
-    "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
     "train_model": "/frontend/service/inferenceservice/model_manager",
-    "metadata_metric": "/frontend/dataleap/metadata/metadata_metric",
-    "dimension": "/frontend/dataleap/metadata/metadata_dimension",
-    "metadata_table": "/frontend/dataleap/metadata/metadata_table",
-    "etl_pipeline":"/frontend/dev/data_pipeline/etl_pipeline",
-    "etl_task":"/frontend/dev/data_pipeline/task_manager",
-    "etl_task_instance":"/frontend/dev/data_pipeline/instance_manager",
-    "dataset":"/frontend/dataleap/media_data/dataset"
+    "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
+
+	"model_market_visual": "/frontend/ai_hub/model_market/model_visual",
+    "model_market_voice": "/frontend/ai_hub/model_market/model_voice",
+    "model_market_language": "/frontend/ai_hub/model_market/model_language",
 }
  # 可以跨域分享cookie的子域名，例如.local.com
 COOKIE_DOMAIN = ''
-JUPYTER_DOMAIN="kubeflow.local.com"
-NNI_DOMAIN='kubeflow.local.com'
 SERVICE_DOMAIN='service.local.com'
+
 
 # 所有训练集群的信息
 CLUSTERS={
@@ -919,13 +939,7 @@ CLUSTERS={
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        "K8S_DASHBOARD_CLUSTER":'/k8s/dashboard/cluster/',
-        "KFP_HOST": 'http://ml-pipeline.kubeflow:8888',
-        "PIPELINE_URL": '/pipeline/#/',
-        # "JUPYTER_DOMAIN":"kubeflow.local.com",   # 如果没有域名就用*   有域名就配置成 HOST
-        # "NNI_DOMAIN":'kubeflow.local.com'    # 如果没有域名就用*   有域名就配置成 HOST
-        "SERVICE_DOMAIN": 'service.local.com',
-        "GRAFANA_HOST": ''
+        # "SERVICE_DOMAIN": 'service.local.com',
     }
 }
 
