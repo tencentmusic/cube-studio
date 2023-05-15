@@ -28,6 +28,6 @@ spec:     # 定义pv属性
   hostPath:
     path: /data/k8s/monitoring/grafana   # /mnt/ceph_fuse/k8s/monitoring/grafana
 
-  persistentVolumeReclaimPolicy: Recycle  
+  persistentVolumeReclaimPolicy: Retain
 
 
