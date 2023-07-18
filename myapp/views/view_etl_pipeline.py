@@ -468,7 +468,7 @@ class ETL_Pipeline_ModelView_Base():
 
         # db.session.commit()
         print(etl_pipeline_id)
-        url = '/static/appbuilder/visonPlus/index.html?pipeline_id=%s'%etl_pipeline_id  # 前后端集成完毕，这里需要修改掉
+        url = '/static/appbuilder/visionPlus/index.html?pipeline_id=%s'%etl_pipeline_id  # 前后端集成完毕，这里需要修改掉
         return redirect('/frontend/showOutLink?url=%s' % urllib.parse.quote(url, safe=""))
         # 返回模板
         # return self.render_template('link.html', data=data)

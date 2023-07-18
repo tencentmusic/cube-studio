@@ -1003,7 +1003,7 @@ class Pipeline_ModelView_Base():
 
         db.session.commit()
         print(pipeline_id)
-        url = '/static/appbuilder/vison/index.html?pipeline_id=%s'%pipeline_id  # 前后端集成完毕，这里需要修改掉
+        url = '/static/appbuilder/vision/index.html?pipeline_id=%s'%pipeline_id  # 前后端集成完毕，这里需要修改掉
         return redirect('/frontend/showOutLink?url=%s'%urllib.parse.quote(url, safe=""))
         # 返回模板
         # return self.render_template('link.html', data=data)
