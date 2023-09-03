@@ -220,7 +220,7 @@ const EditorBody: React.FC = () => {
   useEffect(() => {
     if (Object.keys(pipelineInfo).length) {
       api
-        .getTemplateCommandConfig()
+        .getTemplateCommandConfig(pipelineId)
         .then((res: any) => {
           console.log('job_template_modelview', res);
           if (res?.status === 0 && res?.message === 'success') {
