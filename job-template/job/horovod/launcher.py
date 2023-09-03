@@ -62,7 +62,7 @@ CRD_INFO={
 }
 
 def default_job_name():
-    name = "mpijob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
+    name = "horovod-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
     return name[0:54]
 
 # @pysnooper.snoop()
