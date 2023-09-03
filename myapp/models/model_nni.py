@@ -22,7 +22,7 @@ conf = app.config
 class NNI(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'nni'
     id = Column(Integer, primary_key=True)
-    job_type = Column(Enum('Job'),nullable=True,default='Job')
+    job_type = Column(Enum('Job',name='job_type'),nullable=True,default='Job')
     project_id = Column(Integer, ForeignKey('project.id'), nullable=False)  # 定义外键
     project = relationship(
         "Project", foreign_keys=[project_id]
@@ -31,10 +31,10 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
     namespace = Column(String(200), nullable=True,default='automl')
     describe = Column(Text)
     parallel_trial_count = Column(Integer,default=3)
-    maxExecDuration =  Column(Integer,default=3600)
+    maxExecDuration = Column(Integer,default=3600)
     max_trial_count = Column(Integer,default=12)
     max_failed_trial_count = Column(Integer,default=3)
-    objective_type = Column(Enum('maximize','minimize'),nullable=False,default='maximize')
+    objective_type = Column(Enum('maximize','minimize',name='objective_type'),nullable=False,default='maximize')
     objective_goal = Column(Float, nullable=False,default=0.99)
     objective_metric_name = Column(String(200), nullable=False,default='accuracy')
     objective_additional_metric_names = Column(String(200),default='')   # 逗号分隔
@@ -47,9 +47,9 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
     job_worker_image = Column(String(200),nullable=True,default='')
     job_worker_command = Column(String(200), nullable=True, default='')
     working_dir = Column(String(200), default='')  # 挂载
-    volume_mount = Column(String(100), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
+    volume_mount = Column(String(2000), default='kubeflow-user-workspace(pvc):/mnt')  # 挂载
     node_selector = Column(String(100), default='cpu=true,train=true')  # 挂载
-    image_pull_policy = Column(Enum('Always', 'IfNotPresent'), nullable=False, default='Always')
+    image_pull_policy = Column(Enum('Always', 'IfNotPresent',name='image_pull_policy'), nullable=False, default='Always')
     resource_memory = Column(String(100), default='1G')
     resource_cpu = Column(String(100), default='1')
     resource_gpu = Column(String(100), default='0')
@@ -63,11 +63,12 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def run(self):
-        return Markup(f'<a href="/nni_modelview/run/{self.id}">运行</a>')
+        ops_html = f'<a href="/nni_modelview/run/{self.id}">运行</a> | <a target=_blank href="/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("AUTOML_NAMESPACE")}/{self.name}">容器</a> |  <a target=_blank href="/nni_modelview/log/{self.id}">日志</a> | <a href="/nni_modelview/stop/{self.id}">清理</a> '
+        return Markup(ops_html)
 
-    @renders('parameters')
-    def parameters_html(self):
-        return Markup('<pre><code>' + self.parameters + '</code></pre>')
+    # @renders('parameters')
+    # def parameters_html(self):
+    #     return Markup('<pre><code>' + self.parameters + '</code></pre>')
 
 
 # '''
@@ -85,18 +86,17 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def describe_url(self):
-        host = "http://"+self.project.cluster.get('HOST',request.host)
-        return Markup(f'<a target=_blank href="{host}/nni/{self.name}/">{self.describe}</a>')
+        return Markup(f'<a target=_blank href="/nni_modelview/api/web/{self.id}">{self.describe}</a>')
 
 
-    @renders('trial_spec')
-    def trial_spec_html(self):
-        return Markup('<pre><code>' + self.trial_spec + '</code></pre>')
+    # @renders('trial_spec')
+    # def trial_spec_html(self):
+    #     return Markup('<pre><code>' + self.trial_spec + '</code></pre>')
 
 
-    @renders('experiment')
-    def experiment_html(self):
-        return Markup('<pre><code>' + self.experiment + '</code></pre>')
+    # @renders('experiment')
+    # def experiment_html(self):
+    #     return Markup('<pre><code>' + self.experiment + '</code></pre>')
 
     @property
     def log(self):

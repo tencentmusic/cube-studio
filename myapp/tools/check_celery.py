@@ -1,9 +1,10 @@
 import sys
 import os
-import sys,os
+import sys, os
+
 dir_common = os.path.split(os.path.realpath(__file__))[0] + '/../'
 print(dir_common)
-sys.path.append(dir_common)   # 将根目录添加到系统目录,才能正常引用common文件夹
+sys.path.append(dir_common)  # 将根目录添加到系统目录,才能正常引用common文件夹
 
 import datetime
 import redis
@@ -14,6 +15,7 @@ import pysnooper
 import json
 import requests
 from project import push_admin
+
 
 @pysnooper.snoop()
 def check_push():

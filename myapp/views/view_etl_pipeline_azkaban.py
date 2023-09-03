@@ -5,10 +5,10 @@ conf = app.config
 logging = app.logger
 
 
-# todo： airflow的运行，删除，日志查询
-class AIRFLOW_ETL_PIPELINE():
+# todo： azkaban的运行，删除，日志查询
+class AZKABAN_ETL_PIPELINE():
 
-    def __init__(self, pipeline, host='http://airflow.oa.com'):
+    def __init__(self, pipeline, host='http://azkaban.oa.com'):
         self.pipeline = pipeline
         self.host = host
 

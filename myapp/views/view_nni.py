@@ -4,19 +4,20 @@ from flask_babel import lazy_gettext as _
 from myapp.models.model_nni import NNI
 from myapp.models.model_job import Repository
 from flask_appbuilder.actions import action
-
+import pysnooper
 from flask_babel import lazy_gettext
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
-from myapp import app, appbuilder,db
+from myapp import app, appbuilder, db
 import os
 from wtforms.validators import DataRequired, Length, Regexp
 from sqlalchemy import or_
-from wtforms import IntegerField, SelectField, StringField,FloatField
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget,Select2Widget
+from wtforms import IntegerField, SelectField, StringField, FloatField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget, Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget, MyCodeArea, MySelectMultipleField
 from myapp.views.view_team import Project_Join_Filter
 import copy
+from myapp.utils.py.py_k8s import K8s
 from flask import (
     flash,
     g,
@@ -28,7 +29,7 @@ from .baseApi import (
     MyappModelRestApi
 )
 from myapp import security_manager
-
+import time
 from .base import (
     MyappFilter,
     MyappModelView,
@@ -36,9 +37,8 @@ from .base import (
 from flask_appbuilder import expose
 import datetime, json
 
-
-
 conf = app.config
+
 
 class NNI_Filter(MyappFilter):
     # @pysnooper.snoop()
@@ -61,27 +61,27 @@ class NNI_Filter(MyappFilter):
 class NNI_ModelView_Base():
     datamodel = SQLAInterface(NNI)
     conv = GeneralModelConverter(datamodel)
-    label_title='nni超参搜索'
-    check_redirect_list_url = conf.get('MODEL_URLS',{}).get('nni','')
-
+    label_title = 'nni超参搜索'
+    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('nni', '')
 
     base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('id', 'desc')
     base_filters = [["id", NNI_Filter, lambda: []]]
     order_columns = ['id']
-    list_columns = ['project','describe_url','job_type','creator','modified','run','log']
-    show_columns = ['created_by','changed_by','created_on','changed_on','job_type','name','namespace','describe',
-                    'parallel_trial_count','max_trial_count','objective_type',
-                    'objective_goal','objective_metric_name','objective_additional_metric_names','algorithm_name',
-                    'algorithm_setting','parameters_html','trial_spec_html',
-                    'working_dir','volume_mount','node_selector','image_pull_policy','resource_memory','resource_cpu','resource_gpu',
-                    'experiment_html','alert_status']
+    list_columns = ['project', 'describe_url', 'job_type', 'creator', 'modified', 'run', 'log']
+    show_columns = ['project','created_by', 'changed_by', 'created_on', 'changed_on', 'job_type', 'name', 'namespace', 'describe',
+                    'parallel_trial_count', 'max_trial_count', 'objective_type','parameters',
+                    'objective_goal', 'objective_metric_name', 'objective_additional_metric_names', 'algorithm_name',
+                    'algorithm_setting', 'trial_spec','job_worker_image','job_worker_command',
+                    'working_dir', 'volume_mount', 'node_selector', 'image_pull_policy', 'resource_memory',
+                    'resource_cpu', 'resource_gpu',
+                    'experiment', 'alert_status']
 
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
-    edit_form_extra_fields={}
+    edit_form_extra_fields = {}
 
     edit_form_extra_fields["alert_status"] = MySelectMultipleField(
         label=_(datamodel.obj.lab('alert_status')),
@@ -164,20 +164,20 @@ class NNI_ModelView_Base():
     )
 
     algorithm_name_choices = {
-        'TPE':"TPE",
-        'Random':"随机搜索",
-        "Anneal":"退火算法",
-        "Evolution":"进化算法",
-        "SMAC":"SMAC",
+        'TPE': "TPE",
+        'Random': "随机搜索",
+        "Anneal": "退火算法",
+        "Evolution": "进化算法",
+        "SMAC": "SMAC",
         "BatchTuner": "批量调参器",
-        "GridSearch":"网格搜索",
-        "Hyperband":"Hyperband",
-        "NetworkMorphism":"Network Morphism",
-        "MetisTuner":"Metis Tuner",
-        "BOHB":"BOHB Advisor",
+        "GridSearch": "网格搜索",
+        "Hyperband": "Hyperband",
+        "NetworkMorphism": "Network Morphism",
+        "MetisTuner": "Metis Tuner",
+        "BOHB": "BOHB Advisor",
         "GPTuner": "GP Tuner",
         "PPOTuner": "PPO Tuner",
-        "PBTTuner":"PBT Tuner"
+        "PBTTuner": "PBT Tuner"
     }
 
     algorithm_name_choices = list(algorithm_name_choices.items())
@@ -277,38 +277,35 @@ class NNI_ModelView_Base():
 
         self.edit_form_extra_fields['job_worker_image'] = StringField(
             _(self.datamodel.obj.lab('job_worker_image')),
-            default=json.loads(nni.job_json).get('job_worker_image',conf.get('NNI_JOB_DEFAULT_IMAGE','')) if nni and nni.job_json else conf.get('NNI_JOB_DEFAULT_IMAGE',''),
+            default=conf.get('NNI_IMAGES',''),
             description='工作节点镜像',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
         self.edit_form_extra_fields['job_worker_command'] = StringField(
             _(self.datamodel.obj.lab('job_worker_command')),
-            default=json.loads(nni.job_json).get('job_worker_command','python xx.py') if nni and nni.job_json else 'python xx.py',
+            default='python xx.py',
             description='工作节点启动命令',
             widget=MyBS3TextAreaFieldWidget(),
             validators=[DataRequired()]
         )
 
-
-        self.edit_columns = ['project','name','describe','parallel_trial_count','max_trial_count',
-                          'objective_type','objective_goal','objective_metric_name','objective_additional_metric_names',
-                          'algorithm_name','algorithm_setting','parameters']
-        self.edit_fieldsets=[(
+        self.edit_columns = ['project', 'name', 'describe', 'parallel_trial_count', 'max_trial_count',
+                             'objective_type', 'objective_goal', 'objective_metric_name',
+                             'objective_additional_metric_names',
+                             'algorithm_name', 'algorithm_setting', 'parameters']
+        self.edit_fieldsets = [(
             lazy_gettext('common'),
-            {"fields":  copy.deepcopy(self.edit_columns), "expanded": True},
+            {"fields": copy.deepcopy(self.edit_columns), "expanded": True},
         )]
 
-
-
-        task_column=['job_worker_image','working_dir','job_worker_command','resource_memory','resource_cpu']
+        task_column = ['job_worker_image', 'working_dir', 'job_worker_command', 'resource_memory', 'resource_cpu']
         self.edit_fieldsets.append((
             lazy_gettext('task args'),
             {"fields": task_column, "expanded": True},
         ))
         for column in task_column:
             self.edit_columns.append(column)
-
 
         self.edit_fieldsets.append((
             lazy_gettext('run experiment'),
@@ -319,12 +316,10 @@ class NNI_ModelView_Base():
 
         self.add_form_extra_fields = self.edit_form_extra_fields
         self.add_fieldsets = self.edit_fieldsets
-        self.add_columns=self.edit_columns
+        self.add_columns = self.edit_columns
 
-
-
-    pre_add_web=set_column
-    pre_update_web=set_column
+    pre_add_web = set_column
+    pre_update_web = set_column
 
     # 处理form请求
     def process_form(self, form, is_created):
@@ -389,13 +384,12 @@ class NNI_ModelView_Base():
                            selector=labels
                            )
 
-
-
-        host = nni.project.cluster.get('HOST',request.host)
+        # 创建vs
+        host = nni.project.cluster.get('HOST', request.host)
         if not host:
-            host=request.host
+            host = request.host
         if ':' in host:
-            host = host[:host.rindex(':')]   # 如果捕获到端口号，要去掉
+            host = host[:host.rindex(':')]  # 如果捕获到端口号，要去掉
         vs_json = {
             "apiVersion": "networking.istio.io/v1alpha3",
             "kind": "VirtualService",
@@ -415,7 +409,7 @@ class NNI_ModelView_Base():
                         "match": [
                             {
                                 "uri": {
-                                    "prefix": "/nni/%s//"%nni.name
+                                    "prefix": "/nni/%s//" % nni.name
                                 }
                             },
                             {
@@ -425,7 +419,7 @@ class NNI_ModelView_Base():
                             }
                         ],
                         "rewrite": {
-                            "uri":  "/nni/%s/"%nni.name
+                            "uri": "/nni/%s/" % nni.name
                         },
                         "route": [
                             {
@@ -442,12 +436,17 @@ class NNI_ModelView_Base():
                 ]
             }
         }
-        crd_info=conf.get('CRD_INFO')['virtualservice']
-        k8s_client.delete_istio_ingress(namespace=namespace,name=nni.name)
-
+        crd_info = conf.get('CRD_INFO')['virtualservice']
+        k8s_client.delete_istio_ingress(namespace=namespace, name=nni.name)
 
         k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=vs_json)
 
+        # 删除network NetworkPolicy
+        try:
+            # time.sleep(2)
+            k8s_client.NetworkingV1Api.delete_namespaced_network_policy(namespace=namespace,name=nni.name)
+        except Exception as e:
+            pass
 
     # 生成实验
     # @pysnooper.snoop()
@@ -642,25 +641,22 @@ frameworkcontrollerConfig:
     def pre_add(self, item):
 
         if item.job_type is None:
-            item.job_type='Job'
+            item.job_type = 'Job'
         #     raise MyappException("Job type is mandatory")
 
         if not item.volume_mount:
             item.volume_mount = item.project.volume_mount
 
         core.validate_json(item.parameters)
-        item.parameters = self.validate_parameters(item.parameters,item.algorithm_name)
+        item.parameters = self.validate_parameters(item.parameters, item.algorithm_name)
 
         item.resource_memory=core.check_resource_memory(item.resource_memory,self.src_item_json.get('resource_memory',None) if self.src_item_json else None)
         item.resource_cpu = core.check_resource_cpu(item.resource_cpu,self.src_item_json.get('resource_cpu',None) if self.src_item_json else None)
         self.merge_trial_spec(item)
         # self.make_experiment(item)
 
-
     def pre_update(self, item):
         self.pre_add(item)
-
-
 
     @action(
         "copy", __("Copy NNI Experiment"), confirmation=__('Copy NNI Experiment'), icon="fa-copy",multiple=True, single=False
@@ -670,7 +666,7 @@ frameworkcontrollerConfig:
             nnis = [nnis]
         for nni in nnis:
             new_nni = nni.clone()
-            new_nni.name = new_nni.name+"-copy"
+            new_nni.name = new_nni.name + "-copy"
             new_nni.describe = new_nni.describe + "-copy"
             new_nni.created_on = datetime.datetime.now()
             new_nni.changed_on = datetime.datetime.now()
@@ -680,7 +676,7 @@ frameworkcontrollerConfig:
         return redirect(request.referrer)
 
 
-class NNI_ModelView(NNI_ModelView_Base,MyappModelView):
+class NNI_ModelView(NNI_ModelView_Base, MyappModelView):
     datamodel = SQLAInterface(NNI)
     conv = GeneralModelConverter(datamodel)
 
@@ -688,21 +684,22 @@ class NNI_ModelView(NNI_ModelView_Base,MyappModelView):
 # 添加视图和菜单
 # appbuilder.add_view(NNI_ModelView,"nni超参搜索",icon = 'fa-shopping-basket',category = '超参搜索',category_icon = 'fa-share-alt')
 appbuilder.add_view_no_menu(NNI_ModelView)
+
+
 # appbuilder.add_view_no_menu(NNI_ModelView)
 
 # 添加api
-class NNI_ModelView_Api(NNI_ModelView_Base,MyappModelRestApi):
+class NNI_ModelView_Api(NNI_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(NNI)
     conv = GeneralModelConverter(datamodel)
     route_base = '/nni_modelview/api'
-    list_columns = ['project','describe_url','creator','modified','run','log']
-    add_columns = ['project','name','describe',
-                    'parallel_trial_count','max_trial_count','objective_type',
-                    'objective_goal','objective_metric_name','objective_additional_metric_names','algorithm_name',
-                    'algorithm_setting','parameters','job_json','working_dir','node_selector',
-                   'resource_memory','resource_cpu','alert_status','job_worker_image','job_worker_command']
+    list_columns = ['project', 'describe_url', 'creator', 'modified', 'run']
+    add_columns = ['project', 'name', 'describe',
+                   'parallel_trial_count', 'max_trial_count', 'objective_type',
+                   'objective_goal', 'objective_metric_name', 'objective_additional_metric_names', 'algorithm_name',
+                   'algorithm_setting', 'parameters', 'job_json', 'working_dir', 'node_selector',
+                   'resource_memory', 'resource_cpu', 'alert_status', 'job_worker_image', 'job_worker_command']
     edit_columns = add_columns
+
+
 appbuilder.add_api(NNI_ModelView_Api)
-
-
-
