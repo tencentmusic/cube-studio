@@ -153,6 +153,8 @@ spec:
               port: 9090
             initialDelaySeconds: 30
             timeoutSeconds: 30
+      nodeSelector:
+        kubeflow: 'true'
       volumes:
         - name: tmp-volume
           emptyDir: {}
@@ -214,6 +216,8 @@ spec:
           - mountPath: /tmp
             name: tmp-volume
       serviceAccountName: kubernetes-dashboard-cluster
+      nodeSelector:
+        kubeflow: 'true'
       volumes:
         - name: tmp-volume
           emptyDir: {}

@@ -1,0 +1,471 @@
+# kubectl create secret generic kubernetes-dashboard-certs --from-file=./ -n kubernetes-dashboard
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard-user1
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard-user1
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+spec:
+  ports:
+    - port: 9090
+      targetPort: 9090
+  selector:
+    k8s-app: kubernetes-dashboard-user1
+    
+# kubectl create secret generic kubernetes-dashboard-certs --from-file=certs -n kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-certs
+  namespace: kube-system
+type: Opaque
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-csrf
+  namespace: kube-system
+type: Opaque
+data:
+  csrf: ""
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-key-holder
+  namespace: kube-system
+type: Opaque
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-settings
+  namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubernetes-dashboard-user1
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  - pods/log
+  - services
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cube-studio-jupyter
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - pods/log
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:     # 只需要能搜索到就行
+  - deployments
+  - services
+  - events
+  verbs:
+  - list
+  - delete
+  - watch
+---
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cube-studio-service
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:     # 只需要能搜索到就行
+  - pods
+  - deployments
+  - services
+  - events
+  - pods/log
+  verbs:
+  - get
+  - list
+  - delete
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cube-studio-aihub
+rules:
+- apiGroups:
+  - ""
+  resources:     # 只需要能搜索到就行
+  - pods
+  - deployments
+  - services
+  - events
+  verbs:
+  - list
+  - delete
+  - watch
+- apiGroups:
+  - ""
+  resources:     # 只需要能搜索到就行
+  - pods/log
+  verbs:
+  - list
+  - get
+  - watch
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-pipeline
+  namespace: pipeline      # 生效空间
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubernetes-dashboard-user1   # 仅pipeline空间可以有权限
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-automl
+  namespace: automl      # 生效空间
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubernetes-dashboard-user1
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-service
+  namespace: service      # 生效空间
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cube-studio-jupyter
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-jupyter
+  namespace: jupyter      # 生效空间
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cube-studio-jupyter
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-aihub
+  namespace: aihub      # 生效空间
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cube-studio-aihub
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-dashboard-minimal
+  namespace: kube-system
+rules:
+- apiGroups: [""]
+  resources: ["secrets",'configmaps']
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["kubernetes-dashboard-key-holder", "kubernetes-dashboard-certs"]
+  verbs: ["get", "update", "delete"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["kubernetes-dashboard-settings"]
+  verbs: ["get", "update"]
+- apiGroups: [""]
+  resources: ["services"]
+  resourceNames: ["heapster"]
+  verbs: ["proxy"]
+- apiGroups: [""]
+  resources: ["services/proxy"]
+  resourceNames: ["heapster", "http:heapster:", "https:heapster:"]
+  verbs: ["get"]
+# Allow Dashboard to get, update and delete Dashboard exclusive secrets.
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["kubernetes-dashboard-key-holder", "kubernetes-dashboard-certs", "kubernetes-dashboard-csrf"]
+  verbs: ["get", "update", "delete"]
+  # Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["kubernetes-dashboard-settings"]
+  verbs: ["get", "update"]
+  # Allow Dashboard to get metrics.
+- apiGroups: [""]
+  resources: ["services"]
+  resourceNames: ["heapster", "dashboard-metrics-scraper"]
+  verbs: ["proxy"]
+- apiGroups: [""]
+  resources: ["services/proxy"]
+  resourceNames: ["heapster", "http:heapster:", "https:heapster:", "dashboard-metrics-scraper", "http:dashboard-metrics-scraper"]
+  verbs: ["get"]
+
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard-minimal
+  name: kubernetes-dashboard-minimal
+rules:
+  # Allow Metrics Scraper to get metrics from the Metrics server
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes","namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["nodes","namespaces"]
+    verbs: ["get", "list", "watch"]   
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-minimal
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubernetes-dashboard-minimal
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-dashboard-minimal
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubernetes-dashboard-minimal
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-dashboard-user1
+    namespace: kube-system
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard-user1
+  name: kubernetes-dashboard-user1
+  namespace: kube-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: kubernetes-dashboard-user1
+  template:
+    metadata:
+      labels:
+        k8s-app: kubernetes-dashboard-user1
+    spec:
+      containers:
+        - name: kubernetes-dashboard-user1
+          image: kubernetesui/dashboard:v2.6.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          args:
+            - --namespace=kube-system
+            - --enable-skip-login
+            - --sidecar-host=http://dashboard-user1-metrics-scraper:8000   # 可以多个dashboard共用一个metrics-scraper
+            
+            
+            # 通过 token 的方式登录 dashboard，又不想 token 很快过期
+            # - --auto-generate-certificates
+            # - --namespace=kubernetes-dashboard
+            # - --token-ttl=604800
+            # 查看token
+            # kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
+
+            # - --tls-cert-file=/certs/dashboard.crt
+            # - --tls-key-file=/certs/dashboard.key
+            # Uncomment the following line to manually specify Kubernetes API server Host
+            # If not specified, Dashboard will attempt to auto discover the API server and connect
+            # to it. Uncomment only if the default does not work.
+            # - --apiserver-host=http://my-address:port
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+      nodeSelector:
+        kubeflow: 'true'
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+      serviceAccountName: kubernetes-dashboard-user1
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: dashboard-user1-metrics-scraper
+  name: dashboard-user1-metrics-scraper
+  namespace: kube-system
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    k8s-app: dashboard-user1-metrics-scraper
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    k8s-app: dashboard-user1-metrics-scraper
+  name: dashboard-user1-metrics-scraper
+  namespace: kube-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: dashboard-user1-metrics-scraper
+  template:
+    metadata:
+      labels:
+        k8s-app: dashboard-user1-metrics-scraper
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: 'runtime/default'
+    spec:
+      containers:
+        - name: dashboard-user1-metrics-scraper
+          securityContext:
+            runAsUser: 0
+          image: kubernetesui/metrics-scraper:v1.0.8
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          volumeMounts:
+          - mountPath: /tmp
+            name: tmp-volume
+      serviceAccountName: kubernetes-dashboard-user1
+      nodeSelector:
+        kubeflow: 'true'
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
