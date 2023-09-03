@@ -26,6 +26,8 @@ spec:
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      kubeflow-pvname: kubeflow-minio-pv
+#  selector:
+#    matchLabels:
+#      kubeflow-pvname: kubeflow-minio-pv
+  volumeName: kubeflow-minio-pv
+  storageClassName: ""
