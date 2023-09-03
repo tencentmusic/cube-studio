@@ -22,8 +22,8 @@ export const getADUGTemplateApiInfo = (url?: string, id?: string): Promise<Axios
     })
 }
 
-export const getCustomDialog = (url: string): Promise<AxiosResponse<ICustomDialog>> => {
-    return axios.get(`/myapp/feature/check?url=${url}`)
+export const getCustomDialog = (url: string, signal: AbortSignal): Promise<AxiosResponse<ICustomDialog>> => {
+    return axios.get(`/myapp/feature/check?url=${url}`, { signal })
 }
 
 export const getADUGTemplateList = (url?: string, params?: any): AxiosResFormat<any> => {
@@ -33,9 +33,9 @@ export const getADUGTemplateList = (url?: string, params?: any): AxiosResFormat<
 export const getADUGTemplateDetail = (url: string): AxiosResFormat<any> => {
     return axios.get(`${url}`, {
         params: {
-            form_data: {
+            form_data: JSON.stringify({
                 str_related: 1
-            }
+            })
         }
     })
 }

@@ -96,13 +96,17 @@ const AppWrapper = (props: IProps) => {
   }, [location, sourceAppList, sourceAppMap])
 
   useEffect(() => {
+    const controller = new AbortController()
     const url = encodeURIComponent(location.pathname)
-    getCustomDialog(url).then(res => {
+    getCustomDialog(url, controller.signal).then(res => {
       setCustomDialogInfo(res.data)
       setCustomDialogVisable(res.data.hit)
     }).catch(err => {
       console.log(err);
     })
+    return () => {
+        controller.abort()
+    }
   }, [location])
 
   const handleCurrentRoute = (appMap: Record<string, IRouterConfigPlusItem>, appList: IRouterConfigPlusItem[]) => {

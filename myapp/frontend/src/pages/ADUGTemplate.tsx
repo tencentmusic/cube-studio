@@ -805,10 +805,14 @@ export default function TaskListManager(props?: IAppMenuItem) {
         },
         beforeUpload: file => {
             const isCSV = file.name.indexOf('.csv') !== -1;
-            if (!isCSV) {
-                message.error(`${file.name} 并不是csv文件`);
+            const isXLS = file.name.indexOf('.xls') !== -1;
+            const isJson = file.name.indexOf('.json') !== -1;
+            const isXLSX = file.name.indexOf('.xlsx') !== -1;
+            if (isCSV || isJson || isXLS || isXLSX) {
+                return true
+            } else {
+                message.error(`文件格式支持CSV/JSON/XLS/XLSX`);
             }
-            return isCSV || Upload.LIST_IGNORE;
         },
         onChange(info) {
             if (info.file.status === 'done') {

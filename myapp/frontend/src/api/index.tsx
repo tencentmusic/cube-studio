@@ -72,6 +72,7 @@ axios.interceptors.request.use(
             return logConfig;
         } else {
             handleTips.gotoLogin();
+            return Promise.reject('');
         }
     },
     (error) => {
