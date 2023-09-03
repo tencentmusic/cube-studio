@@ -24,7 +24,7 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
 
 
 RUN pip install kubernetes==18.20.0 pysnooper psutil pika
-COPY job/volcano_predict/* /app/
+COPY job/model_offline_predict/* /app/
 COPY job/pkgs /app/job/pkgs
 WORKDIR /app
 ENV PYTHONPATH=/app:$PYTHONPATH

@@ -398,7 +398,7 @@ def create_rabbitmq(name,create=True):
                     {
                         "name": "rabbitmq",
                         "image": "rabbitmq:3.9.12-management",
-                        "imagePullPolicy": "Always",
+                        "imagePullPolicy": "IfNotPresent",
                         "env":[
                             {
                                 "name":"RABBITMQ_DEFAULT_USER",
