@@ -8636,7 +8636,7 @@ data:
         spec:
           initContainers:
             - name: grpc-bootstrap-init
-              image: busybox:1.28
+              image: busybox:1.36.0
               volumeMounts:
                 - mountPath: /var/lib/grpc/data/
                   name: grpc-io-proxyless-bootstrap
@@ -9189,7 +9189,7 @@ spec:
       serviceAccountName: istio-ingressgateway-service-account
       containers:
         - name: istio-proxy
-          image: "docker.io/istio/proxyv2:1.15.0"
+          image: "istio/proxyv2:1.15.0"
           ports:
             - containerPort: 15021
               protocol: TCP
@@ -9348,6 +9348,8 @@ spec:
         secret:
           secretName: "istio-ingressgateway-ca-certs"
           optional: true
+      nodeSelector:
+        istio: 'true'
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -9392,7 +9394,7 @@ spec:
         fsGroup: 1337
       containers:
         - name: discovery
-          image: "docker.io/istio/pilot:1.15.0"
+          image: "istio/pilot:1.15.0"
           args:
           - "discovery"
           - --monitoringAddr=:15014
@@ -9476,6 +9478,8 @@ spec:
           - name: istio-kubeconfig
             mountPath: /var/run/secrets/remote
             readOnly: true
+      nodeSelector:
+        istio: 'true'
       volumes:
       # Technically not needed on this pod - but it helps debugging/testing SDS
       # Should be removed after everything works.
