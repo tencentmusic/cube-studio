@@ -27,10 +27,11 @@ spec:
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      service-pvname: service-kubeflow-user-workspace
-
+#  selector:
+#    matchLabels:
+#      service-pvname: service-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: service-kubeflow-user-workspace
 
 # 模型归档
 ---
@@ -60,8 +61,9 @@ spec:
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      service-pvname: service-kubeflow-archives
-
+#  selector:
+#    matchLabels:
+#      service-pvname: service-kubeflow-archives
+  storageClassName: ""
+  volumeName: service-kubeflow-archives
 

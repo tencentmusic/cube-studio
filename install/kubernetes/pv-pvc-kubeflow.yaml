@@ -29,6 +29,8 @@ spec:
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      kubeflow-pvname: kubeflow-kubeflow-user-workspace
+#  selector:
+#    matchLabels:
+#      kubeflow-pvname: kubeflow-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: kubeflow-kubeflow-user-workspace

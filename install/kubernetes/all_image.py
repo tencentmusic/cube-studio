@@ -1,58 +1,52 @@
 # 所需要的所有镜像
 kubeflow = [
-    'mysql:5.7',  # 数据库
-    'bitnami/redis:4.0.14',  # 缓存
-    'alpine:3.10',
-    "busybox",
-    "ccr.ccs.tencentyun.com/cube-studio/kubeflow:training-operator",  # 分布式训练
-    'ccr.ccs.tencentyun.com/cube-studio/spark-operator:v1beta2-1.3.7-3.1.1',  # spark serverless
+    'mysql:8.0.32',  # 数据库
+    'bitnami/redis:6.2.12',  # 缓存
+    "busybox:1.36.0",
+    "kubeflow/training-operator:v1-8a066f9",  # 分布式训练
 ]
 
 kubernetes_dashboard = [
-    # 'kubernetesui/dashboard:v2.6.1',  # k8s dashboard
-    # 'kubernetesui/metrics-scraper:v1.0.8',  # k8s dashboard 上的指标监控
-    'kubernetesui/dashboard:v2.2.0',  # k8s dashboard
-    'kubernetesui/metrics-scraper:v1.0.6',  # k8s dashboard 上的指标监控
+    'kubernetesui/dashboard:v2.6.1',  # k8s dashboard
+    'kubernetesui/metrics-scraper:v1.0.8',  # k8s dashboard 上的指标监控
 ]
 
 new_gpu = [
-    'nvidia/k8s-device-plugin:v0.7.1',  # gpu k8s插件
-    'nvidia/dcgm-exporter:2.3.1-2.6.1-ubuntu20.04',  # gpu监控
-    'tkestack/gpu-manager:1.0.3'
+    'nvidia/k8s-device-plugin:v0.11.0-ubuntu20.04',  # gpu k8s插件
+    'nvidia/dcgm-exporter:3.1.7-3.1.4-ubuntu20.04',  # gpu监控
 ]
 
 new_prometheus = [
-    'quay.io/prometheus/alertmanager:v0.15.0',  # 报警
+    "prom/prometheus:v2.27.1",  # peomethues数据库
+    'prom/node-exporter:v1.5.0',  # 机器指标
+
     'quay.io/prometheus-operator/prometheus-config-reloader:v0.46.0',  # prometheus配置翻译
-    "quay.io/prometheus/prometheus:v2.27.1",  # peomethues数据库
-    'quay.io/coreos/kube-state-metrics:v1.3.1',  # 状态 指标
-    'quay.io/prometheus/node-exporter:v0.15.2',  # 机器指标
-    'quay.io/coreos/kube-rbac-proxy:v0.3.1',  # 指标
-    'quay.io/coreos/addon-resizer:1.0',  # 指标
     "quay.io/prometheus-operator/prometheus-operator:v0.46.0",  # prometheus 部署工具
-    "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1",  # peometheus指标翻译为自定义指标
+    'bitnami/kube-rbac-proxy:0.14.1',  # 指标
+    'carlosedp/addon-resizer:v1.8.4',  # 指标
+
     'grafana/grafana:9.1.5'  # 监控看板
+    "ccr.ccs.tencentyun.com/cube-studio/prometheus-adapter:v0.9.1",  # peometheus指标翻译为自定义指标
 ]
 
 istio = [
-    "istio/proxyv2:1.14.1",  # ingressgateway
-    "istio/pilot:1.14.1"  # 数据面
+    "istio/proxyv2:1.15.0",  # ingressgateway
+    "istio/pilot:1.15.0"  # 数据面
 ]
 volcano = [
-    'volcanosh/vc-controller-manager:v1.4.0',  # 控制器
-    'volcanosh/vc-scheduler:v1.4.0',  # 调度器
-    'volcanosh/vc-webhook-manager:v1.4.0'  # 拦截器
+    'volcanosh/vc-controller-manager:v1.7.0',  # 控制器
+    'volcanosh/vc-scheduler:v1.7.0',  # 调度器
+    'volcanosh/vc-webhook-manager:v1.7.0'  # 拦截器
 ]
 
 nni = [
     'frameworkcontroller/frameworkcontroller'  # 超参搜索
 ]
 pipeline = [
-    'minio/minio',
-    'quay.io/argoproj/argoexec:v3.4.3',
-    'quay.io/argoproj/workflow-controller:latest',
-    'quay.io/argoproj/workflow-controller:v3.4.3',
-    'quay.io/argoproj/argocli:latest'
+    'minio/minio:RELEASE.2023-04-20T17-56-55Z',
+    'argoproj/argoexec:v3.4.3',
+    'argoproj/workflow-controller:v3.4.3',
+    'argoproj/argocli:v3.4.3'
 ]
 cube_studio = [
     # notebook基础镜像
@@ -96,19 +90,14 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda',
 
     # 任务模板的镜像
-    "ubuntu:18.04",
+    "ubuntu:20.04",
+    'python:3.9',
     "ccr.ccs.tencentyun.com/cube-studio/datax:latest",
     "ccr.ccs.tencentyun.com/cube-studio/volcano:20211001",
     "ccr.ccs.tencentyun.com/cube-studio/ray:gpu-20210601",
     "ccr.ccs.tencentyun.com/cube-studio/sklearn_estimator:v1",
-    "ccr.ccs.tencentyun.com/cube-studio/xgb_train_and_predict:v1",
-    "ccr.ccs.tencentyun.com/cube-studio/tf2.3_keras_train:latest",
-    "ccr.ccs.tencentyun.com/cube-studio/tf2.3_plain_train:latest",
-    "ccr.ccs.tencentyun.com/cube-studio/tf_distributed_train:latest",
-    "ccr.ccs.tencentyun.com/cube-studio/tf2.3_model_evaluation:latest",
-    "ccr.ccs.tencentyun.com/cube-studio/tf_distributed_eval:latest",
-    "ccr.ccs.tencentyun.com/cube-studio/tf_model_offline_predict:latest",
-    "ccr.ccs.tencentyun.com/cube-studio/pytorch_distributed_train_k8s:20201010",
+    "ccr.ccs.tencentyun.com/cube-studio/xgb:20230801",
+    "ccr.ccs.tencentyun.com/cube-studio/pytorch:20201010",
     "ccr.ccs.tencentyun.com/cube-studio/horovod:20210401",
     "ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
     "ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
@@ -116,27 +105,11 @@ cube_studio = [
     "ccr.ccs.tencentyun.com/cube-studio/kaldi_distributed_on_volcano:v2",
     "ccr.ccs.tencentyun.com/cube-studio/volcano:offline-predict-20220101",
     "ccr.ccs.tencentyun.com/cube-studio/object_detection_on_darknet:v1",
-    "ccr.ccs.tencentyun.com/cube-studio/deploy-service:20211001"
+    "ccr.ccs.tencentyun.com/cube-studio/deploy-service:20250501",
 
     # 用户可能使用的基础镜像
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8-python3.8',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7-python3.8',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.8',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.6',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.8',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.7',
-    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8',
+    'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9',
+
 ]
 
 # images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio+ volcano + nni+ pipeline+cube_studio
@@ -160,7 +133,9 @@ for image in images:
 
     # # 拉取公有镜像
     image = image.replace('@sha256', '')
+    # print("docker pull %s && docker tag %s %s &" % (image_name,image_name,image))
     print("docker pull %s &" % (image,))
+
 
 print('')
 print('wait')
