@@ -26,7 +26,7 @@ RUN mkdir ./frontend
 
 # 拷贝dist包文件
 COPY ./myapp/static/appbuilder/frontend ./frontend
-
+RUN chmod -R 777 frontend
 # 拷贝nginx配置文件
 ADD /install/docker/dockerFrontend/nginx.conf /etc/nginx/nginx.conf
 ADD /install/docker/dockerFrontend/nginx.80.conf /etc/nginx/conf.d/default.conf

@@ -1,25 +1,29 @@
 # docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV TZ=Asia/Shanghai
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PYTHON_VERSION=python3.9
 
+# 取值 amd64、arm64、arm/v6、arm/v7、ppc64le、s390x。
+ARG TARGETARCH=amd64
 # 替换源
-COPY install/docker/sources.list /etc/apt/sources.list
+COPY install/docker/sources.list.${TARGETARCH} /etc/apt/sources.list
+COPY install/docker/pip.conf /root/.pip/pip.conf
 RUN apt-get clean all && apt-get update -y
 
 # 安装运维工具
-RUN apt install -y --force-yes --no-install-recommends apt-utils ca-certificates software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip
+RUN apt install -y --force-yes --fix-missing --no-install-recommends apt-utils ca-certificates software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip
 
 # 安装python
-RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip python3.6-distutils
+RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip python3.9-distutils
 RUN set -x; rm -rf /usr/bin/python /usr/bin/python3; apt install -y --fix-missing ${PYTHON_VERSION} ${PYTHON_VERSION}-dev && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python3 && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip && pip3 install --upgrade pip setuptools wheel
 
 # 安装node
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash
 RUN apt-get install -y nodejs && npm install yarn -g
+#  设置国内源 npm install -g cnpm --registry=https://registry.npm.taobao.org
 
 # 安装字体
 RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
@@ -27,20 +31,19 @@ ENV LANG zh_CN.UTF-8
 ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
 
-# 安装kubectl
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
-
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-    echo "alias la='ls -A'" >> /root/.bashrc && \
-    echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+RUN echo "alias ll='ls -alF'" >> /etc/profile && \
+	echo "alias la='ls -A'" >> /etc/profile && \
+	echo "alias vi='vim'" >> /etc/profile
 
 COPY install/docker/requirements.txt /requirements.txt
 
 RUN pip install --upgrade setuptools pip && \
     pip install -r /requirements.txt && \
     rm -rf /root/.cache/pip
+# 修正部分包版本
+RUN pip install celery==5.2.2
+RUN pip install click==7.1.2
 
 WORKDIR /home/myapp
 
