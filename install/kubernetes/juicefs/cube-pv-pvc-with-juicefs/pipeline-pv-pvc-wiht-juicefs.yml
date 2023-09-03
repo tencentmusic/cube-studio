@@ -38,10 +38,11 @@ spec:
   resources:
     requests:
       storage: 100Gi
-  selector:
-    matchLabels:
-      pipeline-pvname: pipeline-kubeflow-global-pv
-
+#  selector:
+#    matchLabels:
+#      pipeline-pvname: pipeline-kubeflow-global-pv
+  storageClassName: ""
+  volumeName: pipeline-kubeflow-global-pv
 
 # 模型训练
 ---
@@ -79,16 +80,16 @@ metadata:
   name: kubeflow-user-workspace
   namespace: pipeline
 spec:
-  storageClassName: ""
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      pipeline-pvname: pipeline-kubeflow-user-workspace
-
+#  selector:
+#    matchLabels:
+#      pipeline-pvname: pipeline-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: pipeline-kubeflow-user-workspace
 # 模型归档
 ---
 apiVersion: v1
@@ -125,12 +126,13 @@ metadata:
   name: kubeflow-archives
   namespace: pipeline
 spec:
-  storageClassName: ""
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      pipeline-pvname: pipeline-kubeflow-archives
+#  selector:
+#    matchLabels:
+#      pipeline-pvname: pipeline-kubeflow-archives
+  storageClassName: ""
+  volumeName: pipeline-kubeflow-archives
