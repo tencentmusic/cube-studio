@@ -57,7 +57,7 @@ class Myauthdbview(AuthDBView):
                 user = None
             elif check_password_hash(user.password, password):
                 self.appbuilder.sm.update_user_auth_stat(user, True)
-            elif user.password==password:
+            elif user.password == password:
                 self.appbuilder.sm.update_user_auth_stat(user, True)
             else:
                 self.appbuilder.sm.update_user_auth_stat(user, False)
@@ -68,7 +68,7 @@ class Myauthdbview(AuthDBView):
                 user = self.appbuilder.sm.find_user(form.username.data)
                 if user:
                     # 有用户，但是密码不对
-                    flash('发现用户%s已存在，但输入密码不对'%form.username.data, "warning")
+                    flash('发现用户%s已存在，但输入密码不对' % form.username.data, "warning")
                     return redirect(self.appbuilder.get_url_for_login)
                 else:
                     # 没有用户的时候自动注册用户
@@ -81,16 +81,10 @@ class Myauthdbview(AuthDBView):
             self.login_template, title=self.title, form=form, appbuilder=self.appbuilder
         )
 
-
     @expose('/logout')
     def logout(self):
-        login_url = request.host_url.strip('/')+'/login/'
+        login_url = request.host_url.strip('/') + '/login/'
         session.pop('user', None)
         g.user = None
         logout_user()
         return redirect(login_url)
-
-
-
-
-

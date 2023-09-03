@@ -1,14 +1,15 @@
 """Contains the logic to create cohesive forms on the explore view"""
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from wtforms import Field
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,BS3PasswordFieldWidget,DatePickerWidget,DateTimePickerWidget,Select2ManyWidget,Select2Widget
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, BS3PasswordFieldWidget, DatePickerWidget, DateTimePickerWidget, Select2ManyWidget, Select2Widget
 from wtforms import widgets
 from myapp import app
 
 conf = app.config
 
+from wtforms.validators import DataRequired, Length, NumberRange, Optional, Regexp, ValidationError
 
-from wtforms.validators import DataRequired, Length, NumberRange, Optional,Regexp,ValidationError
+
 # from myapp.models.base import MyappModelBase
 # model_base=MyappModelBase()
 #
@@ -60,7 +61,8 @@ class JsonValidator(object):
         try:
             json.loads(data)
         except Exception as e:
-            raise ValidationError("JSON is not valid :%s"%str(e))
+            raise ValidationError("JSON is not valid :%s" % str(e))
+
 
 class MyCommaSeparatedListField(Field):
     widget = BS3TextFieldWidget()
@@ -88,10 +90,8 @@ def filter_not_empty_values(value):
     return data
 
 
-
-
-import pysnooper,datetime,time,json
-from wtforms.widgets.core import HTMLString,html_params
+import pysnooper, datetime, time, json
+from wtforms.widgets.core import HTMLString, html_params
 
 try:
     from html import escape
@@ -100,10 +100,10 @@ except ImportError:
 from wtforms.compat import text_type, iteritems
 
 
-
 class MyCodeArea(object):
     def __init__(self, code=''):
-        self.code=code
+        self.code = code
+
     def __call__(self, field, **kwargs):
         if self.code:
             return HTMLString('<pre><code>%s</code></pre>' % (self.code,))
@@ -111,12 +111,15 @@ class MyCodeArea(object):
             return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
         # return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
 
+
 from wtforms import widgets
+
+
 class MyBS3TextAreaFieldWidget(widgets.TextArea):
-    def __init__(self, rows=3,readonly=0,expand_filed=None,tips=None):  # 扩展成list类型字段
-        self.rows=rows
+    def __init__(self, rows=3, readonly=0, expand_filed=None, tips=None):  # 扩展成list类型字段
+        self.rows = rows
         self.readonly = readonly
-        self.expand_filed=expand_filed
+        self.expand_filed = expand_filed
         self.tips = tips
         return super(MyBS3TextAreaFieldWidget, self).__init__()
 
@@ -126,16 +129,16 @@ class MyBS3TextAreaFieldWidget(widgets.TextArea):
         if field.label:
             kwargs["placeholder"] = field.label.text
         if self.readonly:
-            kwargs['readonly']='readonly'
+            kwargs['readonly'] = 'readonly'
         return super(MyBS3TextAreaFieldWidget, self).__call__(field, **kwargs)
 
 
 class MyBS3TextFieldWidget(widgets.TextInput):
-    def __init__(self, value='',readonly=0,is_date=False,is_date_range=False):
-        self.value=value
+    def __init__(self, value='', readonly=0, is_date=False, is_date_range=False):
+        self.value = value
         self.readonly = readonly
-        self.is_date=is_date
-        self.is_date_range=is_date_range
+        self.is_date = is_date
+        self.is_date_range = is_date_range
         return super(MyBS3TextFieldWidget, self).__init__()
 
     def __call__(self, field, **kwargs):
@@ -147,7 +150,7 @@ class MyBS3TextFieldWidget(widgets.TextInput):
         if self.value:
             kwargs['value'] = self.value
         if self.readonly:
-            kwargs['readonly']='readonly'
+            kwargs['readonly'] = 'readonly'
         return super(MyBS3TextFieldWidget, self).__call__(field, **kwargs)
 
 
@@ -157,7 +160,7 @@ class MyLineSeparatedListField(Field):
     # 前端要显示的值
     def _value(self):
         if self.data:
-            return u"\n".join(self.data)    # 数据库里面的数据是list
+            return u"\n".join(self.data)  # 数据库里面的数据是list
         else:
             return u""
 
@@ -169,7 +172,6 @@ class MyLineSeparatedListField(Field):
             self.data = []
 
 
-
 class MyJSONField(Field):
     widget = MyBS3TextAreaFieldWidget(rows=3)
 
@@ -177,9 +179,9 @@ class MyJSONField(Field):
     def _value(self):
         if self.data:
             # return self.data  #
-            if type(self.data)==str:  # 如果是字符集就原样返回
+            if type(self.data) == str:  # 如果是字符集就原样返回
                 return self.data
-            return json.dumps(self.data,indent=4,ensure_ascii=False)    # 数据库里面的数据是list
+            return json.dumps(self.data, indent=4, ensure_ascii=False)  # 数据库里面的数据是list
         else:
             return u"{}"
 
@@ -195,8 +197,6 @@ class MyJSONField(Field):
     #         self.data={}
     #     print(self.data,type(self.data))
 
-
-
     # 发送到后端的值
     def process_formdata(self, valuelist):
         try:
@@ -205,26 +205,26 @@ class MyJSONField(Field):
             else:
                 self.data = {}
         except Exception as e:
-            self.data=valuelist[0]  # self.default    # 如果出错，self.data就是原始字符串了。
-            raise ValidationError('input must json:'+str(e))
+            self.data = valuelist[0]  # self.default    # 如果出错，self.data就是原始字符串了。
+            raise ValidationError('input must json:' + str(e))
 
 
 from wtforms.widgets.core import escape_html
 from flask_babel import lazy_gettext as _
 
-class MySelect2Widget(object):
 
+class MySelect2Widget(object):
     extra_classes = None
 
-    def __init__(self, extra_classes=None, style=None,multiple=False,new_web=True,value='',can_input=False,conten2choices=False,retry_info=False):
+    def __init__(self, extra_classes=None, style=None, multiple=False, new_web=True, value='', can_input=False, conten2choices=False, retry_info=False):
         self.extra_classes = extra_classes
         self.style = style or u"width:350px"
         self.multiple = multiple
-        self.value=value
-        self.new_web=new_web
+        self.value = value
+        self.new_web = new_web
         self.can_input = can_input
-        self.conten2choices=conten2choices
-        self.retry_info=retry_info
+        self.conten2choices = conten2choices
+        self.retry_info = retry_info
 
     # @pysnooper.snoop()
     def __call__(self, field, **kwargs):
@@ -242,15 +242,15 @@ class MySelect2Widget(object):
         if 'required' not in kwargs and 'required' in getattr(field, 'flags', []):
             kwargs['required'] = True
         if self.new_web:
-            fun="set_change('%s')"%field.name
+            fun = "set_change('%s')" % field.name
         else:
-            fun=''
+            fun = ''
 
         html = ['''<select %s  id=%s onchange="%s">''' %
-                (html_params(name=field.name, **kwargs),field.name,fun)]
+                (html_params(name=field.name, **kwargs), field.name, fun)]
         for val, label, selected in field.iter_choices():
             if self.value:
-                if str(val)==str(self.value):
+                if str(val) == str(self.value):
                     html.append(self.render_option(val, label, selected=True))
                 else:
                     html.append(self.render_option(val, label, selected=False))
@@ -270,6 +270,7 @@ class MySelect2Widget(object):
             options['selected'] = True
         return HTMLString('<option %s>%s</option>' % (html_params(**options), escape_html(label, quote=False)))
 
+
 # json编辑框
 class MyJsonIde(object):
     def __call__(self, field, **kwargs):
@@ -280,14 +281,16 @@ class MyJsonIde(object):
 class MySelect2ManyWidget(widgets.Select):
     extra_classes = None
 
-    def __init__(self, extra_classes=None, style=None,can_input=False):
+    def __init__(self, extra_classes=None, style=None, can_input=False):
         self.extra_classes = extra_classes
         self.style = style or u"width:250px"
-        self.can_input=can_input
+        self.can_input = can_input
         return super(MySelect2ManyWidget, self).__init__()
 
 
 from wtforms.fields.core import SelectField
+
+
 class MySelectMultipleField(SelectField):
     """
     No different from a normal select field, except this one can take (and
@@ -307,9 +310,10 @@ class MySelectMultipleField(SelectField):
         try:
             if value:
                 self.data = list(self.coerce(v) for v in value.split(','))
+                self.data = [x for x in self.data if x]
                 # print(self.data)
             else:
-                self.data=None
+                self.data = None
         except (ValueError, TypeError):
             self.data = None
 
@@ -325,9 +329,9 @@ class MySelectMultipleField(SelectField):
         pass
 
 
-
 from flask_appbuilder.widgets import FormWidget
 from flask_appbuilder._compat import as_unicode
+
 
 class MySearchWidget(FormWidget):
     template = "appbuilder/general/widgets/search.html"
@@ -335,7 +339,7 @@ class MySearchWidget(FormWidget):
 
     def __init__(self, **kwargs):
         self.filters = kwargs.get("filters")
-        self.help_url=kwargs.get("help_url",'')
+        self.help_url = kwargs.get("help_url", '')
         return super(MySearchWidget, self).__init__(**kwargs)
 
     def __call__(self, **kwargs):
@@ -358,4 +362,3 @@ class MySearchWidget(FormWidget):
         kwargs["search_filters"] = search_filters
         kwargs["active_filters"] = self.filters.get_filters_values_tojson()
         return super(MySearchWidget, self).__call__(**kwargs)
-

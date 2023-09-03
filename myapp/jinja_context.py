@@ -12,6 +12,7 @@ from flask import g, request
 from jinja2.sandbox import SandboxedEnvironment
 
 from myapp import app
+
 # template context
 conf = app.config
 BASE_CONTEXT = {
@@ -23,6 +24,7 @@ BASE_CONTEXT = {
     "uuid": uuid,
 }
 BASE_CONTEXT.update(conf.get("JINJA_CONTEXT_ADDONS", {}))
+
 
 def url_param(param: str, default: Optional[str] = None) -> Optional[Any]:
     """Read a url or post parameter and use it in your SQL Lab query

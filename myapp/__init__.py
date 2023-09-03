@@ -1,7 +1,8 @@
-import time,random
+import datetime
+import time, random
 from copy import deepcopy
 import json
-from flask import redirect, g, flash, request, session, abort, render_template,redirect,Flask
+from flask import redirect, g, flash, request, session, abort, render_template, redirect, Flask
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
@@ -17,6 +18,9 @@ from myapp.security import MyappSecurityManager
 from myapp.utils.core import pessimistic_connection_handling, setup_cache
 from myapp.utils.log import DBEventLogger
 import pysnooper
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 wtforms_json.init()
 
 # 在这个文件里面只创建app，不要做view层面的事情。
@@ -29,11 +33,11 @@ app = Flask(__name__)  # ,static_folder='/mnt',static_url_path='/mnt'
 app.config.from_object(CONFIG_MODULE)
 conf = app.config
 
-if conf.get('DATA_DIR',''):
+if conf.get('DATA_DIR', ''):
     if not os.path.exists(conf['DATA_DIR']):
-        os.makedirs(conf['DATA_DIR'],exist_ok=True)
+        os.makedirs(conf['DATA_DIR'], exist_ok=True)
 
-print(conf.get('SQLALCHEMY_DATABASE_URI',''))
+print(conf.get('SQLALCHEMY_DATABASE_URI', ''))
 
 #################################################################
 # Handling manifest file logic at app start
@@ -42,6 +46,7 @@ print(conf.get('SQLALCHEMY_DATABASE_URI',''))
 # MANIFEST_FILE = APP_DIR + "/static/assets/dist/manifest.json"
 MANIFEST_FILE = APP_DIR + "/assets/dist/manifest.json"
 manifest = {}
+
 
 # @pysnooper.snoop()
 def parse_manifest_json():
@@ -137,11 +142,10 @@ migrate = Migrate(app, db, directory=APP_DIR + "/migrations")
 
 # Logging configuration
 logging.basicConfig(format=app.config.get("LOG_FORMAT"))
-logging.getLogger().setLevel( app.config.get("LOG_LEVEL") if app.config.get("LOG_LEVEL") else 1)
+logging.getLogger().setLevel(app.config.get("LOG_LEVEL") if app.config.get("LOG_LEVEL") else 1)
 
 # 系统日志输出，myapp的输出。在gunicor是使用
 if conf.get("ENABLE_TIME_ROTATE"):
-
     logging.getLogger().setLevel(conf.get("TIME_ROTATE_LOG_LEVEL"))
     handler = TimedRotatingFileHandler(
         conf.get("FILENAME"),
@@ -189,7 +193,7 @@ class MyIndexView(IndexView):
 
     @expose("/")
     def index(self):
-        if not g.user or not g.user.get_id():
+        if g.user is None or not g.user.get_id():
             return redirect(appbuilder.get_url_for_login)
         # return redirect("/myapp/home")
         return redirect("/frontend/")
@@ -203,7 +207,6 @@ if not issubclass(custom_sm, MyappSecurityManager):
          See [4565] in UPDATING.md"""
     )
 
-
 # 创建appbuilder
 with app.app_context():
     # 创建所有表
@@ -213,8 +216,8 @@ with app.app_context():
         app,
         db.session,
         base_template="myapp/base.html",
-        indexview=MyIndexView,   # 首页
-        security_manager_class=custom_sm,   # 自定义认证方式
+        indexview=MyIndexView,  # 首页
+        security_manager_class=custom_sm,  # 自定义认证方式
         # Run `myapp init` to update FAB's perms,设置为true就可以自动更新了，这样才能自动添加新建权限
         update_perms=True,
     )
@@ -228,6 +231,7 @@ _feature_flags = conf.get("DEFAULT_FEATURE_FLAGS") or {}
 _feature_flags.update(conf.get("FEATURE_FLAGS") or {})
 # Event Logger
 event_logger = conf.get("EVENT_LOGGER", DBEventLogger)()
+
 
 def get_feature_flags():
     GET_FEATURE_FLAGS_FUNC = conf.get("GET_FEATURE_FLAGS_FUNC")
@@ -256,12 +260,11 @@ if flask_app_mutator:
     flask_app_mutator(app)
 
 
-# 先经历这里的before_request，再进行sm里面的before_request，比如load_user_from_header函数
-
-# 添加每次请求后的操作函数，必须要返回res
 
 import pysnooper
+import jwt
 
+# 先经历flask自己的用户识别，再经历这里的before_request，再进行sm里面的before_request，比如load_user_from_header函数
 @app.before_request
 # @pysnooper.snoop(watch_explode='aa')
 def check_login():
@@ -270,43 +273,41 @@ def check_login():
         if url in request.path:
             return
 
-    if not g.user or not g.user.get_id():
+    if g.user is None or not g.user.get_id():
 
         # 支持跨域名cookie登录
         myapp_username = request.cookies.get('myapp_username', '')
         if myapp_username:
             try:
                 user = security_manager.find_user(myapp_username)
-                g.user = user
-                return
+                if not user:
+                    abort(401)
+                else:
+                    g.user = user
+                    return
             except Exception as e:
                 print(e)
 
         abort(401)
 
-
-
+# 添加每次请求后的操作函数，必须要返回res
 @app.after_request
 def myapp_after_request(resp):
     try:
-        if g.user and g.user.username:
+        if g.user and hasattr(g.user,'username') and g.user.username:
 
             resp.set_cookie('myapp_username', g.user.username,domain=conf.get('COOKIE_DOMAIN',None) if conf.get('COOKIE_DOMAIN',None) else None)  # 设置用户信息传递
             # resp.set_cookie('myapp_username', g.user.username)  # 设置用户信息传递
 
             if hasattr(g, 'id'):
-                resp.set_cookie('id', str(g.id),max_age=3)   # 设置有效期
-        if g.user and g.user.first_name:
-            if 'vip' in g.user.first_name:
-                resp.set_cookie('version', str('vip'))  # 设置有效期
-
-
+                resp.set_cookie('id', str(g.id), max_age=3)  # 设置有效期
 
     except Exception as e:
         print(e)
         resp.set_cookie('myapp_username', 'myapp')
         # resp.delete_cookie('id')
     return resp
+
 
 # 配置影响后操作
 @app.after_request

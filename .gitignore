@@ -18,3 +18,11 @@ myapp/test
 /aihub/src/cubestudio/aihub/web/frontend/node_modules
 /aihub/modelscope/aihub/
 /aihub/modelscope/modelscope/
+/aihub/deep-learning/chat-private-knowledge/wiki/
+/aihub/deep-learning/chat-private-knowledge/cube-studio/
+/myapp/wechat/send/image/
+/myapp/wechat/receive/audio/
+.ipynb_checkpoints
+/job-template/job/*/.ipynb_checkpoints/
+/install/docker/kubeconfig/
+/aihub/__MACOSX/

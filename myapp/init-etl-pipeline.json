@@ -1,0 +1,1708 @@
+[
+  {
+    "name": "dau",
+    "describe": "dau计算",
+    "config": {
+        "alert_user": "admin"
+    },
+    "workflow": "airflow",
+    "dag_json": {
+      "cos导入hdfs-1686184253953": {
+        "label": "数据导入",
+        "location": [
+          304,
+          96
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "cos导入hdfs",
+        "templte_common_ui_config": {
+          "任务元数据": {
+            "crontab": {
+              "type": "str",
+              "item_type": "str",
+              "label": "调度周期",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "1 1 * * *",
+              "placeholder": "",
+              "describe": "周期任务的时间设定 * * * * * 一次性任务可不填写 <br>表示为 minute hour day month week",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "selfDepend": {
+              "type": "str",
+              "item_type": "str",
+              "label": "自依赖判断",
+              "require": 1,
+              "choice": [
+                "自依赖",
+                "单实例运行",
+                "多实例运行"
+              ],
+              "range": "",
+              "default": "单实例运行",
+              "placeholder": "",
+              "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ResourceGroup": {
+              "type": "str",
+              "item_type": "str",
+              "label": "队列",
+              "require": 1,
+              "choice": [
+                "default",
+                "queue1",
+                "queue2"
+              ],
+              "range": "",
+              "default": "default",
+              "placeholder": "",
+              "describe": "队列",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          },
+          "监控配置": {
+            "alert_user": {
+              "type": "str",
+              "item_type": "str",
+              "label": "报警用户",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "admin,",
+              "placeholder": "",
+              "describe": "报警用户，逗号分隔",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时中断",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "task运行时长限制，为0表示不限制(单位s)",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "retry": {
+              "type": "str",
+              "item_type": "str",
+              "label": "重试次数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "重试次数",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "templte_ui_config": {
+          "参数": {
+            "hdfsPath": {
+              "type": "str",
+              "item_type": "str",
+              "label": "hdfs文件路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "hdfs://xx/xxx",
+              "placeholder": "",
+              "describe": "目标hdfs文件路径，不包括文件名，支持${YYYYMMDD}等的日期变量。如果没hdfs路径权限，先联系平台管理员。",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "cosPath": {
+              "type": "str",
+              "item_type": "str",
+              "label": "源cos文件路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "/xx/${YYYYMMDD}.tar.gz",
+              "placeholder": "",
+              "describe": "源cos文件路径，需包括文件名，支持${YYYYMMDD}等的日期变量。如果有多个文件上传，先打成一个.tar.gz压缩包。",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ifNeedZip": {
+              "type": "str",
+              "item_type": "str",
+              "label": "是否需要解压缩",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "1",
+              "placeholder": "",
+              "describe": "是否需要解压缩 {0:不需要,1:需要}。解压方式为tar zcvf。解压后文件会放在目标文件夹。",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "hdfsPath": "hdfs://xx/xxx",
+          "cosPath": "/xx/${YYYYMMDD}.tar.gz",
+          "ifNeedZip": "1",
+          "label": "数据导入"
+        },
+        "upstream": [],
+        "task_id": 1
+      },
+      "hdfs入库至hive-1686184263002": {
+        "label": "数据入库",
+        "location": [
+          304,
+          224
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "hdfs入库至hive",
+        "templte_common_ui_config": {
+          "任务元数据": {
+            "crontab": {
+              "type": "str",
+              "item_type": "str",
+              "label": "调度周期",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "1 1 * * *",
+              "placeholder": "",
+              "describe": "周期任务的时间设定 * * * * * 一次性任务可不填写 <br>表示为 minute hour day month week",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "selfDepend": {
+              "type": "str",
+              "item_type": "str",
+              "label": "自依赖判断",
+              "require": 1,
+              "choice": [
+                "自依赖",
+                "单实例运行",
+                "多实例运行"
+              ],
+              "range": "",
+              "default": "单实例运行",
+              "placeholder": "",
+              "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ResourceGroup": {
+              "type": "str",
+              "item_type": "str",
+              "label": "队列",
+              "require": 1,
+              "choice": [
+                "default",
+                "queue1",
+                "queue2"
+              ],
+              "range": "",
+              "default": "default",
+              "placeholder": "",
+              "describe": "队列",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          },
+          "监控配置": {
+            "alert_user": {
+              "type": "str",
+              "item_type": "str",
+              "label": "报警用户",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "admin,",
+              "placeholder": "",
+              "describe": "报警用户，逗号分隔",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时中断",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "task运行时长限制，为0表示不限制(单位s)",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "retry": {
+              "type": "str",
+              "item_type": "str",
+              "label": "重试次数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "重试次数",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "templte_ui_config": {
+          "参数": {
+            "charSet": {
+              "type": "str",
+              "item_type": "str",
+              "label": "源文件字符集",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "UTF-8",
+              "placeholder": "",
+              "describe": "源文件字符集",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "databaseName": {
+              "type": "str",
+              "item_type": "str",
+              "label": "hive数据库名称",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "hive数据库名称",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "tableName": {
+              "type": "str",
+              "item_type": "str",
+              "label": "hive表名",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "hive表名",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "delimiter": {
+              "type": "str",
+              "item_type": "str",
+              "label": "源文件分隔符, 填ascii码",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "9",
+              "placeholder": "",
+              "describe": "默认TAB，ascii码：9",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "failedOnZeroWrited": {
+              "type": "str",
+              "item_type": "str",
+              "label": "入库为空时任务处理",
+              "require": 1,
+              "choice": [
+                "1",
+                "0"
+              ],
+              "range": "",
+              "default": "1",
+              "placeholder": "",
+              "describe": "无源文件或入库记录为0时,可以指定任务为成功(0)或失败(1)，默认失败(1)",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "partitionType": {
+              "type": "str",
+              "item_type": "str",
+              "label": "分区格式",
+              "require": 1,
+              "choice": [
+                "P_${YYYYMM}",
+                "P_${YYYYMMDD}",
+                "P_${YYYYMMDDHH}",
+                "NULL"
+              ],
+              "range": "",
+              "default": "P_${YYYYMMDDHH}",
+              "placeholder": "",
+              "describe": "分区格式：P_${YYYYMM}、P_${YYYYMMDD}、P_${YYYYMMDDHH}、NULL",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "sourceFilePath": {
+              "type": "str",
+              "item_type": "str",
+              "label": "数据文件hdfs路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "支持三种日期变量:${YYYYMM}、${YYYYMMDD}、${YYYYMMDDHH}。系统用任务实例的数据时间替换日期变量。",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "sourceFileNames": {
+              "type": "str",
+              "item_type": "str",
+              "label": "源文件名",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "*",
+              "placeholder": "",
+              "describe": "源文件名(支持通配符*和${YYYYMMDD});入库不做检查",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "sourceColumnNames": {
+              "type": "str",
+              "item_type": "str",
+              "label": "源文件的栏位名称",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "源文件的栏位名称，以逗号分割（结尾不能是逗号）,必须保证列数和文件内容一致（创建临时表所用表列名）。例如column1,column2,column3。注：不允许输入空格，源文件栏位名称只由大小写字符、数字和下划线组成",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "targetColumnNames": {
+              "type": "str",
+              "item_type": "str",
+              "label": "字段映射关系，即hive表的列名",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "字段映射关系，即hive表的列名。",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "loadMode": {
+              "type": "str",
+              "item_type": "str",
+              "label": "数据入库模式",
+              "require": 1,
+              "choice": [
+                "TRUNCATE",
+                "APPEND"
+              ],
+              "range": "",
+              "default": "TRUNCATE",
+              "placeholder": "",
+              "describe": "数据入库模式,TRUNCATE或APPEND;",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "charSet": "UTF-8",
+          "databaseName": "",
+          "tableName": "",
+          "delimiter": "9",
+          "failedOnZeroWrited": "1",
+          "partitionType": "P_${YYYYMMDDHH}",
+          "sourceFilePath": "",
+          "sourceFileNames": "*",
+          "sourceColumnNames": "",
+          "targetColumnNames": "",
+          "loadMode": "TRUNCATE",
+          "label": "数据入库"
+        },
+        "upstream": [
+          "cos导入hdfs-1686184253953"
+        ],
+        "task_id": 2
+      },
+      "SQL-1686184276800": {
+        "label": "局部特征计算",
+        "location": [
+          -16,
+          352
+        ],
+        "color": {
+          "color": "rgba(0,200,153,1)",
+          "bg": "rgba(0,200,153,0.02)"
+        },
+        "template": "SQL",
+        "templte_common_ui_config": {
+          "任务元数据": {
+            "crontab": {
+              "type": "str",
+              "item_type": "str",
+              "label": "调度周期",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "1 1 * * *",
+              "placeholder": "",
+              "describe": "周期任务的时间设定 * * * * * 一次性任务可不填写 <br>表示为 minute hour day month week",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "selfDepend": {
+              "type": "str",
+              "item_type": "str",
+              "label": "自依赖判断",
+              "require": 1,
+              "choice": [
+                "自依赖",
+                "单实例运行",
+                "多实例运行"
+              ],
+              "range": "",
+              "default": "单实例运行",
+              "placeholder": "",
+              "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ResourceGroup": {
+              "type": "str",
+              "item_type": "str",
+              "label": "队列",
+              "require": 1,
+              "choice": [
+                "default",
+                "queue1",
+                "queue2"
+              ],
+              "range": "",
+              "default": "default",
+              "placeholder": "",
+              "describe": "队列",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          },
+          "监控配置": {
+            "alert_user": {
+              "type": "str",
+              "item_type": "str",
+              "label": "报警用户",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "admin,",
+              "placeholder": "",
+              "describe": "报警用户，逗号分隔",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时中断",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "task运行时长限制，为0表示不限制(单位s)",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "retry": {
+              "type": "str",
+              "item_type": "str",
+              "label": "重试次数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "重试次数",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "templte_ui_config": {
+          "参数": {
+            "filterSQL": {
+              "type": "text",
+              "item_type": "sql",
+              "label": "计算加工逻辑",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "\n    --库名，替换下面的demo_database\n    use demo_database;\n\n    --建表语句，替换下面的demo_table，修改字段。一定要加“if not exists”，这样使只在第一次运行时建表\n    CREATE TABLE if not exists demo_table(\n        qimei36 STRING COMMENT '唯一设备ID',\n        userid_id STRING COMMENT '用户id（各app的用户id）',\n        device_id STRING COMMENT '设备id（各app的device_id）',\n        ftime INT COMMENT '数据分区时间 格式：yyyymmdd'\n    )\n    PARTITION BY LIST( ftime )          --定义分区字段，替换掉ftime。\n    (\n        PARTITION p_20220323 VALUES IN ( 20220323 ),       --初始分区，分区名替换p_20220323，分区值替换20220323\n        PARTITION default\n    )\n    STORED AS ORCFILE COMPRESS;\n\n    -- 分区，根据时间参数新建分区。\n    alter table demo_table drop partition (p_${YYYYMMDD});\n    alter table demo_table add partition p_${YYYYMMDD} values in (${YYYYMMDD});\n\n    -- 写入，用你的sql逻辑替换。\n    insert table demo_table\n    select * from other_db::other_table partition(p_${YYYYMMDD}) t;\n    ",
+              "placeholder": "",
+              "describe": "从hive导出数据的sql，比如 select a,b,c FROM table where imp_date='${YYYYMMDD}' ;sql末尾不要用分号结尾",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "special_para": {
+              "type": "str",
+              "item_type": "str",
+              "label": "hive特殊参数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "set hive.exec.parallel = true;set hive.execute.engine=spark;set hive.multi.join.use.hive=false;set hive.spark.failed.retry=false;",
+              "placeholder": "",
+              "describe": "hive特殊参数",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "template-group": "数据计算",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "filterSQL": "\n    --库名，替换下面的demo_database\n    use demo_database;\n\n    --建表语句，替换下面的demo_table，修改字段。一定要加“if not exists”，这样使只在第一次运行时建表\n    CREATE TABLE if not exists demo_table(\n        qimei36 STRING COMMENT '唯一设备ID',\n        userid_id STRING COMMENT '用户id（各app的用户id）',\n        device_id STRING COMMENT '设备id（各app的device_id）',\n        ftime INT COMMENT '数据分区时间 格式：yyyymmdd'\n    )\n    PARTITION BY LIST( ftime )          --定义分区字段，替换掉ftime。\n    (\n        PARTITION p_20220323 VALUES IN ( 20220323 ),       --初始分区，分区名替换p_20220323，分区值替换20220323\n        PARTITION default\n    )\n    STORED AS ORCFILE COMPRESS;\n\n    -- 分区，根据时间参数新建分区。\n    alter table demo_table drop partition (p_${YYYYMMDD});\n    alter table demo_table add partition p_${YYYYMMDD} values in (${YYYYMMDD});\n\n    -- 写入，用你的sql逻辑替换。\n    insert table demo_table\n    select * from other_db::other_table partition(p_${YYYYMMDD}) t;\n    ",
+          "special_para": "set hive.exec.parallel = true;set hive.execute.engine=spark;set hive.multi.join.use.hive=false;set hive.spark.failed.retry=false;",
+          "label": "局部特征计算"
+        },
+        "upstream": [
+          "hdfs入库至hive-1686184263002"
+        ],
+        "task_id": 3
+      },
+      "SparkScala-1686184279367": {
+        "label": "局部特征计算",
+        "location": [
+          304,
+          352
+        ],
+        "color": {
+          "color": "rgba(0,200,153,1)",
+          "bg": "rgba(0,200,153,0.02)"
+        },
+        "template": "SparkScala",
+        "templte_common_ui_config": {
+          "任务元数据": {
+            "crontab": {
+              "type": "str",
+              "item_type": "str",
+              "label": "调度周期",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "1 1 * * *",
+              "placeholder": "",
+              "describe": "周期任务的时间设定 * * * * * 一次性任务可不填写 <br>表示为 minute hour day month week",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "selfDepend": {
+              "type": "str",
+              "item_type": "str",
+              "label": "自依赖判断",
+              "require": 1,
+              "choice": [
+                "自依赖",
+                "单实例运行",
+                "多实例运行"
+              ],
+              "range": "",
+              "default": "单实例运行",
+              "placeholder": "",
+              "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ResourceGroup": {
+              "type": "str",
+              "item_type": "str",
+              "label": "队列",
+              "require": 1,
+              "choice": [
+                "default",
+                "queue1",
+                "queue2"
+              ],
+              "range": "",
+              "default": "default",
+              "placeholder": "",
+              "describe": "队列",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          },
+          "监控配置": {
+            "alert_user": {
+              "type": "str",
+              "item_type": "str",
+              "label": "报警用户",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "admin,",
+              "placeholder": "",
+              "describe": "报警用户，逗号分隔",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时中断",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "task运行时长限制，为0表示不限制(单位s)",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "retry": {
+              "type": "str",
+              "item_type": "str",
+              "label": "重试次数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "重试次数",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "templte_ui_config": {
+          "参数": {
+            "jar_path": {
+              "type": "text",
+              "item_type": "str",
+              "label": "jar包路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "填写jar包在notebook里的路径，示例/mnt/admin/pipeline_test.py",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "className": {
+              "type": "str",
+              "item_type": "str",
+              "label": "jar包中主类的名字",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "jar包中主类的名字",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "files": {
+              "type": "text",
+              "item_type": "str",
+              "label": "资源文件列表(--files or --archieves)",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "暂未支持",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "programSpecificParams": {
+              "type": "text",
+              "item_type": "str",
+              "label": "传递给程序的参数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "传递给程序的参数,空格分隔,不要换行",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "options": {
+              "type": "text",
+              "item_type": "str",
+              "label": "spark扩展参数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "\n    选项（spark-submit的--conf参数)。不带分号，使用换行分隔(例如):\n    spark.driver.maxResultSize=15G\n    spark.driver.cores=4\n    spark支持一系列--conf扩展属性，此处可以直接填写。例如：spark.yarn.am.waitTime=100s。\n    提交任务时后台会将参数带上提交。换行分隔！！\n    ",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "dynamicAllocation": {
+              "type": "choice",
+              "item_type": "str",
+              "label": "是否动态资源分配",
+              "require": 1,
+              "choice": [
+                "1",
+                "0"
+              ],
+              "range": "",
+              "default": "1",
+              "placeholder": "",
+              "describe": "是否动态资源分配，是：1；否：0",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "driver_memory": {
+              "type": "str",
+              "item_type": "str",
+              "label": "driver内存大小",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "2g",
+              "placeholder": "",
+              "describe": "driver内存大小",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "num_executors": {
+              "type": "str",
+              "item_type": "str",
+              "label": "executor数量",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "4",
+              "placeholder": "",
+              "describe": "executor数量",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "executor_memory": {
+              "type": "str",
+              "item_type": "str",
+              "label": "executor内存大小",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "2g",
+              "placeholder": "",
+              "describe": "executor内存大小",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "executor_cores": {
+              "type": "str",
+              "item_type": "str",
+              "label": "executor核心数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "2",
+              "placeholder": "",
+              "describe": "executor核心数",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "task.main.timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时时间，单位分钟",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "480",
+              "placeholder": "",
+              "describe": "超时时间，单位分钟：480 (代表8小时)",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "task.check.timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "check超时时间，单位分钟",
+              "require": 1,
+              "choice": [
+                "5",
+                "10"
+              ],
+              "range": "",
+              "default": "5",
+              "placeholder": "",
+              "describe": "check超时时间，单位分钟",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "template-group": "数据计算",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "jar_path": "",
+          "className": "",
+          "files": "",
+          "programSpecificParams": "",
+          "options": "",
+          "dynamicAllocation": "1",
+          "driver_memory": "2g",
+          "num_executors": "4",
+          "executor_memory": "2g",
+          "executor_cores": "2",
+          "task.main.timeout": "480",
+          "task.check.timeout": "5",
+          "label": "局部特征计算"
+        },
+        "upstream": [
+          "hdfs入库至hive-1686184263002"
+        ],
+        "task_id": 4
+      },
+      "pyspark-1686184281148": {
+        "label": "局部特征计算",
+        "location": [
+          608,
+          352
+        ],
+        "color": {
+          "color": "rgba(0,200,153,1)",
+          "bg": "rgba(0,200,153,0.02)"
+        },
+        "template": "pyspark",
+        "templte_common_ui_config": {
+          "任务元数据": {
+            "crontab": {
+              "type": "str",
+              "item_type": "str",
+              "label": "调度周期",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "1 1 * * *",
+              "placeholder": "",
+              "describe": "周期任务的时间设定 * * * * * 一次性任务可不填写 <br>表示为 minute hour day month week",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "selfDepend": {
+              "type": "str",
+              "item_type": "str",
+              "label": "自依赖判断",
+              "require": 1,
+              "choice": [
+                "自依赖",
+                "单实例运行",
+                "多实例运行"
+              ],
+              "range": "",
+              "default": "单实例运行",
+              "placeholder": "",
+              "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ResourceGroup": {
+              "type": "str",
+              "item_type": "str",
+              "label": "队列",
+              "require": 1,
+              "choice": [
+                "default",
+                "queue1",
+                "queue2"
+              ],
+              "range": "",
+              "default": "default",
+              "placeholder": "",
+              "describe": "队列",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          },
+          "监控配置": {
+            "alert_user": {
+              "type": "str",
+              "item_type": "str",
+              "label": "报警用户",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "admin,",
+              "placeholder": "",
+              "describe": "报警用户，逗号分隔",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时中断",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "task运行时长限制，为0表示不限制(单位s)",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "retry": {
+              "type": "str",
+              "item_type": "str",
+              "label": "重试次数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "重试次数",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "templte_ui_config": {
+          "参数": {
+            "py_script_path": {
+              "type": "str",
+              "item_type": "str",
+              "label": "pyspark脚本路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "填写pyspark脚本在notebook里的路径，示例/mnt/admin/pipeline_test.py",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "files": {
+              "type": "str",
+              "item_type": "str",
+              "label": "资源文件列表",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "暂未支持",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "pyFiles": {
+              "type": "str",
+              "item_type": "str",
+              "label": "执行脚本依赖文件列表(spark-submit中的--py-files)",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "暂未支持",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "programSpecificParams": {
+              "type": "text",
+              "item_type": "str",
+              "label": "传递给程序的参数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "传递给程序的参数,空格分隔,不要换行",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "options": {
+              "type": "text",
+              "item_type": "str",
+              "label": "spark扩展参数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "选项（spark-submit的--conf参数)。例如：spark.yarn.am.waitTime=100s。换行分隔！！",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "dynamicAllocation": {
+              "type": "str",
+              "item_type": "str",
+              "label": "是否动态资源分配",
+              "require": 1,
+              "choice": [
+                1,
+                0
+              ],
+              "range": "",
+              "default": 1,
+              "placeholder": "",
+              "describe": "是否动态资源分配，是：1；否：0",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "driver_memory": {
+              "type": "str",
+              "item_type": "str",
+              "label": "driver内存大小",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "2g",
+              "placeholder": "",
+              "describe": "driver内存大小",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "num_executors": {
+              "type": "str",
+              "item_type": "str",
+              "label": "executor数量",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": 4,
+              "placeholder": "",
+              "describe": "executor数量",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "executor_memory": {
+              "type": "str",
+              "item_type": "str",
+              "label": "executor内存大小",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "2g",
+              "placeholder": "",
+              "describe": "executor内存大小",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "executor_cores": {
+              "type": "str",
+              "item_type": "str",
+              "label": "executor核心数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": 2,
+              "placeholder": "",
+              "describe": "executor核心数",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "task.main.timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时时间，单位分钟",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": 480,
+              "placeholder": "",
+              "describe": "超时时间，单位分钟：480 (代表8小时)",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "task.check.timeout": {
+              "type": "int",
+              "item_type": "int",
+              "label": "check超时时间，单位分钟",
+              "require": 1,
+              "choice": [
+                "5",
+                "10"
+              ],
+              "range": "",
+              "default": "5",
+              "placeholder": "",
+              "describe": "check超时时间，单位分钟",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "template-group": "数据计算",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "py_script_path": "",
+          "files": "",
+          "pyFiles": "",
+          "programSpecificParams": "",
+          "options": "",
+          "dynamicAllocation": 1,
+          "driver_memory": "2g",
+          "num_executors": 4,
+          "executor_memory": "2g",
+          "executor_cores": 2,
+          "task.main.timeout": 480,
+          "task.check.timeout": "5",
+          "label": "局部特征计算"
+        },
+        "upstream": [
+          "hdfs入库至hive-1686184263002"
+        ],
+        "task_id": 5
+      },
+      "hive出库至hdfs-1686184293917": {
+        "label": "结果计算",
+        "location": [
+          304,
+          496
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "hive出库至hdfs",
+        "templte_common_ui_config": {
+          "任务元数据": {
+            "crontab": {
+              "type": "str",
+              "item_type": "str",
+              "label": "调度周期",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "1 1 * * *",
+              "placeholder": "",
+              "describe": "周期任务的时间设定 * * * * * 一次性任务可不填写 <br>表示为 minute hour day month week",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "selfDepend": {
+              "type": "str",
+              "item_type": "str",
+              "label": "自依赖判断",
+              "require": 1,
+              "choice": [
+                "自依赖",
+                "单实例运行",
+                "多实例运行"
+              ],
+              "range": "",
+              "default": "单实例运行",
+              "placeholder": "",
+              "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ResourceGroup": {
+              "type": "str",
+              "item_type": "str",
+              "label": "队列",
+              "require": 1,
+              "choice": [
+                "default",
+                "queue1",
+                "queue2"
+              ],
+              "range": "",
+              "default": "default",
+              "placeholder": "",
+              "describe": "队列",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          },
+          "监控配置": {
+            "alert_user": {
+              "type": "str",
+              "item_type": "str",
+              "label": "报警用户",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "admin,",
+              "placeholder": "",
+              "describe": "报警用户，逗号分隔",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时中断",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "task运行时长限制，为0表示不限制(单位s)",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "retry": {
+              "type": "str",
+              "item_type": "str",
+              "label": "重试次数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "重试次数",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "templte_ui_config": {
+          "参数": {
+            "databaseName": {
+              "type": "str",
+              "item_type": "str",
+              "label": "hive表所在的database",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "hive表所在的database",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "destCheckFileName": {
+              "type": "str",
+              "item_type": "str",
+              "label": "对账文件名",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "对账文件名",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "destCheckFilePath": {
+              "type": "str",
+              "item_type": "str",
+              "label": "对账文件路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "对账文件路径",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "destFileDelimiter": {
+              "type": "str",
+              "item_type": "str",
+              "label": "出库文件分隔符",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "9",
+              "placeholder": "",
+              "describe": "出库文件分隔符，填ascii字符对应的数字。默认TAB：9",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "destFilePath": {
+              "type": "str",
+              "item_type": "str",
+              "label": "出库文件路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "",
+              "placeholder": "",
+              "describe": "出库文件路径",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "filterSQL": {
+              "type": "text",
+              "item_type": "sql",
+              "label": "源SQL",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "select t1,t2,t3 from your_table where imp_date=${YYYYMMDD}",
+              "placeholder": "",
+              "describe": "源SQL",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "databaseName": "",
+          "destCheckFileName": "",
+          "destCheckFilePath": "",
+          "destFileDelimiter": "9",
+          "destFilePath": "",
+          "filterSQL": "select t1,t2,t3 from your_table where imp_date=${YYYYMMDD}",
+          "label": "结果计算"
+        },
+        "upstream": [
+          "SQL-1686184276800",
+          "pyspark-1686184281148",
+          "SparkScala-1686184279367"
+        ],
+        "task_id": 6
+      },
+      "hdfs导入cos-1686184296749": {
+        "label": "数据导出",
+        "location": [
+          304,
+          608
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "hdfs导入cos",
+        "templte_common_ui_config": {
+          "任务元数据": {
+            "crontab": {
+              "type": "str",
+              "item_type": "str",
+              "label": "调度周期",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "1 1 * * *",
+              "placeholder": "",
+              "describe": "周期任务的时间设定 * * * * * 一次性任务可不填写 <br>表示为 minute hour day month week",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "selfDepend": {
+              "type": "str",
+              "item_type": "str",
+              "label": "自依赖判断",
+              "require": 1,
+              "choice": [
+                "自依赖",
+                "单实例运行",
+                "多实例运行"
+              ],
+              "range": "",
+              "default": "单实例运行",
+              "placeholder": "",
+              "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ResourceGroup": {
+              "type": "str",
+              "item_type": "str",
+              "label": "队列",
+              "require": 1,
+              "choice": [
+                "default",
+                "queue1",
+                "queue2"
+              ],
+              "range": "",
+              "default": "default",
+              "placeholder": "",
+              "describe": "队列",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          },
+          "监控配置": {
+            "alert_user": {
+              "type": "str",
+              "item_type": "str",
+              "label": "报警用户",
+              "require": 0,
+              "choice": [],
+              "range": "",
+              "default": "admin,",
+              "placeholder": "",
+              "describe": "报警用户，逗号分隔",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "timeout": {
+              "type": "str",
+              "item_type": "str",
+              "label": "超时中断",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "task运行时长限制，为0表示不限制(单位s)",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            },
+            "retry": {
+              "type": "str",
+              "item_type": "str",
+              "label": "重试次数",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "0",
+              "placeholder": "",
+              "describe": "重试次数",
+              "editable": 1,
+              "addable": 0,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "templte_ui_config": {
+          "参数": {
+            "hdfsPath": {
+              "type": "str",
+              "item_type": "str",
+              "label": "hdfs文件路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "hdfs://xx/xxx",
+              "placeholder": "",
+              "describe": "源hdfs文件路径，包括文件名，支持通配符*，支持${YYYYMMDD}等的日期变量。如果没hdfs路径权限，联系平台管理员。",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "cosPath": {
+              "type": "str",
+              "item_type": "str",
+              "label": "目标cos文件路径",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "/xx/xx/${YYYYMMDD}.tar.gz",
+              "placeholder": "",
+              "describe": "目标cos文件路径，需包括文件名，支持${YYYYMMDD}等的日期变量，如果有多个文件上传，会在自动在cos文件名后面添加一个随机串。",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            },
+            "ifNeedZip": {
+              "type": "str",
+              "item_type": "str",
+              "label": "是否需要压缩",
+              "require": 1,
+              "choice": [],
+              "range": "",
+              "default": "1",
+              "placeholder": "",
+              "describe": "是否需要压缩 {0:不需要,1:需要}。压缩会压缩成单个文件。压缩方式为.tar.gz",
+              "editable": 1,
+              "condition": "",
+              "sub_args": {}
+            }
+          }
+        },
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "hdfsPath": "hdfs://xx/xxx",
+          "cosPath": "/xx/xx/${YYYYMMDD}.tar.gz",
+          "ifNeedZip": "1",
+          "label": "数据导出"
+        },
+        "upstream": [
+          "hive出库至hdfs-1686184293917"
+        ],
+        "task_id": 7
+      }
+    }
+  }
+]
