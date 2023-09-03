@@ -25,9 +25,10 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  selector:
-    matchLabels:
-      infra-pvname: infra-mysql-pv
-
+#  selector:
+#    matchLabels:
+#      infra-pvname: infra-mysql-pv
+  volumeName: infra-mysql-pv
+  storageClassName: ""
 
 

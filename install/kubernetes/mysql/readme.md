@@ -12,4 +12,4 @@ kubectl apply -f deploy.yaml
 ## 校验mysql的pv和pvc是否匹配完成
 
 # 本地调试可以使用docker启动mysql
-docker run -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:5.7  
+docker run -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:8.0.32  
