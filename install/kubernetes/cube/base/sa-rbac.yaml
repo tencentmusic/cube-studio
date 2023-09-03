@@ -8,11 +8,8 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: kubeflow-clusterrole
+  name: kubeflow-dashboard
 rules:
-- apiGroups: ["*"]
-  resources: ["pods","pods/log","services","endpoints","configmaps","nodes","deployments","mpijobs","tfjobs","pytorchjobs","frameworks"]
-  verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
 - apiGroups: ["*"]
   resources: ["*"]
   verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
@@ -27,7 +24,7 @@ subjects:
   namespace: infra
 roleRef:
   kind: ClusterRole
-  name: kubeflow-clusterrole
+  name: kubeflow-dashboard
   apiGroup: rbac.authorization.k8s.io
 
 

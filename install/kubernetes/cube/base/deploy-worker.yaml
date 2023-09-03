@@ -44,7 +44,9 @@ spec:
         - name: infra-kubeflow
           persistentVolumeClaim:
             claimName: infra-kubeflow
-      serviceAccount: kubeflow-dashboard
+      serviceAccountName: kubeflow-dashboard
+      imagePullSecrets:
+        - name: hubsecret
       containers:
         - name: kubeflow-dashboard-worker
           image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
