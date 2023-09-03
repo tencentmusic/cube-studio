@@ -48,7 +48,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     command = Column(String(1000),default='')
     args = Column(Text,default='')
     env = Column(Text,default='')
-    volume_mount = Column(String(200),default='')
+    volume_mount = Column(String(2000),default='')
     node_selector = Column(String(100),default='cpu=true,serving=true')
     replicas = Column(Integer,default=1)
     ports = Column(String(100),default='80')
@@ -148,7 +148,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     model_output = Column(Text(65536), default='')
     inference_config = Column(Text(65536), default='')   # make configmap
     model_status = Column(String(200),default='offline')
-    # model_status = Column(Enum('offline','test','online','delete'),nullable=True,default='offline')
+    # model_status = Column(Enum('offline','test','online','delete',name='model_status'),nullable=True,default='offline')
 
     transformer=Column(String(200),default='')  # pre process and post process
 

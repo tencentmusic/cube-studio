@@ -1,7 +1,8 @@
+import pysnooper
 from flask_appbuilder import Model
 
 from sqlalchemy import Text
-
+import os,time,json
 from myapp.models.helpers import AuditMixinNullable
 from myapp import app
 from sqlalchemy import Column, Integer, String
@@ -83,8 +84,14 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
     @property
     def icon_html(self):
         img_url = self.icon if self.icon else "/static/assets/images/dataset.png"
-        url = '<a target=_blank href="%s"><img height="50px" width="50px" src="%s"></a>' % (img_url,img_url)
-        return Markup(url)
+
+        url = f'''
+<a target=_blank href='{img_url}'>
+  <img style='height:50px; width:50px; border-radius:10%' src='{img_url}'>
+</a>
+        '''
+        print(url)
+        return url
 
     @property
     def download_url_html(self):

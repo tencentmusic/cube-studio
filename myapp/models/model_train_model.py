@@ -65,10 +65,17 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def model_metric(self):
-        metric_json = json.loads(self.metrics) if self.metrics else {}
-        metric_str=''
-        for metric_name in metric_json:
-            metric_str+=metric_name+":"+metric_json[metric_name]
-
-        return metric_str
+        try:
+            metric_list = json.loads(self.metrics) if self.metrics else {}
+            metric_str=''
+            if type(metric_list)!=list:
+                metric_list=[metric_list]
+            for metric_json in metric_list:
+                for metric_name in metric_json:
+                    metric_str+=str(metric_name)+":"+str(metric_json[metric_name])+","
+                metric_str=metric_str.strip(',')+'\n'
+            return metric_str.strip()
+        except Exception as e:
+            print(e)
+            return self.metrics
 

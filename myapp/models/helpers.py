@@ -335,12 +335,13 @@ class AuditMixinNullable(AuditMixin):
 
     @renders("created_by")
     def creator(self):  # noqa
-        return self._user_link(self.created_by)
-        # return self.created_by.username
+        # return self._user_link(self.created_by)
+        return self.created_by.username
 
     @property
     def changed_by_(self):
-        return self._user_link(self.changed_by)
+        return self.changed_by.username
+        # return self._user_link(self.changed_by)
 
     @renders("changed_on")
     def changed_on_(self):
