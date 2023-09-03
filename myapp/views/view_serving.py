@@ -2,13 +2,13 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from myapp.models.model_serving import Service
 from myapp.utils import core
 from flask_babel import lazy_gettext as _
-from myapp import app, appbuilder,db
+from myapp import app, appbuilder, db
 from myapp.models.model_job import Repository
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from myapp import security_manager
 from wtforms.validators import DataRequired, Length, Regexp
-from wtforms import  StringField
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget,Select2Widget
+from wtforms import StringField
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget
 from flask import (
     flash,
@@ -25,11 +25,11 @@ from .base import (
 from .baseApi import (
     MyappModelRestApi
 )
-from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
+from myapp.views.view_team import Project_Join_Filter, filter_join_org_project
 from flask_appbuilder import expose
 import json
-conf = app.config
 
+conf = app.config
 
 
 class Service_Filter(MyappFilter):
@@ -44,25 +44,25 @@ class Service_Filter(MyappFilter):
         return query.filter(self.model.project_id.in_(join_projects_id))
 
 
-
-
 class Service_ModelView_base():
     datamodel = SQLAInterface(Service)
 
-    show_columns = ['project','name', 'label','images','volume_mount','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
-    add_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','host']
-    list_columns = ['project','name_url','host_url','ip','deploy','creator','modified']
-    cols_width={
-        "name_url":{"type": "ellip2", "width": 200},
+    show_columns = ['project', 'name', 'label', 'images', 'volume_mount', 'working_dir', 'command', 'env',
+                    'resource_memory', 'resource_cpu', 'resource_gpu', 'replicas', 'ports', 'host']
+    add_columns = ['project', 'name', 'label', 'images', 'working_dir', 'command', 'env', 'resource_memory',
+                   'resource_cpu', 'resource_gpu', 'replicas', 'ports', 'host']
+    list_columns = ['project', 'name_url', 'host_url', 'ip', 'deploy', 'creator', 'modified']
+    cols_width = {
+        "name_url": {"type": "ellip2", "width": 200},
         "host_url": {"type": "ellip2", "width": 400},
         "ip": {"type": "ellip2", "width": 250},
         "deploy": {"type": "ellip2", "width": 200},
         "modified": {"type": "ellip2", "width": 150}
     }
-    search_columns = ['created_by','project','name','label','images','resource_memory','resource_cpu','resource_gpu','volume_mount','host']
+    search_columns = ['created_by', 'project', 'name', 'label', 'images', 'resource_memory', 'resource_cpu', 'resource_gpu', 'volume_mount', 'host']
 
-    edit_columns = ['project','name', 'label','images','working_dir','command','env','resource_memory','resource_cpu','resource_gpu','replicas','ports','volume_mount','host',]
-    base_order = ('id','desc')
+    edit_columns = ['project', 'name', 'label', 'images', 'working_dir', 'command', 'env', 'resource_memory', 'resource_cpu', 'resource_gpu', 'replicas', 'ports', 'volume_mount', 'host', ]
+    base_order = ('id', 'desc')
     order_columns = ['id']
     label_title = '云原生服务'
     base_filters = [["id", Service_Filter, lambda: []]]
@@ -93,7 +93,6 @@ class Service_ModelView_base():
         "host": StringField(_(datamodel.obj.lab('host')), default=Service.host.default.arg,description='访问域名，' + host_rule, widget=BS3TextFieldWidget()),
     }
 
-
     add_form_extra_fields['resource_gpu'] = StringField(
         _(datamodel.obj.lab('resource_gpu')), default='0',
         description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡',
@@ -102,85 +101,80 @@ class Service_ModelView_base():
     )
 
     edit_form_extra_fields = add_form_extra_fields
-    # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(小写字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
 
+    # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(小写字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
 
     def pre_add(self, item):
         if not item.volume_mount:
-            item.volume_mount=item.project.volume_mount
+            item.volume_mount = item.project.volume_mount
 
-    def delete_old_service(self,service_name,cluster):
+    def delete_old_service(self, service_name, cluster):
         service_external_name = (service_name + "-external").lower()[:60].strip('-')
         from myapp.utils.py.py_k8s import K8s
-        k8s = K8s(cluster.get('KUBECONFIG',''))
+        k8s = K8s(cluster.get('KUBECONFIG', ''))
         namespace = conf.get('SERVICE_NAMESPACE')
         k8s.delete_deployment(namespace=namespace, name=service_name)
         k8s.delete_service(namespace=namespace, name=service_name)
         k8s.delete_service(namespace=namespace, name=service_external_name)
         k8s.delete_istio_ingress(namespace=namespace, name=service_name)
 
-
     def pre_update(self, item):
         # 修改了名称的话，要把之前的删掉
-        if self.src_item_json.get('name','')!=item.name:
-            self.delete_old_service(self.src_item_json.get('name',''),item.project.cluster)
+        if self.src_item_json.get('name', '') != item.name:
+            self.delete_old_service(self.src_item_json.get('name', ''), item.project.cluster)
             flash('检测到修改名称，旧服务已清理完成', category='warning')
 
     def pre_delete(self, item):
-        self.delete_old_service(item.name,item.project.cluster)
+        self.delete_old_service(item.name, item.project.cluster)
         flash('服务已清理完成', category='success')
 
     @expose('/clear/<service_id>', methods=['POST', "GET"])
     def clear(self, service_id):
         service = db.session.query(Service).filter_by(id=service_id).first()
-        self.delete_old_service(service.name,service.project.cluster)
+        self.delete_old_service(service.name, service.project.cluster)
         flash('服务清理完成', category='success')
-        return redirect(conf.get('MODEL_URLS',{}).get('service',''))
+        return redirect(conf.get('MODEL_URLS', {}).get('service', ''))
 
+    @expose('/deploy/<service_id>', methods=['POST', "GET"])
+    def deploy(self, service_id):
 
-    @expose('/deploy/<service_id>',methods=['POST',"GET"])
-    def deploy(self,service_id):
-        image_secrets = conf.get('HUBSECRET', [])
-        user_hubsecrets = db.session.query(Repository.hubsecret).filter(Repository.created_by_fk == g.user.id).all()
-        if user_hubsecrets:
-            for hubsecret in user_hubsecrets:
-                if hubsecret[0] not in image_secrets:
-                    image_secrets.append(hubsecret[0])
+        image_pull_secrets = conf.get('HUBSECRET', [])
+        user_repositorys = db.session.query(Repository).filter(Repository.created_by_fk == g.user.id).all()
+        image_pull_secrets = list(set(image_pull_secrets + [rep.hubsecret for rep in user_repositorys]))
 
         service = db.session.query(Service).filter_by(id=service_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(service.project.cluster.get('KUBECONFIG',''))
+        k8s_client = K8s(service.project.cluster.get('KUBECONFIG', ''))
         namespace = conf.get('SERVICE_NAMESPACE')
 
         volume_mount = service.volume_mount
-        labels = {"app":service.name,"user":service.created_by.username,"pod-type":"service"}
+        labels = {"app": service.name, "user": service.created_by.username, "pod-type": "service"}
         env = service.env
-        env+="\nRESOURCE_CPU="+service.resource_cpu
+        env += "\nRESOURCE_CPU=" + service.resource_cpu
         env += "\nRESOURCE_MEMORY=" + service.resource_memory
 
         k8s_client.create_deployment(namespace=namespace,
-                              name=service.name,
-                              replicas=service.replicas,
-                              labels=labels,
-                              command=['bash','-c',service.command] if service.command else None,
-                              args=None,
-                              volume_mount=volume_mount,
-                              working_dir=service.working_dir,
-                              node_selector=service.get_node_selector(),
-                              resource_memory="0~"+service.resource_memory,
-                              resource_cpu="0~"+service.resource_cpu,
-                              resource_gpu=service.resource_gpu if service.resource_gpu else '',
-                              image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
-                              image_pull_secrets=image_secrets,
-                              image=service.images,
-                              hostAliases=conf.get('HOSTALIASES',''),
-                              env=env,
-                              privileged=False,
-                              accounts=None,
-                              username=service.created_by.username,
-                              ports=[int(port) for port in service.ports.split(',')]
-                              )
-
+                                     name=service.name,
+                                     replicas=service.replicas,
+                                     labels=labels,
+                                     command=['bash', '-c', service.command] if service.command else None,
+                                     args=None,
+                                     volume_mount=volume_mount,
+                                     working_dir=service.working_dir,
+                                     node_selector=service.get_node_selector(),
+                                     resource_memory="0~" + service.resource_memory,
+                                     resource_cpu="0~" + service.resource_cpu,
+                                     resource_gpu=service.resource_gpu if service.resource_gpu else '',
+                                     image_pull_policy=conf.get('IMAGE_PULL_POLICY', 'Always'),
+                                     image_pull_secrets=image_pull_secrets,
+                                     image=service.images,
+                                     hostAliases=conf.get('HOSTALIASES', ''),
+                                     env=env,
+                                     privileged=False,
+                                     accounts=None,
+                                     username=service.created_by.username,
+                                     ports=[int(port) for port in service.ports.split(',')]
+                                     )
 
         ports = [int(port) for port in service.ports.split(',')]
 
@@ -192,30 +186,30 @@ class Service_ModelView_base():
             selector=labels
         )
         # 如果域名配置的gateway，就用这个
-        host = service.name+"."+service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
+        host = service.name + "." + service.project.cluster.get('SERVICE_DOMAIN', conf.get('SERVICE_DOMAIN', ''))
         if service.host:
-            host=service.host.replace('http://','').replace('https://','').strip()
+            host = service.host.replace('http://', '').replace('https://', '').strip()
             if "/" in host:
                 host = host[:host.index("/")]
             if ":" in host:
                 host = host[:host.index(":")]
         k8s_client.create_istio_ingress(namespace=namespace,
-                           name=service.name,
-                           host = host,
-                           ports=service.ports.split(',')
-                           )
+                                        name=service.name,
+                                        host=host,
+                                        ports=service.ports.split(',')
+                                        )
 
         # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
         # 创建EXTERNAL_IP的服务
 
-        SERVICE_EXTERNAL_IP=[]
+        SERVICE_EXTERNAL_IP = []
         # 使用项目组ip
         if service.project.expand:
             ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
-            if ip and type(ip)==str:
+            if ip and type(ip) == str:
                 SERVICE_EXTERNAL_IP = [ip]
-            if ip and type(ip)==list:
-                SERVICE_EXTERNAL_IP=ip
+            if ip and type(ip) == list:
+                SERVICE_EXTERNAL_IP = ip
 
         # 使用全局ip
         if not SERVICE_EXTERNAL_IP:
@@ -226,18 +220,17 @@ class Service_ModelView_base():
             ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  # 如果捕获到端口号，要去掉
             if ip == '127.0.0.1':
                 host = service.project.cluster.get('HOST', '')
-                if not host:
+                if host:
+                    host = host[:host.rindex(':')] if ':' in host else host
                     SERVICE_EXTERNAL_IP = [host]
             elif core.checkip(ip):
                 SERVICE_EXTERNAL_IP = [ip]
-
-
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
             SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
 
-            service_ports = [[30000+10*service.id+index,port] for index,port in enumerate(ports)]
+            service_ports = [[30000 + 10 * service.id + index, port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
                 namespace=namespace,
@@ -248,24 +241,20 @@ class Service_ModelView_base():
                 external_ip=SERVICE_EXTERNAL_IP
             )
 
-        flash('服务部署完成',category='success')
-        return redirect(conf.get("MODEL_URLS",{}).get("service",'/'))
+        flash('服务部署完成', category='success')
+        return redirect(conf.get("MODEL_URLS", {}).get("service", '/'))
 
 
-
-
-
-
-class Service_ModelView(Service_ModelView_base,MyappModelView,DeleteMixin):
+class Service_ModelView(Service_ModelView_base, MyappModelView, DeleteMixin):
     datamodel = SQLAInterface(Service)
+
 
 appbuilder.add_view_no_menu(Service_ModelView)
 
 
-class Service_ModelView_Api(Service_ModelView_base,MyappModelRestApi):
+class Service_ModelView_Api(Service_ModelView_base, MyappModelRestApi):
     datamodel = SQLAInterface(Service)
     route_base = '/service_modelview/api'
 
+
 appbuilder.add_api(Service_ModelView_Api)
-
-

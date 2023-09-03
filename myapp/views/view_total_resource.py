@@ -1,22 +1,20 @@
-
 import math
 from flask import Markup
 from jinja2 import Environment, BaseLoader, DebugUndefined
-from myapp import app, appbuilder,db
+from myapp import app, appbuilder, db
 from flask import request
 from .baseFormApi import (
     MyappFormRestApi
 )
 
-import datetime,time,json
+import datetime, time, json
 
 from ..utils.py.py_k8s import K8s
 
 conf = app.config
 logging = app.logger
 
-
-pipeline_resource_used={
+pipeline_resource_used = {
     "check_time": None,
     "data": {}
 }
@@ -26,12 +24,13 @@ node_resource_used = {
 }
 global_cluster_load = {}
 
+
 # 机器学习首页资源弹窗
 # @pysnooper.snoop()
 def node_traffic():
     if not node_resource_used['check_time'] or node_resource_used['check_time'] < (datetime.datetime.now() - datetime.timedelta(minutes=10)):
 
-        all_node_json={}
+        all_node_json = {}
         clusters = conf.get('CLUSTERS', {})
         for cluster_name in clusters:
             try:
@@ -40,19 +39,19 @@ def node_traffic():
 
                 all_node = k8s_client.get_node()
                 all_node_resource = k8s_client.get_all_node_allocated_resources()
-                all_node_json[cluster_name]={}
+                all_node_json[cluster_name] = {}
                 for node in all_node:
-                    all_node_json[cluster_name][node['hostip']]=node
-                    node_allocated_resources=all_node_resource.get(node['name'],{
-                        "used_cpu":0,
-                        "used_memory":0,
-                        "used_gpu":0
+                    all_node_json[cluster_name][node['hostip']] = node
+                    node_allocated_resources = all_node_resource.get(node['name'], {
+                        "used_cpu": 0,
+                        "used_memory": 0,
+                        "used_gpu": 0
                     })
                     all_node_json[cluster_name][node['hostip']].update(node_allocated_resources)
             except Exception as e:
                 print(e)
 
-        node_resource_used['data']=all_node_json
+        node_resource_used['data'] = all_node_json
         node_resource_used['check_time'] = datetime.datetime.now()
 
     all_node_json = node_resource_used['data']
@@ -106,19 +105,23 @@ def node_traffic():
                 nodes.update(stored_nodes[org][device])
 
         cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
-        grafana_url = "http://"+cluster_config.get('HOST', request.host) + conf.get('GRAFANA_CLUSTER_PATH')
+        grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_CLUSTER_PATH')
         for ip in nodes:
-            node_dashboard_url = "http://" + cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/node/%s?namespace=default' % nodes[ip]['name']
+            node_dashboard_url = "//"+ cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/node/%s?namespace=default' % nodes[ip]['name']
             org = nodes[ip]['labels'].get('org', 'public')
             enable_train = nodes[ip]['labels'].get('train', 'true')
             ip_html = '<a target="_blank" href="%s">%s</a>' % (node_dashboard_url, ip)
             share = nodes[ip]['labels'].get('share', 'true')
             clolr = "#FFFFFF" if share == 'true' else '#F0F0F0'
-            device = 'cpu'
-            if 'gpu' in nodes[ip]['labels']:
-                device = 'gpu/' + nodes[ip]['labels'].get('gpu-type', '')
+            device = ''
+            if 'cpu' in nodes[ip]['labels'] and nodes[ip]['labels']['cpu'] == 'true':
+                device = 'cpu/'
+            if 'gpu' in nodes[ip]['labels'] and nodes[ip]['labels']['gpu']=='true':
+                device = device+'gpu/'
             if 'vgpu' in nodes[ip]['labels']:
-                device = 'vgpu/' + nodes[ip]['labels'].get('gpu-type', '')
+                device = device+'vgpu/'
+            device = device + nodes[ip]['labels'].get('gpu-type', '')
+            device=device.strip('/')
 
             message += '<tr bgcolor="%s">%s %s %s %s %s %s %s<tr>' % (
                 clolr,
@@ -136,7 +139,7 @@ def node_traffic():
             global_cluster_load[cluster_name]['cpu_all'] += int(nodes[ip]['cpu'])
             global_cluster_load[cluster_name]['mem_req'] += int(nodes[ip]['used_memory'])
             global_cluster_load[cluster_name]['mem_all'] += int(nodes[ip]['memory'])
-            global_cluster_load[cluster_name]['gpu_req'] += round(float(nodes[ip]['used_gpu']),2)
+            global_cluster_load[cluster_name]['gpu_req'] += round(float(nodes[ip]['used_gpu']), 2)
             global_cluster_load[cluster_name]['gpu_all'] += int(float(nodes[ip]['gpu']))
 
     message = Markup('<table style="margin:20px">%s</table>' % message)
@@ -155,6 +158,7 @@ def node_traffic():
     # 返回模板
     return data
 
+
 # pipeline每个任务的资源占用情况
 # @pysnooper.snoop()
 def pod_resource():
@@ -168,7 +172,7 @@ def pod_resource():
                 # 获取pod的资源占用
                 all_tasks_json[cluster_name] = {}
                 # print(all_node_json)
-                for namespace in ['pipeline', 'automl', 'service']:
+                for namespace in ['jupyter', 'pipeline', 'automl', 'service', 'aihub']:
                     all_tasks_json[cluster_name][namespace] = {}
                     all_pods = k8s_client.get_pods(namespace=namespace)
                     for pod in all_pods:
@@ -208,16 +212,17 @@ def pod_resource():
         pipeline_resource_used['check_time'] = datetime.datetime.now()
 
     all_tasks_json = pipeline_resource_used['data']
-    all_pod_resource=[]
+    all_pod_resource = []
     for cluster_name in all_tasks_json:
         cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
         for namespace in all_tasks_json[cluster_name]:
             for org in all_tasks_json[cluster_name][namespace]:
                 for pod_name in all_tasks_json[cluster_name][namespace][org]:
                     pod = all_tasks_json[cluster_name][namespace][org][pod_name]
-                    dashboard_url = "http://" + cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (namespace, pod_name)
-                    task_grafana_url = "http://"+cluster_config.get('HOST', request.host) + conf.get('GRAFANA_TASK_PATH')
-                    node_grafana_url = "http://"+cluster_config.get('HOST', request.host) + conf.get('GRAFANA_NODE_PATH')
+                    dashboard_url = f'/k8s/web/search/{cluster_name}/{namespace}/{pod_name}'
+                    task_grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_TASK_PATH')
+                    node_grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_NODE_PATH')
+
 
                     pod_resource={
                         "cluster":cluster_name,
@@ -233,12 +238,13 @@ def pod_resource():
                     all_pod_resource.append(pod_resource)
     return all_pod_resource
 
+
 # 添加api
 class Total_Resource_ModelView_Api(MyappFormRestApi):
     route_base = '/total_resource/api/'
-    order_columns=["cpu","memory"]
-    primary_key='pod'
-    cols_width={
+    order_columns = ["cpu", "memory"]
+    primary_key = 'pod'
+    cols_width = {
         "cluster": {"type": "ellip2", "width": 100},
         "project": {"type": "ellip2", "width": 100},
         "namespace": {"type": "ellip2", "width": 100},
@@ -249,16 +255,16 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
         "memory": {"type": "ellip2", "width": 100},
         "gpu": {"type": "ellip2", "width": 100}
     }
-    label_columns={
-        "cluster":"集群",
-        "project":"项目组",
-        "namespace":"空间",
-        "pod":"容器",
-        "username":"用户",
+    label_columns = {
+        "cluster": "集群",
+        "project": "项目组",
+        "namespace": "空间",
+        "pod": "容器",
+        "username": "用户",
         "node": "节点",
-        "cpu":"cpu使用",
-        "memory":"内存使用",
-        "gpu":"gpu使用"
+        "cpu": "cpu使用",
+        "memory": "内存使用",
+        "gpu": "gpu使用"
     }
     ops_link = [
         {
@@ -270,31 +276,31 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
             "url": conf.get('GRAFANA_CLUSTER_PATH')
         }
     ]
-    label_title='整体资源'
+    label_title = '整体资源'
     list_title = "运行中资源列表"
-    page_size=1000
-    enable_echart=True
-    base_permissions=['can_list']
-    list_columns = ['cluster','project','namespace','pod','username','node','cpu','memory','gpu']
+    page_size = 1000
+    enable_echart = True
+    base_permissions = ['can_list']
+    list_columns = ['cluster', 'project', 'namespace', 'pod', 'username', 'node', 'cpu', 'memory', 'gpu']
 
-    alert_config={
-        conf.get('MODEL_URLS',{}).get('total_resource',''):node_traffic
+    alert_config = {
+        conf.get('MODEL_URLS', {}).get('total_resource', ''): node_traffic
     }
 
-    def query_list(self, order_column,order_direction,page_index,page_size,filters=None,**kargs):
+    def query_list(self, order_column, order_direction, page_index, page_size, filters=None, **kargs):
 
-        lst=pod_resource()
+        lst = pod_resource()
         if order_column and lst:
             lst = sorted(lst, key=lambda d:float(d[order_column].split('/')[0])/float(d[order_column].split('/')[1]) if '/0' not in d[order_column] else 0, reverse = False if order_direction=='asc' else True)
         total_count=len(lst)
         return total_count,lst
 
     # @pysnooper.snoop()
-    def echart_option(self,filters=None):
+    def echart_option(self, filters=None):
         global global_cluster_load
 
         if not global_cluster_load:
-            node_resource_used['check_time']=None
+            node_resource_used['check_time'] = None
             node_traffic()
         pod_resource_metric = pod_resource()
         # print(pod_resource_metric)
@@ -303,10 +309,10 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
             return {}
 
         # 获取不同集群当前的占用率
-        data1=[]
+        data1 = []
         for cluster_name in global_cluster_load:
             traffic = 0
-            num=0
+            num = 0
             if int(global_cluster_load[cluster_name]['cpu_all']):
                 traffic += int(global_cluster_load[cluster_name]['cpu_req'])/int(global_cluster_load[cluster_name]['cpu_all'])
                 num+=1
@@ -318,39 +324,38 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                 num+=1
             if num:
                 data1.append({
-                    "name":cluster_name,
-                    "value":traffic/num
+                    "name": cluster_name,
+                    "value": traffic / num
                 })
 
-
         # 获取不同人的资源占用总数
-        metric={}
+        metric = {}
         for pod in pod_resource_metric:
             if pod['username'] not in metric:
-                metric[pod['username']]=0
+                metric[pod['username']] = 0
             # 1G 22，，1 核 44， 1 T4 1400
             metric[pod['username']] += int(pod['memory'].split("/")[1])
-            metric[pod['username']] += int(pod['cpu'].split("/")[1])*2
-            metric[pod['username']] += int(float(pod['gpu']))*60
+            metric[pod['username']] += int(pod['cpu'].split("/")[1]) * 2
+            metric[pod['username']] += int(float(pod['gpu'])) * 60
         data2 = []
         for username in metric:
-            if int(metric[username])>0:
+            if int(metric[username]) > 0:
                 data2.append({
-                    "name":username,
-                    "value":int(metric[username])
+                    "name": username,
+                    "value": int(metric[username])
                 })
 
         # 获取不同人的资源利用率
-        metric={}
+        metric = {}
         for pod in pod_resource_metric:
             if pod['username'] not in metric:
-                metric[pod['username']]={
-                    "cpu_req":0,
-                    "cpu_all":0,
-                    "mem_req":0,
-                    "mem_all":0,
-                    "gpu_req":0,
-                    "gpu_all":0
+                metric[pod['username']] = {
+                    "cpu_req": 0,
+                    "cpu_all": 0,
+                    "mem_req": 0,
+                    "mem_all": 0,
+                    "gpu_req": 0,
+                    "gpu_all": 0
                 }
 
             metric[pod['username']]["mem_req"] += int(pod['memory'].split("/")[0])
@@ -364,8 +369,8 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
             if metric[username]['mem_all']>0 and metric[username]['cpu_all']>0:
                 value = metric[username]['mem_req']/metric[username]['mem_all'] / 2 + metric[username]['cpu_req']/metric[username]['cpu_all'] / 2
                 data3.append({
-                    "name":username,
-                    "value":value
+                    "name": username,
+                    "value": value
                 })
         # print(data1)
         # print(data2)
@@ -460,13 +465,9 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
         '''
 
         rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(option)
-        option = rtemplate.render(data1=data1,data2=data2,data3=data3)
+        option = rtemplate.render(data1=data1, data2=data2, data3=data3)
 
         return option
 
 
 appbuilder.add_api(Total_Resource_ModelView_Api)
-
-
-
-

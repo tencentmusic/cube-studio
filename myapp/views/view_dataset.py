@@ -6,8 +6,9 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from wtforms.validators import DataRequired, Regexp
 from myapp import app, appbuilder
 from wtforms import StringField, SelectField
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget, MySelect2Widget
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget, Select2ManyWidget
+from myapp.forms import MyBS3TextAreaFieldWidget, MySelect2Widget, MyCommaSeparatedListField, MySelect2ManyWidget, \
+    MySelectMultipleField
 from flask import jsonify, Markup, make_response
 from .baseApi import MyappModelRestApi
 from flask import g, request, redirect
@@ -56,15 +57,14 @@ class Dataset_ModelView_base():
     order_columns = ['id']
     base_filters = [["id", Dataset_Filter, lambda: []]]  # 设置权限过滤器
 
-    add_columns = ['name', 'version', 'label', 'describe', 'subdataset', 'source_type', 'source', 'industry', 'field',
-                   'usage', 'research', 'storage_class', 'file_type', 'years', 'url', 'download_url', 'path',
+    add_columns = ['name', 'version', 'label', 'describe', 'subdataset', 'source_type', 'source', 'field',
+                   'usage', 'storage_class', 'file_type', 'url', 'download_url', 'path',
                    'storage_size', 'entries_num', 'duration', 'price', 'status', 'icon', 'owner', 'features']
     show_columns = ['id', 'name', 'version', 'label', 'describe', 'subdataset', 'segment', 'source_type', 'source',
-                    'industry', 'field', 'usage', 'research', 'storage_class', 'file_type', 'status', 'years', 'url',
+                    'industry', 'field', 'usage', 'storage_class', 'file_type', 'status', 'url',
                     'path', 'download_url', 'storage_size', 'entries_num', 'duration', 'price', 'status', 'icon',
                     'owner', 'features']
-    search_columns = ['name', 'version', 'label', 'describe', 'source_type', 'source', 'industry', 'field', 'usage',
-                      'research', 'storage_class', 'file_type', 'status', 'years', 'url', 'path', 'download_url']
+    search_columns = ['name', 'version', 'label', 'describe', 'source_type', 'source', 'field', 'usage','storage_class', 'file_type', 'status', 'url', 'path', 'download_url']
     spec_label_columns = {
         "subdataset": "子数据集名称",
         "source_type": "来源类型",
@@ -91,12 +91,12 @@ class Dataset_ModelView_base():
     }
 
     edit_columns = add_columns
-    list_columns = ['icon_html', 'name', 'version', 'label', 'describe', 'source_type', 'source', 'status', 'industry',
-                    'field', 'url_html', 'download_url_html', 'usage', 'research', 'storage_class', 'file_type',
-                    'years', 'path_html', 'storage_size', 'entries_num', 'duration', 'price', 'owner', 'ops_html']
+    list_columns = ['icon_html', 'name', 'version', 'label', 'describe','owner', 'source_type', 'source', 'status',
+                    'field', 'url_html', 'download_url_html', 'usage', 'storage_class', 'file_type', 'path_html', 'storage_size', 'entries_num', 'price']
+
     cols_width = {
         "name": {"type": "ellip1", "width": 200},
-        "label": {"type": "ellip2", "width": 300},
+        "label": {"type": "ellip2", "width": 200},
         "version": {"type": "ellip2", "width": 100},
         "describe": {"type": "ellip2", "width": 300},
         "field": {"type": "ellip1", "width": 100},
@@ -201,7 +201,7 @@ class Dataset_ModelView_base():
             label=_(datamodel.obj.lab('field')),
             description='领域',
             widget=MySelect2Widget(can_input=True),
-            choices=[[x, x] for x in ['视觉', "音频", "自然语言", "风控", "搜索", '推荐']],
+            choices=[[x, x] for x in ['视觉', "音频", "自然语言",'多模态', "风控", "搜索", '推荐','广告']],
             validators=[]
         ),
         "source_type": SelectField(
@@ -214,16 +214,16 @@ class Dataset_ModelView_base():
         ),
         "source": SelectField(
             label=_(datamodel.obj.lab('source')),
-            description='数据来源',
+            description='数据来源，可自己填写',
             widget=MySelect2Widget(can_input=True),
             choices=[[x, x] for x in
                      ['github', "kaggle", "天池", 'UCI', 'AWS 公开数据集', 'Google 公开数据集', "采购公司1", "标注团队1", "政府网站1"]],
             validators=[]
         ),
-        "file_type": SelectField(
+        "file_type": MySelectMultipleField(
             label=_(datamodel.obj.lab('file_type')),
             description='文件类型',
-            widget=MySelect2Widget(can_input=True),
+            widget=Select2ManyWidget(),
             choices=[[x, x] for x in ["png", "jpg", 'txt', 'csv', 'wav', 'mp3', 'mp4', 'nv4', 'zip', 'gz']],
         ),
         "storage_class": SelectField(

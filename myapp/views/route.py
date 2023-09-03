@@ -1,7 +1,4 @@
-
-
 from myapp import app
-
 
 config = app.config
 
@@ -19,5 +16,3 @@ def healthcheck():
 @app.route("/ping")
 def ping():
     return "OK"
-
-

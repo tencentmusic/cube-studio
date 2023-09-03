@@ -9,7 +9,7 @@ from myapp.utils import core
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from flask_appbuilder.actions import action
-from myapp import app, appbuilder,db
+from myapp import app, appbuilder, db
 from flask_babel import lazy_gettext
 import re
 import pytz
@@ -21,9 +21,9 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from myapp import security_manager
 from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget,Select2Widget
-from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget, MyBS3TextFieldWidget,MySelectMultipleField
-from myapp.views.view_team import Project_Join_Filter,filter_join_org_project
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2ManyWidget, Select2Widget
+from myapp.forms import MyBS3TextAreaFieldWidget, MySelect2Widget, MyBS3TextFieldWidget, MySelectMultipleField
+from myapp.views.view_team import Project_Join_Filter, filter_join_org_project
 from flask import (
     flash,
     g,
@@ -41,14 +41,15 @@ from .baseApi import (
 )
 
 from flask_appbuilder import expose
-import datetime,time,json
+import datetime, time, json
+
 conf = app.config
 
-
 global_all_service_load = {
-    "data":None,
-    "check_time":None
+    "data": None,
+    "check_time": None
 }
+
 
 class InferenceService_Filter(MyappFilter):
     # @pysnooper.snoop()
@@ -62,13 +63,19 @@ class InferenceService_Filter(MyappFilter):
 
 class InferenceService_ModelView_base():
     datamodel = SQLAInterface(InferenceService)
-    check_redirect_list_url = conf.get('MODEL_URLS',{}).get('inferenceservice','')
+    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('inferenceservice', '')
 
     # add_columns = ['service_type','project','name', 'label','images','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host','hpa','metrics','health']
-    add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path', 'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa','priority', 'canary', 'shadow', 'host','inference_config',  'working_dir', 'command','volume_mount', 'env', 'ports', 'metrics', 'health','expand','sidecar']
-    show_columns = ['service_type','project', 'name', 'label','model_name', 'model_version', 'images', 'model_path', 'images', 'volume_mount','sidecar','working_dir', 'command', 'env', 'resource_memory',
-                    'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'inference_host_url','hpa','priority', 'canary', 'shadow', 'health','model_status','expand','metrics','deploy_history','host','inference_config']
-    enable_echart = True
+    add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path',
+                   'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa', 'priority',
+                   'canary', 'shadow', 'host', 'inference_config', 'working_dir', 'command', 'volume_mount', 'env',
+                   'ports', 'metrics', 'health', 'expand', 'sidecar']
+    show_columns = ['service_type', 'project', 'name', 'label', 'model_name', 'model_version', 'images', 'model_path',
+                    'images', 'volume_mount', 'sidecar', 'working_dir', 'command', 'env', 'resource_memory',
+                    'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'inference_host_url',
+                    'hpa', 'priority', 'canary', 'shadow', 'health', 'model_status', 'expand', 'metrics',
+                    'deploy_history', 'host', 'inference_config']
+    enable_echart = False
     edit_columns = add_columns
 
     add_form_query_rel_fields = {
@@ -76,32 +83,34 @@ class InferenceService_ModelView_base():
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
 
-    list_columns = ['project','service_type','label','model_name_url','model_version','inference_host_url','ip','model_status','resource','replicas_html','creator','modified','operate_html']
-    cols_width={
-        "project":{"type": "ellip2", "width": 150},
+    list_columns = ['project', 'service_type', 'label', 'model_name_url', 'model_version', 'inference_host_url', 'ip',
+                    'model_status', 'resource', 'replicas_html', 'creator', 'modified', 'operate_html']
+    cols_width = {
+        "project": {"type": "ellip2", "width": 150},
         "label": {"type": "ellip2", "width": 300},
         "service_type": {"type": "ellip2", "width": 100},
-        "model_name_url":{"type": "ellip2", "width": 300},
+        "model_name_url": {"type": "ellip2", "width": 300},
         "model_version": {"type": "ellip2", "width": 200},
-        "inference_host_url": {"type": "ellip2", "width": 500},
+        "inference_host_url": {"type": "ellip1", "width": 500},
         "ip": {"type": "ellip2", "width": 250},
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 350},
         "resource": {"type": "ellip2", "width": 300},
     }
-    search_columns = ['name','created_by','project','service_type','label','model_name','model_version','model_path','host','model_status','resource_gpu']
+    search_columns = ['name', 'created_by', 'project', 'service_type', 'label', 'model_name', 'model_version',
+                      'model_path', 'host', 'model_status', 'resource_gpu']
     ops_link = [
         {
             "text": "服务资源监控",
-            "url": conf.get('GRAFANA_SERVICE_PATH','/grafana/d/istio-service/istio-service?var-namespace=service&var-service=')+"All"
+            "url": conf.get('GRAFANA_SERVICE_PATH','/grafana/d/istio-service/istio-service?var-namespace=service&var-service=') + "All"
         }
     ]
     label_title = '推理服务'
-    base_order = ('id','desc')
+    base_order = ('id', 'desc')
     order_columns = ['id']
 
-    base_filters = [["id",InferenceService_Filter, lambda: []]]
+    base_filters = [["id", InferenceService_Filter, lambda: []]]
     images = []
     INFERNENCE_IMAGES = list(conf.get('INFERNENCE_IMAGES', {}).values())
     for item in INFERNENCE_IMAGES:
@@ -109,8 +118,8 @@ class InferenceService_ModelView_base():
     service_type_choices= ['serving','tfserving','torch-server','onnxruntime','triton-server']
     spec_label_columns = {
         # "host": _("域名：测试环境test.xx，调试环境 debug.xx"),
-        "resource":"资源",
-        "replicas_html":"副本数"
+        "resource": "资源",
+        "replicas_html": "副本数"
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
     host_rule=",<br>".join([cluster+"集群:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
@@ -140,14 +149,14 @@ class InferenceService_ModelView_base():
             description='容器的agent代理,istio用于服务网格',
             widget=Select2ManyWidget(),
             validators=[],
-            choices=[['istio','istio']]
+            choices=[['istio', 'istio']]
         ),
         "priority": SelectField(
             _('服务优先级'),
             widget=MySelect2Widget(),
             default=1,
             description='优先满足高优先级的资源需求，同时保证每个服务的最低pod副本数',
-            choices=[[1, '高优先级'],[0, '低优先级']],
+            choices=[[1, '高优先级'], [0, '低优先级']],
             validators=[DataRequired()]
         ),
         'model_name': StringField(
@@ -159,7 +168,7 @@ class InferenceService_ModelView_base():
         ),
         'model_version': StringField(
             _('模型版本号'),
-            default= datetime.datetime.now().strftime('v%Y.%m.%d.1'),
+            default=datetime.datetime.now().strftime('v%Y.%m.%d.1'),
             description='版本号，时间格式',
             widget=MyBS3TextFieldWidget(),
             validators=[DataRequired(), Length(1, 54)]
@@ -190,8 +199,8 @@ class InferenceService_ModelView_base():
         'expand': StringField(
             _(datamodel.obj.lab('expand')),
             default=json.dumps({
-                "help_url":"https://github.com/tencentmusic/cube-studio/tree/master/images/serving"
-            },indent=4,ensure_ascii=False),
+                "help_url": conf.get('GIT_URL')+ "/images/serving"
+            }, indent=4, ensure_ascii=False),
             description='扩展字段',
             widget=MyBS3TextAreaFieldWidget(rows=3)
         ),
@@ -209,13 +218,13 @@ class InferenceService_ModelView_base():
             description='流量复制，将该服务的所有请求，按比例复制到目标服务上，格式 service1:20%,service2:30%，表示复制20%流量到service1，30%到service2',
             widget=BS3TextFieldWidget()
         ),
-        'volume_mount':StringField(
+        'volume_mount': StringField(
             _(datamodel.obj.lab('volume_mount')),
             default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
             description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',
             widget=BS3TextFieldWidget()
         ),
-        'model_path':StringField(
+        'model_path': StringField(
             _('模型地址'),
             default='',
             description=Markup('tfserving：仅支持添加了服务签名的saved_model目录地址，例如 /xx/saved_model<br>'
@@ -238,7 +247,7 @@ class InferenceService_ModelView_base():
             description='启动命令，<font color="#FF0000">留空时将被自动重置</font>',
             widget=MyBS3TextAreaFieldWidget(rows=3)
         ),
-        'env':StringField(
+        'env': StringField(
             _(datamodel.obj.lab('env')),
             default='',
             description='使用模板的task自动添加的环境变量，支持模板变量。书写格式:每行一个环境变量env_key=env_value',
@@ -301,7 +310,6 @@ class InferenceService_ModelView_base():
 ]
     '''
 
-
     edit_form_extra_fields = add_form_extra_fields
     # edit_form_extra_fields['name']=StringField(_(datamodel.obj.lab('name')), description='英文名(小写字母、数字、- 组成)，最长50个字符',widget=MyBS3TextFieldWidget(readonly=True), validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
 
@@ -336,8 +344,8 @@ class InferenceService_ModelView_base():
         }
 
     # @pysnooper.snoop()
-    def tfserving_model_config(self,model_name,model_version,model_path):
-        config_str='''
+    def tfserving_model_config(self, model_name, model_version, model_path):
+        config_str = '''
 model_config_list {
   config {
     name: "%s"
@@ -350,12 +358,11 @@ model_config_list {
     }
   }
 }
-        '''%(model_name,model_path.strip('/'),model_version)
+        ''' % (model_name, model_path.strip('/'), model_version)
         return config_str
 
-
     def tfserving_monitoring_config(self):
-        config_str='''
+        config_str = '''
 prometheus_config {
   enable: true
   path: "/metrics"
@@ -384,9 +391,9 @@ platform_configs {
         '''
         return config_str
 
-# 这些配置可在环境变量中  TS_<PROPERTY_NAME>中实现
+    # 这些配置可在环境变量中  TS_<PROPERTY_NAME>中实现
     def torch_config(self):
-        config_str='''
+        config_str = '''
 inference_address=http://0.0.0.0:8080
 management_address=http://0.0.0.0:8081
 metrics_address=http://0.0.0.0:8082
@@ -405,7 +412,7 @@ vmargs=-Dlog4j.configurationFile=file:///config/log4j2.xml
         return config_str
 
     def torch_log(self):
-        config_str='''
+        config_str = '''
 <RollingFile name="access_log" fileName="${env:LOG_LOCATION:-logs}/access_log.log" filePattern="${env:LOG_LOCATION:-logs}/access_log.%d{dd-MMM}.log.gz"> 
   <PatternLayout pattern="%d{ISO8601} - %m%n"/>  
   <Policies> 
@@ -418,15 +425,15 @@ vmargs=-Dlog4j.configurationFile=file:///config/log4j2.xml
         '''
         return config_str
 
-    def triton_config(self,item,model_type):
-        plat_form={
-            "onnx":"onnxruntime_onnx",
-            "tensorrt":"tensorrt_plan",
-            "torch":"pytorch_libtorch",
-            "pytorch":"pytorch_libtorch",
-            "tf":"tensorflow_savedmodel"
+    def triton_config(self, item, model_type):
+        plat_form = {
+            "onnx": "onnxruntime_onnx",
+            "tensorrt": "tensorrt_plan",
+            "torch": "pytorch_libtorch",
+            "pytorch": "pytorch_libtorch",
+            "tf": "tensorflow_savedmodel"
         }
-        parameters=''
+        parameters = ''
         if model_type == 'tf':
             parameters = '''
 optimization { execution_accelerators { 
@@ -435,13 +442,13 @@ optimization { execution_accelerators {
         parameters { key: "precision_mode" value: "FP16" }}] 
 }}
         '''
-        if model_type=='onnx':
+        if model_type == 'onnx':
             parameters = '''
 parameters { key: "intra_op_thread_count" value: { string_value: "0" } }
 parameters { key: "execution_mode" value: { string_value: "1" } }
 parameters { key: "inter_op_thread_count" value: { string_value: "0" } }
         '''
-        if model_type=='pytorch' or model_type=='torch':
+        if model_type == 'pytorch' or model_type == 'torch':
             parameters = '''
 parameters: { key: "DISABLE_OPTIMIZED_EXECUTION" value: { string_value:"true" } }
 parameters: { key: "INFERENCE_MODE" value: { string_value: "false" } }
@@ -455,7 +462,7 @@ max_batch_size: 0
 input %s
 output %s
 %s
-        '''%(item.model_name,plat_form[model_type],self.input_demo,self.output_demo,parameters)
+        ''' % (item.model_name, plat_form[model_type], self.input_demo, self.output_demo, parameters)
         return config_str
 
     # @pysnooper.snoop(watch_explode=('item'))
@@ -468,15 +475,15 @@ output %s
 
         # 先存储特定参数到expand
         expand = json.loads(item.expand) if item.expand else {}
-        print(self.src_item_json)
-        model_version = item.model_version.replace('v','').replace('.','').replace(':','')
-        model_path = "/"+item.model_path.strip('/') if item.model_path else ''
+        # print(self.src_item_json)
+        model_version = item.model_version.replace('v', '').replace('.', '').replace(':', '')
+        model_path = "/" + item.model_path.strip('/') if item.model_path else ''
         # 对网络地址先同一在命令中下载
-        download_command=''
+        download_command = ''
         if 'http:' in item.model_path or 'https:' in item.model_path:
-            model_file = item.model_path[item.model_path.rindex('/')+1:]
+            model_file = item.model_path[item.model_path.rindex('/') + 1:]
             model_path = model_file
-            download_command = 'wget %s && '%item.model_path
+            download_command = 'wget %s && ' % item.model_path
             if '.zip' in item.model_path:
                 download_command+='unzip -O %s && '%model_file
                 model_path = model_file.replace('.zip', '').replace('.tar.gz', '')  # 这就要求压缩文件和目录同名，并且下面直接就是目录。其他格式的文件不能压缩
@@ -484,43 +491,43 @@ output %s
                 download_command += 'tar -zxvf %s && '%model_file
                 model_path = model_file.replace('.zip','').replace('.tar.gz','')  # 这就要求压缩文件和目录同名，并且下面直接就是目录。其他格式的文件不能压缩
 
-        if item.service_type=='tfserving':
+        if item.service_type == 'tfserving':
             des_model_path = "/models/%s/" % (item.model_name,)
-            des_version_path = "/models/%s/%s/"%(item.model_name,model_version)
+            des_version_path = "/models/%s/%s/" % (item.model_name, model_version)
             if not item.id or not item.command:
                 item.command=download_command+'''mkdir -p %s && cp -r %s/* %s  &&  /usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config'''%(des_version_path,model_path,des_version_path)
 
-            item.health='8501:/v1/models/%s/versions/%s/metadata'%(item.model_name,model_version)
+            item.health = '8501:/v1/models/%s/versions/%s/metadata' % (item.model_name, model_version)
 
             expand['models.config']=expand['models.config'] if expand.get('models.config','') else self.tfserving_model_config(item.model_name,model_version,des_model_path)
             expand['monitoring.config']=expand['monitoring.config'] if expand.get('monitoring.config','') else self.tfserving_monitoring_config()
             expand['platform.config'] = expand['platform.config'] if expand.get('platform.config','') else self.tfserving_platform_config()
             if not item.inference_config:
-                item.inference_config='''
+                item.inference_config = '''
 ---models.config
 %s
 ---monitoring.config
 %s
 ---platform.config
 %s
-                '''%(
-                    self.tfserving_model_config(item.model_name,model_version,des_model_path),
+                ''' % (
+                    self.tfserving_model_config(item.model_name, model_version, des_model_path),
                     self.tfserving_monitoring_config(),
                     self.tfserving_platform_config()
-                    )
+                )
 
-        if item.service_type=='torch-server':
+        if item.service_type == 'torch-server':
             if not item.working_dir:
-                item.working_dir='/models'
+                item.working_dir = '/models'
             model_file = model_path[model_path.rindex('/') + 1:] if '/' in model_path else model_path
-            tar_command='ls'
+            tar_command = 'ls'
             if '.mar' not in model_path:
                 tar_command = 'torch-model-archiver --model-name %s --version %s --handler %s --serialized-file %s --export-path /models -f'%(item.model_name,model_version,item.transformer or item.model_type,model_path)
             else:
-                if ('http:' in item.model_path or 'https://' in item.model_path) and item.working_dir=='/models':
+                if ('http:' in item.model_path or 'https://' in item.model_path) and item.working_dir == '/models':
                     print('has download to des_version_path')
                 else:
-                    tar_command='cp -rf %s /models/'%(model_path)
+                    tar_command = 'cp -rf %s /models/' % (model_path)
             if not item.id or not item.command:
                 item.command=download_command+'cp /config/* /models/ && '+tar_command+' && torchserve --start --model-store /models --models %s=%s.mar --foreground --ts-config=/config/config.properties'%(item.model_name,item.model_name)
 
@@ -538,12 +545,11 @@ output %s
                     self.torch_log()
                 )
 
-
-        if item.service_type=='triton-server':
+        if item.service_type == 'triton-server':
             # 识别模型类型
             model_type = 'tf'
             if '.onnx' in model_path:
-                model_type='onnx'
+                model_type = 'onnx'
             if '.plan' in model_path:
                 model_type = 'tensorrt'
             if '.pt' in model_path or '.pth' in model_path:
@@ -556,13 +562,13 @@ output %s
                     model_file_ext = model_path.split(".")[-1]
                     item.command=download_command+'mkdir -p /models/{model_name}/{model_version}/ && cp /config/* /models/{model_name}/ && cp -r {model_path} /models/{model_name}/{model_version}/model.{model_file_ext} && tritonserver --model-repository=/models --strict-model-config=true  --log-verbose=1'.format(model_path=model_path,model_name=item.model_name,model_version=model_version,model_file_ext=model_file_ext)
 
-            config_str = self.triton_config(item,model_type)
-            old_config_str = json.loads(self.src_item_json['expand']).get('config.pbtxt','') if item.id else ''
-            new_config_str = expand.get('config.pbtxt','')
+            config_str = self.triton_config(item, model_type)
+            old_config_str = json.loads(self.src_item_json['expand']).get('config.pbtxt', '') if item.id else ''
+            new_config_str = expand.get('config.pbtxt', '')
             if not item.id:
-                expand['config.pbtxt']=config_str
-            elif new_config_str==old_config_str and new_config_str!=config_str:
-                expand['config.pbtxt']=config_str
+                expand['config.pbtxt'] = config_str
+            elif new_config_str == old_config_str and new_config_str != config_str:
+                expand['config.pbtxt'] = config_str
             elif not new_config_str:
                 expand['config.pbtxt'] = config_str
 
@@ -574,38 +580,37 @@ output %s
                     config_str,
                 )
 
-
-        if item.service_type=='onnxruntime':
+        if item.service_type == 'onnxruntime':
             if not item.id or not item.command:
-                item.command=download_command+'./onnxruntime_server --log_level info --model_path  %s'%model_path
+                item.command = download_command + './onnxruntime_server --log_level info --model_path  %s' % model_path
 
-        item.name=item.service_type+"-"+item.model_name+"-"+model_version
+        item.name = item.model_name + "-" + model_version
+        if len(item.name)>60:
+            item.name = item.name[:60]
         # item.expand = json.dumps(expand,indent=4,ensure_ascii=False)
-
-
 
     # @pysnooper.snoop()
     def pre_add(self, item):
         if not item.model_path:
-            item.model_path=''
+            item.model_path = ''
         if not item.volume_mount:
-            item.volume_mount=item.project.volume_mount
+            item.volume_mount = item.project.volume_mount
         self.use_expand(item)
 
         if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
             try:
-                flash('检测到模型地址为网络压缩文件，需压缩文件名和解压后文件夹名相同','warning')
+                flash('检测到模型地址为网络压缩文件，需压缩文件名和解压后文件夹名相同', 'warning')
             except Exception as e:
                 pass
                 print(e)
 
-    def delete_old_service(self,service_name,cluster):
+    def delete_old_service(self, service_name, cluster):
         try:
             from myapp.utils.py.py_k8s import K8s
-            k8s_client = K8s(cluster.get('KUBECONFIG',''))
+            k8s_client = K8s(cluster.get('KUBECONFIG', ''))
             service_namespace = conf.get('SERVICE_NAMESPACE')
-            for namespace in [service_namespace,]:
-                for name in [service_name,'debug-'+service_name,'test-'+service_name]:
+            for namespace in [service_namespace, ]:
+                for name in [service_name, 'debug-' + service_name, 'test-' + service_name]:
                     service_external_name = (name + "-external").lower()[:60].strip('-')
                     k8s_client.delete_deployment(namespace=namespace, name=name)
                     k8s_client.delete_service(namespace=namespace, name=name)
@@ -638,14 +643,14 @@ output %s
             flash('发现模型服务变更，启动清理服务%s:%s'%(self.src_item_json.get('model_name',''),self.src_item_json.get('model_version','')),'success')
 
 
-        src_project_id = self.src_item_json.get('project_id',0)
-        if src_project_id and src_project_id!=item.project.id:
+        src_project_id = self.src_item_json.get('project_id', 0)
+        if src_project_id and src_project_id != item.project.id:
             try:
                 from myapp.models.model_team import Project
                 src_project = db.session.query(Project).filter_by(id=int(src_project_id)).first()
-                if src_project and src_project.cluster['NAME']!=item.project.cluster['NAME']:
+                if src_project and src_project.cluster['NAME'] != item.project.cluster['NAME']:
                     # 如果集群变了，原有集群的已经部署的服务要clear掉
-                    service_name = self.src_item_json.get('name','')
+                    service_name = self.src_item_json.get('name', '')
                     if service_name:
                         from myapp.utils.py.py_k8s import K8s
                         k8s_client = K8s(src_project.cluster.get('KUBECONFIG', ''))
@@ -667,7 +672,7 @@ output %s
 
     # 事后无法读取到project属性
     def pre_delete(self, item):
-        self.delete_old_service(item.name,item.project.cluster)
+        self.delete_old_service(item.name, item.project.cluster)
         flash('服务已清理完成', category='success')
 
     @expose('/clear/<service_id>', methods=['POST', "GET"])
@@ -675,42 +680,40 @@ output %s
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         if service:
             self.delete_old_service(service.name, service.project.cluster)
-            service.model_status='offline'
+            service.model_status = 'offline'
             if not service.deploy_history:
                 service.deploy_history=''
             service.deploy_history = service.deploy_history + "\n" + "clear: %s %s" % (g.user.username,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             db.session.commit()
             flash('服务清理完成', category='success')
-        return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice',''))
+        return redirect(conf.get('MODEL_URLS', {}).get('inferenceservice', ''))
 
-
-    @expose('/deploy/debug/<service_id>',methods=['POST',"GET"])
+    @expose('/deploy/debug/<service_id>', methods=['POST', "GET"])
     # @pysnooper.snoop()
-    def deploy_debug(self,service_id):
-        return self.deploy(service_id,env='debug')
+    def deploy_debug(self, service_id):
+        return self.deploy(service_id, env='debug')
 
-    @expose('/deploy/test/<service_id>',methods=['POST',"GET"])
+    @expose('/deploy/test/<service_id>', methods=['POST', "GET"])
     # @pysnooper.snoop()
-    def deploy_test(self,service_id):
-        return self.deploy(service_id,env='test')
+    def deploy_test(self, service_id):
+        return self.deploy(service_id, env='test')
 
     @expose('/deploy/prod/<service_id>', methods=['POST', "GET"])
     # @pysnooper.snoop()
     def deploy_prod(self, service_id):
-        return self.deploy(service_id,env='prod')
+        return self.deploy(service_id, env='prod')
 
-
-    @expose('/deploy/update/', methods=['POST','GET'])
+    @expose('/deploy/update/', methods=['POST', 'GET'])
     # @pysnooper.snoop(watch_explode=('deploy'))
     def update_service(self):
         args = request.json if request.json else {}
         namespace = conf.get('SERVICE_NAMESPACE', 'service')
         args.update(request.args)
-        service_id = int(args.get('service_id',0))
+        service_id = int(args.get('service_id', 0))
         service_name = args.get('service_name', '')
         model_name = args.get('model_name', '')
         model_version = args.get('model_version', '')
-        service=None
+        service = None
 
         if service_id:
             service = db.session.query(InferenceService).filter_by(id=service_id).first()
@@ -718,50 +721,49 @@ output %s
             service = db.session.query(InferenceService).filter_by(name=service_name).first()
         elif model_name:
             if model_version:
-                service = db.session.query(InferenceService)\
-                    .filter(InferenceService.model_name == model_name)\
-                    .filter(InferenceService.model_version == model_version)\
-                    .filter(InferenceService.model_status == 'online')\
+                service = db.session.query(InferenceService) \
+                    .filter(InferenceService.model_name == model_name) \
+                    .filter(InferenceService.model_version == model_version) \
+                    .filter(InferenceService.model_status == 'online') \
                     .order_by(InferenceService.id.desc()).first()
             else:
-                service = db.session.query(InferenceService)\
-                    .filter(InferenceService.model_name==model_name)\
-                    .filter(InferenceService.model_status=='online')\
+                service = db.session.query(InferenceService) \
+                    .filter(InferenceService.model_name == model_name) \
+                    .filter(InferenceService.model_status == 'online') \
                     .order_by(InferenceService.id.desc()).first()
 
         if service:
-            status=0
-            message='success'
-            if request.method=='POST':
-                min_replicas = int(args.get('min_replicas',0))
+            status = 0
+            message = 'success'
+            if request.method == 'POST':
+                min_replicas = int(args.get('min_replicas', 0))
                 if min_replicas:
                     service.min_replicas = min_replicas
                     if service.max_replicas < min_replicas:
-                        service.max_replicas=min_replicas
+                        service.max_replicas = min_replicas
                     db.session.commit()
                     try:
                         self.deploy(service.id)
                     except Exception as e:
                         print(e)
-                        status=-1
-                        message=str(e)
+                        status = -1
+                        message = str(e)
                 time.sleep(3)
 
-
             from myapp.utils.py.py_k8s import K8s
-            k8s_client = K8s(service.project.cluster.get('KUBECONFIG',''))
-            deploy=None
+            k8s_client = K8s(service.project.cluster.get('KUBECONFIG', ''))
+            deploy = None
             try:
-                deploy = k8s_client.AppsV1Api.read_namespaced_deployment(name=service.name,namespace=namespace)
+                deploy = k8s_client.AppsV1Api.read_namespaced_deployment(name=service.name, namespace=namespace)
             except Exception as e:
                 print(e)
-                status=-1,
-                message=str(e)
+                status = -1,
+                message = str(e)
 
-            back={
+            back = {
                 "result": {
-                    "service":service.to_json(),
-                    "deploy":deploy.to_dict() if deploy else {}
+                    "service": service.to_json(),
+                    "deploy": deploy.to_dict() if deploy else {}
                 },
                 "status": status,
                 "message": message
@@ -771,55 +773,51 @@ output %s
 
         else:
             return jsonify({
-                "result":"",
-                "status":-1,
-                "message":"service not exist or service not online"
+                "result": "",
+                "status": -1,
+                "message": "service not exist or service not online"
             })
 
     # @pysnooper.snoop()
-    def deploy(self,service_id,env='prod'):
+    def deploy(self, service_id, env='prod'):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
-        namespace = conf.get('SERVICE_NAMESPACE','service')
+        namespace = conf.get('SERVICE_NAMESPACE', 'service')
         name = service.name
         command = service.command
         deployment_replicas = service.min_replicas
-        if env=='debug':
-            name = env+'-'+service.name
+        if env == 'debug':
+            name = env + '-' + service.name
             command = 'sleep 43200'
             deployment_replicas = 1
             # namespace=pre_namespace
 
-        if env =='test':
-            name = env+'-'+service.name
+        if env == 'test':
+            name = env + '-' + service.name
             # namespace=pre_namespace
 
-        image_secrets = conf.get('HUBSECRET', [])
-        user_hubsecrets = db.session.query(Repository.hubsecret).filter(Repository.created_by_fk == g.user.id).all()
-        if user_hubsecrets:
-            for hubsecret in user_hubsecrets:
-                if hubsecret[0] not in image_secrets:
-                    image_secrets.append(hubsecret[0])
 
+        image_pull_secrets = conf.get('HUBSECRET', [])
+        user_repositorys = db.session.query(Repository).filter(Repository.created_by_fk == g.user.id).all()
+        image_pull_secrets = list(set(image_pull_secrets + [rep.hubsecret for rep in user_repositorys]))
 
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(service.project.cluster.get('KUBECONFIG',''))
+        k8s_client = K8s(service.project.cluster.get('KUBECONFIG', ''))
 
         config_datas = service.inference_config.strip().split("\n---") if service.inference_config else []
         config_datas = [x.strip() for x in config_datas if x.strip()]
         volume_mount = service.volume_mount
-        print('文件个数：',len(config_datas))
-        config_data={}
+        print('文件个数：', len(config_datas))
+        config_data = {}
         for data in config_datas:
-            file_name = re.sub('^-*', '',data.split('\n')[0]).strip()
+            file_name = re.sub('^-*', '', data.split('\n')[0]).strip()
             file_content = '\n'.join(data.split('\n')[1:])
             if file_name and file_content:
                 config_data[file_name] = file_content
         if config_data:
             print('create configmap')
-            k8s_client.create_configmap(namespace=namespace,name=name,data=config_data,labels={'app':name})
-            volume_mount += ",%s(configmap):/config/"%name
+            k8s_client.create_configmap(namespace=namespace, name=name, data=config_data, labels={'app': name})
+            volume_mount += ",%s(configmap):/config/" % name
         ports = [int(port) for port in service.ports.split(',')]
-
 
         pod_env = service.env
         pod_env += "\nKUBEFLOW_ENV=" + env
@@ -830,16 +828,17 @@ output %s
         pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area', 'guangzhou')
         pod_env += "\nRESOURCE_CPU=" + service.resource_cpu
         pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
+        pod_env += "\nRESOURCE_GPU=" + service.resource_gpu
         pod_env = pod_env.strip(',')
 
-        if env=='test' or env =='debug':
+        if env == 'test' or env == 'debug':
             try:
                 print('delete deployment')
-                k8s_client.delete_deployment(namespace=namespace,name=name)
+                k8s_client.delete_deployment(namespace=namespace, name=name)
             except Exception as e:
                 print(e)
         # 因为所有的服务流量通过ingress实现，所以没有isito的envoy代理
-        labels = {"app":name,"user":service.created_by.username,'pod-type':"inference"}
+        labels = {"app": name, "user": service.created_by.username, 'pod-type': "inference"}
 
         try:
             pod_ports = copy.deepcopy(ports)
@@ -855,14 +854,15 @@ output %s
                     health_port = int(service.health[:service.health.index(":")])
                     pod_ports.append(health_port)
             except Exception as e:
-                print(e)
+                pass
+                # print(e)
 
             pod_ports = list(set(pod_ports))
             print('create deployment')
-            annotations={}
+            annotations = {}
             # https://istio.io/latest/docs/reference/config/annotations/
-            if service.sidecar and 'istio' in service.sidecar and service.service_type=='serving':
-                labels['sidecar.istio.io/inject']='true'
+            if service.sidecar and 'istio' in service.sidecar and service.service_type == 'serving':
+                labels['sidecar.istio.io/inject'] = 'true'
 
             k8s_client.create_deployment(
                 namespace=namespace,
@@ -870,7 +870,7 @@ output %s
                 replicas=deployment_replicas,
                 labels=labels,
                 annotations=annotations,
-                command=['sh','-c',command] if command else None,
+                command=['sh', '-c', command] if command else None,
                 args=None,
                 volume_mount=volume_mount,
                 working_dir=service.working_dir,
@@ -878,20 +878,19 @@ output %s
                 resource_memory=service.resource_memory,
                 resource_cpu=service.resource_cpu,
                 resource_gpu=service.resource_gpu if service.resource_gpu else '',
-                image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
-                image_pull_secrets=image_secrets,
+                image_pull_policy=conf.get('IMAGE_PULL_POLICY', 'Always'),
+                image_pull_secrets=image_pull_secrets,
                 image=service.images,
-                hostAliases=conf.get('HOSTALIASES',''),
+                hostAliases=conf.get('HOSTALIASES', ''),
                 env=pod_env,
                 privileged=False,
                 accounts=None,
                 username=service.created_by.username,
                 ports=pod_ports,
-                health=service.health if ':' in service.health and env!='debug' else None
+                health=service.health if ':' in service.health and env != 'debug' else None
             )
         except Exception as e:
-            flash('deploymnet:'+str(e),'warning')
-
+            flash('deploymnet:' + str(e), 'warning')
 
         # 监控
         if service.metrics:
@@ -901,7 +900,7 @@ output %s
                 "prometheus.io/path": service.metrics.split(":")[1]
             }
         else:
-            annotations={}
+            annotations = {}
         print('deploy service')
         # 端口改变才重新部署服务
 
@@ -914,22 +913,24 @@ output %s
             selector=labels
         )
         # 如果域名配置的gateway，就用这个
-        host = service.name+"."+ service.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
+        host = service.name + "." + service.project.cluster.get('SERVICE_DOMAIN', conf.get('SERVICE_DOMAIN', ''))
 
         if service.host:
-            host=service.host.replace('http://','').replace('https://','').strip()
-            if "/" in host:
-                host = host[:host.index("/")]
+            config_host = service.host.replace('http://', '').replace('https://', '').strip()
+            if "/" in config_host:
+                config_host = config_host[:config_host.index("/")]
+            if config_host:
+                host=config_host
 
         # 前缀来区分不同的环境服务
-        if env=='debug' or env=='test':
-            host=env+'.'+host
+        if env == 'debug' or env == 'test':
+            host = env + '.' + host
         try:
             print('deploy istio ingressgateway')
             k8s_client.create_istio_ingress(
                 namespace=namespace,
                 name=name,
-                host = host,
+                host=host,
                 ports=service.ports.split(','),
                 canary=service.canary,
                 shadow=service.shadow
@@ -939,7 +940,7 @@ output %s
 
         # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
 
-        SERVICE_EXTERNAL_IP=[]
+        SERVICE_EXTERNAL_IP = []
         # 使用项目组ip
         if service.project.expand:
             ip = json.loads(service.project.expand).get('SERVICE_EXTERNAL_IP', '')
@@ -954,20 +955,21 @@ output %s
 
         # 使用当前ip
         if not SERVICE_EXTERNAL_IP:
-            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host # 如果捕获到端口号，要去掉
-            if ip=='127.0.0.1':
-                host = service.project.cluster.get('HOST','')
-                if not host:
+            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  # 如果捕获到端口号，要去掉
+            if ip == '127.0.0.1':
+                host = service.project.cluster.get('HOST', '')
+                if host:
+                    host = host[:host.rindex(':')] if ':' in host else host
                     SERVICE_EXTERNAL_IP = [host]
-            elif core.checkip(ip):
-                SERVICE_EXTERNAL_IP=[ip]
 
+            elif core.checkip(ip):
+                SERVICE_EXTERNAL_IP = [ip]
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
             SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
 
-            service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
+            service_ports = [[20000 + 10 * service.id + index, port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             print('deploy proxy ip')
             k8s_client.create_service(
@@ -976,23 +978,23 @@ output %s
                 username=service.created_by.username,
                 ports=service_ports,
                 selector=labels,
-                external_ip=SERVICE_EXTERNAL_IP
+                external_ip=SERVICE_EXTERNAL_IP,
+                # external_traffic_policy='Local'
             )
-
 
         # # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
         # ip和端口形式只定向到生产，因为不能像泛化域名一样随意添加
-        TKE_EXISTED_LBID=''
+        TKE_EXISTED_LBID = ''
         if service.project.expand:
-            TKE_EXISTED_LBID = json.loads(service.project.expand).get('TKE_EXISTED_LBID',"")
+            TKE_EXISTED_LBID = json.loads(service.project.expand).get('TKE_EXISTED_LBID', "")
         if not TKE_EXISTED_LBID:
-            TKE_EXISTED_LBID = service.project.cluster.get("TKE_EXISTED_LBID",'')
+            TKE_EXISTED_LBID = service.project.cluster.get("TKE_EXISTED_LBID", '')
         if not TKE_EXISTED_LBID:
-            TKE_EXISTED_LBID = conf.get('TKE_EXISTED_LBID','')
+            TKE_EXISTED_LBID = conf.get('TKE_EXISTED_LBID', '')
 
         if not SERVICE_EXTERNAL_IP and TKE_EXISTED_LBID:
             TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')[0]
-            service_ports = [[20000+10*service.id+index,port] for index,port in enumerate(ports)]
+            service_ports = [[20000 + 10 * service.id + index, port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
                 namespace=namespace,
@@ -1002,21 +1004,20 @@ output %s
                 selector=labels,
                 service_type='LoadBalancer',
                 annotations={
-                    "service.kubernetes.io/tke-existed-lbid":TKE_EXISTED_LBID,
+                    "service.kubernetes.io/tke-existed-lbid": TKE_EXISTED_LBID,
                 }
             )
 
-
-        if env=='prod':
+        if env == 'prod':
             hpas = re.split(',|;', service.hpa)
             regex = re.compile(r"\(.*\)")
-            if float(regex.sub('', service.resource_gpu))<1:
+            if float(regex.sub('', service.resource_gpu)) < 1:
                 for hpa in copy.deepcopy(hpas):
                     if 'gpu' in hpa:
                         hpas.remove(hpa)
 
             # 伸缩容
-            if int(service.max_replicas)>int(service.min_replicas) and service.hpa:
+            if int(service.max_replicas) > int(service.min_replicas) and service.hpa:
                 try:
                     # 创建+绑定deployment
                     print('create hpa')
@@ -1028,9 +1029,9 @@ output %s
                         hpa=','.join(hpas)
                     )
                 except Exception as e:
-                    flash('hpa:'+str(e),'warning')
+                    flash('hpa:' + str(e), 'warning')
             else:
-                k8s_client.delete_hpa(namespace=namespace,name=name)
+                k8s_client.delete_hpa(namespace=namespace, name=name)
 
         # # 使用激活器
         # if int(service.min_replicas)==0:
@@ -1038,41 +1039,40 @@ output %s
         #     pass
 
         # 不记录部署测试的情况
-        if env =='debug' and service.model_status=='offline':
+        if env == 'debug' and service.model_status == 'offline':
             service.model_status = 'debug'
-        if env=='test' and service.model_status=='offline':
+        if env == 'test' and service.model_status == 'offline':
             service.model_status = 'test'
 
-        if env=='prod':
+        if env == 'prod':
             service.model_status = 'online'
         service.deploy_history=service.deploy_history+"\n"+"deploy %s: %s %s"%(env,g.user.username,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         service.deploy_history = '\n'.join(service.deploy_history.split("\n")[-10:])
         db.session.commit()
-        if env=="debug":
+        if env == "debug":
             time.sleep(2)
-            pods = k8s_client.get_pods(namespace=namespace,labels={"app":name})
+            pods = k8s_client.get_pods(namespace=namespace, labels={"app": name})
             if pods:
                 pod = pods[0]
                 print('deploy debug success')
                 return redirect("/k8s/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
 
         # 生产环境才有域名代理灰度的问题
-        if env=='prod':
+        if env == 'prod':
             from myapp.tasks.async_task import upgrade_service
             kwargs = {
                 "service_id": service.id,
-                "name":service.name,
-                "namespace":namespace
+                "name": service.name,
+                "namespace": namespace
             }
             upgrade_service.apply_async(kwargs=kwargs)
 
         flash('服务部署完成，正在进行同域名服务版本切换', category='success')
         print('deploy prod success')
-        return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice',''))
-
+        return redirect(conf.get('MODEL_URLS', {}).get('inferenceservice', ''))
 
     @action(
-        "copy", __("Copy service"), confirmation=__('Copy Service'), icon="fa-copy",multiple=True, single=False
+        "copy", __("Copy service"), confirmation=__('Copy Service'), icon="fa-copy", multiple=True, single=False
     )
     def copy(self, services):
         if not isinstance(services, list):
@@ -1080,13 +1080,13 @@ output %s
         try:
             for service in services:
                 new_services = service.clone()
-                index=1
+                index = 1
                 model_version = datetime.datetime.now().strftime('v%Y.%m.%d.1')
                 while True:
                     model_version = datetime.datetime.now().strftime('v%Y.%m.%d.'+str(index))
                     exits_service = db.session.query(InferenceService).filter_by(model_version=model_version).filter_by(model_name=new_services.model_name).first()
                     if exits_service:
-                        index+=1
+                        index += 1
                     else:
                         break
 
@@ -1102,9 +1102,8 @@ output %s
             raise e
         return redirect(request.referrer)
 
-
     # @pysnooper.snoop()
-    def echart_option(self,filters=None):
+    def echart_option(self, filters=None):
         print(filters)
         global global_all_service_load
         if not global_all_service_load:
@@ -1115,7 +1114,7 @@ output %s
             all_services = db.session.query(InferenceService).filter_by(model_status='online').all()
 
             from myapp.utils.py.py_prometheus import Prometheus
-            prometheus = Prometheus(conf.get('PROMETHEUS',''))
+            prometheus = Prometheus(conf.get('PROMETHEUS', ''))
             # prometheus = Prometheus('10.101.142.16:8081')
             all_services_load = prometheus.get_istio_service_metric(namespace='service')
             services_metrics = []
@@ -1126,7 +1125,7 @@ output %s
             start_point = max(end_point - 60, 0)
 
             # @pysnooper.snoop()
-            def add_metric_data(metric,metric_name,service_name):
+            def add_metric_data(metric, metric_name, service_name):
                 if metric_name == 'qps':
                     metric = [[date_value[0], int(float(date_value[1]))] for date_value in metric if datetime.datetime.now().timestamp() > date_value[0] > today_time]
                 if metric_name == 'memory':
@@ -1137,10 +1136,10 @@ output %s
                 if metric:
                     # 将时间戳转化为时间段分箱，按分钟分箱
 
-                    metric_binning = [[0] for x in range(60*60*24//time_during)]  # 每5分钟一个分箱
+                    metric_binning = [[0] for x in range(60 * 60 * 24 // time_during)]  # 每5分钟一个分箱
                     for date_value in metric:
                         timestamp, value = date_value[0], date_value[1]
-                        metric_binning[(timestamp-today_time)//time_during].append(value)
+                        metric_binning[(timestamp - today_time) // time_during].append(value)
                     metric_binning = [int(sum(x) / len(x)) for x in metric_binning]
 
                     # metric_binning = [[datetime.datetime.fromtimestamp(today_time+time_during*i+time_during).strftime('%Y-%m-%dT%H:%M:%S.000Z'),metric_binning[i]] for i in range(len(metric_binning)) if i<=end_point]
@@ -1155,7 +1154,6 @@ output %s
                             "data": metric_binning
                         }
                     )
-
 
             for service in all_services:
                 # qps_metric = all_services_load['qps'].get(service.name,[])
@@ -1179,8 +1177,8 @@ output %s
                 for pod_name in all_services_load['gpu']:
                     if service.name in pod_name:
                         pod_metric = all_services_load['gpu'][pod_name]
-                        servie_pod_metrics = servie_pod_metrics+pod_metric
-                add_metric_data(servie_pod_metrics,'gpu',service.created_by.username+":"+service.label)
+                        servie_pod_metrics = servie_pod_metrics + pod_metric
+                add_metric_data(servie_pod_metrics, 'gpu', service.created_by.username + ":" + service.label)
 
             # dataZoom: [
             #     {
@@ -1237,15 +1235,15 @@ output %s
             rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(option)
             option = rtemplate.render(
                 legend=legend,
-                services_metric=json.dumps(services_metrics,ensure_ascii=False,indent=4),
+                services_metric=json.dumps(services_metrics, ensure_ascii=False, indent=4),
                 start_point=start_point,
                 end_point=end_point,
                 today=datetime.datetime.now().strftime('%Y/%m/%d'),
-                tomorrow=(datetime.datetime.now()+datetime.timedelta(days=1)).strftime('%Y/%m/%d'),
+                tomorrow=(datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y/%m/%d'),
             )
             # global_all_service_load['check_time']=datetime.datetime.now()
 
-        global_all_service_load['data']=option
+        global_all_service_load['data'] = option
         # print(option)
         # file = open('myapp/test.txt',mode='w')
         # file.write(option)
@@ -1253,15 +1251,15 @@ output %s
         return option
 
 
-
-class InferenceService_ModelView(InferenceService_ModelView_base,MyappModelView):
+class InferenceService_ModelView(InferenceService_ModelView_base, MyappModelView):
     datamodel = SQLAInterface(InferenceService)
 
 
 appbuilder.add_view_no_menu(InferenceService_ModelView)
 
+
 # 添加api
-class InferenceService_ModelView_Api(InferenceService_ModelView_base,MyappModelRestApi):
+class InferenceService_ModelView_Api(InferenceService_ModelView_base, MyappModelRestApi):
     datamodel = SQLAInterface(InferenceService)
     route_base = '/inferenceservice_modelview/api'
 
@@ -1272,8 +1270,8 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base,MyappModelR
         else:
             response['echart'] = False
 
-    def set_columns_related(self,exist_add_args,response_add_columns):
-        exist_service_type = exist_add_args.get('service_type','')
+    def set_columns_related(self, exist_add_args, response_add_columns):
+        exist_service_type = exist_add_args.get('service_type', '')
         service_model_path = {
             "tfserving": "/mnt/.../saved_model",
             "torch-server": "/mnt/.../$model_name.mar",
@@ -1293,8 +1291,3 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base,MyappModelR
 
 
 appbuilder.add_api(InferenceService_ModelView_Api)
-
-
-
-
-
