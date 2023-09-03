@@ -58,15 +58,18 @@ print(k8s_volume_mounts)
 
 GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
 GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
-print(GPU_TYPE,GPU_RESOURCE)
+# print(GPU_TYPE,GPU_RESOURCE)
+gpu_num = GPU_RESOURCE.split(',')[0]
+if '(' in gpu_num:
+    gpu_type = gpu_num[gpu_num.index('(')+1:gpu_num.index(')')]
+    gpu_num = gpu_num[:gpu_num.index('(')]
 
+    KFJ_TASK_NODE_SELECTOR['gpu-type']=gpu_type
 
 
 def default_job_name():
     name = "volcanojob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
     return name[0:54]
-
-
 
 
 import subprocess
@@ -86,7 +89,7 @@ def run_shell(shell):
         if status == 0:  # 判断子进程是否结束
             print('shell finish %s'%status,flush=True)
             break
-        if status==-9 or status==-15 or status==143:   # 外界触发kill
+        if status==-9 or status==-15 or status==143 or status==127:   # 外界触发kill
         # if status!=0:  # 外界触发kill
             print('shell finish %s'%status,flush=True)
             break
@@ -167,11 +170,11 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
             "spec": {
                 "restartPolicy": "Never",
                 "volumes": k8s_volumes,
-                # "imagePullSecrets": [
-                #     {
-                #         "name": "hubsecret"
-                #     }
-                # ],
+                "imagePullSecrets": [
+                    {
+                        "name": "hubsecret"
+                    }
+                ],
                 "affinity": {
                     "nodeAffinity": {
                         "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -251,8 +254,9 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
 
 
     if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        task_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        task_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
+
+        task_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = gpu_num
+        task_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = gpu_num
 
     worker_pod_spec = copy.deepcopy(task_spec)
     worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker
@@ -278,8 +282,9 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
             "schedulerName":"volcano",
             "cleanPodPolicy": "None",
             "plugins":{
-                "env":[],
-                "svc":[]
+                "env": [],
+                "svc": [],
+                "ssh": []
             },
             "queue":"default",
             "tasks": [
