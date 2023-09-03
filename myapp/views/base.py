@@ -1,4 +1,3 @@
-
 import datetime
 import functools
 import logging
@@ -19,7 +18,7 @@ from werkzeug.exceptions import HTTPException
 from wtforms.fields.core import Field, UnboundField
 from flask_appbuilder import ModelView
 from flask_appbuilder.baseviews import BaseCRUDView, BaseView, expose
-from myapp import conf, db, get_feature_flags, security_manager,event_logger
+from myapp import conf, db, get_feature_flags, security_manager, event_logger
 from myapp.exceptions import MyappException, MyappSecurityException
 from myapp.translations.utils import get_language_pack
 from myapp.utils import core
@@ -43,8 +42,6 @@ FRONTEND_CONF_KEYS = (
     "MYAPP_WEBSERVER_DOMAINS",
 )
 
-
-
 from flask_appbuilder.const import (
     FLAMSG_ERR_SEC_ACCESS_DENIED,
     LOGMSG_ERR_SEC_ACCESS_DENIED,
@@ -53,6 +50,7 @@ from flask_appbuilder.const import (
 from flask_appbuilder._compat import as_unicode
 
 log = logging.getLogger(__name__)
+
 
 def has_access(f):
     """
@@ -172,14 +170,16 @@ def json_error_response(msg=None, status=500, stacktrace=None, payload=None, lin
         mimetype="application/json",
     )
 
-def json_response(message,status,result):
+
+def json_response(message, status, result):
     return jsonify(
         {
-            "message":message,
-            "status":status,
-            "result":result
+            "message": message,
+            "status": status,
+            "result": result
         }
     )
+
 
 def json_success(json_msg, status=200):
     return Response(json_msg, status=status, mimetype="application/json")
@@ -188,6 +188,7 @@ def json_success(json_msg, status=200):
 def data_payload_response(payload_json, has_error=False):
     status = 400 if has_error else 200
     return json_success(payload_json, status=status)
+
 
 # 产生下载csv的响应header
 def generate_download_headers(extension, filename=None):
@@ -253,6 +254,7 @@ def handle_api_exception(f):
 
     return functools.update_wrapper(wraps, f)
 
+
 # 获取用户的角色
 def get_user_roles():
     if g.user.is_anonymous:
@@ -292,6 +294,7 @@ class BaseMyappView(BaseView):
             conf['alert_config'] = {}
         conf['alert_config'].update(self.alert_config)
 
+
 # 自定义list页面
 class MyappListWidget(ListWidget):
     template = "myapp/fab_overrides/list.html"
@@ -299,33 +302,32 @@ class MyappListWidget(ListWidget):
 
 # model 页面基本视图
 class MyappModelView(ModelView):
-    api_type='web'
-    datamodel=None
+    api_type = 'web'
+    datamodel = None
     page_size = 100
     list_widget = MyappListWidget
-    src_item_object = None    # 原始model对象
-    src_item_json={}    # 原始model对象的json
-    check_redirect_list_url=None
+    src_item_object = None  # 原始model对象
+    src_item_json = {}  # 原始model对象的json
+    check_redirect_list_url = None
     search_widget = MySearchWidget
-    help_url=''
+    help_url = ''
 
     pre_add_web = None
     pre_update_web = None
     post_list = None
     pre_show = None
     post_show = None
-    check_edit_permission=None
+    check_edit_permission = None
     label_title = ''
-
+    expand_columns={}
     conv = GeneralModelConverter(datamodel)
-    pre_list=None
+    pre_list = None
     user_permissions = {
         "can_add": True,
         "can_edit": True,
         "can_delete": True,
         "can_show": True
     }
-
 
     # 建构响应体
     @staticmethod
@@ -346,14 +348,12 @@ class MyappModelView(ModelView):
 
         _ret_json = jsonify(kwargs)
         resp = make_response(_ret_json, code)
-        flash_json=[]
+        flash_json = []
         for f in flashes:
             flash_json.append([f[0], f[1]])
         resp.headers["api_flashes"] = json.dumps(flash_json)
         resp.headers["Content-Type"] = "application/json; charset=utf-8"
         return resp
-
-
 
     # 配置增删改查页面标题
     def _init_titles(self):
@@ -368,7 +368,7 @@ class MyappModelView(ModelView):
             if not self.label_title:
                 self.list_title = "List " + self._prettify_name(class_name)
             else:
-                self.list_title  = self.label_title + " 列表"
+                self.list_title = self.label_title + " 列表"
         if not self.add_title:
             if not self.label_title:
                 self.add_title = "Add " + self._prettify_name(class_name)
@@ -378,16 +378,16 @@ class MyappModelView(ModelView):
             if not self.label_title:
                 self.edit_title = "Edit " + self._prettify_name(class_name)
             else:
-                self.edit_title ='修改 ' + self.label_title
+                self.edit_title = '修改 ' + self.label_title
         if not self.show_title:
             if not self.label_title:
                 self.show_title = "Show " + self._prettify_name(class_name)
             else:
-                self.show_title = self.label_title+" 详情"
+                self.show_title = self.label_title + " 详情"
         self.title = self.list_title
 
     # 每个用户对当前记录的权限，base_permissions 是对所有记录的权限
-    def check_item_permissions(self,item):
+    def check_item_permissions(self, item):
         self.user_permissions = {
             "add": True,
             "edit": True,
@@ -401,7 +401,7 @@ class MyappModelView(ModelView):
         """
             Auto generates pretty label_columns from list of columns
         """
-        if hasattr(self.datamodel.obj,'label_columns') and self.datamodel.obj.label_columns:
+        if hasattr(self.datamodel.obj, 'label_columns') and self.datamodel.obj.label_columns:
             for col in self.datamodel.obj.label_columns:
                 self.label_columns[col] = self.datamodel.obj.label_columns[col]
 
@@ -410,7 +410,7 @@ class MyappModelView(ModelView):
                 self.label_columns[col] = self._prettify_column(col)
 
     # 获取列的中文显示
-    def lab(self,col):
+    def lab(self, col):
         if col in self.label_columns:
             return _(self.label_columns[col])
         return _(self._prettify_column(col))
@@ -427,21 +427,20 @@ class MyappModelView(ModelView):
             include_cols=self.search_columns,
             exclude_cols=exclude_cols,
             filters=self._filters,
-            help_url = self.help_url
+            help_url=self.help_url
         )
         return widgets
 
-
     def _get_list_widget(
-        self,
-        filters,
-        actions=None,
-        order_column="",
-        order_direction="",
-        page=None,
-        page_size=None,
-        widgets=None,
-        **args,
+            self,
+            filters,
+            actions=None,
+            order_column="",
+            order_direction="",
+            page=None,
+            page_size=None,
+            widgets=None,
+            **args,
     ):
 
         """ get joined base filter and current active filter for query """
@@ -481,7 +480,6 @@ class MyappModelView(ModelView):
         )
         return widgets
 
-
     @event_logger.log_this
     @expose("/list/")
     @has_access
@@ -493,7 +491,6 @@ class MyappModelView(ModelView):
             self.list_template, title=self.list_title, widgets=widgets
         )
         return res
-
 
     @event_logger.log_this
     @expose("/show/<pk>", methods=["GET"])
@@ -512,7 +509,6 @@ class MyappModelView(ModelView):
             widgets=widgets,
             related_views=self._related_views,
         )
-
 
     # @pysnooper.snoop(watch_explode=('item'))
     def _add(self):
@@ -549,13 +545,12 @@ class MyappModelView(ModelView):
             self.update_redirect()
         return self._get_add_widget(form=form, exclude_cols=exclude_cols)
 
-
     @event_logger.log_this
     @expose("/add", methods=["GET", "POST"])
     @has_access
     def add(self):
         self.src_item_json = {}
-        if request.method=='GET' and self.pre_add_web:
+        if request.method == 'GET' and self.pre_add_web:
             try:
                 self.pre_add_web()
                 self.conv = GeneralModelConverter(self.datamodel)
@@ -580,8 +575,6 @@ class MyappModelView(ModelView):
             return self.render_template(
                 self.add_template, title=self.add_title, widgets=widget
             )
-
-
 
     # @pysnooper.snoop(watch_explode=('item'))
     def _edit(self, pk):
@@ -651,7 +644,7 @@ class MyappModelView(ModelView):
         pk = self._deserialize_pk_if_composite(pk)
         self.src_item_object = self.datamodel.get(pk, self._base_filters)
 
-        if request.method=='GET' and self.pre_update_web and self.src_item_object:
+        if request.method == 'GET' and self.pre_update_web and self.src_item_object:
             try:
                 self.pre_update_web(self.src_item_object)
                 self.conv = GeneralModelConverter(self.datamodel)
@@ -668,7 +661,6 @@ class MyappModelView(ModelView):
                 print(e)
                 self.update_redirect()
                 return redirect(self.get_redirect())
-
 
         if self.src_item_object:
             self.src_item_json = self.src_item_object.to_json()
@@ -701,7 +693,6 @@ class MyappModelView(ModelView):
                 related_views=self._related_views,
             )
 
-
     @event_logger.log_this
     @expose("/delete/<pk>")
     @has_access
@@ -725,6 +716,7 @@ class MyappModelView(ModelView):
         return redirect(url)
         # return self.post_delete_redirect()
 
+
 from flask_appbuilder.widgets import GroupFormListWidget
 from flask import (
     abort,
@@ -736,6 +728,7 @@ from flask import (
     session,
     url_for,
 )
+
 
 class CompactCRUDMixin(BaseCRUDView):
     """
@@ -858,11 +851,7 @@ class DeleteMixin(object):
         else:
             view_menu = security_manager.find_view_menu(item.get_perm())
             pvs = (
-                security_manager.get_session.query(
-                    security_manager.permissionview_model
-                )
-                .filter_by(view_menu=view_menu)
-                .all()
+                security_manager.get_session.query(security_manager.permissionview_model).filter_by(view_menu=view_menu).all()
             )
 
             schema_view_menu = None
@@ -870,11 +859,7 @@ class DeleteMixin(object):
                 schema_view_menu = security_manager.find_view_menu(item.schema_perm)
 
                 pvs.extend(
-                    security_manager.get_session.query(
-                        security_manager.permissionview_model
-                    )
-                    .filter_by(view_menu=schema_view_menu)
-                    .all()
+                    security_manager.get_session.query(security_manager.permissionview_model).filter_by(view_menu=schema_view_menu).all()
                 )
 
             if self.datamodel.delete(item):
@@ -913,7 +898,6 @@ class DeleteMixin(object):
 
 # model list的过滤器
 class MyappFilter(BaseFilter):
-
     """Add utility function to make BaseFilter easy and fast
 
     These utility function exist in the SecurityManager, but would do
@@ -951,7 +935,6 @@ class MyappFilter(BaseFilter):
             if perm_name == permission_name:
                 vm.add(vm_name)
         return vm
-
 
 
 # 检查是否有权限
@@ -1001,9 +984,7 @@ def check_ownership(obj, raise_if_false=True):
 
 
 # 绑定字段
-def bind_field(
-    self, form: DynamicForm, unbound_field: UnboundField, options: Dict[Any, Any]
-) -> Field:
+def bind_field(self, form: DynamicForm, unbound_field: UnboundField, options: Dict[Any, Any]) -> Field:
     """
     Customize how fields are bound by stripping all whitespace.
 

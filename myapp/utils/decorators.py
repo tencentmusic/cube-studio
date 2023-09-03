@@ -1,12 +1,9 @@
-
 from functools import wraps
 
 from contextlib2 import contextmanager
 from flask import request
 
 from myapp.utils.dates import now_as_float
-
-
 
 
 @contextmanager
@@ -22,7 +19,6 @@ def stats_timing(stats_key, stats_logger):
 
 
 def etag(check_perms=bool):
-
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):

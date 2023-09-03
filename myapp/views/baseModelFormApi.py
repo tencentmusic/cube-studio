@@ -12,8 +12,8 @@ from flask_appbuilder.actions import action
 from flask_babel import gettext as __
 from flask_appbuilder.actions import ActionItem
 from flask import jsonify, request
-from flask import flash,g
-from flask import current_app, make_response,send_file
+from flask import flash, g
+from flask import current_app, make_response, send_file
 from flask.globals import session
 from flask_babel import lazy_gettext as _
 import jsonschema
@@ -65,11 +65,12 @@ from flask import (
     abort,
 )
 from flask_appbuilder.exceptions import FABException, InvalidOrderByColumnFABException
-from flask_appbuilder.security.decorators import permission_name, protect,has_access
-from flask_appbuilder.api import BaseModelApi,BaseApi,ModelRestApi
+from flask_appbuilder.security.decorators import permission_name, protect, has_access
+from flask_appbuilder.api import BaseModelApi, BaseApi, ModelRestApi
 from sqlalchemy.sql import sqltypes
-from myapp import app, appbuilder,db,event_logger,cache
+from myapp import app, appbuilder, db, event_logger, cache
 from myapp.models.favorite import Favorite
+
 conf = app.config
 
 log = logging.getLogger(__name__)
@@ -78,14 +79,14 @@ API_ADD_FIELDSETS_RIS_KEY = 'add_fieldsets'
 API_EDIT_FIELDSETS_RIS_KEY = 'edit_fieldsets'
 API_SHOW_FIELDSETS_RIS_KEY = 'show_fieldsets'
 API_HELP_URL_RIS_KEY = 'help_url'
-API_ACTION_RIS_KEY='action'
-API_ROUTE_RIS_KEY ='route_base'
+API_ACTION_RIS_KEY = 'action'
+API_ROUTE_RIS_KEY = 'route_base'
 
-API_PERMISSIONS_RIS_KEY="permissions"
-API_USER_PERMISSIONS_RIS_KEY="user_permissions"
-API_RELATED_RIS_KEY="related"
-API_COLS_WIDTH_RIS_KEY='cols_width'
-API_EXIST_ADD_ARGS_RIS_KEY='exist_add_args'
+API_PERMISSIONS_RIS_KEY = "permissions"
+API_USER_PERMISSIONS_RIS_KEY = "user_permissions"
+API_RELATED_RIS_KEY = "related"
+API_COLS_WIDTH_RIS_KEY = 'cols_width'
+API_EXIST_ADD_ARGS_RIS_KEY = 'exist_add_args'
 API_IMPORT_DATA_RIS_KEY = 'import_data'
 API_DOWNLOAD_DATA_RIS_KEY = 'download_data'
 API_OPS_BUTTON_RIS_KEY = 'ops_link'
@@ -99,15 +100,14 @@ def get_error_msg():
 
 
 def safe(f):
-
     def wraps(self, *args, **kwargs):
         try:
             return f(self, *args, **kwargs)
         except BadRequest as e:
-            return self.response_error(400,message=str(e))
+            return self.response_error(400, message=str(e))
         except Exception as e:
             logging.exception(e)
-            return self.response_error(500,message=get_error_msg())
+            return self.response_error(500, message=get_error_msg())
 
     return functools.update_wrapper(wraps, f)
 
@@ -161,15 +161,14 @@ def rison(schema=None):
                                 )[0]
                             )
                         except Exception:
-                            return self.response_error(400,message="Not a valid rison/json argument"
-                            )
+                            return self.response_error(400, message="Not a valid rison/json argument")
                     else:
-                        return self.response_error(400,message="Not a valid rison argument")
+                        return self.response_error(400, message="Not a valid rison argument")
             if schema:
                 try:
                     jsonschema.validate(instance=kwargs["rison"], schema=schema)
                 except jsonschema.ValidationError as e:
-                    return self.response_error(400,message=f"Not a valid rison schema {e}")
+                    return self.response_error(400, message=f"Not a valid rison schema {e}")
             return f(self, *args, **kwargs)
 
         return functools.update_wrapper(wraps, f)
@@ -222,60 +221,68 @@ def merge_response_func(func, key):
     return wrap
 
 
-def json_response(message,status,result):
+def json_response(message, status, result):
     return jsonify(
         {
-            "message":message,
-            "status":status,
-            "result":result
+            "message": message,
+            "status": status,
+            "result": result
         }
     )
 
 
-
 import pysnooper
+
+
 # @pysnooper.snoop(depth=5)
 # 暴露url+视图函数。视图函数会被覆盖，暴露url也会被覆盖
 class MyappFormRestApi(ModelRestApi):
-
     # 定义主键列
-    label_title=''
+    label_title = ''
     primary_key = 'id'
     api_type = 'json'
     allow_browser_login = True
     base_filters = []
     page_size = 100
-    src_item_object = None    # 原始model对象
-    src_item_json={}    # 原始model对象的json
+    src_item_object = None  # 原始model对象
+    src_item_json = {}  # 原始model对象的json
     check_edit_permission = None
-    datamodel=None
+    datamodel = None
 
-    def pre_show(self,item):
+    def pre_show(self, item):
         pass
-    def pre_show_res(self,result):
+
+    def pre_show_res(self, result):
         return result
+
     def pre_add(self, item):
         pass
+
     def post_add(self, item):
         pass
-    def pre_add_req(self,req_json):
+
+    def pre_add_req(self, req_json):
         return req_json
-    def pre_add_res(self,result):
+
+    def pre_add_res(self, result):
         return result
 
-    def pre_update_req(self,req_json):
+    def pre_update_req(self, req_json):
         return req_json
-    def pre_update_res(self,result):
+
+    def pre_update_res(self, result):
         return result
 
     def pre_update(self, item):
         pass
+
     def post_update(self, item):
         pass
 
-    def pre_list_req(self,req_json):
+    def pre_list_req(self, req_json):
         return req_json
-    def pre_list_res(self,result):
+
+    def pre_list_res(self, result):
         return result
 
     # 可以调整顺序
@@ -284,22 +291,24 @@ class MyappFormRestApi(ModelRestApi):
 
     def pre_delete(self, item):
         pass
+
     def post_delete(self, item):
         pass
 
     # 添加和更新前info信息的查询，或者填写界面的查询
     def pre_add_web(self):
         pass
-    def pre_update_web(self,item):
+
+    def pre_update_web(self, item):
         pass
 
-    edit_form_extra_fields={}
+    edit_form_extra_fields = {}
     add_form_extra_fields = {}
     add_fieldsets = []
-    edit_fieldsets=[]
+    edit_fieldsets = []
     show_fieldsets = []
 
-    ops_link=[
+    ops_link = [
         # {
         #     "text": "git",
         #     "url": "https://github.com/tencentmusic/cube-studio"
@@ -308,7 +317,7 @@ class MyappFormRestApi(ModelRestApi):
 
     help_url = None
 
-    default_filter={}
+    default_filter = {}
     actions = {}
 
     user_permissions = {
@@ -318,28 +327,28 @@ class MyappFormRestApi(ModelRestApi):
         "show": True
     }
     add_form_query_rel_fields = {}
-    edit_form_query_rel_fields={}
-    related_views=[]
-    add_more_info=None
-    remember_columns=[]
-    spec_label_columns={}
-    base_permissions=['can_add','can_show','can_edit','can_list','can_delete']
-    cols_width={}
-    import_data=False
-    download_data=False
-    enable_favorite=False
+    edit_form_query_rel_fields = {}
+    related_views = []
+    add_more_info = None
+    remember_columns = []
+    spec_label_columns = {}
+    base_permissions = ['can_add', 'can_show', 'can_edit', 'can_list', 'can_delete']
+    cols_width = {}
+    import_data = False
+    download_data = False
+    enable_favorite = False
     pre_upload = None
-    set_columns_related=None
+    set_columns_related = None
     alert_config = {}
 
     # @pysnooper.snoop()
-    def csv_response(self,file_path,file_name=None):
+    def csv_response(self, file_path, file_name=None):
         # 下载csv
-        response = make_response(send_file(file_path,as_attachment=True,conditional=True))
+        response = make_response(send_file(file_path, as_attachment=True, conditional=True))
         if not file_name:
             file_name = os.path.basename(file_path)
         if '.csv' not in file_name:
-            file_name=file_name+".csv"
+            file_name = file_name + ".csv"
         response.headers["Content-Disposition"] = f"attachment; filename={file_name}".format(file_name=file_name)
         return response
 
@@ -362,7 +371,7 @@ class MyappFormRestApi(ModelRestApi):
 
         _ret_json = jsonify(kwargs)
         resp = make_response(_ret_json, code)
-        flash_json=[]
+        flash_json = []
         for f in flashes:
             flash_json.append([f[0], f[1]])
         resp.headers["api_flashes"] = json.dumps(flash_json)
@@ -406,10 +415,9 @@ class MyappFormRestApi(ModelRestApi):
                 action = ActionItem(*func._action, func=func)
                 self.actions[action.name] = action
 
-
         # 初始化label字段
         # 全局的label
-        if hasattr(self.datamodel.obj,'label_columns') and self.datamodel.obj.label_columns:
+        if hasattr(self.datamodel.obj, 'label_columns') and self.datamodel.obj.label_columns:
             for col in self.datamodel.obj.label_columns:
                 self.label_columns[col] = self.datamodel.obj.label_columns[col]
 
@@ -432,7 +440,7 @@ class MyappFormRestApi(ModelRestApi):
             self.edit_columns.remove(self.primary_key)
 
         if 'alert_config' not in conf:
-            conf['alert_config']={}
+            conf['alert_config'] = {}
         conf['alert_config'].update(self.alert_config)
 
     def _init_model_schemas(self):
@@ -452,13 +460,12 @@ class MyappFormRestApi(ModelRestApi):
             )
         if self.edit_model_schema is None:
             self.edit_model_schema = self.model2schemaconverter.convert(
-                list(set(list(self.edit_columns+self.show_columns+self.list_columns+self.search_columns))), nested=False, enum_dump_by_name=True
+                list(set(list(self.edit_columns + self.show_columns + self.list_columns + self.search_columns))), nested=False, enum_dump_by_name=True
             )
         if self.show_model_schema is None:
             self.show_model_schema = self.model2schemaconverter.convert(
                 self.show_columns
             )
-
 
     # @pysnooper.snoop(watch_explode=('value','column_type'))
     def _init_cols_width(self):
@@ -467,28 +474,27 @@ class MyappFormRestApi(ModelRestApi):
         for column in columns:
             if column.name not in self.cols_width and column.name in self.list_columns:  # 只需要配置没有配置过的list_columns
                 column_type = column.type
-                if column_type.__class__.__name__ in ['Integer','Float','Numeric','Integer','Date','Enum']:
+                if column_type.__class__.__name__ in ['Integer', 'Float', 'Numeric', 'Integer', 'Date', 'Enum']:
                     self.cols_width[column.name] = {
-                        "type":'ellip2',
-                        "width":100
+                        "type": 'ellip2',
+                        "width": 100
                     }
-                elif column_type.__class__.__name__ in ['Time','Datetime']:
+                elif column_type.__class__.__name__ in ['Time', 'Datetime']:
                     self.cols_width[column.name] = {
                         "type": 'ellip2',
                         "width": 300
                     }
-                elif column_type.__class__.__name__ in ['String','Text']:
-                    width=100
-                    if column_type.length and column_type.length>100 and column_type.length<500:
+                elif column_type.__class__.__name__ in ['String', 'Text']:
+                    width = 100
+                    if column_type.length and column_type.length > 100 and column_type.length < 500:
                         width = column_type.length
-                    if column_type.length and column_type.length>500:
-                        width =500
+                    if column_type.length and column_type.length > 500:
+                        width = 500
 
                     self.cols_width[column.name] = {
-                        "type":'ellip2',
+                        "type": 'ellip2',
                         "width": width
                     }
-
 
         for attr in self.list_columns:
             if attr not in self.cols_width:
@@ -515,7 +521,7 @@ class MyappFormRestApi(ModelRestApi):
     # 重新渲染add界面
     # @pysnooper.snoop()
     def merge_exist_add_args(self, response, **kwargs):
-        exist_add_args = request.args.get('exist_add_args','')
+        exist_add_args = request.args.get('exist_add_args', '')
         if exist_add_args:
             exist_add_args = json.loads(exist_add_args)
             # 把这些值转为add_column中的默认值
@@ -523,25 +529,25 @@ class MyappFormRestApi(ModelRestApi):
             response_add_columns = {}
             for column in response[API_ADD_COLUMNS_RIS_KEY]:
                 if column['name'] in exist_add_args and exist_add_args[column['name']]:
-                    column['default']=exist_add_args[column['name']]
-                response_add_columns[column['name']]=column
+                    column['default'] = exist_add_args[column['name']]
+                response_add_columns[column['name']] = column
             # 提供字段变换内容
             if self.set_columns_related:
                 try:
-                    self.set_columns_related(exist_add_args,response_add_columns)
+                    self.set_columns_related(exist_add_args, response_add_columns)
                     response[API_ADD_COLUMNS_RIS_KEY] = list(response_add_columns.values())
                 except Exception as e:
                     print(e)
 
     # 根据columnsfields 转化为 info的json信息
     # @pysnooper.snoop()
-    def columnsfield2info(self,columnsfields):
+    def columnsfield2info(self, columnsfields):
         ret = list()
         for col_name in columnsfields:
             column_field = columnsfields[col_name]
             # print(column_field)
-            col_info={}
-            col_info['name']=col_name
+            col_info = {}
+            col_info['name'] = col_name
 
             column_field_kwargs = column_field.kwargs
             # type 类型 EnumField   values
@@ -554,8 +560,8 @@ class MyappFormRestApi(ModelRestApi):
             col_info['validators'] = column_field_kwargs.get('validators', [])
             col_info['choices'] = column_field_kwargs.get('choices', [])
             if 'widget' in column_field_kwargs:
-                col_info['widget'] = column_field_kwargs['widget'].__class__.__name__.replace('Widget', '').replace('Field','').replace('My', '')
-                if hasattr(column_field_kwargs['widget'],'readonly') and column_field_kwargs['widget'].readonly:
+                col_info['widget'] = column_field_kwargs['widget'].__class__.__name__.replace('Widget', '').replace('Field', '').replace('My', '')
+                if hasattr(column_field_kwargs['widget'], 'readonly') and column_field_kwargs['widget'].readonly:
                     col_info['disable'] = True
                 # 处理可选可填类型
                 if hasattr(column_field_kwargs['widget'], 'can_input') and column_field_kwargs['widget'].can_input:
@@ -571,9 +577,8 @@ class MyappFormRestApi(ModelRestApi):
             ret.append(col_info)
         return ret
 
-
     # 每个用户对当前记录的权限，base_permissions 是对所有记录的权限
-    def check_item_permissions(self,item):
+    def check_item_permissions(self, item):
         self.user_permissions = {
             "add": True,
             "edit": True,
@@ -608,8 +613,7 @@ class MyappFormRestApi(ModelRestApi):
             **_kwargs,
         )
 
-        response[API_ADD_COLUMNS_RES_KEY]=add_columns
-
+        response[API_ADD_COLUMNS_RES_KEY] = add_columns
 
     # @pysnooper.snoop(watch_explode=('edit_columns'))
     def merge_edit_field_info(self, response, **kwargs):
@@ -624,52 +628,51 @@ class MyappFormRestApi(ModelRestApi):
         )
         # 处理retry_info，如果有这种类型，就禁止编辑
         for column in edit_columns:
-            if column.get('retry_info',False):
-                column['disable']=True
+            if column.get('retry_info', False):
+                column['disable'] = True
         response[API_EDIT_COLUMNS_RES_KEY] = edit_columns
-
 
     # @pysnooper.snoop(watch_explode=('edit_columns'))
     def merge_add_fieldsets_info(self, response, **kwargs):
         # if self.pre_add_web:
         #     self.pre_add_web()
-        add_fieldsets=[]
+        add_fieldsets = []
         if self.add_fieldsets:
             for group in self.add_fieldsets:
                 group_name = group[0]
-                group_fieldsets=group[1]
+                group_fieldsets = group[1]
                 add_fieldsets.append({
-                    "group":group_name,
-                    "expanded":group_fieldsets.get('expanded',True),
-                    "fields":group_fieldsets['fields']
+                    "group": group_name,
+                    "expanded": group_fieldsets.get('expanded', True),
+                    "fields": group_fieldsets['fields']
                 })
 
         response[API_ADD_FIELDSETS_RIS_KEY] = add_fieldsets
 
     # @pysnooper.snoop(watch_explode=('edit_columns'))
     def merge_edit_fieldsets_info(self, response, **kwargs):
-        edit_fieldsets=[]
+        edit_fieldsets = []
         if self.edit_fieldsets:
             for group in self.edit_fieldsets:
                 group_name = group[0]
-                group_fieldsets=group[1]
+                group_fieldsets = group[1]
                 edit_fieldsets.append({
-                    "group":group_name,
-                    "expanded":group_fieldsets.get('expanded',True),
-                    "fields":group_fieldsets['fields']
+                    "group": group_name,
+                    "expanded": group_fieldsets.get('expanded', True),
+                    "fields": group_fieldsets['fields']
                 })
         response[API_EDIT_FIELDSETS_RIS_KEY] = edit_fieldsets
 
     def merge_show_fieldsets_info(self, response, **kwargs):
-        show_fieldsets=[]
+        show_fieldsets = []
         if self.show_fieldsets:
             for group in self.show_fieldsets:
                 group_name = group[0]
-                group_fieldsets=group[1]
+                group_fieldsets = group[1]
                 show_fieldsets.append({
-                    "group":group_name,
-                    "expanded":group_fieldsets.get('expanded',True),
-                    "fields":group_fieldsets['fields']
+                    "group": group_name,
+                    "expanded": group_fieldsets.get('expanded', True),
+                    "fields": group_fieldsets['fields']
                 })
         response[API_SHOW_FIELDSETS_RIS_KEY] = show_fieldsets
 
@@ -679,7 +682,7 @@ class MyappFormRestApi(ModelRestApi):
         search_filters = dict()
         dict_filters = self._filters.get_search_filters()
         for col in self.search_columns:
-            search_filters[col]={}
+            search_filters[col] = {}
             search_filters[col]['filter'] = [
                 {"name": as_unicode(flt.name), "operator": flt.arg_name}
                 for flt in dict_filters[col]
@@ -688,7 +691,7 @@ class MyappFormRestApi(ModelRestApi):
             # print(col)
             # print(self.datamodel.list_columns)
             # 对于外键全部可选值返回，或者还需要现场查询(现场查询用哪个字段是个问题)
-            if self.datamodel and self.edit_model_schema:   # 根据edit_column 生成的model_schema，编辑里面才会读取外键对象列表
+            if self.datamodel and self.edit_model_schema:  # 根据edit_column 生成的model_schema，编辑里面才会读取外键对象列表
                 # ao = self.edit_model_schema.fields
                 if col in self.edit_model_schema.fields:
 
@@ -705,14 +708,13 @@ class MyappFormRestApi(ModelRestApi):
 
                     search_filters[col]["type"] = field.__class__.__name__ if 'type' not in search_filters[col] else search_filters[col]["type"]
 
-
             # 用户可能会自定义字段的操作格式，比如字符串类型，显示和筛选可能是menu
             if col in self.edit_form_extra_fields:
                 column_field = self.edit_form_extra_fields[col]
                 column_field_kwargs = column_field.kwargs
                 # type 类型 EnumField   values
                 # aa = column_field
-                search_filters[col]['type'] = column_field.field_class.__name__.replace('Field', '').replace('My','')
+                search_filters[col]['type'] = column_field.field_class.__name__.replace('Field', '').replace('My', '')
                 search_filters[col]['choices'] = column_field_kwargs.get('choices', [])
                 # 选-填 字段在搜索时为填写字段
                 if hasattr(column_field_kwargs.get('widget', {}), 'can_input') and column_field_kwargs['widget'].can_input:
@@ -730,23 +732,22 @@ class MyappFormRestApi(ModelRestApi):
                         try:
                             field_contents = db.session.query(getattr(self.datamodel.obj, col)).group_by(getattr(self.datamodel.obj, col)).all()
                             field_contents = list(set([item[0] for item in field_contents]))
-                            cache.set(self.datamodel.obj.__tablename__ + "_" + col, field_contents,timeout=60 * 60)
+                            cache.set(self.datamodel.obj.__tablename__ + "_" + col, field_contents, timeout=60 * 60)
 
                         except Exception as e:
                             print(e)
 
                     if field_contents:
                         search_filters[col]['ui-type'] = 'select'
-                        search_filters[col]['choices']= [[x, x] for x in list(set(field_contents))]
+                        search_filters[col]['choices'] = [[x, x] for x in list(set(field_contents))]
 
             search_filters[col] = self.make_ui_info(search_filters[col])
             # 多选字段在搜索时为单选字段
-            if search_filters[col].get('ui-type','')=='select2':
-                search_filters[col]['ui-type']='select'
+            if search_filters[col].get('ui-type', '') == 'select2':
+                search_filters[col]['ui-type'] = 'select'
 
-            search_filters[col]['default']=self.default_filter.get(col,'')
+            search_filters[col]['default'] = self.default_filter.get(col, '')
         response[API_FILTERS_RES_KEY] = search_filters
-
 
     def merge_add_title(self, response, **kwargs):
         response[API_ADD_TITLE_RES_KEY] = self.add_title
@@ -814,17 +815,17 @@ class MyappFormRestApi(ModelRestApi):
 
     # @pysnooper.snoop(watch_explode=('aa'))
     def merge_columns_info(self, response, **kwargs):
-        columns_info={}
+        columns_info = {}
         for attr in dir(self.datamodel.obj):
-            value = getattr(self.datamodel.obj, attr) if hasattr(self.datamodel.obj,attr) else None
-            if type(value)==InstrumentedAttribute:
-                if type(value.comparator)==ColumnProperty.Comparator:
-                    columns_info[value.key]={
-                        "type":str(value.comparator.type)
-                    }
-                if type(value.comparator)==RelationshipProperty.Comparator:
+            value = getattr(self.datamodel.obj, attr) if hasattr(self.datamodel.obj, attr) else None
+            if type(value) == InstrumentedAttribute:
+                if type(value.comparator) == ColumnProperty.Comparator:
                     columns_info[value.key] = {
-                        "type":"Relationship"
+                        "type": str(value.comparator.type)
+                    }
+                if type(value.comparator) == RelationshipProperty.Comparator:
+                    columns_info[value.key] = {
+                        "type": "Relationship"
                     }
         response[API_COLUMNS_INFO_RIS_KEY] = columns_info
 
@@ -837,26 +838,25 @@ class MyappFormRestApi(ModelRestApi):
         for attr_name in self.actions:
             action = self.actions[attr_name]
             actions_info[action.name] = {
-                "name":action.name,
-                "text":action.text,
-                "confirmation":action.confirmation,
-                "icon":action.icon,
-                "multiple":action.multiple,
-                "single":action.single
+                "name": action.name,
+                "text": action.text,
+                "confirmation": action.confirmation,
+                "icon": action.icon,
+                "multiple": action.multiple,
+                "single": action.single
             }
         response[API_ACTION_RIS_KEY] = actions_info
 
-
     def merge_route_info(self, response, **kwargs):
-        response[API_ROUTE_RIS_KEY] = "/"+self.route_base.strip('/')+"/"
-        response['primary_key']=self.primary_key
+        response[API_ROUTE_RIS_KEY] = "/" + self.route_base.strip('/') + "/"
+        response['primary_key'] = self.primary_key
         response['label_title'] = self.label_title or self._prettify_name(self.datamodel.model_name)
 
     # @pysnooper.snoop(watch_explode=())
     # 添加关联model的字段
     def merge_related_field_info(self, response, **kwargs):
         try:
-            add_info={}
+            add_info = {}
             if self.related_views:
                 for related_views_class in self.related_views:
                     related_views = related_views_class()
@@ -886,12 +886,11 @@ class MyappFormRestApi(ModelRestApi):
     def merge_show_title(self, response, **kwargs):
         response[API_SHOW_TITLE_RES_KEY] = self.show_title
 
-
-    def merge_more_info(self,response,**kwargs):
+    def merge_more_info(self, response, **kwargs):
         # 将 配置根据历史填写值作为选项的字段配置出来。
         if self.add_more_info:
             try:
-                self.add_more_info(response,**kwargs)
+                self.add_more_info(response, **kwargs)
             except Exception as e:
                 print(e)
 
@@ -903,10 +902,8 @@ class MyappFormRestApi(ModelRestApi):
         }
         return self.response(code, **back_data)
 
-
-
     @expose("/_info", methods=["GET"])
-    @merge_response_func(merge_more_info,'more_info')
+    @merge_response_func(merge_more_info, 'more_info')
     @merge_response_func(merge_ops_data, API_IMPORT_DATA_RIS_KEY)
     @merge_response_func(merge_exist_add_args, API_EXIST_ADD_ARGS_RIS_KEY)
     @merge_response_func(merge_cols_width, API_COLS_WIDTH_RIS_KEY)
@@ -937,7 +934,7 @@ class MyappFormRestApi(ModelRestApi):
         _response = dict()
         _args = kwargs.get("rison", {})
         _args.update(request.args)
-        id = _args.get(self.primary_key,'')
+        id = _args.get(self.primary_key, '')
         if id:
             item = self.datamodel.get(id)
             if item and self.pre_update_web:
@@ -959,21 +956,20 @@ class MyappFormRestApi(ModelRestApi):
         self.set_response_key_mappings(_response, self.api_info, _args, **_args)
         return self.response(200, **_response)
 
-    def query_show(self,pk,_args):
+    def query_show(self, pk, _args):
         raise NotImplementedError('To be implemented')
-
 
     @expose("/<pk>", methods=["GET"])
     # @pysnooper.snoop()
     def api_show(self, pk, **kwargs):
         _response = dict()
         _args = request.json or {}
-        _args.update(json.loads(request.args.get('form_data',"{}")))
+        _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
             del _args['form_data']
 
-        data = self.query_show(pk=pk,_args=_args)
+        data = self.query_show(pk=pk, _args=_args)
 
         back_data = {
             'result': data,
@@ -982,14 +978,14 @@ class MyappFormRestApi(ModelRestApi):
         }
         return self.response(200, **back_data)
 
-    def query_list(self,filters,order_column,order_direction,page_index,page_size,query_select_columns,**kargs):
+    def query_list(self, filters, order_column, order_direction, page_index, page_size, query_select_columns, **kargs):
         raise NotImplementedError('To be implemented')
 
     @expose("/", methods=["GET"])
     def api_list(self, **kwargs):
         _response = dict()
         _args = request.json or {}
-        _args.update(json.loads(request.args.get('form_data',"{}")))
+        _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
             del _args['form_data']
@@ -1013,27 +1009,26 @@ class MyappFormRestApi(ModelRestApi):
             # 参数缩写都在每个filter的arg_name
             joined_filters = self._handle_filters_args(_args)
         except FABException as e:
-            return self.response_error(400,message=str(e))
+            return self.response_error(400, message=str(e))
         # handle base order
         try:
             order_column, order_direction = self._handle_order_args(_args)
         except InvalidOrderByColumnFABException as e:
-            return self.response_error(400,message=str(e))
+            return self.response_error(400, message=str(e))
         # handle pagination
         page_index, page_size = self._handle_page_args(_args)
         # Make the query
         query_select_columns = _pruned_select_cols or self.list_columns
-        filters={
+        filters = {
         }
         for flt, value in joined_filters.get_filters_values():
-            filters[flt.column_name]=[value] if flt.column_name not in filters else (filters[flt.column_name]+[value])
+            filters[flt.column_name] = [value] if flt.column_name not in filters else (filters[flt.column_name] + [value])
 
-        count,lst = self.query_list(filters,order_column,order_direction,page_index,page_size,query_select_columns)
-
+        count, lst = self.query_list(filters, order_column, order_direction, page_index, page_size,query_select_columns)
 
         _response['data'] = lst
         # _response["ids"] = pks
-        _response["count"] = count   # 这个是总个数
+        _response["count"] = count  # 这个是总个数
 
         back_data = {
             'result': _response,
@@ -1043,8 +1038,7 @@ class MyappFormRestApi(ModelRestApi):
         # print(back_data)
         return self.response(200, **back_data)
 
-
-    def query_add(self,_args):
+    def query_add(self, _args):
         raise NotImplementedError('To be implemented')
 
     # @expose("/add", methods=["POST"])
@@ -1053,76 +1047,72 @@ class MyappFormRestApi(ModelRestApi):
     @pysnooper.snoop(watch_explode=('item', 'json_data'))
     def api_add(self):
         _args = request.json or {}
-        _args.update(json.loads(request.args.get('form_data',"{}")))
+        _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
             del _args['form_data']
 
         try:
             result_data = self.query_add(_args)
-            back_data={
+            back_data = {
                 'result': result_data,
-                "status":0,
-                'message':"success"
+                "status": 0,
+                'message': "success"
             }
             return self.response(
                 200,
                 **back_data,
             )
         except IntegrityError as e:
-            return self.response_error(422,message=str(e.orig))
+            return self.response_error(422, message=str(e.orig))
         except Exception as e1:
             return self.response_error(500, message=str(e1))
 
-    def query_edit(self,pk,_args):
+    def query_edit(self, pk, _args):
         raise NotImplementedError('To be implemented')
-
 
     @expose("/<pk>", methods=["PUT"])
     # @pysnooper.snoop(watch_explode=('item','data'))
     def api_edit(self, pk):
         _args = request.json or {}
-        _args.update(json.loads(request.args.get('form_data',"{}")))
+        _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
             del _args['form_data']
 
-        result = self.query_edit(pk,_args)
+        result = self.query_edit(pk, _args)
         try:
-            back_data={
-                "status":0,
-                "message":"success",
-                "result":result
+            back_data = {
+                "status": 0,
+                "message": "success",
+                "result": result
             }
             return self.response(
                 200,
                 **back_data,
             )
         except IntegrityError as e:
-            return self.response_error(422,message=str(e.orig))
+            return self.response_error(422, message=str(e.orig))
 
-
-    def query_delete(self,pk,_args):
+    def query_delete(self, pk, _args):
         raise NotImplementedError('To be implemented')
-
 
     @expose("/<pk>", methods=["DELETE"])
     @pysnooper.snoop()
     def api_delete(self, pk):
         _args = request.json or {}
-        _args.update(json.loads(request.args.get('form_data',"{}")))
+        _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
             del _args['form_data']
 
-        result = self.query_delete(pk,_args)
-        back_data={
-            "status":0,
-            "message":"success",
-            "result":result
+        result = self.query_delete(pk, _args)
+        back_data = {
+            "status": 0,
+            "message": "success",
+            "result": result
         }
         return self.response(200, **back_data)
-
 
     @expose("/action/<string:name>/<pk>", methods=["GET"])
     def single_action(self, name, pk):
@@ -1138,7 +1128,7 @@ class MyappFormRestApi(ModelRestApi):
                 "result": {},
                 "message": 'success'
             }
-            return self.response(200,**back)
+            return self.response(200, **back)
         except Exception as e:
             print(e)
             back = {
@@ -1146,11 +1136,10 @@ class MyappFormRestApi(ModelRestApi):
                 "message": str(e),
                 "result": {}
             }
-            return self.response(200,**back)
-
+            return self.response(200, **back)
 
     @expose("/multi_action/<string:name>", methods=["POST"])
-    def multi_action(self,name):
+    def multi_action(self, name):
         """
             Action method to handle multiple records selected from a list view
         """
@@ -1158,21 +1147,21 @@ class MyappFormRestApi(ModelRestApi):
         action = self.actions.get(name)
         try:
             back = action.func(pks)
-            message = back if type(back)==str else 'success'
-            back={
-                "status":0,
-                "result":{},
-                "message":message
+            message = back if type(back) == str else 'success'
+            back = {
+                "status": 0,
+                "result": {},
+                "message": message
             }
-            return self.response(200,**back)
+            return self.response(200, **back)
         except Exception as e:
             print(e)
             back = {
-                "status":-1,
+                "status": -1,
                 "message": str(e),
-                "result":{}
+                "result": {}
             }
-            return self.response(200,**back)
+            return self.response(200, **back)
 
     """
     ------------------------------------------------
@@ -1199,7 +1188,6 @@ class MyappFormRestApi(ModelRestApi):
             except Exception:
                 pass
         return pk
-
 
     def _handle_page_args(self, rison_args):
         """
@@ -1256,7 +1244,6 @@ class MyappFormRestApi(ModelRestApi):
         self._filters.rest_add_filters(rison_args.get(API_FILTERS_RIS_KEY, []))
         return self._filters.get_joined_filters(self._base_filters)
 
-
     # @pysnooper.snoop(watch_explode=("column"))
     def _description_columns_json(self, cols=None):
         """
@@ -1272,12 +1259,11 @@ class MyappFormRestApi(ModelRestApi):
         for col in edit_form_extra_fields:
             column = edit_form_extra_fields[col]
             if hasattr(column, 'kwargs') and column.kwargs:
-                description = column.kwargs.get('description','')
+                description = column.kwargs.get('description', '')
                 if description:
                     ret[col] = description
 
         return ret
-
 
     def _label_columns_json(self, cols=None):
         """
@@ -1291,7 +1277,7 @@ class MyappFormRestApi(ModelRestApi):
             ret[key] = as_unicode(_(value).encode("UTF-8"))
 
         # 全局的label
-        if hasattr(self.datamodel.obj,'label_columns') and self.datamodel.obj.label_columns:
+        if hasattr(self.datamodel.obj, 'label_columns') and self.datamodel.obj.label_columns:
             for col in self.datamodel.obj.label_columns:
                 ret[col] = self.datamodel.obj.label_columns[col]
 
@@ -1305,15 +1291,15 @@ class MyappFormRestApi(ModelRestApi):
 
         return ret
 
-    def make_ui_info(self,ret):
+    def make_ui_info(self, ret):
 
         # 可序列化处理
-        if ret.get('default',None) and isfunction(ret['default']):
+        if ret.get('default', None) and isfunction(ret['default']):
             ret['default'] = None  # 函数没法序列化
 
         # 统一处理校验器
-        local_validators=[]
-        for v in ret.get('validators',[]):
+        local_validators = []
+        for v in ret.get('validators', []):
             # print(v)
             # if ret.get('name', '') == "warehouse_level":
             #     print(ret)
@@ -1324,70 +1310,70 @@ class MyappFormRestApi(ModelRestApi):
             val = {}
             val['type'] = v.__class__.__name__
 
-            if type(v) == validators.Regexp or type(v) == validate.Regexp:   # 一种是数据库的校验器，一种是可视化的校验器
+            if type(v) == validators.Regexp or type(v) == validate.Regexp:  # 一种是数据库的校验器，一种是可视化的校验器
                 val['regex'] = str(v.regex.pattern)
             elif type(v) == validators.Length or type(v) == validate.Length:
                 val['min'] = v.min
                 val['max'] = v.max
-            elif type(v) == validators.NumberRange or type(v) == validate.Range :
+            elif type(v) == validators.NumberRange or type(v) == validate.Range:
                 val['min'] = v.min
                 val['max'] = v.max
             else:
                 pass
 
             local_validators.append(val)
-        ret['validators']=local_validators
+        ret['validators'] = local_validators
 
         # 统一规范前端type和选择时value
         # 选择器
-        if ret.get('type','') in ['QuerySelect','Select','Related','MySelectMultiple','SelectMultiple','Enum']:
-            choices = ret.get('choices',[])
-            values = ret.get('values',[])
+        if ret.get('type', '') in ['QuerySelect', 'Select', 'Related', 'MySelectMultiple', 'SelectMultiple', 'Enum']:
+            choices = ret.get('choices', [])
+            values = ret.get('values', [])
             if choices:
-                values=[]
+                values = []
                 for choice in choices:
-                    if choice and len(choice)==2:
+                    if choice and len(choice) == 2:
                         values.append({
-                            "id":choice[0],
-                            "value":choice[1]
+                            "id": choice[0],
+                            "value": choice[1]
                         })
-            ret['values']=values
-            if not ret.get('ui-type',''):
-                ret['ui-type']='select2' if 'SelectMultiple' in ret['type'] else 'select'
+            ret['values'] = values
+            if not ret.get('ui-type', ''):
+                ret['ui-type'] = 'select2' if 'SelectMultiple' in ret['type'] else 'select'
 
         # 字符串
-        if ret.get('ui-type','') not in ['list','datePicker']:  # list,datePicker 类型，保持原样
-            if ret.get('type','') in ['String',]:
-                if ret.get('widget','BS3Text')=='BS3Text':
+        if ret.get('ui-type', '') not in ['list', 'datePicker']:  # list,datePicker 类型，保持原样
+            if ret.get('type', '') in ['String', ]:
+                if ret.get('widget', 'BS3Text') == 'BS3Text':
                     ret['ui-type'] = 'input'
                 else:
                     ret['ui-type'] = 'textArea'
 
         # 长文本输入
-        if 'text' in ret.get('type','').lower():
+        if 'text' in ret.get('type', '').lower():
             ret['ui-type'] = 'textArea'
-        if 'varchar' in ret.get('type','').lower():
+        if 'varchar' in ret.get('type', '').lower():
             ret['ui-type'] = 'input'
 
         # bool类型
-        if 'boolean' in ret.get('type','').lower():
+        if 'boolean' in ret.get('type', '').lower():
             ret['ui-type'] = 'radio'
-            ret['values']=[
+            ret['values'] = [
                 {
-                    "id":True,
-                    "value":"yes",
+                    "id": True,
+                    "value": "yes",
                 },
                 {
                     "id": False,
                     "value": "no",
                 },
             ]
-            ret['default']=True if ret.get('default',0) else False
+            ret['default'] = True if ret.get('default', 0) else False
 
         # 处理正则自动输入
-        default = ret.get('default',None)
-        if default and re.match('\$\{.*\}',str(default)):
-            ret['ui-type']='match-input'
+        default = ret.get('default', None)
+        if default and re.match('\$\{.*\}', str(default)):
+            ret['ui-type'] = 'match-input'
 
         return ret
 
@@ -1408,25 +1394,25 @@ class MyappFormRestApi(ModelRestApi):
 
         # 根据数据库信息添加
         if self.datamodel:
-            list_columns = self.datamodel.list_columns     # 只有数据库存储的字段，没有外键字段
+            list_columns = self.datamodel.list_columns  # 只有数据库存储的字段，没有外键字段
             if field.name in list_columns:
                 column = list_columns[field.name]
                 default = column.default
                 # print(type(column.type))
-                column_type=column.type
+                column_type = column.type
                 # aa=column_type
                 column_type_str = str(column_type.__class__.__name__)
-                if column_type_str=='Enum':
-                    ret['values']=[
+                if column_type_str == 'Enum':
+                    ret['values'] = [
                         {
-                            "id":x,
-                            "value":x
+                            "id": x,
+                            "value": x
                         } for x in column.type.enums
                     ]
                 # print(column_type)
                 # if type(column_type)==
                 # print(column.__class__.__name__)
-                ret['type']=column_type_str
+                ret['type'] = column_type_str
                 if default:
                     ret['default'] = default.arg
 
@@ -1436,7 +1422,7 @@ class MyappFormRestApi(ModelRestApi):
                 # from sqlalchemy.sql.schema import Column
                 # # if column
         if field.name in self.remember_columns:
-            ret["remember"]=True
+            ret["remember"] = True
         else:
             ret["remember"] = False
         ret["label"] = _(self.label_columns.get(field.name, ""))
@@ -1446,7 +1432,7 @@ class MyappFormRestApi(ModelRestApi):
         elif field.validate:
             ret["validators"] = [field.validate]
         else:
-            ret["validators"]=[]
+            ret["validators"] = []
 
         # Handles related fields
         if isinstance(field, Related) or isinstance(field, RelatedList):
@@ -1454,8 +1440,6 @@ class MyappFormRestApi(ModelRestApi):
                 field, filter_rel_field, page=page, page_size=page_size
             )
             ret["validators"].append(validators.DataRequired())
-
-
 
         # 如果是外键，都加必填
         # if
@@ -1466,7 +1450,6 @@ class MyappFormRestApi(ModelRestApi):
         ret["unique"] = getattr(field, "unique", False)
         # When using custom marshmallow schemas fields don't have unique property
 
-
         # 根据edit_form_extra_fields来确定
         if self.edit_form_extra_fields:
             if field.name in self.edit_form_extra_fields:
@@ -1474,18 +1457,18 @@ class MyappFormRestApi(ModelRestApi):
                 column_field_kwargs = column_field.kwargs
                 # type 类型 EnumField   values
                 # aa = column_field
-                ret['type']=column_field.field_class.__name__.replace('Field','')
+                ret['type'] = column_field.field_class.__name__.replace('Field', '')
                 # ret['description']=column_field_kwargs.get('description','')
-                ret['description'] = self.description_columns.get(field.name,column_field_kwargs.get('description', ''))
-                ret['label'] = self.label_columns.get(field.name,column_field_kwargs.get('label', ''))
+                ret['description'] = self.description_columns.get(field.name, column_field_kwargs.get('description', ''))
+                ret['label'] = self.label_columns.get(field.name, column_field_kwargs.get('label', ''))
                 ret['default'] = column_field_kwargs.get('default', '')
                 ret['validators'] = column_field_kwargs.get('validators', ret["validators"])
                 ret['choices'] = column_field_kwargs.get('choices', [])
                 if 'widget' in column_field_kwargs:
-                    ret['widget']=column_field_kwargs['widget'].__class__.__name__.replace('Widget','').replace('Field','').replace('My','')
+                    ret['widget'] = column_field_kwargs['widget'].__class__.__name__.replace('Widget', '').replace('Field', '').replace('My', '')
                     # 处理禁止编辑
                     if hasattr(column_field_kwargs['widget'], 'readonly') and column_field_kwargs['widget'].readonly:
-                        ret['disable']=True
+                        ret['disable'] = True
                     # 处理重新拉取info
                     if hasattr(column_field_kwargs['widget'], 'retry_info') and column_field_kwargs['widget'].retry_info:
                         ret['retry_info'] = True
@@ -1505,22 +1488,22 @@ class MyappFormRestApi(ModelRestApi):
                     if hasattr(column_field_kwargs['widget'], 'expand_filed') and column_field_kwargs['widget'].expand_filed:
                         print(field.name)
                         ret['ui-type'] = 'list'
-                        ret["info"]=self.columnsfield2info(column_field_kwargs['widget'].expand_filed)
+                        ret["info"] = self.columnsfield2info(column_field_kwargs['widget'].expand_filed)
 
                     # 处理内容自动填充可取值，对于那种配置使用过往记录作为可选值的参数进行处理
                     if hasattr(column_field_kwargs['widget'], 'conten2choices') and column_field_kwargs['widget'].conten2choices:
                         # 先从缓存中拿结果
-                        field_contents=None
+                        field_contents = None
                         try:
-                            field_contents = cache.get(self.datamodel.obj.__tablename__+"_"+field.name)
+                            field_contents = cache.get(self.datamodel.obj.__tablename__ + "_" + field.name)
                         except Exception as e:
                             print(e)
                         # 缓存没有数据，再从数据库中读取
                         if not field_contents:
                             try:
-                                field_contents = db.session.query(getattr(self.datamodel.obj,field.name)).group_by(getattr(self.datamodel.obj,field.name)).all()
+                                field_contents = db.session.query(getattr(self.datamodel.obj, field.name)).group_by(getattr(self.datamodel.obj, field.name)).all()
                                 field_contents = list(set([item[0] for item in field_contents]))
-                                cache.set(self.datamodel.obj.__tablename__+"_"+field.name, field_contents, timeout=60 * 60)
+                                cache.set(self.datamodel.obj.__tablename__ + "_" + field.name, field_contents,timeout=60 * 60)
 
                             except Exception as e:
                                 print(e)
@@ -1528,17 +1511,16 @@ class MyappFormRestApi(ModelRestApi):
                         if field_contents:
                             ret['choices'] = [[x, x] for x in list(set(field_contents))]
 
-
         # 补充数据库model中定义的是否必填
-        columns = [column for column in self.datamodel.obj.__table__._columns if column.name==field.name and hasattr(column,'nullable') and not column.nullable]
+        columns = [column for column in self.datamodel.obj.__table__._columns if column.name == field.name and hasattr(column, 'nullable') and not column.nullable]
         if columns:
             if 'validators' in ret:
                 ret['validators'].append(validators.DataRequired())
             else:
-                ret['validators']=[validators.DataRequired()]
+                ret['validators'] = [validators.DataRequired()]
 
         # print(ret)
-        ret=self.make_ui_info(ret)
+        ret = self.make_ui_info(ret)
 
         return ret
 
@@ -1563,7 +1545,7 @@ class MyappFormRestApi(ModelRestApi):
                 page = col_args.get(API_PAGE_INDEX_RIS_KEY, None)
                 page_size = col_args.get(API_PAGE_SIZE_RIS_KEY, None)
 
-            page_size=1000
+            page_size = 1000
             ret.append(
                 self._get_field_info(
                     model_schema.fields[col],
@@ -1574,9 +1556,7 @@ class MyappFormRestApi(ModelRestApi):
             )
         return ret
 
-    def _get_list_related_field(
-        self, field, filter_rel_field, page=None, page_size=None
-    ):
+    def _get_list_related_field(self, field, filter_rel_field, page=None, page_size=None):
         """
             Return a list of values for a related field
 
