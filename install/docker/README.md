@@ -4,11 +4,7 @@
 ## deploy mysql
 
 ```
-linux
 docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:8.0.32
-mac
-docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:8.0.32
-
 ```
 进入mysql，创建kubeflow数据库
 ```

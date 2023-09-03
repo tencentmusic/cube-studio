@@ -73,9 +73,9 @@ class NNI_ModelView_Base():
     show_columns = ['created_by','changed_by','created_on','changed_on','job_type','name','namespace','describe',
                     'parallel_trial_count','max_trial_count','objective_type',
                     'objective_goal','objective_metric_name','objective_additional_metric_names','algorithm_name',
-                    'algorithm_setting','parameters_html','trial_spec_html',
+                    'algorithm_setting','parameters','trial_spec',
                     'working_dir','volume_mount','node_selector','image_pull_policy','resource_memory','resource_cpu','resource_gpu',
-                    'experiment_html','alert_status']
+                    'experiment','alert_status']
 
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]

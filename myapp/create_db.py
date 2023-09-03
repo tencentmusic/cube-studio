@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os
+import os,time
 import pysnooper
 
 # @pysnooper.snoop()
@@ -11,7 +11,14 @@ def init_db():
         """Inits the Myapp application"""
         import pymysql
         # 创建连接
-        conn = pymysql.connect(host=uri.host, port=uri.port, user=uri.username, password=uri.password, charset='utf8')
+        while True:
+            try:
+                # 创建连接
+                conn = pymysql.connect(host=uri.host, port=uri.port, user=uri.username, password=uri.password, charset='utf8')
+                break
+            except:
+                print('链接数据库失败，5s后重连', flush=True)
+                time.sleep(5)
         # 创建游标
         cursor = conn.cursor()
 
