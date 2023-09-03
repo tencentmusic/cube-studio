@@ -131,11 +131,11 @@ def create_header_deploy(name):
                 "spec": {
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
-                    # "imagePullSecrets": [
-                    #     {
-                    #         "name": "hubsecret"
-                    #     }
-                    # ],
+                    "imagePullSecrets": [
+                        {
+                            "name": "hubsecret"
+                        }
+                    ],
                     "affinity": {
                         "nodeAffinity": {
                             "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -299,11 +299,11 @@ def create_worker_deploy(header_name,worker_name):
                             ]
                         }
                     },
-                    # "imagePullSecrets": [
-                    #     {
-                    #         "name": "hubsecret"
-                    #     }
-                    # ],
+                    "imagePullSecrets": [
+                        {
+                            "name": "hubsecret"
+                        }
+                    ],
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
                     "containers": [
@@ -314,7 +314,7 @@ def create_worker_deploy(header_name,worker_name):
                             "command": [
                                 "/bin/bash",
                                 "-c",
-                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:$RAY_HEAD_SERVICE_PORT_REDIS --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
+                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:6379 --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
                             ],
                             "volumeMounts": k8s_volume_mounts,
                             "env": [
@@ -329,10 +329,6 @@ def create_worker_deploy(header_name,worker_name):
                                 {
                                     "name": "RAY_HEAD_SERVICE_HOST",
                                     "value": header_name
-                                },
-                                {
-                                    "name": "RAY_HEAD_SERVICE_PORT_REDIS",
-                                    "value": "6379"
                                 }
                             ],
                             "resources": {
