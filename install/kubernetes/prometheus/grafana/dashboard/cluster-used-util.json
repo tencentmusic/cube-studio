@@ -831,7 +831,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(max(node_filesystem_size{fstype=~\"ext[24]\"} - node_filesystem_avail{fstype=~\"ext[24]\"}) by (device,pod,namespace)) by (pod,namespace) / scalar(sum(max(node_filesystem_size{fstype=~\"ext[24]\"}) by (device,pod,namespace))) * on (namespace, pod) group_left(node) node_namespace_pod:kube_pod_info:\n",
+          "expr": "sum(max(node_filesystem_size_bytes{fstype=~\"ext[24]\"} - node_filesystem_avail_bytes{fstype=~\"ext[24]\"}) by (device,pod,namespace)) by (pod,namespace) / scalar(sum(max(node_filesystem_size_bytes{fstype=~\"ext[24]\"}) by (device,pod,namespace))) * on (namespace, pod) group_left(node) node_namespace_pod:kube_pod_info:\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{node}}",

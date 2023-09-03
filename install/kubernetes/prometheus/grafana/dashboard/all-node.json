@@ -446,7 +446,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "100 - (avg by (instance) (irate(node_cpu{job=\"node-exporter\", mode=\"idle\"}[5m])) * 100)\n",
+          "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\"}[5m])) * 100)\n",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -540,7 +540,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "node_memory_MemTotal{job=\"node-exporter\"}\n- node_memory_MemFree{job=\"node-exporter\"}\n- node_memory_Buffers{job=\"node-exporter\"}\n- node_memory_Cached{job=\"node-exporter\"}\n",
+          "expr": "node_memory_MemTotal_bytes{job=\"node-exporter\"}\n- node_memory_MemFree_bytes{job=\"node-exporter\"}\n- node_memory_Buffers_bytes{job=\"node-exporter\"}\n- node_memory_Cached_bytes{job=\"node-exporter\"}\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -630,7 +630,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "rate(node_network_receive_bytes{job=\"node-exporter\", device!~\"lo\"}[5m])",
+          "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\", device!~\"lo\"}[5m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}:{{device}}",
@@ -720,7 +720,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "rate(node_network_transmit_bytes{job=\"node-exporter\", device!~\"lo\"}[5m])",
+          "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\", device!~\"lo\"}[5m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}:{{device}}",
@@ -843,7 +843,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "sum by (instance) (rate(node_disk_io_time_ms{job=\"node-exporter\"}[2m]))",
+          "expr": "sum by (instance) (rate(node_disk_io_time_seconds_total{job=\"node-exporter\"}[2m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}} io time",

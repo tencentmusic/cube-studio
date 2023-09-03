@@ -204,7 +204,7 @@ spec:
       serviceAccountName: kubeflow-prometheus-adapter
       containers:
       - name: prometheus-adapter
-        image: "k8s.gcr.io/prometheus-adapter/prometheus-adapter:v0.9.1"
+        image: "ccr.ccs.tencentyun.com/cube-studio/prometheus-adapter:v0.9.1"
         imagePullPolicy: IfNotPresent
         args:
         - /adapter
@@ -247,7 +247,6 @@ spec:
           name: tmp
       nodeSelector:
         {}
-      priorityClassName:
       securityContext:
         fsGroup: 10001
       tolerations:

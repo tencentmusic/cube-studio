@@ -224,7 +224,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(kube_pod_container_resource_requests_memory_bytes) / sum(node_memory_MemTotal)",
+                            "expr": "sum(kube_pod_container_resource_requests_memory_bytes) / sum(node_memory_MemTotal_bytes)",
                             "format": "time_series",
                             "instant": true,
                             "intervalFactor": 2,
@@ -308,7 +308,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(kube_pod_container_resource_limits_memory_bytes) / sum(node_memory_MemTotal)",
+                            "expr": "sum(kube_pod_container_resource_limits_memory_bytes) / sum(node_memory_MemTotal_bytes)",
                             "format": "time_series",
                             "instant": true,
                             "intervalFactor": 2,
