@@ -1,5 +1,3 @@
-
-
 import time, os
 from kubernetes import client
 from kubernetes import watch
@@ -7,16 +5,17 @@ from myapp.utils.py.py_k8s import K8s
 from myapp.project import push_message
 from myapp import app
 from myapp.utils.celery import session_scope
-conf=app.config
 
-cluster=os.getenv('ENVIRONMENT','').lower()
+conf = app.config
+
+cluster = os.getenv('ENVIRONMENT', '').lower()
 if not cluster:
-    print('no cluster %s'%cluster)
+    print('no cluster %s' % cluster)
     exit(1)
 else:
-    clusters = conf.get('CLUSTERS',{})
+    clusters = conf.get('CLUSTERS', {})
     if clusters and cluster in clusters:
-        kubeconfig = clusters[cluster].get('KUBECONFIG','')
+        kubeconfig = clusters[cluster].get('KUBECONFIG', '')
         K8s(kubeconfig)
     else:
         print('no kubeconfig in cluster %s' % cluster)
@@ -24,11 +23,13 @@ else:
 
 from myapp.models.model_serving import InferenceService
 from datetime import datetime, timezone, timedelta
+
+
 # @pysnooper.snoop()
 def listen_service():
     namespace = conf.get('SERVICE_NAMESPACE')
     w = watch.Watch()
-    while(True):
+    while (True):
         try:
             print('begin listen')
             for event in w.stream(client.CoreV1Api().list_namespaced_pod, namespace=namespace,timeout_seconds=60):  # label_selector=label,
@@ -36,7 +37,7 @@ def listen_service():
                     try:
                         if event['object'].status and event['object'].status.container_statuses and event["type"]=='MODIFIED':  # 容器重启会触发MODIFIED
                             # terminated 终止，waiting 等待启动，running 运行中
-                            container_statuse= event['object'].status.container_statuses[0].state
+                            container_statuse = event['object'].status.container_statuses[0].state
                             terminated = container_statuse.terminated
                             # waiting = container_statuse.waiting
                             # running = container_statuse.running
@@ -62,8 +63,7 @@ def listen_service():
             print(ee)
             time.sleep(5)
 
+
 # 不能使用异步io，因为stream会阻塞
-if __name__=='__main__':
+if __name__ == '__main__':
     listen_service()
-
-
