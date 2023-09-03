@@ -151,7 +151,7 @@ spec:
         fsGroup: 1000
       initContainers:
       - name: init-sysctl
-        image: busybox
+        image: busybox:1.36.0
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
