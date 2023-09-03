@@ -61,7 +61,7 @@ class Images(Model,AuditMixinNullable,MyappModelBase):
     repository = relationship(
         "Repository", foreign_keys=[repository_id]
     )
-    entrypoint=Column(String(200))
+    entrypoint=Column(String(2000))
     dockerfile=Column(Text)
     gitpath=Column(String(200))
 
@@ -90,7 +90,7 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
         "Project", foreign_keys=[project_id]
     )
     name = Column(String(500), nullable=False,unique=True)
-    version = Column(Enum('Release','Alpha'),nullable=False,default='Release')
+    version = Column(Enum('Release','Alpha',name='version'),nullable=False,default='Release')
     images_id = Column(Integer, ForeignKey('images.id'))
     images = relationship(
         Images, foreign_keys=[images_id]
@@ -98,10 +98,10 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     hostAliases = Column(Text)   # host文件
     describe = Column(String(500), nullable=False)
     workdir=Column(String(400))
-    entrypoint=Column(String(200))
+    entrypoint=Column(String(2000))
     args=Column(Text)
     env = Column(Text)   # 默认自带的环境变量
-    volume_mount = Column(String(400),default='')  # 强制必须挂载
+    volume_mount = Column(String(2000),default='')  # 强制必须挂载
     privileged = Column(Boolean, default=False)   # 是否启用特权模式
     accounts = Column(String(100))   # 使用k8s账户
     demo=Column(Text)
@@ -175,7 +175,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     dag_json = Column(Text,nullable=False,default='{}')
     namespace=Column(String(100),default='pipeline')
     global_env = Column(String(500),default='')
-    schedule_type = Column(Enum('once', 'crontab'),nullable=False,default='once')
+    schedule_type = Column(Enum('once', 'crontab',name='schedule_type'),nullable=False,default='once')
     cron_time = Column(String(100))        # 调度周期
     cronjob_start_time = Column(String(300), default='')
     pipeline_file=Column(Text(655360),default='')
@@ -183,7 +183,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     version_id = Column(String(100))
     run_id = Column(String(100))
     node_selector = Column(String(100), default='cpu=true,train=true')
-    image_pull_policy = Column(Enum('Always','IfNotPresent'),nullable=False,default='Always')
+    image_pull_policy = Column(Enum('Always','IfNotPresent',name='image_pull_policy'),nullable=False,default='Always')
     parallelism = Column(Integer, nullable=False,default=1)  # 同一个pipeline，最大并行的task数目
     alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated')   # 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated
     alert_user = Column(String(300), default='')
@@ -191,7 +191,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     expand = Column(Text(65536),default='[]')
     depends_on_past = Column(Boolean, default=False)
     max_active_runs = Column(Integer, nullable=False,default=3)   # 最大同时运行的pipeline实例
-    expired_limit = Column(Integer, nullable=False, default=1)  # 过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能
+    expired_limit = Column(Integer, nullable=False, default=0)  # 过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能
     parameter = Column(Text(65536), default='{}')
 
 
@@ -589,7 +589,7 @@ class RunHistory(Model,MyappModelBase):
     pipeline = relationship(
         "Pipeline", foreign_keys=[pipeline_id]
     )
-    pipeline_file = Column(Text(65536), default='')
+    pipeline_file = Column(Text(655360), default='')
     pipeline_argo_id = Column(String(100))   # 上传的pipeline id
     version_id = Column(String(100))        # 上传的版本号
     experiment_id = Column(String(100))
@@ -633,8 +633,8 @@ class Crd:
     status = Column(String(100), default='')
     annotations = Column(Text, default='')
     labels = Column(Text, default='')
-    spec = Column(Text(65536), default='')
-    status_more = Column(Text(65536), default='')
+    spec = Column(Text(655360), default='')
+    status_more = Column(Text(), default='')
     username = Column(String(100), default='')
     info_json = Column(Text, default='{}')
     add_row_time = Column(DateTime, default=datetime.datetime.now)
