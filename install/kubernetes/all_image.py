@@ -19,12 +19,10 @@ new_gpu = [
 new_prometheus = [
     "prom/prometheus:v2.27.1",  # peomethues数据库
     'prom/node-exporter:v1.5.0',  # 机器指标
-
     'quay.io/prometheus-operator/prometheus-config-reloader:v0.46.0',  # prometheus配置翻译
     "quay.io/prometheus-operator/prometheus-operator:v0.46.0",  # prometheus 部署工具
     'bitnami/kube-rbac-proxy:0.14.1',  # 指标
     'carlosedp/addon-resizer:v1.8.4',  # 指标
-
     'grafana/grafana:9.1.5'  # 监控看板
     "ccr.ccs.tencentyun.com/cube-studio/prometheus-adapter:v0.9.1",  # peometheus指标翻译为自定义指标
 ]
