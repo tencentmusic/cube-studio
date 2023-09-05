@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 read -p "是否继续执行脚本？(yes/no)" answer
