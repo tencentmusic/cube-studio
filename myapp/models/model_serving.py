@@ -22,7 +22,7 @@ class service_common():
     @property
     def monitoring_url(self):
         # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
-        url="http://"+self.project.cluster.get('HOST',request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        url="//"+self.project.cluster.get('HOST',request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
         return Markup(f'<a href="{url}">监控</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
 
@@ -61,7 +61,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def deploy(self):
-        monitoring_url = "http://"+self.project.cluster.get('HOST', request.host) + conf.get('GRAFANA_SERVICE_PATH') + self.name
+        monitoring_url = "//"+self.project.cluster.get('HOST', request.host) + conf.get('GRAFANA_SERVICE_PATH') + self.name
         help_url=''
         try:
             help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
@@ -83,7 +83,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     def name_url(self):
         # user_roles = [role.name.lower() for role in list(g.user.roles)]
         # if "admin" in user_roles:
-        url = "http://"+self.project.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE")}/{self.name.replace("_", "-")}'
 
         return Markup(f'<a target=_blank href="{url}">{self.label}</a>')
 
@@ -112,7 +112,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
                 SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
 
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
-            return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+            return Markup(f'<a target=_blank href="//{host}">{host}</a>')
         else:
             return "未开通"
 
@@ -183,7 +183,8 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def model_name_url(self):
-        url = "http://"+self.project.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (conf.get('SERVICE_NAMESPACE'), self.name.replace('_', '-'))
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE")}/{self.name.replace("_", "-")}'
+
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
     @property
@@ -203,7 +204,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         except Exception as e:
             print(e)
 
-        monitoring_url="http://"+self.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        monitoring_url="//"+self.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
         dom = f'''
                 <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
@@ -259,13 +260,30 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
                 SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
 
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
-            return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+            url = host
+
+            # 如果是tfserving
+            if self.service_type == 'tfserving':
+                url = host + f"/v1/models/{self.model_name}/metadata"
+            # 如果是torch-server
+            if self.service_type == 'torch-server':
+                url = SERVICE_EXTERNAL_IP + f":{port + 1}/models"
+
+            # 处理业务自己配置的host的特殊配置
+            if self.host:
+                url = self.host
+                # 如果只配置了路径，则用前面的域名+配置的路径
+                if self.host[0] == '/':
+                    # 只配置了路径的话，就用原来的host
+                    url = host + self.host
+
+            return Markup(f'<a target=_blank href="//{url}">{host}</a>')
 
         elif TKE_EXISTED_LBID:
             TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')
             if len(TKE_EXISTED_LBID)>1:
                 host = TKE_EXISTED_LBID[1] + ":" + str(port)
-                return Markup(f'<a target=_blank href="http://{host}/">{host}</a>')
+                return Markup(f'<a target=_blank href="//{host}">{host}</a>')
 
         return "未开通"
 
@@ -273,22 +291,25 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     def __repr__(self):
         return self.name
 
-
-
     @property
     def inference_host_url(self):
         url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
+        link = url
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
-                url = self.host
+                link = url = self.host
+            elif self.host[0]=='/':
+                # 只配置了路径的话，就用原来的host
+                link = url + self.host
             else:
-                url = "http://"+self.host
+                link = "http://"+self.host
 
-        link = url
-        if self.service_type=='tfserving':
-            link+="/v1/models/"+self.model_name
-        if self.service_type=='torch-server':
+
+        if not self.host and self.service_type=='tfserving':
+            link+=f"/v1/models/{self.model_name}/metadata"
+        if not self.host and self.service_type=='torch-server':
             link+=":8080/models"
+
         hosts=f'''
         <a target=_blank href="{link}">{url}</a>
         <br><a target=_blank href="{link.replace('http://','http://debug.').replace('https://','https://debug.')}">{url.replace('http://','http://debug.').replace('https://','https://debug.')}</a>
