@@ -409,7 +409,7 @@
   },
   "model-download": {
     "project_name": "数据导入导出",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/model_download:latest",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/model_download:20221001",
     "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_download",
     "image_describe": "模型导入",
     "job_template_name": "model-download",
