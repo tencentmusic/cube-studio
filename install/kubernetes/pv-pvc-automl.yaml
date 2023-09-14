@@ -16,6 +16,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/pipeline/workspace
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -52,6 +53,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/pipeline/archives
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

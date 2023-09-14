@@ -14,6 +14,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/global
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -41,7 +42,6 @@ metadata:
   labels:
     pipeline-pvname: pipeline-kubeflow-user-workspace
 spec:
-
   capacity:
     storage: 500Gi
   accessModes:
@@ -49,6 +49,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/pipeline/workspace
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 
 ---
 kind: PersistentVolumeClaim
@@ -84,6 +85,7 @@ spec:
   hostPath:
     path: /mnt/ceph_fuse/meiyangchen
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 # 模型归档
 ---
 apiVersion: v1
@@ -100,6 +102,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/pipeline/archives
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

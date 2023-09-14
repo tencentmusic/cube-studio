@@ -29,7 +29,7 @@ spec:     # 定义pv属性
     - ReadWriteMany
   hostPath:
     path: /data/k8s/monitoring/prometheus   # /nfs_share/k8s/monitoring/grafana   需要在主机上设置777权限
-
+  storageClassName: ""
   persistentVolumeReclaimPolicy: Retain
 
 

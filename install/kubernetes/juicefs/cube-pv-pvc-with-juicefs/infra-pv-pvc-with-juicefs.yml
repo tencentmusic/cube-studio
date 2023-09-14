@@ -12,6 +12,7 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   csi:
     driver: csi.juicefs.com
     volumeHandle: infra-kubeflow-global-pv
@@ -57,6 +58,7 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   csi:
     driver: csi.juicefs.com
     volumeHandle: infra-kubeflow

@@ -14,6 +14,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/global
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -47,6 +48,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

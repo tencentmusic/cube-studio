@@ -13,6 +13,7 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   csi:
     driver: csi.juicefs.com
     volumeHandle: jupyter-kubeflow-user-workspace
@@ -39,10 +40,11 @@ spec:
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      jupyter-pvname: jupyter-kubeflow-user-workspace
-
+#  selector:
+#    matchLabels:
+#      jupyter-pvname: jupyter-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: jupyter-kubeflow-user-workspace
 
 # 模型归档
 ---
@@ -58,6 +60,7 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   csi:
     driver: csi.juicefs.com
     volumeHandle: jupyter-kubeflow-archives
@@ -84,7 +87,9 @@ spec:
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      jupyter-pvname: jupyter-kubeflow-archives
+#  selector:
+#    matchLabels:
+#      jupyter-pvname: jupyter-kubeflow-archives
+  storageClassName: ""
+  volumeName: jupyter-kubeflow-archives
 

@@ -11,6 +11,7 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   csi:
     driver: csi.juicefs.com
     volumeHandle: service-kubeflow-user-workspace
@@ -39,6 +40,7 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   csi:
     driver: csi.juicefs.com
     volumeHandle: service-kubeflow-archives
@@ -60,15 +62,16 @@ metadata:
   name: kubeflow-user-workspace
   namespace: service
 spec:
-  storageClassName: ""
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      service-pvname: service-kubeflow-user-workspace
+#  selector:
+#    matchLabels:
+#      service-pvname: service-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: service-kubeflow-user-workspace
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -76,12 +79,13 @@ metadata:
   name: kubeflow-archives
   namespace: service
 spec:
-  storageClassName: ""
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      service-pvname: service-kubeflow-archives
+#  selector:
+#    matchLabels:
+#      service-pvname: service-kubeflow-archives
+  storageClassName: ""
+  volumeName: service-kubeflow-archives
