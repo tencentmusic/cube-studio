@@ -24,6 +24,13 @@ spec:
                 operator: In
                 values:
                 - "true"
+      initContainers:
+        - name: modify-volume-permission
+          image: busybox:1.36.0
+          command: ["sh","-c","chown 472 /var/lib/grafana/"]
+          volumeMounts:
+            - mountPath: /var/lib/grafana
+              name: grafana-storage
       containers:
       - name: grafana
         image:  grafana/grafana:9.1.5
