@@ -131,8 +131,8 @@ class InferenceService_ModelView_base():
             widget=Select2Widget(),
             validators=[DataRequired()]
         ),
-        "resource_memory":StringField(_(datamodel.obj.lab('resource_memory')),default='5G',description='内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管路员',widget=BS3TextFieldWidget(),validators=[DataRequired()]),
-        "resource_cpu":StringField(_(datamodel.obj.lab('resource_cpu')), default='5',description='cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管路员',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
+        "resource_memory":StringField(_(datamodel.obj.lab('resource_memory')),default='5G',description='内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管理员',widget=BS3TextFieldWidget(),validators=[DataRequired()]),
+        "resource_cpu":StringField(_(datamodel.obj.lab('resource_cpu')), default='5',description='cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管理员',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "min_replicas": StringField(_(datamodel.obj.lab('min_replicas')), default=InferenceService.min_replicas.default.arg,description='最小副本数，用来配置高可用，流量变动自动伸缩',widget=BS3TextFieldWidget(), validators=[DataRequired()]),
         "max_replicas": StringField(_(datamodel.obj.lab('max_replicas')), default=InferenceService.max_replicas.default.arg,
                                     description='最大副本数，用来配置高可用，流量变动自动伸缩', widget=BS3TextFieldWidget(),
