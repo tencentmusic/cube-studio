@@ -42,7 +42,7 @@ KFJ_TASK_RESOURCE_MEMORY = os.getenv('KFJ_TASK_RESOURCE_MEMORY', '')
 NUM_WORKER = 3
 INIT_FILE=''
 crd_info={
-    "group": "batch.paddlepaddle.org",
+    "group": "kubeflow.org",
     "version": "v1",
     'kind': 'PaddleJob',
     "plural": "paddlejobs",
@@ -236,7 +236,7 @@ def make_paddlejob(name,num_workers,num_ps,image,working_dir,command):
     ps_pod_spec = copy.deepcopy(pod_spec)
     ps_pod_spec['replicas']=int(num_ps)
     paddle_deploy = {
-        "apiVersion": "batch.paddlepaddle.org/v1",
+        "apiVersion": "kubeflow.org/v1",
         "kind": "PaddleJob",
         "metadata": {
             "namespace": KFJ_NAMESPACE,
