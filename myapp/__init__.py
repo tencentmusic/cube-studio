@@ -112,6 +112,9 @@ if conf.get("BLUEPRINTS"):
 if conf.get("SILENCE_FAB"):
     logging.getLogger("flask_appbuilder").setLevel(logging.ERROR)
 
+# 获取 kubernetes.client.rest 的日志记录器
+logging.getLogger("kubernetes.client.rest").setLevel(logging.WARNING)
+
 if app.debug:
     app.logger.setLevel(logging.DEBUG)  # pylint: disable=no-member
 else:
@@ -273,6 +276,9 @@ def check_login():
         if url in request.path:
             return
 
+    if request.method.lower()=='options':
+        return
+
     if g.user is None or not g.user.get_id():
 
         # 支持跨域名cookie登录
@@ -280,6 +286,18 @@ def check_login():
         if myapp_username:
             try:
                 user = security_manager.find_user(myapp_username)
+                if not user:
+                    abort(401)
+                else:
+                    g.user = user
+                    return
+            except Exception as e:
+                print(e)
+        # 支持header认证
+        authorization_value = request.headers.get('Authorization','')
+        if authorization_value:
+            try:
+                user = security_manager.load_user_from_header(authorization_value)
                 if not user:
                     abort(401)
                 else:
