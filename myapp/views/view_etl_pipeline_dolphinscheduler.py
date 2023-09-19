@@ -5,10 +5,10 @@ conf = app.config
 logging = app.logger
 
 
-# todo： dophinscheduler的运行，删除，日志查询
-class DOPHINSCHEDULER_ETL_PIPELINE():
+# todo： dolphinscheduler的运行，删除，日志查询
+class DOLPHINSCHEDULER_ETL_PIPELINE():
 
-    def __init__(self, pipeline, host='http://dophinscheduler.oa.com'):
+    def __init__(self, pipeline, host='http://dolphinscheduler.oa.com'):
         self.pipeline = pipeline
         self.host = host
 
