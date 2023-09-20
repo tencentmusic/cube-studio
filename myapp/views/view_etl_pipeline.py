@@ -168,7 +168,7 @@ class ETL_Pipeline_ModelView_Base():
             widget=MySelect2Widget(),
             default='airflow',
             description='调度集群选择',
-            choices=[['airflow', 'airflow'], ['dophinscheduler', 'dophinscheduler'], ['azkaban', 'azkaban']],
+            choices=[['airflow', 'airflow'], ['dolphinscheduler', 'dolphinscheduler'], ['azkaban', 'azkaban']],
             validators=[DataRequired()]
         )
     }
