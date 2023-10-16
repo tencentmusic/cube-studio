@@ -305,7 +305,7 @@ class Dataset_ModelView_base():
 
     @expose("/upload/<dataset_id>", methods=["POST"])
     # @pysnooper.snoop()
-    def upload(self, dataset_id):
+    def upload_dataset(self, dataset_id):
         dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
         filename = request.form['filename']
         partition = request.form.get('partition', '')
@@ -387,7 +387,7 @@ class Dataset_ModelView_base():
     @expose("/download/<dataset_id>", methods=["GET", "POST"])
     @expose("/download/<dataset_id>/<partition>", methods=["GET", "POST"])
     # @pysnooper.snoop()
-    def download(self, dataset_id, partition=''):
+    def download_dataset(self, dataset_id, partition=''):
 
         # 生成下载链接
         def path2url(path):
