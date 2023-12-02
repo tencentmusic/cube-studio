@@ -143,6 +143,11 @@ class TFJob(K8sCRD):
                 },
                 "spec": {
                     "affinity": self.make_affinity_spec(job_name, node_affin, pod_affin),
+                    "imagePullSecrets": [
+                        {
+                            "name": "hubsecret"
+                        }
+                    ],
                     "containers": [
                         {
                             "name": "tensorflow",

@@ -532,7 +532,7 @@ export default function DataSearch() {
                                                     }}
                                                     options={[
                                                         'test',
-                                                    ]} placeholder="智能查询" width={'240px'} /> : null
+                                                    ]} placeholder="AI智能生成(企业版)" width={'240px'} /> : null
                                             }
                                         </div>
                                         <div className="d-f ac">

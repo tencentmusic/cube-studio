@@ -373,7 +373,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "100 - (avg by (cpu) (irate(node_cpu{job=\"node-exporter\", mode=\"idle\", instance=~\"$node.*\"}[5m])) * 100)\n",
+          "expr": "100 - (avg by (cpu) (irate(node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\", instance=~\"$node.*\"}[5m])) * 100)\n",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 10,
@@ -581,7 +581,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "node_memory_MemTotal{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_MemFree{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Buffers{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Cached{job=\"node-exporter\", instance=~\"$node.*\"}\n",
+          "expr": "node_memory_MemTotal_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_MemFree_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Buffers_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Cached_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "memory used",
@@ -592,7 +592,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "node_memory_Buffers{job=\"node-exporter\", instance=~\"$node.*\"}",
+          "expr": "node_memory_Buffers_bytes{job=\"node-exporter\", instance=~\"$node.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "memory buffers",
@@ -603,7 +603,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "node_memory_Cached{job=\"node-exporter\", instance=~\"$node.*\"}",
+          "expr": "node_memory_Cached_bytes{job=\"node-exporter\", instance=~\"$node.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "memory cached",
@@ -614,7 +614,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "node_memory_MemFree{job=\"node-exporter\", instance=~\"$node.*\"}",
+          "expr": "node_memory_MemFree_bytes{job=\"node-exporter\", instance=~\"$node.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "memory free",
@@ -723,7 +723,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "(\n  node_memory_MemTotal{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_MemFree{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Buffers{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Cached{job=\"node-exporter\", instance=~\"$node.*\"}\n) * 100\n  /\nnode_memory_MemTotal{job=\"node-exporter\", instance=~\"$node.*\"}\n",
+          "expr": "(\n  node_memory_MemTotal_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_MemFree_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Buffers_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n- node_memory_Cached_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n) * 100\n  /\nnode_memory_MemTotal_bytes{job=\"node-exporter\", instance=~\"$node.*\"}\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -817,7 +817,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "sum by (instance) (rate(node_disk_io_time_ms{job=\"node-exporter\",  instance=~\"$node.*\"}[2m]))",
+          "expr": "sum by (instance) (rate(node_disk_io_time_seconds_total{job=\"node-exporter\",  instance=~\"$node.*\"}[2m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "io time",
@@ -926,7 +926,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "(\n  sum(node_filesystem_size{job=\"node-exporter\", device!=\"rootfs\", instance=~\"$node.*\"})\n- sum(node_filesystem_avail{job=\"node-exporter\", device!=\"rootfs\", instance=~\"$node.*\"})\n) * 100\n  /\nsum(node_filesystem_size{job=\"node-exporter\", device!=\"rootfs\", instance=~\"$node.*\"})\n",
+          "expr": "(\n  sum(node_filesystem_size_bytes{job=\"node-exporter\", device!=\"rootfs\", instance=~\"$node.*\"})\n- sum(node_filesystem_avail_bytes{job=\"node-exporter\", device!=\"rootfs\", instance=~\"$node.*\"})\n) * 100\n  /\nsum(node_filesystem_size_bytes{job=\"node-exporter\", device!=\"rootfs\", instance=~\"$node.*\"})\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -989,7 +989,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "rate(node_network_receive_bytes{job=\"node-exporter\", instance=~\"$node.*\", device!~\"lo\"}[5m])",
+          "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\", instance=~\"$node.*\", device!~\"lo\"}[5m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{device}}",
@@ -1079,7 +1079,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "rate(node_network_transmit_bytes{job=\"node-exporter\", instance=~\"$node.*\", device!~\"lo\"}[5m])",
+          "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\", instance=~\"$node.*\", device!~\"lo\"}[5m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{device}}",
@@ -1133,14 +1133,14 @@
           "type": "prometheus",
           "uid": "P1809F7CD0C75ACF3"
         },
-        "definition": "label_values(node_boot_time{job=\"node-exporter\"}, instance)",
+        "definition": "label_values(node_boot_time_seconds{job=\"node-exporter\"}, instance)",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "node",
         "options": [],
         "query": {
-          "query": "label_values(node_boot_time{job=\"node-exporter\"}, instance)",
+          "query": "label_values(node_boot_time_seconds{job=\"node-exporter\"}, instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,

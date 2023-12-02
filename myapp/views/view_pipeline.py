@@ -356,6 +356,8 @@ def dag_to_pipeline(pipeline,dbsession,workflow_label=None,**kwargs):
         # print(command)
         task_template = {
             "name": task.name,  # 因为同一个
+            "outputs":{
+            },
             "container": {
                 "name":task.name + "-" + uuid.uuid4().hex[:4],
                 "command": command,

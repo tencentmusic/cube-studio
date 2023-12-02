@@ -13,6 +13,7 @@ spec:
   hostPath:
     path: /data/k8s/infra/mysql
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -25,9 +26,10 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  selector:
-    matchLabels:
-      infra-pvname: infra-mysql-pv
-
+#  selector:
+#    matchLabels:
+#      infra-pvname: infra-mysql-pv
+  volumeName: infra-mysql-pv
+  storageClassName: ""
 
 

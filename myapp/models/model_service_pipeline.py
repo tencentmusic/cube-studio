@@ -39,7 +39,7 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     images = Column(String(200), nullable=False)
     working_dir = Column(String(100),default='')
     command = Column(String(1000),default='')
-    volume_mount = Column(String(200),default='')
+    volume_mount = Column(String(2000),default='')
     image_pull_policy = Column(Enum('Always','IfNotPresent'),nullable=False,default='Always')
     replicas = Column(Integer, default=1)  
     resource_memory = Column(String(100),default='2G')

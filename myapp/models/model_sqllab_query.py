@@ -1,7 +1,7 @@
 from flask_appbuilder import Model
 from myapp.models.helpers import AuditMixinNullable, ImportMixin
 from myapp import app
-from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey ,Date,DateTime,Text
 from myapp.models.base import MyappModelBase
 import datetime
 metadata = Model.metadata
@@ -32,7 +32,7 @@ class Sqllab_Query(Model,AuditMixinNullable,MyappModelBase):
     ui_url = Column(String(400), nullable=False, default='')
     result_url = Column(String(400), nullable=False, default='')
     result_line_num = Column(String(400), nullable=False, default='-1')
-    err_msg = Column(String(5000), nullable=False, default='')
+    err_msg = Column(Text)
 
     username = Column(String(400), nullable=False, default='')
 

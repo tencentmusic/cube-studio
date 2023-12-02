@@ -14,6 +14,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/global
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -26,10 +27,11 @@ spec:
   resources:
     requests:
       storage: 100Gi
-  selector:
-    matchLabels:
-      infra-pvname: infra-kubeflow-global-pv
-
+#  selector:
+#    matchLabels:
+#      infra-pvname: infra-kubeflow-global-pv
+  storageClassName: ""
+  volumeName: infra-kubeflow-global-pv
 
 ---
 apiVersion: v1
@@ -46,6 +48,7 @@ spec:
   hostPath:
     path: /data/k8s/kubeflow/
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -58,7 +61,8 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  selector:
-    matchLabels:
-      infra-pvname: infra-kubeflow
-
+#  selector:
+#    matchLabels:
+#      infra-pvname: infra-kubeflow
+  storageClassName: ""
+  volumeName: infra-kubeflow

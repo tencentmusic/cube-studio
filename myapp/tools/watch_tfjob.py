@@ -1,10 +1,8 @@
-
-
-import time,datetime, os
+import time, datetime, os
 from kubernetes import client
 from kubernetes import watch
 import json
-from myapp.utils.py.py_k8s import check_status_time,K8s
+from myapp.utils.py.py_k8s import check_status_time, K8s
 import pysnooper
 from myapp import app
 from myapp.models.model_job import (
@@ -12,26 +10,28 @@ from myapp.models.model_job import (
     Task
 )
 from myapp.utils.celery import session_scope
-from myapp.project import push_admin,push_message
+from myapp.project import push_admin, push_message
 from myapp.models.model_job import Pipeline
-conf=app.config
+
+conf = app.config
 
 from myapp.utils.py.py_prometheus import Prometheus
 
-prometheus = Prometheus(conf.get('PROMETHEUS',''))
+prometheus = Prometheus(conf.get('PROMETHEUS', ''))
 
-cluster=os.getenv('ENVIRONMENT','').lower()
+cluster = os.getenv('ENVIRONMENT', '').lower()
 if not cluster:
-    print('no cluster %s'%cluster)
+    print('no cluster %s' % cluster)
     exit(1)
 else:
-    clusters = conf.get('CLUSTERS',{})
+    clusters = conf.get('CLUSTERS', {})
     if clusters and cluster in clusters:
-        kubeconfig = clusters[cluster].get('KUBECONFIG','')
+        kubeconfig = clusters[cluster].get('KUBECONFIG', '')
         K8s(kubeconfig)
     else:
         print('no kubeconfig in cluster %s' % cluster)
         exit(1)
+
 
 # 推送消息
 # @pysnooper.snoop()
@@ -47,12 +47,12 @@ def deliver_message(tfjob):
     info_json = json.loads(tfjob.info_json)
     # print(info_json,experiments.status)
     if tfjob.status in info_json['alert_status'] and tfjob.status not in info_json['has_push']:
-        receivers=list(set(receivers))
+        receivers = list(set(receivers))
         # data = {
         #     "Sender": sender,
         #     "Rcptto":receivers,
         # }
-        workflow_name = info_json.get('workflow_name','')
+        workflow_name = info_json.get('workflow_name', '')
         hp_name = info_json.get('hp_name', '')
         if workflow_name:
             message = "tfjob: %s \nworkflow: %s \nnamespace: %s\nstatus: %s \ntime: %s" % (tfjob.name,workflow_name,tfjob.namespace,tfjob.status,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -62,13 +62,13 @@ def deliver_message(tfjob):
             message = "tfjob: %s \nnamespace: %s\nstatus: %s \ntime: %s" % (tfjob.name,tfjob.namespace,tfjob.status,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         if message:
-            push_message(receivers,message)
+            push_message(receivers, message)
 
 
 # @pysnooper.snoop()
-def check_has_push(crd,dbsession):
+def check_has_push(crd, dbsession):
     # 可能是workflow启动的或者是hp启动的
-    workflow_name = crd['labels'].get('workflow-name','')
+    workflow_name = crd['labels'].get('workflow-name', '')
     hp_name = crd['labels'].get('hp-name', '')
     username = crd['username']
     alert_status = ''
@@ -80,52 +80,52 @@ def check_has_push(crd,dbsession):
         print("tf %s from workflow_name %s,user %s,status %s" % (crd['name'],workflow_name,crd['username'],crd['status']))
 
     # print("%s status %s"%(crd['name'], crd['status']))
-    alert_status='Pending'   # 这里写死，就是相当于必须且仅Pending告警
+    alert_status = 'Pending'  # 这里写死，就是相当于必须且仅Pending告警
 
-    info_json={
-        "workflow_name":workflow_name,
-        "hp_name":hp_name,
+    info_json = {
+        "workflow_name": workflow_name,
+        "hp_name": hp_name,
         "alert_status": alert_status,
-        "has_push":''
+        "has_push": ''
     }
     # print(crd['name'],crd['namespace'])
-    tfjob = dbsession.query(Tfjob).filter(Tfjob.name==crd['name']).filter(Tfjob.namespace==crd['namespace']).first()
+    tfjob = dbsession.query(Tfjob).filter(Tfjob.name == crd['name']).filter(Tfjob.namespace == crd['namespace']).first()
     if tfjob:
         print('exist tfjob')
         if tfjob.info_json:
             exist_info_json = json.loads(tfjob.info_json)
-            info_json['has_push']=exist_info_json.get('has_push','')
+            info_json['has_push'] = exist_info_json.get('has_push', '')
 
         tfjob.create_time = crd['create_time']
         tfjob.status = crd['status']
-        tfjob.annotations = json.dumps(crd['annotations'],indent=4,ensure_ascii=False)
-        tfjob.labels = json.dumps(crd['labels'],indent=4,ensure_ascii=False)
-        tfjob.spec = json.dumps(crd['spec'],indent=4,ensure_ascii=False),
-        tfjob.status_more = json.dumps(crd['status_more'],indent=4,ensure_ascii=False)
+        tfjob.annotations = json.dumps(crd['annotations'], indent=4, ensure_ascii=False)
+        tfjob.labels = json.dumps(crd['labels'], indent=4, ensure_ascii=False)
+        tfjob.spec = json.dumps(crd['spec'], indent=4, ensure_ascii=False),
+        tfjob.status_more = json.dumps(crd['status_more'], indent=4, ensure_ascii=False)
         tfjob.username = crd['username']
-        tfjob.info_json = json.dumps(info_json,indent=4,ensure_ascii=False)
+        tfjob.info_json = json.dumps(info_json, indent=4, ensure_ascii=False)
         dbsession.commit()
 
         if crd['status'] in info_json['alert_status'] and crd['status'] not in info_json['has_push']:
-            return False,tfjob
+            return False, tfjob
         else:
-            return True,tfjob
+            return True, tfjob
     else:
         print('new tfjob')
         # crd['status_more']={}
         # crd['spec']={}
-        tfjob = Tfjob(name=crd['name'],namespace=crd['namespace'],create_time=crd['create_time'],
-                            status=crd['status'],
-                            annotations=json.dumps(crd['annotations'],indent=4,ensure_ascii=False),
-                            labels=json.dumps(crd['labels'],indent=4,ensure_ascii=False),
-                            spec=json.dumps(crd['spec'],indent=4,ensure_ascii=False),
-                            status_more=json.dumps(crd['status_more'],indent=4,ensure_ascii=False),
-                            username=username,
-                            info_json=json.dumps(info_json,indent=4,ensure_ascii=False))
+        tfjob = Tfjob(name=crd['name'], namespace=crd['namespace'], create_time=crd['create_time'],
+                      status=crd['status'],
+                      annotations=json.dumps(crd['annotations'], indent=4, ensure_ascii=False),
+                      labels=json.dumps(crd['labels'], indent=4, ensure_ascii=False),
+                      spec=json.dumps(crd['spec'], indent=4, ensure_ascii=False),
+                      status_more=json.dumps(crd['status_more'], indent=4, ensure_ascii=False),
+                      username=username,
+                      info_json=json.dumps(info_json, indent=4, ensure_ascii=False))
 
         dbsession.add(tfjob)
         dbsession.commit()
-        return False,tfjob
+        return False, tfjob
 
 
 #
@@ -164,12 +164,11 @@ def check_has_push(crd,dbsession):
 #             push_message([task.pipeline.created_by.username],message)
 
 
-
 # @pysnooper.snoop()
-def save_monitoring(tfjob,dbsession):
+def save_monitoring(tfjob, dbsession):
     try:
-        if tfjob.status=='Succeeded':
-            task_id = json.loads(tfjob.labels).get('task-id','')
+        if tfjob.status == 'Succeeded':
+            task_id = json.loads(tfjob.labels).get('task-id', '')
             if task_id:
                 task = dbsession.query(Task).filter_by(id=int(task_id)).first()
                 metrics = prometheus.get_pod_resource_metric(tfjob.name, namespace='pipeline')
@@ -200,7 +199,7 @@ def save_monitoring(tfjob,dbsession):
 
                 print(monitoring_new)
                 if task:
-                    task.monitoring = json.dumps(monitoring_new,ensure_ascii=False,indent=4)
+                    task.monitoring = json.dumps(monitoring_new, ensure_ascii=False, indent=4)
                     dbsession.commit()
                     # print(pods)
 
@@ -210,9 +209,8 @@ def save_monitoring(tfjob,dbsession):
         print(e)
 
 
-
 # @pysnooper.snoop()
-def save_history(tfjob,dbsession):
+def save_history(tfjob, dbsession):
     info_json = json.loads(tfjob.info_json)
     if info_json['has_push']:
         if not tfjob.status in info_json['has_push']:
@@ -224,13 +222,13 @@ def save_history(tfjob,dbsession):
 
 
 # @pysnooper.snoop()
-def check_crd_exist(group,version,namespace,plural,name):
-    exist_crd = client.CustomObjectsApi().get_namespaced_custom_object(group,version,namespace,plural,name)
+def check_crd_exist(group, version, namespace, plural, name):
+    exist_crd = client.CustomObjectsApi().get_namespaced_custom_object(group, version, namespace, plural, name)
     return exist_crd
 
 
 @pysnooper.snoop()
-def deal_event(event,crd_info,namespace):
+def deal_event(event, crd_info, namespace):
     with session_scope(nullpool=True) as dbsession:
         try:
             crd_object = event['object']
@@ -266,17 +264,18 @@ def deal_event(event,crd_info,namespace):
             elif 'upload-rtx' in back_object:
                 back_object['username'] = back_object['labels']['upload-rtx']
 
-            has_push, crd_model = check_has_push(back_object,dbsession)
+            has_push, crd_model = check_has_push(back_object, dbsession)
             if not has_push:
                 try:
                     deliver_message(crd_model)
                 except Exception as e1:
                     print('push fail:', e1)
                     push_admin(str(e1))
-            save_history(crd_model,dbsession)
-            save_monitoring(crd_model,dbsession)
+            save_history(crd_model, dbsession)
+            save_monitoring(crd_model, dbsession)
         except Exception as e:
             print(e)
+
 
 @pysnooper.snoop()
 def listen_crd():
@@ -284,22 +283,22 @@ def listen_crd():
     namespace = conf.get('PIPELINE_NAMESPACE')
     w = watch.Watch()
     print('begin listen')
-    while(True):
+    while (True):
         try:
             for event in w.stream(client.CustomObjectsApi().list_namespaced_custom_object, group=crd_info['group'],
                                   version=crd_info['version'],
                                   namespace=namespace, plural=crd_info['plural'], pretty='true'):
 
-                if event['type']=='ADDED' or event['type']=='MODIFIED':  # ADDED  MODIFIED DELETED
-                    deal_event(event,crd_info,namespace)
-                elif event['type']=='ERROR':
+                if event['type'] == 'ADDED' or event['type'] == 'MODIFIED':  # ADDED  MODIFIED DELETED
+                    deal_event(event, crd_info, namespace)
+                elif event['type'] == 'ERROR':
                     w = watch.Watch()
                     time.sleep(60)
 
         except Exception as ee:
             print(ee)
 
-# 不能使用异步io，因为stream会阻塞
-if __name__=='__main__':
-    listen_crd()
 
+# 不能使用异步io，因为stream会阻塞
+if __name__ == '__main__':
+    listen_crd()

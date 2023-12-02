@@ -22,6 +22,7 @@ from .base import (
     MyappFilter,
 )
 from myapp.models.model_metadata_metric import Metadata_metric
+
 conf = app.config
 logging = app.logger
 
@@ -34,15 +35,14 @@ class Metadata_Metrics_table_Filter(MyappFilter):
         # 公开的，或者责任人包含自己的
         return query.filter(
             or_(
-                self.model.public==True,
+                self.model.public == True,
                 self.model.metric_responsible.contains(g.user.username)
             )
         )
 
 
-
 Remark_fields = {
-    "begin_date":StringField(
+    "begin_date": StringField(
         label=_("起点时间"),
         default='',
         description='起点时间精确到天',
@@ -62,32 +62,37 @@ Remark_fields = {
     )
 }
 
+
 class Metadata_metric_ModelView_base():
-    label_title='指标'
+    label_title = '指标'
     datamodel = SQLAInterface(Metadata_metric)
-    base_permissions = ['can_add','can_show','can_edit','can_list','can_delete']
+    base_permissions = ['can_add', 'can_show', 'can_edit', 'can_list', 'can_delete']
     base_order = ("id", "desc")
     order_columns = ['id']
-    search_columns=['metric_data_type','metric_responsible','app','name','label','describe','metric_type','metric_level','task_id','caliber','remark']
-    show_columns=['id','app','metric_data_type','name','label','describe','metric_type','metric_level','metric_dim','metric_responsible','caliber','task_id','public','remark']
-    list_columns = ['app','metric_data_type','name','label','describe','metric_level','metric_responsible','public','metric_type','task_id']
+    search_columns = ['metric_data_type', 'metric_responsible', 'app', 'name', 'label', 'describe', 'metric_type',
+                      'metric_level', 'task_id', 'caliber', 'remark']
+    show_columns = ['id', 'app', 'metric_data_type', 'name', 'label', 'describe', 'metric_type', 'metric_level',
+                    'metric_dim', 'metric_responsible', 'caliber', 'task_id', 'public', 'remark']
+    list_columns = ['app', 'metric_data_type', 'name', 'label', 'describe', 'metric_level', 'metric_responsible',
+                    'public', 'metric_type', 'task_id']
     cols_width = {
-        "name":{"type": "ellip2", "width": 200},
+        "name": {"type": "ellip2", "width": 200},
         "label": {"type": "ellip2", "width": 200},
         "task_id": {"type": "ellip2", "width": 250},
         "describe": {"type": "ellip2", "width": 400},
         "metric_responsible": {"type": "ellip2", "width": 300},
         "remark_html": {"type": "ellip1", "width": 300}
     }
-    spec_label_columns={
-        "name":"指标英文名",
+    spec_label_columns = {
+        "name": "指标英文名",
         "label": "指标中文名",
-        "describe":"指标描述",
-        "metric_data_type":"指标模块",
+        "describe": "指标描述",
+        "metric_data_type": "指标模块",
         "task_id": "任务id",
-        "remark_html":"备注"
+        "remark_html": "备注"
     }
-    add_columns = ['app','metric_data_type','name','label','describe','metric_type','metric_level','metric_dim','metric_responsible','caliber','task_id','public','remark']
+    add_columns = ['app', 'metric_data_type', 'name', 'label', 'describe', 'metric_type', 'metric_level', 'metric_dim',
+                   'metric_responsible', 'caliber', 'task_id', 'public', 'remark']
     # show_columns = ['project','name','describe','config_html','dag_json_html','expand_html']
     edit_columns = add_columns
     base_filters = [["id", Metadata_Metrics_table_Filter, lambda: []]]
@@ -95,10 +100,10 @@ class Metadata_metric_ModelView_base():
         "app": SelectField(
             label=_(datamodel.obj.lab('app')),
             description='产品',
-            widget=MySelect2Widget(can_input=True,conten2choices=True),
-            choices=[[x,x] for x in ['产品1',"产品2","产品3"]]
+            widget=MySelect2Widget(can_input=True, conten2choices=True),
+            choices=[[x, x] for x in ['产品1', "产品2", "产品3"]]
         ),
-        "name":StringField(
+        "name": StringField(
             label=_(datamodel.obj.lab('name')),
             description='指标英文名',
             widget=BS3TextFieldWidget(),
@@ -127,20 +132,20 @@ class Metadata_metric_ModelView_base():
             description='指标类型',
             default='原子指标',
             widget=Select2Widget(),
-            choices=[[x,x] for x in ['原子指标', '衍生指标']]
+            choices=[[x, x] for x in ['原子指标', '衍生指标']]
         ),
         "metric_data_type": SelectField(
             label=_(datamodel.obj.lab('metric_data_type')),
             description='指标归属模块',
-            widget=MySelect2Widget(can_input=True,conten2choices=True),
-            choices=[[x,x] for x in ['模块1',"模块2","模块3"]]
+            widget=MySelect2Widget(can_input=True, conten2choices=True),
+            choices=[[x, x] for x in ['模块1', "模块2", "模块3"]]
         ),
-        "metric_level":SelectField(
+        "metric_level": SelectField(
             label=_(datamodel.obj.lab('metric_level')),
             description='指标重要级别',
             default='普通',
             widget=Select2Widget(),
-            choices=[[x,x] for x in ['普通','重要','核心']]
+            choices=[[x, x] for x in ['普通', '重要', '核心']]
         ),
         "metric_dim": SelectField(
             label=_(datamodel.obj.lab('metric_dim')),
@@ -159,7 +164,7 @@ class Metadata_metric_ModelView_base():
             label=_(datamodel.obj.lab('status')),
             description='指标状态',
             widget=Select2Widget(),
-            choices=[[x,x] for x in [ "下线","待审批",'创建中',"上线",]]
+            choices=[[x, x] for x in ["下线", "待审批", '创建中', "上线", ]]
         ),
         "caliber": StringField(
             label=_(datamodel.obj.lab('caliber')),
@@ -175,21 +180,20 @@ class Metadata_metric_ModelView_base():
     }
 
     edit_form_extra_fields = add_form_extra_fields
-    import_data=True
-    download_data=True
+    import_data = True
+    download_data = True
 
-
-    def pre_show_res(self,_response):
+    def pre_show_res(self, _response):
         data = _response['data']
-        if data.get('remark',None):
-            data['remark']=json.loads(data.get('remark','[]'))
+        if data.get('remark', None):
+            data['remark'] = json.loads(data.get('remark', '[]'))
 
     def pre_add_req(self, req_json=None):
         if req_json and 'remark' in req_json:
-            req_json['remark'] = json.dumps(req_json.get('remark',[]),indent=4,ensure_ascii=False)
+            req_json['remark'] = json.dumps(req_json.get('remark', []), indent=4, ensure_ascii=False)
         return req_json
 
-    pre_update_req=pre_add_req
+    pre_update_req = pre_add_req
 
     add_fieldsets = [
         (
@@ -204,8 +208,7 @@ class Metadata_metric_ModelView_base():
     ]
     edit_fieldsets = add_fieldsets
 
-
-    def pre_upload(self,data):
+    def pre_upload(self, data):
         data['public'] = bool(int(data.get('public', 1)))
         return data
 
@@ -217,25 +220,18 @@ class Metadata_metric_ModelView_base():
             abort(404)
         for item in items:
             try:
-                if item.created_by.username==g.user.username:
+                if item.created_by.username == g.user.username:
                     self.pre_delete(item)
                     self.datamodel.delete(item, raise_exception=True)
                     self.post_delete(item)
             except Exception as e:
                 flash(str(e), "danger")
 
-class Metadata_metric_ModelView_Api(Metadata_metric_ModelView_base,MyappModelRestApi):
+
+class Metadata_metric_ModelView_Api(Metadata_metric_ModelView_base, MyappModelRestApi):
     datamodel = SQLAInterface(Metadata_metric)
     route_base = '/metadata_metric_modelview/api'
-    label_title='指标'
+    label_title = '指标'
 
 
 appbuilder.add_api(Metadata_metric_ModelView_Api)
-
-
-
-
-
-
-
-

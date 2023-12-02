@@ -1,83 +1,75 @@
 {
-    "mysql-ui": {
-        "project_name":"public",
-        "service_name":"mysql-ui",
-        "service_describe":"可视化编辑mysql数据库",
-        "image_name":"ccr.ccs.tencentyun.com/cube-studio/phpmyadmin",
-        "command":"",
-        "env":"PMA_HOST=mysql-service.infra\nPMA_PORT=3306\nPMA_USER=root\nPMA_PASSWORD=admin",
-        "ports":"80",
-        "expand": {
-            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
-        }
-    },
-    "redis-ui": {
-        "project_name":"public",
-        "service_name":"redis-ui",
-        "service_describe":"可视化编辑redis数据库",
-        "image_name":"ccr.ccs.tencentyun.com/cube-studio/patrikx3:latest",
-        "command":"",
-        "env":"REDIS_NAME=default\nREDIS_HOST=redis-master.infra\nREDIS_PORT=6379\nREDIS_PASSWORD=admin",
-        "ports":"7843",
-        "expand": {
-            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
-        }
-    },
-    "mongo-express": {
-        "project_name":"public",
-        "service_name":"mongo-express",
-        "service_describe":"可视化编辑mongo数据库",
-        "image_name":"mongo-express:0.54.0",
-        "command":"",
-        "env":"ME_CONFIG_MONGODB_SERVER=xx.xx.xx.xx\nME_CONFIG_MONGODB_PORT=xx\nME_CONFIG_MONGODB_ENABLE_ADMIN=true\nME_CONFIG_MONGODB_ADMINUSERNAME=xx\nME_CONFIG_MONGODB_ADMINPASSWORD=xx\nME_CONFIG_MONGODB_AUTH_DATABASE=xx\nME_CONFIG_MONGODB_AUTH_USERNAME=xx\nME_CONFIG_MONGODB_AUTH_PASSWORD=xx\nVCAP_APP_HOST=0.0.0.0\nVCAP_APP_PORT=8081\nME_CONFIG_OPTIONS_EDITORTHEME=ambiance",
-        "ports":"8081",
-        "expand": {
-            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
-        }
-    },
-    "neo4j": {
-        "project_name":"public",
-        "service_name":"neo4j",
-        "service_describe":"可视化编辑图数据库neo4j",
-        "image_name":"ccr.ccs.tencentyun.com/cube-studio/neo4j:4.4",
-        "command":"",
-        "env":"NEO4J_AUTH=neo4j/admin",
-        "ports":"7474,7687",
-        "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/neo4j(hostpath):/var/lib/neo4j/data",
-        "expand": {
-            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
-        }
-    },
-    "jaeger": {
-        "project_name":"public",
-        "service_name":"jaeger",
-        "service_describe":"jaeger链路追踪",
-        "image_name":"jaegertracing/all-in-one:1.29",
-        "command":"",
-        "env":"",
-        "ports":"16686,5775",
-        "expand": {
-            "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
-        }
-    },
-    "label-studio": {
-        "project_name":"public",
-        "service_name":"label-studio",
-        "service_describe":"标注平台",
-        "image_name":"heartexlabs/label-studio:latest",
-        "command":"",
-        "env":"LOCAL_FILES_SERVING_ENABLED=true",
-        "ports":"8080",
-        "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/label-studio(hostpath):/label-studio/data"
-    },
-    "cartoonize": {
-        "project_name":"public",
-        "service_name":"cartoonize",
-        "service_describe":"卡通化",
-        "image_name":"ccr.ccs.tencentyun.com/cube-studio/cartoonize:latest",
-        "command":"",
-        "resource_memory": "5G",
-        "env":"",
-        "ports":"8080"
+  "mysql-ui": {
+    "project_name": "public",
+    "service_name": "mysql-ui",
+    "service_describe": "可视化编辑mysql数据库",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/phpmyadmin",
+    "command": "",
+    "env": "PMA_HOST=mysql-service.infra\nPMA_PORT=3306\nPMA_USER=root\nPMA_PASSWORD=admin",
+    "ports": "80",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
     }
+  },
+  "redis-ui": {
+    "project_name": "public",
+    "service_name": "redis-ui",
+    "service_describe": "可视化编辑redis数据库",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/patrikx3:latest",
+    "command": "",
+    "env": "REDIS_NAME=default\nREDIS_HOST=redis-master.infra\nREDIS_PORT=6379\nREDIS_PASSWORD=admin",
+    "ports": "7843",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+    }
+  },
+  "mongo-express": {
+    "project_name": "public",
+    "service_name": "mongo-express",
+    "service_describe": "可视化编辑mongo数据库",
+    "image_name": "mongo-express:0.54.0",
+    "command": "",
+    "env": "ME_CONFIG_MONGODB_SERVER=xx.xx.xx.xx\nME_CONFIG_MONGODB_PORT=xx\nME_CONFIG_MONGODB_ENABLE_ADMIN=true\nME_CONFIG_MONGODB_ADMINUSERNAME=xx\nME_CONFIG_MONGODB_ADMINPASSWORD=xx\nME_CONFIG_MONGODB_AUTH_DATABASE=xx\nME_CONFIG_MONGODB_AUTH_USERNAME=xx\nME_CONFIG_MONGODB_AUTH_PASSWORD=xx\nVCAP_APP_HOST=0.0.0.0\nVCAP_APP_PORT=8081\nME_CONFIG_OPTIONS_EDITORTHEME=ambiance",
+    "ports": "8081",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+    }
+  },
+  "neo4j": {
+    "project_name": "public",
+    "service_name": "neo4j",
+    "service_describe": "可视化编辑图数据库neo4j",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/neo4j:4.4",
+    "command": "",
+    "env": "NEO4J_AUTH=neo4j/admin",
+    "ports": "7474,7687",
+    "volume_mount": "kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/admin/neo4j(hostpath):/var/lib/neo4j/data",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+    }
+  },
+  "jaeger": {
+    "project_name": "public",
+    "service_name": "jaeger",
+    "service_describe": "jaeger链路追踪",
+    "image_name": "jaegertracing/all-in-one:1.29",
+    "command": "",
+    "env": "",
+    "ports": "16686,5775",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+    }
+  },
+  "postgresql-ui": {
+    "project_name": "public",
+    "service_name": "postgresql-ui",
+    "service_describe": "可视化编辑postgresql数据库",
+    "image_name": "dpage/pgadmin4",
+    "command": "",
+    "env": "PGADMIN_DEFAULT_EMAIL=admin@tencent.com\nPGADMIN_DEFAULT_PASSWORD=root",
+    "ports": "80",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
+    }
+  }
 }

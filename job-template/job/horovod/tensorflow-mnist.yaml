@@ -4,15 +4,16 @@ metadata:
   name: tensorflow-mnist
 spec:
   slotsPerWorker: 1
-  cleanPodPolicy: Running
+  runPolicy:
+    cleanPodPolicy: Running
   mpiReplicaSpecs:
     Launcher:
       replicas: 1
       template:
         spec:
           containers:
-          - image: ccr.ccs.tencentyun.com/cube-studio/horovod:20210401
-            name: mpi-launcher
+          - image: horovod/horovod:0.20.0-tf2.3.0-torch1.6.0-mxnet1.5.0-py3.7-cpu
+            name: mpi
             command:
             - mpirun
             args:
@@ -34,7 +35,7 @@ spec:
             - btl
             - ^openib
             - python
-            - /horovod/examples/tensorflow2/tensorflow2_mnist.py
+            - /examples/tensorflow2_mnist.py
             resources:
               limits:
                 cpu: 1
@@ -44,11 +45,9 @@ spec:
       template:
         spec:
           containers:
-          - image: ccr.ccs.tencentyun.com/cube-studio/horovod:20210401
-            name: mpi-worker
+          - image: horovod/horovod:0.20.0-tf2.3.0-torch1.6.0-mxnet1.5.0-py3.7-cpu
+            name: mpi
             resources:
               limits:
                 cpu: 2
                 memory: 4Gi
-
-

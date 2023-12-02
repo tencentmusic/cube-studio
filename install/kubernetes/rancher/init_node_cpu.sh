@@ -1,9 +1,5 @@
-hostname=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1 | awk -F. {'printf("node%03d%03d%03d%03d\n", $1, $2, $3, $4)'}`
-echo $hostname
-hostnamectl set-hostname ${hostname}
-
-echo "127.0.0.1 ${hostname}" >> /etc/hosts
-echo "::1 ${hostname}" >> /etc/hosts
+# ubuntu:20.04
+#sysctl -w net/netfilter/nf_conntrack_max=524288
 
 service docker stop
 rpm -qa | grep docker | xargs yum remove -y
@@ -18,8 +14,13 @@ yum update -y
 yum install docker-ce -y 
 yum install -y htop docker-compose
 yum install -y wireshark
+yum install -y telnet
+
 # 停止docker，修改配置
 systemctl stop docker
+systemctl stop docker.socket
+systemctl stop docker.service
+
 # 将源docker目录下文件，复制到新目录下
 cp -R /var/lib/docker/* /data/docker/
 

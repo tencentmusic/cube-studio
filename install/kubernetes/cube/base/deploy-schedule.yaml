@@ -38,7 +38,9 @@ spec:
                 path: entrypoint.sh
               - key: config.py
                 path: config.py
-      serviceAccount: kubeflow-dashboard
+      serviceAccountName: kubeflow-dashboard
+      imagePullSecrets:
+        - name: hubsecret
       containers:
         - name: kubeflow-dashboard-schedule
           image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard

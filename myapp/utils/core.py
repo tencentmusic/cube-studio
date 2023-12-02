@@ -1,4 +1,3 @@
-
 """Utility functions used across Myapp"""
 from datetime import date, datetime, time, timedelta
 import decimal
@@ -35,6 +34,7 @@ import numpy
 import pandas as pd
 import parsedatetime
 from jinja2 import Environment, BaseLoader, DebugUndefined
+
 try:
     from pydruid.utils.having import Having
 except ImportError:
@@ -79,10 +79,10 @@ except NameError:
     pass
 
 
-def validate_str(obj,key='var'):
+def validate_str(obj, key='var'):
     if obj and re.match("^[A-Za-z0-9_-]*$", obj):
         return True
-    raise MyappException("%s is not valid"%key)
+    raise MyappException("%s is not valid" % key)
 
 
 def flasher(msg, severity=None):
@@ -151,7 +151,7 @@ def memoized(func=None, watch=None):
 
 
 def parse_js_uri_path_item(
-    item: Optional[str], unquote: bool = True, eval_undefined: bool = False
+        item: Optional[str], unquote: bool = True, eval_undefined: bool = False
 ) -> Optional[str]:
     """Parse a uri path item made with js.
 
@@ -458,8 +458,8 @@ def generic_find_fk_constraint_name(table, columns, referenced, insp):
     """Utility to find a foreign-key constraint name in alembic migrations"""
     for fk in insp.get_foreign_keys(table):
         if (
-            fk["referred_table"] == referenced
-            and set(fk["referred_columns"]) == columns
+                fk["referred_table"] == referenced
+                and set(fk["referred_columns"]) == columns
         ):
             return fk["name"]
 
@@ -470,8 +470,8 @@ def generic_find_fk_constraint_names(table, columns, referenced, insp):
 
     for fk in insp.get_foreign_keys(table):
         if (
-            fk["referred_table"] == referenced
-            and set(fk["referred_columns"]) == columns
+                fk["referred_table"] == referenced
+                and set(fk["referred_columns"]) == columns
         ):
             names.add(fk["name"])
 
@@ -554,6 +554,7 @@ def hp_parameters_demo():
 '''
     return demo.strip()
 
+
 # 超参搜索的定义demo
 def nni_parameters_demo():
     demo = '''
@@ -566,15 +567,13 @@ def nni_parameters_demo():
 '''
     return demo.strip()
 
+
 def validate_json(obj):
     if obj:
         try:
             json.loads(obj)
         except Exception as e:
-            raise MyappException("JSON is not valid :%s"%str(e))
-
-
-
+            raise MyappException("JSON is not valid :%s" % str(e))
 
 
 # 校验task args是否合法
@@ -595,20 +594,23 @@ default_args = {
     }
 }
 
+
 # 渲染字符串模板变量
 def template_command(command):
     rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(command)
     des_str = rtemplate.render(rtx=g.user.username)
     return des_str
 
+
 # @pysnooper.snoop()
 def validate_job_args(job_template):
     validate_json(job_template.args)
-    validate_job_args_type=['int','bool','str','text','enum','float','multiple','dict','list','file','json']
+    validate_job_args_type = ['int', 'bool', 'str', 'text', 'enum', 'float', 'multiple', 'dict', 'list', 'file', 'json']
+
     # 校验x修复参数
     # @pysnooper.snoop()
     def check_attr(attr):
-        default_args_temp=copy.deepcopy(default_args)
+        default_args_temp = copy.deepcopy(default_args)
         default_args_temp.update(attr)
         attr = default_args_temp
         attr['type'] = str(attr['type'])
@@ -623,19 +625,19 @@ def validate_job_args(job_template):
         attr['condition'] = str(attr['condition'])
 
         if attr['type'] not in validate_job_args_type:
-            raise MyappException("job template args type must in %s "%str(validate_job_args_type))
-        if attr['type']=='enum' or attr['type']=='multiple' or attr['type']=='list':
-            if attr['item_type'] not in ['int', 'str', 'text', 'float','dict']:
-                raise MyappException("job template args item_type must in %s " % str(['int', 'str', 'text', 'float','dict']))
-        if attr['type']=='enum' or attr['type']=='multiple':
+            raise MyappException("job template args type must in %s " % str(validate_job_args_type))
+        if attr['type'] == 'enum' or attr['type'] == 'multiple' or attr['type'] == 'list':
+            if attr['item_type'] not in ['int', 'str', 'text', 'float', 'dict']:
+                raise MyappException("job template args item_type must in %s " % str(['int', 'str', 'text', 'float', 'dict']))
+        if attr['type'] == 'enum' or attr['type'] == 'multiple':
             if not attr['choice']:
                 raise MyappException("job template args choice must exist when type is enum,multiple ")
-        if attr['type']=='dict':
+        if attr['type'] == 'dict':
             if not attr['sub_args']:
                 raise MyappException("job template args sub_args must exist when type is dict ")
             for sub_attr in attr['sub_args']:
                 attr['sub_args'][sub_attr] = check_attr(attr['sub_args'][sub_attr])
-        if attr['type']=='list' and attr['item_type']=='dict':
+        if attr['type'] == 'list' and attr['item_type'] == 'dict':
             if not attr['sub_args']:
                 raise MyappException("job template args sub_args must exist when type is list ")
 
@@ -651,14 +653,12 @@ def validate_job_args(job_template):
         for attr_name in job_args[group]:
             job_args[group][attr_name] = check_attr(job_args[group][attr_name])
 
-    return json.dumps(job_args,indent=4, ensure_ascii=False)
-
-
+    return json.dumps(job_args, indent=4, ensure_ascii=False)
 
 
 # task_args 为用户填写的参数，job_args为定义的参数标准
 # @pysnooper.snoop()
-def validate_task_args(task_args,job_args):  # 两个都是字典
+def validate_task_args(task_args, job_args):  # 两个都是字典
     if not task_args:
         return {}
 
@@ -679,12 +679,11 @@ def validate_task_args(task_args,job_args):  # 两个都是字典
             # except Exception as e:
             #     raise MyappException("task args json is not valid: %s"%str(value))
 
-        raise MyappException("task args type is not valid: %s"%str(value))
-
+        raise MyappException("task args type is not valid: %s" % str(value))
 
     # 校验 task的attr和job的attr是否符合
     # @pysnooper.snoop()
-    def check_attr(task_attr,job_attr):
+    def check_attr(task_attr, job_attr):
         validate_attr = task_attr
 
         if job_attr['type'] == 'str' or job_attr['type'] == 'text' or job_attr['type'] == 'int' or job_attr['type'] == 'float':
@@ -711,14 +710,14 @@ def validate_task_args(task_args,job_args):  # 两个都是字典
         # 校验字典的子属性
         if job_attr['type'] == 'dict':
             for sub_attr_name in task_attr:
-                validate_attr[sub_attr_name] = check_attr(task_attr[sub_attr_name],job_attr['sub_args'][sub_attr_name])
+                validate_attr[sub_attr_name] = check_attr(task_attr[sub_attr_name], job_attr['sub_args'][sub_attr_name])
 
         # 检验list的每个元素
         if job_attr['type'] == 'list':
             if job_attr['item_type'] == 'dict':
-                validate_attr=[]
+                validate_attr = []
                 for sub_task_attr in task_attr:
-                    validate_sub_attr={}
+                    validate_sub_attr = {}
                     for sub_attr_name in sub_task_attr:
                         validate_sub_attr[sub_attr_name] = check_attr(sub_task_attr[sub_attr_name],job_attr['sub_args'][sub_attr_name])
                     validate_attr.append(validate_sub_attr)
@@ -727,15 +726,14 @@ def validate_task_args(task_args,job_args):  # 两个都是字典
 
         return validate_attr
 
-
-    validate_args={}
+    validate_args = {}
     try:
         for group in job_args:
             for attr_name in job_args[group]:
                 job_attr = job_args[group][attr_name]
                 if attr_name in task_args:
-                    task_attr=task_args[attr_name]
-                    validate_args[attr_name] = check_attr(task_attr,job_attr)
+                    task_attr = task_args[attr_name]
+                    validate_args[attr_name] = check_attr(task_attr, job_attr)
                 elif job_args['require']:
                     raise MyappException("task args %s must is require" % attr_name)
                 elif job_args['default']:
@@ -745,7 +743,7 @@ def validate_task_args(task_args,job_args):  # 两个都是字典
 
 
     except Exception as e:
-        raise MyappException("task args is not valid: %s"%str(e))
+        raise MyappException("task args is not valid: %s" % str(e))
 
 
 def up_word(words):
@@ -753,11 +751,8 @@ def up_word(words):
     return ' '.join([s.capitalize() for s in words])
 
 
-
-
 def add_column():
     pass
-
 
 
 def table_has_constraint(table, name, db):
@@ -868,17 +863,17 @@ def notify_user_about_perm_udate(granter, user, role, datasource, tpl_name, conf
 
 
 def send_email_smtp(
-    to,
-    subject,
-    html_content,
-    config,
-    files=None,
-    data=None,
-    images=None,
-    dryrun=False,
-    cc=None,
-    bcc=None,
-    mime_subtype="mixed",
+        to,
+        subject,
+        html_content,
+        config,
+        files=None,
+        data=None,
+        images=None,
+        dryrun=False,
+        cc=None,
+        bcc=None,
+        mime_subtype="mixed",
 ):
     """
     Send an email with html content, eg:
@@ -943,6 +938,7 @@ def send_email_smtp(
 def send_MIME_email(e_from, e_to, mime_msg, config, dryrun=False):
     logging.info("Dryrun enabled, email notification content is below:")
     logging.info(mime_msg.as_string())
+
 
 # 自动将,;\n分割符变为列表
 def get_email_address_list(address_string: str) -> List[str]:
@@ -1054,8 +1050,7 @@ def merge_extra_filters(form_data: dict):
         # boundaries. The rest of extra_filters are simple
         # [column_name in list_of_values]. `__` prefix is there to avoid
         # potential conflicts with column that would be named `from` or `to`
-        if "adhoc_filters" not in form_data or not isinstance(
-            form_data["adhoc_filters"], list
+        if "adhoc_filters" not in form_data or not isinstance(form_data["adhoc_filters"], list
         ):
             form_data["adhoc_filters"] = []
         date_options = {
@@ -1065,6 +1060,7 @@ def merge_extra_filters(form_data: dict):
             "__time_origin": "druid_time_origin",
             "__granularity": "granularity",
         }
+
         # Grab list of existing filters 'keyed' on the column and operator
 
         def get_filter_key(f):
@@ -1076,9 +1072,9 @@ def merge_extra_filters(form_data: dict):
         existing_filters = {}
         for existing in form_data["adhoc_filters"]:
             if (
-                existing["expressionType"] == "SIMPLE"
-                and existing["comparator"] is not None
-                and existing["subject"] is not None
+                    existing["expressionType"] == "SIMPLE"
+                    and existing["comparator"] is not None
+                    and existing["subject"] is not None
             ):
                 existing_filters[get_filter_key(existing)] = existing["comparator"]
 
@@ -1097,7 +1093,7 @@ def merge_extra_filters(form_data: dict):
                             # Add filters for unequal lists
                             # order doesn't matter
                             if sorted(existing_filters[filter_key]) != sorted(
-                                filtr["val"]
+                                    filtr["val"]
                             ):
                                 form_data["adhoc_filters"].append(to_adhoc(filtr))
                         else:
@@ -1136,21 +1132,20 @@ def user_label(user: User) -> Optional[str]:
 
 def is_adhoc_metric(metric) -> bool:
     return (
-        isinstance(metric, dict)
-        and (
-            (
-                metric["expressionType"] == ADHOC_METRIC_EXPRESSION_TYPES["SIMPLE"]
-                and metric["column"]
-                and metric["aggregate"]
+            isinstance(metric, dict)
+            and (
+                    (
+                            metric["expressionType"] == ADHOC_METRIC_EXPRESSION_TYPES["SIMPLE"]
+                            and metric["column"]
+                            and metric["aggregate"]
+                    )
+                    or (
+                            metric["expressionType"] == ADHOC_METRIC_EXPRESSION_TYPES["SQL"]
+                            and metric["sqlExpression"]
+                    )
             )
-            or (
-                metric["expressionType"] == ADHOC_METRIC_EXPRESSION_TYPES["SQL"]
-                and metric["sqlExpression"]
-            )
-        )
-        and metric["label"]
+            and metric["label"]
     )
-
 
 
 def ensure_path_exists(path: str):
@@ -1162,12 +1157,12 @@ def ensure_path_exists(path: str):
 
 
 def get_since_until(
-    time_range: Optional[str] = None,
-    since: Optional[str] = None,
-    until: Optional[str] = None,
-    time_shift: Optional[str] = None,
-    relative_start: Optional[str] = None,
-    relative_end: Optional[str] = None,
+        time_range: Optional[str] = None,
+        since: Optional[str] = None,
+        until: Optional[str] = None,
+        time_shift: Optional[str] = None,
+        relative_start: Optional[str] = None,
+        relative_end: Optional[str] = None,
 ) -> Tuple[datetime, datetime]:
     """Return `since` and `until` date time tuple from string representations of
     time_range, since, until and time_shift.
@@ -1357,8 +1352,59 @@ def get_stacktrace():
     if current_app.config.get("SHOW_STACKTRACE"):
         return traceback.format_exc()
 
+
+def pic2html(image_arr,max_num=4):
+    # 要定格写，不然markdown不识别
+    html = '''
+<table> 
+<tbody>
+%s
+</tbody>
+</table>
+    '''
+    if len(image_arr)==1:
+        one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>'%(image_arr[0],image_arr[0])}
+</tr> 
+        '''
+        html = html%one_img_html
+    if len(image_arr)==2:
+        one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
+</tr> 
+        '''
+        html = html % one_img_html
+    if len(image_arr)==3 and max_num<5:
+        one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
+</tr> 
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[2], image_arr[2])}
+</tr> 
+        '''
+        html = html % one_img_html
+    if len(image_arr)==4 and max_num<5:
+        one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
+</tr> 
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[2], image_arr[2])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[3], image_arr[3])}
+</tr> 
+        '''
+        html = html % one_img_html
+    return html
+
+
 # @pysnooper.snoop()
-def check_resource_memory(resource_memory,src_resource_memory=None):
+def check_resource_memory(resource_memory, src_resource_memory=None):
     def set_host_max(resource):
         return resource
         # resource_int =0
@@ -1371,56 +1417,57 @@ def check_resource_memory(resource_memory,src_resource_memory=None):
         # return resource
 
     # @pysnooper.snoop()
-    def check_max_memory(resource,src_resource=None):
+    def check_max_memory(resource, src_resource=None):
         if not resource:
             return resource
-        src_resource_int=0
+        src_resource_int = 0
         if src_resource and 'G' in src_resource:
-            src_resource_int = int(float(src_resource.replace('G',''))*1000)
+            src_resource_int = int(float(src_resource.replace('G', '')) * 1000)
         if src_resource and 'M' in src_resource:
             src_resource_int = int(src_resource.replace('M', ''))
 
-        resource_int=0
+        resource_int = 0
         if resource and 'G' in resource:
-            resource_int = int(float(resource.replace('G',''))*1000)
+            resource_int = int(float(resource.replace('G', '')) * 1000)
         if resource and 'M' in resource:
             resource_int = int(resource.replace('M', ''))
         #  如果是变小了，可以直接使用，这是因为最大值可能是admin设置的。普通用户只能调小
-        if resource_int<=src_resource_int:
+        if resource_int <= src_resource_int:
             return resource
 
-        if resource_int>100000:
+        if resource_int > 100000:
             return '100G'
         else:
             return resource
 
-    resource = resource_memory.upper().replace('-','~').replace('_','~').strip()
+    resource = resource_memory.upper().replace('-', '~').replace('_', '~').strip()
     if not "~" in resource:
         pattern = '^[0-9]+[GM]$'  # 匹配字符串
         match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource memory input not valid')
         if not g.user.is_admin():
-            resource = set_host_max(check_max_memory(resource,src_resource_memory))
+            resource = set_host_max(check_max_memory(resource, src_resource_memory))
         else:
             resource = set_host_max(resource)
         return resource
     else:
-        pattern = '^[0-9]+[GM]~[0-9]+[GM]$' # 匹配字符串
-        match_obj = re.match(pattern=pattern,string = resource)
+        pattern = '^[0-9]+[GM]~[0-9]+[GM]$'  # 匹配字符串
+        match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource memory input not valid')
         if not g.user.is_admin():
             min = set_host_max(check_max_memory(resource.split('~')[0]))
             max = set_host_max(check_max_memory(resource.split('~')[1]))
-            resource = str(min)+"~"+str(max)
+            resource = str(min) + "~" + str(max)
         else:
             min = set_host_max(resource.split('~')[0])
             max = set_host_max(resource.split('~')[1])
             resource = str(min) + "~" + str(max)
         return resource
 
-def check_resource_cpu(resource_cpu,src_resource_cpu=None):
+
+def check_resource_cpu(resource_cpu, src_resource_cpu=None):
     def set_host_max(resource):
         return resource
         # resource_int =0
@@ -1429,14 +1476,14 @@ def check_resource_cpu(resource_cpu,src_resource_cpu=None):
         #     resource = 80
         # return resource
 
-    def check_max_cpu(resource,src_resource=None):
+    def check_max_cpu(resource, src_resource=None):
         resource_int = float(resource) if resource else 0
         src_resource_int = float(src_resource) if src_resource else 0
 
-        if resource_int<=src_resource_int:
+        if resource_int <= src_resource_int:
             return resource
 
-        if resource_int>50:
+        if resource_int > 50:
             return '50'
             # raise MyappException('resource cpu max 50')
         return resource
@@ -1448,7 +1495,7 @@ def check_resource_cpu(resource_cpu,src_resource_cpu=None):
         if not match_obj:
             raise MyappException('resource cpu input not valid')
         if not g.user.is_admin():
-            resource = set_host_max(check_max_cpu(resource,src_resource_cpu))
+            resource = set_host_max(check_max_cpu(resource, src_resource_cpu))
         else:
             resource = set_host_max(resource)
         return resource
@@ -1458,13 +1505,13 @@ def check_resource_cpu(resource_cpu,src_resource_cpu=None):
         if not match_obj:
             raise MyappException('resource cpu input not valid')
         try:
-            resource = "%.1f~%.1f"%(float(resource.split("~")[0]),float(resource.split("~")[1]))
+            resource = "%.1f~%.1f" % (float(resource.split("~")[0]), float(resource.split("~")[1]))
         except Exception:
             raise MyappException('resource cpu input not valid')
         if not g.user.is_admin():
             min = set_host_max(check_max_cpu(resource.split('~')[0]))
             max = set_host_max(check_max_cpu(resource.split('~')[1]))
-            resource=str(min)+"~"+str(max)
+            resource = str(min) + "~" + str(max)
         else:
             min = set_host_max(resource.split('~')[0])
             max = set_host_max(resource.split('~')[1])
@@ -1472,440 +1519,21 @@ def check_resource_cpu(resource_cpu,src_resource_cpu=None):
         return resource
 
 
-import yaml
-# @pysnooper.snoop(watch_explode=())
-def merge_tfjob_experiment_template(worker_num,node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,command):
-    nodeSelector=None
-    if node_selector and '=' in node_selector:
-        nodeSelector = {}
-        for selector in re.split(',|;|\n|\t', node_selector):
-            nodeSelector[selector.strip().split('=')[0].strip()] = selector.strip().split('=')[1].strip()
-
-    if not "~" in resource_memory:
-        resource_memory = resource_memory + "~" + resource_memory
-    if not "~" in resource_cpu:
-        resource_cpu = resource_cpu + "~" + resource_cpu
-    requests_memory,limits_memory=resource_memory.strip().split('~')
-    requests_cpu,limits_cpu = resource_cpu.strip().split('~')
-    commands = command.split(' ')
-    commands = [command for command in commands if command]
-    commands.append('$replace')
-
-    volumes=[]
-    volumeMounts=[]
-    if volume_mount and ":" in volume_mount:
-        volume_mount = volume_mount.strip()
-        if volume_mount:
-            volume_mounts = volume_mount.split(',')
-            for volume_mount in volume_mounts:
-                volume, mount = volume_mount.split(":")[0].strip(), volume_mount.split(":")[1].strip()
-                if "(pvc)" in volume:
-                    pvc_name = volume.replace('(pvc)', '').replace(' ', '')
-                    volumn_name = pvc_name.replace('_', '-')
-                    volumes.append(
-                        {
-                            "name": volumn_name,
-                            "persistentVolumeClaim": {
-                                "claimName": pvc_name
-                            }
-                        }
-                    )
-                    volumeMounts.append({
-                        "name":volumn_name,
-                        "mountPath":mount
-                    })
-
-    if hostAliases:
-        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
-        hostAliases = [
-            {
-                "ip": host.split(' ')[0],
-                "hostnames":[
-                    host.split(' ')[1]
-                ]
-            } for host in hostAliases
-        ]
-    else:
-        hostAliases=[]
-
-    raw_json={
-      "apiVersion": "kubeflow.org/v1",
-      "kind": "TFJob",
-      "metadata": {
-          "name": "{{.Trial}}",
-          "namespace": "{{.NameSpace}}"
-      },
-      "spec": {
-          "tfReplicaSpecs": {
-              "Worker": {
-                  "replicas": int(worker_num),
-                  "restartPolicy": "OnFailure",
-                  "template": {
-                      "spec": {
-                          "hostAliases": hostAliases,
-                          "imagePullSecrets": image_secrets,
-                          "nodeSelector": nodeSelector,
-                          "volumes": volumes if volumes else None,
-                          "containers": [
-                              {
-                                  "name": "tensorflow",
-                                  "image": image,
-                                  "workingDir": workingDir if workingDir else None,
-                                  "imagePullPolicy": image_pull_policy,
-                                  "volumeMounts":volumeMounts if volumeMounts else None,
-                                  "resources": {
-                                      "requests": {
-                                          "cpu": float(requests_cpu),
-                                          "memory": requests_memory
-                                      },
-                                      "limits": {
-                                          "cpu": float(limits_cpu),
-                                          "memory": limits_memory
-                                      }
-                                  },
-                                  "command": commands if command else None
-                              }
-                          ]
-                      }
-                  }
-              }
-          }
-
-      }
-    }
-
-    # # print(raw_json)
-    # @pysnooper.snoop(watch_explode=('data'))
-    # def clean_key(data):
-    #     temp = copy.deepcopy(data)
-    #     for key in temp:
-    #         if temp[key]==None or temp[key]==[] or temp[key]=={} or temp[key]=='':
-    #             del data[key]
-    #         elif type(temp[key])==dict:
-    #             data[key]=clean_key(data[key])
-    #     return data
-    #
-    # raw_json=clean_key(raw_json)
-    # print(yaml.dump(raw_json))
-
-    global_commands = '''
-        {{- with .HyperParameters}}
-        {{- range .}}
-        - "{{.Name}}={{.Value}}"
-        {{- end}}
-        {{- end}}
-        '''
-    global_commands = global_commands.strip().split('\n')
-    global_commands = [global_command.strip() for global_command in global_commands if global_command.strip()]
-    replace_str = ''
-    for global_command in global_commands:
-        replace_str += global_command+'\n'+'            '
-
-    rawTemplate = yaml.dump(raw_json).replace('- $replace',replace_str)
-
-    return rawTemplate
-
-
-
-# @pysnooper.snoop(watch_explode=())
-def merge_job_experiment_template(node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,command):
-    nodeSelector=None
-    if node_selector and '=' in node_selector:
-        nodeSelector = {}
-        for selector in re.split(',|;|\n|\t', node_selector):
-            nodeSelector[selector.strip().split('=')[0].strip()] = selector.strip().split('=')[1].strip()
-    if not "~" in resource_memory:
-        resource_memory = resource_memory+"~"+resource_memory
-    if not "~" in resource_cpu:
-        resource_cpu = resource_cpu+"~"+resource_cpu
-    requests_memory,limits_memory=resource_memory.strip().split('~')
-    requests_cpu,limits_cpu = resource_cpu.strip().split('~')
-    commands = command.split(' ')
-    commands = [command for command in commands if command]
-    commands.append('$replace')
-
-    volumes=[]
-    volumeMounts=[]
-    if volume_mount and ":" in volume_mount:
-        volume_mount = volume_mount.strip()
-        if volume_mount:
-            volume_mounts = volume_mount.split(',')
-            for volume_mount in volume_mounts:
-                volume, mount = volume_mount.split(":")[0].strip(), volume_mount.split(":")[1].strip()
-                if "(pvc)" in volume:
-                    pvc_name = volume.replace('(pvc)', '').replace(' ', '')
-                    volumn_name = pvc_name.replace('_', '-')
-                    volumes.append(
-                        {
-                            "name": volumn_name,
-                            "persistentVolumeClaim": {
-                                "claimName": pvc_name
-                            }
-                        }
-                    )
-                    volumeMounts.append({
-                        "name":volumn_name,
-                        "mountPath":mount
-                    })
-
-    if hostAliases:
-        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
-        hostAliases = [
-            {
-                "ip": host.split(' ')[0],
-                "hostnames":[
-                    host.split(' ')[1]
-                ]
-            } for host in hostAliases
-        ]
-    else:
-        hostAliases=[]
-
-
-
-    raw_json={
-      "apiVersion": "batch/v1",
-      "kind": "Job",
-      "metadata": {
-          "name": "{{.Trial}}",
-          "namespace": "{{.NameSpace}}"
-      },
-      "spec": {
-          "template": {
-              "spec": {
-                  "hostAliases": hostAliases,
-                  "imagePullSecrets": image_secrets,
-                  "restartPolicy": "Never",
-                  "nodeSelector": nodeSelector,
-                  "volumes": volumes if volumes else None,
-                  "containers": [
-                      {
-                          "name": "{{.Trial}}",
-                          "image": image,
-                          "workingDir": workingDir if workingDir else None,
-                          "imagePullPolicy": image_pull_policy,
-                          "volumeMounts":volumeMounts if volumeMounts else None,
-                          "resources": {
-                              "requests": {
-                                  "cpu": float(requests_cpu),
-                                  "memory": requests_memory
-                              },
-                              "limits": {
-                                  "cpu": float(limits_cpu),
-                                  "memory": limits_memory
-                              }
-                          },
-                          "command": commands if command else None
-                      }
-                  ]
-              }
-          }
-      }
-    }
-
-    # # print(raw_json)
-    # @pysnooper.snoop(watch_explode=('data'))
-    # def clean_key(data):
-    #     temp = copy.deepcopy(data)
-    #     for key in temp:
-    #         if temp[key]==None or temp[key]==[] or temp[key]=={} or temp[key]=='':
-    #             del data[key]
-    #         elif type(temp[key])==dict:
-    #             data[key]=clean_key(data[key])
-    #     return data
-    #
-    # raw_json=clean_key(raw_json)
-    # print(yaml.dump(raw_json))
-
-    global_commands = '''
-    {{- with .HyperParameters}}
-    {{- range .}}
-    - "{{.Name}}={{.Value}}"
-    {{- end}}
-    {{- end}}
-    '''
-    global_commands = global_commands.strip().split('\n')
-    global_commands = [global_command.strip() for global_command in global_commands if global_command.strip()]
-    replace_str = ''
-    for global_command in global_commands:
-        replace_str += global_command+'\n'+'        '
-
-    rawTemplate = yaml.dump(raw_json).replace('- $replace',replace_str)
-
-    return rawTemplate
-
-
-
-# @pysnooper.snoop(watch_explode=())
-def merge_pytorchjob_experiment_template(worker_num,node_selector,volume_mount,image,image_secrets,hostAliases,workingDir,image_pull_policy,resource_memory,resource_cpu,master_command,worker_command):
-    nodeSelector=None
-    if node_selector and '=' in node_selector:
-        nodeSelector = {}
-        for selector in re.split(',|;|\n|\t', node_selector):
-            nodeSelector[selector.strip().split('=')[0].strip()] = selector.strip().split('=')[1].strip()
-    if not "~" in resource_memory:
-        resource_memory = resource_memory + "~" + resource_memory
-    if not "~" in resource_cpu:
-        resource_cpu = resource_cpu + "~" + resource_cpu
-    requests_memory,limits_memory=resource_memory.strip().split('~')
-    requests_cpu,limits_cpu = resource_cpu.strip().split('~')
-    master_commands = master_command.split(' ')
-    master_commands = [master_command for master_command in master_commands if master_command]
-    master_commands.append('$replace')
-
-
-    worker_commands = worker_command.split(' ')
-    worker_commands = [worker_command for worker_command in worker_commands if worker_command]
-    worker_commands.append('$replace')
-
-    volumes=[]
-    volumeMounts=[]
-    if volume_mount and ":" in volume_mount:
-        volume_mount = volume_mount.strip()
-        if volume_mount:
-            volume_mounts = volume_mount.split(',')
-            for volume_mount in volume_mounts:
-                volume, mount = volume_mount.split(":")[0].strip(), volume_mount.split(":")[1].strip()
-                if "(pvc)" in volume:
-                    pvc_name = volume.replace('(pvc)', '').replace(' ', '')
-                    volumn_name = pvc_name.replace('_', '-')
-                    volumes.append(
-                        {
-                            "name": volumn_name,
-                            "persistentVolumeClaim": {
-                                "claimName": pvc_name
-                            }
-                        }
-                    )
-                    volumeMounts.append({
-                        "name":volumn_name,
-                        "mountPath":mount
-                    })
-
-    if hostAliases:
-        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
-        hostAliases = [
-            {
-                "ip": host.split(' ')[0],
-                "hostnames":[
-                    host.split(' ')[1]
-                ]
-            } for host in hostAliases
-        ]
-    else:
-        hostAliases=[]
-
-
-
-    raw_json={
-      "apiVersion": "kubeflow.org/v1",
-      "kind": "PyTorchJob",
-      "metadata": {
-          "name": "{{.Trial}}",
-          "namespace": "{{.NameSpace}}"
-      },
-      "spec": {
-          "pytorchReplicaSpecs": {
-              "Master": {
-                  "replicas": 1,
-                  "restartPolicy": "OnFailure",
-                  "template": {
-                      "spec": {
-                          "hostAliases": hostAliases,
-                          "imagePullSecrets": image_secrets,
-                          "nodeSelector": nodeSelector,
-                          "volumes": volumes if volumes else None,
-                          "containers": [
-                              {
-                                  "name": "pytorch",
-                                  "image": image,
-                                  "workingDir": workingDir if workingDir else None,
-                                  "imagePullPolicy": image_pull_policy,
-                                  "volumeMounts":volumeMounts if volumeMounts else None,
-                                  "command": master_commands if master_command else None
-                              }
-                          ]
-                      }
-                  }
-              },
-              "Worker": {
-                  "replicas": worker_num,
-                  "restartPolicy": "OnFailure",
-                  "template": {
-                      "spec": {
-                          "hostAliases": hostAliases,
-                          "imagePullSecrets": image_secrets,
-                          "nodeSelector": nodeSelector,
-                          "volumes": volumes if volumes else None,
-                          "containers": [
-                              {
-                                  "name": "pytorch",
-                                  "image": image,
-                                  "workingDir": workingDir if workingDir else None,
-                                  "imagePullPolicy": image_pull_policy,
-                                  "volumeMounts": volumeMounts if volumeMounts else None,
-                                  "resources": {
-                                      "requests": {
-                                          "cpu": float(requests_cpu),
-                                          "memory": requests_memory
-                                      },
-                                      "limits": {
-                                          "cpu": float(limits_cpu),
-                                          "memory": limits_memory
-                                      }
-                                  },
-                                  "command": worker_commands if worker_command else None
-                              }
-                          ]
-                      }
-                  }
-              }
-          }
-      }
-    }
-
-    # # print(raw_json)
-    # @pysnooper.snoop(watch_explode=('data'))
-    # def clean_key(data):
-    #     temp = copy.deepcopy(data)
-    #     for key in temp:
-    #         if temp[key]==None or temp[key]==[] or temp[key]=={} or temp[key]=='':
-    #             del data[key]
-    #         elif type(temp[key])==dict:
-    #             data[key]=clean_key(data[key])
-    #     return data
-    #
-    # raw_json=clean_key(raw_json)
-    # print(yaml.dump(raw_json))
-
-    global_commands = '''
-    {{- with .HyperParameters}}
-    {{- range .}}
-    - "{{.Name}}={{.Value}}"
-    {{- end}}
-    {{- end}}
-    '''
-    global_commands = global_commands.strip().split('\n')
-    global_commands = [global_command.strip() for global_command in global_commands if global_command.strip()]
-    replace_str = ''
-    for global_command in global_commands:
-        replace_str += global_command+'\n'+'            '
-
-    rawTemplate = yaml.dump(raw_json).replace('- $replace',replace_str)
-
-    return rawTemplate
 
 def checkip(ip):
     import re
+    if ":" in ip:
+        ip = ip[:ip.index(':')]
     p = re.compile('^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$')
     if p.match(ip):
         return True
     else:
         return False
 
+
 # @pysnooper.snoop()
 def get_gpu(resource_gpu):
-    gpu_num=0
+    gpu_num = 0
     gpu_type = None
     try:
         if resource_gpu:
@@ -1925,29 +1553,27 @@ def get_gpu(resource_gpu):
     gpu_type = gpu_type.upper() if gpu_type else None
     return gpu_num, gpu_type
 
-
-
 # 按expand字段中index字段进行排序
-def sort_expand_index(items,dbsession):
+def sort_expand_index(items):
     all = {
-        0:[]
+        0: []
     }
     for item in items:
         try:
             if item.expand:
-                index = float(json.loads(item.expand).get('index',0))
+                index = float(json.loads(item.expand).get('index', 0))
                 if index:
                     if index in all:
                         all[index].append(item)
                     else:
-                        all[index]=[item]
+                        all[index] = [item]
                 else:
                     all[0].append(item)
             else:
                 all[0].append(item)
         except Exception as e:
             print(e)
-    back=[]
+    back = []
     for index in sorted(all):
         back.extend(all[index])
         # 当有小数的时候自动转正
@@ -1958,8 +1584,7 @@ def sort_expand_index(items,dbsession):
 
 # 生成前端锁需要的扩展字段
 # @pysnooper.snoop()
-def fix_task_position(pipeline,tasks,expand_tasks):
-
+def fix_task_position(pipeline, tasks, expand_tasks):
     for task_name in tasks:
         task = tasks[task_name]
 
@@ -1976,10 +1601,11 @@ def fix_task_position(pipeline,tasks,expand_tasks):
             if str(task_id) == task['id']:
                 task['position']['x'] = x
                 task['position']['y'] = y
+
     def read_position(task_id):
         for task in expand_tasks:
             if str(task_id) == task['id']:
-                return task['position']['x'],task['position']['y']
+                return task['position']['x'], task['position']['y']
 
     # 检查指定位置是否存在指定节点
     def has_exist_node(x, y, task_id):
@@ -1988,7 +1614,6 @@ def fix_task_position(pipeline,tasks,expand_tasks):
                 if int(x) == int(task['position']['x']) and int(y) == int(task['position']['y']) and task['id'] != str(task_id):
                     return True
         return False
-
 
     # 生成下行链路图
     for task_name in dag_json:
@@ -1999,35 +1624,32 @@ def fix_task_position(pipeline,tasks,expand_tasks):
 
     # 获取节点下游节点总数目
     def get_down_node_num(task_name):
-        down_nodes = dag_json[task_name].get('downstream',[])
+        down_nodes = dag_json[task_name].get('downstream', [])
         if down_nodes:
-            return len(down_nodes)+sum([get_down_node_num(node) for node in down_nodes])
+            return len(down_nodes) + sum([get_down_node_num(node) for node in down_nodes])
         else:
             return 0
 
-
     # 计算每个根节点的下游叶子总数
     has_change = True
-    root_num=0
+    root_num = 0
     root_nodes = []
     for task_name in dag_json:
         task = dag_json[task_name]
         # 为根节点记录第几颗树和deep
-        if not task.get("upstream",[]):
-            root_num+=1
+        if not task.get("upstream", []):
+            root_num += 1
             task['deep'] = 1
             root_nodes.append(task_name)
-            dag_json[task_name]['total_down_num']=get_down_node_num(task_name)
+            dag_json[task_name]['total_down_num'] = get_down_node_num(task_name)
 
-
-    root_nodes = sorted(root_nodes, key=lambda task_name: dag_json[task_name]['total_down_num'],reverse=True)  # 按子孙数量排序
+    root_nodes = sorted(root_nodes, key=lambda task_name: dag_json[task_name]['total_down_num'], reverse=True)  # 按子孙数量排序
     print(root_nodes)
     for i in range(len(root_nodes)):
-        dag_json[root_nodes[i]]['index']=i
-
+        dag_json[root_nodes[i]]['index'] = i
 
     # 更新叶子深度和树index，下游节点总数目
-    max_deep=1
+    max_deep = 1
     while (has_change):
         has_change = False
         for task_name in dag_json:
@@ -2045,28 +1667,25 @@ def fix_task_position(pipeline,tasks,expand_tasks):
                     has_change = True
                     if 'deep' in task:
                         dag_json[downstream_task_name]['deep'] = 1 + task['deep']
-                        if max_deep<(1 + task['deep']):
+                        if max_deep < (1 + task['deep']):
                             max_deep = 1 + task['deep']
                 else:
                     # 旧叶子，可能节点被多个不同deep的上游引导，使用deep最大的做为引导
                     if dag_json[downstream_task_name]['deep'] < task['deep'] + 1:
                         has_change = True
                         dag_json[downstream_task_name]['deep'] = 1 + task['deep']
-                        if max_deep<(1 + task['deep']):
+                        if max_deep < (1 + task['deep']):
                             max_deep = 1 + task['deep']
-
 
                 # 叶子节点直接采用根节点的信息。有可能是多个根长出来的，选择index最小的根
                 if 'index' not in dag_json[downstream_task_name]:
                     has_change = True
                     if 'index' in task:
-                        dag_json[downstream_task_name]['index']=task['index']
+                        dag_json[downstream_task_name]['index'] = task['index']
                 else:
-                    if task['index']>dag_json[downstream_task_name]['index']:
+                    if task['index'] > dag_json[downstream_task_name]['index']:
                         has_change = True
                         dag_json[downstream_task_name]['index'] = task['index']
-
-
 
     # print(dag_json)
     # 根据上下行链路获取位置
@@ -2077,28 +1696,27 @@ def fix_task_position(pipeline,tasks,expand_tasks):
 
     # @pysnooper.snoop()
     def set_downstream_position(task_name):
-        downstream_tasks = [x for x in dag_json[task_name]['downstream'] if dag_json[x]['index']==dag_json[task_name]['index']]  # 获取相同树的下游节点
-        downstream_tasks = sorted(downstream_tasks, key=lambda temp: dag_json[temp]['total_down_num'],reverse=True)  # 按子孙数目排序
+        downstream_tasks = [x for x in dag_json[task_name]['downstream'] if dag_json[x]['index'] == dag_json[task_name]['index']]  # 获取相同树的下游节点
+        downstream_tasks = sorted(downstream_tasks, key=lambda temp: dag_json[temp]['total_down_num'], reverse=True)  # 按子孙数目排序
         for i in range(len(downstream_tasks)):
             downstream_task = downstream_tasks[i]
-            y = dag_json[downstream_task]['deep']*150-100
+            y = dag_json[downstream_task]['deep'] * 100 - 50
             # 获取前面的树有多少同一层叶子
-            front_task_num=0
+            front_task_num = 0
             for temp in dag_json:
                 # print(dag_json[temp]['index'],dag_json[task_name]['index'], dag_json[temp]['deep'],dag_json[task_name]['deep'])
-                if dag_json[temp]['index']<dag_json[downstream_task]['index'] and dag_json[temp]['deep']==dag_json[downstream_task]['deep']:
-                    front_task_num+=1
-            front_task_num+=i
+                if dag_json[temp]['index'] < dag_json[downstream_task]['index'] and dag_json[temp]['deep'] == dag_json[downstream_task]['deep']:
+                    front_task_num += 1
+            front_task_num += i
             # y至少要操作他的上游节点的最小值。下游节点有多上上游节点时，靠左排布
             up = min([read_position(tasks[task_name]['id'])[0] for task_name in dag_json[downstream_task]['upstream']])  # 获取这个下游节点的全部上游节点的x值
             x = max(up,400*front_task_num+50)
             # x = 400*front_task_num+50
-            set_position(str(tasks[downstream_task]['id']),x,y)
+            set_position(str(tasks[downstream_task]['id']), x, y)
 
         # 布局下一层
         for temp in downstream_tasks:
             set_downstream_position(temp)
-
 
     # print(dag_json)
     # 一棵树一棵树的构建。优先布局下游叶子节点数量大的
@@ -2107,9 +1725,6 @@ def fix_task_position(pipeline,tasks,expand_tasks):
         set_position(task_id, start_x, start_y)
         start_x += 400
         set_downstream_position(task_name)
-
-
-
 
     return expand_tasks
 
@@ -2129,103 +1744,11 @@ def hive_create_sql_demo():
 
 
 import subprocess
+
+
 def run_shell(shell):
     cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=sys.stderr, close_fds=True,
                            stdout=sys.stdout, universal_newlines=True, shell=True, bufsize=1)
 
     cmd.communicate()
     return cmd.returncode
-
-# import yaml
-# # @pysnooper.snoop(watch_explode=())
-# def merge_tf_experiment_template(worker_num,node_selector,volume_mount,image,workingDir,image_pull_policy,memory,cpu,command,parameters):
-#     parameters = json.loads(parameters)
-#     nodeSelector=None
-#     if node_selector and '=' in node_selector:
-#             nodeSelector={}
-#             for selector in re.split(',|;|\n|\t', node_selector):
-#                 nodeSelector[selector.strip().split('=')[0].strip()] = selector.strip().split('=')[1].strip()
-#     requests_memory,limits_memory=memory.strip().split('~')
-#     requests_cpu,limits_cpu = cpu.strip().split('~')
-#     commands = command.split(' ')
-#     commands = [command for command in commands if command]
-#     for parameter in parameters:
-#         commands.append('')
-#
-#
-#     volumes=[]
-#     volumeMounts=[]
-#     if volume_mount and ":" in volume_mount:
-#         volume_mount = volume_mount.strip()
-#         if volume_mount:
-#             volume_mounts = volume_mount.split(',')
-#             for volume_mount in volume_mounts:
-#                 volume, mount = volume_mount.split(":")[0].strip(), volume_mount.split(":")[1].strip()
-#                 if "(pvc)" in volume:
-#                     pvc_name = volume.replace('(pvc)', '').replace(' ', '')
-#                     volumn_name = pvc_name.replace('_', '-')
-#                     volumes.append(
-#                         {
-#                             "name": volumn_name,
-#                             "persistentVolumeClaim": {
-#                                 "claimName": pvc_name
-#                             }
-#                         }
-#                     )
-#                     volumeMounts.append({
-#                         "name":volumn_name,
-#                         "mountPath":mount
-#                     })
-#
-#
-#
-#     raw_json={
-#       "apiVersion": "kubeflow.org/v1",
-#       "kind": "TFJob",
-#       "metadata": {
-#           "name": "{{.Trial}}",
-#           "namespace": "{{.NameSpace}}"
-#       },
-#       "spec": {
-#           "tfReplicaSpecs": {
-#               "Worker": {
-#                   "replicas": int(worker_num),
-#                   "restartPolicy": "OnFailure",
-#                   "template": {
-#                       "spec": {
-#                           "nodeSelector": nodeSelector,
-#                           "volumes": volumes if volumes else None,
-#                           "containers": [
-#                               {
-#                                   "name": "tensorflow",
-#                                   "image": image,
-#                                   "workingDir": workingDir if workingDir else None,
-#                                   "imagePullPolicy": image_pull_policy,
-#                                   "volumeMounts":volumeMounts if volumeMounts else None,
-#                                   "resources": {
-#                                       "requests": {
-#                                           "cpu": float(requests_cpu),
-#                                           "memory": requests_memory
-#                                       },
-#                                       "limits": {
-#                                           "cpu": float(limits_cpu),
-#                                           "memory": limits_memory
-#                                       }
-#                                   },
-#                                   "command": commands
-#                               }
-#                           ]
-#                       }
-#                   }
-#               }
-#           }
-#
-#       }
-#     }
-#
-#
-#     rawTemplate = yaml.dump(raw_json)
-#
-#     return rawTemplate
-#
-#

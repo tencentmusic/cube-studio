@@ -10,6 +10,7 @@ import ModuleDetail from './components/ModuleDetail';
 import ModuleItem from './components/ModuleItem';
 import SearchItem from './components/SearchItem';
 import style from './style';
+import { selectPipelineId } from '@src/models/pipeline';
 
 const { Item } = Stack;
 
@@ -47,6 +48,7 @@ const ModuleTree: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchResult, setSearchResult] = useState(new Map());
+  const pipelineId = useAppSelector(selectPipelineId);
 
   const handleTemplateData = (res: any) => {
     const dataSet = new Map();
@@ -129,7 +131,7 @@ const ModuleTree: React.FC = () => {
     setLoading(true);
     setNodeCount(0);
     api
-      .getTemplateCommandConfig()
+      .getTemplateCommandConfig(pipelineId)
       .then((res: any) => {
         console.log('job_template_modelview', res);
         if (res?.status === 0 && res?.message === 'success') {

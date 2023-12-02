@@ -9,9 +9,11 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  selector:
-    matchLabels:
-      monitoring-pvname: monitoring-grafana-pv
+#  selector:
+#    matchLabels:
+#      monitoring-pvname: monitoring-grafana-pv
+  storageClassName: ""
+  volumeName: monitoring-grafana-pv
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -27,7 +29,7 @@ spec:     # 定义pv属性
     - ReadWriteMany  
   hostPath:
     path: /data/k8s/monitoring/grafana   # /mnt/ceph_fuse/k8s/monitoring/grafana
-
-  persistentVolumeReclaimPolicy: Recycle  
+  storageClassName: ""
+  persistentVolumeReclaimPolicy: Retain
 
 

@@ -35,9 +35,9 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     ide_type = Column(String(100), default='jupyter')
     working_dir = Column(String(200), default='')  # 挂载
     env = Column(String(400),default='') # 环境变量
-    volume_mount = Column(String(400), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
+    volume_mount = Column(String(2000), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
     node_selector = Column(String(200), default='cpu=true,notebook=true')  # 挂载
-    image_pull_policy = Column(Enum('Always', 'IfNotPresent'), nullable=True, default='Always')
+    image_pull_policy = Column(Enum('Always', 'IfNotPresent',name='image_pull_policy'), nullable=True, default='Always')
     resource_memory = Column(String(100), default='10G')
     resource_cpu = Column(String(100), default='10')
     resource_gpu = Column(String(100), default='0')
@@ -48,6 +48,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def name_url(self):
+        host = "http://" + self.project.cluster.get('HOST', request.host)
+
         expand = json.loads(self.expand) if self.expand else {}
         root = expand.get('root','')
 
@@ -60,18 +62,27 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
                 url = "/notebook/"+self.namespace + "/" + self.name+"/lab?#"+self.mount
 
         # url= url + "#"+self.mount
-        host = "http://"+self.project.cluster.get('HOST',request.host)
+
 
         # 对于有边缘节点，直接使用边缘集群的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
         if SERVICE_EXTERNAL_IP:
+            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip()
             service_ports = 10000 + 10 * self.id
             host = "http://%s:%s"%(SERVICE_EXTERNAL_IP,str(service_ports))
             if self.ide_type=='theia':
                 url = "/" + "#/mnt/" + self.created_by.username
             else:
-                url = '/notebook/jupyter/%s/lab/tree/mnt/%s'%(self.name,self.created_by.username)
+                url = "/notebook/" + self.namespace + "/" + self.name + "/lab?#" + self.mount
+                # url = '/notebook/jupyter/%s/lab/tree/mnt/%s'%(self.name,self.created_by.username)
         return Markup(f'<a target=_blank href="{host}{url}">{self.name}</a>')
+
+    @property
+    def ide_type_html(self):
+        images = dict([[x[0],x[1]] for x in conf.get('NOTEBOOK_IMAGES', [])])
+        if self.images in images:
+            return images[self.images]
+        return self.ide_type
 
     @property
     def mount(self):
@@ -102,8 +113,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
             status = pods[0]['status']
             if g.user.is_admin():
-                k8s_dash_url = "http://"+self.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
-
+                # k8s_dash_url = "http://"+self.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
+                k8s_dash_url = f'/k8s/web/search/{self.cluster["NAME"]}/jupyter/{self.name}'
                 url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
                 return url
             return status

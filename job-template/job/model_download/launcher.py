@@ -98,9 +98,28 @@ def download(**kwargs):
             print(res.content)
             exit(1)
 
+    try:
+        model_path=json.loads(model_path)
+        model_path = model_path[kwargs['sub_model_name']]
+    except Exception as e:
+        pass
     if model_path and os.path.exists(model_path):
-        os.makedirs(kwargs['save_path'],exist_ok=True)
-        shutil.copy2(model_path,kwargs['save_path'])
+        save_path = kwargs['save_path']
+        os.makedirs(save_path,exist_ok=True)
+        if os.path.isdir(model_path):
+            g = os.walk(model_path)
+            for path, dir_list, file_list in g:
+                for file_name in file_list:
+                    one_file_path = os.path.join(path, file_name)
+                    try:
+                        des_path = os.path.join(save_path,file_name)
+                        if os.path.exists(des_path):
+                            os.remove(des_path)
+                        shutil.copy2(one_file_path,des_path)
+                    except Exception as e:
+                        print(e)
+        else:
+            shutil.copy2(model_path,save_path)
         # 同时将模型信息写入到存储中,比如计算指标
         if kwargs['from']=='模型管理':
             if exist_model:
@@ -114,6 +133,7 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("download model launcher")
     arg_parser.add_argument('--from', type=str, help="模型来源地", default='train_model')
     arg_parser.add_argument('--model_name', type=str, help="模型名", default='demo')
+    arg_parser.add_argument('--sub_model_name', type=str, help="子模型名", default='')
     arg_parser.add_argument('--model_version', type=str, help="模型版本号",default=datetime.datetime.now().strftime('v%Y.%m.%d.1'))
     arg_parser.add_argument('--model_status', type=str, help="模型状态", default='')
     arg_parser.add_argument('--save_path', type=str, help="下载目录", default='')

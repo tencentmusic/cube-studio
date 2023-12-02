@@ -5,5 +5,4 @@ resources:
   - ../../base
 images:
   - name: kubeflow/training-operator
-    newName: ccr.ccs.tencentyun.com/cube-studio/kubeflow
-    newTag: "training-operator"
+    newTag: "v1-8a066f9"

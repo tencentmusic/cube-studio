@@ -471,7 +471,7 @@ RESULTS_BACKEND = RedisCache(
 
 class CeleryConfig(object):
     # 任务队列
-    broker_url =  'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
+    broker_url = 'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
     # celery_task的定义模块
     imports = (
         'myapp.tasks',
@@ -527,7 +527,7 @@ class CeleryConfig(object):
             'max_retries': 0,
             "reject_on_worker_lost": False
         },
-		# 异步升级服务
+        # 异步升级服务
         'task.upgrade_service': {
             'rate_limit': '1/s',
             'soft_time_limit': 3600,
@@ -535,23 +535,28 @@ class CeleryConfig(object):
             'max_retries': 0,
             "reject_on_worker_lost": False
         },
-		# 上传workflow信息
+        # 上传workflow信息
         'task.upload_workflow': {
             'rate_limit': '10/s',
             'soft_time_limit': 600,
             "expires": 600,
             'max_retries': 0,
             "reject_on_worker_lost": False
-		},
+        },
         'task.check_pod_terminating':{
             'rate_limit': '1/s',
             'soft_time_limit': 600,
             "expires": 600,
             'max_retries': 0,
             "reject_on_worker_lost": False
+        },
+        'task.exec_command': {
+            'rate_limit': '1/s',
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
         }
-
-
     }
 
     # 定时任务的配置项，key为celery_task的name，值是调度配置
@@ -585,21 +590,21 @@ class CeleryConfig(object):
         'task_delete_debug_docker': {
             'task': 'task.delete_debug_docker',   # 定时删除debug的pod
             # 'schedule': 10.0,
-            'schedule': crontab(minute='30', hour='22'),
+            'schedule': crontab(minute='30', hour='23'),
         },
         'task_watch_gpu': {
             'task': 'task.watch_gpu',   # 定时推送gpu的使用情况
             'schedule': crontab(minute='10',hour='8-23/2'),
         },
-		'task_adjust_node_resource': {
+        'task_adjust_node_resource': {
             'task': 'task.adjust_node_resource',  # 定时在多项目组间进行资源均衡
             'schedule': crontab(minute='*/10'),
         },
-		'task_watch_pod_utilization': {
+        'task_watch_pod_utilization': {
             'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
             'schedule': crontab(minute='10',hour='11'),
         },
-		"task_check_pod_terminating": {
+        "task_check_pod_terminating": {
             "task": "task.check_pod_terminating",
             'schedule': crontab(minute='*/10'),
         }
@@ -608,6 +613,7 @@ class CeleryConfig(object):
  # 帮助文档地址，显示在web导航栏
 DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/wiki'
 BUG_REPORT_URL = 'https://github.com/tencentmusic/cube-studio/issues/new'
+GIT_URL = 'https://github.com/tencentmusic/cube-studio/tree/master'
 
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
@@ -693,7 +699,7 @@ CRD_INFO={
         "timeout": 60 * 60 * 24 * 2
     },
     "paddlejob":{
-        "group": "batch.paddlepaddle.org",
+        "group": "kubeflow.org",
         "version": "v1",
         'kind': 'PaddleJob',
         "plural": "paddlejobs",
@@ -733,20 +739,23 @@ VGPU_DRIVE_TYPE = "TENCENT"   # tke gpumanager的方式
 
 # 各类model list界面的帮助文档
 HELP_URL={
-    "pipeline":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "job_template":"https://github.com/tencentmusic/cube-studio/tree/master/job-template",
-    "task":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "nni":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "images":"https://github.com/tencentmusic/cube-studio/tree/master/images",
-    "notebook":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "service":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "inferenceservice":"https://github.com/tencentmusic/cube-studio/tree/master/images/serving",
-    "run":"https://github.com/tencentmusic/cube-studio/tree/master/docs/example",
-    "docker":"https://github.com/tencentmusic/cube-studio/tree/master/images"
+    "pipeline":f"{GIT_URL}/docs/example",
+    "job_template":f"{GIT_URL}/job-template",
+    "task":f"{GIT_URL}/docs/example",
+    "nni":f"{GIT_URL}/docs/example",
+    "images":f"{GIT_URL}/images",
+    "notebook":f"{GIT_URL}/docs/example",
+    "service":f"{GIT_URL}/docs/example",
+    "inferenceservice":f"{GIT_URL}/images/serving",
+    "run":f"{GIT_URL}/docs/example",
+    "docker":f"{GIT_URL}/images"
 }
 
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
 CUSTOMIZE_JOB='自定义镜像'
+LOGICAL_JOB = 'logical'
+PYTHON_JOB = 'python'
+
 # admin管理员用户
 ADMIN_USER='admin'
 # pipeline任务的运行空间，目前必填pipeline
@@ -759,6 +768,8 @@ AUTOML_NAMESPACE = 'automl'
 NOTEBOOK_NAMESPACE = 'jupyter'
 # 内部服务命名空间，必填service
 SERVICE_NAMESPACE = 'service'
+# aihub的命令空间
+AIHUB_NAMESPACE = 'aihub'
 # 服务链路追踪地址
 SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
@@ -833,7 +844,7 @@ ALL_LINKS=[
     {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
-        "url": "/k8s/dashboard/cluster/#/pod?namespace=infra"
+        "url": K8S_DASHBOARD_CLUSTER+"#/pod?namespace=infra"
     },
     {
         "label":"Grafana",
@@ -880,9 +891,9 @@ INFERNENCE_HEALTH={
     "torch-server":"8080:/ping",
     "triton-server":"8000:/v2/health/ready"
 }
-DOCKER_IMAGES='ccr.ccs.tencentyun.com/cube-studio/docker'
+DOCKER_IMAGES='docker:23.0.4'
 # notebook，pipeline镜像拉取策略
-IMAGE_PULL_POLICY='Always'    # IfNotPresent   Always
+IMAGE_PULL_POLICY='IfNotPresent'    # IfNotPresent   Always
 
 # 任务资源使用情况地址
 GRAFANA_TASK_PATH='/grafana/d/pod-info/pod-info?var-pod='
@@ -924,7 +935,7 @@ MODEL_URLS = {
     "train_model": "/frontend/service/inferenceservice/model_manager",
     "inferenceservice": "/frontend/service/inferenceservice/inferenceservice_manager",
 
-	"model_market_visual": "/frontend/ai_hub/model_market/model_visual",
+    "model_market_visual": "/frontend/ai_hub/model_market/model_visual",
     "model_market_voice": "/frontend/ai_hub/model_market/model_voice",
     "model_market_language": "/frontend/ai_hub/model_market/model_language",
 }
@@ -945,4 +956,4 @@ CLUSTERS={
 
 
 
-
+HOST = CLUSTERS[ENVIRONMENT].get('HOST',None)

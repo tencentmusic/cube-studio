@@ -52,8 +52,8 @@ class CRD_Filter(MyappFilter):
 
 
 class Crd_ModelView_Base():
-    list_columns = ['name','namespace_url','create_time','status','username','stop']
-    show_columns = ['name','namespace','create_time','status','annotations','labels','spec','status_more','info_json_html']
+    list_columns = ['name', 'namespace_url', 'create_time', 'status', 'username', 'stop']
+    show_columns = ['name', 'namespace', 'create_time', 'status', 'annotations', 'labels', 'spec', 'status_more', 'info_json_html']
     order_columns = ['id']
     base_permissions = ['can_show', 'can_list', 'can_delete']
     # base_permissions = ['list','delete','show']
@@ -148,9 +148,7 @@ class Crd_ModelView_Base():
         self.update_redirect()
         return redirect(self.get_redirect())
 
-    @action(
-        "stop_all", __("Stop"), __("Stop all Really?"), "fa-trash", single=False
-    )
+    @action("stop_all", __("Stop"), __("Stop all Really?"), "fa-trash", single=False)
     def stop_all(self, items):
         self.base_muldelete(items)
         self.update_redirect()
@@ -167,16 +165,19 @@ class Crd_ModelView_Base():
     #     )
     #     return res
 
-    @action(
-        "muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False
-    )
+    @action("muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False)
     def muldelete(self, items):
         self.base_muldelete(items)
         for item in items:
-            if item:
-                self._delete(item.id)
-        self.update_redirect()
-        return redirect(self.get_redirect())
+            db.session.delete(item)
+
+        db.session.commit()
+        return json.dumps(
+            {
+                "success": [],
+                "fail": []
+            }, indent=4, ensure_ascii=False
+        )
 
 
 class Workflow_Filter(MyappFilter):
@@ -242,10 +243,10 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
     label_title = '运行实例'
     datamodel = SQLAInterface(Workflow)
-    list_columns = ['project','pipeline_url','cluster', 'create_time','change_time','elapsed_time', 'final_status','status', 'username', 'log','stop']
-    search_columns = ['status','labels','name','cluster','annotations','spec','status_more','username','create_time']
+    list_columns = ['project', 'pipeline_url', 'cluster', 'create_time', 'change_time', 'elapsed_time', 'final_status', 'status', 'username', 'log', 'stop']
+    search_columns = ['status', 'labels', 'name', 'cluster', 'annotations', 'spec', 'status_more', 'username', 'create_time']
     cols_width = {
-        "project": {"type": "ellip2", "width": 200},
+        "project": {"type": "ellip2", "width": 100},
         "pipeline_url": {"type": "ellip2", "width": 300},
         "create_time": {"type": "ellip2", "width": 200},
         "change_time": {"type": "ellip2", "width": 200},
@@ -254,7 +255,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
     spec_label_columns = {
         "final_status": "删除前状态",
     }
-    show_columns = ['name', 'namespace', 'create_time', 'status','task_status', 'annotations_html', 'labels_html', 'spec_html','status_more_html', 'info_json_html']
+    show_columns = ['name', 'namespace', 'create_time', 'status', 'task_status', 'annotations_html', 'labels_html', 'spec_html', 'status_more_html', 'info_json_html']
     crd_name = 'workflow'
 
     # @pysnooper.snoop(watch_explode=('status_more',))
@@ -291,8 +292,8 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         layout_config["status"] = workflow_obj['status']
         layout_config.update(labels)
         layout_config['progress'] = status_more.get('progress', '0/0')
-        layout_config["start_time"] = k8s_client.to_local_time(status_more['startedAt'])
-        layout_config['finish_time'] = k8s_client.to_local_time(status_more['finishedAt'])
+        layout_config["start_time"] = k8s_client.to_local_time(status_more.get('startedAt',''))
+        layout_config['finish_time'] = k8s_client.to_local_time(status_more.get('finishedAt',''))
 
         layout_config['crd_json'] = {
             "apiVersion": "argoproj.io/v1alpha1",
@@ -324,11 +325,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         layout_config['icon'] = dag_status_icon.get(workflow_obj['status'], dag_default_status_icon)
         layout_config['title'] = workflow_name
         layout_config['right_button'] = []
-        if workflow_obj['status'] == 'Failed' or workflow_obj['status'] == 'Error':
-            layout_config['right_button'].append({
-                "label": "Retry",
-                "url": f"/workflow_modelview/api/retry/{cluster_name}/{namespace}/{workflow_name}"
-            })
+
         if workflow_model:
             layout_config["right_button"].append(
                 {
@@ -380,12 +377,12 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 {
                     "name": "start_time",
                     "label": "开始时间",
-                    "value": k8s_client.to_local_time(status_more['startedAt'])
+                    "value": k8s_client.to_local_time(status_more['startedAt']) if 'startedAt' in status_more else ''
                 },
                 {
                     "name": "finish_time",
                     "label": "结束时间",
-                    "value": k8s_client.to_local_time(status_more['finishedAt'])
+                    "value": k8s_client.to_local_time(status_more['finishedAt']) if 'finishedAt' in status_more else ''
                 },
                 {
                     "name": "run_id",
@@ -435,12 +432,15 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                         pod_name = workflow_name + "-" + task_name + "-" + child.replace(workflow_name, '').strip('-')
                         s3_key = ''
                         metric_key = ''
+                        output_key = ''
                         artifacts = status_more['nodes'][child].get('outputs', {}).get('artifacts', [])
                         for artifact in artifacts:
                             if artifact['name'] == 'main-logs':
                                 s3_key = artifact.get('s3', {}).get('key', '')
                             if artifact['name'] == 'metric':
                                 metric_key = artifact.get('s3', {}).get('key', '')
+                            if artifact['name'] == 'output':
+                                output_key = artifact.get('s3', {}).get('key', '')
                         retry = nodes_spec[task_name].get('retryStrategy', {}).get("limit", 0)
 
                         # 对于可重试节点的发起节点，没有日志和执行命令，
@@ -468,8 +468,8 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                             "pid": status_more['nodes'][upstream_node_name]['id'],
                             "title": title,
                             "pod": pod_name,
-                            "start_time": k8s_client.to_local_time(status_more['nodes'][child]['startedAt']),
-                            "finish_time": k8s_client.to_local_time(status_more['nodes'][child]['finishedAt']),
+                            "start_time": k8s_client.to_local_time(status_more['nodes'][child].get('startedAt','')),
+                            "finish_time": k8s_client.to_local_time(status_more['nodes'][child].get('finishedAt','')),
                             "detail_url": self.route_base + f"/web/node_detail/{cluster_name}/{namespace}/{workflow_name}/{child}",
                             "name": pod_name,
                             "outputs": status_more['nodes'][child].get('outputs', {}),
@@ -481,20 +481,21 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                             },
                             "message": status_more['nodes'][child].get('message', ''),
                             "node_shape": "rectangle",
-                            "color": status_color.get(status,default_status_color),
-                            "task_name":task_name,
-                            "task_id":nodes_spec[task_name].get('metadata',{}).get("labels",{}).get("task-id",''),
+                            "color": status_color.get(status, default_status_color),
+                            "task_name": task_name,
+                            "task_id": nodes_spec[task_name].get('metadata', {}).get("labels", {}).get("task-id", ''),
                             "task_label": nodes_spec[task_name].get('metadata', {}).get("annotations", {}).get("task-label", '').encode('utf-8').decode('unicode_escape'),
-                            "volumeMounts":nodes_spec[task_name].get('container', {}).get("volumeMounts", []),
+                            "volumeMounts": nodes_spec[task_name].get('container', {}).get("volumeMounts", []),
                             "volumes": nodes_spec[task_name].get('volumes', []),
-                            "node_selector":node_selector,
-                            "s3_key":s3_key,
-                            "metric_key":metric_key,
-                            "retry":retry,
-                            "resource_cpu":str(nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests",{}).get("cpu",'0')),
+                            "node_selector": node_selector,
+                            "s3_key": s3_key,
+                            "metric_key": metric_key,
+                            "output_key":output_key,
+                            "retry": retry,
+                            "resource_cpu": str(nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests", {}).get("cpu", '0')),
                             "resource_memory": str(nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests", {}).get("memory", '0')),
                             "resource_gpu": str(nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests", {}).get("nvidia.com/gpu", '0')),
-                            "children":[]
+                            "children": []
                         }
                         if node_name == child and not self.node_detail_config:
                             self.node_detail_config = ui_node
@@ -511,10 +512,13 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
     @expose("/web/log/<cluster_name>/<namespace>/<workflow_name>/<pod_name>", methods=["GET", ])
     @expose("/web/log_node/<cluster_name>/<namespace>/<workflow_name>/<pod_name>", methods=["GET", ])
-    def log_node(self, cluster_name, namespace, workflow_name, pod_name):
-        log = self.get_minio_content(f'{workflow_name}/{pod_name}/main.log')
+    @expose("/web/log/<cluster_name>/<namespace>/<workflow_name>/<pod_name>/<file_name>", methods=["GET", ])
+    def log_node(self, cluster_name, namespace, workflow_name, pod_name,file_name='main.log'):
+        log = self.get_minio_content(f'{workflow_name}/{pod_name}/{file_name}')
         if '/web/log/' in request.path:
-            return Markup(log)
+            from wtforms.widgets.core import HTMLString, html_params
+
+            return Markup("<pre><code>%s</code></pre>"%log)
         return jsonify({
             "status": 0,
             "message": "",
@@ -525,48 +529,76 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         })
 
     # @pysnooper.snoop(watch_explode=())
-    def get_minio_content(self, key, decompress=False, download=False):
+    def get_minio_content(self, key, decompress=True, download=False):
+        if request.host=='127.0.0.1':
+            return
         content = ''
         from minio import Minio
         try:
-            minioClient = Minio(endpoint='minio.kubeflow:9000',  # minio.kubeflow:9000    '9.135.92.226:9000'
-                                access_key='minio',
-                                secret_key='minio123',
-                                secure=False
-                                )
-            # objects = minioClient.list_objects('mlpipeline', recursive=True)
-            # for obj in objects:
-            #     print(obj._object_name)
+            minioClient = Minio(
+                endpoint='minio.kubeflow:9000',  # minio.kubeflow:9000    '9.135.92.226:9944'
+                access_key='minio',
+                secret_key='minio123',
+                secure=False
+            )
             if download:
                 save_path = "/mlpipeline/" + key
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 minioClient.fget_object('mlpipeline', key, save_path)
-                response = make_response(
-                    send_from_directory(os.path.dirname(save_path), os.path.basename(save_path), as_attachment=True, conditional=True))
+                response = make_response(send_from_directory(os.path.dirname(save_path), os.path.basename(save_path), as_attachment=True,conditional=True))
                 return response
             response = None
             try:
                 response = minioClient.get_object('mlpipeline', key)
-                content = response.data.decode()
+                content = response.data
             except Exception as e:
+                content = str(e)
                 print(e)
+                return content
             finally:
                 if response:
                     response.close()
                     response.release_conn()
 
-            # data = minioClient.get_object('mlpipeline', key)
-            # from io import StringIO
-            # f = StringIO()
-            # for d in data.stream(32 * 1024):
-            #     f.write(d.decode("utf-8"))
-            # content = f.getvalue()
-
         except Exception as e:
             print(e)
+            return str(e)
+
         if decompress:
-            import zlib
-            content = zlib.decompress(content)
+            if '.zip' in key:
+                import zlib
+                content = zlib.decompress(content)
+            if '.tgz' in key:
+                path = 'minio/' + key
+                if os.path.exists(path):
+                    os.remove(path)
+
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                file = open(path,mode='wb')
+                file.write(content)
+                file.close()
+                import tarfile
+                # 打开tgz文件
+                with tarfile.open(path, 'r:gz') as tar:
+                    # 解压所有文件到指定目录
+                    tar.extractall(os.path.dirname(path))
+
+                files = os.listdir(os.path.dirname(path))
+                content = ''
+                for file in files:
+                    path = os.path.join(os.path.dirname(path),file)
+                    if os.path.isfile(path) and path[path.rindex('.'):] in ['.txt','.json','.log','.csv']:
+                        content = ''.join(open(os.path.join(os.path.dirname(path),file)).readlines())
+                        content += '\n'
+
+        # print(key[key.rindex('.'):])
+        if key[key.rindex('.'):] in ['.txt','.json','.log','.csv']:
+            if type(content)==bytes:
+                content = content.decode()
+
+            # 删除 ANSI 转义序列
+            ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+            content = ansi_escape.sub('', content)
         return content
 
     @expose("/web/node_detail/<cluster_name>/<namespace>/<workflow_name>/<node_name>", methods=["GET", ])
@@ -599,13 +631,14 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         host_url = "http://" + conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host)
 
-        online_pod_log_url=host_url+conf.get('K8S_DASHBOARD_CLUSTER') + f"#/log/{namespace}/{pod_name}/pod?namespace={namespace}&container=main"
-        offline_pod_log_url = f'/workflow_modelview/api/web/log/{cluster_name}/{namespace}/{workflow_name}/{pod_name}'
-        debug_online_url=host_url+conf.get('K8S_DASHBOARD_CLUSTER') + f"#/shell/{namespace}/{pod_name}/main?namespace={namespace}"
+        online_pod_log_url = "/k8s/web/log/%s/%s/%s/main" % (cluster_name, namespace, pod_name)
+        offline_pod_log_url = f'/workflow_modelview/api/web/log/{cluster_name}/{namespace}/{workflow_name}/{pod_name}/main.log'
+        offline_pod_metric_url = f'/workflow_modelview/api/web/log/{cluster_name}/{namespace}/{workflow_name}/{pod_name}/metric.tgz'
+        debug_online_url = "/k8s/web/debug/%s/%s/%s/main" % (cluster_name, namespace, pod_name)
         grafana_pod_url = host_url+conf.get('GRAFANA_TASK_PATH','/grafana/d/pod-info/pod-info?var-pod=')+pod_name
         labels = json.loads(workflow.get('labels', "{}"))
         pipeline_name = labels.get('pipeline-name', workflow_name)
-        bind_pod_url = host_url + f"/k8s/dashboard/cluster/#/search?namespace={namespace}&q={pipeline_name}"
+        bind_pod_url = f'/k8s/web/search/{cluster_name}/{namespace}/{pipeline_name}'
 
         echart_option = '''
 {
@@ -644,13 +677,15 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
     }
   ]
 }
-
-
         '''
-
-        # if node_detail_config['metric_key']:
-        #     content = self.get_minio_content(node_detail_config['metric_key'],decompress=True)
-        #     print(content)
+        metric_content = ''
+        try:
+            if node_detail_config['metric_key']:
+                metric_content = self.get_minio_content(node_detail_config['metric_key'],decompress=True)
+                # print(metric_content)
+                metric_content = metric_content
+        except Exception as e:
+            print(e)
 
         message = node_detail_config.get('message', '')
         node_type = node_detail_config.get('node_type', '')
@@ -730,7 +765,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 },
                 {
                     "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
-                    "text": "在线调试" + ("" if pod_status == 'Running' else '(未运行)'),
+                    "text": "在线调试" + ("" if pod_status == 'Running' else '(no)'),
                     "url": debug_online_url
                 },
                 {
@@ -764,6 +799,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 "bottomButton": []
             }
         ]
+
         tab3 = [
             {
                 "tabName": "在线日志",
@@ -804,7 +840,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                         "groupName": "相关容器",
                         "groupContent": {
                             "value": {
-                                "url": f"{host_url}/k8s/dashboard/cluster/#/search?namespace={namespace}&q={pod_name}",
+                                "url": host_url+conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/')+f"#/search?namespace={namespace}&q={pod_name}",
                                 "target": "div.kd-chrome-container.kd-bg-background",
                             } if pod_status else "pod未发现",
                             "type": 'iframe' if pod_status else "html"
@@ -906,10 +942,10 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             }
         )
 
-    @expose("/web/layout/<cluster_name>/<namespace>/<workflow_name>", methods=["GET",])
-    def web_layout(self,cluster_name,namespace,workflow_name):
-        layout_config, dag_config,node_detail_config,workflow = self.get_dag(cluster_name,namespace,workflow_name)
-        layout_config['title']=f"{cluster_name} {namespace} {workflow_name} {layout_config['start_time']} {layout_config['finish_time']}"
+    @expose("/web/layout/<cluster_name>/<namespace>/<workflow_name>", methods=["GET", ])
+    def web_layout(self, cluster_name, namespace, workflow_name):
+        layout_config, dag_config, node_detail_config, workflow = self.get_dag(cluster_name, namespace, workflow_name)
+        layout_config['title'] = f"{cluster_name} {namespace} {workflow_name} {layout_config['start_time']} {layout_config['finish_time']}"
         return jsonify(
             {
                 "status": 0,
@@ -917,7 +953,6 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 "result": layout_config
             }
         )
-
 
 class Workflow_ModelView(Workflow_ModelView_Base, MyappModelView, DeleteMixin):
     datamodel = SQLAInterface(Workflow)
@@ -991,4 +1026,3 @@ appbuilder.add_api(Workflow_ModelView_Api)
 #     crd_name = 'pytorchjob'
 #
 # appbuilder.add_api(Pytorchjob_ModelView_Api)
-

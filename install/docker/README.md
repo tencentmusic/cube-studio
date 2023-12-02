@@ -4,11 +4,7 @@
 ## deploy mysql
 
 ```
-linux
-docker run --network host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:5.7
-mac
-docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -d mysql:5.7
-
+docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:8.0.32
 ```
 进入mysql，创建kubeflow数据库
 ```
@@ -16,7 +12,7 @@ mysql> CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT
 
 # 然后给admin用户授权，以便其他容器能访问。
 mysql> use mysql;
-mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION; 
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; 
 mysql> flush privileges;
 ```
 
@@ -24,19 +20,19 @@ mysql> flush privileges;
 
 ```
 构建基础镜像（包含基础环境）
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base -f install/docker/Dockerfile-base .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01 -f install/docker/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.08.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.04.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.08.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.04.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.04.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.08.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.08.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -48,13 +44,21 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2023.
 
 #### 本地后端python代码开发
 
-需要安装下面的环境包, python 3.6.9
+需要安装下面的环境包, python 3.9.16
 
 ```bash
 pip3 install --upgrade setuptools pip 
-pip3 install -r requirements.txt -r requirements-dev.txt 
+pip3 install -r requirements.txt
+```
+或者使用conda
+```bash
+conda create -y -n cube-studio python=3.9
+source activate cube-studio
+conda config --append channels conda-forge
+conda install --file requirements.txt
 ```
 本地安装python包，避免本地打开代码时大量包缺失报错
+
 
 #### 本地后端代码调试
 
@@ -65,11 +69,6 @@ docker-compose.yaml文件在install/docker目录下，这里提供了mac和linux
 1) debug backend
 ```
 STAGE: 'dev'
-docker-compose -f docker-compose.yml  up
-```
-2) Production
-```
-STAGE: 'prod'
 docker-compose -f docker-compose.yml  up
 ```
 
@@ -83,14 +82,14 @@ docker-compose -f docker-compose.yml  up
 
 #### 前端代码目录
 
-- `/myapp/frontend` 主要前端项目文件
-- `/myapp/vision` 流程图（旧版）
-- `/myapp/visionPlus` 流程图（新版）
+- `myapp/frontend` 主要前端项目文件
+- `myapp/vision` 流程图（AI pipeline）
+- `myapp/visionPlus` 流程图（数据ETL pipeline）
 
 项目资源打包：
 ```
 开发环境要求：
-node: 14.15.0+
+node: 16.15.0+
 npm: 6.14.8+
 
 包管理（建议使用yarn）：
@@ -101,7 +100,7 @@ yarn: npm install yarn -g
 # 初始化安装可能会遇到依赖包的版本选择，直接回车默认即可
 cd myapp/vision && yarn && yarn build
 ```
-输出路径：`/myapp/static/appbuilder`
+输出路径：`myapp/static/appbuilder`
 #### 纯前端开发（本地）
 
 ##### 环境准备
@@ -111,9 +110,9 @@ cd myapp/vision && yarn && yarn build
 - https://github.com/nodejs/Release 这里可以找到14.x等往期版本
 
 
-以主要前端项目`/myapp/frontend`为例，到这里前端开发环境已经准备好了
+以主要前端项目`myapp/frontend`为例，到这里前端开发环境已经准备好了
 
-1. `cd /myapp/frontend` 进入目录
+1. `cd myapp/frontend` 进入目录
 2. `npm run start` 进入调试模式
 3. `npm run build` 打包编译静态资源
 #### 前端配置代理

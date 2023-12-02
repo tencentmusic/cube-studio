@@ -103,75 +103,75 @@ spec:
     app: volcano-admission
   sessionAffinity: None
 ---
-# Source: volcano/templates/admission.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: volcano-admission
-  name: volcano-admission
-  namespace: kubeflow
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: volcano-admission
-  template:
-    metadata:
-      labels:
-        app: volcano-admission
-    spec:
-      serviceAccount: volcano-admission
-      containers:
-        - args:
-            - --tls-cert-file=/admission.local.config/certificates/tls.crt
-            - --tls-private-key-file=/admission.local.config/certificates/tls.key
-            - --ca-cert-file=/admission.local.config/certificates/ca.crt
-            - --admission-conf=/admission.local.config/configmap/volcano-admission.conf
-            - --webhook-namespace=kubeflow
-            - --webhook-service-name=volcano-admission-service
-            - --logtostderr
-            - --port=8443
-            - -v=4
-            - 2>&1
-          image: volcanosh/vc-webhook-manager:v1.4.0
-          imagePullPolicy: IfNotPresent
-          name: admission
-          volumeMounts:
-            - mountPath: /admission.local.config/certificates
-              name: admission-certs
-              readOnly: true
-            - mountPath: /admission.local.config/configmap
-              name: admission-config
-      volumes:
-        - name: admission-certs
-          secret:
-            defaultMode: 420
-            secretName: volcano-admission-secret
-        - name: admission-config
-          configMap:
-            name: volcano-admission-configmap
+## Source: volcano/templates/admission.yaml
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  labels:
+#    app: volcano-admission
+#  name: volcano-admission
+#  namespace: kubeflow
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: volcano-admission
+#  template:
+#    metadata:
+#      labels:
+#        app: volcano-admission
+#    spec:
+#      serviceAccount: volcano-admission
+#      containers:
+#        - args:
+#            - --tls-cert-file=/admission.local.config/certificates/tls.crt
+#            - --tls-private-key-file=/admission.local.config/certificates/tls.key
+#            - --ca-cert-file=/admission.local.config/certificates/ca.crt
+#            - --admission-conf=/admission.local.config/configmap/volcano-admission.conf
+#            - --webhook-namespace=kubeflow
+#            - --webhook-service-name=volcano-admission-service
+#            - --logtostderr
+#            - --port=8443
+#            - -v=4
+#            - 2>&1
+#          image: volcanosh/vc-webhook-manager:v1.7.0
+#          imagePullPolicy: IfNotPresent
+#          name: admission
+#          volumeMounts:
+#            - mountPath: /admission.local.config/certificates
+#              name: admission-certs
+#              readOnly: true
+#            - mountPath: /admission.local.config/configmap
+#              name: admission-config
+#      volumes:
+#        - name: admission-certs
+#          secret:
+#            defaultMode: 420
+#            secretName: volcano-admission-secret
+#        - name: admission-config
+#          configMap:
+#            name: volcano-admission-configmap
 ---
-# Source: volcano/templates/admission.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: volcano-admission-init
-  namespace: kubeflow
-  labels:
-    app: volcano-admission-init
-spec:
-  backoffLimit: 3
-  template:
-    spec:
-      serviceAccountName: volcano-admission
-      restartPolicy: Never
-      containers:
-        - name: main
-          image: volcanosh/vc-webhook-manager:v1.4.0
-          imagePullPolicy: IfNotPresent
-          command: ["./gen-admission-secret.sh", "--service", "volcano-admission-service", "--namespace",
-                    "kubeflow", "--secret", "volcano-admission-secret"]
+## Source: volcano/templates/admission.yaml
+#apiVersion: batch/v1
+#kind: Job
+#metadata:
+#  name: volcano-admission-init
+#  namespace: kubeflow
+#  labels:
+#    app: volcano-admission-init
+#spec:
+#  backoffLimit: 3
+#  template:
+#    spec:
+#      serviceAccountName: volcano-admission
+#      restartPolicy: Never
+#      containers:
+#        - name: main
+#          image: volcanosh/vc-webhook-manager:v1.7.0
+#          imagePullPolicy: IfNotPresent
+#          command: ["./gen-admission-secret.sh", "--service", "volcano-admission-service", "--namespace",
+#                    "kubeflow", "--secret", "volcano-admission-secret"]
 ---
 # Source: volcano/templates/batch_v1alpha1_job.yaml
 apiVersion: apiextensions.k8s.io/v1
@@ -7506,12 +7506,12 @@ spec:
       serviceAccount: volcano-controllers
       containers:
           - name: volcano-controllers
-            image: volcanosh/vc-controller-manager:v1.4.0
+            image: volcanosh/vc-controller-manager:v1.7.0
             args:
               - --logtostderr
               - -v=4
               - 2>&1
-            imagePullPolicy: "IfNotPresent"
+            imagePullPolicy: IfNotPresent
 ---
 # Source: volcano/templates/scheduler.yaml
 apiVersion: v1
@@ -7602,6 +7602,9 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "create", "delete", "update"]
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
 ---
 # Source: volcano/templates/scheduler.yaml
 kind: ClusterRoleBinding
@@ -7657,13 +7660,13 @@ spec:
       serviceAccount: volcano-scheduler
       containers:
         - name: volcano-scheduler
-          image: volcanosh/vc-scheduler:v1.4.0
+          image: volcanosh/vc-scheduler:v1.7.0
           args:
             - --logtostderr
             - --scheduler-conf=/volcano.scheduler/volcano-scheduler.conf
             - -v=3
             - 2>&1
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: scheduler-config
               mountPath: /volcano.scheduler

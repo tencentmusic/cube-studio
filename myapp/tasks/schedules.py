@@ -519,6 +519,9 @@ def upload_timerun(pipeline_id,stop_time):
                                 workflow = dbsession.query(Workflow).filter(Workflow.labels.contains(run_id)).first()
                                 workflow.status='Deleted'
                                 dbsession.commit()
+                                # 也更新timeruns的状态
+                                pass_run.status = 'Deleted'
+                                dbsession.commit()
 
                     # 如果有新的还没运行的，就运行
                     for timerun in timeruns:
@@ -1176,6 +1179,36 @@ def cp_cubestudio():
         core.run_shell(f'cp -rf /cube-studio {des_path}')
     except Exception as e:
         print(e)
+
+import requests
+
+@celery_app.task(name="task.check_pod_terminating",bind=True)
+def check_pod_terminating(task):
+    headers={
+        'Content-Type': "application/json",
+        "Authorization":conf.get('ADMIN_USER').split(',')[0]
+    }
+    res = requests.get('http://kubeflow-dashboard.infra/k8s/read/pod/terminating',headers=headers)
+    if res.status_code==200:
+        terminating_pods = res.json()
+        print(terminating_pods)
+        for cluster_name in terminating_pods:
+            for pod_name in terminating_pods[cluster_name]:
+                pod = terminating_pods[cluster_name][pod_name]
+                host = pod['host']
+
+                kill_pod_url = f'/k8s/delete/pod/{cluster_name}/service/{pod_name}'
+                # try:
+                #     requests.get(kill_pod_url,timeout=30,headers=headers)
+                # except Exception as e:
+                #     print(e)
+
+                message = f'集群{cluster_name},{host} {pod_name} kill失败， 可先选择强制删除 {kill_pod_url}'
+                username = pod['username']
+                push_message(conf.get('ADMIN_USER').split(','),message)
+    else:
+        push_message(conf.get('ADMIN_USER').split(','), '查询终止态pod失败')
+
 
 if __name__=="__main__":
     pass

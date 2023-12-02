@@ -12,7 +12,7 @@
 
 关于镜像的版本，这与rancher和k8s的版本有关。你可以在这里选择一个能够部署k8s 1.18的rancher版本：https://github.com/rancher/rancher/releases
 
-比如我这里使用的是rancher_version=v2.5.2，即2.5.2版本，那么这个版本依赖的镜像，可以在https://github.com/rancher/rancher/releases/tag/$rancher_version  中找到其所依赖的镜像txt文件，也就是 https://github.com/rancher/rancher/releases/download/$rancher_version/rancher-images.txt
+比如我这里使用的是rancher_version=v2.6.2，即2.6.2版本，那么这个版本依赖的镜像，可以在https://github.com/rancher/rancher/releases/tag/$rancher_version  中找到其所依赖的镜像txt文件，也就是 https://github.com/rancher/rancher/releases/download/$rancher_version/rancher-images.txt
 
 之后，将依赖的镜像在开发网中拉取下来，然后重新tag成内网仓库镜像，例如docker.oa.com域名下的镜像，推送到docker.oa.com上，接着需要在idc中的每个机器上拉取下来，再tag成原始镜像名。
 参考命令：
@@ -46,24 +46,26 @@ reset_docker.sh 是为了在机器从rancher集群中踢出以后，把rancher�
 
 # 部署rancher server
 
-# 部署k8s集群
-
 单节点部署rancher server  
 
 ```bash
 # 清理历史部署痕迹
 reset_docker.sh
 
-# 需要拉取镜像(这里以2.5.2版本为例)
+# 需要拉取镜像(这里以2.6.2版本为例)
+wget https://github.com/rancher/rancher/releases/download/v2.6.2/rancher-images.txt
+
 python3 all_image.py > pull_rancher_images.sh
 sh pull_rancher_images.sh
 
-export RANCHER_CONTAINER_TAG=v2.5.2
+export RANCHER_CONTAINER_TAG=v2.6.2
 sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
 
 ```
 
-执行完毕后，进去rancher server的https://xx.xx.xx.xx/ 的web界面，这里的xx取决于你服务器的IP地址，之后选择添加集群->选择自定义集群->填写集群名称
+# 部署k8s集群
+
+部署完rancher server后，进去rancher server的https://xx.xx.xx.xx/ 的web界面，这里的xx取决于你服务器的IP地址，之后选择添加集群->选择自定义集群->填写集群名称
 
 然后选择kubernetes的版本（注意：这个版本在第一次打开选择页面时可能刷新不出来，需要等待1~2分钟再刷新才能显示）
 
@@ -135,7 +137,6 @@ services部分的示例（注意缩进对齐）
 
 部署完成后，集群的状态会变为"Active"，之后就可以继续其他的操作了，比如执行sh start.sh xx.xx.xx.xx等等
 
-
 # rancher server 高可用
   
  rancher server 有高可用部署方案，可以参考官网https://rancher.com/docs/rancher/v2.x/en/installation/how-ha-works/
@@ -147,13 +148,15 @@ services部分的示例（注意缩进对齐）
 因此下面提供一种方案，能使在单容器模式下，机器重启后，rancher server仍可用。
 ```bash
 export RANCHER_CONTAINER_NAME=myrancher
-export RANCHER_CONTAINER_TAG=v2.5.2
+export RANCHER_CONTAINER_TAG=v2.6.2
 
 docker stop $RANCHER_CONTAINER_NAME
 docker create --volumes-from $RANCHER_CONTAINER_NAME --name rancher-data rancher/rancher:$RANCHER_CONTAINER_TAG
 # 先备份一遍
 docker run --volumes-from rancher-data --privileged -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup.tar.gz /var/lib/rancher
 docker run --name myrancher-new -d --privileged --volumes-from rancher-data --restart=unless-stopped -p 443:443 rancher/rancher:$RANCHER_CONTAINER_TAG
+# 等到上面运行成功
+docker rm $RANCHER_CONTAINER_NAME
 ```
 
 然后就可以把原有容器删除掉了。
@@ -177,8 +180,6 @@ docker logs --tail 3 $RANCHER_CONTAINER_NAME
 docker stop $RANCHER_CONTAINER_NAME 
 docker start $RANCHER_CONTAINER_NAME
 ```
-
-
 
 # 部署完成后需要部分修正
 

@@ -32,6 +32,20 @@
             "condition": "",
             "sub_args": {}
         },
+        "--sub_model_name": {
+            "type": "str",
+            "item_type": "str",
+            "label": "子模型名(a-z0-9-字符组成，最长54个字符)",
+            "require": 0,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "子模型名，对于包含多个子模型的用户填写",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
         "--model_version": {
             "type": "str",
             "item_type": "str",

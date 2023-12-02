@@ -63,7 +63,22 @@ def get_volume_mounts(volume_mount,username):
                             "subPath":username
                         }
                     )
-
+                # 外部挂载盘不挂载子目录
+                if "(storage)" in volume:
+                    pvc_name = volume.replace('(storage)', '').replace(' ', '')
+                    volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
+                    k8s_volumes.append({
+                        "name": volumn_name,
+                        "persistentVolumeClaim": {
+                            "claimName": pvc_name
+                        }
+                    })
+                    k8s_volume_mounts.append(
+                        {
+                            "name": volumn_name,
+                            "mountPath": mount,
+                        }
+                    )
                 if "(hostpath)" in volume:
                     hostpath_name = volume.replace('(hostpath)', '').replace(' ', '')
                     temps = re.split('_|\.|/', hostpath_name)
@@ -191,11 +206,11 @@ def create_header_deploy(name):
                 "spec": {
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
-                    # "imagePullSecrets": [
-                    #     {
-                    #         "name": "hubsecret"
-                    #     }
-                    # ],
+                    "imagePullSecrets": [
+                        {
+                            "name": "hubsecret"
+                        }
+                    ],
                     "affinity": {
                         "nodeAffinity": {
                             "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -357,11 +372,11 @@ def create_worker_deploy(header_name,worker_name):
                             ]
                         }
                     },
-                    # "imagePullSecrets": [
-                    #     {
-                    #         "name": "hubsecret"
-                    #     }
-                    # ],
+                    "imagePullSecrets": [
+                        {
+                            "name": "hubsecret"
+                        }
+                    ],
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
                     "containers": [

@@ -14,6 +14,7 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   csi:
     driver: csi.juicefs.com
     volumeHandle: automl-kubeflow-user-workspace
@@ -40,6 +41,8 @@ spec:
   resources:
     requests:
       storage: 500Gi
-  selector:
-    matchLabels:
-      automl-pvname: automl-kubeflow-user-workspace
+#  selector:
+#    matchLabels:
+#      automl-pvname: automl-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: automl-kubeflow-user-workspace

@@ -5,10 +5,11 @@ import json
 
 from flask import current_app, g, request
 
+
 # @pysnooper.snoop(depth=2)
 class AbstractEventLogger(ABC):
     @abstractmethod
-    def log(self, user_id, action,duration_ms, *args, **kwargs):
+    def log(self, user_id, action, duration_ms, *args, **kwargs):
         pass
 
     def log_this(self, f):
@@ -46,16 +47,17 @@ class AbstractEventLogger(ABC):
     def stats_logger(self):
         return current_app.config.get("STATS_LOGGER")
 
+
 # @pysnooper.snoop(depth=2)
 class DBEventLogger(AbstractEventLogger):
 
-    def log(self, user_id, action,duration_ms, *args, **kwargs):
+    def log(self, user_id, action, duration_ms, *args, **kwargs):
         from myapp.models.log import Log
         referrer = request.referrer[:1000] if request.referrer else None
 
         log = Log(
             action=action,
-            json=json.dumps(kwargs,indent=4,ensure_ascii=False),
+            json=json.dumps(kwargs, indent=4, ensure_ascii=False),
             duration_ms=duration_ms,
             referrer=referrer,
             user_id=user_id,

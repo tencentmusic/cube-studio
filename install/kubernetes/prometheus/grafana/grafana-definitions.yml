@@ -796,7 +796,7 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "sum(max(node_filesystem_size{fstype=\u007e\"ext[24]\"} - node_filesystem_avail{fstype=\u007e\"ext[24]\"}) by (device,pod,namespace)) by (pod,namespace) / scalar(sum(max(node_filesystem_size{fstype=\u007e\"ext[24]\"}) by (device,pod,namespace))) * on (namespace, pod) group_left(node) node_namespace_pod:kube_pod_info:\n",
+                                  "expr": "sum(max(node_filesystem_size_bytes{fstype=\u007e\"ext[24]\"} - node_filesystem_avail_bytes{fstype=\u007e\"ext[24]\"}) by (device,pod,namespace)) by (pod,namespace) / scalar(sum(max(node_filesystem_size_bytes{fstype=\u007e\"ext[24]\"}) by (device,pod,namespace))) * on (namespace, pod) group_left(node) node_namespace_pod:kube_pod_info:\n",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "{{node}}",
@@ -1712,7 +1712,7 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "1 - sum(max by (device, node) (node_filesystem_avail{fstype=\u007e\"ext[24]\"})) / sum(max by (device, node) (node_filesystem_size{fstype=\u007e\"ext[24]\"}))",
+                                  "expr": "1 - sum(max by (device, node) (node_filesystem_avail_bytes{fstype=\u007e\"ext[24]\"})) / sum(max by (device, node) (node_filesystem_size_bytes{fstype=\u007e\"ext[24]\"}))",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "Disk",
@@ -2088,7 +2088,7 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "sum(kube_pod_container_resource_requests_memory_bytes) / sum(node_memory_MemTotal)",
+                                  "expr": "sum(kube_pod_container_resource_requests_memory_bytes) / sum(node_memory_MemTotal_bytes)",
                                   "format": "time_series",
                                   "instant": true,
                                   "intervalFactor": 2,
@@ -2172,7 +2172,7 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "sum(kube_pod_container_resource_limits_memory_bytes) / sum(node_memory_MemTotal)",
+                                  "expr": "sum(kube_pod_container_resource_limits_memory_bytes) / sum(node_memory_MemTotal_bytes)",
                                   "format": "time_series",
                                   "instant": true,
                                   "intervalFactor": 2,
@@ -4762,7 +4762,7 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "100 - (avg by (cpu) (irate(node_cpu{job=\"node-exporter\", mode=\"idle\", instance=\"$instance\"}[5m])) * 100)\n",
+                                  "expr": "100 - (avg by (cpu) (irate(node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\", instance=\"$instance\"}[5m])) * 100)\n",
                                   "format": "time_series",
                                   "intervalFactor": 10,
                                   "legendFormat": "{{cpu}}",
@@ -4972,28 +4972,28 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "node_memory_MemTotal{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_MemFree{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Buffers{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Cached{job=\"node-exporter\", instance=\"$instance\"}\n",
+                                  "expr": "node_memory_MemTotal_bytes{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_MemFree_bytes{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Buffers_bytes{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Cached_bytes{job=\"node-exporter\", instance=\"$instance\"}\n",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "memory used",
                                   "refId": "A"
                               },
                               {
-                                  "expr": "node_memory_Buffers{job=\"node-exporter\", instance=\"$instance\"}",
+                                  "expr": "node_memory_Buffers_bytes{job=\"node-exporter\", instance=\"$instance\"}",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "memory buffers",
                                   "refId": "B"
                               },
                               {
-                                  "expr": "node_memory_Cached{job=\"node-exporter\", instance=\"$instance\"}",
+                                  "expr": "node_memory_Cached_bytes{job=\"node-exporter\", instance=\"$instance\"}",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "memory cached",
                                   "refId": "C"
                               },
                               {
-                                  "expr": "node_memory_MemFree{job=\"node-exporter\", instance=\"$instance\"}",
+                                  "expr": "node_memory_MemFree_bytes{job=\"node-exporter\", instance=\"$instance\"}",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "memory free",
@@ -5101,7 +5101,7 @@ items:
                           "tableColumn": "",
                           "targets": [
                               {
-                                  "expr": "(\n  node_memory_MemTotal{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_MemFree{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Buffers{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Cached{job=\"node-exporter\", instance=\"$instance\"}\n) * 100\n  /\nnode_memory_MemTotal{job=\"node-exporter\", instance=\"$instance\"}\n",
+                                  "expr": "(\n  node_memory_MemTotal_bytes{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_MemFree_bytes{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Buffers_bytes{job=\"node-exporter\", instance=\"$instance\"}\n- node_memory_Cached_bytes{job=\"node-exporter\", instance=\"$instance\"}\n) * 100\n  /\nnode_memory_MemTotal_bytes{job=\"node-exporter\", instance=\"$instance\"}\n",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": ""
@@ -5199,7 +5199,7 @@ items:
                                   "refId": "B"
                               },
                               {
-                                  "expr": "sum by (instance) (rate(node_disk_io_time_ms{job=\"node-exporter\",  instance=\"$instance\"}[2m]))",
+                                  "expr": "sum by (instance) (rate(node_disk_io_time_seconds_total{job=\"node-exporter\",  instance=\"$instance\"}[2m]))",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "io time",
@@ -5307,7 +5307,7 @@ items:
                           "tableColumn": "",
                           "targets": [
                               {
-                                  "expr": "(\n  sum(node_filesystem_size{job=\"node-exporter\", device!=\"rootfs\", instance=\"$instance\"})\n- sum(node_filesystem_avail{job=\"node-exporter\", device!=\"rootfs\", instance=\"$instance\"})\n) * 100\n  /\nsum(node_filesystem_size{job=\"node-exporter\", device!=\"rootfs\", instance=\"$instance\"})\n",
+                                  "expr": "(\n  sum(node_filesystem_size_bytes{job=\"node-exporter\", device!=\"rootfs\", instance=\"$instance\"})\n- sum(node_filesystem_avail_bytes{job=\"node-exporter\", device!=\"rootfs\", instance=\"$instance\"})\n) * 100\n  /\nsum(node_filesystem_size_bytes{job=\"node-exporter\", device!=\"rootfs\", instance=\"$instance\"})\n",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": ""
@@ -5384,7 +5384,7 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "rate(node_network_receive_bytes{job=\"node-exporter\", instance=\"$instance\", device!\u007e\"lo\"}[5m])",
+                                  "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\", instance=\"$instance\", device!\u007e\"lo\"}[5m])",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "{{device}}",
@@ -5475,7 +5475,7 @@ items:
                           "steppedLine": false,
                           "targets": [
                               {
-                                  "expr": "rate(node_network_transmit_bytes{job=\"node-exporter\", instance=\"$instance\", device!\u007e\"lo\"}[5m])",
+                                  "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\", instance=\"$instance\", device!\u007e\"lo\"}[5m])",
                                   "format": "time_series",
                                   "intervalFactor": 2,
                                   "legendFormat": "{{device}}",
@@ -5569,7 +5569,7 @@ items:
                       "options": [
 
                       ],
-                      "query": "label_values(node_boot_time{job=\"node-exporter\"}, instance)",
+                      "query": "label_values(node_boot_time_seconds{job=\"node-exporter\"}, instance)",
                       "refresh": 2,
                       "regex": "",
                       "sort": 0,

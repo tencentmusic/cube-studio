@@ -1,5 +1,5 @@
 # register_model 模板
-镜像：ccr.ccs.tencentyun.com/cube-studio/model_register:20221001
+镜像：ccr.ccs.tencentyun.com/cube-studio/model_register:20230501
 启动参数：
 ```bash
 {
@@ -46,6 +46,20 @@
             "condition": "",
             "sub_args": {}
         },
+        "--model_metric": {
+            "type": "str",
+            "item_type": "str",
+            "label": "模型指标",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "模型指标",
+            "editable": 1,
+            "condition": "",
+            "sub_args": {}
+        },
         "--model_path": {
             "type": "str",
             "item_type": "str",
@@ -80,11 +94,13 @@
             "label": "模型框架",
             "require": 1,
             "choice": [
+                "lr",
                 "xgb",
                 "tf",
                 "pytorch",
                 "onnx",
-                "tensorrt"
+                "tensorrt",
+                "aihub"
             ],
             "range": "",
             "default": "tf",
@@ -100,10 +116,12 @@
             "label": "推理框架",
             "require": 1,
             "choice": [
+                "sklearn",
                 "tfserving",
                 "torch-server",
                 "onnxruntime",
-                "triton-server"
+                "triton-server",
+                "aihub"
             ],
             "range": "",
             "default": "tfserving",

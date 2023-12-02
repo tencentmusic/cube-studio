@@ -1,0 +1,70 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "mysqlreader",
+                    "parameter": {
+                        "username": "root",
+                        "password": "admin",
+                        "column": [
+                            "age",
+                            "duration",
+                            "campaign",
+                            "pdays",
+                            "previous",
+                            "emp_var_rate",
+                            "cons_price_idx",
+                            "cons_conf_idx",
+                            "euribor3m",
+                            "nr_employed",
+                            "y"
+                        ],
+                        "connection": [
+                            {
+                                "table": [
+                                    "test_data"
+                                ],
+                                "jdbcUrl": [
+     "jdbc:mysql://xx.xx.xx.xx:xx/xx"
+                                ]
+                            }
+                        ]
+                    }
+                },
+               "writer": {
+                    "name": "txtfilewriter",
+                    "parameter": {
+                        "path": "/mnt/admin/pipeline/",
+                        "fileName": "test_data.csv",
+                        "writeMode": "truncate",
+                        "fileFormat":"csv",
+                        "header": [
+                            "age",
+                            "duration",
+                            "campaign",
+                            "pdays",
+                            "previous",
+                            "emp_var_rate",
+                            "cons_price_idx",
+                            "cons_conf_idx",
+                            "euribor3m",
+                            "nr_employed",
+                            "y"
+                        ],
+                        "dateFormat": "yyyy-MM-dd"
+                    }
+                }
+            }
+        ]
+    }
+}

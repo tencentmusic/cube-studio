@@ -64,6 +64,20 @@
 
 ### ubuntu
 ```
+
+cuda11.8.0-cudnn8
+- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8
+	
+python3.7
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.7
+	
+python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.8
+
+python3.9
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9
+ 
+ 
 cuda11.0.3-cudnn8
 - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8
 	

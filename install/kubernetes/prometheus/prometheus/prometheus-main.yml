@@ -6,29 +6,31 @@ metadata:
   name: k8s
   namespace: monitoring
 spec:
-  alerting:
-    alertmanagers:
-    - name: alertmanager-main
-      namespace: monitoring
-      port: web
-  image: quay.io/prometheus/prometheus:v2.27.1
+#  alerting:
+#    alertmanagers:
+#    - name: alertmanager-main
+#      namespace: monitoring
+#      port: web
+  image: prom/prometheus:v2.27.1 # quay.io/prometheus/prometheus:v2.27.1
   replicas: 1
   retention: 3d
   resources:
     requests:
       memory: 400Mi
-#  storage:
-#    volumeClaimTemplate:
-#      spec:
-#        accessModes:
-#        - ReadWriteOnce
-#        resources:
-#          requests:
-#            storage: 10Gi
-#        selector:
-#          matchLabels:
-#            monitoring-pvname: monitoring-prometheus-pv
-#      status: {}
+  nodeSelector:
+    monitoring: 'true'
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 10Gi
+        selector:
+          matchLabels:
+            monitoring-pvname: monitoring-prometheus-pv
+      status: {}
   ruleSelector:
     matchLabels:
       prometheus: k8s

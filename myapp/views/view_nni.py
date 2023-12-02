@@ -73,9 +73,9 @@ class NNI_ModelView_Base():
     show_columns = ['created_by','changed_by','created_on','changed_on','job_type','name','namespace','describe',
                     'parallel_trial_count','max_trial_count','objective_type',
                     'objective_goal','objective_metric_name','objective_additional_metric_names','algorithm_name',
-                    'algorithm_setting','parameters_html','trial_spec_html',
+                    'algorithm_setting','parameters','trial_spec',
                     'working_dir','volume_mount','node_selector','image_pull_policy','resource_memory','resource_cpu','resource_gpu',
-                    'experiment_html','alert_status']
+                    'experiment','alert_status']
 
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -277,7 +277,7 @@ class NNI_ModelView_Base():
 
         self.edit_form_extra_fields['job_worker_image'] = StringField(
             _(self.datamodel.obj.lab('job_worker_image')),
-            default=json.loads(nni.job_json).get('job_worker_image',conf.get('NNI_JOB_DEFAULT_IMAGE','')) if nni and nni.job_json else conf.get('NNI_JOB_DEFAULT_IMAGE',''),
+            default=conf.get('NNI_IMAGES',''),
             description='工作节点镜像',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
@@ -374,7 +374,7 @@ class NNI_ModelView_Base():
             resource_gpu='0',
             image_pull_policy=conf.get('IMAGE_PULL_POLICY','Always'),
             image_pull_secrets=image_secrets,
-            image=conf.get('NNI_IMAGES',json.loads(nni.job_json).get('job_worker_image')) ,
+            image=json.loads(nni.job_json).get('job_worker_image', conf.get('NNI_IMAGES', '')),
             hostAliases=conf.get('HOSTALIASES',''),
             env=None,
             privileged=False,

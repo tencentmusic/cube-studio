@@ -71,7 +71,7 @@ def deploy(**kwargs):
             'framework': kwargs['framework'],
             'run_id': KFJ_RUN_ID,
             'run_time': datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S'),
-            'metrics': '',
+            'metrics': kwargs['model_metric'],
             'md5': '',
             'api_type': kwargs['inference_framework'],
             'pipeline_id': KFJ_PIPELINE_ID
@@ -116,11 +116,10 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("deploy service launcher")
     arg_parser.add_argument('--project_name', type=str, help="所属项目组", default='public')
     arg_parser.add_argument('--model_name', type=str, help="模型名", default='demo')
-    arg_parser.add_argument('--model_version', type=str, help="模型版本号",
-                            default=datetime.datetime.now().strftime('v%Y.%m.%d.1'))
+    arg_parser.add_argument('--model_version', type=str, help="模型版本号", default=datetime.datetime.now().strftime('v%Y.%m.%d.1'))
     arg_parser.add_argument('--model_path', type=str, help="模型地址", default='')
+    arg_parser.add_argument('--model_metric', type=str, help="模型指标", default='')
     arg_parser.add_argument('--describe', type=str, help="模型描述", default='xx模型')
-
     arg_parser.add_argument('--framework', type=str, help="算法框架", default='tf')
     arg_parser.add_argument('--inference_framework', type=str, help="推理框架", default='tfserving')
 

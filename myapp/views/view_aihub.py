@@ -37,25 +37,25 @@ class Aihub_Filter(MyappFilter):
         # user_roles = [role.name.lower() for role in list(get_user_roles())]
         # if "admin" in user_roles:
         #     return query.filter(Project.type == value).order_by(Project.id.desc())
-        return query.filter(self.model.field==value)
+        return query.filter(self.model.field == value)
 
 
 class Aihub_base():
-    label_title='模型市场'
+    label_title = '模型市场'
     datamodel = SQLAInterface(Aihub)
     base_permissions = ['can_show','can_list']
     base_order = ("hot", "desc")
     order_columns = ['id']
-    search_columns=['describe','label','name','scenes']
+    search_columns = ['describe', 'label', 'name', 'scenes']
     list_columns = ['card']
-    page_size=100
+    page_size = 100
 
-    spec_label_columns={
-        "name":"英文名",
+    spec_label_columns = {
+        "name": "英文名",
         "field": "领域",
         "label": "中文名",
-        "describe":"描述",
-        "scenes":"场景",
+        "describe": "描述",
+        "scenes": "场景",
         "card": "信息"
     }
 
@@ -65,7 +65,7 @@ class Aihub_base():
             description='AI领域',
             widget=Select2Widget(),
             default='',
-            choices=[['机器视觉','机器视觉'], ['听觉','听觉'],['自然语言', '自然语言'],['强化学习', '强化学习'],['图论', '图论'], ['通用','通用']]
+            choices=[['机器视觉', '机器视觉'], ['听觉', '听觉'], ['自然语言', '自然语言'], ['多模态', '多模态'], ['大模型', '大模型']]
         ),
     }
 
@@ -74,75 +74,29 @@ class Aihub_base():
         flash('AIHub内容使用，请使用<a target="_blank" href="https://github.com/tencentmusic/cube-studio/blob/master/README_CN.md">企业版</a>',category='success')
         return items
 
-# @pysnooper.snoop()
-def aihub_demo():
-    # 根目录
-    if not hasattr(conf, 'all_model') or not conf.all_model:
-        from myapp import db
-        from myapp.models.model_aihub import Aihub
-        conf.all_model = db.session.query(Aihub).all()
 
-    try:
-        from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s()
-        pods = k8s_client.get_pods(namespace='aihub')
-        all_model = {}
-        for model in conf.all_model:
-            for pod in pods:
-                if pod['status'] == 'Running' and model.name in pod['name'] and model.name not in all_model:
-                    containerStatuses = pod['status_more'].get('container_statuses', [])
-                    if len(containerStatuses) > 0:
-                        containerStatuse = containerStatuses[0]
-                        containerStatuse = containerStatuse.get("ready", False)
-                        if containerStatuse:
-                            all_model[model.name] = model
-        all_model = list(all_model.values())
-    except Exception as e:
-        print(e)
-        return
-    if not all_model:
-        return None
-    rec_model = random.choice(all_model)
-
-    # flash(rec_html,'info')
-    rec_html = Markup(f'<iframe class="aiapp-content" src= "{"/aihub/%s" % rec_model.name}" ></iframe>')
-
-    data = {
-        'content': rec_html,
-        'delay': 30000,
-        'hit': True,
-        'target': conf.get('MODEL_URLS', {}).get('model_market_visual', ''),
-        'title': 'AIHub应用推荐',
-        'style': {
-            'height': '700px'
-        },
-        'type': 'html',
-    }
-    # flash('未能正常获取弹窗信息', 'warning')
-    return data
-
-
-class Aihub_visual_Api(Aihub_base,MyappModelRestApi):
+class Aihub_visual_Api(Aihub_base, MyappModelRestApi):
     route_base = '/model_market/visual/api'
     base_filters = [["id", Aihub_Filter, '机器视觉']]
+
     # @pysnooper.snoop()
-    def add_more_info(self,response,**kwargs):
+    def add_more_info(self, response, **kwargs):
         response['list_ui_type'] = 'card'
         response['list_ui_args'] = {
             "card_width": '23%',
             "card_heigh": '250px'
         }
-    alert_config={
-        conf.get('MODEL_URLS',{}).get('model_market_visual',''):aihub_demo
-    }
+
+
 appbuilder.add_api(Aihub_visual_Api)
 
 
-class Aihub_voice_Api(Aihub_base,MyappModelRestApi):
+class Aihub_voice_Api(Aihub_base, MyappModelRestApi):
     route_base = '/model_market/voice/api'
     base_filters = [["id", Aihub_Filter, '听觉']]
+
     # @pysnooper.snoop()
-    def add_more_info(self,response,**kwargs):
+    def add_more_info(self, response, **kwargs):
         response['list_ui_type'] = 'card'
         response['list_ui_args'] = {
             "card_width": '23%',
@@ -152,11 +106,12 @@ class Aihub_voice_Api(Aihub_base,MyappModelRestApi):
 appbuilder.add_api(Aihub_voice_Api)
 
 
-class Aihub_language_Api(Aihub_base,MyappModelRestApi):
+class Aihub_language_Api(Aihub_base, MyappModelRestApi):
     route_base = '/model_market/language/api'
     base_filters = [["id", Aihub_Filter, '自然语言']]
+
     # @pysnooper.snoop()
-    def add_more_info(self,response,**kwargs):
+    def add_more_info(self, response, **kwargs):
         response['list_ui_type'] = 'card'
         response['list_ui_args'] = {
             "card_width": '23%',
@@ -179,11 +134,13 @@ class Aihub_multimodal_Api(Aihub_base,MyappModelRestApi):
 
 appbuilder.add_api(Aihub_multimodal_Api)
 
-class Aihub_graph_Api(Aihub_base,MyappModelRestApi):
+
+class Aihub_graph_Api(Aihub_base, MyappModelRestApi):
     route_base = '/model_market/graph/api'
     base_filters = [["id", Aihub_Filter, '图论']]
+
     # @pysnooper.snoop()
-    def add_more_info(self,response,**kwargs):
+    def add_more_info(self, response, **kwargs):
         response['list_ui_type'] = 'card'
         response['list_ui_args'] = {
             "card_width": '23%',
@@ -192,11 +149,13 @@ class Aihub_graph_Api(Aihub_base,MyappModelRestApi):
 
 appbuilder.add_api(Aihub_graph_Api)
 
-class Aihub_common_Api(Aihub_base,MyappModelRestApi):
-    route_base = '/model_market/common/api'
-    base_filters = [["id", Aihub_Filter, '通用']]
+
+class Aihub_common_Api(Aihub_base, MyappModelRestApi):
+    route_base = '/model_market/aigc/api'
+    base_filters = [["id", Aihub_Filter, '大模型']]
+
     # @pysnooper.snoop()
-    def add_more_info(self,response,**kwargs):
+    def add_more_info(self, response, **kwargs):
         response['list_ui_type'] = 'card'
         response['list_ui_args'] = {
             "card_width": '23%',
@@ -206,10 +165,8 @@ class Aihub_common_Api(Aihub_base,MyappModelRestApi):
 appbuilder.add_api(Aihub_common_Api)
 
 
-class Aihub_Api(Aihub_base,MyappModelRestApi):
+class Aihub_Api(Aihub_base, MyappModelRestApi):
     route_base = '/model_market/all/api'
 
+
 appbuilder.add_api(Aihub_Api)
-
-
-

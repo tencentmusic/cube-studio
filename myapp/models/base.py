@@ -87,7 +87,7 @@ class MyappModelBase():
         "consecutive_build":"连续构建",
         "need_gpu":"需要gpu",
         "last_image":"最新镜像",
-        "expired_limit":"有效实例数目",
+        "expired_limit":"保留实例数目",
         "canary":"分流",
         "shadow": "流量复制",
         "log": "日志",

@@ -6,3 +6,4 @@ resources:
   - kubeflow.org_pytorchjobs.yaml
   - kubeflow.org_xgboostjobs.yaml
   - kubeflow.org_mpijobs.yaml
+  - kubeflow.org_paddlejobs.yaml

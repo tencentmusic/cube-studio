@@ -1,28 +1,20 @@
-# FROM ubuntu:18.04
-FROM horovod/horovod:nightly
+FROM python:3.9
 
-USER root
-RUN apt update && apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip
-RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
-ENV LANG zh_CN.UTF-8
-ENV LC_ALL zh_CN.UTF-8
-ENV LANGUAGE zh_CN.UTF-8
-# 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-    echo "alias la='ls -A'" >> /root/.bashrc && \
-    echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+ENV TZ Asia/Shanghai
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN pip install pysnooper dill requests kubernetes==18.20.0
-ENV TZ 'Asia/Shanghai'
+RUN wget https://github.com/stern/stern/releases/download/v1.21.0/stern_1.21.0_linux_amd64.tar.gz && tar -zxvf stern_1.21.0_linux_amd64.tar.gz && rm stern_1.21.0_linux_amd64.tar.gz && chmod +x stern &&  mv stern /usr/bin/stern
+
+RUN /usr/local/bin/python -m pip install --upgrade pip
+
+RUN pip install pysnooper psutil requests numpy scikit-learn pandas pyinstaller kubernetes==18.20.0
 
 COPY job/horovod/* /app/
 COPY job/pkgs /app/job/pkgs
-ENV PYTHONPATH=/app:$PYTHONPATH
 
 WORKDIR /app
+ENV PYTHONPATH=/app:$PYTHONPATH
 
-ENTRYPOINT ["python", "start.py"]
+ENTRYPOINT ["python3", "launcher.py"]
 
-# https://github.com/horovod/horovod/tree/master/examples   示例代码
-# docker run --name horovod -it --entrypoint '' ccr.ccs.tencentyun.com/cube-studio/horovod:20210401 bash
+

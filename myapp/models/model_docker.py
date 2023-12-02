@@ -36,11 +36,11 @@ class Docker(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def save(self):
-        return Markup(f'<a href="/docker_modelview/save/{self.id}">保存</a>')
+        return Markup(f'<a href="/docker_modelview/api/save/{self.id}">保存</a>')
 
     @property
     def debug(self):
-        return Markup(f'<a target=_blank href="/docker_modelview/debug/{self.id}">调试</a> | <a  href="/docker_modelview/delete_pod/{self.id}">清理</a> | <a target=_blank href="/docker_modelview/save/{self.id}">保存</a>')
+        return Markup(f'<a target=_blank href="/docker_modelview/api/debug/{self.id}">调试</a> | <a  href="/docker_modelview/api/delete_pod/{self.id}">清理</a> | <a target=_blank href="/docker_modelview/api/save/{self.id}">保存</a>')
 
     @property
     def image_history(self):

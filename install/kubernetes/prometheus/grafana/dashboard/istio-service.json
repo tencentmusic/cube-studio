@@ -82,6 +82,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"})",
           "format": "time_series",
@@ -89,6 +90,7 @@
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{destination_service_name}}",
+          "range": true,
           "refId": "B"
         },
         {
@@ -96,11 +98,13 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum by (destination_workload,response_code) (irate(istio_requests_total{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "hide": false,
           "interval": "",
           "legendFormat": "{{response_code}} , {{destination_workload}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -189,6 +193,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum by (destination_workload) (irate(istio_request_bytes_sum{destination_service_namespace=\"$namespace\",destination_workload=~\"($service)\"}[1m]))",
           "format": "time_series",
@@ -196,6 +201,7 @@
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{destination_workload}}",
+          "range": true,
           "refId": "B"
         }
       ],
@@ -215,11 +221,13 @@
       },
       "yaxes": [
         {
-          "format": "bytes",
+          "$$hashKey": "object:207",
+          "format": "bits",
           "logBase": 1,
           "show": true
         },
         {
+          "$$hashKey": "object:208",
           "format": "short",
           "logBase": 1,
           "show": true
@@ -379,6 +387,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod=~\".*$service.*\"}[5m]))",
           "format": "time_series",
@@ -401,7 +410,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "CPU Usage",
+      "title": "CPU 利用率",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -544,6 +553,12 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -553,7 +568,204 @@
         "y": 8
       },
       "hiddenSeries": false,
-      "id": 10,
+      "id": 14,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sort": "avg",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod=~\".*$service.*\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{exported_pod}} GPU {{gpu}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "pod GPU 利用率",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "cumulative"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percent",
+          "logBase": 1,
+          "max": "100",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 0,
+        "y": 18
+      },
+      "hiddenSeries": false,
+      "id": 18,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "container_request_gpu_memory{container_name=~\"$service\"}",
+          "format": "time_series",
+          "hide": false,
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "{{ node}}:{{pod_name}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "VGPU 显存申请GB",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:204",
+          "format": "mbytes",
+          "logBase": 1,
+          "min": 0,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:205",
+          "format": "bytes",
+          "logBase": 1,
+          "min": 0,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 6,
+        "y": 18
+      },
+      "hiddenSeries": false,
+      "id": 17,
       "legend": {
         "alignAsTable": true,
         "avg": true,
@@ -589,19 +801,20 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod=~\".*$service.*\"}",
+          "expr": "container_gpu_memory_total{container_name=~\"$service\"}",
           "format": "time_series",
           "instant": false,
           "interval": "30s",
           "intervalFactor": 1,
-          "legendFormat": "{{exported_pod}}",
+          "legendFormat": "{{node}}:{{pod_name}}",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "GPU 使用率",
+      "title": "VGPU 显存占用",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -615,12 +828,14 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "$$hashKey": "object:1166",
+          "format": "mbytes",
           "logBase": 1,
           "min": 0,
           "show": true
         },
         {
+          "$$hashKey": "object:1167",
           "format": "short",
           "logBase": 1,
           "min": 0,
@@ -643,20 +858,21 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
+        "h": 10,
+        "w": 6,
+        "x": 12,
         "y": 18
       },
       "hiddenSeries": false,
-      "id": 13,
+      "id": 10,
       "legend": {
         "alignAsTable": true,
         "avg": false,
         "current": false,
+        "hideEmpty": false,
         "max": true,
         "min": false,
-        "rightSide": true,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": true
@@ -671,7 +887,7 @@
       "paceLength": 10,
       "percentage": false,
       "pluginVersion": "9.1.5",
-      "pointradius": 2,
+      "pointradius": 5,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
@@ -684,19 +900,20 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (destination_workload) (istio_requests_total{destination_service_namespace=\"$namespace\"})",
+          "expr": "container_request_gpu_utilization{container_name=~\"$service\"}",
           "format": "time_series",
-          "hide": false,
-          "interval": "",
+          "instant": false,
+          "interval": "30s",
           "intervalFactor": 1,
-          "legendFormat": "{{destination_workload}}",
-          "refId": "B"
+          "legendFormat": "{{node}}:{{pod_name}}",
+          "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "全部域名服务监控",
+      "title": "VGPU 核申请率",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -710,14 +927,117 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "$$hashKey": "object:821",
+          "format": "percentunit",
           "logBase": 1,
+          "min": 0,
           "show": true
         },
         {
+          "$$hashKey": "object:822",
           "format": "short",
           "logBase": 1,
+          "min": 0,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 18,
+        "y": 18
+      },
+      "hiddenSeries": false,
+      "id": 16,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": false,
+        "hideEmpty": false,
+        "max": true,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "container_gpu_utilization{container_name=~\"$service\"}",
+          "format": "time_series",
+          "instant": false,
+          "interval": "30s",
+          "intervalFactor": 1,
+          "legendFormat": "{{node}}:{{pod_name}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "VGPU 利用率",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:462",
+          "format": "short",
+          "logBase": 1,
+          "min": 0,
           "show": true
+        },
+        {
+          "$$hashKey": "object:463",
+          "format": "short",
+          "logBase": 1,
+          "min": 0,
+          "show": false
         }
       ],
       "yaxis": {
@@ -762,9 +1082,13 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": {
           "type": "prometheus",
@@ -792,7 +1116,7 @@
     ]
   },
   "time": {
-    "from": "now/d",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
