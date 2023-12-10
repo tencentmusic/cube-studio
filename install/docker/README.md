@@ -23,16 +23,16 @@ mysql> flush privileges;
 docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.08.01 -f install/docker/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.12.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.08.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.12.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.08.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.08.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.12.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.12.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -133,10 +133,10 @@ docker-compose -f docker-compose.yml  up
 ```
 [global]
 index-url = http://mirrors.aliyun.com/pypi/simple/
-extra-index-url = https://pypi.tuna.tsinghua.edu.cn/simple/
+extra-index-url = https://mirrors.aliyun.com/pypi/simple/
 
 [install]
-trusted-host=mirrors.aliyun.com pypi.tuna.tsinghua.edu.cn
+trusted-host=mirrors.aliyun.com
 ```
 然后在cube-studio/install/docker/Dockerfile-base中增加:
 

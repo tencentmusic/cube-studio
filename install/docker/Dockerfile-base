@@ -1,4 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9-amd64-20231001 -f install/docker/Dockerfile-base .
 
 FROM ubuntu:22.04
 
@@ -39,11 +39,12 @@ RUN echo "alias ll='ls -alF'" >> /etc/profile && \
 COPY install/docker/requirements.txt /requirements.txt
 
 RUN pip install --upgrade setuptools pip && \
-    pip install -r /requirements.txt && \
+    pip install --ignore-installed -r /requirements.txt && \
     rm -rf /root/.cache/pip
-# 修正部分包版本
-RUN pip install celery==5.2.2
-RUN pip install click==7.1.2
+
+## 修正部分包版本
+# RUN pip install Flask-Babel==4.0.0
+#RUN pip install cryptography==3.4.8
 
 WORKDIR /home/myapp
 

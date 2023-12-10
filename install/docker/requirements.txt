@@ -1,101 +1,53 @@
-alembic==1.0.11             # via flask-migrate  数据库迁移工具
-amqp==5.1.1                 # via kombu   AMQP客户端库
-apispec[yaml]==1.3.3        # via flask-appbuilder   用于生成API文档的库
-asn1crypto==0.24.0          # via cryptography  ASN.1解析和序列化库
-attrs==19.1.0               # via jsonschema   Python类的属性管理库
-babel==2.7.0                # via flask-babel  国际化和本地化库
-billiard==3.6.4.0           # via celery  Python多进程库
-black==19.3b0               # Python代码格式化工具
-bleach==3.3.0               # HTML清理和链接化库
-bs4==0.0.1                  # 用于解析HTML和XML文档
-certifi==2019.6.16          # via requests  SSL证书库
-cffi==1.15.1                # via cryptography   用于调用C代码
-chardet==3.0.4              # via requests  # 字符编码检测库
-colorama==0.4.1             # 用于在命令行输出中添加颜色和样式
-contextlib2==0.5.5          # 用于提供与contextlib模块相似的功能
-cos-python-sdk-v5==1.9.22   # cos的工具
-# coverage==4.5.3           # Python代码覆盖率工具，用于测量代码执行过程中实际运行的代码行数
-croniter==0.3.30            # cron表达式解析库
-docstring-parser==0.14.1    # 解析Python文档字符串的库
-# flake8-import-order==0.18.1  # Flake8插件，用于检查导入顺序
-# flake8-mypy==17.8.0       # Flake8插件，用于检查类型注释
-# flake8==3.7.7             # Python代码风格检查工具
-flask-appbuilder==2.2.2     # Flask应用构建库
-flask-babel==0.12.2         # via flask-appbuilder # Flask多语言支持库
+Flask==2.3.3
+flask-appbuilder==4.3.7     # Flask应用构建库
+Flask-Migrate==4.0.5        # 数据库版本变更
+flask-compress==1.14       #  Flask响应压缩库
 flask-caching==2.0.2        # Flask缓存库
-flask-compress==1.4.0       #  Flask响应压缩库
-flask-cors==4.0.0           # Flask跨域资源共享（CORS）库
-flask-jwt-extended==3.20.0  # via flask-appbuilder  Flask JSON Web Token (JWT) 扩展库
-flask-login==0.4.1          # via flask-appbuilder  Flask用户登录管理库
-flask-migrate==2.5.2        #  Flask数据库迁移库
-flask-openid==1.3.0         # via flask-appbuilder  Flask OpenID库
-Flask-SocketIO==5.3.2       # Flask Socket.IO集成库
-Flask-Sockets==0.2.1        # Flask WebSockets集成库
-flask-sqlalchemy==2.4.0     # via flask-appbuilder, flask-migrate    Flask SQLAlchemy集成库
-flask-talisman==0.7.0       #  Flask安全头库
-flask-wtf==0.14.2           # Flask WTForms集成库
-flask==1.1.1                # 轻量级Web应用框架
-future==0.17.1              # via parsedatetime  Python 2和3兼容库
-gevent-websocket==0.10.1    #  gevent WebSocket库
-gevent==22.10.2             # 基于协程的Python网络库
+flask-talisman==1.1.0       #  Flask安全头库
+Flask-OpenID==1.3.0         # via flask-appbuilder  Flask OpenID库
+Flask-SQLAlchemy==2.5.1     # via flask-appbuilder
+Flask-Login==0.6.2          # via flask-appbuilder
+Flask-Limiter==3.5.0        # via flask-appbuilder
+Flask-JWT-Extended==4.5.2   # via flask-appbuilder
+Flask-WTF==1.2.1            # via flask-appbuilder
+Jinja2==3.1.2               # via flask-appbuilder
+kombu==5.3.2                # via flask-appbuilder
+SQLAlchemy==1.4.49          # via flask-appbuilder
+SQLAlchemy-Utils==0.41.1    # via flask-appbuilder
+werkzeug==2.3.7
+wtforms==2.3.3
+wtforms-json==0.3.5
+Flask-Cors==3.0.10          # Flask跨域资源共享（CORS）库
+# Flask-Babel==4.0.0          # 翻译专用
+
+celery==5.2.2               # 异步任务队列库,5.2.2
 gunicorn==21.2.0            # Python WSGI HTTP服务器
-html-table==1.0             # HTML表格解析库
-humanize==0.5.1             # 使数字更具可读性的库
-idna==2.8                   # IDNA兼容库
-ipdb==0.13.11               # IPython调试器
-isodate==0.6.0              # ISO 8601日期解析库
-itsdangerous==1.1.0         # via flask  数据签名库
-jinja2==2.10.1              # via flask, flask-babel  模板引擎库
-jsonschema==3.0.1           # via flask-appbuilder  JSON Schema验证库
-kubernetes==18.20.0         #  Kubernetes Python客户端库
-markdown==3.1.1             # Markdown文本转换库
-markupsafe==1.1.1           # via jinja2, mako  安全的字符串操作库
-marshmallow-enum==1.4.1     # via flask-appbuilder   Marshmallow枚举字段库
-marshmallow-sqlalchemy==0.17.0  # via flask-appbuilder  Marshmallow和SQLAlchemy集成库
-marshmallow==2.19.5         # via flask-appbuilder, marshmallow-enum, marshmallow-sqlalchemy   对象序列化和反序列化库
-minio==7.1.13               # MinIO Python客户端库
-mypy==1.1.1                 # Python静态类型检查器
-nose==1.3.7                 # Python测试框架
-numpy==1.24.2               # via pandas
-pandas==1.5.3
-parsedatetime==2.4          # 日期时间解析库
-pathlib2==2.3.4             # pathlib库的Python 2兼容版本
-pip-tools==3.7.0            #  pip辅助工具
-pre-commit==1.17.0          # Git预提交钩子库
-prison==0.1.2               # via flask-appbuilder  Python数据序列化库
-pyarrow==6.0.1
-pycodestyle==2.5.0          # Python代码风格检查工具
-pyjwt==1.7.1                # via flask-appbuilder, flask-jwt-extended  用于编码、解码和验证JSON Web Tokens（JWT）
-pylint==2.5.0               # Python源代码分析器，用于查找编程错误、遵循代码风格指南
-pymysql==1.0.2
-PySnooper==0.4.2
-python-dateutil==2.8.1      # 提供了处理日期和时间的扩展功能
-python-dotenv==0.10.3       # 用于从.env文件中加载环境变量。
-pytz==2022.7.1              # via babel, celery, pandas  是一个处理时区的库
-pyyaml==5.4.1               # 是一个处理YAML文件的库
-qrcode==7.3.1               # 是一个生成二维码的库
-redis==4.6.0
-requests==2.22.0
-retry==0.9.2                # 是一个用于重试函数执行的库
-selenium==3.141.0           # 是一个用于自动化Web测试的库。
-simplejson==3.16.0          # 是一个处理JSON数据的库
-six==1.12.0                 # 是一个用于兼容Python 2和Python 3的库 via bleach, flask-jwt-extended, flask-talisman, isodate, jsonschema, pathlib2, polyline, prison, pydruid, pyrsistent, python-dateutil, sqlalchemy-utils, wtforms-json
-sqlalchemy-utils==0.34.1    # 是一个SQLAlchemy的扩展库，提供了一些额外的功能
-sqlalchemy==1.3.19
-statsd==3.3.0               # 是一个用于发送统计数据到StatsD服务器的库。
-tox==3.11.1                 # 是一个用于自动化测试和虚拟环境管理的库
-werkzeug==0.15.5            # via flask, flask-jwt-extended
-wtforms-json==0.3.3         # 是一个用于处理WTForms表单的JSON数据的库
-wtforms==2.2.1              # via flask-wtf, wtforms-json  是一个用于处理Web表单的库
-Pillow==9.5.0
-elasticsearch==7.12.1
-jieba==0.42.1
-sseclient-py==1.7.2
-emoji==2.5.0
-pydub==0.25.1               # 是一个用于处理音频文件的库
-psycopg2-binary==2.8
+humanize==4.8.0             # 使数字更具可读性的库
+emoji==2.8.0                # 表情字符处理
+psycopg2-binary==2.9.8      # postgresql数据库
 wechatpy==1.8.18            # 是一个用于处理微信公众号API的库
+pycryptodome==3.19.0        # wechat需要的基础库
 xlrd==2.0.1                 # 是一个用于读取Excel文件的库
+pydub==0.25.1               # 是一个用于处理音频文件的库
 openpyxl==3.1.2             # 是一个用于处理Excel文件的库
-# celery==5.2.2             # 异步任务队列库
-# click==7.1.2
+elasticsearch==7.12.1       # es数据库
+jieba==0.42.1               # 中文分词
+sseclient-py==1.8.0         # openai 流式客户端
+simplejson==3.19.1          # 是一个处理JSON数据的库
+PySnooper==1.2.0            # 函数调用跟踪
+kubernetes==21.7.0          #  Kubernetes Python客户端库
+statsd==4.0.1               # 是一个用于发送统计数据到StatsD服务器的库。
+redis==5.0.1                # redis数据库连接
+pymysql==1.1.0              # 连接mysql数据库
+minio==7.1.17               # MinIO Python客户端库
+markdown==3.4.4             # Markdown文本转换库
+croniter==1.4.1             # cron表达式解析库
+contextlib2==21.6.0         # 用于提供与contextlib模块相似的功能
+parsedatetime==2.6          # 日期时间解析库
+pylint==3.0.0               # Python源代码分析器，用于查找编程错误、遵循代码风格指南
+bleach==6.0.0               # HTML清理和链接化库
+pandas==2.1.1               # 数据处理
+beautifulsoup4==4.12.2      # 用于解析HTML和XML文档
+cffi==1.16.0
+
+
