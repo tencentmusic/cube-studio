@@ -1,4 +1,13 @@
+
 # 1、gpu机器环境的准备  
+
+安装gpu驱动
+https://www.nvidia.cn/Download/index.aspx?lang=cn
+安装cuda
+https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=20.04&target_type=deb_network
+
+安装nvidia-docker2
+
 
 首先需要找运维同学安装机器gpu卡对应的驱动，然后需要让你的docker能识别并应用gpu驱动。
 
@@ -40,9 +49,22 @@ notebook=true  用于开发
 ```
 
 # 3、部署k8s gpu插件(vgpu)
+
 daemonset 	kube-system/nvidia-device-plugin.会在机器上部署pod，用于scheduler识别改机器可用gpu算力。
 
-daemonset 	kube-system/vgpu-nvidia-device-plugin,会在gpu上虚拟化多张卡，在plugin中不同的虚拟化方式，有可能会占用的方式不同。此处使用的虚拟化方式不影响调用方式
+daemonset 	kube-system/gpu-manager,会在gpu上虚拟化多张卡，在plugin中不同的虚拟化方式，有可能会占用的方式不同。此处使用的虚拟化方式不影响调用方式
+
+
+使用vgpu添加的挂载，
+```bash
+/var/lib/kubelet/device-plugins:/var/lib/kubelet/device-plugins
+/etc/gpu-manager/vm:/etc/gpu-manager/vm
+/etc/gpu-manager/vdriver:/etc/gpu-manager/vdriver
+/var/run/docker.sock:/var/run/docker.sock
+/sys/fs/cgroup:/sys/fs/cgroup
+/usr:/usr
+```
+
 
 # 4、部署k8s监控组件
 daemonset 	monitoring/dcgm-exporter.会在机器上部署pod，用于监控gpu上的使用率

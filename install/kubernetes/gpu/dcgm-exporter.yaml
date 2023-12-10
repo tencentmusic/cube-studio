@@ -20,6 +20,7 @@ spec:
         app.kubernetes.io/version: "2.4.0"
       name: "dcgm-exporter"
     spec:
+      hostNetwork: true
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -43,11 +44,11 @@ spec:
         - name: "DCGM_EXPORTER_KUBERNETES"
           value: "true"
         name: "dcgm-exporter"
-#        hostNetwork: true
         ports:
         - name: "metrics"
           containerPort: 9400
         securityContext:
+          privileged: true
           runAsNonRoot: false
           runAsUser: 0
         volumeMounts:
@@ -69,6 +70,10 @@ metadata:
   labels:
     app.kubernetes.io/name: "dcgm-exporter"
     app.kubernetes.io/version: "2.4.0"
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: '9400'
+    prometheus.io/path: /metrics
 spec:
   selector:
     app.kubernetes.io/name: "dcgm-exporter"

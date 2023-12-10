@@ -49,6 +49,9 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
+#        env:
+#          - name: NVIDIA_VISIBLE_DEVICES
+#            value: "0,1,2"
         volumeMounts:
           - name: device-plugin
             mountPath: /var/lib/kubelet/device-plugins
