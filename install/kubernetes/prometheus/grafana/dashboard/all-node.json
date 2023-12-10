@@ -51,108 +51,6 @@
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 13,
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": true,
-        "max": true,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "sort": "avg",
-        "sortDesc": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "paceLength": 10,
-      "percentage": false,
-      "pluginVersion": "9.1.5",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
-          },
-          "exemplar": true,
-          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod=''}",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": " {{instance}} GPU {{gpu}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "机器 非平台应用 GPU 利用率",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "percent",
-          "logBase": 1,
-          "max": "100",
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 8
-      },
-      "hiddenSeries": false,
       "id": 14,
       "legend": {
         "alignAsTable": true,
@@ -190,18 +88,17 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "exemplar": true,
-          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod!=''}",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": " {{instance}}，{{exported_pod}} GPU {{gpu}}",
-          "refId": "A"
+          "editorMode": "builder",
+          "expr": "sum by(instance, gpu) (DCGM_FI_DEV_GPU_UTIL)",
+          "hide": false,
+          "legendFormat": " {{instance}} GPU {{gpu}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "机器 平台应用 GPU 利用率",
+      "title": "GPU Usage",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -285,7 +182,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 16
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 3,
@@ -408,7 +305,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 16
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 2,
@@ -446,16 +343,18 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\"}[5m])) * 100)\n",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
+          "range": true,
           "refId": "B"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Idle CPU",
+      "title": "CPU Usage",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -502,7 +401,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 16
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 4,
@@ -592,7 +491,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 8,
@@ -604,6 +503,8 @@
         "min": false,
         "rightSide": true,
         "show": true,
+        "sort": "max",
+        "sortDesc": true,
         "total": false,
         "values": true
       },
@@ -630,11 +531,12 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\", device!~\"lo\"}[5m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{instance}}:{{device}}",
-          "refId": "A"
+          "editorMode": "builder",
+          "expr": "sum by(instance) (rate(node_network_receive_bytes_total{job=\"node-exporter\", device!~\"lo\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "thresholds": [],
@@ -682,7 +584,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 9,
@@ -720,11 +622,12 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\", device!~\"lo\"}[5m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{instance}}:{{device}}",
-          "refId": "A"
+          "editorMode": "builder",
+          "expr": "sum by(instance) (rate(node_network_transmit_bytes_total{job=\"node-exporter\", device!~\"lo\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "thresholds": [],
@@ -769,10 +672,196 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 10,
-        "w": 24,
+        "h": 7,
+        "w": 12,
         "x": 0,
-        "y": 32
+        "y": 24
+      },
+      "hiddenSeries": false,
+      "id": 15,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "max",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "builder",
+          "expr": "sum by(instance, device) (rate(node_infiniband_port_data_received_bytes_total{job=\"node-exporter\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{instance}}:{{device}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "IB Received",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "hiddenSeries": false,
+      "id": 16,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "max",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "builder",
+          "expr": "sum by(instance, device) (rate(node_infiniband_port_data_transmitted_bytes_total{job=\"node-exporter\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{instance}}:{{device}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "IB Transmitted",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 11,
@@ -821,38 +910,119 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "sum by (instance) (rate(node_disk_bytes_read{job=\"node-exporter\"}[2m]))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{instance}} read",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
-          },
-          "expr": "sum by (instance) (rate(node_disk_bytes_written{job=\"node-exporter\"}[2m]))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{instance}} written",
+          "editorMode": "builder",
+          "expr": "sum by(instance) (rate(node_disk_read_bytes_total{job=\"node-exporter\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
-          },
-          "expr": "sum by (instance) (rate(node_disk_io_time_seconds_total{job=\"node-exporter\"}[2m]))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{instance}} io time",
-          "refId": "C"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Disk I/O",
+      "title": "Disk Read I/O",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "hiddenSeries": false,
+      "id": 17,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "max",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "read",
+          "yaxis": 1
+        },
+        {
+          "alias": "io time",
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "builder",
+          "expr": "sum by(instance) (rate(node_disk_written_bytes_total{job=\"node-exporter\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Disk Write I/O",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -881,7 +1051,7 @@
       }
     }
   ],
-  "refresh": "5s",
+  "refresh": "",
   "schemaVersion": 37,
   "style": "dark",
   "tags": [],

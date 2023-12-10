@@ -91,7 +91,6 @@ kubectl apply -f ./servicemonitor/pushgateway-sm.yml
 # 部署gpu监控
 ```
 kubectl apply -f ./gpu/dcgm-exporter.yaml
-kubectl apply -f ./gpu/dcgm-exporter-sm.yaml
 ```
 
 # prometheus-adapter  部署

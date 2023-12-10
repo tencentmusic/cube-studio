@@ -82,10 +82,12 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "expr": "sum by (pod) (container_memory_working_set_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod=~\".*$pod.*\"})",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ pod}}",
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "B"
         }
       ],
@@ -283,18 +285,19 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod=~\".*$pod.*\"}",
+          "editorMode": "code",
+          "expr": "DCGM_FI_DEV_GPU_UTIL{pod=~\".*$pod.*\"}",
           "format": "time_series",
           "instant": false,
           "interval": "30s",
           "intervalFactor": 1,
-          "legendFormat": "{{exported_pod}}",
+          "legendFormat": "{{instance}},{{pod}} GPU {{gpu}}",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "GPU 使用率",
+      "title": "pod GPU Utilization",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -351,13 +354,13 @@
       "id": 7,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
+        "avg": false,
         "current": true,
-        "max": true,
+        "max": false,
         "min": false,
         "rightSide": true,
         "show": true,
-        "sort": "avg",
+        "sort": "current",
         "sortDesc": true,
         "total": false,
         "values": true
@@ -385,17 +388,20 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
-          "expr": "DCGM_FI_DEV_MEM_COPY_UTIL{exported_pod=~\".*$pod.*\"}",
+          "editorMode": "code",
+          "expr": "DCGM_FI_DEV_FB_USED{pod=~'.*$pod.*'}/(DCGM_FI_DEV_FB_USED{pod=~'.*$pod.*'} + DCGM_FI_DEV_FB_FREE{pod=~'.*$pod.*'})",
           "format": "time_series",
+          "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{exported_pod}} GPU {{gpu}}",
-          "refId": "A"
+          "legendFormat": "{{instance}},{{pod}} GPU {{gpu}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "pod GPU 显存占用率",
+      "title": "pod GPU Memory Usage Util",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -409,13 +415,15 @@
       },
       "yaxes": [
         {
-          "format": "percent",
+          "$$hashKey": "object:57",
+          "format": "percentunit",
           "logBase": 1,
-          "max": "100",
+          "max": "1",
           "min": "0",
           "show": true
         },
         {
+          "$$hashKey": "object:58",
           "format": "short",
           "logBase": 1,
           "show": true
@@ -483,7 +491,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{ pod}} receive",
+          "legendFormat": "{{pod}} receive",
           "refId": "A"
         },
         {
@@ -496,7 +504,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ pod}} send",
+          "legendFormat": "{{pod}} send",
           "refId": "B"
         }
       ],
@@ -544,7 +552,7 @@
             "mode": "thresholds"
           },
           "custom": {
-            "align": "left",
+            "align": "center",
             "displayMode": "color-text",
             "filterable": true,
             "inspect": false
@@ -599,7 +607,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "内存申请值 (max)"
+            "displayName": "memory request (max)"
           }
         ]
       },
@@ -610,13 +618,15 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "container_spec_memory_limit_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}/1000/1000/1000",
+          "expr": "container_spec_memory_limit_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl|aihub\"}/1024/1024/1024",
           "format": "table",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
+          "range": true,
           "refId": "A"
         },
         {
@@ -624,8 +634,9 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "container_memory_working_set_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}/1000/1000/1000",
+          "expr": "container_memory_working_set_bytes{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl|aihub\"}/1024/1024/1024",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -639,8 +650,9 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (node,namespace,pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}[2m]))",
+          "expr": "sum by (node,namespace,pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl|aihub\"}[2m]))",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -653,8 +665,9 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "container_spec_cpu_quota{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl\"}/100000",
+          "expr": "container_spec_cpu_quota{job=\"kubelet\", image!=\"\",container_name!=\"POD\",pod!=\"\",namespace=~\"pipeline|jupyter|service|automl|aihub\"}/100000",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -663,7 +676,7 @@
           "refId": "D"
         }
       ],
-      "title": "全局pod资源使用",
+      "title": "All pod",
       "transformations": [
         {
           "id": "labelsToFields",
@@ -707,11 +720,11 @@
               "service": 11
             },
             "renameByName": {
-              "Value": "cpu使用值",
-              "Value #A": "内存申请值",
-              "Value #B": "内存使用值",
-              "Value #C": "cpu使用率",
-              "Value #D": "cpu申请值"
+              "Value": "cpu-used",
+              "Value #A": "memory-request",
+              "Value #B": "memory-used",
+              "Value #C": "cpu-used",
+              "Value #D": "cpu-request"
             }
           }
         },
@@ -731,19 +744,31 @@
                 ],
                 "operation": "aggregate"
               },
-              "cpu使用值": {
+              "cpu-used": {
                 "aggregations": [
                   "max"
                 ],
                 "operation": "aggregate"
               },
-              "cpu使用率": {
+              "cpu-used-ratio": {
                 "aggregations": [
                   "max"
                 ],
                 "operation": "aggregate"
               },
               "cpu申请值": {
+                "aggregations": [
+                  "max"
+                ],
+                "operation": "aggregate"
+              },
+              "memory-request": {
+                "aggregations": [
+                  "max"
+                ],
+                "operation": "aggregate"
+              },
+              "memory-used": {
                 "aggregations": [
                   "max"
                 ],
@@ -761,25 +786,13 @@
                 "aggregations": [],
                 "operation": "groupby"
               },
-              "使用值": {
+              "request": {
                 "aggregations": [
                   "lastNotNull"
                 ],
                 "operation": "aggregate"
               },
-              "内存使用值": {
-                "aggregations": [
-                  "max"
-                ],
-                "operation": "aggregate"
-              },
-              "内存申请值": {
-                "aggregations": [
-                  "max"
-                ],
-                "operation": "aggregate"
-              },
-              "申请值": {
+              "used": {
                 "aggregations": [
                   "lastNotNull"
                 ],
@@ -801,20 +814,20 @@
       {
         "current": {
           "selected": false,
-          "text": "a",
-          "value": "a"
+          "text": "-",
+          "value": "-"
         },
         "hide": 0,
         "label": "Pod",
         "name": "pod",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "rikochen-mtl-daily-usermode-abt",
             "value": "rikochen-mtl-daily-usermode-abt"
           }
         ],
-        "query": "a",
+        "query": "-",
         "skipUrlSync": false,
         "type": "textbox"
       }

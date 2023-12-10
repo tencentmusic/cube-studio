@@ -110,7 +110,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "域名服务平均qps请求量(1分钟内平均)",
+      "title": "qps(1min average)",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -207,7 +207,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "域名服务吞吐率（1分钟）",
+      "title": "Throughput（1min average）",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -410,7 +410,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "CPU 利用率",
+      "title": "CPU Utilization",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -469,9 +469,9 @@
       "id": 12,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
-        "current": false,
-        "max": true,
+        "avg": false,
+        "current": true,
+        "max": false,
         "min": false,
         "rightSide": false,
         "show": true,
@@ -503,18 +503,20 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "DCGM_FI_DEV_MEM_COPY_UTIL{exported_pod=~\".*$service.*\"}",
+          "expr": "DCGM_FI_DEV_FB_USED{pod=~'.*$service.*'}/(DCGM_FI_DEV_FB_USED{pod=~'.*$service.*'} + DCGM_FI_DEV_FB_FREE{pod=~'.*$service.*'})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{exported_pod}} GPU {{gpu}}",
+          "legendFormat": "{{pod}} GPU {{gpu}}",
+          "range": true,
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "pod GPU 显存占用率",
+      "title": "pod GPU Memory Usage Util",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -528,13 +530,15 @@
       },
       "yaxes": [
         {
-          "format": "percent",
+          "$$hashKey": "object:672",
+          "format": "percentunit",
           "logBase": 1,
-          "max": "100",
+          "max": "1",
           "min": "0",
           "show": true
         },
         {
+          "$$hashKey": "object:673",
           "format": "short",
           "logBase": 1,
           "show": true
@@ -607,18 +611,18 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod=~\".*$service.*\"}",
+          "expr": "DCGM_FI_DEV_GPU_UTIL{pod=~\".*$service.*\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{exported_pod}} GPU {{gpu}}",
+          "legendFormat": "{{pod}} GPU {{gpu}}",
           "range": true,
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "pod GPU 利用率",
+      "title": "pod GPU Utilization",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -715,7 +719,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "VGPU 显存申请GB",
+      "title": "VGPU GPU Memory Request(GB)",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -814,7 +818,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "VGPU 显存占用",
+      "title": "VGPU GPU Memory Used",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -913,7 +917,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "VGPU 核申请率",
+      "title": "VGPU Request Rate",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -1012,7 +1016,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "VGPU 利用率",
+      "title": "VGPU Utilization",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -1054,8 +1058,8 @@
       {
         "current": {
           "selected": false,
-          "text": "service",
-          "value": "service"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
@@ -1147,6 +1151,6 @@
   "timezone": "",
   "title": "istio service",
   "uid": "istio-service",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

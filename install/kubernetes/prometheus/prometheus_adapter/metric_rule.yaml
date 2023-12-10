@@ -44,14 +44,14 @@ data:
 
 
     # gpu 利用率
-    - seriesQuery: '{__name__="DCGM_FI_DEV_GPU_UTIL",exported_pod!="",exported_namespace="service"}'
+    - seriesQuery: '{__name__="DCGM_FI_DEV_GPU_UTIL",pod!="",namespace="service"}'
       seriesFilters: []
       # pod 自定义指标 就是hpa查询指定命名空间指定pod的指标。所以需要通过resources配置 指标标签和命名空间和pod名称的映射关系
       resources:
         overrides:
-          exported_namespace:      # 指标的标签
+          namespace:      # 指标的标签
             resource: namespace     # k8s的资源名
-          exported_pod:      # 指标的标签
+          pod:      # 指标的标签
             resource: pod       # k8s的资源名
           # kubernetes_name:
           #  group: apps
@@ -65,7 +65,7 @@ data:
     # kubectl get --raw="/apis/custom.metrics.k8s.io/v1beta1" | jq
     # kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/{namespace-name}/{object-type}/{object-name}/{metric-name...}"
     # 最后形成的查询地址 kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/service/pods/*/container_gpu_usage" | jq
-    # sum(avg_over_time(DCGM_FI_DEV_GPU_UTIL{exported_pod!="",exported_namespace="service"}[5m]))by(exported_pod)
+    # sum(avg_over_time(DCGM_FI_DEV_GPU_UTIL{pod!="",namespace="service"}[5m]))by(pod)
 
 
 

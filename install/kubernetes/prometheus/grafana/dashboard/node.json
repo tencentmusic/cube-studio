@@ -90,18 +90,18 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "DCGM_FI_DEV_GPU_UTIL{exported_pod!='',instance=~\"$node.*\"}",
+          "expr": "DCGM_FI_DEV_GPU_UTIL{pod!='',instance=~\"$node.*\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": " {{instance}}，{{exported_pod}} GPU {{gpu}}",
+          "legendFormat": " {{instance}}，{{pod}} GPU {{gpu}}",
           "range": true,
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "机器 平台应用 GPU 利用率",
+      "title": "node pod GPU Utilization",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -184,6 +184,7 @@
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\",container_name!=\"POD\",instance=~\"$node.*\"}[5m]))",
           "format": "time_series",
@@ -191,12 +192,13 @@
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{pod}}",
+          "range": true,
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "机器pod cpu",
+      "title": "node pod cpu",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -290,7 +292,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "机器pod 内存",
+      "title": "node pod memory",
       "tooltip": {
         "shared": true,
         "sort": 1,
@@ -1115,6 +1117,192 @@
       "yaxis": {
         "align": false
       }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      },
+      "hiddenSeries": false,
+      "id": 16,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "max",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "builder",
+          "expr": "sum by(device) (rate(node_infiniband_port_data_received_bytes_total{job=\"node-exporter\", instance=~\"$node.*\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{device}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "IB Received",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 50
+      },
+      "hiddenSeries": false,
+      "id": 18,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "max",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.5",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "builder",
+          "expr": "sum by(device) (rate(node_infiniband_port_data_transmitted_bytes_total{job=\"node-exporter\", instance=~\"$node.*\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "{{device}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "IB Transmitted",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
     }
   ],
   "refresh": "",
@@ -1126,8 +1314,8 @@
       {
         "current": {
           "selected": false,
-          "text": "10.101.133.143",
-          "value": "10.101.133.143"
+          "text": "10.135.0.70",
+          "value": "10.135.0.70"
         },
         "datasource": {
           "type": "prometheus",
@@ -1186,6 +1374,6 @@
   "timezone": "browser",
   "title": "node",
   "uid": "node",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
