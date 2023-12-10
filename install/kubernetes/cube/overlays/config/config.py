@@ -89,7 +89,7 @@ AUTH_TYPE = AUTH_DB
 # AUTH_ROLE_ADMIN = 'Admin'
 
 # Uncomment to setup Public role name, no authentication needed
-# AUTH_ROLE_PUBLIC = 'Public'
+# AUTH_ROLE_PUBLIC = 'Gamma'
 
 # 是否允许用户注册
 AUTH_USER_REGISTRATION = False
@@ -115,7 +115,7 @@ OAUTH_PROVIDERS=[]
 # 语言翻译上的配置
 # ---------------------------------------------------
 # 默认使用的语言
-BABEL_DEFAULT_LOCALE = "en"
+BABEL_DEFAULT_LOCALE = os.getenv('LOCALE','zh')
 # Your application default translation path
 BABEL_DEFAULT_FOLDER = "myapp/translations"
 # The allowed translation for you app
@@ -208,43 +208,29 @@ ADDITIONAL_MODULE_DS_MAP = {}
 ADDITIONAL_MIDDLEWARE = []
 
 LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "INFO"
 
 # ---------------------------------------------------
 # Enable Time Rotate Log Handler
 # ---------------------------------------------------
 # LOG_LEVEL = DEBUG, INFO, WARNING, ERROR, CRITICAL
-
+# 控制日志是否输出到文件
 ENABLE_TIME_ROTATE = False
+# 输出到文件的日志级别
 TIME_ROTATE_LOG_LEVEL = "DEBUG"
+# 日志地址
 FILENAME = os.path.join(DATA_DIR, "myapp.log")
+# 这意味着每天午夜时分，日志文件都会自动轮换
 ROLLOVER = "midnight"
+# 这意味着每天都会轮换一次日志文件
 INTERVAL = 1
+# 这意味着系统将保留最近 30 天的日志文件
 BACKUP_COUNT = 30
-
-# Custom logger for auditing queries. This can be used to send ran queries to a
-# structured immutable store for auditing purposes. The function is called for
-# every query ran, in both SQL Lab and charts/dashboards.
-# def QUERY_LOGGER(
-#     database,
-#     query,
-#     schema=None,
-#     user=None,
-#     client=None,
-#     security_manager=None,
-# ):
-#     pass
-
-# Set this API key to enable Mapbox visualizations
-MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")
 
 # If defined, shows this text in an alert-warning box in the navbar
 # one example use case may be "STAGING" to make it clear that this is
 # not the production version of the site.
 WARNING_MSG = None
-
-from celery.schedules import crontab
-from werkzeug.contrib.cache import RedisCache
 
 # 自动添加到响应头的配置
 HTTP_HEADERS = {
@@ -305,53 +291,12 @@ PERMISSION_INSTRUCTIONS_LINK = ""
 # configuration. These blueprints will get integrated in the app
 BLUEPRINTS = []
 
-# Provide a callable that receives a tracking_url and returns another
-# URL. This is used to translate internal Hadoop job tracker URL
-# into a proxied one
-TRACKING_URL_TRANSFORMER = lambda x: x  # noqa: E731
-
-# Allow for javascript controls components
-# this enables programmers to customize certain charts (like the
-# geospatial ones) by inputing javascript in controls. This exposes
-# an XSS security vulnerability
-ENABLE_JAVASCRIPT_CONTROLS = False
-
-
-# A callable that allows altering the database conneciton URL and params
-# on the fly, at runtime. This allows for things like impersonation or
-# arbitrary logic. For instance you can wire different users to
-# use different connection parameters, or pass their email address as the
-# username. The function receives the connection uri object, connection
-# params, the username, and returns the mutated uri and params objects.
-# Example:
-#   def DB_CONNECTION_MUTATOR(uri, params, username, security_manager, source):
-#       user = security_manager.find_user(username=username)
-#       if user and user.email:
-#           uri.username = user.email
-#       return uri, params
-#
-# Note that the returned uri and params are passed directly to sqlalchemy's
-# as such `create_engine(url, **params)`
-DB_CONNECTION_MUTATOR = None
-
 # When not using gunicorn, (nginx for instance), you may want to disable
 # using flask-compress
 ENABLE_FLASK_COMPRESS = True
 
-# Enable / disable scheduled email reports
-ENABLE_SCHEDULED_EMAIL_REPORTS = True
-
-# If enabled, certail features are run in debug mode
-# Current list:
-# * Emails are sent using dry-run mode (logging only)
-SCHEDULED_EMAIL_DEBUG_MODE = True
-
 # 任务的最小执行间隔min
 PIPELINE_TASK_CRON_RESOLUTION = 10
-
-# Email report configuration
-# From address in emails
-EMAIL_REPORT_FROM_ADDRESS = "reports@myapp.org"
 
 # Send bcc of all reports to this address. Set to None to disable.
 # This is useful for maintaining an audit trail of all email deliveries.
@@ -450,11 +395,10 @@ REDIS_PORT = os.getenv('REDIS_PORT', '6379')
 SOCKETIO_MESSAGE_QUEUE = 'redis://:%s@%s:%s/2'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))
 
 # 数据库配置地址
-SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','mysql+pymysql://root:admin@127.0.0.1:3306/myapp?charset=utf8')
+SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','')
+
 SQLALCHEMY_BINDS = {}
 from celery.schedules import crontab
-from werkzeug.contrib.cache import RedisCache
-
 
 CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24  # cache默认超时是24小时，一天才过期
 
@@ -465,10 +409,6 @@ CACHE_CONFIG = {
     'CACHE_REDIS_URL':'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
 }
 
-
-RESULTS_BACKEND = RedisCache(
-    host=REDIS_HOST, port=int(REDIS_PORT), key_prefix='myapp_results',password=REDIS_PASSWORD)
-
 class CeleryConfig(object):
     # 任务队列
     broker_url = 'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
@@ -478,6 +418,7 @@ class CeleryConfig(object):
     )
     # 结果存储
     result_backend = 'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
+    worker_redirect_stdouts = True
     worker_redirect_stdouts_level = 'DEBUG'
     # celery worker每次去redis取任务的数量
     worker_prefetch_multiplier = 10
@@ -498,8 +439,14 @@ class CeleryConfig(object):
     enable_utc = False
     # 任务失败或者超时也确认
     task_acks_on_failure_or_timeout = True
+    broker_connection_retry_on_startup = True
     # worker 将不会存储任务状态并返回此任务的值
     task_ignore_result = True
+    # celery是否拦截系统根日志
+    # worker_hijack_root_logger = False
+    # worker_log_format = "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s"
+    # worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s]%(task_name)s: %(message)s"
+
 
     # 任务的限制，key是celery_task的name，值是限制配置
     task_annotations = {
@@ -521,6 +468,14 @@ class CeleryConfig(object):
         },
         # 异步任务，检查在线构建镜像的docker pod
         'task.check_docker_commit': {
+            'rate_limit': '1/s',
+            'soft_time_limit': 600,
+            "expires": 600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
+        },
+        # 异步任务，检查notebook在线构建pod
+        'task.check_notebook_commit': {
             'rate_limit': '1/s',
             'soft_time_limit': 600,
             "expires": 600,
@@ -596,10 +551,10 @@ class CeleryConfig(object):
             'task': 'task.watch_gpu',   # 定时推送gpu的使用情况
             'schedule': crontab(minute='10',hour='8-23/2'),
         },
-        'task_adjust_node_resource': {
-            'task': 'task.adjust_node_resource',  # 定时在多项目组间进行资源均衡
-            'schedule': crontab(minute='*/10'),
-        },
+        # 'task_adjust_node_resource': {
+        #     'task': 'task.adjust_node_resource',  # 定时在多项目组间进行资源均衡
+        #     'schedule': crontab(minute='*/10'),
+        # },
         'task_watch_pod_utilization': {
             'task': 'task.watch_pod_utilization',   # 定时推送低负载利用率的pod
             'schedule': crontab(minute='10',hour='11'),
@@ -618,7 +573,10 @@ GIT_URL = 'https://github.com/tencentmusic/cube-studio/tree/master'
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
 
-FAB_API_MAX_PAGE_SIZE=1000    # 最大翻页数目，不设置的话就会是20
+FAB_API_MAX_PAGE_SIZE=2000    # 最大翻页数目，不设置的话就会是20
+MAX_TASK_CPU=50  # 最大任务cpu申请值
+MAX_TASK_MEM=100  # 最大任务内存申请值
+ENABLE_TASK_APPROVE=False   # 是否启动任务申请授权，需要重写推送通知，由推送通知进行对接授权接口
 
 CELERY_CONFIG = CeleryConfig
 
@@ -677,13 +635,6 @@ CRD_INFO={
         'kind': 'VirtualService',
         "timeout": 60 * 60 * 24 * 1
     },
-    "framework": {
-        "group": "frameworkcontroller.microsoft.com",
-        "version": "v1",
-        "plural": "frameworks",
-        'kind': 'Framework',
-        "timeout": 60 * 60 * 24 * 2
-    },
     "vcjob": {
         "group": "batch.volcano.sh",
         "version": "v1alpha1",
@@ -724,37 +675,39 @@ GLOBAL_ENV={
     "KFJ_ARCHIVE_BASE_PATH":"/archives",
     "KFJ_PIPELINE_NAME":"{{pipeline_name}}",
     "KFJ_NAMESPACE":"pipeline",
-    "KFJ_GPU_TYPE": 'NVIDIA',
-    "GPU_TYPE": 'NVIDIA',
     "KFJ_GPU_MEM_MIN":"13G",
     "KFJ_GPU_MEM_MAX":"13G",
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
 }
 
 # 各种环节使用的gpu驱动类型
-GPU_DRIVE_TYPE = "NVIDIA"
+GPU_RESOURCE={}
+DEFAULT_GPU_RESOURCE_NAME='nvidia.com/gpu'
 
-# vgpu的类型方式
-VGPU_DRIVE_TYPE = "TENCENT"   # tke gpumanager的方式
-
-# 各类model list界面的帮助文档
-HELP_URL={
-    "pipeline":f"{GIT_URL}/docs/example",
-    "job_template":f"{GIT_URL}/job-template",
-    "task":f"{GIT_URL}/docs/example",
-    "nni":f"{GIT_URL}/docs/example",
-    "images":f"{GIT_URL}/images",
-    "notebook":f"{GIT_URL}/docs/example",
-    "service":f"{GIT_URL}/docs/example",
-    "inferenceservice":f"{GIT_URL}/images/serving",
-    "run":f"{GIT_URL}/docs/example",
-    "docker":f"{GIT_URL}/images"
+# 配置禁用gpu的方法，不然对复合共用型机器，gpu会被共享使用
+GPU_NONE={
+    "gpu":['NVIDIA_VISIBLE_DEVICES','none']
 }
 
+# vgpu的类型方式
+VGPU_RESOURCE={
+    "mgpu":"tencent.com/vcuda-core"
+}
+VGPU_DRIVE_TYPE = "mgpu"   # tke gpumanager的方式
+
+
+RDMA_RESOURCE_NAME=''
+
+DEFAULT_POD_RESOURCES={}
+
+# 各类model list界面的帮助文档
+HELP_URL={}
+
 # 不使用模板中定义的镜像而直接使用用户镜像的模板名称
-CUSTOMIZE_JOB='自定义镜像'
+CUSTOMIZE_JOB='自定义镜像' if BABEL_DEFAULT_LOCALE=='zh' else 'customize'
 LOGICAL_JOB = 'logical'
 PYTHON_JOB = 'python'
+USER_CUSTOMIZE_IMAGES=[CUSTOMIZE_JOB,'hyperparam-search-nni']  # 使用用户自定义的镜像而不使用模板的镜像，工作目录和启动命令，需要这些模板有images，command，workdir参数
 
 # admin管理员用户
 ADMIN_USER='admin'
@@ -777,6 +730,8 @@ SERVICE_PIPELINE_JAEGER='tracing.service'
 HUBSECRET = ['hubsecret']
 # 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
 REPOSITORY_ORG='ccr.ccs.tencentyun.com/cube-studio/'
+# 用户常用默认镜像
+USER_IMAGE = 'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9'
 # notebook每个pod使用的用户账号
 JUPYTER_ACCOUNTS='jupyter-user'
 HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,AUTOML_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE]
@@ -828,7 +783,9 @@ STORE_CONFIG = {
 }
 
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
+K8S_NETWORK_MODE = 'iptables'   # iptables ipvs
 
+MINIO_HOST = 'minio.kubeflow:9000'
 
 # 多行分割内网特定host
 HOSTALIASES='''
@@ -854,6 +811,7 @@ ALL_LINKS=[
 ]
 
 # 推理服务的各种配置
+ML_SERVER_IMAGE=['ccr.ccs.tencentyun.com/cube-studio/xx:xxx']
 TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0-gpu']
 TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu']
 ONNXRUNTIME_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda']
@@ -892,8 +850,9 @@ INFERNENCE_HEALTH={
     "triton-server":"8000:/v2/health/ready"
 }
 DOCKER_IMAGES='docker:23.0.4'
+WAIT_POD_IMAGES='ccr.ccs.tencentyun.com/cube-studio/wait-pod:v1'
 # notebook，pipeline镜像拉取策略
-IMAGE_PULL_POLICY='IfNotPresent'    # IfNotPresent   Always
+IMAGE_PULL_POLICY='Always'    # IfNotPresent   Always
 
 # 任务资源使用情况地址
 GRAFANA_TASK_PATH='/grafana/d/pod-info/pod-info?var-pod='
@@ -939,9 +898,11 @@ MODEL_URLS = {
     "model_market_voice": "/frontend/ai_hub/model_market/model_voice",
     "model_market_language": "/frontend/ai_hub/model_market/model_language",
 }
- # 可以跨域分享cookie的子域名，例如.local.com
+ # 可以跨域分享cookie的子域名，例如.svc.local.com
 COOKIE_DOMAIN = ''
-SERVICE_DOMAIN='service.local.com'
+SERVICE_DOMAIN='service.svc.cluster.local'
+CHATGPT_TOKEN = [""]
+CHATGPT_CHAT_URL = ['']
 
 
 # 所有训练集群的信息

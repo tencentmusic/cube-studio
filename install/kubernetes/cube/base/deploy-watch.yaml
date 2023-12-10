@@ -38,6 +38,8 @@ spec:
                 path: entrypoint.sh
               - key: config.py
                 path: config.py
+              - key: project.py
+                path: project.py
         - name: kubernetes-config
           configMap:
             name: kubernetes-config
@@ -84,6 +86,9 @@ spec:
             - name: kubeflow-dashboard-config
               mountPath: /home/myapp/myapp/config.py
               subPath: config.py
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/project.py
+              subPath: project.py
             - name: tz-config
               mountPath: /etc/localtime
             - name: kubernetes-config

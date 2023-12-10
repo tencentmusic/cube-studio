@@ -37,6 +37,8 @@ spec:
                 path: entrypoint.sh
               - key: config.py
                 path: config.py
+              - key: project.py
+                path: project.py
         - name: kubernetes-config
           configMap:
             name: kubernetes-config
@@ -45,6 +47,7 @@ spec:
             claimName: infra-kubeflow
 
       serviceAccountName: kubeflow-dashboard
+
       imagePullSecrets:
         - name: hubsecret
       containers:
@@ -81,11 +84,6 @@ spec:
               configMapKeyRef:
                 name: deploy-config
                 key: ENVIRONMENT
-          - name: GPU_TYPE
-            valueFrom:
-              configMapKeyRef:
-                name: deploy-config
-                key: GPU_TYPE
 
           volumeMounts:
             - name: kubeflow-dashboard-config
@@ -94,6 +92,9 @@ spec:
             - name: kubeflow-dashboard-config
               mountPath: /home/myapp/myapp/config.py
               subPath: config.py
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/project.py
+              subPath: project.py
             - name: tz-config
               mountPath: /etc/localtime
             - name: infra-kubeflow
