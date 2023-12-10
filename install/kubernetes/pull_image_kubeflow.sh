@@ -1,4 +1,3 @@
-docker pull frameworkcontroller/frameworkcontroller &
 docker pull nvidia/dcgm-exporter:3.1.7-3.1.4-ubuntu20.04 &
 docker pull grafana/grafana:9.1.5ccr.ccs.tencentyun.com/cube-studio/prometheus-adapter:v0.9.1 &
 docker pull quay.io/prometheus-operator/prometheus-operator:v0.46.0 &

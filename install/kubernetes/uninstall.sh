@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 read -p "是否继续执行脚本？(yes/no)" answer
@@ -89,14 +90,6 @@ if [[ "$answer" == "yes" ]]; then
     # 部署gpu的监控
     kubectl delete -f gpu/nvidia-device-plugin.yml
     kubectl delete -f gpu/dcgm-exporter.yaml
-    kubectl delete -f gpu/dcgm-exporter-sm.yaml
-
-    # 部署frameworkcontroller nni超参搜索使用
-    kubectl delete serviceaccount frameworkcontroller --namespace kubeflow
-    kubectl delete clusterrolebinding frameworkcontroller-kubeflow --clusterrole=cluster-admin --user=system:serviceaccount:kubeflow:frameworkcontroller
-    kubectl delete -f frameworkcontroller/frameworkcontroller-with-default-config.yaml
-    sleep 5
-    # kubectl wait crd/frameworks.frameworkcontroller.microsoft.com --for condition=established --timeout=60s
 
     kubectl delete serviceaccount frameworkbarrier --namespace pipeline
     kubectl delete serviceaccount frameworkbarrier --namespace automl
