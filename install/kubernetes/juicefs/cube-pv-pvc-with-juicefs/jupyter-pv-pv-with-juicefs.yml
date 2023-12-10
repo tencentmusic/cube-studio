@@ -92,4 +92,3 @@ spec:
 #      jupyter-pvname: jupyter-kubeflow-archives
   storageClassName: ""
   volumeName: jupyter-kubeflow-archives
-
