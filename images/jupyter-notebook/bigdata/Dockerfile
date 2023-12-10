@@ -1,4 +1,4 @@
-FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base
+FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04
 
 MAINTAINER hamawhite
 ARG SPARK_HADOOP_VERSION=3.2

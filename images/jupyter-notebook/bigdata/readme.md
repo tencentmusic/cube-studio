@@ -5,7 +5,7 @@
 | Spark | 3.1.3 | spark-3.1.3-bin-hadoop3.2 |
 | Hive | 3.1.2 | apache-hive-3.1.2-bin |
 | Flink | 1.15.1 | pyFlink |
-| Python | 3.8.12 | notebook:jupyter-ubuntu-cpu-base 自带版本 |
+| Python | 3.8.12 | notebook:jupyter-ubuntu22.04 自带版本 |
 
 ## 二、基于Dockerfile实现
 
