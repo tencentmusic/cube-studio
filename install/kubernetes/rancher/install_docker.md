@@ -3,7 +3,7 @@
 
 ##  卸载旧版本docker
 ```bash
-apt-get remove docker docker-engine docker-ce docker.io docker-ce docker-ce-cli
+apt-get remove docker docker-engine docker-ce docker.io docker-ce docker-ce-cli docker-compose
 ```
 
 ## 安装docker
@@ -32,7 +32,8 @@ apt-cache madison docker-ce
 # 安装最新版(最好使用指定版本)
 # sudo apt install -y docker-ce docker-compose
 # 安装指定版本，使用安装指定版本
-sudo apt install -y docker-ce=5:20.10.24~3-0~ubuntu-focal
+apt install -y docker-ce=5:20.10.24~3-0~ubuntu-focal
+apt install -y docker-compose
 ```
 
 # ubuntu 安装 k8s客户端
@@ -63,10 +64,22 @@ source <(kubectl completion bash)
 
 ## 安装docker
 ```bash
+# 先卸载原有docker
+service docker stop
+rpm -qa | grep docker | xargs yum remove -y
+rpm -qa | grep docker
+rm -rf /usr/lib/systemd/system/docker.service
+
+
 yum install -y yum-utils
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo 
+
 yum update -y
-yum install docker-ce
+# 查看可用版本
+yum list docker-ce --showduplicates
+# 安装20.x的版本
+yum install -y docker-ce-3:20.10.24-3.el8
 
 systemctl start docker
 
@@ -87,3 +100,7 @@ setenforce 0
 yum install -y kubectl-1.24.0 
 source <(kubectl completion bash)
 ```
+
+
+
+

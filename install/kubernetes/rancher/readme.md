@@ -43,6 +43,92 @@ init_node.sh 是为了初始化机器，可以把自己要做的初始化任务�
 
 reset_docker.sh 是为了在机器从rancher集群中踢出以后，把rancher环境清理干净。
 
+# centos8 初始化
+
+```bash
+#修改/etc/firewalld/firewalld.conf
+#FirewallBackend=nftables
+FirewallBackend=iptables
+
+yum install -y yum-utils device-mapper-persistent-data lvm2
+yum install -y iptables container-selinux iptables-services
+# 加载内核模块
+(
+cat << EOF
+
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl stop iptables
+systemctl disable iptables
+systemctl stop ip6tables
+systemctl disable ip6tables
+systemctl stop nftables
+systemctl disable nftables
+
+modprobe br_netfilter 
+modprobe ip_tables 
+modprobe iptable_nat 
+modprobe iptable_filter 
+modprobe iptable_mangle 
+modprobe iptable_mangle
+modprobe ip6_tables 
+modprobe ip6table_nat 
+modprobe ip6table_filter 
+modprobe ip6table_mangle 
+modprobe ip6table_mangle
+
+EOF
+)>>  /etc/rc.d/rc.local
+chmod +x /etc/rc.d/rc.local
+sh /etc/rc.d/rc.local
+# 查看加载的内核模块
+lsmod
+sudo echo 'ip_tables' >> /etc/modules
+
+
+systemctl status iptables
+systemctl status ip6tables
+systemctl status nftables
+systemctl status firewalld
+
+modinfo iptable_nat
+modinfo ip6table_nat
+
+echo "net.bridge.bridge-nf-call-ip6tables = 1" >> /etc/sysctl.conf
+echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
+echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+echo "1" >/proc/sys/net/bridge/bridge-nf-call-iptables
+sysctl -p
+
+systemctl restart docker
+
+reboot
+
+# ipv6相关错误可以忽略
+# 查看模块
+# ls /lib/modules/`uname -r`/kernel/net/ipv6/netfilter/
+```
+
+
+# ubuntu 22.04
+
+```bash
+vi /etc/default/grub
+
+GRUB_CMDLINE_LINUX="cgroup_memory=1 cgroup_enable=memory swapaccount=1 systemd.unified_cgroup_hierarchy=0"
+更新
+sudo update-grub
+
+vi  /etc/sysctl.conf
+
+net.bridge.bridge-nf-call-iptables=1
+
+桌面版还要禁用大内存页
+设置vm.nr_hugepages=0
+
+重启
+```
+
 
 # 部署rancher server
 
@@ -50,18 +136,25 @@ reset_docker.sh 是为了在机器从rancher集群中踢出以后，把rancher�
 
 ```bash
 # 清理历史部署痕迹
-reset_docker.sh
+sh reset_docker.sh
 
 # 需要拉取镜像(这里以2.6.2版本为例)
 wget https://github.com/rancher/rancher/releases/download/v2.6.2/rancher-images.txt
 
-python3 all_image.py > pull_rancher_images.sh
-sh pull_rancher_images.sh
+sh pull_rancher_images.sh 
 
 export RANCHER_CONTAINER_TAG=v2.6.2
 sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
-
+# 打开 https://xx.xx.xx.xx:443/ 等待web界面可以打开。预计要1~10分钟
+# 查看登陆密码
+docker logs  myrancher  2>&1 | grep "Bootstrap Password:"
 ```
+
+# rancher server 启动可能问题
+
+permission denied
+
+mount 查看所属盘是否有noexec 限制
 
 # 部署k8s集群
 
@@ -147,6 +240,16 @@ services部分的示例（注意缩进对齐）
 并且使用单容器模式部署的时候，如果docker service或者机器重启了，rancher server就会报异常。一般会报wait k3s start的错误。
 因此下面提供一种方案，能使在单容器模式下，机器重启后，rancher server仍可用。
 ```bash
+
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl stop iptables
+systemctl disable iptables
+systemctl stop ip6tables
+systemctl disable ip6tables
+systemctl stop nftables
+systemctl disable nftables
+
 export RANCHER_CONTAINER_NAME=myrancher
 export RANCHER_CONTAINER_TAG=v2.6.2
 
@@ -155,7 +258,7 @@ docker create --volumes-from $RANCHER_CONTAINER_NAME --name rancher-data rancher
 # 先备份一遍
 docker run --volumes-from rancher-data --privileged -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup.tar.gz /var/lib/rancher
 docker run --name myrancher-new -d --privileged --volumes-from rancher-data --restart=unless-stopped -p 443:443 rancher/rancher:$RANCHER_CONTAINER_TAG
-# 等到上面运行成功
+# 等到新web界面正常打开
 docker rm $RANCHER_CONTAINER_NAME
 ```
 
