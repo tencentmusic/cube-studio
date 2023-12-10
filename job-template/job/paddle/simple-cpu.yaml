@@ -1,0 +1,25 @@
+apiVersion: "kubeflow.org/v1"
+kind: PaddleJob
+metadata:
+  name: paddle-simple-cpu
+  namespace: kubeflow
+spec:
+  paddleReplicaSpecs:
+    Worker:
+      replicas: 2
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: paddle
+              image: registry.baidubce.com/paddlepaddle/paddle:2.4.0rc0-cpu
+              command:
+                - python
+              args:
+                - "-m"
+                - paddle.distributed.launch
+                - "run_check"
+              ports:
+                - containerPort: 37777
+                  name: master
+              imagePullPolicy: Always
