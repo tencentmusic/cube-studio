@@ -4,7 +4,7 @@ FROM ${FROM_IMAGES}
 ARG PYTHON_VERSION
 
 # 安装python
-RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip python3-distutils
+RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip $PYTHON_VERSION-distutils
 RUN set -x; rm -rf /usr/bin/python; apt install -y --fix-missing ${PYTHON_VERSION} && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python
 
 RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ignore-installed" \
