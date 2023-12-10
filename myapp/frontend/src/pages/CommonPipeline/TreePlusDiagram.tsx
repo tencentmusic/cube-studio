@@ -88,7 +88,7 @@ export default class RelationDiagram extends D3Tool {
 	}
 
 	public htmlStrEnCode = (str: string) => {
-		const res = str.replace(/[\u00A0-\u9999<>\-\&\:]/g, function (i) {
+		const res = `${str}`.replace(/[\u00A0-\u9999<>\-\&\:]/g, function (i) {
 			return '&#' + i.charCodeAt(0) + ';';
 		})
 		return res
@@ -713,7 +713,7 @@ export default class RelationDiagram extends D3Tool {
 
 				this.loadingEnd && this.loadingEnd()
 				resolve('')
-			}, 0)
+			}, 100)
 		})
 	}
 

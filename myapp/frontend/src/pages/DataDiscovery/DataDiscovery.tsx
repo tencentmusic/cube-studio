@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next';
 import DataDiscoverySearch from '../../components/DataDiscoverySearch/DataDiscoverySearch';
 import './DataDiscovery.less';
 
 export default function DataDiscovery() {
+    const { t, i18n } = useTranslation();
     const [searchContent, setSearchContent] = useState<string>()
 
     return (
@@ -13,7 +15,7 @@ export default function DataDiscovery() {
                 onChange={(value) => {
                     setSearchContent(value)
                 }}
-                placeholder="输入关键字（表名）搜索" />
+                placeholder={t('输入关键字（表名）搜索')} />
         </div>
     )
 }

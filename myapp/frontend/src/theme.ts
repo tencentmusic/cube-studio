@@ -47,16 +47,16 @@ const star: IThemeConfig = {
 };
 
 const blue: IThemeConfig = {
-    '--ant-primary-color': '#40a9ff',
-    '--ant-primary-color-hover': '#40a9ff',
+    '--ant-primary-color': '#1672fa',
+    '--ant-primary-color-hover': '#1672fa',
     '--ant-primary-color-active': '#096dd9',
     '--ant-primary-color-outline': 'rgba(24, 144, 255, 0.2)',
     '--ant-primary-1': '#e6f7ff',
     '--ant-primary-2': '#bae7ff',
     '--ant-primary-3': '#91d5ff',
     '--ant-primary-4': '#69c0ff',
-    '--ant-primary-5': '#40a9ff',
-    '--ant-primary-6': '#40a9ff',
+    '--ant-primary-5': '#1672fa',
+    '--ant-primary-6': '#1672fa',
     '--ant-primary-7': '#096dd9',
     '--ant-primary-color-deprecated-pure': '',
     '--ant-primary-color-deprecated-l-35': '#cbe6ff',
@@ -87,7 +87,7 @@ const blue: IThemeConfig = {
     '--ant-info-color': '#1890ff',
     '--ant-info-color-deprecated-bg': '#e6f7ff',
     '--ant-info-color-deprecated-border': '#91d5ff',
-    '--ant-link': '#40a9ff',
+    '--ant-link': '#1672fa',
 };
 
 const dark: IThemeConfig = {
@@ -98,7 +98,7 @@ const themesCollection: Record<TThemeType, IThemeConfig> = { star, dark, blue };
 
 export type TThemeType = 'dark' | 'blue' | 'star'
 
-export const changeTheme = (theme: TThemeType) => {
+export const setTheme = (theme: TThemeType) => {
     const nextTheme = themesCollection[theme];
 
     Object.keys(nextTheme).forEach((key) => {

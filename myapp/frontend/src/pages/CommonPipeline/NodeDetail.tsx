@@ -70,39 +70,6 @@ export default function NodeDetail(props: IProps) {
         </Col>
     }
 
-    const handleNodeDetail = (item: any) => {
-        switch (item.type) {
-            case 'sql':
-                return <Col span={16}>
-                    <div className="ellip3" style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{item.value}</div>
-                    <div>
-                        <span className="link cp mr16" onClick={() => {
-                            setIsSqlVisable(true)
-                            setCurrentDataItem(item)
-                        }}>详情</span>
-                        <CopyToClipboard text={`${item.value || ''}`} onCopy={() => {
-                            message.success('已成功复制到粘贴板')
-                        }}>
-                            <span className="link cp">复制<CopyOutlined /></span>
-                        </CopyToClipboard>
-                    </div>
-                </Col>
-            case 'table':
-                return handelNodeDetailTable(item)
-            default:
-                break;
-        }
-
-        let tarValue: any = item.value
-        if (item.key === 'us_id') {
-            tarValue = <span><a target="_blank" href={`https://us.woa.com/#/taskManage/instance/${item.value}?inChargeType=0&search%7Citem.keywords%7CpageIndex%7CpageSize=%5B%7B%22taskId%22%3A%22${item.value}%22%7D%5D%5B1%5D%5B50%5D&searchNext%7CcycleUnit%7CpageIndex=%5BD%5D%5B1%5D&locale=zh_CN`} rel="noreferrer">{item.value}</a></span>
-        }
-        if (item.key === 'lifecycle') {
-            tarValue = <span>{item.value}<a className="pl8" target="_blank" href="http://tdwhelper.oa.com/storage_stat/storage_path_info.php" rel="noreferrer">修改生命周期</a></span>
-        }
-        return <Col span={16}><span style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{tarValue}</span></Col>
-    }
-
     const handleGroupContent = (type: TGroupContentType, content: any, tabName: string, groupName: string) => {
         switch (type) {
             case 'map':

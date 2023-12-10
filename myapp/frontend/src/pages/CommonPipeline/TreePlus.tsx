@@ -7,6 +7,7 @@ import NodeDetail from './NodeDetail';
 import RelationDiagram from './TreePlusDiagram';
 import { ILayoutConfig, INodeDetailItem, INodeItem } from './TreePlusInterface';
 import './TreePlus.less';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
 	id?: string | number | undefined | null;
@@ -20,6 +21,7 @@ export default function TreePlus(props: IProps) {
 	const [nodeDetail, setNodeDetail] = useState<INodeDetailItem[]>([])
 	const [loadingDetail, setLoadingDetail] = useState(false)
 	const [layoutConfig, setLayoutConfig] = useState<ILayoutConfig>()
+	const { t, i18n } = useTranslation();
 
 	const treeDataRef = useRef<INodeItem[]>()
 
@@ -111,7 +113,6 @@ export default function TreePlus(props: IProps) {
 				relationDiagram.initData([])
 				setIsNoData(true)
 			}
-
 		}
 	};
 
@@ -148,7 +149,7 @@ export default function TreePlus(props: IProps) {
 				isNoData ? <div className="p-a w100 h100 d-f ac jc ta-c z1">
 					<div>
 						<div><img className="w320" src={require('../../images/workData.png')} alt="" /></div>
-						<div className="fs22">暂无数据</div>
+						<div className="fs22">{t('暂无数据')}</div>
 					</div>
 				</div> : null
 			}

@@ -1,27 +1,27 @@
-@theme_color: #1E1653;
+@theme_color   : var(--ant-primary-color);
 // @theme_color: #0084f6;
-@title_b: #f2f3f5; //标题栏背景色
-@side_b: rgba(0, 0, 0, 0.04); //描边 & 模块分割底色
-@side_strong: #cacaca; //按钮描边
+@title_b       : #f2f3f5; //标题栏背景色
+@side_b        : rgba(0, 0, 0, 0.04); //描边 & 模块分割底色
+@side_strong   : #cacaca; //按钮描边
 
-@divider_b: #e5e5e5; //divider分割线
-@hint_b: rgba(0,0,0,0.32); //hint & disable
-@icon_b: #666666; //icon & secondary
-@text_b: #1d2129; //text
-@divider_w: rgba(white, 0.12); //divider
-@hint_w: rgba(white, 0.3); //hint disable
-@icon_w: rgba(white, 0.7); //icon secondary
-@text_w: rgb(255, 255, 255); //text
+@divider_b    : #e5e5e5; //divider分割线
+@hint_b       : rgba(0, 0, 0, 0.32); //hint & disable
+@icon_b       : #666666; //icon & secondary
+@text_b       : #1d2129; //text
+@divider_w    : rgba(white, 0.12); //divider
+@hint_w       : rgba(white, 0.3); //hint disable
+@icon_w       : rgba(white, 0.7); //icon secondary
+@text_w       : rgb(255, 255, 255); //text
 @success_green: #03b266;
-@fail_red: #ff4444;
-@warn_yellow: #fc7e36;
-@common_blue: #0084f6;
-@disable: #898183;
+@fail_red     : #ff4444;
+@warn_yellow  : #fc7e36;
+@common_blue  : @theme_color;
+@disable      : #898183;
 @placeholder_b: #cccccc;
 
 // ----------------------------------基础布局样式----------------------------------------
-.ti2{
-  text-indent:8px;
+.ti2 {
+  text-indent: 8px;
 }
 
 // 内边距
@@ -29,28 +29,36 @@
   .p@{i} {
     padding: @i * 1px;
   }
+
   .pt@{i} {
     padding-top: @i * 1px;
   }
+
   .pl@{i} {
     padding-left: @i * 1px;
   }
+
   .pb@{i} {
     padding-bottom: @i * 1px;
   }
+
   .pr@{i} {
     padding-right: @i * 1px;
   }
+
   .ptb@{i} {
-    padding-top: @i * 1px;
+    padding-top   : @i * 1px;
     padding-bottom: @i * 1px;
   }
+
   .plr@{i} {
-    padding-left: @i * 1px;
+    padding-left : @i * 1px;
     padding-right: @i * 1px;
   }
+
   .createPadding(@n, (@i + 2));
 }
+
 .createPadding(128);
 
 // 外边距
@@ -58,52 +66,64 @@
   .m@{i} {
     margin: @i * 1px;
   }
+
   .mt@{i} {
     margin-top: @i * 1px;
   }
+
   .ml@{i} {
     margin-left: @i * 1px;
   }
+
   .mb@{i} {
     margin-bottom: @i * 1px;
   }
+
   .mr@{i} {
     margin-right: @i * 1px;
   }
+
   .mtb@{i} {
-    margin-top: @i * 1px;
+    margin-top   : @i * 1px;
     margin-bottom: @i * 1px;
   }
+
   .mlr@{i} {
-    margin-left: @i * 1px;
+    margin-left : @i * 1px;
     margin-right: @i * 1px;
   }
+
   .createMargin(@n, (@i + 2));
 }
+
 .createMargin(128);
 
 // 高宽
 .createWH(@n, @i: 1) when (@i =< @n) {
   @name: @i*32;
+
   .w@{name} {
     width: @i * 32px;
   }
+
   .h@{name} {
     height: @i * 32px;
   }
 
   .createWH(@n, (@i + 1));
 }
+
 .createWH(30);
 
-.w33{
+.w33 {
   width: 33%;
 }
-.w50{
+
+.w50 {
   width: 50%;
 }
 
-.br3{
+.br3 {
   border-radius: 3px;
 }
 
@@ -111,12 +131,15 @@
 .fs0 {
   font-size: 0px;
 }
+
 .createFS(@n, @i: 12) when (@i =< @n) {
   .fs@{i} {
     font-size: @i * 1px;
   }
+
   .createFS(@n, (@i + 2));
 }
+
 .createFS(60);
 
 // 层级系列
@@ -181,7 +204,7 @@
   top: 0;
 }
 
-.l-10000{
+.l-10000 {
   left: -10000px;
 }
 
@@ -353,6 +376,7 @@
 .s0 {
   flex-shrink: 0;
 }
+
 // 边框系列
 .bor {
   border: solid 1px;
@@ -385,7 +409,8 @@
 }
 
 .bg-module {
-  background: rgba(0, 0, 0, 0.02);; //模块分割底色
+  background: rgba(0, 0, 0, 0.02);
+  ; //模块分割底色
 }
 
 .bg-title {
@@ -451,7 +476,7 @@
 
 // 状态色
 .bg-success {
-  background-color: @theme_color !important;
+  background-color: @theme_color  !important;
 }
 
 .bg-fail {
@@ -571,35 +596,35 @@
   position: relative;
 
   &::after {
-    position: absolute;
-    left: 0;
-    top: 0;
-    border: 1px solid;
-    width: 200%;
-    height: 200%;
-    content: "";
-    transform: scale(0.5);
+    position        : absolute;
+    left            : 0;
+    top             : 0;
+    border          : 1px solid;
+    width           : 200%;
+    height          : 200%;
+    content         : "";
+    transform       : scale(0.5);
     transform-origin: left top;
   }
 }
 
 // 用于全屏居中（容器）
 .center-fullscreen {
-  display: flex;
+  display        : flex;
   justify-content: center;
-  align-items: center;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
+  align-items    : center;
+  position       : absolute;
+  width          : 100%;
+  height         : 100%;
+  top            : 0;
+  left           : 0;
 }
 
 .fullscreen {
-  width: 100vw;
-  height: 100vh;
+  width     : 100vw;
+  height    : 100vh;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow  : hidden;
 }
 
 .box {
@@ -607,7 +632,7 @@
 }
 
 .shadow {
-    box-shadow: 0px 8px 16px -4px rgba(37, 48, 68, 0.16), 0px 1px 3px 0px rgba(37, 48, 68, 0.12);
+  box-shadow: 0px 8px 16px -4px rgba(37, 48, 68, 0.16), 0px 1px 3px 0px rgba(37, 48, 68, 0.12);
 }
 
 .shadow-hover {
@@ -623,94 +648,94 @@
 
 //文字限制几多行后就出现省略号
 .ellip1 {
-  overflow: hidden;
+  overflow     : hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space  : nowrap;
 }
 
-.ellip2{
-  display: -webkit-box;
-  overflow: hidden;
-  box-orient: vertical;
+.ellip2 {
+  display           : -webkit-box;
+  overflow          : hidden;
+  box-orient        : vertical;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
-.ellip3{
-  display: -webkit-box;
-  overflow: hidden;
-  box-orient: vertical;
+.ellip3 {
+  display           : -webkit-box;
+  overflow          : hidden;
+  box-orient        : vertical;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
 .link {
-  cursor: pointer;
-  color: @theme_color;
+  cursor         : pointer;
+  color          : @theme_color;
   text-decoration: none;
 }
 
-.mark{
+.mark {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
 .link-disable {
-  cursor: not-allowed;
-  color: @hint_b;
+  cursor         : not-allowed;
+  color          : @hint_b;
   text-decoration: none;
 }
 
 .btn-tag-info {
-  display: inline-block;
-  padding: 2px 6px 2px 6px;
-  color: @theme_color;
-  background-color: fade(@theme_color, 10%);
-  border-radius: 2px;
-  font-size: 12px;
-  font-weight: normal;
+  display         : inline-block;
+  padding         : 2px 6px 2px 6px;
+  color           : @theme_color;
+  background-color: rgba(@theme_color, 10%);
+  border-radius   : 2px;
+  font-size       : 12px;
+  font-weight     : normal;
 }
 
 .btn-tag-warn {
-  display: inline-block;
-  padding: 2px 6px 2px 6px;
-  color: @warn_yellow;
-  background-color: fade(@warn_yellow, 10%);
-  border-radius: 2px;
-  font-size: 12px;
-  font-weight: normal;
+  display         : inline-block;
+  padding         : 2px 6px 2px 6px;
+  color           : @warn_yellow;
+  background-color: rgba(@warn_yellow, 10%);
+  border-radius   : 2px;
+  font-size       : 12px;
+  font-weight     : normal;
 }
 
 .btn-tag-error {
-  display: inline-block;
-  padding: 2px 6px 2px 6px;
-  color: @fail_red;
-  background-color: fade(@fail_red, 10%);
-  border-radius: 2px;
-  font-size: 12px;
-  font-weight: normal;
+  display         : inline-block;
+  padding         : 2px 6px 2px 6px;
+  color           : @fail_red;
+  background-color: rgba(@fail_red, 10%);
+  border-radius   : 2px;
+  font-size       : 12px;
+  font-weight     : normal;
 }
 
 .btn-tag-success {
-  display: inline-block;
-  padding: 2px 6px 2px 6px;
-  color: @success_green;
-  background-color: fade(@success_green, 10%);
-  border-radius: 2px;
-  font-size: 12px;
-  font-weight: normal;
+  display         : inline-block;
+  padding         : 2px 6px 2px 6px;
+  color           : @success_green;
+  background-color: rgba(@success_green, 10%);
+  border-radius   : 2px;
+  font-size       : 12px;
+  font-weight     : normal;
 }
 
 .btn-tag-disable {
-  display: inline-block;
-  padding: 2px 6px 2px 6px;
-  color: @disable;
-  background-color: fade(@disable, 10%);
-  border-radius: 2px;
-  font-size: 12px;
-  font-weight: normal;
+  display         : inline-block;
+  padding         : 2px 6px 2px 6px;
+  color           : @disable;
+  background-color: rgba(@disable, 10%);
+  border-radius   : 2px;
+  font-size       : 12px;
+  font-weight     : normal;
 }
 
-.fadein{
+.fadein {
   animation: fadeIn 0.3s;
 }
 
@@ -718,12 +743,13 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
 }
 
-.divider{
-  border-top: 1px solid hsla(0,0%,91%,.1);
-  width: 100%;
+.divider {
+  border-top: 1px solid hsla(0, 0%, 91%, .1);
+  width     : 100%;
 }
