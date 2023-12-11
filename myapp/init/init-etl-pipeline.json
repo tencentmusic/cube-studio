@@ -1,0 +1,243 @@
+[
+  {
+    "name": "dau",
+    "describe": "dau计算",
+    "config": {
+        "alert_user": "admin"
+    },
+    "workflow": "airflow",
+    "dag_json": {
+      "cos导入hdfs-1686184253953": {
+        "label": "数据导入",
+        "location": [
+          304,
+          96
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "cos导入hdfs",
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "hdfsPath": "hdfs://xx/xxx",
+          "cosPath": "/xx/${YYYYMMDD}.tar.gz",
+          "ifNeedZip": "1",
+          "label": "数据导入"
+        },
+        "upstream": [],
+        "task_id": 1
+      },
+      "hdfs入库至hive-1686184263002": {
+        "label": "数据入库",
+        "location": [
+          304,
+          224
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "hdfs入库至hive",
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "charSet": "UTF-8",
+          "databaseName": "",
+          "tableName": "",
+          "delimiter": "9",
+          "failedOnZeroWrited": "1",
+          "partitionType": "P_${YYYYMMDDHH}",
+          "sourceFilePath": "",
+          "sourceFileNames": "*",
+          "sourceColumnNames": "",
+          "targetColumnNames": "",
+          "loadMode": "TRUNCATE",
+          "label": "数据入库"
+        },
+        "upstream": [
+          "cos导入hdfs-1686184253953"
+        ],
+        "task_id": 2
+      },
+      "SQL-1686184276800": {
+        "label": "局部特征计算",
+        "location": [
+          -16,
+          352
+        ],
+        "color": {
+          "color": "rgba(0,200,153,1)",
+          "bg": "rgba(0,200,153,0.02)"
+        },
+        "template": "SQL",
+        "template-group": "数据计算",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "filterSQL": "\n    --库名，替换下面的demo_database\n    use demo_database;\n\n    --建表语句，替换下面的demo_table，修改字段。一定要加“if not exists”，这样使只在第一次运行时建表\n    CREATE TABLE if not exists demo_table(\n        qimei36 STRING COMMENT '唯一设备ID',\n        userid_id STRING COMMENT '用户id（各app的用户id）',\n        device_id STRING COMMENT '设备id（各app的device_id）',\n        ftime INT COMMENT '数据分区时间 格式：yyyymmdd'\n    )\n    PARTITION BY LIST( ftime )          --定义分区字段，替换掉ftime。\n    (\n        PARTITION p_20220323 VALUES IN ( 20220323 ),       --初始分区，分区名替换p_20220323，分区值替换20220323\n        PARTITION default\n    )\n    STORED AS ORCFILE COMPRESS;\n\n    -- 分区，根据时间参数新建分区。\n    alter table demo_table drop partition (p_${YYYYMMDD});\n    alter table demo_table add partition p_${YYYYMMDD} values in (${YYYYMMDD});\n\n    -- 写入，用你的sql逻辑替换。\n    insert table demo_table\n    select * from other_db::other_table partition(p_${YYYYMMDD}) t;\n    ",
+          "special_para": "set hive.exec.parallel = true;set hive.execute.engine=spark;set hive.multi.join.use.hive=false;set hive.spark.failed.retry=false;",
+          "label": "局部特征计算"
+        },
+        "upstream": [
+          "hdfs入库至hive-1686184263002"
+        ],
+        "task_id": 3
+      },
+      "SparkScala-1686184279367": {
+        "label": "局部特征计算",
+        "location": [
+          304,
+          352
+        ],
+        "color": {
+          "color": "rgba(0,200,153,1)",
+          "bg": "rgba(0,200,153,0.02)"
+        },
+        "template": "SparkScala",
+        "template-group": "数据计算",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "jar_path": "",
+          "className": "",
+          "files": "",
+          "programSpecificParams": "",
+          "options": "",
+          "dynamicAllocation": "1",
+          "driver_memory": "2g",
+          "num_executors": "4",
+          "executor_memory": "2g",
+          "executor_cores": "2",
+          "task.main.timeout": "480",
+          "task.check.timeout": "5",
+          "label": "局部特征计算"
+        },
+        "upstream": [
+          "hdfs入库至hive-1686184263002"
+        ],
+        "task_id": 4
+      },
+      "pyspark-1686184281148": {
+        "label": "局部特征计算",
+        "location": [
+          608,
+          352
+        ],
+        "color": {
+          "color": "rgba(0,200,153,1)",
+          "bg": "rgba(0,200,153,0.02)"
+        },
+        "template": "pyspark",
+        "template-group": "数据计算",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "py_script_path": "",
+          "files": "",
+          "pyFiles": "",
+          "programSpecificParams": "",
+          "options": "",
+          "dynamicAllocation": 1,
+          "driver_memory": "2g",
+          "num_executors": 4,
+          "executor_memory": "2g",
+          "executor_cores": 2,
+          "task.main.timeout": 480,
+          "task.check.timeout": "5",
+          "label": "局部特征计算"
+        },
+        "upstream": [
+          "hdfs入库至hive-1686184263002"
+        ],
+        "task_id": 5
+      },
+      "hive出库至hdfs-1686184293917": {
+        "label": "结果计算",
+        "location": [
+          304,
+          496
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "hive出库至hdfs",
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "databaseName": "",
+          "destCheckFileName": "",
+          "destCheckFilePath": "",
+          "destFileDelimiter": "9",
+          "destFilePath": "",
+          "filterSQL": "select t1,t2,t3 from your_table where imp_date=${YYYYMMDD}",
+          "label": "结果计算"
+        },
+        "upstream": [
+          "SQL-1686184276800",
+          "pyspark-1686184281148",
+          "SparkScala-1686184279367"
+        ],
+        "task_id": 6
+      },
+      "hdfs导入cos-1686184296749": {
+        "label": "数据导出",
+        "location": [
+          304,
+          608
+        ],
+        "color": {
+          "color": "rgba(0,170,200,1)",
+          "bg": "rgba(0,170,200,0.02)"
+        },
+        "template": "hdfs导入cos",
+        "template-group": "出库入库",
+        "task-config": {
+          "crontab": "1 1 * * *",
+          "selfDepend": "单实例运行",
+          "ResourceGroup": "default",
+          "alert_user": "admin,",
+          "timeout": "0",
+          "retry": "0",
+          "hdfsPath": "hdfs://xx/xxx",
+          "cosPath": "/xx/xx/${YYYYMMDD}.tar.gz",
+          "ifNeedZip": "1",
+          "label": "数据导出"
+        },
+        "upstream": [
+          "hive出库至hdfs-1686184293917"
+        ],
+        "task_id": 7
+      }
+    }
+  }
+]

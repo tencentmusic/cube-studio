@@ -1,0 +1,10 @@
+[
+  {
+    "group_name": "基础命令",
+    "name": "ccr.ccs.tencentyun.com/cube-studio/python:strong",
+    "repository": "hubsecret",
+    "gitpath": "",
+    "describe": "丰富版本python镜像",
+    "dockerfile":"FROM python:3.9\n\nENV TZ=Asia/Shanghai\nENV DEBIAN_FRONTEND=noninteractive\n\nRUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple\n\nRUN pip install numpy \n\nWORKDIR /app\n\nEXPOSE 80"
+  }
+]

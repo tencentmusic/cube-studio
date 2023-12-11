@@ -1,0 +1,86 @@
+[
+  {
+    "type": "org",
+    "name": "推荐中心",
+    "describe": "推荐项目组",
+    "expand": {}
+  },
+    {
+    "type": "org",
+    "name": "搜索中心",
+    "describe": "搜索项目组",
+    "expand": {}
+  },
+    {
+    "type": "org",
+    "name": "广告中心",
+    "describe": "广告项目组",
+    "expand": {}
+  },  {
+    "type": "org",
+    "name": "安全中心",
+    "describe": "安全项目组",
+    "expand": {}
+  },  {
+    "type": "org",
+    "name": "多媒体中心",
+    "describe": "多媒体项目组",
+    "expand": {}
+  }, {
+    "type": "job-template",
+    "name": "基础命令",
+    "describe": "python/bash等直接在服务器命令行中执行命令的模板",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "数据导入导出",
+    "describe": "集群与用户机器或其他集群之间的数据迁移",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "数据预处理",
+    "describe": "结构化话数据特征处理",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "数据处理工具",
+    "describe": "数据的单机或分布式处理任务,ray/spark/hadoop/volcanojob",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "基础命令",
+    "describe": "python/bash等直接在服务器命令行中执行命令的模板",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "特征处理",
+    "describe": "特征处理相关",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "机器学习框架",
+    "describe": "传统机器学习框架，sklearn",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "机器学习算法",
+    "describe": "传统机器学习，lr/决策树/gbdt/xgb/fm等",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "深度学习",
+    "describe": "深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "分布式加速",
+    "describe": "tf相关的训练，模型校验，离线预测等功能",
+    "expand": {"index": 1}
+  }, {
+    "type": "job-template",
+    "name": "tf分布式",
+    "describe": "tf相关的训练，模型校验，离线预测等功能",
+    "expand": {"index": 1}
+  }
+
+]
