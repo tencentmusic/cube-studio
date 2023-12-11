@@ -1,4 +1,4 @@
-import json, datetime
+import json, datetime, time
 import requests
 import pysnooper
 
@@ -25,8 +25,8 @@ class Prometheus():
         # print(mem_expr)
         params = {
             'query': mem_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time())-300,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -52,8 +52,8 @@ class Prometheus():
         # print(mem_expr)
         params = {
             'query': mem_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 300,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -79,8 +79,8 @@ class Prometheus():
 
         params = {
             'query': cpu_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 300,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -101,7 +101,7 @@ class Prometheus():
         except Exception as e:
             print(e)
 
-        gpu_expr = "avg by (exported_pod) (DCGM_FI_DEV_GPU_UTIL{exported_namespace='%s'})" % (namespace)
+        gpu_expr = "avg by (pod) (DCGM_FI_DEV_GPU_UTIL{namespace='%s'})" % (namespace)
 
         params = {
             'query': gpu_expr,
@@ -120,7 +120,7 @@ class Prometheus():
                 if metrics:
                     # print(metrics)
                     for pod in metrics:
-                        pod_name = pod['metric']['exported_pod']
+                        pod_name = pod['metric']['pod']
                         if pod_name not in service_metric['gpu']:
                             service_metric['gpu'][pod_name] = {}
                         service_metric['gpu'][pod_name] = pod['values']
@@ -129,6 +129,107 @@ class Prometheus():
             print(e)
 
         return service_metric
+
+
+
+    # 获取当前pod利用率
+    # @pysnooper.snoop()
+    def get_resource_metric(self):
+        max_cpu = 0
+        max_mem = 0
+        ave_gpu = 0
+        pod_metric = {}
+        # 这个pod  30分钟内的最大值
+        mem_expr = "sum by (pod) (container_memory_working_set_bytes{container!='POD', container!=''})"
+        # print(mem_expr)
+        params = {
+            'query': mem_expr,
+            'start': int(time.time()) - 300,
+            'end': int(time.time()),
+            'step': "1m",  # 运行小于1分钟的，将不会被采集到
+            # 'timeout':"30s"
+        }
+        print(params)
+
+        try:
+            res = requests.get(url=self.query_range_path, params=params)
+            metrics = json.loads(res.content.decode('utf8', 'ignore'))
+            if metrics['status'] == 'success':
+                metrics = metrics['data']['result']
+                if metrics:
+                    for pod in metrics:
+                        if pod['metric']:
+                            pod_name = pod['metric']['pod']
+                            values = max([float(x[1]) for x in pod['values']])
+                            if pod_name not in pod_metric:
+                                pod_metric[pod_name] = {}
+                            pod_metric[pod_name]['memory'] = round(values / 1024 / 1024 / 1024, 2)
+
+        except Exception as e:
+            print(e)
+
+        cpu_expr = "sum by (pod) (rate(container_cpu_usage_seconds_total{container!='POD'}[1m]))"
+
+        params = {
+            'query': cpu_expr,
+            'start': int(time.time()) - 300,
+            'end': int(time.time()),
+            'step': "1m",  # 运行小于1分钟的，将不会被采集到
+            # 'timeout':"30s"
+        }
+        print(params)
+        try:
+
+            res = requests.get(url=self.query_range_path, params=params)
+            metrics = json.loads(res.content.decode('utf8', 'ignore'))
+            if metrics['status'] == 'success':
+                metrics = metrics['data']['result']
+                if metrics:
+                    for pod in metrics:
+                        if pod['metric']:
+                            pod_name = pod['metric']['pod']
+                            values = [float(x[1]) for x in pod['values']]
+                            # values = round(sum(values) / len(values), 2)
+                            values = round(max(values), 2)
+                            if pod_name not in pod_metric:
+                                pod_metric[pod_name] = {}
+                            pod_metric[pod_name]['cpu'] = values
+
+        except Exception as e:
+            print(e)
+
+        gpu_expr = "avg by (pod) (DCGM_FI_DEV_GPU_UTIL)"
+
+        params = {
+            'query': gpu_expr,
+            'start': int(time.time()) - 300,
+            'end': int(time.time()),
+            'step': "1m",  # 运行小于1分钟的，将不会被采集到
+            # 'timeout':"30s"
+        }
+        print(params)
+        try:
+
+            res = requests.get(url=self.query_range_path, params=params)
+            metrics = json.loads(res.content.decode('utf8', 'ignore'))
+            if metrics['status'] == 'success':
+                metrics = metrics['data']['result']
+                if metrics:
+                    # print(metrics)
+                    for pod in metrics:
+                        if pod['metric']:
+                            pod_name = pod['metric']['pod']
+                            values = [float(x[1]) for x in pod['values']]
+                            # values = round(sum(values)/len(values),2)
+                            values = round(max(values), 2)
+                            if pod_name not in pod_metric:
+                                pod_metric[pod_name] = {}
+                            pod_metric[pod_name]['gpu'] = values / 100
+
+        except Exception as e:
+            print(e)
+
+        return pod_metric
 
     # @pysnooper.snoop()
     def get_namespace_resource_metric(self, namespace):
@@ -141,8 +242,8 @@ class Prometheus():
         # print(mem_expr)
         params = {
             'query': mem_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 60*60*24,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -168,8 +269,8 @@ class Prometheus():
 
         params = {
             'query': cpu_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 60*60*24,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -193,12 +294,12 @@ class Prometheus():
         except Exception as e:
             print(e)
 
-        gpu_expr = "avg by (exported_pod) (DCGM_FI_DEV_GPU_UTIL{exported_namespace='%s'})" % (namespace)
+        gpu_expr = "avg by (pod) (DCGM_FI_DEV_GPU_UTIL{namespace='%s'})" % (namespace)
 
         params = {
             'query': gpu_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 60*60*24,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -212,7 +313,7 @@ class Prometheus():
                 if metrics:
                     # print(metrics)
                     for pod in metrics:
-                        pod_name = pod['metric']['exported_pod']
+                        pod_name = pod['metric']['pod']
                         values = [float(x[1]) for x in pod['values']]
                         # values = round(sum(values)/len(values),2)
                         values = round(max(values), 2)
@@ -237,8 +338,8 @@ class Prometheus():
         # print(mem_expr)
         params = {
             'query': mem_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 60*60*24,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -262,8 +363,8 @@ class Prometheus():
 
         params = {
             'query': cpu_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 60*60*24,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
@@ -282,18 +383,17 @@ class Prometheus():
         except Exception as e:
             print(e)
 
-        gpu_expr = "avg by (exported_pod) (DCGM_FI_DEV_GPU_UTIL{exported_namespace='%s',exported_pod=~'%s.*'})" % (namespace, pod_name)
+        gpu_expr = "avg by (pod) (DCGM_FI_DEV_GPU_UTIL{namespace='%s',pod=~'%s.*'})" % (namespace, pod_name)
 
         params = {
             'query': gpu_expr,
-            'start': (datetime.datetime.now() - datetime.timedelta(days=1) - datetime.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
-            'end': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+            'start': int(time.time()) - 60*60*24,
+            'end': int(time.time()),
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
         print(params)
         try:
-
             res = requests.get(url=self.query_range_path, params=params)
             metrics = json.loads(res.content.decode('utf8', 'ignore'))
             if metrics['status'] == 'success':

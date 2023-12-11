@@ -13,9 +13,9 @@ from inspect import isfunction
 from sqlalchemy import create_engine
 from flask_appbuilder.actions import action
 from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from flask_appbuilder.actions import ActionItem
 from flask.globals import session
-from flask_babel import lazy_gettext as _
 import jsonschema
 from marshmallow import ValidationError
 from marshmallow_sqlalchemy.fields import Related, RelatedList
@@ -73,7 +73,6 @@ from myapp.models.favorite import Favorite
 
 conf = app.config
 
-log = logging.getLogger(__name__)
 API_COLUMNS_INFO_RIS_KEY = 'columns_info'
 API_ADD_FIELDSETS_RIS_KEY = 'add_fieldsets'
 API_EDIT_FIELDSETS_RIS_KEY = 'edit_fieldsets'
@@ -240,6 +239,10 @@ import pysnooper
 class MyappModelRestApi(ModelRestApi):
     # 定义主键列
     label_title = ''
+    list_title =''
+    add_title = ''
+    edit_title = ''
+    show_title = ''
     primary_key = 'id'
     api_type = 'json'
     allow_browser_login = True
@@ -248,6 +251,7 @@ class MyappModelRestApi(ModelRestApi):
     src_item_object = None  # 原始model对象
     src_item_json = {}  # 原始model对象的json
     check_edit_permission = None
+    check_delete_permission = None
     datamodel = None
 
     def pre_show(self, item):
@@ -344,6 +348,7 @@ class MyappModelRestApi(ModelRestApi):
     echart_option = None
     alert_config = {}
     expand_columns = {}
+    order_columns = []
 
     # @pysnooper.snoop()
     def csv_response(self, file_path, file_name=None):
@@ -381,7 +386,6 @@ class MyappModelRestApi(ModelRestApi):
 
         # flashes.append((category, message))
         session["_flashes"] = []
-
         _ret_json = jsonify(kwargs)
         resp = make_response(_ret_json, code)
         flash_json = []
@@ -391,27 +395,40 @@ class MyappModelRestApi(ModelRestApi):
         resp.headers["Content-Type"] = "application/json; charset=utf-8"
         return resp
 
+    # @pysnooper.snoop()
     def _init_titles(self):
-        """
-            Init Titles if not defined
-        """
-        super(ModelRestApi, self)._init_titles()
-        class_name = self.datamodel.model_name
-        if self.label_title:
-            self.list_title = self.label_title + " 列表"
-            self.add_title = "添加 " + self.label_title
-            self.edit_title = "编辑 " + self.label_title
-            self.show_title = "查看 " + self.label_title
 
-        if not self.list_title:
-            self.list_title = "List " + self._prettify_name(class_name)
-        if not self.add_title:
-            self.add_title = "Add " + self._prettify_name(class_name)
-        if not self.edit_title:
-            self.edit_title = "Edit " + self._prettify_name(class_name)
-        if not self.show_title:
-            self.show_title = "Show " + self._prettify_name(class_name)
+        if self.label_title:
+            # if not self.list_title:
+            self.list_title = self.label_title + __(" 列表")
+            # if not self.add_title:
+            self.add_title = __("添加 ") + self.label_title
+            # if not self.edit_title:
+            self.edit_title = __("编辑 ") + self.label_title
+            # if not self.show_title:
+            self.show_title = __("查看 ") + self.label_title
+
         self.title = self.list_title
+
+    # @pysnooper.snoop()
+    def _init_label_columns(self):
+        # 初始化label字段
+        # 全局的label
+        all_label_columns={}
+        if hasattr(self.datamodel.obj, 'label_columns') and self.datamodel.obj.label_columns:
+            for col in self.datamodel.obj.label_columns:
+                all_label_columns[col] = self.datamodel.obj.label_columns[col]
+        # print(all_label_columns)
+        new_label_columns = self.list_columns+self.show_columns+self.edit_columns+self.add_columns
+        new_label_columns = list(set(new_label_columns))
+        for col in new_label_columns:
+            self.label_columns[col] = all_label_columns.get(col,col)
+            # print(col,self.label_columns[col])
+
+        # 本view特定的label
+        for col in self.spec_label_columns:
+            self.label_columns[col] = self.spec_label_columns[col]
+
 
     # @pysnooper.snoop()
     def _init_properties(self):
@@ -428,16 +445,7 @@ class MyappModelRestApi(ModelRestApi):
                 action = ActionItem(*func._action, func=func)
                 self.actions[action.name] = action
 
-        # 初始化label字段
-        # 全局的label
-        if hasattr(self.datamodel.obj, 'label_columns') and self.datamodel.obj.label_columns:
-            for col in self.datamodel.obj.label_columns:
-                self.label_columns[col] = self.datamodel.obj.label_columns[col]
-
-        # 本view特定的label
-        for col in self.spec_label_columns:
-            self.label_columns[col] = self.spec_label_columns[col]
-
+        # self._init_label_columns()
         self.primary_key = self.datamodel.get_pk_name()
 
         self._init_cols_width()
@@ -465,11 +473,11 @@ class MyappModelRestApi(ModelRestApi):
             )
         if self.add_model_schema is None:
             self.add_model_schema = self.model2schemaconverter.convert(
-                self.add_columns, nested=False, enum_dump_by_name=True
+                self.add_columns, nested=False
             )
         if self.edit_model_schema is None:
             self.edit_model_schema = self.model2schemaconverter.convert(
-                list(set(list(self.edit_columns+self.show_columns+self.list_columns+self.search_columns))), nested=False, enum_dump_by_name=True
+                list(set(list(self.edit_columns+self.show_columns+self.list_columns+self.search_columns))), nested=False
             )
         if self.show_model_schema is None:
             self.show_model_schema = self.model2schemaconverter.convert(
@@ -887,8 +895,8 @@ class MyappModelRestApi(ModelRestApi):
             action = self.actions[attr_name]
             actions_info[action.name] = {
                 "name": action.name,
-                "text": action.text,
-                "confirmation": action.confirmation,
+                "text": __(action.text),
+                "confirmation": __(action.confirmation),
                 "icon": action.icon,
                 "multiple": action.multiple,
                 "single": action.single
@@ -929,6 +937,8 @@ class MyappModelRestApi(ModelRestApi):
         pass
 
     def merge_list_title(self, response, **kwargs):
+        self._init_titles()
+        # print(self.list_title)
         response[API_LIST_TITLE_RES_KEY] = self.list_title
 
     def merge_show_title(self, response, **kwargs):
@@ -967,10 +977,10 @@ class MyappModelRestApi(ModelRestApi):
     @merge_response_func(merge_show_columns, API_SHOW_COLUMNS_RIS_KEY)
     @merge_response_func(merge_list_label_columns, API_LABEL_COLUMNS_RIS_KEY)
     @merge_response_func(merge_list_columns, API_LIST_COLUMNS_RIS_KEY)
-    @merge_response_func(merge_list_title, API_LIST_TITLE_RIS_KEY)
     @merge_response_func(merge_show_title, API_SHOW_TITLE_RIS_KEY)
     @merge_response_func(merge_add_title, API_ADD_TITLE_RIS_KEY)
     @merge_response_func(merge_edit_title, API_EDIT_TITLE_RIS_KEY)
+    @merge_response_func(merge_list_title, API_LIST_TITLE_RIS_KEY)
     @merge_response_func(merge_description_columns, API_DESCRIPTION_COLUMNS_RIS_KEY)
     @merge_response_func(merge_order_columns, API_ORDER_COLUMNS_RIS_KEY)
     @merge_response_func(merge_columns_info, API_COLUMNS_INFO_RIS_KEY)
@@ -990,11 +1000,19 @@ class MyappModelRestApi(ModelRestApi):
                     self.pre_update_web(item)
                 except Exception as e:
                     print(e)
-            if item and self.check_item_permissions:
-                try:
-                    self.check_item_permissions(item)
-                except Exception as e:
-                    print(e)
+            # # 似乎未生效
+            # if item and self.check_item_permissions:
+            #     try:
+            #         self.check_item_permissions(item)
+            #     except Exception as e:
+            #         print(e)
+
+            if self.check_edit_permission:
+                has_permission = self.check_edit_permission(item)
+                if not has_permission:
+                    flash('no permission to edit', category='warning')
+                    return self.response_error(422, message='no permission to edit')
+
         elif self.pre_add_web:
             try:
                 self.pre_add_web()
@@ -1054,7 +1072,7 @@ class MyappModelRestApi(ModelRestApi):
         else:
             _show_model_schema = self.show_model_schema
 
-        data = _show_model_schema.dump(item, many=False).data
+        data = _show_model_schema.dump(item, many=False)
         if int(_args.get('str_related', 0)):
             for key in data:
                 if type(data[key]) == dict:
@@ -1074,15 +1092,16 @@ class MyappModelRestApi(ModelRestApi):
             "status": 0,
             'message': "success"
         }
+
         return self.response(200, **back_data)
 
     @expose("/", methods=["GET"])
-    # @pysnooper.snoop(watch_explode=('_args','_filters'))
+    # @pysnooper.snoop(watch_explode=('aa'))
     def api_list(self, **kwargs):
         _response = dict()
 
         try:
-            req_json = request.json or {}
+            req_json = request.get_json(silent=True) or {}
         except Exception as e:
             print(e)
             req_json = {}
@@ -1156,6 +1175,7 @@ class MyappModelRestApi(ModelRestApi):
         )
         if self.post_list:
             lst = self.post_list(lst)
+
         # pks = self.datamodel.get_keys(lst)
         # import marshmallow.schema
         # for item in lst:
@@ -1163,7 +1183,7 @@ class MyappModelRestApi(ModelRestApi):
         # aa =
         # item.project = 'aaa'
 
-        data = _list_model_schema.dump(lst, many=True).data
+        data = _list_model_schema.dump(lst, many=True)
 
         # 把外键换成字符串
         if int(_args.get('str_related', 0)):
@@ -1189,6 +1209,8 @@ class MyappModelRestApi(ModelRestApi):
             'message': "success"
         }
         # print(back_data)
+        # aa = back_data['result']
+        # back_data['result']['data'][0]['creator']='aaaa'
         return self.response(200, **back_data)
 
     # @pysnooper.snoop()
@@ -1241,28 +1263,32 @@ class MyappModelRestApi(ModelRestApi):
             return self.response_error(400, message="Request is not JSON")
         try:
             json_data = request.json
+            for key in json_data:
+                if type(json_data[key]) == str:
+                    json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入
             if self.pre_add_req:
-                json_data_temp = self.pre_add_req(req_json=request.json)
+                json_data_temp = self.pre_add_req(req_json=json_data)
                 if json_data_temp:
                     json_data = json_data_temp
             # 将扩展字段先合并在一起
             if self.expand_columns:
                 json_data = self.to_expand(json_data)
 
+            json_data = {key: json_data[key] for key in json_data if key in self.add_columns}
             item = self.add_model_schema.load(json_data)
             # item = self.add_model_schema.load(data)
         except Exception as err:
             flash(str(err),'error')
             return self.response_error(422, message=str(err))
         # This validates custom Schema with custom validations
-        if isinstance(item.data, dict):
+        if isinstance(item, dict):
             return self.response_error(422, message=item.errors)
         try:
-            self.pre_add(item.data)
-            self.datamodel.add(item.data, raise_exception=True)
-            self.post_add(item.data)
-            result_data = self.add_model_schema.dump(item.data, many=False).data
-            result_data[self.primary_key] = self.datamodel.get_pk_value(item.data)
+            self.pre_add(item)
+            self.datamodel.add(item, raise_exception=True)
+            self.post_add(item)
+            result_data = self.add_model_schema.dump(item, many=False)
+            result_data[self.primary_key] = self.datamodel.get_pk_value(item)
             back_data = {
                 'result': result_data,
                 "status": 0,
@@ -1277,6 +1303,7 @@ class MyappModelRestApi(ModelRestApi):
         except Exception as e1:
             return self.response_error(500, message=str(e1))
 
+    @event_logger.log_this
     @expose("/<int:pk>", methods=["PUT"])
     # @pysnooper.snoop(watch_explode=('item','data'))
     def api_edit(self, pk):
@@ -1284,47 +1311,48 @@ class MyappModelRestApi(ModelRestApi):
         item = self.datamodel.get(pk, self._base_filters)
         self.src_item_json = item.to_json()
 
-        try:
-            if self.check_edit_permission:
-                has_permission = self.check_edit_permission(item)
-                if not has_permission:
-                    return json_response(message='no permission to edit', status=1, result={})
-
-        except Exception as e:
-            print(e)
-            return json_response(message='check edit permission' + str(e), status=1, result={})
+        if self.check_edit_permission:
+            has_permission = self.check_edit_permission(item)
+            if not has_permission:
+                flash('no permission to edit', category='warning')
+                return self.response_error(422, message='no permission to edit')
 
         if not request.is_json:
             return self.response_error(400, message="Request is not JSON")
         if not item:
             return self.response_error(404, message='Not found')
         try:
+            json_data = request.json
+            for key in json_data:
+                if type(json_data[key]) == str:
+                    json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入
+
             if self.pre_update_req:
-                json_data = self.pre_update_req(request.json)
-            else:
-                json_data = request.json
+                json_data = self.pre_update_req(json_data)
+
             # 将扩展字段先合并在一起
             if self.expand_columns:
                 json_data = self.to_expand(json_data)
 
             data = self._merge_update_item(item, json_data)
+            data = {key: data[key] for key in data if key in self.edit_columns}
             item = self.edit_model_schema.load(data, instance=item)
         except Exception as err:
             return self.response_error(422, message=str(err))
             # return self.response_error(422, message=err.messages)
         # This validates custom Schema with custom validations
-        if isinstance(item.data, dict):
+        if isinstance(item, dict):
             return self.response_error(422, message=item.errors)
-        self.pre_update(item.data)
+        self.pre_update(item)
 
         try:
-            self.datamodel.edit(item.data, raise_exception=True)
+            self.datamodel.edit(item, raise_exception=True)
             if self.post_update:
-                self.post_update(item.data)
+                self.post_update(item)
             result = self.edit_model_schema.dump(
-                item.data, many=False
-            ).data
-            result[self.primary_key] = self.datamodel.get_pk_value(item.data)
+                item, many=False
+            )
+            result[self.primary_key] = self.datamodel.get_pk_value(item)
             back_data = {
                 "status": 0,
                 "message": "success",
@@ -1337,12 +1365,20 @@ class MyappModelRestApi(ModelRestApi):
         except IntegrityError as e:
             return self.response_error(422, message=str(e.orig))
 
+    @event_logger.log_this
     @expose("/<int:pk>", methods=["DELETE"])
     # @pysnooper.snoop()
     def api_delete(self, pk):
         item = self.datamodel.get(pk, self._base_filters)
         if not item:
             return self.response_error(404, message='Not found')
+
+        if self.check_delete_permission:
+            has_permission = self.check_delete_permission(item)
+            if not has_permission:
+                flash('no permission to delete',category='warning')
+                return self.response_error(422, message='no permission to delete')
+
         if self.pre_delete:
             self.pre_delete(item)
         try:
@@ -1357,6 +1393,7 @@ class MyappModelRestApi(ModelRestApi):
         except IntegrityError as e:
             return self.response_error(422, message=str(e.orig))
 
+    @event_logger.log_this
     @expose("/action/<string:name>/<int:pk>", methods=["GET"])
     def single_action(self, name, pk):
         """
@@ -1381,6 +1418,7 @@ class MyappModelRestApi(ModelRestApi):
             }
             return self.response(200, **back)
 
+    @event_logger.log_this
     @expose("/multi_action/<string:name>", methods=["POST"])
     def multi_action(self, name):
         """
@@ -1427,7 +1465,7 @@ class MyappModelRestApi(ModelRestApi):
 
     @expose("/echart", methods=["GET"])
     def echart(self):
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         _args.update(json.loads(request.args.get('form_data', "{}")))
         for key in request.args:
             if key!='form_data':
@@ -1474,11 +1512,12 @@ class MyappModelRestApi(ModelRestApi):
             for col_name in header:
                 # attr = self.datamodel.obj
                 if not hasattr(self.datamodel.obj, col_name):
-                    flash('csv首行header与数据库字段不对应', 'warning')
+                    message = __('csv首行header与数据库字段不对应')
+                    flash(message, 'warning')
                     back = {
                         "status": 1,
                         "result": [],
-                        "message": "csv首行header与数据库字段不对应"
+                        "message": message
                     }
                     return self.response(200, **back)
 
@@ -1507,10 +1546,10 @@ class MyappModelRestApi(ModelRestApi):
                 print(e)
                 result.append(str(e))
 
-        flash('成功导入%s行，失败导入%s行' % (len([x for x in result if x == 'success']), len([x for x in result if x == 'fail'])),'warning')
+        flash('success %s rows，fail %s rows' % (len([x for x in result if x == 'success']), len([x for x in result if x == 'fail'])),'warning')
         back = {
             "status": 0,
-            "message": "result为上传成功行，共成功%s" % len([x for x in result if x == 'success']),
+            "message": "success %s rows" % len([x for x in result if x == 'success']),
             "result": result
         }
         return self.response(200, **back)
@@ -1536,7 +1575,7 @@ class MyappModelRestApi(ModelRestApi):
         if os.path.exists(csv_file_path):
             os.remove(csv_file_path)
 
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         req_json = json.loads(request.args.get('form_data', "{}"))  # 根据请求筛选下载数据，而不是全量下载
         _args.update(req_json)
         # 下载搜索出来的
@@ -1593,7 +1632,7 @@ class MyappModelRestApi(ModelRestApi):
                 back_data = {
                     'result': '',
                     "status": 'success',
-                    'message': '收藏成功'
+                    'message': 'favorite success'
                 }
                 return self.response(200, **back_data)
 
@@ -1601,7 +1640,7 @@ class MyappModelRestApi(ModelRestApi):
                 back_data = {
                     'result': '',
                     "status": 'fail',
-                    'message': '目标不存在，或无权限查看'
+                    'message': 'target not exist or no permission'
                 }
                 return self.response(404, **back_data)
         elif request.method=='DELETE':
@@ -1612,7 +1651,7 @@ class MyappModelRestApi(ModelRestApi):
             back_data = {
                 'result': '',
                 "status": 'success',
-                'message': '取消收藏成功'
+                'message': 'unfavorite success'
             }
             return self.response(200, **back_data)
 
@@ -1621,7 +1660,7 @@ class MyappModelRestApi(ModelRestApi):
     #     item = self.datamodel.get(pk, self._base_filters)
     #     return response
 
-    @action("muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False)
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
     # @pysnooper.snoop(watch_explode=('items'))
     def muldelete(self, items):
         if not items:
@@ -1746,6 +1785,7 @@ class MyappModelRestApi(ModelRestApi):
 
         return ret
 
+    # 有可能在过程中变化了label columns
     def _label_columns_json(self, cols=None):
         """
             Prepares dict with labels to be JSON serializable
@@ -1757,18 +1797,7 @@ class MyappModelRestApi(ModelRestApi):
         for key, value in d.items():
             ret[key] = as_unicode(_(value).encode("UTF-8"))
 
-        # 全局的label
-        if hasattr(self.datamodel.obj, 'label_columns') and self.datamodel.obj.label_columns:
-            for col in self.datamodel.obj.label_columns:
-                ret[col] = self.datamodel.obj.label_columns[col]
-
-        # 本view特定的label
-        for col in self.label_columns:
-            ret[col] = self.label_columns[col]
-
-        # 本view特定的label
-        for col in self.spec_label_columns:
-            ret[col] = self.spec_label_columns[col]
+        self._init_label_columns()
 
         # 扩展字段里面的label
         if self.expand_columns:
@@ -1779,6 +1808,9 @@ class MyappModelRestApi(ModelRestApi):
                 column_field_kwargs = new_columns[col_name].kwargs
                 ret[col_name] = column_field_kwargs.get('label',col_name)
 
+        new_label_columns = self.list_columns+self.show_columns+self.edit_columns+self.add_columns
+        for col in list(set(new_label_columns)):
+            ret[col] = self.label_columns.get(col,col)
 
         return ret
 
@@ -1907,7 +1939,7 @@ class MyappModelRestApi(ModelRestApi):
 
             # 处理扩展字段，一个字段存储一个list的值
             if hasattr(column_field_kwargs['widget'], 'expand_filed') and column_field_kwargs['widget'].expand_filed:
-                print(column_name)
+                # print(column_name)
                 ret['ui-type'] = 'list'
                 ret["info"] = self.columnsfield2info(column_field_kwargs['widget'].expand_filed)
 
@@ -1917,7 +1949,7 @@ class MyappModelRestApi(ModelRestApi):
                 field_contents = None
                 try:
                     field_contents = cache.get(self.datamodel.obj.__tablename__ + "_" + column_name)
-                    print('从缓存中读取' + self.datamodel.obj.__tablename__ + "_" + column_name)
+                    # print('read from cache ' + self.datamodel.obj.__tablename__ + "_" + column_name)
                 except Exception as e:
                     print(e)
                 # 缓存没有数据，再从数据库中读取
@@ -1982,8 +2014,8 @@ class MyappModelRestApi(ModelRestApi):
             ret["remember"] = True
         else:
             ret["remember"] = False
-        ret["label"] = _(self.label_columns.get(field.name, ""))
-        ret["description"] = _(self.description_columns.get(field.name, ""))
+        ret["label"] = self.label_columns.get(field.name, "")
+        ret["description"] = self.description_columns.get(field.name, "")
         if field.validate and isinstance(field.validate, list):
             ret["validators"] = [v for v in field.validate]
         elif field.validate:
@@ -2097,7 +2129,7 @@ class MyappModelRestApi(ModelRestApi):
         :param data: python data structure
         :return: python data structure
         """
-        data_item = self.edit_model_schema.dump(model_item, many=False).data
+        data_item = self.edit_model_schema.dump(model_item, many=False)
         for _col in data_item:
             if _col not in data.keys():
                 data[_col] = data_item[_col]
