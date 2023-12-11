@@ -1,4 +1,6 @@
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+import os
+
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import pysnooper
@@ -52,7 +54,7 @@ class Notebook_Filter(MyappFilter):
 
 class Notebook_ModelView_Base():
     datamodel = SQLAInterface(Notebook)
-    label_title = 'notebook'
+    label_title = _('notebook')
     check_redirect_list_url = conf.get('MODEL_URLS', {}).get('notebook', '')
     crd_name = 'notebook'
     conv = GeneralModelConverter(datamodel)
@@ -61,9 +63,10 @@ class Notebook_ModelView_Base():
     base_filters = [["id", Notebook_Filter, lambda: []]]
     order_columns = ['id']
     search_columns = ['created_by', 'name']
-    add_columns = ['project', 'name', 'describe', 'images', 'working_dir', 'volume_mount', 'resource_memory',
-                   'resource_cpu', 'resource_gpu']
+    add_columns = ['project', 'name', 'describe', 'images', 'working_dir', 'volume_mount', 'resource_memory','resource_cpu', 'resource_gpu']
     list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe','reset', 'resource', 'renew']
+    if conf.get('ENABLE_JUPYTER_PASSWORD',False):
+        list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe','reset','password', 'resource', 'renew']
     cols_width = {
         "project": {"type": "ellip2", "width": 150},
         "ide_type_html": {"type": "ellip2", "width": 200},
@@ -72,9 +75,6 @@ class Notebook_ModelView_Base():
         "resource": {"type": "ellip2", "width": 300},
         "status": {"type": "ellip2", "width": 100},
         "renew": {"type": "ellip2", "width": 200}
-    }
-    spec_label_columns={
-        "ide_type_html": "ide类型"
     }
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -85,83 +85,83 @@ class Notebook_ModelView_Base():
     def set_column(self, notebook=None):
         # 对编辑进行处理
         self.add_form_extra_fields['name'] = StringField(
-            _(self.datamodel.obj.lab('name')),
+            _('名称'),
             default="%s-" % g.user.username + uuid.uuid4().hex[:4],
-            description='英文名(小写字母、数字、-组成)，最长50个字符',
+            description= _('英文名(小写字母、数字、-组成)，最长50个字符'),
             widget=MyBS3TextFieldWidget(readonly=True if notebook else False),
             validators=[DataRequired(), Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54)]  # 注意不能以-开头和结尾
         )
         self.add_form_extra_fields['describe'] = StringField(
-            _(self.datamodel.obj.lab('describe')),
-            default='%s的个人notebook' % g.user.username,
-            description='中文描述',
+            _('描述'),
+            default='%s-notebook' % g.user.username,
+            description= _('中文描述'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
 
         # "project": QuerySelectField(
-        #     _(datamodel.obj.lab('project')),
+        #     _('项目组'),
         #     query_factory=filter_join_org_project,
         #     allow_blank=True,
         #     widget=Select2Widget()
         # ),
 
         self.add_form_extra_fields['project'] = QuerySelectField(
-            _(self.datamodel.obj.lab('project')),
+            _('项目组'),
             default='',
-            description=_(r'部署项目组'),
+            description= _('部署项目组'),
             query_factory=filter_join_org_project,
             widget=MySelect2Widget(extra_classes="readonly" if notebook else None, new_web=False),
         )
         self.add_form_extra_fields['images'] = SelectField(
-            _(self.datamodel.obj.lab('images')),
-            description=_(r'notebook基础环境镜像，如果显示不准确，请删除新建notebook'),
+            _('镜像'),
+            description= _('notebook基础环境镜像，如果显示不准确，请删除新建notebook'),
             widget=MySelect2Widget(extra_classes="readonly" if notebook else None, new_web=False, can_input=True),
             choices=[[x[0], x[1]] for x in conf.get('NOTEBOOK_IMAGES', [])],
             validators=[DataRequired()]
         )
         self.add_form_extra_fields['node_selector'] = StringField(
-            _(self.datamodel.obj.lab('node_selector')),
+            _('机器选择'),
             default='cpu=true,notebook=true',
-            description="部署task所在的机器",
+            description= _("部署task所在的机器"),
             widget=BS3TextFieldWidget()
         )
         self.add_form_extra_fields['image_pull_policy'] = SelectField(
-            _(self.datamodel.obj.lab('image_pull_policy')),
-            description="镜像拉取策略(Always为总是拉取远程镜像，IfNotPresent为若本地存在则使用本地镜像)",
+            _('拉取策略'),
+            description= _("镜像拉取策略(Always为总是拉取远程镜像，IfNotPresent为若本地存在则使用本地镜像)"),
             widget=Select2Widget(),
             choices=[['Always', 'Always'], ['IfNotPresent', 'IfNotPresent']]
         )
         self.add_form_extra_fields['volume_mount'] = StringField(
-            _(self.datamodel.obj.lab('volume_mount')),
+            _('挂载'),
             default=notebook.project.volume_mount if notebook else '',
-            description='外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录',
+            description= _('外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录'),
             widget=BS3TextFieldWidget()
         )
         self.add_form_extra_fields['working_dir'] = StringField(
-            _(self.datamodel.obj.lab('working_dir')),
+            _('工作目录'),
             default='/mnt',
-            description="工作目录，如果为空，则使用Dockerfile中定义的workingdir",
+            description= _("工作目录，如果为空，则使用Dockerfile中定义的workingdir"),
             widget=BS3TextFieldWidget()
         )
         self.add_form_extra_fields['resource_memory'] = StringField(
-            _(self.datamodel.obj.lab('resource_memory')),
+            _('内存'),
             default=Notebook.resource_memory.default.arg,
-            description='内存的资源使用限制，示例：1G，20G',
+            description= _('内存的资源使用限制，示例：1G，20G'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
         self.add_form_extra_fields['resource_cpu'] = StringField(
-            _(self.datamodel.obj.lab('resource_cpu')),
+            _('cpu'),
             default=Notebook.resource_cpu.default.arg,
-            description='cpu的资源使用限制(单位：核)，示例：2', widget=BS3TextFieldWidget(),
+            description= _('cpu的资源使用限制(单位：核)，示例：2'), widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
 
         self.add_form_extra_fields['resource_gpu'] = StringField(
-            _(self.datamodel.obj.lab('resource_gpu')),
+            _('gpu'),
             default='0',
-            description='gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
+            description= _('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
@@ -221,16 +221,16 @@ class Notebook_ModelView_Base():
         self.pre_add(item)
 
     def post_add(self, item):
-        flash('自动reset 一分钟后生效', 'warning')
+        flash(__('自动reset 一分钟后生效'), 'warning')
         try:
             self.reset_notebook(item)
         except Exception as e:
             print(e)
-            flash('reset后查看运行运行状态', 'warning')
+            flash(__('reset后查看运行运行状态'), 'warning')
 
     # @pysnooper.snoop(watch_explode=('item'))
     def post_update(self, item):
-        flash('reset以后配置方可生效', 'warning')
+        flash(__('reset以后配置方可生效'), 'warning')
 
         # item.changed_on = datetime.datetime.now()
         # db.session.commit()
@@ -245,7 +245,7 @@ class Notebook_ModelView_Base():
         db.session.commit()
 
     def post_list(self,items):
-        flash('注意：个人重要文件本地git保存，notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/%s/下'%g.user.username,category='info')
+        flash(__('注意：个人重要文件本地git保存，notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/')+g.user.username,category='info')
         return items
 
     # @event_logger.log_this
@@ -376,7 +376,7 @@ class Notebook_ModelView_Base():
             working_dir=workingDir,
             node_selector=notebook.get_node_selector(),
             resource_memory="0G~" + notebook.resource_memory,
-            resource_cpu="0~" + notebook.resource_cpu,
+            resource_cpu="0G~" + notebook.resource_cpu,
             resource_gpu=notebook.resource_gpu,
             image_pull_policy=conf.get('IMAGE_PULL_POLICY', 'Always'),
             image_pull_secrets=image_pull_secrets,
@@ -475,7 +475,8 @@ class Notebook_ModelView_Base():
                 username=notebook.created_by.username,
                 ports=service_ports,
                 selector=labels,
-                external_ip=SERVICE_EXTERNAL_IP
+                service_type='ClusterIP' if conf.get('K8S_NETWORK_MODE','iptables')!='ipvs' else 'NodePort',
+                external_ip=SERVICE_EXTERNAL_IP if conf.get('K8S_NETWORK_MODE','iptables')!='ipvs' else None
             )
 
         return crd
@@ -487,9 +488,9 @@ class Notebook_ModelView_Base():
         notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
         try:
             self.reset_notebook(notebook)
-            flash('已重置，Running状态后可进入。注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。', 'info')
+            flash(__('已重置，Running状态后可进入。注意：notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。'), 'info')
         except Exception as e:
-            message = '重置失败，稍后重试。%s' % str(e)
+            message = __('重置失败，稍后重试。') + str(e)
             flash(message, 'warning')
             return self.response(400, **{"message": message, "status": 1, "result": {}})
 
@@ -525,7 +526,6 @@ class Notebook_ModelView_Base():
     def pre_delete(self, item):
         self.base_muldelete([item])
 
-    @event_logger.log_this
     @expose("/list/")
     @has_access
     def list(self):
@@ -550,7 +550,7 @@ class Notebook_ModelView_Base():
     #     url = url_for(f"{self.endpoint}.list")
     #     return redirect(url)
 
-    @action("stop_all", __("Stop"), __("Stop all Really?"), "fa-trash", single=False)
+    @action("stop_all", "停止", "停止所有选中的notebook?", "fa-trash", single=False)
     def stop_all(self, items):
         self.base_muldelete(items)
         self.update_redirect()
@@ -572,3 +572,14 @@ class Notebook_ModelView_Api(Notebook_ModelView_Base, MyappModelRestApi):
 
 
 appbuilder.add_api(Notebook_ModelView_Api)
+
+
+# 添加api
+class Notebook_ModelView_SDK_Api(Notebook_ModelView_Base, MyappModelRestApi):
+    datamodel = SQLAInterface(Notebook)
+    route_base = '/notebook_modelview/sdk'
+    add_columns = ['project', 'name', 'describe', 'images', 'working_dir', 'volume_mount', 'resource_memory','resource_cpu', 'resource_gpu','volume_mount','image_pull_policy','expand']
+    edit_columns = add_columns
+    list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe', 'reset', 'resource', 'renew']
+    show_columns = ['project', 'name', 'namespace', 'describe', 'images', 'working_dir', 'env', 'volume_mount','resource_memory', 'resource_cpu', 'resource_gpu', 'status', 'ide_type', 'image_pull_policy','node_selector', 'expand']
+appbuilder.add_api(Notebook_ModelView_SDK_Api)
