@@ -56,14 +56,10 @@ k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MO
 print(k8s_volumes)
 print(k8s_volume_mounts)
 
-GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
-GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
-# print(GPU_TYPE,GPU_RESOURCE)
-gpu_num = GPU_RESOURCE.split(',')[0]
-if '(' in gpu_num:
-    gpu_type = gpu_num[gpu_num.index('(')+1:gpu_num.index(')')]
-    gpu_num = gpu_num[:gpu_num.index('(')]
-
+GPU_RESOURCE_NAME= os.getenv('GPU_RESOURCE_NAME', '')
+GPU_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
+gpu_num,gpu_type,_ = k8s_client.get_gpu(GPU_RESOURCE)
+if gpu_type:
     KFJ_TASK_NODE_SELECTOR['gpu-type']=gpu_type
 
 
@@ -221,18 +217,18 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
                                 "name": "NCCL_DEBUG",
                                 "value":"INFO"
                             },
-                            {
-                                "name": "NCCL_IB_DISABLE",
-                                "value": "1"
-                            },
+                            # {
+                            #     "name": "NCCL_IB_DISABLE",
+                            #     "value": "1"
+                            # },
                             # {
                             #     "name": "NCCL_DEBUG_SUBSYS",
                             #     "value": "ALL"
                             # },
-                            {
-                                "name": "NCCL_SOCKET_IFNAME",
-                                "value": "eth0"
-                            }
+                            # {
+                            #     "name": "NCCL_SOCKET_IFNAME",
+                            #     "value": "eth0"
+                            # }
                         ],
                         "command": ['bash','-c',command],
                         "volumeMounts": k8s_volume_mounts,
@@ -253,10 +249,9 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
     }
 
 
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-
-        task_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = gpu_num
-        task_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = gpu_num
+    if int(gpu_num):
+        task_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
+        task_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
 
     worker_pod_spec = copy.deepcopy(task_spec)
     worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker

@@ -21,8 +21,7 @@ class Rabbit_Producer():
                  virtual_host='/'):  # 默认端口5672，可不写
         credentials = pika.PlainCredentials(user, password)
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=host, port=port, credentials=credentials, virtual_host=virtual_host,
-                                      heartbeat=10))  # virtual_host='/'
+            pika.ConnectionParameters(host=host, port=port, credentials=credentials, virtual_host=virtual_host, heartbeat=10))  # virtual_host='/'
         self.channel = self.connection.channel()  # 声明一个管道
         self.properties = pika.BasicProperties(  # 需要将消息发送到exchange，exchange会把消息分发给queue。queue会把消息分发给消费者
             delivery_mode=2,  # 消息持久化

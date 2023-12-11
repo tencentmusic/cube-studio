@@ -36,6 +36,7 @@ NUM_WORKER = 3
 HEADER_NAME = os.getenv('RAY_HOST', '')
 WORKER_NAME = HEADER_NAME.replace('header', 'worker')
 INIT_FILE=''
+workingDir='/'
 
 
 k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CREATOR)
@@ -44,10 +45,11 @@ k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MO
 print(k8s_volumes)
 print(k8s_volume_mounts)
 
-GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
-GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
-print(GPU_TYPE,GPU_RESOURCE)
-
+GPU_RESOURCE_NAME= os.getenv('GPU_RESOURCE_NAME', '')
+GPU_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
+gpu_num,gpu_type,_ = k8s_client.get_gpu(GPU_RESOURCE)
+if gpu_type:
+    KFJ_TASK_NODE_SELECTOR['gpu-type']=gpu_type
 
 def create_header_service(name):
     service_json = {
@@ -176,10 +178,11 @@ def create_header_deploy(name):
                             "name": "ray-head",
                             "image": KFJ_TASK_IMAGES,
                             "imagePullPolicy": "Always",
+                            "workingDir": workingDir,
                             "command": [
                                 "/bin/bash",
                                 "-c",
-                                "%s ray start --head --port=6379 --redis-shard-ports=6380,6381 --num-cpus=$MY_CPU_REQUEST --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
+                                "%s ray start --head --port=6379 --num-cpus=$MY_CPU_REQUEST --block"%INIT_FILE
                             ],
                             "ports": [
                                 {
@@ -219,10 +222,6 @@ def create_header_deploy(name):
             }
         }
     }
-
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        header_deploy['spec']['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        header_deploy['spec']['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
 
     return header_deploy
 
@@ -311,10 +310,11 @@ def create_worker_deploy(header_name,worker_name):
                             "name": "ray-worker",
                             "image": KFJ_TASK_IMAGES,
                             "imagePullPolicy": "Always",
+                            "workingDir": workingDir,
                             "command": [
                                 "/bin/bash",
                                 "-c",
-                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:6379 --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
+                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:6379 --block"%INIT_FILE
                             ],
                             "volumeMounts": k8s_volume_mounts,
                             "env": [
@@ -348,9 +348,9 @@ def create_worker_deploy(header_name,worker_name):
         }
     }
 
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
+    if int(gpu_num):
+        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
+        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
 
 
     return worker_deploy
@@ -447,6 +447,7 @@ def launcher_cluster(deal=None):
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description="build component")
     arg_parser.add_argument('--num_workers', type=int, required=False, help="workers的数量", default=3)
+    arg_parser.add_argument('--workdir', type=str, required=False, help="启动目录", default='/')
     arg_parser.add_argument('--deal', type=str, required=False, help="创建集群还是删除集群", default='create')
     arg_parser.add_argument('--init', type=str, required=False, help="每个worker的初始化脚本，用来安装环境", default='')
     args = arg_parser.parse_args()
@@ -456,7 +457,7 @@ if __name__ == '__main__':
     if args.init.strip() and not os.path.exists(args.init):
         print('init file not exist')
         exit(1)
-
+    workingDir = args.workdir
     NUM_WORKER = int(args.num_workers)
     if args.init.strip():
         INIT_FILE = "bash "+args.init.strip()+" && "

@@ -120,10 +120,6 @@ k8s_volumes, k8s_volume_mounts = get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CRE
 print(k8s_volumes)
 print(k8s_volume_mounts)
 
-GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
-GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
-print(GPU_TYPE,GPU_RESOURCE)
-
 
 def create_header_service(name):
     service_json = {
@@ -253,7 +249,7 @@ def create_header_deploy(name):
                             "command": [
                                 "/bin/bash",
                                 "-c",
-                                "%s ray start --head --port=6379 --redis-shard-ports=6380,6381 --num-cpus=$MY_CPU_REQUEST --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
+                                "%s ray start --head --port=6379 --num-cpus=$MY_CPU_REQUEST --block"%INIT_FILE
                             ],
                             "ports": [
                                 {
@@ -293,10 +289,6 @@ def create_header_deploy(name):
             }
         }
     }
-
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        header_deploy['spec']['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        header_deploy['spec']['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
 
     return header_deploy
 
@@ -387,7 +379,7 @@ def create_worker_deploy(header_name,worker_name):
                             "command": [
                                 "/bin/bash",
                                 "-c",
-                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:$RAY_HEAD_SERVICE_PORT_REDIS --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
+                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:6379 --block"%INIT_FILE
                             ],
                             "volumeMounts": k8s_volume_mounts,
                             "env": [
@@ -402,10 +394,6 @@ def create_worker_deploy(header_name,worker_name):
                                 {
                                     "name": "RAY_HEAD_SERVICE_HOST",
                                     "value": header_name
-                                },
-                                {
-                                    "name": "RAY_HEAD_SERVICE_PORT_REDIS",
-                                    "value": "6379"
                                 }
                             ],
                             "resources": {
@@ -424,11 +412,6 @@ def create_worker_deploy(header_name,worker_name):
             }
         }
     }
-
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-
 
     return worker_deploy
 

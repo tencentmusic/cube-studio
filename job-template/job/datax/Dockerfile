@@ -12,7 +12,6 @@ COPY job/pkgs/pip.conf /root/.pip/pip.conf
 RUN apt update -y && apt install -y --no-install-recommends software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip
 
 # 安装python
-# 安装python
 RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip
 
 RUN apt install -y python3.9 python3.9-dev && rm -rf /usr/bin/python3; ln -s /usr/bin/python3.9 /usr/bin/python3 \

@@ -32,10 +32,10 @@
                         "connection": [
                             {
                                 "table": [
-                                    "test_data"
+                                    "train"
                                 ],
                                 "jdbcUrl": [
-     "jdbc:mysql://xx.xx.xx.xx:xx/xx"
+     "jdbc:mysql://mysql-service.infra:3306/example"
                                 ]
                             }
                         ]
@@ -44,8 +44,8 @@
                "writer": {
                     "name": "txtfilewriter",
                     "parameter": {
-                        "path": "/mnt/admin/pipeline/",
-                        "fileName": "test_data.csv",
+                        "path": "/mnt/admin/pipeline/example/ml/",
+                        "fileName": "data-test.csv",
                         "writeMode": "truncate",
                         "fileFormat":"csv",
                         "header": [

@@ -79,7 +79,7 @@ TASK_RESOURCE_GPU=0
 主要包含 环境安装，和并发任务启动部分
 ```
 # 安装包环境
-pip install tme-di numpy pandas pysnooper pika psutil pynvml --index-url https://mirrors.cloud.tencent.com/pypi/simple/
+pip install tme-di numpy pandas pysnooper pika psutil pynvml --index-url https://mirrors.aliyun.com/pypi/simple
 # 安装自己需要的环境
 pip install xx
 

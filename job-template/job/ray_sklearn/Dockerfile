@@ -1,9 +1,11 @@
 #FROM rayproject/ray:nightly
-FROM ccr.ccs.tencentyun.com/cube-studio/ray:gpu
+#FROM ccr.ccs.tencentyun.com/cube-studio/ray:gpu
+ARG BASE_IMAGE=rayproject/ray:nightly-py39-cpu
+FROM ${BASE_IMAGE}
 USER root
 
 # 安装调试相关工具
-RUN apt update && apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip software-properties-common
+RUN apt update -y && apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip software-properties-common
 
 ENV TZ 'Asia/Shanghai'
 ENV DEBIAN_FRONTEND=noninteractive
@@ -21,10 +23,10 @@ RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
     /bin/bash -c "source /root/.bashrc"
 
 WORKDIR /app
-RUN pip3 install kubernetes==18.20.0 pysnooper psutil
-RUN pip3 install scikit-learn==0.23.2 pandas numpy joblib 
+RUN pip3 install kubernetes==21.7.0 pysnooper psutil
+RUN pip3 install scikit-learn pandas numpy joblib
 
-COPY job/ray_sklearn/sklearn_estimator/* /app/
+COPY job/ray_sklearn/* /app/
 COPY job/pkgs /app/job/pkgs
 ENV PYTHONPATH=/app:$PYTHONPATH
 

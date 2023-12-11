@@ -97,10 +97,10 @@ if __name__ == "__main__":
         if args.partition:
             args.save_dir=f'/mnt/{KFJ_CREATOR}/dataset/{args.name}/{args.version}/{args.partition}'
     # print("{} args: {}".format(__file__, args))
-    if args.src_type=='当前平台':
+    if args.src_type=='cube-studio':
         download(**args.__dict__)
     elif args.src_type=='huggingface':
         pass
-    elif args.src_type=='魔塔':
+    elif args.src_type=='modelscope':
         pass
 
