@@ -8,6 +8,7 @@ import { saveTaskList } from '@src/models/task';
 import { toggle } from '@src/models/setting';
 import api from '@src/api';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 const { Item } = Stack;
 
 const EditorHead: React.FC = () => {
@@ -15,6 +16,7 @@ const EditorHead: React.FC = () => {
   const pipelineId = useAppSelector(selectPipelineId);
   const info = useAppSelector(selectInfo);
   const userName = useAppSelector(selectUserName);
+  const { t, i18n } = useTranslation();
 
   // useEffect(() => {
   //   console.log('info', info);
@@ -24,7 +26,7 @@ const EditorHead: React.FC = () => {
   const handleNewPipeline = () => {
     api
       .pipeline_modelview_add({
-        describe: `新建项目-${Date.now()}`,
+        describe: `${t('新建项目')}-${Date.now()}`,
         name: `${userName}-pipeline-${Date.now()}`,
         node_selector: 'cpu=true,train=true',
         schedule_type: 'once',
@@ -78,12 +80,12 @@ const EditorHead: React.FC = () => {
                     }}
                     onClick={handleNewPipeline}
                   >
-                    新建项目
+                    {t('新建项目')}
                   </PrimaryButton>
                 )}
             </Item>
             <Item className={info.name ? '' : style.hidden}>
-              <TooltipHost content="设置">
+              <TooltipHost content={t('设置')}>
                 <IconButton
                   iconProps={{ iconName: 'Settings' }}
                   onClick={() => {

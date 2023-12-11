@@ -8,6 +8,7 @@ import { selectInfo, updateChanged, updateEditing, selectChanged } from '@src/mo
 import { selectShow, toggle } from '@src/models/setting';
 import { updateShowEditor, updateKeyValue, selectShowEditor, selectKey, selectValue } from '@src/models/editor';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 
 const Setting: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -20,6 +21,7 @@ const Setting: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<IDropdownOption>();
   const [taskArgs, setTaskArgs] = useState<any>({});
   const [templateArgs, setTemplateArgs] = useState<any>({});
+  const { t, i18n } = useTranslation();
 
   // 配置变化事件
   const handleOnChange = (key: string, value: string | number | IDropdownOption, type?: string) => {
@@ -158,7 +160,7 @@ const Setting: React.FC = () => {
       className={style.settingContainer}
     >
       <div className={style.settingHeader}>
-        <div className={style.headerTitle}>项目设置</div>
+        <div className={style.headerTitle}>{t('项目设置')}</div>
         <IconButton
           iconProps={{
             iconName: 'ChromeClose',
@@ -187,8 +189,8 @@ const Setting: React.FC = () => {
           /> */}
           {/* <div className={style.splitLine}></div> */}
           <TextField
-            label="名称"
-            description="英文名(字母、数字、- 组成)，最长50个字符"
+            label={t('名称')}
+            description={t('英文名(字母、数字、- 组成)，最长50个字符')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('label', value ? value : '');
             }}
@@ -250,7 +252,7 @@ const Setting: React.FC = () => {
                                 dispatch(updateShowEditor(true));
                               }}
                             >
-                              编辑
+                              {t('编辑')}
                             </ActionButton>
                           ) : null}
                         </div>
@@ -280,7 +282,7 @@ const Setting: React.FC = () => {
             acc.push(
               (
                 <React.Fragment key={cur}>
-                  <Label>参数 {cur}</Label>
+                  <Label>{t('参数')} {cur}</Label>
                   {mapCurrent.flat()}
                   <div className={style.splitLine}></div>
                 </React.Fragment>

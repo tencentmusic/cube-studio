@@ -5,6 +5,7 @@ import FlowEditor from '@src/components/FlowEditor';
 import ModuleTree from '@src/components/ModuleTree';
 import { useAppSelector } from '@src/models/hooks';
 import { selectIsLoadError } from '@src/models/pipeline';
+import { useTranslation } from 'react-i18next';
 
 // app 页面初始化样式
 const appContainerStyle: IStackStyles = {
@@ -17,6 +18,7 @@ const appContainerStyle: IStackStyles = {
 
 const App: React.FC = () => {
   const isLoadError = useAppSelector(selectIsLoadError);
+  const { t, i18n } = useTranslation();
 
   return (
     <Stack className="app-container" horizontal styles={appContainerStyle}>
@@ -36,7 +38,7 @@ const App: React.FC = () => {
         }} onClick={() => {
           window.location.reload()
         }}>
-          解析异常，请点击刷新重试
+          {t('解析异常，请点击刷新重试')}
         </div> : null
       }
       {/* 任务模板库 */}

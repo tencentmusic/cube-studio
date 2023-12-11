@@ -23,6 +23,7 @@ import Section from '@src/components/Home/Section';
 import { videoDemo } from '@src/static/home';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { getPipelineList, selectPipelineList, selectAll, getAllList } from '@src/models/pipeline';
+import { useTranslation } from 'react-i18next';
 
 const homeContainerStyle: IStackStyles = {
   root: {
@@ -65,6 +66,7 @@ const Home: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [hasProject, setHasProject] = useState<boolean>(false);
   const [isEnd, setIsEnd] = useState<boolean>(false);
+  const { t, i18n } = useTranslation();
 
   const column: IColumn[] = [
     {
@@ -77,7 +79,7 @@ const Home: React.FC = () => {
     },
     {
       key: 'name',
-      name: '任务流',
+      name: t('任务流'),
       fieldName: 'name',
       minWidth: 200,
       maxWidth: 350,
@@ -99,7 +101,7 @@ const Home: React.FC = () => {
     },
     {
       key: 'describe',
-      name: '描述',
+      name: t('描述'),
       fieldName: 'describe',
       minWidth: 200,
       maxWidth: 300,
@@ -107,7 +109,7 @@ const Home: React.FC = () => {
     },
     {
       key: 'changed_on',
-      name: '修改时间',
+      name: t('修改时间'),
       fieldName: 'changed_on',
       minWidth: 200,
       maxWidth: 300,
@@ -115,7 +117,7 @@ const Home: React.FC = () => {
     },
     {
       key: 'project_id',
-      name: '项目组',
+      name: t('项目组'),
       minWidth: 150,
       maxWidth: 200,
       onRender: (item: any) => {
@@ -154,7 +156,20 @@ const Home: React.FC = () => {
 
   // 初始化
   useEffect(() => {
-    setVideoList(videoDemo);
+    setVideoList([
+      {
+        name: t('新人制作一个pipeline'),
+        img: '/static/assets/images/ad/video-cover2-thumb.png',
+        url: 'https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/make_pipeline.mp4',
+        type: 'video',
+      },
+      {
+        name: t('开发定制一个任务模板'),
+        img: '/static/assets/images/ad/video-cover2-thumb.png',
+        url: 'https://docker-76009.sz.gfp.tencent-cloud.com/kubeflow/make_job_template.mp4',
+        type: 'video',
+      },
+    ]);
     api.pipeline_modelview_demo().then((res: any) => {
       if (res.status === 0) {
         const { result } = res;
@@ -216,8 +231,8 @@ const Home: React.FC = () => {
           },
         }}
       >
-        <Section name="平台主要功能" data={pipelineList} first={true}></Section>
-        <Section name="新手视频" data={videoList}></Section>
+        <Section name={t('平台主要功能')} data={pipelineList} first={true}></Section>
+        <Section name={t('新手视频')} data={videoList}></Section>
         <Stack
           styles={{
             root: {
@@ -237,12 +252,12 @@ const Home: React.FC = () => {
                 fontWeight: 'bold',
               }}
             >
-              流水线
+              {t('流水线')}
             </div>
           </Stack>
           <Pivot aria-label="Basic Pivot Example" defaultSelectedKey="1">
             <PivotItem
-              headerText="我的"
+              headerText={t('我的')}
               headerButtonProps={{
                 'data-order': 1,
                 'data-title': 'My Files Title',
@@ -254,13 +269,13 @@ const Home: React.FC = () => {
                   items={myPipeLine}
                   columns={column.concat({
                     key: 'action',
-                    name: '操作',
+                    name: t('操作'),
                     minWidth: 200,
                     maxWidth: 300,
                     onRender: (item: any) => {
                       return (
                         <div>
-                          <TooltipHost content="删除">
+                          <TooltipHost content={t('删除')}>
                             <IconButton
                               onClick={() => {
                                 deletePipeline(item);
@@ -297,7 +312,7 @@ const Home: React.FC = () => {
                 />
               </div>
             </PivotItem>
-            <PivotItem headerText="协作" itemKey="2">
+            <PivotItem headerText={t('协作')} itemKey="2">
               <div>
                 <ShimmeredDetailsList
                   setKey="none"
@@ -334,7 +349,7 @@ const Home: React.FC = () => {
                   }}
                 >
                   <PrimaryButton
-                    text="下一页"
+                    text={t('下一页')}
                     styles={{ root: { marginRight: 10 } }}
                     disabled={isEnd}
                     onClick={() => {
@@ -343,7 +358,7 @@ const Home: React.FC = () => {
                     }}
                   ></PrimaryButton>
                   <PrimaryButton
-                    text="上一页"
+                    text={t('上一页')}
                     styles={{ root: { marginRight: 10 } }}
                     disabled={page === 0}
                     onClick={() => {
@@ -353,7 +368,7 @@ const Home: React.FC = () => {
                   ></PrimaryButton>
                   <Dropdown
                     defaultSelectedKey={'10'}
-                    placeholder="选择页数"
+                    placeholder={t('选择页数')}
                     options={options}
                     styles={dropdownStyles}
                     onChange={(e, opt) => {
@@ -369,7 +384,7 @@ const Home: React.FC = () => {
                       },
                     }}
                   >
-                    选择页数
+                    {t('选择页数')}
                   </Text>
                 </Stack>
               </div>

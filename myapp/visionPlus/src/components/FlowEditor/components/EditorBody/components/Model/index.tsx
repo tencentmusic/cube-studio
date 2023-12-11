@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { updateTaskList, updateTaskId, selectTaskId } from '@src/models/task';
 import style from './style';
 import { selectInfo } from '@src/models/pipeline';
+import { useTranslation } from 'react-i18next';
 
 interface ModelProps {
   model: any;
@@ -34,6 +35,8 @@ const Model: React.FC<ModelProps> = props => {
   const [templateArgs, setTemplateArgs] = useState<any>({});
   const [taskArgs, setTaskArgs] = useState<any>({});
   const info = useAppSelector(selectInfo);
+  const { t, i18n } = useTranslation();
+
   const _overflowItems: ICommandBarItemProps[] = [
     {
       key: 'debug',
@@ -345,8 +348,8 @@ const Model: React.FC<ModelProps> = props => {
           <div className={style.splitLine}></div>
 
           <TextField
-            label="别名"
-            description="节点别名"
+            label={t('别名')}
+            description={t('节点别名')}
             required
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('label', value ? value : '');
@@ -407,7 +410,7 @@ const Model: React.FC<ModelProps> = props => {
                                     dispatch(updateShowEditor(true));
                                   }}
                                 >
-                                  编辑
+                                  {t('编辑')}
                                 </ActionButton>
                               ) : null}
                             </div>

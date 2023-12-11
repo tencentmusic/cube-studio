@@ -11,6 +11,7 @@ import ModuleItem from './components/ModuleItem';
 import SearchItem from './components/SearchItem';
 import style from './style';
 import { selectPipelineId } from '@src/models/pipeline';
+import { useTranslation } from 'react-i18next';
 
 const { Item } = Stack;
 
@@ -49,6 +50,7 @@ const ModuleTree: React.FC = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchResult, setSearchResult] = useState(new Map());
   const pipelineId = useAppSelector(selectPipelineId);
+  const { t, i18n } = useTranslation();
 
   const handleTemplateData = (res: any) => {
     const dataSet = new Map();
@@ -189,7 +191,7 @@ const ModuleTree: React.FC = () => {
           {/* 模板搜索 */}
           <Stack horizontal horizontalAlign="space-between">
             <SearchBox
-              placeholder="搜索模板名称或描述"
+              placeholder={t('搜索模板名称或描述')}
               role="search"
               className={style.searchBoxStyle}
               onChange={debounce((event, newValue) => {

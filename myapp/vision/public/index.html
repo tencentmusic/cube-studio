@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Web site created using create-react-app" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>机器学习平台</title>
-</head>
+    <title>cube-studio</title>
+    <script>
+      const isDev = process.env.NODE_ENV === 'development' ? true : false;
+      const assetsUrl = isDev ? '/assets' : '/static/appbuilder/assets';
 
-<body>
+      window.FabricConfig = {
+        iconBaseUrl: `${assetsUrl}/fonts/`,
+        fontBaseUrl: `${assetsUrl}`,
+      };
+    </script>
+  </head>
+
+  <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="app"></div>
-</body>
-
+  </body>
 </html>

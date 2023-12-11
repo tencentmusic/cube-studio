@@ -1,16 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router } from 'react-router-dom';
-import { mergeStyles, initializeIcons, ThemeProvider, createTheme } from '@fluentui/react';
+import { mergeStyles, initializeIcons, ThemeProvider, createTheme, registerDefaultFontFaces } from '@fluentui/react';
 import AppRouter from './routes';
 import { store } from './models/store';
 import { Provider } from 'react-redux';
 import './app.less';
 import "antd/lib/button/style/index.css";
 import "antd/lib/message/style/index.css";
+import './locales/i18n';
+// import i18n from './locales/i18n'
+// i18n.changeLanguage('en')
+
+const isDev = process.env.NODE_ENV === 'development' ? true : false
+const assetsUrl = isDev ? '/assets' : '/static/appbuilder/assets'
 
 // fluentui icon 资源初始化
-initializeIcons();
+initializeIcons(`${assetsUrl}/fonts/`);
+registerDefaultFontFaces(`${assetsUrl}`)
 
 const myTheme = createTheme({
   palette: {

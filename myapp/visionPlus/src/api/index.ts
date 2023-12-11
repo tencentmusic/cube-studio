@@ -2,180 +2,6 @@ import ajax from './ajax';
 import { IPipelineAdd, IPipelineEdit } from '../types/pipeline';
 import { ITaskAdd, ITaskEdit } from '../types/task';
 
-const QuestUrl = 'http://11.150.126.122:8081/api/'
-// 8.1 回滚策略
-const rollback = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}rollback`,
-    data: {
-      "strategy_id": data,
-      "opr": "rollback"
-    }
-  });
-};
-// 8.2 测试发布策略
-const test_release = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}test_release`,
-    data: {
-      "strategy_id": data,
-      "opr": "test_release"
-    }
-  });
-};
-
-// 8.3 正式发布策略
-const real_release = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}real_release`,
-    data: {
-      "strategy_id": data,
-      "opr": "real_release"
-    }
-  });
-};
-
-// 8.12 统一物料召回查询
-const get_strategys = (data: any): Promise<any> => {
-  // return ajax.get(`http://11.150.126.122:8081/api/get_strategys?opr=${"get_strategys"}&&strategy_ids=[1,2]`);
-  return ajax.post({
-    url: `${QuestUrl}get_strategys`,
-    data: {
-      ...data,
-      "opr": "get_strategys"
-    }
-  });
-};
-
-const get_components_mark = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}get_components_mark`,
-    data: {
-      "components": data,
-      "opr": "get_components_mark"
-    }
-  });
-};
-
-const get_component_config = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}get_component_config`,
-    data: {
-      "component_mark": data,
-      "component": "recall",
-      "opr": "get_component_config",
-      "component_type": ""
-    }
-  });
-};
-// 注册辅助组件
-const get_component_config2 = (data: any, data2: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}get_component_config`,
-    data: {
-      "component_mark": "",
-      "component": data2,
-      "opr": "get_component_config",
-      "component_type": data
-    }
-  });
-};
-// 、、8.4 修改策略
-const modify_strategy = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}modify_strategy`,
-    data: {
-      data: {
-        ...data,
-      },
-      "opr": "modify_strategy"
-    }
-  });
-};
-// 8.5 添加策略
-const add_strategy = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}add_strategy`,
-    data: {
-      data: {
-        ...data,
-      },
-      "opr": "add_strategy"
-    }
-  });
-};
-// 8.7 注册召回组件
-const register_recall_component = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}register_recall_component`,
-    data: {
-      ...data,
-      "opr": "register_recall_component"
-    }
-  });
-};
-// 8.8 注册辅助组件
-const register_assistant_component = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}register_assistant_component`,
-    data: {
-      ...data,
-      "opr": "register_assistant_component"
-    }
-  });
-};
-
-const get_components_type = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}get_components_type`,
-    data: {
-      "components": [data],
-      "opr": "get_components_type"
-    }
-  });
-};
-// 8.6 注册辅助组件类型
-const register_assistant_component_type = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}register_assistant_component_type`,
-    data: {
-      ...data,
-      "opr": "register_assistant_component_type"
-    }
-  });
-};
-
-// 8.9 配置校验
-const config_check = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}config_check`,
-    data: {
-      ...data,
-      "opr": "config_check"
-    }
-  });
-};
-// 8.10 组件信息展示
-const get_components_info = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}get_components_info`,
-    data: {
-      ...data,
-      "opr": "get_components_info"
-    }
-  });
-};
-// 8.13 修改组件信息
-const mod_component_info = (data: any): Promise<any> => {
-  return ajax.post({
-    url: `${QuestUrl}mod_component_info`,
-    data: {
-      ...data,
-      "opr": "mod_component_info"
-    }
-  });
-};
-
 // const getTemplateCommandConfig = (): Promise<any> => {
 //   return ajax.get('/etl_pipeline_modelview/template/list/');
 // };
@@ -195,9 +21,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
           "default": "",
           "placeholder": "",
           "describe": "周期任务的时间设定 * * * * * 表示为 minute hour day month week",
-          "editable": 1,
-          "condition": "",
-          "sub_args": {}
+          "editable": 1
         },
         "selfDepend": {
           "type": "str",
@@ -213,9 +37,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
           "default": "单实例运行",
           "placeholder": "",
           "describe": "一个任务的多次调度实例之间是否要进行前后依赖",
-          "editable": 1,
-          "condition": "",
-          "sub_args": {}
+          "editable": 1
         }
       },
       "templte_list": {
@@ -234,9 +56,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "3",
                   "placeholder": "",
                   "describe": "源服务器 ，例如：tdw出库mysql 源服务器就是 TDW集群",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "targetServer": {
                   "type": "str",
@@ -248,9 +68,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "3",
                   "placeholder": "",
                   "describe": "目标服务器（注意是目标服务器名，不是IP/域名），例如：tdw出库mysql 目标服务器就是 MySQL数据库，这里只填写服务器引用，配置需要到安全中心:https://security.tianqiong.woa.com/auth/group",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "charSet": {
                   "type": "str",
@@ -262,9 +80,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "UTF-8",
                   "placeholder": "",
                   "describe": "源文件字符集",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "databaseName": {
                   "type": "str",
@@ -276,9 +92,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "DB名称",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "delimiter": {
                   "type": "str",
@@ -290,9 +104,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "9",
                   "placeholder": "",
                   "describe": "默认TAB，ascii码：9",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "failedOnZeroWrited": {
                   "type": "str",
@@ -304,9 +116,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "1",
                   "placeholder": "",
                   "describe": "默认失败(1)",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "partitionType": {
                   "type": "str",
@@ -318,9 +128,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "P_${YYYYMMDDHH}",
                   "placeholder": "",
                   "describe": "分区格式：P_${YYYYMM},P_${YYYYMMDD},P_${YYYYMMDDHH}",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "sourceFilePath": {
                   "type": "str",
@@ -332,9 +140,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "支持三种日期变量:${YYYYMM}，${YYYYMMDD}，${YYYYMMDDHH}。系统用任务实例的数据时间替换日期变量。",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "sourceFileNames": {
                   "type": "str",
@@ -346,9 +152,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "源文件名(支持通配符*和${YYYYMMDD});入库不做检查",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "sourceColumnNames": {
                   "type": "str",
@@ -360,9 +164,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "源文件的栏位名称，以逗号分割（结尾不能是逗号）,必须保证列数和文件内容一致（创建临时表所用表列名）。例如column1,column2,column3。注：不允许输入空格，源文件栏位名称只由大小写字符、数字和下划线组成",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "tableName": {
                   "type": "str",
@@ -374,9 +176,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "TDW数据库名。",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "targetColumnNames": {
                   "type": "str",
@@ -388,9 +188,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "字段映射关系，即tdw表的列名。",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "writeConcurrency": {
                   "type": "str",
@@ -402,9 +200,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "3",
                   "placeholder": "",
                   "describe": "写结果库的并发session数,取值为：1,2,4，三个取值。",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -431,9 +227,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "3",
                   "placeholder": "",
                   "describe": "源服务器 ，例如：tdw出库mysql 源服务器就是 TDW集群",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "targetServer": {
                   "type": "str",
@@ -445,9 +239,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "3",
                   "placeholder": "",
                   "describe": "目标服务器（注意是目标服务器名，不是IP/域名），例如：tdw出库mysql 目标服务器就是 MySQL数据库，这里只填写服务器引用，配置需要到安全中心:https://security.tianqiong.woa.com/auth/group",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "databaseName": {
                   "type": "str",
@@ -459,9 +251,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "TDW表所在的database",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "destCheckFileName": {
                   "type": "str",
@@ -473,9 +263,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "对账文件名",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "destCheckFilePath": {
                   "type": "str",
@@ -487,9 +275,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "对账文件路径",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "destFileDelimiter": {
                   "type": "str",
@@ -501,9 +287,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "9",
                   "placeholder": "",
                   "describe": "出库文件分隔符，填ascii字符对应的数字。默认TAB：9",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "destFilePath": {
                   "type": "str",
@@ -515,9 +299,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "出库文件路径",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "filterSQL": {
                   "type": "str",
@@ -529,9 +311,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "源SQL",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -560,9 +340,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "从TDW导出数据的sql，比如 select a,b,c FROM table where imp_date='${YYYYMMDD}' ;sql末尾不要用分号结尾",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "special_para": {
                   "type": "str",
@@ -574,9 +352,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "set hive.exec.parallel = true;set hive.execute.engine=spark;set hive.multi.join.use.hive=false;set hive.spark.failed.retry=false;",
                   "placeholder": "",
                   "describe": "tdw特殊参数",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -603,9 +379,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "脚本路径",
                   "describe": "脚本路径",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "params": {
                   "type": "str",
@@ -617,9 +391,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "脚本参数",
                   "describe": "脚本参数",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "special_para": {
                   "type": "str",
@@ -631,9 +403,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "set hive.exec.parallel = true;set hive.execute.engine=spark;set hive.multi.join.use.hive=false;set hive.spark.failed.retry=false;",
                   "placeholder": "",
                   "describe": "TDW参数",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -660,9 +430,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "pyspark脚本名称",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "programSpecificParams": {
                   "type": "str",
@@ -674,9 +442,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "传递给程序的参数,空格分隔,不要换行",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "driver_memory": {
                   "type": "int",
@@ -688,9 +454,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "2g",
                   "placeholder": "",
                   "describe": "driver内存大小",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "num_executors": {
                   "type": "int",
@@ -702,9 +466,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "4",
                   "placeholder": "",
                   "describe": "executor数量",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "executor_memory": {
                   "type": "int",
@@ -716,9 +478,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "2g",
                   "placeholder": "",
                   "describe": "executor内存大小",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "executor_cores": {
                   "type": "int",
@@ -730,9 +490,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "2",
                   "placeholder": "",
                   "describe": "executor核心数",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "task.main.timeout": {
                   "type": "int",
@@ -744,9 +502,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "480",
                   "placeholder": "",
                   "describe": "超时时间，单位分钟：480 (代表8小时)",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -773,9 +529,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "jar包的包名",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "className": {
                   "type": "str",
@@ -787,9 +541,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "主类的名字",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "programSpecificParams": {
                   "type": "str",
@@ -801,9 +553,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "传递给程序的参数,空格分隔,不要换行",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "options": {
                   "type": "str",
@@ -815,9 +565,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "选项（spark支持的选项)。不带分号，使用换行分隔",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "driver_memory": {
                   "type": "int",
@@ -829,9 +577,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "2g",
                   "placeholder": "",
                   "describe": "driver内存大小",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "num_executors": {
                   "type": "int",
@@ -843,9 +589,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "4",
                   "placeholder": "",
                   "describe": "executor数量",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "executor_memory": {
                   "type": "int",
@@ -857,9 +601,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "2g",
                   "placeholder": "",
                   "describe": "executor内存大小",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "executor_cores": {
                   "type": "int",
@@ -871,9 +613,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "2",
                   "placeholder": "",
                   "describe": "executor核心数",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "task.main.timeout": {
                   "type": "int",
@@ -885,9 +625,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "480",
                   "placeholder": "",
                   "describe": "超时时间，单位分钟：480 (代表8小时)",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -916,9 +654,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "脚本路径",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "params": {
                   "type": "str",
@@ -930,9 +666,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "脚本参数",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -959,9 +693,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "参数1",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "args2": {
                   "type": "str",
@@ -973,9 +705,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "参数2",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "args3": {
                   "type": "int",
@@ -987,9 +717,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "参数3",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "args4": {
                   "type": "choice",
@@ -1006,9 +734,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "aa",
                   "placeholder": "",
                   "describe": "参数4",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 },
                 "args5": {
                   "type": "str",
@@ -1020,9 +746,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "这是个不可编辑参数",
                   "placeholder": "",
                   "describe": "这个参数不可编辑",
-                  "editable": 0,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 0
                 },
                 "args6": {
                   "type": "text",
@@ -1034,9 +758,7 @@ const getTemplateCommandConfig = (pipelineId: number | string): Promise<any> => 
                   "default": "",
                   "placeholder": "",
                   "describe": "参数6，多行的文本编辑器",
-                  "editable": 1,
-                  "condition": "",
-                  "sub_args": {}
+                  "editable": 1
                 }
               }
             },
@@ -1192,23 +914,6 @@ const api = {
   task_modelview_get,
   task_modelview_del,
   task_modelview_edit,
-  get_strategys,
-  get_components_mark,
-  add_strategy,
-  register_recall_component,
-  register_assistant_component,
-  get_components_type,
-  register_assistant_component_type,
-  get_components_info,
-  modify_strategy,
-  mod_component_info,
-
-  config_check,
-  rollback,
-  test_release,
-  real_release,
-  get_component_config,
-  get_component_config2
 };
 
 export default api;

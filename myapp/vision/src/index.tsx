@@ -1,15 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router } from 'react-router-dom';
-import { mergeStyles, initializeIcons, createTheme, ThemeProvider } from '@fluentui/react';
+import { mergeStyles, initializeIcons, createTheme, fontFace, createFontStyles, registerIcons, ThemeProvider, registerDefaultFontFaces } from '@fluentui/react';
 import AppRouter from './routes';
 import { store } from './models/store';
 import { Provider } from 'react-redux';
+// import i18n from './locales/i18n'
 import './app.less';
 import 'antd/dist/antd.css';
 
+import './locales/i18n';
+// i18n.changeLanguage('en')
+
+const isDev = process.env.NODE_ENV === 'development' ? true : false
+const assetsUrl = isDev ? '/assets' : '/static/appbuilder/assets'
+
+window.FabricConfig = {
+  iconBaseUrl: `${assetsUrl}/fonts/`,
+  fontBaseUrl: `${assetsUrl}`
+}
+
 // fluentui icon 资源初始化
-initializeIcons();
+initializeIcons(`${assetsUrl}/fonts/`);
+registerDefaultFontFaces(`${assetsUrl}`)
 
 const myTheme = createTheme({
   palette: {
@@ -49,6 +62,7 @@ mergeStyles({
   },
 });
 
+// eslint-disable-next-line react/no-deprecated
 ReactDOM.render(
   <ThemeProvider style={{ height: '100vh' }} applyTo='body' theme={myTheme}>
     <React.StrictMode>

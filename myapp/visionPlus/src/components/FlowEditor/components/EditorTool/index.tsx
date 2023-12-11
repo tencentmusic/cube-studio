@@ -17,6 +17,7 @@ import { toggle } from '@src/models/template';
 import { Button, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { isNode, removeElements } from 'react-flow-renderer';
+import { useTranslation } from 'react-i18next';
 import style from './style';
 
 const { Item } = Stack;
@@ -30,6 +31,7 @@ const EditorTool: React.FC = () => {
   const taskList = useAppSelector(selectTaskList);
   const isEditing = useAppSelector(selectEditing);
   const selectedElements = useAppSelector(selectSelected);
+  const { t, i18n } = useTranslation();
 
   const commandItem: ICommandBarItemProps[] = [
     {
@@ -40,7 +42,7 @@ const EditorTool: React.FC = () => {
         iconName: 'Library',
         styles: style.commonIcon,
       },
-      text: '展开/关闭菜单',
+      text: t('展开/关闭菜单'),
       onClick: e => {
         e?.preventDefault();
         dispatch(toggle());
@@ -54,7 +56,7 @@ const EditorTool: React.FC = () => {
         iconName: 'save',
         styles: style.commonIcon,
       },
-      text: '保存',
+      text: t('保存'),
       onClick: async e => {
         e?.preventDefault();
         // dispatch(await saveTaskList());
@@ -131,7 +133,7 @@ const EditorTool: React.FC = () => {
         iconName: 'Delete',
         styles: style.commonIcon,
       },
-      text: '删除节点',
+      text: t('删除节点'),
       onClick: () => {
         if (isNode(selectedElements[0])) {
           const taskId = +selectedElements[0]?.id;
@@ -187,18 +189,18 @@ const EditorTool: React.FC = () => {
       <div className={style.commandBarStyleCustom}>
         <Button type="text" icon={<AppstoreOutlined />} onClick={() => {
           dispatch(toggle());
-        }}>展开/关闭菜单</Button>
+        }}>{t('展开/关闭菜单')}</Button>
         <Button type="text" icon={<SaveOutlined />} onClick={() => {
-          message.success('保存成功')
+          message.success(t('保存成功'))
           dispatch(savePipeline());
-        }}>保存</Button>
+        }}>{t('保存')}</Button>
         <Button type="text" icon={<DeleteOutlined />} onClick={() => {
           if (isNode(selectedElements[0])) {
             dispatch(savePipeline());
           }
           dispatch(updateEditing(true));
           dispatch(updateElements(removeElements(selectedElements, elements)));
-        }}>删除节点</Button>
+        }}>{t('删除节点')}</Button>
         {commandList}
       </div>
       <Stack
@@ -215,7 +217,7 @@ const EditorTool: React.FC = () => {
               iconName={isEditing ? 'AlertSolid' : 'SkypeCircleCheck'}
               styles={{ root: { color: isEditing ? '#e95f39' : '#8cb93c', marginRight: 5 } }}
             />
-            {isEditing ? '未保存' : '已保存'}
+            {isEditing ? t('未保存') : t('已保存')}
           </>
         ) : (
             <>
@@ -227,7 +229,7 @@ const EditorTool: React.FC = () => {
                 }}
                 size={SpinnerSize.small}
               ></Spinner>
-            保存中
+            {t('保存中')}
           </>
           )}
       </Stack>

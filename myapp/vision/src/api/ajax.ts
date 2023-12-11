@@ -3,15 +3,17 @@ import cookie from 'cookie';
 
 const { myapp_username, t_uid, km_uid } = cookie.parse(document.cookie);
 const Authorization = myapp_username || t_uid || km_uid || '';
+import { getI18n } from 'react-i18next';
 
-axios.defaults.baseURL =
-  process.env.NODE_ENV === 'development' ? 'http://localhost' || process.env.REACT_APP_API_HOST : window.location.origin;
+// console.log(getI18n())
 
-axios.defaults.headers = Object.assign(axios.defaults.headers, {
-  'Content-Type': 'application/json',
- 
-  // Authorization,
-});
+// axios.defaults.baseURL =
+// process.env.NODE_ENV === 'development' ? 'http://localhost' || process.env.REACT_APP_API_HOST : window.location.origin;
+
+// axios.defaults.headers = Object.assign(axios.defaults.headers, {
+//   'Content-Type': 'application/json',
+//   // Authorization,
+// });
 
 axios.interceptors.response.use(
   (res: AxiosResponse) => res,
@@ -30,6 +32,10 @@ const Ajax = {
       const defaultOptions: AxiosRequestConfig = {
         timeout: 10000,
         responseType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'language': getI18n().language
+        }
       };
 
       Object.assign(defaultOptions, options);
@@ -50,6 +56,10 @@ const Ajax = {
       const defaultOptions: AxiosRequestConfig = {
         timeout: 10000,
         responseType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'language': getI18n().language
+        }
       };
 
       Object.assign(defaultOptions, options);
@@ -69,6 +79,10 @@ const Ajax = {
       const defaultOptions: AxiosRequestConfig = {
         timeout: 10000,
         responseType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'language': getI18n().language
+        }
       };
 
       Object.assign(defaultOptions, options);
@@ -90,6 +104,10 @@ const Ajax = {
       const defaultOptions: AxiosRequestConfig = {
         timeout: 10000,
         responseType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'language': getI18n().language
+        }
       };
 
       Object.assign(defaultOptions, options);
