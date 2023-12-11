@@ -25,7 +25,7 @@ class AbstractEventLogger(ABC):
             d.update(request_params)
             d.update(kwargs)
 
-            d.update(request.json or {})
+            d.update(request.get_json(silent=True) or {})
 
             self.stats_logger.incr(f.__name__)
             start_dttm = datetime.datetime.now()

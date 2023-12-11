@@ -1,14 +1,14 @@
 
 from flask_appbuilder import ModelRestApi
-from flask_appbuilder.models.sqla.interface import SQLAInterface
-
+from myapp.views.baseSQLA import MyappSQLAInterface
 from myapp import app, appbuilder
 from myapp.models.log import Log
 from . import LogMixin
 
 
 class LogRestApi(LogMixin, ModelRestApi):
-    datamodel = SQLAInterface(Log)
+    datamodel = MyappSQLAInterface(Log)
+
 
     class_permission_name = "LogModelView"
     method_permission_name = {

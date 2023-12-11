@@ -49,8 +49,6 @@ from myapp.exceptions import MyappException, MyappTimeoutException
 from myapp.utils.dates import datetime_to_epoch, EPOCH
 import re
 
-logging.getLogger("MARKDOWN").setLevel(logging.INFO)
-
 PY3K = sys.version_info >= (3, 0)
 DTTM_ALIAS = "__timestamp"
 ADHOC_METRIC_EXPRESSION_TYPES = {"SIMPLE": "SIMPLE", "SQL": "SQL"}
@@ -498,33 +496,28 @@ def dag_json_demo():
 
 # job模板参数的定义
 def job_template_args_definition():
-    demo = '''
-{
-    "group1":{               # 参数分组，仅做web显示使用
-       "--attr1":{           # 参数名
-        "type":"str",        # int,str,text,bool,enum,float,multiple,date,datetime,file,dict,list,json
-        "item_type": "",     # 在type为enum,multiple,list时每个子参数的类型
-        "label":"参数1",      # 中文名
-        "require":1,         # 是否必须
-        "choice":[],         # type为enum/multiple时，可选值
-        "range":"$min,$max", # 最小最大取值，在int,float时使用，包含$min，但是不包含$max
-        "default":"",        # 默认值
-        "placeholder":"",    # 输入提示内容
-        "describe":"这里是这个参数的描述和备注",
-        "editable":1,        # 是否可修改
-        "condition":"",      # 显示的条件
-        "sub_args": {        # 如果type是dict或者list对应下面的参数
-        }
-      },
-      "attr2":{
+    demo = f'''
+{{
+    "group1":{{               # {_('参数分组，仅做web显示使用')}
+       "--attr1":{{           # {_('参数名')}
+        "type":"str",        # str,text,list,json
+        "label":"{_('参数1')}",      # {_('中文名')}
+        "require":1,         # {_('是否必须')}
+        "choice":[],         # {_('设定输入的可选值，可选值')}
+        "default":"",        # {_('默认值')}
+        "placeholder":"",    # {_('输入提示内容')}
+        "describe":"{_('这里是这个参数的描述和备注')}",
+        "editable":1        # {_('是否可修改')}
+      }},
+      "--attr2":{{
        ...
-      }
-    },
-    "group2":{
-    }
-}
-    '''
-    return demo.strip()
+      }}
+    }},
+    "group2":{{
+    }}
+}}
+'''.strip()
+    return _(demo)
 
 
 # 超参搜索的定义demo
@@ -551,8 +544,9 @@ def hp_parameters_demo():
         ]
     }
 }
-'''
-    return demo.strip()
+'''.strip()
+
+    return _(demo)
 
 
 # 超参搜索的定义demo
@@ -587,11 +581,7 @@ default_args = {
     "default": "",  # 默认值
     "placeholder": "",  # 输入提示内容
     "describe": "",
-    "editable": 1,  # 是否可修改
-    # "show": 1,  # 是否展示给用户填写
-    "condition": "",  # 显示的条件
-    "sub_args": {  # 如果type是dict或者list对应下面的参数
-    }
+    "editable": 1  # 是否可修改
 }
 
 
@@ -622,7 +612,7 @@ def validate_job_args(job_template):
         attr['placeholder'] = str(attr['placeholder'])
         attr['describe'] = str(attr['describe']) if attr['describe'] else str(attr['label'])
         attr['editable'] = int(attr['editable'])
-        attr['condition'] = str(attr['condition'])
+
 
         if attr['type'] not in validate_job_args_type:
             raise MyappException("job template args type must in %s " % str(validate_job_args_type))
@@ -1405,6 +1395,7 @@ def pic2html(image_arr,max_num=4):
 
 # @pysnooper.snoop()
 def check_resource_memory(resource_memory, src_resource_memory=None):
+    from myapp import conf
     def set_host_max(resource):
         return resource
         # resource_int =0
@@ -1435,7 +1426,7 @@ def check_resource_memory(resource_memory, src_resource_memory=None):
         if resource_int <= src_resource_int:
             return resource
 
-        if resource_int > 100000:
+        if resource_int > conf.get('MAX_TASK_MEM',100):
             return '100G'
         else:
             return resource
@@ -1468,6 +1459,7 @@ def check_resource_memory(resource_memory, src_resource_memory=None):
 
 
 def check_resource_cpu(resource_cpu, src_resource_cpu=None):
+    from myapp import conf
     def set_host_max(resource):
         return resource
         # resource_int =0
@@ -1483,7 +1475,7 @@ def check_resource_cpu(resource_cpu, src_resource_cpu=None):
         if resource_int <= src_resource_int:
             return resource
 
-        if resource_int > 50:
+        if resource_int > conf.get('MAX_TASK_CPU',50):
             return '50'
             # raise MyappException('resource cpu max 50')
         return resource
@@ -1530,10 +1522,14 @@ def checkip(ip):
     else:
         return False
 
+import pysnooper
 
 # @pysnooper.snoop()
-def get_gpu(resource_gpu):
+def get_gpu(resource_gpu,resource_name=None):
+    from myapp import conf
     gpu_num = 0
+    if not resource_name:
+        resource_name=conf.get('DEFAULT_GPU_RESOURCE_NAME','')
     gpu_type = None
     try:
         if resource_gpu:
@@ -1544,6 +1540,18 @@ def get_gpu(resource_gpu):
                 gpu_type = re.findall(r"（(.+?)）", resource_gpu)
                 gpu_type = gpu_type[0] if gpu_type else None
 
+            # 括号里面填的可能是npu，这种词汇，不属于卡的型号，而是卡的类型
+            if gpu_type and gpu_type.lower() in list(conf.get('GPU_RESOURCE',{}).keys()):
+                gpu_mfrs=gpu_type.lower()
+                gpu_type=None
+                resource_name = conf.get("GPU_RESOURCE", {}).get(gpu_mfrs, resource_name)
+            # 填的是(卡的类型,卡的型号)
+            if gpu_type and ',' in gpu_type:
+                gpu_mfrs=gpu_type.split(',')[0].strip().lower()
+                if gpu_mfrs:
+                    resource_name = conf.get("GPU_RESOURCE", {}).get(gpu_mfrs, resource_name)
+                gpu_type=gpu_type.split(',')[1].strip().upper()
+
             resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
             resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
             gpu_num = float(resource_gpu)
@@ -1551,7 +1559,7 @@ def get_gpu(resource_gpu):
     except Exception as e:
         print(e)
     gpu_type = gpu_type.upper() if gpu_type else None
-    return gpu_num, gpu_type
+    return gpu_num, gpu_type, resource_name
 
 # 按expand字段中index字段进行排序
 def sort_expand_index(items):
@@ -1729,6 +1737,134 @@ def fix_task_position(pipeline, tasks, expand_tasks):
     return expand_tasks
 
 
+import yaml
+
+# @pysnooper.snoop(watch_explode=())
+def merge_job_experiment_template(node_selector, volume_mount, image, image_secrets, hostAliases, workingDir, image_pull_policy, resource_memory, resource_cpu, command):
+    nodeSelector = None
+    if node_selector and '=' in node_selector:
+        nodeSelector = {}
+        for selector in re.split(',|;|\n|\t', node_selector):
+            nodeSelector[selector.strip().split('=')[0].strip()] = selector.strip().split('=')[1].strip()
+    if not "~" in resource_memory:
+        resource_memory = resource_memory + "~" + resource_memory
+    if not "~" in resource_cpu:
+        resource_cpu = resource_cpu + "~" + resource_cpu
+    requests_memory, limits_memory = resource_memory.strip().split('~')
+    requests_cpu, limits_cpu = resource_cpu.strip().split('~')
+    commands = command.split(' ')
+    commands = [command for command in commands if command]
+    commands.append('$replace')
+
+    volumes = []
+    volumeMounts = []
+    if volume_mount and ":" in volume_mount:
+        volume_mount = volume_mount.strip()
+        if volume_mount:
+            volume_mounts = volume_mount.split(',')
+            for volume_mount in volume_mounts:
+                volume, mount = volume_mount.split(":")[0].strip(), volume_mount.split(":")[1].strip()
+                if "(pvc)" in volume:
+                    pvc_name = volume.replace('(pvc)', '').replace(' ', '')
+                    volumn_name = pvc_name.replace('_', '-')
+                    volumes.append(
+                        {
+                            "name": volumn_name,
+                            "persistentVolumeClaim": {
+                                "claimName": pvc_name
+                            }
+                        }
+                    )
+                    volumeMounts.append({
+                        "name": volumn_name,
+                        "mountPath": mount
+                    })
+
+    if hostAliases:
+        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
+        hostAliases = [
+            {
+                "ip": host.split(' ')[0],
+                "hostnames": [
+                    host.split(' ')[1]
+                ]
+            } for host in hostAliases
+        ]
+    else:
+        hostAliases = []
+
+    raw_json = {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {
+            "name": "{{.Trial}}",
+            "namespace": "{{.NameSpace}}"
+        },
+        "spec": {
+            "template": {
+                "spec": {
+                    "hostAliases": hostAliases,
+                    "imagePullSecrets": image_secrets,
+                    "restartPolicy": "Never",
+                    "nodeSelector": nodeSelector,
+                    "volumes": volumes if volumes else None,
+                    "containers": [
+                        {
+                            "name": "{{.Trial}}",
+                            "image": image,
+                            "workingDir": workingDir if workingDir else None,
+                            "imagePullPolicy": image_pull_policy,
+                            "volumeMounts": volumeMounts if volumeMounts else None,
+                            "resources": {
+                                "requests": {
+                                    "cpu": float(requests_cpu),
+                                    "memory": requests_memory
+                                },
+                                "limits": {
+                                    "cpu": float(limits_cpu),
+                                    "memory": limits_memory
+                                }
+                            },
+                            "command": commands if command else None
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+    # # print(raw_json)
+    # @pysnooper.snoop(watch_explode=('data'))
+    # def clean_key(data):
+    #     temp = copy.deepcopy(data)
+    #     for key in temp:
+    #         if temp[key]==None or temp[key]==[] or temp[key]=={} or temp[key]=='':
+    #             del data[key]
+    #         elif type(temp[key])==dict:
+    #             data[key]=clean_key(data[key])
+    #     return data
+    #
+    # raw_json=clean_key(raw_json)
+    # print(yaml.dump(raw_json))
+
+    global_commands = '''
+    {{- with .HyperParameters}}
+    {{- range .}}
+    - "{{.Name}}={{.Value}}"
+    {{- end}}
+    {{- end}}
+    '''
+    global_commands = global_commands.strip().split('\n')
+    global_commands = [global_command.strip() for global_command in global_commands if global_command.strip()]
+    replace_str = ''
+    for global_command in global_commands:
+        replace_str += global_command + '\n' + '        '
+
+    rawTemplate = yaml.dump(raw_json).replace('- $replace', replace_str)
+
+    return rawTemplate
+
+
 def hive_create_sql_demo():
     sql = '''create table if not exists test_table(
     ftime int comment '分区时间',
@@ -1752,3 +1888,14 @@ def run_shell(shell):
 
     cmd.communicate()
     return cmd.returncode
+
+# 将json的文本中的全部unicode_escape编码的文本转换回中文
+def decode_unicode_escape(data):
+    if isinstance(data, str):
+        return data.encode('utf-8').decode('unicode_escape')
+    elif isinstance(data, dict):
+        return {decode_unicode_escape(key): decode_unicode_escape(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [decode_unicode_escape(item) for item in data]
+    else:
+        return data

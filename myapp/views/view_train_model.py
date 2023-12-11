@@ -1,6 +1,7 @@
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from myapp.models.model_train_model import Training_Model
 from myapp.models.model_serving import InferenceService
+from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from myapp import app, appbuilder, db
 import uuid
@@ -66,78 +67,77 @@ class Training_Model_ModelView_Base():
         "model_metric": {"type": "ellip2", "width": 300},
     }
     spec_label_columns = {
-        "path": "模型文件",
-        "framework": "算法框架",
-        "api_type": "推理框架",
-        "pipeline_id": "任务流id",
-        "deploy": "发布",
-        "model_metric": "指标"
+        "path": _("模型文件"),
+        "framework": _("训练框架"),
+        "api_type": _("推理框架"),
+        "deploy": _("发布")
     }
 
-    label_title = '模型'
+    label_title = _('模型')
     base_filters = [["id", Training_Model_Filter, lambda: []]]
 
-    path_describe = r'''
-            tfserving：仅支持tf save_model方式的模型目录, /mnt/xx/../saved_model/<br>
-            torch-server：torch-model-archiver编译后的mar模型文件地址, /mnt/xx/../xx.mar或torch script保存的模型<br>
-            onnxruntime：onnx模型文件的地址, /mnt/xx/../xx.onnx<br>
-            tensorrt:模型文件地址, /mnt/xx/../xx.plan<br>
-            '''
+    path_describe = _('''
+serving：自定义镜像的推理服务，模型地址随意<br>
+tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/<br>
+torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型<br>
+onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx<br>
+triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
+'''.strip())
 
-    service_type_choices = [x.replace('_', '-') for x in ['sklearn','xgb','tfserving', 'torch-server', 'onnxruntime', 'triton-server','aihub']]
+    service_type_choices = [x.replace('_', '-') for x in ['serving','tfserving', 'torch-server', 'onnxruntime', 'triton-server','aihub']]
 
     add_form_extra_fields = {
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description=_(path_describe),
+            description=path_describe,
             validators=[DataRequired()]
         ),
         "describe": StringField(
-            _(datamodel.obj.lab('describe')),
-            description=_('模型描述'),
+            _("描述"),
+            description= _('模型描述'),
             validators=[DataRequired()]
         ),
         "pipeline_id": StringField(
-            _(datamodel.obj.lab('pipeline_id')),
-            description=_('任务流的id，0表示非任务流产生模型'),
+            _('任务流id'),
+            description= _('任务流的id，0表示非任务流产生模型'),
             default='0'
         ),
         "version": StringField(
             _('版本'),
             widget=MyBS3TextFieldWidget(),
-            description='模型版本',
+            description= _('模型版本'),
             default=datetime.datetime.now().strftime('v%Y.%m.%d.1'),
             validators=[DataRequired()]
         ),
         "run_id": StringField(
-            _(datamodel.obj.lab('run_id')),
+            _('run id'),
             widget=MyBS3TextFieldWidget(),
-            description='pipeline 训练的run id',
+            description= _('pipeline 训练的run id'),
             default='random_run_id_' + uuid.uuid4().hex[:32]
         ),
         "run_time": StringField(
-            _(datamodel.obj.lab('run_time')),
+            _('运行时间'),
             widget=MyBS3TextFieldWidget(),
-            description='pipeline 训练的 运行时间',
+            description= _('pipeline 训练的 运行时间'),
             default=datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S'),
         ),
         "name": StringField(
             _("模型名"),
             widget=MyBS3TextFieldWidget(),
-            description='模型名(a-z0-9-字符组成，最长54个字符)',
+            description= _('模型名(a-z0-9-字符组成，最长54个字符)'),
             validators=[DataRequired(), Regexp("^[a-z0-9\-]*$"), Length(1, 54)]
         ),
         "framework": SelectField(
             _('算法框架'),
-            description="选项xgb、tf、pytorch、onnx、tensorrt等",
+            description= _("选项xgb、tf、pytorch、onnx、tensorrt等"),
             widget=Select2Widget(),
-            choices=[['lr','lr'],['xgb', 'xgb'], ['tf', 'tf'], ['pytorch', 'pytorch'], ['onnx', 'onnx'], ['tensorrt', 'tensorrt'],['aihub', 'aihub']],
+            choices=[['sklearn','sklearn'],['xgb', 'xgb'], ['tf', 'tf'], ['pytorch', 'pytorch'], ['onnx', 'onnx'], ['tensorrt', 'tensorrt'],['aihub', 'aihub']],
             validators=[DataRequired()]
         ),
         'api_type': SelectField(
             _("部署类型"),
-            description="推理框架类型",
+            description= _("推理框架类型"),
             choices=[[x, x] for x in service_type_choices],
             validators=[DataRequired()]
         )
@@ -145,7 +145,7 @@ class Training_Model_ModelView_Base():
     edit_form_extra_fields = add_form_extra_fields
 
     # edit_form_extra_fields['path']=FileField(
-    #         _('模型压缩文件'),
+    #         __('模型压缩文件'),
     #         description=_(path_describe),
     #         validators=[
     #             FileAllowed(["zip",'tar.gz'],_("zip/tar.gz Files Only!")),
@@ -156,6 +156,8 @@ class Training_Model_ModelView_Base():
     def pre_add(self, item):
         if not item.run_id:
             item.run_id = 'random_run_id_' + uuid.uuid4().hex[:32]
+        if not item.pipeline_id:
+            item.pipeline_id = 0
 
     def pre_update(self, item):
         if not item.path:
@@ -184,9 +186,9 @@ class Training_Model_ModelView_Base():
 
             db.session.add(exist_inference)
             db.session.commit()
-            flash('新服务版本创建完成', 'success')
+            flash(__('新服务版本创建完成'), 'success')
         else:
-            flash('服务版本已存在', 'success')
+            flash(__('服务版本已存在'), 'success')
         import urllib.parse
 
         url = conf.get('MODEL_URLS', {}).get('inferenceservice', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "model_name", "value": exist_inference.model_name}], ensure_ascii=False))
@@ -194,11 +196,13 @@ class Training_Model_ModelView_Base():
         return redirect(url)
 
 
-class Training_Model_ModelView(Training_Model_ModelView_Base, MyappModelView, DeleteMixin):
+class Training_Model_ModelView(Training_Model_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Training_Model)
+    route_base = '/training_model_modelview/web/api'
+    add_columns = ['project', 'name', 'version', 'describe', 'path', 'framework', 'metrics','api_type']
 
 
-appbuilder.add_view_no_menu(Training_Model_ModelView)
+appbuilder.add_api(Training_Model_ModelView)
 
 
 class Training_Model_ModelView_Api(Training_Model_ModelView_Base, MyappModelRestApi):  # noqa

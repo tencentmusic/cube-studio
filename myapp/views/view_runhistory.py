@@ -1,7 +1,7 @@
 import datetime
 import random
 import json
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 import pysnooper
 import urllib.parse
 from flask import request
@@ -10,6 +10,7 @@ import calendar
 from myapp import app, appbuilder, db
 from wtforms import SelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
+from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from sqlalchemy import or_
 from flask_appbuilder import expose
@@ -25,7 +26,6 @@ from .base import (
 )
 
 conf = app.config
-logging = app.logger
 
 
 class RunHistory_Filter(MyappFilter):
@@ -45,12 +45,12 @@ class RunHistory_Filter(MyappFilter):
 
 
 class RunHistory_ModelView_Base():
-    label_title = '定时调度历史'
+    label_title = _('定时调度历史')
     datamodel = SQLAInterface(RunHistory)
     base_order = ('id', 'desc')
     order_columns = ['id']
     base_permissions = ['can_show', 'can_list', 'can_delete']
-    list_columns = ['pipeline_url', 'creator', 'create_time', 'execution_date', 'status_url']
+    list_columns = ['pipeline_url', 'creator', 'execution_date', 'status_url']
     cols_width = {
         "pipeline_url": {"type": "ellip2", "width": 300},
         "create_time": {"type": "ellip2", "width": 250}
@@ -59,8 +59,8 @@ class RunHistory_ModelView_Base():
     base_filters = [["id", RunHistory_Filter, lambda: []]]
     add_form_extra_fields = {
         "status": SelectField(
-            _(datamodel.obj.lab('status')),
-            description="状态comed为已识别未提交，created为已提交",
+            _('状态'),
+            description= _("状态comed为已识别未提交，created为已提交"),
             widget=Select2Widget(),
             choices=[['comed', 'comed'], ['created', 'created']]
         ),

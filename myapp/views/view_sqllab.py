@@ -8,6 +8,8 @@ from flask_appbuilder import CompactCRUDMixin, expose
 import pysnooper, datetime, time, json
 from myapp.utils.celery import session_scope
 import logging
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp.models.model_sqllab_query import Sqllab_Query
 
 conf = app.config
@@ -50,12 +52,12 @@ def add_task(req_data):
         engine_arg2 = req_data['engine_arg2']
         qsql = req_data['sql']
     except Exception as e:
-        raise KeyError("添加任务参数缺失")
+        raise KeyError(__("添加任务参数缺失"))
 
     try:
         engine_impl = engine_impls[engine_arg1]
     except Exception as e:
-        raise KeyError("%s引擎未实现" % engine_arg1)
+        raise KeyError(engine_arg1+__("引擎未实现"))
 
     q = Sqllab_Query(
         submit_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -74,12 +76,12 @@ def check_task_engine(qid):
     with session_scope(nullpool=True) as dbsession:
         q = dbsession.query(Sqllab_Query).filter(Sqllab_Query.id == int(qid)).first()
         if not q:
-            raise RuntimeError("任务数据库记录不存在，id:" + str(qid))
+            raise RuntimeError(__("任务数据库记录不存在，id:") + str(qid))
         eng = q.engine_arg1
     try:
         engine_impl = engine_impls[eng]
     except Exception as e:
-        raise KeyError("%s引擎未实现" % eng)
+        raise KeyError(eng+__("引擎未实现"))
     return qid, engine_impl
 
 
@@ -87,7 +89,7 @@ def check_process_res(res_keys, res):
     try:
         res = {key: res[key] for key in res_keys}
     except Exception as e:
-        raise KeyError("返回值异常，检查引擎实现，需包含：" + str(res_keys))
+        raise KeyError(__("返回值异常，检查引擎实现，需包含：") + str(res_keys))
     return res
 
 
@@ -118,7 +120,7 @@ class Sqllab_Query_View(BaseMyappView):
             "result": [
                 {
                     "type": 'select',
-                    "label": '引擎',
+                    "label": __('引擎'),
                     "id": 'engine_arg1',
                     "value": [
                         {
@@ -138,7 +140,7 @@ class Sqllab_Query_View(BaseMyappView):
                 },
                 {
                     "type": 'input-select',
-                    "label": '数据库',
+                    "label": __('数据库'),
                     "id": 'engine_arg2',
                     "value": [],
                 }
@@ -153,7 +155,7 @@ class Sqllab_Query_View(BaseMyappView):
         if args_in:
             req_data = args_in
         else:
-            req_data = request.json
+            req_data = request.get_json(silent=True)
         qid, engine_impl = add_task(req_data)
         res = engine_impl.submit_task(qid)
         res_keys = ["err_msg", "task_id"]
