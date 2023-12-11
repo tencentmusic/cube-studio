@@ -1,0 +1,10 @@
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/ide.mp4 /mnt/admin/pipeline/example/media/ide.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/aigc.mp4 /mnt/admin/pipeline/example/media/aigc.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/pipeline.mp4 /mnt/admin/pipeline/example/media/pipeline.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/vgpu.mp4 /mnt/admin/pipeline/example/media/vgpu.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/notebook.mp4 /mnt/admin/pipeline/example/media/notebook.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/aihub.mp4 /mnt/admin/pipeline/example/media/aihub.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/%E5%A4%A7%E6%A8%A1%E5%9E%8B.mp4 /mnt/admin/pipeline/example/media/大模型.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/%E8%87%AA%E5%8A%A8%E5%8C%96%E6%A0%87%E6%B3%A8.mp4 /mnt/admin/pipeline/example/media/自动化标注.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA.mp4 /mnt/admin/pipeline/example/media/输入输出.mp4
+https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/aihub%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.mp4 /mnt/admin/pipeline/example/media/aihub应用开发.mp4

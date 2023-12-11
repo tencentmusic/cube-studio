@@ -25,17 +25,17 @@ https://github.com/tencentmusic/cube-studio/wiki
 提示：
 - 1、可自由定制任务插件，更适用当前业务需求
 
-| 模块  | 模板 | 类型 | 文档地址 |
-| :----- | :---- | :---- |:---- |
+| 模块     | 模板 | 类型 | 文档地址 |
+|:-------| :---- | :---- |:---- |
 | 数据导入导出 | datax | 单机 | job-template/job/datax/README.md
 | 数据导入导出 | 数据集导入 | 单机 | job-template/job/dataset/README.md
 | 数据导入导出 | 模型导入 | 单机 | job-template/job/model_download/README.md
-| 数据预处理 | data-process | 单机 | job-template/job/data-process/README.md
-| 数据处理 | hadoop | 单机 | job-template/job/hadoop/README.md
-| 数据处理 | spark | 分布式 | job-template/job/spark/README.md
-| 数据处理 | ray | 分布式 | job-template/job/ray/README.md
-| 数据处理 | volcanojob | 分布式 | job-template/job/volcano/README.md
-| 特征工程 | feature-process | 单机 | job-template/job/feature-process/README.md
+| 数据预处理  | data-process | 单机 | job-template/job/data-process/README.md
+| 数据处理工具 | hadoop | 单机 | job-template/job/hadoop/README.md
+| 数据处理工具   | spark | 分布式 | job-template/job/spark/README.md
+| 数据处理工具   | ray | 分布式 | job-template/job/ray/README.md
+| 数据处理工具   | volcanojob | 分布式 | job-template/job/volcano/README.md
+| 特征处理   | feature-process | 单机 | job-template/job/feature-process/README.md
 | 机器学习框架 | ray-sklearn | 分布式 | job-template/job/ray_sklearn/README.md
 | 机器学习算法 | random_forest | 单机 | job-template/job/random_forest/README.md
 | 机器学习算法 | lr | 单机 | job-template/job/lr/README.md
@@ -48,27 +48,27 @@ https://github.com/tencentmusic/cube-studio/wiki
 | 机器学习算法 | decision-tree | 单机 | job-template/job/decision_tree/README.md
 | 机器学习算法 | bayesian | 单机 | job-template/job/bayesian/README.md
 | 机器学习算法 | adaboost | 单机 | job-template/job/adaboost/README.md
-| 深度学习 | tfjob | 分布式 | job-template/job/tf/README.md
-| 深度学习 | pytorchjob | 分布式 | job-template/job/pytorch/README.md
-| 深度学习 | paddle | 分布式 | job-template/job/paddle/README.md
-| 深度学习 | mxnet | 分布式 | job-template/job/mxnet/README.md
-| 深度学习 | mindspore | 分布式 | job-template/job/mindspore/README.md
-| 深度学习 | horovod | 分布式 | job-template/job/horovod/README.md
-| 深度学习 | mpi | 分布式 | job-template/job/mpi/README.md
-| 深度学习 | colossalai | 分布式 | job-template/job/colossalai/README.md
-| 深度学习 | deepspeed | 分布式 | job-template/job/deepspeed/README.md
-| 深度学习 | megatron | 分布式 | job-template/job/megatron/README.md
-| 模型处理 | model-evaluation | 单机 | job-template/job/model_evaluation/README.md
-| 模型服务化 | model-convert | 单机 | job-template/job/model_convert/README.md
-| 模型服务化 | model-register | 单机 | job-template/job/model_register/README.md
-| 模型服务化 | deploy-service | 单机 | job-template/job/deploy-service/README.md
-| 模型服务化 | model-offline-predict | 分布式 | job-template/job/model_offline_predict/README.md
-| 多媒体类 | media-download | 分布式 | job-template/job/video-audio/README.md
-| 多媒体类 | video-img | 分布式 | job-template/job/video-audio/README.md
-| 多媒体类 | video-audio | 分布式 | job-template/job/video-audio/README.md
-| 大模型 | llama2 | 单机多卡 | job-template/job/llama2/README.md
-| 大模型  | chatglm2 | 单机多卡 | job-template/job/chatglm2/README.md
-| 大模型  | baichuan2 | 单机多卡 | job-template/job/baichuan2/README.md
+| 深度学习   | tfjob | 分布式 | job-template/job/tf/README.md
+| 深度学习   | pytorchjob | 分布式 | job-template/job/pytorch/README.md
+| 深度学习   | paddle | 分布式 | job-template/job/paddle/README.md
+| 深度学习   | mxnet | 分布式 | job-template/job/mxnet/README.md
+| 深度学习   | mindspore | 分布式 | job-template/job/mindspore/README.md
+| 深度学习   | horovod | 分布式 | job-template/job/horovod/README.md
+| 深度学习   | mpi | 分布式 | job-template/job/mpi/README.md
+| 深度学习   | colossalai | 分布式 | job-template/job/colossalai/README.md
+| 深度学习   | deepspeed | 分布式 | job-template/job/deepspeed/README.md
+| 深度学习   | megatron | 分布式 | job-template/job/megatron/README.md
+| 模型处理   | model-evaluation | 单机 | job-template/job/model_evaluation/README.md
+| 模型服务化  | model-convert | 单机 | job-template/job/model_convert/README.md
+| 模型服务化  | model-register | 单机 | job-template/job/model_register/README.md
+| 模型服务化  | deploy-service | 单机 | job-template/job/deploy-service/README.md
+| 模型服务化  | model-offline-predict | 分布式 | job-template/job/model_offline_predict/README.md
+| 多媒体类   | media-download | 分布式 | job-template/job/video-audio/README.md
+| 多媒体类   | video-img | 分布式 | job-template/job/video-audio/README.md
+| 多媒体类   | video-audio | 分布式 | job-template/job/video-audio/README.md
+| 大模型    | llama2 | 单机多卡 | job-template/job/llama2/README.md
+| 大模型    | chatglm2 | 单机多卡 | job-template/job/chatglm2/README.md
+| 大模型    | baichuan2 | 单机多卡 | job-template/job/baichuan2/README.md
 
 
 # 公司

@@ -1,0 +1,70 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "postgresqlreader",
+                    "parameter": {
+                        "username": "postgres",
+                        "password": "postgres",
+                        "column": [
+                            "age",
+                            "duration",
+                            "campaign",
+                            "pdays",
+                            "previous",
+                            "emp_var_rate",
+                            "cons_price_idx",
+                            "cons_conf_idx",
+                            "euribor3m",
+                            "nr_employed",
+                            "y"
+                        ],
+                        "connection": [
+                            {
+                                "table": [
+                                    "train"
+                                ],
+                                "jdbcUrl": [
+     "jdbc:postgresql://postgresql.kubeflow:5432/example"
+                                ]
+                            }
+                        ]
+                    }
+                },
+               "writer": {
+                    "name": "txtfilewriter",
+                    "parameter": {
+                        "path": "/mnt/admin/pipeline/example/ml/",
+                        "fileName": "data-pg.csv",
+                        "writeMode": "truncate",
+                        "fileFormat":"csv",
+                        "header": [
+                            "age",
+                            "duration",
+                            "campaign",
+                            "pdays",
+                            "previous",
+                            "emp_var_rate",
+                            "cons_price_idx",
+                            "cons_conf_idx",
+                            "euribor3m",
+                            "nr_employed",
+                            "y"
+                        ],
+                        "dateFormat": "yyyy-MM-dd"
+                    }
+                }
+            }
+        ]
+    }
+}
