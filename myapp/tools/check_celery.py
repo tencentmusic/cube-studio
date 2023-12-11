@@ -1,7 +1,7 @@
-import sys
-import os
-import sys, os
 
+import sys, os
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 dir_common = os.path.split(os.path.realpath(__file__))[0] + '/../'
 print(dir_common)
 sys.path.append(dir_common)  # 将根目录添加到系统目录,才能正常引用common文件夹
@@ -33,13 +33,13 @@ def check_push():
             unscheduld_num = r.llen('celery')
             print(unscheduld_num)
             if unscheduld_num > 100:
-                push_admin('超过100个任务堆积未被调度')
+                push_admin(__('超过100个任务堆积未被调度'))
                 return
         if r.exists('unacked'):
             unacked_num = r.hlen('unacked')
             print(unacked_num)
             if unacked_num > 500:
-                push_admin("超过500个调度未完成")
+                push_admin(__("超过500个调度未完成"))
 
     except Exception as e:
         print(e)

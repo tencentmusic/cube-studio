@@ -1,4 +1,6 @@
 import time, os
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from kubernetes import client
 from kubernetes import watch
 from myapp.utils.py.py_k8s import K8s

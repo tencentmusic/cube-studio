@@ -1,4 +1,6 @@
 import time, datetime, os
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from kubernetes import client
 from kubernetes import watch
 import json
@@ -221,13 +223,13 @@ def save_history(pytorchjob, dbsession):
     dbsession.commit()
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_crd_exist(group, version, namespace, plural, name):
     exist_crd = client.CustomObjectsApi().get_namespaced_custom_object(group, version, namespace, plural, name)
     return exist_crd
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def deal_event(event, crd_info, namespace):
     with session_scope(nullpool=True) as dbsession:
         try:
@@ -277,7 +279,7 @@ def deal_event(event, crd_info, namespace):
             print(e)
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def listen_crd():
     crd_info = conf.get('CRD_INFO')['pytorchjob']
     namespace = conf.get('PIPELINE_NAMESPACE')
