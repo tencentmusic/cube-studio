@@ -9,7 +9,8 @@ import numpy
 import random
 import copy
 from myapp.models.helpers import AuditMixinNullable
-
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 
@@ -40,7 +41,7 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     working_dir = Column(String(100),default='')
     command = Column(String(1000),default='')
     volume_mount = Column(String(2000),default='')
-    image_pull_policy = Column(Enum('Always','IfNotPresent'),nullable=False,default='Always')
+    image_pull_policy = Column(Enum('Always','IfNotPresent',name='image_pull_policy'),nullable=False,default='Always')
     replicas = Column(Integer, default=1)  
     resource_memory = Column(String(100),default='2G')
     resource_cpu = Column(String(100), default='2')
@@ -67,15 +68,15 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     @property
     def run(self):
         service_pipeline_run_url = "/service_pipeline_modelview/run_service_pipeline/" +str(self.id)
-        return Markup(f'<a target=_blank href="{service_pipeline_run_url}">运行</a>')
+        return Markup(f'<a target=_blank href="{service_pipeline_run_url}">{__("运行")}</a>')
 
     @property
     def log(self):
         if self.run_id:
             service_pipeline_url = "/service_pipeline_modelview/web/log/%s"%self.id
-            return Markup(f'<a target=_blank href="{service_pipeline_url}">日志</a>')
+            return Markup(f'<a target=_blank href="{service_pipeline_url}">{__("日志")}</a>')
         else:
-            return Markup('日志')
+            return Markup(__('日志'))
 
 
     @property
@@ -87,26 +88,26 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     @property
     def operate_html(self):
         dom=f'''
-        <a target=_blank href="/service_pipeline_modelview/run_service_pipeline/{self.id}">部署</a> | 
+        <a target=_blank href="/service_pipeline_modelview/run_service_pipeline/{self.id}">{__("部署")}</a> | 
         <a target=_blank href="/service_pipeline_modelview/web/pod/{self.id}">pod</a> | 
-        <a target=_blank href="/service_pipeline_modelview/web/log/{self.id}">日志</a> |
-        <a target=_blank href="/service_pipeline_modelview/web/monitoring/{self.id}">监控</a> |
-        <a href="/service_pipeline_modelview/clear/{self.id}">清理</a>
+        <a target=_blank href="/service_pipeline_modelview/web/log/{self.id}">{__("日志")}</a> |
+        <a target=_blank href="/service_pipeline_modelview/web/monitoring/{self.id}">{__("监控")}</a> |
+        <a href="/service_pipeline_modelview/clear/{self.id}">{__("清理")}</a>
         '''
         return Markup(dom)
 
 
-    @renders('dag_json')
+    @property
     def dag_json_html(self):
         dag_json = self.dag_json or '{}'
         return Markup('<pre><code>' + dag_json + '</code></pre>')
 
 
-    @renders('expand')
+    @property
     def expand_html(self):
         return Markup('<pre><code>' + self.expand + '</code></pre>')
 
-    @renders('parameter')
+    @property
     def parameter_html(self):
         return Markup('<pre><code>' + self.parameter + '</code></pre>')
 

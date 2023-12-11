@@ -1,6 +1,8 @@
 from flask_appbuilder import Model
 from sqlalchemy.orm import relationship
 import json
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from sqlalchemy import (
     Boolean,
     Text,
@@ -11,7 +13,8 @@ import random
 import copy
 import urllib.parse
 from myapp.models.helpers import AuditMixinNullable
-
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp import app,db
 from myapp.models.helpers import ImportMixin
 from myapp.models.model_team import Project
@@ -28,48 +31,34 @@ from myapp.utils.py import py_k8s
 
 class Repository(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'repository'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(200), unique = True, nullable=False)
-    server = Column(String(200), nullable=False)
-    user = Column(String(100), nullable=False)
-    password = Column(String(100), nullable=False)
-    hubsecret = Column(String(100))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    name = Column(String(200), unique = True, nullable=False,comment='英文名')
+    server = Column(String(200), nullable=False,comment='仓库地址')
+    user = Column(String(100), nullable=False,comment='账户')
+    password = Column(String(100), nullable=False,comment='密码')
+    hubsecret = Column(String(100),comment='k8s secret名')
 
     def __repr__(self):
         return self.name
 
-    label_columns_spec={
-        "server":'域名',
-        "user":"用户名",
-        "hubsecret": 'k8s hubsecret',
-    }
-    label_columns=MyappModelBase.label_columns.copy()
-    label_columns.update(label_columns_spec)
-
-
 class Images(Model,AuditMixinNullable,MyappModelBase):
     __tablename__='images'
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    project_id = Column(Integer, ForeignKey('project.id'),comment='项目组id')
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
 
-    name = Column(String(500), nullable=False)
-    describe = Column(String(1000), nullable=False)
-    repository_id = Column(Integer, ForeignKey('repository.id'))
+    name = Column(String(500), nullable=False,comment='英文名')
+    describe = Column(String(1000), nullable=False,comment='描述')
+    repository_id = Column(Integer, ForeignKey('repository.id'),comment='仓库id')
     repository = relationship(
         "Repository", foreign_keys=[repository_id]
     )
-    entrypoint=Column(String(2000))
-    dockerfile=Column(Text)
-    gitpath=Column(String(200))
+    entrypoint=Column(String(2000),comment='入口点')
+    dockerfile=Column(Text,comment='dockerfile')
+    gitpath=Column(String(200),comment='git地址')
 
-    label_columns_spec={
-        "project":'功能分类',
-    }
-    label_columns = MyappModelBase.label_columns.copy()
-    label_columns.update(label_columns_spec)
 
     @property
     def images_url(self):
@@ -84,52 +73,47 @@ class Images(Model,AuditMixinNullable,MyappModelBase):
 
 class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     __tablename__='job_template'
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    project_id = Column(Integer, ForeignKey('project.id'),comment='项目组id')
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
-    name = Column(String(500), nullable=False,unique=True)
-    version = Column(Enum('Release','Alpha',name='version'),nullable=False,default='Release')
-    images_id = Column(Integer, ForeignKey('images.id'))
+    name = Column(String(500), nullable=False,unique=True,comment='英文名')
+    version = Column(Enum('Release','Alpha',name='version'),nullable=False,default='Release',comment='版本')
+    images_id = Column(Integer, ForeignKey('images.id'),comment='镜像id')
     images = relationship(
         Images, foreign_keys=[images_id]
     )
-    hostAliases = Column(Text)   # host文件
-    describe = Column(String(500), nullable=False)
-    workdir=Column(String(400))
-    entrypoint=Column(String(2000))
-    args=Column(Text)
-    env = Column(Text)   # 默认自带的环境变量
-    volume_mount = Column(String(2000),default='')  # 强制必须挂载
-    privileged = Column(Boolean, default=False)   # 是否启用特权模式
-    accounts = Column(String(100))   # 使用k8s账户
-    demo=Column(Text)
-    expand = Column(Text(65536), default='{}')
+    hostAliases = Column(Text,comment='域名映射')   # host文件
+    describe = Column(String(500), nullable=False,comment='描述')
+    workdir=Column(String(400),comment='工作目录')
+    entrypoint=Column(String(2000),comment='入口点')
+    args=Column(Text,comment='启动参数')
+    env = Column(Text,comment='默认自带的环境变量')   #
+    volume_mount = Column(String(2000),default='',comment='强制必须挂载')  #
+    privileged = Column(Boolean, default=False,comment=' 是否启用特权模式')   #
+    accounts = Column(String(100),comment='使用k8s账户')   #
+    demo=Column(Text,comment='配置示例')
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
 
-    label_columns_spec={
-        "project": "功能分类",
-    }
-    label_columns = MyappModelBase.label_columns.copy()
-    label_columns.update(label_columns_spec)
 
     def __repr__(self):
         return self.name   # +"(%s)"%self.version
 
-    @renders('args')
+    @property
     def args_html(self):
         return Markup('<pre><code>' + self.args + '</code></pre>')
 
-    @renders('demo')
+    @property
     def demo_html(self):
         return Markup('<pre><code>' + self.demo + '</code></pre>')
 
-    @renders('expand')
+    @property
     def expand_html(self):
         return Markup('<pre><code>' + self.expand + '</code></pre>')
 
 
-    @renders('name')
+    @property
     def name_title(self):
         return Markup(f'<a data-toggle="tooltip" rel="tooltip" title data-original-title="{self.describe}">{self.name}</a>')
 
@@ -140,14 +124,14 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
 
     # import pysnooper
     # @pysnooper.snoop()
-    def get_env(self,name):
+    def get_env(self,name,default=None):
         if self.env and name in self.env:
             envs = self.env.split('\n')
             for env in envs:
                 if name in env:
                     return env[env.index('=')+1:].strip()
         else:
-            return None
+            return default
 
 
     def clone(self):
@@ -165,34 +149,34 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
 
 class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'pipeline'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100),nullable=False,unique=True)
-    describe = Column(String(200),nullable=False)
-    project_id = Column(Integer, ForeignKey('project.id'),nullable=False)  # 定义外键
+    id = Column(Integer, primary_key=True,comment='id主键')
+    name = Column(String(100),nullable=False,unique=True,comment='英文名')
+    describe = Column(String(200),nullable=False,comment='描述')
+    project_id = Column(Integer, ForeignKey('project.id'),nullable=False,comment='项目组id')
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
-    dag_json = Column(Text,nullable=False,default='{}')
-    namespace=Column(String(100),default='pipeline')
-    global_env = Column(String(500),default='')
-    schedule_type = Column(Enum('once', 'crontab',name='schedule_type'),nullable=False,default='once')
-    cron_time = Column(String(100))        # 调度周期
-    cronjob_start_time = Column(String(300), default='')
-    pipeline_file=Column(Text(655360),default='')
-    pipeline_argo_id = Column(String(100))
-    version_id = Column(String(100))
-    run_id = Column(String(100))
-    node_selector = Column(String(100), default='cpu=true,train=true')
-    image_pull_policy = Column(Enum('Always','IfNotPresent',name='image_pull_policy'),nullable=False,default='Always')
-    parallelism = Column(Integer, nullable=False,default=1)  # 同一个pipeline，最大并行的task数目
-    alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated')   # 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated
-    alert_user = Column(String(300), default='')
+    dag_json = Column(Text,nullable=False,default='{}',comment='上下游关系')
+    namespace=Column(String(100),default='pipeline',comment='命名空间')
+    global_env = Column(String(500),default='',comment='全局环境变量')
+    schedule_type = Column(Enum('once', 'crontab',name='schedule_type'),nullable=False,default='once',comment='调度类型')
+    cron_time = Column(String(100),comment='调度周期')        #
+    cronjob_start_time = Column(String(300), default='',comment='定时调度补录起点')
+    pipeline_file=Column(Text(655360),default='',comment='workflow yaml文件')
+    pipeline_argo_id = Column(String(100),comment='argo workflow id')
+    version_id = Column(String(100),comment='workflow version id')
+    run_id = Column(String(100),comment='workflow run id')
+    node_selector = Column(String(100), default='cpu=true,train=true',comment='机器选择器')
+    image_pull_policy = Column(Enum('Always','IfNotPresent',name='image_pull_policy'),nullable=False,default='Always',comment='镜像拉取策略')
+    parallelism = Column(Integer, nullable=False,default=1,comment='同一个pipeline，最大并行的task数目')  #
+    alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated',comment=' 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated')   #
+    alert_user = Column(String(300), default='',comment='报警接收人')
 
-    expand = Column(Text(65536),default='[]')
-    depends_on_past = Column(Boolean, default=False)
-    max_active_runs = Column(Integer, nullable=False,default=3)   # 最大同时运行的pipeline实例
-    expired_limit = Column(Integer, nullable=False, default=0)  # 过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能
-    parameter = Column(Text(65536), default='{}')
+    expand = Column(Text(65536),default='[]',comment='扩展参数')
+    depends_on_past = Column(Boolean, default=False,comment='是否依赖过往实例')
+    max_active_runs = Column(Integer, nullable=False,default=3,comment='最大同时运行的pipeline实例')   #
+    expired_limit = Column(Integer, nullable=False, default=0,comment='过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能')  #
+    parameter = Column(Text(65536), default='{}',comment='前端保留参数，用于记录编排样式')
 
 
     def __repr__(self):
@@ -213,9 +197,9 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def log(self):
         if self.run_id:
             pipeline_url = "/pipeline_modelview/web/log/%s"%self.id
-            return Markup(f'<a target=_blank href="{pipeline_url}">日志</a>')
+            return Markup(f'<a target=_blank href="{pipeline_url}">{__("日志")}</a>')
         else:
-            return Markup('日志')
+            return Markup(__('日志'))
 
 
     @property
@@ -225,27 +209,27 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
 
 
-    @renders('dag_json')
+    @property
     def dag_json_html(self):
         dag_json = self.dag_json or '{}'
         return Markup('<pre><code>' + dag_json + '</code></pre>')
 
 
-    @renders('expand')
+    @property
     def expand_html(self):
         return Markup('<pre><code>' + self.expand + '</code></pre>')
 
-    @renders('parameter')
+    @property
     def parameter_html(self):
         return Markup('<pre><code>' + self.parameter + '</code></pre>')
 
 
-    @renders('pipeline_file')
+    @property
     def pipeline_file_html(self):
         pipeline_file = self.pipeline_file or ''
         return Markup('<pre><code>' + pipeline_file + '</code></pre>')
 
-    # @renders('describe')
+    # @property
     # def describe_html(self):
     #     return Markup('<pre><code>' + self.pipeline_file + '</code></pre>')
 
@@ -479,32 +463,33 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
 class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'task'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    label = Column(String(100), nullable=False)   # 别名
-    job_template_id = Column(Integer, ForeignKey('job_template.id'))  # 定义外键
+    id = Column(Integer, primary_key=True,comment='id主键')
+    name = Column(String(100), nullable=False,comment='英文名')
+    label = Column(String(100), nullable=False,comment='中文名')   # 别名
+    job_template_id = Column(Integer, ForeignKey('job_template.id'),comment='任务模板id')
     job_template = relationship(
         "Job_Template", foreign_keys=[job_template_id]
     )
-    pipeline_id = Column(Integer, ForeignKey('pipeline.id'))  # 定义外键
+    pipeline_id = Column(Integer, ForeignKey('pipeline.id'),comment='项目组id')
     pipeline = relationship(
         "Pipeline", foreign_keys=[pipeline_id]
     )
-    working_dir = Column(String(1000),default='')
-    command = Column(String(1000),default='')
-    overwrite_entrypoint = Column(Boolean,default=False)   # 是否覆盖入口
-    args = Column(Text)
-    volume_mount = Column(String(2000),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')   # 挂载
-    node_selector = Column(String(100),default='cpu=true,train=true')   # 挂载
-    resource_memory = Column(String(100),default='2G')
-    resource_cpu = Column(String(100), default='2')
-    resource_gpu= Column(String(100), default='0')
-    timeout = Column(Integer, nullable=False,default=0)
-    retry = Column(Integer, nullable=False,default=0)
-    outputs = Column(Text,default='{}')   # task的输出，会将输出复制到minio上   {'prediction': '/output.txt'}
-    monitoring = Column(Text,default='{}')  # 该任务的监控信息
-    expand = Column(Text(65536), default='')
-    skip = Column(Boolean,default=False)  # 是否跳过
+    working_dir = Column(String(1000),default='',comment='启动目录')
+    command = Column(String(1000),default='',comment='启动命令')
+    overwrite_entrypoint = Column(Boolean,default=False,comment='是否覆盖模板中的入口点')
+    args = Column(Text,comment='任务启动参数')
+    volume_mount = Column(String(2000),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',comment='挂载')   #
+    node_selector = Column(String(100),default='cpu=true,train=true',comment='机器选择器')   #
+    resource_memory = Column(String(100),default='2G',comment='申请内存')
+    resource_cpu = Column(String(100), default='2',comment='申请cpu')
+    resource_gpu= Column(String(100), default='0',comment='申请gpu')
+    resource_rdma = Column(String(100), default='0',comment='rdma的资源数量')  #
+    timeout = Column(Integer, nullable=False,default=0,comment='超时')
+    retry = Column(Integer, nullable=False,default=0,comment='重试次数')
+    outputs = Column(Text,default='{}',comment='task的输出，会将输出复制到minio上 ')   #   {'prediction': '/output.txt'}
+    monitoring = Column(Text,default='{}',comment='该任务的监控信息')  #
+    expand = Column(Text(65536), default='',comment='扩展参数')
+    skip = Column(Boolean,default=False,comment='是否跳过')  #
     export_parent = "pipeline"
 
 
@@ -535,22 +520,22 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         return project_node_selector
 
 
-    @renders('args')
+    @property
     def args_html(self):
         return Markup('<pre><code>' + self.args + '</code></pre>')
 
-    @renders('expand')
+    @property
     def expand_html(self):
         return Markup('<pre><code>' + self.expand + '</code></pre>')
 
-    @renders('monitoring')
+    @property
     def monitoring_html(self):
         try:
             monitoring = json.loads(self.monitoring)
             monitoring['link']="http://"+self.pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
         except Exception:
-            return Markup('<pre><code> 暂无 </code></pre>')
+            return Markup('<pre><code> nothing </code></pre>')
 
     @property
     def job_args_demo(self):
@@ -584,20 +569,20 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 # 每次上传运行
 class RunHistory(Model,MyappModelBase):
     __tablename__ = "run"
-    id = Column(Integer, primary_key=True)
-    pipeline_id = Column(Integer, ForeignKey('pipeline.id'))  # 定义外键
+    id = Column(Integer, primary_key=True,comment='id主键')
+    pipeline_id = Column(Integer, ForeignKey('pipeline.id'),comment='任务流id')
     pipeline = relationship(
         "Pipeline", foreign_keys=[pipeline_id]
     )
-    pipeline_file = Column(Text(655360), default='')
-    pipeline_argo_id = Column(String(100))   # 上传的pipeline id
-    version_id = Column(String(100))        # 上传的版本号
-    experiment_id = Column(String(100))
-    run_id = Column(String(100))
-    message = Column(Text, default='')
-    created_on = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    execution_date=Column(String(200), nullable=False)
-    status = Column(String(100),default='comed')   # commed表示已经到了该调度的时间，created表示已经发起了调度。注意操作前校验去重
+    pipeline_file = Column(Text(655360), default='',comment='workflow yaml')
+    pipeline_argo_id = Column(String(100),comment='任务流 argo id')   # 上传的pipeline id
+    version_id = Column(String(100),comment='上传的版本号')        #
+    experiment_id = Column(String(100),comment='实验id')
+    run_id = Column(String(100),comment='run id')
+    message = Column(Text, default='',comment='消息')
+    created_on = Column(DateTime, default=datetime.datetime.now, nullable=False,comment='创建时间')
+    execution_date=Column(String(200), nullable=False,comment='执行时间')
+    status = Column(String(100),default='comed',comment='状态')   # commed表示已经到了该调度的时间，created表示已经发起了调度。注意操作前校验去重
 
     @property
     def create_time(self):
@@ -623,38 +608,38 @@ class RunHistory(Model,MyappModelBase):
 
 class Crd:
     # __tablename__ = "crd"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100),default='')
-    cluster = Column(String(100), default='')
-    namespace = Column(String(100), default='')
-    create_time=Column(String(100), default='')
-    change_time = Column(String(100), default='')
+    id = Column(Integer, primary_key=True,comment='id主键')
+    name = Column(String(100),default='',comment='英文名')
+    cluster = Column(String(100), default='',comment='k8s集群')
+    namespace = Column(String(100), default='',comment='命名空间')
+    create_time=Column(String(100), default='',comment='创建时间')
+    change_time = Column(String(100), default='',comment='修改时间')
 
-    status = Column(String(100), default='')
-    annotations = Column(Text, default='')
-    labels = Column(Text, default='')
-    spec = Column(Text(655360), default='')
-    status_more = Column(Text(), default='')
-    username = Column(String(100), default='')
-    info_json = Column(Text, default='{}')
-    add_row_time = Column(DateTime, default=datetime.datetime.now)
+    status = Column(String(100), default='',comment='状态')
+    annotations = Column(Text, default='',comment='注释')
+    labels = Column(Text, default='',comment='标签')
+    spec = Column(Text(655360), default='',comment='配置详情')
+    status_more = Column(Text(), default='',comment='状态')
+    username = Column(String(100), default='',comment='用户名')
+    info_json = Column(Text, default='{}',comment='通知记录')
+    add_row_time = Column(DateTime, default=datetime.datetime.now,comment='记录时间')
     # delete = Column(Boolean,default=False)
-    foreign_key = Column(String(100), default='')
+    foreign_key = Column(String(100), default='',comment='外键')
 
-    @renders('annotations')
+    @property
     def annotations_html(self):
         return Markup('<pre><code>' + self.annotations + '</code></pre>')
 
-    @renders('labels')
+    @property
     def labels_html(self):
         return Markup('<pre><code>' + self.labels + '</code></pre>')
 
     @property
     def final_status(self):
-        status='未知'
+        status='unknown'
         try:
             if self.status_more:
-                status = json.loads(self.status_more).get('phase','未知')
+                status = json.loads(self.status_more).get('phase','unknown')
         except Exception as e:
             print(e)
         default='<svg t="1669360410529" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6711" width="20" height="20"><path d="M937.984 741.376c-6.144 10.24-18.432 14.336-28.672 8.192-10.24-6.144-14.336-18.432-8.192-28.672 118.784-212.992 40.96-481.28-172.032-598.016-212.992-118.784-481.28-40.96-598.016 172.032s-40.96 481.28 172.032 598.016c153.6 86.016 339.968 69.632 479.232-32.768 8.192-6.144 22.528-4.096 28.672 4.096 6.144 8.192 4.096 22.528-4.096 28.672-151.552 112.64-356.352 129.024-522.24 36.864-233.472-129.024-317.44-421.888-188.416-653.312 129.024-233.472 421.888-317.44 653.312-188.416 233.472 126.976 317.44 419.84 188.416 653.312z m-647.168-243.712l190.464 169.984 282.624-303.104c8.192-8.192 20.48-8.192 28.672 0 8.192 8.192 8.192 20.48 0 28.672l-311.296 331.776-219.136-198.656c-8.192-8.192-8.192-20.48-2.048-28.672 8.192-8.192 20.48-8.192 30.72 0z" p-id="6712" fill="#dbdbdb"></path></svg>'
@@ -666,19 +651,19 @@ class Crd:
         }
         return Markup(status_icon.get(status,default)+"&nbsp;&nbsp;"+status)
 
-    @renders('spec')
+    @property
     def spec_html(self):
         return Markup('<pre><code>' + self.spec + '</code></pre>')
 
-    @renders('status_more')
+    @property
     def status_more_html(self):
         return Markup('<pre><code>' + self.status_more + '</code></pre>')
 
-    @renders('info_json')
+    @property
     def info_json_html(self):
         return Markup('<pre><code>' + self.info_json + '</code></pre>')
 
-    @renders('namespace')
+    @property
     def namespace_url(self):
         # user_roles = [role.name.lower() for role in list(g.user.roles)]
         # if "admin" in user_roles:
@@ -693,7 +678,7 @@ class Crd:
 class Workflow(Model,Crd,MyappModelBase):
     __tablename__ = 'workflow'
 
-    @renders('namespace')
+    @property
     def namespace_url(self):
         if self.pipeline:
             url = conf.get('K8S_DASHBOARD_CLUSTER', '') + '#/search?namespace=%s&q=%s' % (self.namespace, self.pipeline.name.replace('_', '-'))
@@ -773,7 +758,7 @@ class Workflow(Model,Crd,MyappModelBase):
                 return str(round(elapsed,2))+"h"
         except Exception as e:
             print(e)
-        return '未知'
+        return 'unknown'
 
 
     @property
@@ -795,7 +780,7 @@ class Workflow(Model,Crd,MyappModelBase):
 
             except Exception as e:
                 print(e)
-        return Markup('未知')
+        return Markup('unknown')
 
     @property
     def pipeline(self):
@@ -823,17 +808,17 @@ class Workflow(Model,Crd,MyappModelBase):
         if pipeline:
             return pipeline.project.name
         else:
-            return "未知"
+            return "unknown"
 
     @property
     def log(self):
         url = f'/frontend/commonRelation?backurl=/workflow_modelview/api/web/dag/{self.cluster}/{self.namespace}/{self.name}'
-        return Markup(f'<a target=_blank href="{url}">日志</a>')
+        return Markup(f'<a target=_blank href="{url}">{__("日志")}</a>')
 
 
     @property
     def stop(self):
-        return Markup(f'<a href="/workflow_modelview/stop/{self.id}">停止</a>')
+        return Markup(f'<a href="/workflow_modelview/stop/{self.id}">{__("停止")}</a>')
 
 
 class Tfjob(Model,Crd,MyappModelBase):
@@ -850,7 +835,7 @@ class Tfjob(Model,Crd,MyappModelBase):
                     return Markup(f'<a href="/pipeline_modelview/list/?_flt_2_name={pipeline.name}">{pipeline.describe}</a>')
             except Exception as e:
                 print(e)
-        return Markup('未知')
+        return Markup('unknown')
 
     @property
     def run_instance(self):
@@ -859,10 +844,10 @@ class Tfjob(Model,Crd,MyappModelBase):
                 labels = json.loads(self.labels)
                 run_id = labels.get("run-id",'')
                 if run_id:
-                    return Markup(f'<a href="/workflow_modelview/list/?_flt_2_labels={run_id}">运行实例</a>')
+                    return Markup(f'<a href="/workflow_modelview/list/?_flt_2_labels={run_id}">{__("运行实例")}</a>')
             except Exception as e:
                 print(e)
-        return Markup('未知')
+        return Markup('unknown')
 
 
 

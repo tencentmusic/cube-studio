@@ -3,7 +3,8 @@ import json
 from flask_appbuilder import Model
 from sqlalchemy.orm import relationship
 from sqlalchemy import Text
-
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp.models.helpers import AuditMixinNullable
 from .model_team import Project
 from .model_job import Pipeline
@@ -17,23 +18,23 @@ conf = app.config
 
 class Training_Model(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'model'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    version = Column(String(100))
-    describe = Column(String(1000))
-    path = Column(String(200))
-    download_url = Column(String(200))
-    project_id = Column(Integer, ForeignKey('project.id'))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    name = Column(String(100), nullable=False,comment='英文名')
+    version = Column(String(100),comment='版本')
+    describe = Column(String(1000),comment='描述')
+    path = Column(String(200),comment='模型路径')
+    download_url = Column(String(200),comment='下载url')
+    project_id = Column(Integer, ForeignKey('project.id'),comment='项目组id')
     project = relationship(
         Project, foreign_keys=[project_id]
     )
-    pipeline_id = Column(Integer,default=0)
-    run_id = Column(String(100),nullable=False)   # pipeline run instance
-    run_time = Column(String(100))
-    framework = Column(String(100))
-    metrics = Column(Text,default='{}')
-    md5 = Column(String(200),default='')
-    api_type = Column(String(100))
+    pipeline_id = Column(Integer,default=0,comment='任务流id')
+    run_id = Column(String(100),nullable=False,comment='run id')   # pipeline run instance
+    run_time = Column(String(100),comment='运行时间')
+    framework = Column(String(100),comment='训练框架')
+    metrics = Column(Text,default='{}',comment='指标')
+    md5 = Column(String(200),default='',comment='md5值')
+    api_type = Column(String(100),comment='api类型')
 
     def __repr__(self):
         return self.name
@@ -45,7 +46,7 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
             if pipeline:
                 return Markup(f'<a target=_blank href="/frontend/showOutLink?url=%2Fstatic%2Fappbuilder%2Fvison%2Findex.html%3Fpipeline_id%3D{self.pipeline_id}">{pipeline.describe}</a>')
 
-        return Markup('未知')
+        return Markup('unknown')
 
     @property
     def project_url(self):
@@ -54,12 +55,12 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
         elif self.pipeline and self.pipeline.project:
             return Markup(f'{self.pipeline.project.name}({self.pipeline.project.describe})')
         else:
-            return Markup('未知')
+            return Markup('unknown')
 
     @property
     def deploy(self):
         ops=f'''
-        <a href="/training_model_modelview/deploy/{self.id}">发布</a> 
+        <a href="/training_model_modelview/api/deploy/{self.id}">{__("发布")}</a> 
         '''
         return Markup(ops)
 
@@ -78,4 +79,5 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
         except Exception as e:
             print(e)
             return self.metrics
+
 

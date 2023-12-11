@@ -333,7 +333,8 @@ class AuditMixinNullable(AuditMixin):
             return escape("{}".format(self.created_by))
         return ""
 
-    @renders("created_by")
+    # @renders("created_by")
+    @property
     def creator(self):  # noqa
         # return self._user_link(self.created_by)
         return self.created_by.username
@@ -343,7 +344,8 @@ class AuditMixinNullable(AuditMixin):
         return self.changed_by.username
         # return self._user_link(self.changed_by)
 
-    @renders("changed_on")
+    # @renders("changed_on")
+    @property
     def changed_on_(self):
         return Markup(f'<span class="no-wrap">{self.changed_on}</span>')
 
@@ -355,7 +357,8 @@ class AuditMixinNullable(AuditMixin):
             return "unknown"
 
     # 修改时间到目前的时间距离
-    @renders("changed_on")
+    # @renders("changed_on")
+    @property
     def modified(self):
         # return Markup(f'<span class="no-wrap">{self.changed_on_humanized}</span>')
         return self.changed_on_humanized

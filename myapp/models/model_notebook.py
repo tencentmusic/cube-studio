@@ -5,6 +5,8 @@ from sqlalchemy import (
     Text,
     Enum,
 )
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp.models.base import MyappModelBase
 from myapp.models.model_team import Project
 from myapp.models.helpers import AuditMixinNullable
@@ -23,38 +25,49 @@ from myapp.utils.py import py_k8s
 
 class Notebook(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'notebook'
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'), nullable=False)  # 定义外键
+    id = Column(Integer, primary_key=True,comment='id主键')
+    project_id = Column(Integer, ForeignKey('project.id'), nullable=False,comment='项目组id')  # 定义外键
     project = relationship(
         "Project", foreign_keys=[project_id]
     )
-    name = Column(String(200), unique = True, nullable=True)
-    describe = Column(String(200), nullable=True)
-    namespace = Column(String(200), nullable=True,default='jupyter')
-    images=Column(String(200), nullable=True,default='')
-    ide_type = Column(String(100), default='jupyter')
-    working_dir = Column(String(200), default='')  # 挂载
-    env = Column(String(400),default='') # 环境变量
-    volume_mount = Column(String(2000), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
-    node_selector = Column(String(200), default='cpu=true,notebook=true')  # 挂载
-    image_pull_policy = Column(Enum('Always', 'IfNotPresent',name='image_pull_policy'), nullable=True, default='Always')
-    resource_memory = Column(String(100), default='10G')
-    resource_cpu = Column(String(100), default='10')
-    resource_gpu = Column(String(100), default='0')
-    expand = Column(Text(65536), default='{}')
+    name = Column(String(200), unique = True, nullable=True,comment='英文名')
+    describe = Column(String(200), nullable=True,comment='描述')
+    namespace = Column(String(200), nullable=True,default='jupyter',comment='命名空间')
+    images=Column(String(200), nullable=True,default='',comment='镜像')
+    ide_type = Column(String(100), default='jupyter',comment='ide类型')
+    working_dir = Column(String(200), default='',comment='工作目录')
+    env = Column(String(400),default='',comment='环境变量') #
+    volume_mount = Column(String(2000), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',comment='挂载')  #
+    node_selector = Column(String(200), default='cpu=true,notebook=true',comment='机器选择器')  #
+    image_pull_policy = Column(Enum('Always', 'IfNotPresent',name='image_pull_policy'), nullable=True, default='Always',comment='镜像拉取策略')
+    resource_memory = Column(String(100), default='10G',comment='申请内存')
+    resource_cpu = Column(String(100), default='10',comment='申请cpu')
+    resource_gpu = Column(String(100), default='0',comment='申请gpu')
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
 
     def __repr__(self):
         return self.name
 
     @property
     def name_url(self):
-        host = "http://" + self.project.cluster.get('HOST', request.host)
+        SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
+
+        host = "//" + self.project.cluster.get('HOST', request.host)
 
         expand = json.loads(self.expand) if self.expand else {}
         root = expand.get('root','')
 
         if self.ide_type=='theia':
             url = "/notebook/"+self.namespace + "/" + self.name+"/" + "#"+self.mount
+        elif self.ide_type=='matlab':
+            url = "/notebook/"+self.namespace + "/" + self.name+"/index.html"
+        elif self.ide_type=='rstudio' and not SERVICE_EXTERNAL_IP:
+            url1 = host+"/notebook/" + self.namespace + "/" + self.name + "/auth-sign-in?appUri=%2F"
+            url2 = host+"/notebook/" + self.namespace + "/" + self.name+"/"
+            a_html='''<a onclick="(function (){window.open('%s','_blank');window.open('%s','_blank')})()">%s</a>'''%(url1,url2,self.name)
+            return Markup(a_html)
+
+            # url = "/notebook/" + self.namespace + "/" + self.name+"/"
         else:
             if root:
                 url = '/notebook/jupyter/%s/lab/tree/%s' % (self.name,root.lstrip('/'))
@@ -63,15 +76,17 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
 
         # url= url + "#"+self.mount
 
-
         # 对于有边缘节点，直接使用边缘集群的代理ip
-        SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
         if SERVICE_EXTERNAL_IP:
             SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip()
             service_ports = 10000 + 10 * self.id
-            host = "http://%s:%s"%(SERVICE_EXTERNAL_IP,str(service_ports))
+            host = "//%s:%s"%(SERVICE_EXTERNAL_IP,str(service_ports))
             if self.ide_type=='theia':
                 url = "/" + "#/mnt/" + self.created_by.username
+            elif self.ide_type == 'matlab':
+                url = "/notebook/" + self.namespace + "/" + self.name + "/index.html"
+            elif self.ide_type == 'rstudio':
+                url = '/'
             else:
                 url = "/notebook/" + self.namespace + "/" + self.name + "/lab?#" + self.mount
                 # url = '/notebook/jupyter/%s/lab/tree/mnt/%s'%(self.name,self.created_by.username)
@@ -83,6 +98,20 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if self.images in images:
             return images[self.images]
         return self.ide_type
+
+    @property
+    def password(self):
+        import hashlib
+        src_str = f'cube-studio-{self.id}'
+
+        # 计算字符串的MD5哈希值
+        hash_object = hashlib.md5(src_str.encode())
+        hash_str = hash_object.hexdigest()
+
+        # 从哈希值中提取6个字符作为密钥
+        key = hash_str[:6]
+
+        return key
 
     @property
     def mount(self):
@@ -111,17 +140,18 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             k8s_client = py_k8s.K8s(self.cluster.get('KUBECONFIG',''))
             namespace = conf.get('NOTEBOOK_NAMESPACE')
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
-            status = pods[0]['status']
-            if g.user.is_admin():
-                # k8s_dash_url = "http://"+self.cluster.get('HOST',request.host)+conf.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=jupyter&q=" + self.name
-                k8s_dash_url = f'/k8s/web/search/{self.cluster["NAME"]}/jupyter/{self.name}'
-                url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
-                return url
-            return status
+            if pods and len(pods)>0:
+                status = pods[0]['status']
+                if g.user.is_admin():
+                    k8s_dash_url = f'/k8s/web/search/{self.cluster["NAME"]}/jupyter/{self.name}'
+                    url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
+                    return url
+                return status
 
         except Exception as e:
             print(e)
-            return "unknown"
+
+        return "unknown"
 
     @property
     def cluster(self):
@@ -138,7 +168,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
 
         end = self.changed_on+datetime.timedelta(seconds=timeout)
         end = end.strftime('%Y-%m-%d')
-        return Markup(f'<a href="/notebook_modelview/renew/{self.id}">截至 {end}</a>')
+        return Markup(f'<a href="/notebook_modelview/api/renew/{self.id}">{__("截至")} {end}</a>')
 
 
     def get_node_selector(self):
@@ -148,6 +178,5 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     # 清空激活
     @property
     def reset(self):
-        return Markup(f'<a href="/notebook_modelview/reset/{self.id}">reset</a>')
-
+        return Markup(f'<a href="/notebook_modelview/api/reset/{self.id}">reset</a>')
 

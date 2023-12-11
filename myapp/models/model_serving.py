@@ -3,7 +3,8 @@ from sqlalchemy.orm import relationship
 import json
 from sqlalchemy import Text
 from myapp.utils import core
-
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp.models.helpers import AuditMixinNullable
 from flask import request,g
 from .model_team import Project
@@ -23,7 +24,7 @@ class service_common():
     def monitoring_url(self):
         # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
         url="//"+self.project.cluster.get('HOST',request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
-        return Markup(f'<a href="{url}">监控</a>')
+        return Markup(f'<a href="{url}">{__("监控")}</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
 
 
@@ -35,29 +36,29 @@ class service_common():
 
 class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     __tablename__ = 'service'
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    project_id = Column(Integer, ForeignKey('project.id'),comment='项目组id')
     project = relationship(
         Project, foreign_keys=[project_id]
     )
 
-    name = Column(String(100), nullable=False,unique=True)   # Used to generate pod service and vs
-    label = Column(String(100), nullable=False)
-    images = Column(String(200), nullable=False)
-    working_dir = Column(String(100),default='')
-    command = Column(String(1000),default='')
-    args = Column(Text,default='')
-    env = Column(Text,default='')
-    volume_mount = Column(String(2000),default='')
-    node_selector = Column(String(100),default='cpu=true,serving=true')
-    replicas = Column(Integer,default=1)
-    ports = Column(String(100),default='80')
-    resource_memory = Column(String(100),default='2G')
-    resource_cpu = Column(String(100), default='2')
-    resource_gpu= Column(String(100), default='0')
-    deploy_time = Column(String(100), nullable=False,default=datetime.datetime.now)
-    host = Column(String(200), default='')
-    expand = Column(Text(65536), default='{}')
+    name = Column(String(100), nullable=False,unique=True,comment='英文名')   # Used to generate pod service and vs
+    label = Column(String(100), nullable=False,comment='中文名')
+    images = Column(String(200), nullable=False,comment='镜像')
+    working_dir = Column(String(100),default='',comment='启动目录')
+    command = Column(String(1000),default='',comment='启动命令')
+    args = Column(Text,default='',comment='启动参数')
+    env = Column(Text,default='',comment='环境变量')
+    volume_mount = Column(String(2000),default='',comment='挂载')
+    node_selector = Column(String(100),default='cpu=true,serving=true',comment='机器选择器')
+    replicas = Column(Integer,default=1,comment='副本')
+    ports = Column(String(100),default='80',comment='端口')
+    resource_memory = Column(String(100),default='2G',comment='申请内存')
+    resource_cpu = Column(String(100), default='2',comment='申请cpu')
+    resource_gpu= Column(String(100), default='0',comment='申请gpu')
+    deploy_time = Column(String(100), nullable=False,default=datetime.datetime.now,comment='部署时间')
+    host = Column(String(200), default='',comment='域名')
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
 
     @property
     def deploy(self):
@@ -69,14 +70,14 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
             print(e)
 
         if help_url:
-            return Markup(f'<a target=_blank href="{help_url}">帮助</a> | <a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{monitoring_url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
+            return Markup(f'<a href="/service_modelview/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/clear/{self.id}">{__("清理")}</a>')
         else:
-            return Markup(f'帮助 | <a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{monitoring_url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
+            return Markup(f'<a href="/service_modelview/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/clear/{self.id}">{__("清理")}</a>')
 
 
     @property
     def clear(self):
-        return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
+        return Markup(f'<a href="/service_modelview/clear/{self.id}">{__("清理")}</a>')
 
 
     @property
@@ -118,6 +119,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def host_url(self):
+        # 泛域名先统一http
         url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
             if 'http://' in self.host or 'https://' in self.host:
@@ -130,56 +132,56 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
 class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     __tablename__ = 'inferenceservice'
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    project_id = Column(Integer, ForeignKey('project.id'),comment='项目组id')
     project = relationship(
         Project, foreign_keys=[project_id]
     )
 
-    name = Column(String(100), nullable=True,unique=True)
-    label = Column(String(100), nullable=False)
+    name = Column(String(100), nullable=True,unique=True,comment='英文名')
+    label = Column(String(100), nullable=False,comment='中文名')
 
-    service_type= Column(String(100),nullable=True,default='serving')
-    model_name = Column(String(200),default='')
-    model_version = Column(String(200),default='')
-    model_path = Column(String(200),default='')
-    model_type = Column(String(200),default='')
-    model_input = Column(Text(65536), default='')
-    model_output = Column(Text(65536), default='')
-    inference_config = Column(Text(65536), default='')   # make configmap
-    model_status = Column(String(200),default='offline')
+    service_type= Column(String(100),nullable=True,default='serving',comment='服务类型')
+    model_name = Column(String(200),default='',comment='模型名')
+    model_version = Column(String(200),default='',comment='模型版本')
+    model_path = Column(String(200),default='',comment='模型地址')
+    model_type = Column(String(200),default='',comment='模型类型')
+    model_input = Column(Text(65536), default='',comment='模型输入')
+    model_output = Column(Text(65536), default='',comment='模型输出')
+    inference_config = Column(Text(65536), default='',comment='配置文件')   # make configmap
+    model_status = Column(String(200),default='offline',comment='服务状态')
     # model_status = Column(Enum('offline','test','online','delete',name='model_status'),nullable=True,default='offline')
 
-    transformer=Column(String(200),default='')  # pre process and post process
+    transformer=Column(String(200),default='',comment='预处理')  # pre process and post process
 
-    images = Column(String(200), nullable=False)
-    working_dir = Column(String(100),default='')
-    command = Column(String(1000),default='')
-    args = Column(Text,default='')
-    env = Column(Text,default='')
-    volume_mount = Column(String(2000),default='')
-    node_selector = Column(String(100),default='cpu=true,serving=true')
-    min_replicas = Column(Integer,default=1)
-    max_replicas = Column(Integer, default=1)
-    hpa = Column(String(400), default='')
-    metrics = Column(Text(65536), default='')
-    health = Column(String(400), default='')
-    sidecar = Column(String(400), default='')
-    ports = Column(String(100),default='80')
-    resource_memory = Column(String(100),default='2G')
-    resource_cpu = Column(String(100), default='2')
-    resource_gpu= Column(String(100), default='0')
-    deploy_time = Column(String(100), nullable=True,default=datetime.datetime.now)
-    host = Column(String(200), default='')
-    expand = Column(Text(65536), default='{}')
-    canary = Column(String(400), default='')
-    shadow = Column(String(400), default='')
+    images = Column(String(200), nullable=False,comment='镜像')
+    working_dir = Column(String(100),default='',comment='启动目录')
+    command = Column(String(1000),default='',comment='启动命令')
+    args = Column(Text,default='',comment='启动参数')
+    env = Column(Text,default='',comment='环境变量')
+    volume_mount = Column(String(2000),default='',comment='挂载')
+    node_selector = Column(String(100),default='cpu=true,serving=true',comment='机器选择器')
+    min_replicas = Column(Integer,default=1,comment='最小副本数')
+    max_replicas = Column(Integer, default=1,comment='最大副本数')
+    hpa = Column(String(400), default='',comment='弹性伸缩')
+    metrics = Column(Text(65536), default='',comment='监控接口')
+    health = Column(String(400), default='',comment='健康检查')
+    sidecar = Column(String(400), default='',comment='伴随容器')
+    ports = Column(String(100),default='80',comment='端口')
+    resource_memory = Column(String(100),default='2G',comment='申请内存')
+    resource_cpu = Column(String(100), default='2',comment='申请cpu')
+    resource_gpu= Column(String(100), default='0',comment='申请gpu')
+    deploy_time = Column(String(100), nullable=True,default=datetime.datetime.now,comment='部署时间')
+    host = Column(String(200), default='',comment='域名')
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
+    canary = Column(String(400), default='',comment='灰度发布')
+    shadow = Column(String(400), default='',comment='灰度发布')
 
-    run_id = Column(String(100),nullable=True)
-    run_time = Column(String(100))
-    deploy_history = Column(Text(65536), default='')
+    run_id = Column(String(100),nullable=True,comment='run id')
+    run_time = Column(String(100),comment='运行时间')
+    deploy_history = Column(Text(65536), default='',comment='部署历史')
 
-    priority = Column(Integer,default=1)   # giving priority to meeting high-priority resource needs
+    priority = Column(Integer,default=1,comment='优先级')   # giving priority to meeting high-priority resource needs
 
     @property
     def model_name_url(self):
@@ -206,34 +208,38 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
         monitoring_url="//"+self.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
-        dom = f'''
-                <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
-                <a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a> | 
-                <a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a> |
-                <a target=_blank href="{monitoring_url}">监控</a> |
-                <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
-                '''
-        if help_url:
-            dom=f'<a target=_blank href="{help_url}">帮助</a> | '+dom
+        if self.created_by.id == g.user.id or self.project.user_role(g.user.id)=='creator':
+            dom = f'''
+                    <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">{__("调试")}</a> | 
+                    <a href="/inferenceservice_modelview/deploy/test/{self.id}">{__("部署测试")}</a> | 
+                    <a href="/inferenceservice_modelview/deploy/prod/{self.id}">{__("部署生产")}</a> |
+                    <a target=_blank href="{monitoring_url}">{__("监控")}</a> |
+                    <a href="/inferenceservice_modelview/clear/{self.id}">{__("清理")}</a>
+                    '''
         else:
-            dom = '帮助 | ' + dom
+            dom = f''' {__("调试")} | {__("部署测试")} | {__("部署生产")}</a> | <a target=_blank href="{monitoring_url}">{__("监控")}</a> | {__("清理")} '''
+
+        # if help_url:
+        #     dom=f'<a target=_blank href="{help_url}">{__("帮助")}</a> | '+dom
+        # else:
+        #     dom = f'{__("帮助")} | ' + dom
         return Markup(dom)
 
     @property
     def debug(self):
-        return Markup(f'<a target=_blank href="/inferenceservice_modelview/debug/{self.id}">调试</a>')
+        return Markup(f'<a target=_blank href="/inferenceservice_modelview/debug/{self.id}">{__("调试")}</a>')
 
     @property
     def test_deploy(self):
-        return Markup(f'<a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/deploy/test/{self.id}">{__("部署测试")}</a>')
 
     @property
     def deploy(self):
-        return Markup(f'<a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/deploy/prod/{self.id}">{__("部署生产")}</a>')
 
     @property
     def clear(self):
-        return Markup(f'<a href="/inferenceservice_modelview/clear/{self.id}">清理</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/clear/{self.id}">{__("清理")}</a>')
 
     @property
     def ip(self):
@@ -285,14 +291,16 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
                 host = TKE_EXISTED_LBID[1] + ":" + str(port)
                 return Markup(f'<a target=_blank href="//{host}">{host}</a>')
 
-        return "未开通"
+        return __("未开通")
 
 
     def __repr__(self):
         return self.name
 
+
     @property
     def inference_host_url(self):
+        # 泛域名先使用http
         url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         link = url
         if self.host:

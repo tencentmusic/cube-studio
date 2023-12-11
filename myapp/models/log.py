@@ -30,31 +30,25 @@ class Log(Model,MyappModelBase):
 
     __tablename__ = "logs"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,comment='id主键')
 
-    user_id = Column(Integer, ForeignKey("ab_user.id"))
+    user_id = Column(Integer, ForeignKey("ab_user.id"),comment='用户id')
     user = relationship(
         MyUser, foreign_keys=[user_id]
     )
-    action = Column(String(512))
-    method = Column(String(50))
-    path = Column(String(200))
-    status = Column(Integer)
-    json = Column(Text)
-    dttm = Column(DateTime, default=datetime.now)  # 不要使用datetime.now()不然是程序启动的固定时间了
-    duration_ms = Column(Integer)
-    referrer = Column(String(1024))
+    action = Column(String(512),comment='动作')
+    method = Column(String(50),comment='方法')
+    path = Column(String(200),comment='访问地址')
+    status = Column(Integer,comment='状态')
+    json = Column(Text,comment='请求提')
+    dttm = Column(DateTime, default=datetime.now,comment='访问时间')  # 不要使用datetime.now()不然是程序启动的固定时间了
+    duration_ms = Column(Integer,comment='持续时长')
+    referrer = Column(String(1024),comment='来源地址')
 
 
-    label_columns={
-        'user':'用户',
-        "action": "函数",
-        "method": "方法",
-        "path": "网址",
-        "status": "状态",
-        "dttm": "时间",
-        "duration_ms": "响应延迟",
-        "referrer": "相关人",
-    }
+
+
+
+
 
 

@@ -18,10 +18,10 @@ import pysnooper
 
 class Favorite(Model,MyappModelBase):
     __tablename__ = "favorite"
-    id = Column(Integer, primary_key=True)
-    model_name = Column(String(100), nullable=False)
-    row_id = Column(String(500), nullable=False)
-    user_id = Column(Integer)
+    id = Column(Integer, primary_key=True,comment='id主键')
+    model_name = Column(String(100), nullable=False,comment='数据结构')
+    row_id = Column(String(500), nullable=False,comment='数据id')
+    user_id = Column(Integer,comment='用户id')
 
     def __repr__(self):
         return "userid(%s)model(%s)rowid(%s)"%(self.user_id,self.model_name,self.row_id)
