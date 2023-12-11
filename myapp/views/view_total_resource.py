@@ -94,9 +94,9 @@ def node_traffic():
         for ip in nodes:
             org = nodes[ip]['labels'].get('org', 'public')
             device = 'cpu'
-            if 'gpu' in nodes[ip]['labels']:
+            if nodes[ip]['labels'].get('gpu','')=='true':
                 device = 'gpu/' + nodes[ip]['labels'].get('gpu-type', '')
-            if 'vgpu' in nodes[ip]['labels']:
+            if nodes[ip]['labels'].get('vgpu', '') == 'true':
                 device = 'vgpu/' + nodes[ip]['labels'].get('gpu-type', '')
             if org not in stored_nodes:
                 stored_nodes[org] = {}
@@ -119,11 +119,11 @@ def node_traffic():
             share = nodes[ip]['labels'].get('share', 'true')
             clolr = "#FFFFFF" if share == 'true' else '#F0F0F0'
             device = ''
-            if 'cpu' in nodes[ip]['labels'] and nodes[ip]['labels']['cpu'] == 'true':
+            if nodes[ip]['labels'].get('cpu','') == 'true':
                 device = 'cpu/'
-            if 'gpu' in nodes[ip]['labels'] and nodes[ip]['labels']['gpu']=='true':
+            if nodes[ip]['labels'].get('gpu','')=='true':
                 device = device+'gpu/'
-            if 'vgpu' in nodes[ip]['labels']:
+            if nodes[ip]['labels'].get('vgpu','')=='true':
                 device = device+'vgpu/'
             device = device + nodes[ip]['labels'].get('gpu-type', '')
             device=device.strip('/')
