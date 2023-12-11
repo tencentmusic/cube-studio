@@ -1,21 +1,24 @@
+import copy
 import os
 import re
+import time
 
 import flask
-from flask_appbuilder.models.sqla.interface import SQLAInterface
-
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
+from myapp.utils import core
 from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from flask import jsonify, make_response, send_from_directory, send_file
 import pysnooper
 from myapp.models.model_job import Pipeline, Workflow
 from flask_appbuilder.actions import action
 from myapp.project import push_message
-from myapp import app, appbuilder, db
+from myapp import app, appbuilder, db, event_logger, cache
 from flask import request
 from sqlalchemy import or_
 from flask import Markup
 from myapp.utils.py import py_k8s
-
+import logging
 from .baseApi import (
     MyappModelRestApi
 )
@@ -35,7 +38,6 @@ from flask_appbuilder import expose
 import datetime, json
 
 conf = app.config
-logging = app.logger
 
 
 class CRD_Filter(MyappFilter):
@@ -57,18 +59,6 @@ class Crd_ModelView_Base():
     order_columns = ['id']
     base_permissions = ['can_show', 'can_list', 'can_delete']
     # base_permissions = ['list','delete','show']
-    # label_columns = {
-    #     "annotations_html": _("Annotations"),
-    #     "labels_html": _("Labels"),
-    #     "name": _("名称"),
-    #     "spec_html": _("Spec"),
-    #     "status_more_html": _("Status"),
-    #     "namespace_url":_("命名空间"),
-    #     "create_time":_("创建时间"),
-    #     "status": _("状态"),
-    #     "username": _("关联用户"),
-    #     "log": _("日志"),
-    # }
     crd_name = ''
     base_order = ('create_time', 'desc')
     base_filters = [["id", CRD_Filter, lambda: []]]
@@ -131,7 +121,7 @@ class Crd_ModelView_Base():
                         item.status = 'Deleted'
                         item.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         db.session.commit()
-                        push_message(conf.get('ADMIN_USER', '').split(','), '手动触发stop %s %s' % (crd_info['plural'],item.name))
+                        push_message(conf.get('ADMIN_USER', '').split(','), 'stop %s %s' % (crd_info['plural'],item.name))
 
 
                 except Exception as e:
@@ -144,11 +134,11 @@ class Crd_ModelView_Base():
     def stop(self, crd_id):
         crd = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
         self.base_muldelete([crd])
-        flash('清理完成', 'success')
+        flash(__('清理完成'), 'success')
         self.update_redirect()
         return redirect(self.get_redirect())
 
-    @action("stop_all", __("Stop"), __("Stop all Really?"), "fa-trash", single=False)
+    @action("stop_all", "停止", "停止所有选中的workflow?", "fa-trash", single=False)
     def stop_all(self, items):
         self.base_muldelete(items)
         self.update_redirect()
@@ -165,7 +155,7 @@ class Crd_ModelView_Base():
     #     )
     #     return res
 
-    @action("muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False)
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
     def muldelete(self, items):
         self.base_muldelete(items)
         for item in items:
@@ -232,16 +222,17 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         except Exception as e:
             print(e)
 
+    @event_logger.log_this
     @expose("/stop/<crd_id>")
     def stop(self, crd_id):
         workflow = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
         self.delete_more(workflow)
 
-        flash('清理完成', 'success')
+        flash(__('清理完成'), 'success')
         url = conf.get('MODEL_URLS', {}).get('workflow', '')
         return redirect(url)
 
-    label_title = '运行实例'
+    label_title = _('运行实例')
     datamodel = SQLAInterface(Workflow)
     list_columns = ['project', 'pipeline_url', 'cluster', 'create_time', 'change_time', 'elapsed_time', 'final_status', 'status', 'username', 'log', 'stop']
     search_columns = ['status', 'labels', 'name', 'cluster', 'annotations', 'spec', 'status_more', 'username', 'create_time']
@@ -251,26 +242,34 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         "create_time": {"type": "ellip2", "width": 200},
         "change_time": {"type": "ellip2", "width": 200},
         "final_status": {"type": "ellip1", "width": 250},
+        "elapsed_time":{"type": "ellip1", "width": 150},
     }
     spec_label_columns = {
-        "final_status": "删除前状态",
+        "final_status": _('删除前状态')
     }
     show_columns = ['name', 'namespace', 'create_time', 'status', 'task_status', 'annotations_html', 'labels_html', 'spec_html', 'status_more_html', 'info_json_html']
     crd_name = 'workflow'
 
-    # @pysnooper.snoop(watch_explode=('status_more',))
     def get_dag(self, cluster_name, namespace, workflow_name, node_name=''):
 
         k8s_client = py_k8s.K8s(conf.get('CLUSTERS', {}).get(cluster_name, {}).get('KUBECONFIG', ''))
         crd_info = conf.get('CRD_INFO', {}).get('workflow', {})
-        workflow_obj = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'],
-                                              plural=crd_info['plural'], namespace=namespace, name=workflow_name)
-        workflow_model = db.session.query(Workflow).filter_by(name=workflow_name).first()
+        try_num=3
+        workflow_obj=None
+        # 尝试三次查询
+        while not workflow_obj and try_num>0:
+            workflow_obj = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'],
+                                                  plural=crd_info['plural'], namespace=namespace, name=workflow_name)
+            workflow_model = db.session.query(Workflow).filter_by(name=workflow_name).first()
+            if not workflow_obj:
+                if workflow_model:
+                    workflow_obj = workflow_model.to_json()
+            try_num-=1
+            if not workflow_obj:
+                time.sleep(2)
+        # 没有查询到就返回空
         if not workflow_obj:
-            if workflow_model:
-                workflow_obj = workflow_model.to_json()
-            else:
-                return {}, {}, {}, None
+            return {}, {}, {}, None
 
         # print(workflow_obj)
         labels = json.loads(workflow_obj.get('labels', "{}"))
@@ -295,18 +294,20 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         layout_config["start_time"] = k8s_client.to_local_time(status_more.get('startedAt',''))
         layout_config['finish_time'] = k8s_client.to_local_time(status_more.get('finishedAt',''))
 
-        layout_config['crd_json'] = {
-            "apiVersion": "argoproj.io/v1alpha1",
-            "kind": "Workflow",
-            "metadata": {
-                "annotations": annotations,
-                "name": workflow_name,
-                "labels": labels,
-                "namespace": namespace
-            },
-            "spec": spec,
-            "status": status_more
-        }
+        layout_config['crd_json'] = core.decode_unicode_escape(
+            {
+                "apiVersion": "argoproj.io/v1alpha1",
+                "kind": "Workflow",
+                "metadata": {
+                    "annotations": annotations,
+                    "name": workflow_name,
+                    "labels": labels,
+                    "namespace": namespace
+                },
+                "spec": spec,
+                "status": status_more
+            }
+        )
 
         if int(layout_config.get("pipeline-id", '0')):
             pipeline = db.session.query(Pipeline).filter_by(id=int(layout_config.get("pipeline-id", '0'))).first()
@@ -329,13 +330,13 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         if workflow_model:
             layout_config["right_button"].append(
                 {
-                    "label": "Terminate",
+                    "label": "终止",
                     "url": f"/workflow_modelview/api/stop/{workflow_model.id}"
                 }
             )
         layout_config['right_button'].append(
             {
-                "label": "pipeline",
+                "label": __("任务流"),
                 "url": f'/pipeline_modelview/web/{pipeline.id}'
             }
         )
@@ -343,7 +344,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             [
                 {
                     "name": "cluster",
-                    "label": "集群",
+                    "label": __("集群"),
                     "value": cluster_name
                 },
                 # {
@@ -358,12 +359,12 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 },
                 {
                     "name": "status",
-                    "label": "状态",
+                    "label": __("状态"),
                     "value": workflow_obj['status']
                 },
                 {
                     "name": "message",
-                    "label": "消息",
+                    "label": __("消息"),
                     "value": status_more.get('message', '')
                 },
 
@@ -371,17 +372,17 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             [
                 {
                     "name": "create_time",
-                    "label": "创建时间",
+                    "label": __("创建时间"),
                     "value": workflow_obj['create_time']
                 },
                 {
                     "name": "start_time",
-                    "label": "开始时间",
+                    "label": __("开始时间"),
                     "value": k8s_client.to_local_time(status_more['startedAt']) if 'startedAt' in status_more else ''
                 },
                 {
                     "name": "finish_time",
-                    "label": "结束时间",
+                    "label": __("结束时间"),
                     "value": k8s_client.to_local_time(status_more['finishedAt']) if 'finishedAt' in status_more else ''
                 },
                 {
@@ -392,24 +393,24 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             ],
             [
                 {
-                    "name": "create_by",
-                    "label": "创建人",
+                    "name": "created_by",
+                    "label": __("创建人"),
                     "value": pipeline.created_by.username
                 },
                 {
                     "name": "run_user",
-                    "label": "执行人",
+                    "label": __("执行人"),
                     "value": labels.get("run-rtx", '')
                 },
 
                 {
                     "name": "progress",
-                    "label": "进度",
+                    "label": __("进度"),
                     "value": status_more.get('progress', '0/0')
                 },
                 {
                     "name": "schedule_type",
-                    "label": "调度类型",
+                    "label": __("调度类型"),
                     "value": labels.get("schedule_type", 'once')
                 },
 
@@ -445,23 +446,30 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
                         # 对于可重试节点的发起节点，没有日志和执行命令，
                         displayName = status_more['nodes'][child].get('displayName', '')
-                        displayName = displayName.replace("(0)", '(首次运行)')
+                        displayName = displayName.replace("(0)", '(first)')
                         match = re.findall("(\([1-9]+\))", displayName)
                         if len(match) > 0:
                             retry_index = match[0].replace("(", '').replace(")", '')
-                            displayName = displayName.replace(match[0], f'(第{retry_index}次重试)')
+                            displayName = displayName.replace(match[0], __('(第%s次重试)')%retry_index)
                         title = nodes_spec[task_name].get('metadata', {}).get("annotations", {}).get("task-label", pod_name).encode('utf-8').decode('unicode_escape')+f"({displayName})"
                         node_type = status_more['nodes'][child]['type']
                         if node_type == "Retry":
-                            title += f"(有{retry}次重试机会)"
+                            title += __("(有%s次重试机会)")%retry
                         if node_type == 'Skipped':
-                            title += "(跳过)"
+                            title += "(skip)"
 
                         nodeSelector = nodes_spec[task_name].get('nodeSelector', {})
                         node_selector = ''
                         for key in nodeSelector:
                             node_selector += key + "=" + nodeSelector[key] + ","
                         node_selector = node_selector.strip(',')
+                        requests_resource = nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests", {})
+                        resource_gpu = "0"
+                        for resource_name in list(conf.get('GPU_RESOURCE',{}).values()):
+                            if resource_name in requests_resource:
+                                resource_gpu = str(requests_resource.get(resource_name,"0"))
+                                break
+
                         ui_node = {
                             "node_type": node_type,
                             "nid": status_more['nodes'][child]['id'],
@@ -494,7 +502,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                             "retry": retry,
                             "resource_cpu": str(nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests", {}).get("cpu", '0')),
                             "resource_memory": str(nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests", {}).get("memory", '0')),
-                            "resource_gpu": str(nodes_spec[task_name].get('container', {}).get("resources", {}).get("requests", {}).get("nvidia.com/gpu", '0')),
+                            "resource_gpu": resource_gpu,
                             "children": []
                         }
                         if node_name == child and not self.node_detail_config:
@@ -536,7 +544,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         from minio import Minio
         try:
             minioClient = Minio(
-                endpoint='minio.kubeflow:9000',  # minio.kubeflow:9000    '9.135.92.226:9944'
+                endpoint=conf.get('MINIO_HOST','minio.kubeflow:9000'),  # minio.kubeflow:9000    '9.135.92.226:9944'
                 access_key='minio',
                 secret_key='minio123',
                 secure=False
@@ -602,7 +610,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         return content
 
     @expose("/web/node_detail/<cluster_name>/<namespace>/<workflow_name>/<node_name>", methods=["GET", ])
-    # @pysnooper.snoop()
+    
     def web_node_detail(self,cluster_name,namespace,workflow_name,node_name):
         layout_config, dag_config,node_detail_config,workflow = self.get_dag(cluster_name, namespace, workflow_name,node_name)
         # print(node_detail_config)
@@ -612,7 +620,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         pod_name = node_detail_config["pod"]
         # 获取pod信息
         k8s_client = py_k8s.K8s(conf.get('CLUSTERS', {}).get(cluster_name, {}).get('KUBECONFIG', ''))
-        pod_yaml = 'pod未发现'
+        pod_yaml = __('pod未发现')
         pod_status = ''
         pod = None
         try:
@@ -620,8 +628,48 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             pod = k8s_client.get_pod_humanized(namespace=namespace, pod_name=pod_name)
             if pod:
                 pod_status = pod.get("status", {}).get('phase', 'Unknown')
+                # 去除一些比好看的，没必要的信息
+                for key in copy.deepcopy(pod['metadata'].get('annotations',{})):
+                    if 'cni' in key or 'kubectl' in key:
+                        del pod['metadata']['annotations'][key]
 
+                for key in ['creationTimestamp','resourceVersion','uid']:
+                    if key in pod['metadata']:
+                        del pod['metadata'][key]
+
+                for key in ['initContainers','enableServiceLinks','dnsPolicy','tolerations','terminationGracePeriodSeconds']:
+                    if key in pod['spec']:
+                        del pod['spec'][key]
+
+                volumes = []
+                for index,volume in enumerate(pod['spec'].get('volumes',[])):
+                    if 'my-minio-cred' in str(volume) or 'kube-api-access' in str(volume):
+                        pass
+                    else:
+                        volumes.append(volume)
+
+                pod['spec']['volumes']=volumes
+
+                if 'status' in pod:
+                    del pod['status']
+
+                containers = []
+                for container in pod['spec']['containers']:
+                    if 'emissary' in str(container['command']):
+                        container_temp = copy.deepcopy(container)
+                        envs = []
+                        for env in container_temp.get('env',[]):
+                            if 'ARGO_' not in str(env):
+                                envs.append(env)
+
+                        container_temp['env']=envs
+
+                        containers.append(container_temp)
+
+                pod['spec']['containers'] = containers
+                pod = core.decode_unicode_escape(pod)
                 pod_yaml = json.dumps(pod, indent=4, ensure_ascii=False, default=str)
+
                 import yaml
                 pod_yaml = yaml.safe_dump(yaml.load(pod_yaml), default_flow_style=False, indent=4)
                 # print(pod)
@@ -700,20 +748,20 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         tab1 = [
             {
-                "tabName": "输入输出",
+                "tabName": __("输入输出"),
                 "content": [
                     {
-                        "groupName": "消息",
+                        "groupName": __("消息"),
                         "groupContent": {
-                            "label": '消息',
-                            "value": message if message else '运行正常',
+                            "label": __('消息'),
+                            "value": message if message else __('运行正常'),
                             "type": 'html'
                         }
                     },
                     {
-                        "groupName": "任务详情",
+                        "groupName": __("任务详情"),
                         "groupContent": {
-                            "label": '任务详情',
+                            "label": __('任务详情'),
                             "value": {
                                 "task id": node_detail_config['task_id'],
                                 "task name": node_detail_config['task_name'],
@@ -733,25 +781,14 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                         }
                     },
                     {
-                        "groupName": "挂载详情",
+                        "groupName": __("挂载详情"),
                         "groupContent": {
-                            "label": '挂载详情',
+                            "label": __('挂载详情'),
                             "value": dict(
-                                [['容器路径', '主机路径']] + [[item['mountPath'], volumes.get(item['name'], '')] for item in
-                                                      node_detail_config['volumeMounts']]),
+                                [[__('容器路径'), __('主机路径')]] + [[item['mountPath'], volumes.get(item['name'], '')] for item in node_detail_config['volumeMounts']]),
                             "type": 'map'
                         }
                     },
-                    # {
-                    #     "groupName": "离线日志",
-                    #     "groupContent": {
-                    #         "label": '离线日志',
-                    #         "value": offline_pod_log_url,
-                    #         "type": 'api',
-                    #         "value_type":"html",
-                    #         "cycle_second": 30
-                    #     }
-                    # }
                 ],
                 "bottomButton": []
             }
@@ -759,37 +796,37 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         if node_type == 'Pod':
             tab1[0]['bottomButton'] = [
                 {
-                    "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
-                    "text": "在线日志" + ("" if pod else '(未发现)'),
+                    # "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
+                    "text": __("在线日志") + ("" if pod else '(no)'),
                     "url": online_pod_log_url
                 },
                 {
-                    "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
-                    "text": "在线调试" + ("" if pod_status == 'Running' else '(no)'),
+                    # "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
+                    "text": __("在线调试") + ("" if pod_status == 'Running' else '(no)'),
                     "url": debug_online_url
                 },
                 {
-                    "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
-                    "text": "相关容器" + ("" if pod else '(未发现)'),
+                    # "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
+                    "text": __("相关容器") + ("" if pod else '(no)'),
                     "url": bind_pod_url
                 },
                 {
-                    "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
-                    "text": "资源使用",
+                    # "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
+                    "text": __("资源使用"),
                     "url": grafana_pod_url
                 },
                 {
-                    "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
-                    "text": "离线日志" + ("" if node_type == 'Pod' else '(未发现)'),
+                    # "icon": '<svg t="1672911530794" class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2682" width="200" height="200"><path d="M331.502964 331.496564c-11.110365 11.110365-11.110365 29.107109 0 40.191874l321.816594 321.790994c11.110365 11.161565 29.107109 11.110365 40.191874 0.0256 11.110365-11.110365 11.110365-29.081509 0-40.191874L371.720439 331.496564C360.610073 320.411799 342.61333 320.411799 331.502964 331.496564z" p-id="2683"></path><path d="M96.2141 59.958213 59.990213 96.2077c-79.97415 79.97415-79.99975 209.637745 0 289.611895l126.719604 126.719604c62.668604 62.719804 155.749913 75.878163 231.602476 40.243074 0.281599-0.128 0.537598-0.230399 0.844797-0.332799 0.537598-0.255999 1.177596-0.486398 1.715195-0.742398-0.0512-0.128 0.0512 0.128 0 0 2.713592-1.356796 5.171184-3.07199 7.449577-5.350383 11.238365-11.238365 11.238365-29.491108 0-40.755073-9.036772-9.011172-22.24633-10.598367-33.049497-5.171184-0.0512-0.1536 0.0768 0.1536 0 0-56.575823 25.72792-125.849207 15.180753-172.364261-31.359902L103.433277 349.621308c-59.980613-60.006212-59.980613-157.234709 0-217.215321L132.386787 103.426877c59.980613-59.980613 157.234709-59.955013 217.215321 0l119.474827 119.474827c47.283052 47.257452 57.292621 117.810832 30.131106 174.847454 0 0 0.0256-0.0256 0 0-0.0768 0.204799 0.1024-0.204799 0 0 0.0512 0.0256-0.0256-0.0256 0 0-3.839988 10.239968-2.227193 22.707129 6.015981 30.950303 11.238365 11.238365 29.491108 11.263965 40.755073 0 2.303993-2.303993 4.377586-4.915185 5.759982-7.679976 0.1536 0.0256-0.179199-0.0256 0 0 37.196684-76.313361 24.217524-170.905066-39.167878-234.316068l-126.719604-126.719604C305.851844-19.990337 176.16265-19.990337 96.2141 59.958213z" p-id="2684"></path><path d="M963.411389 927.155503l-36.249487 36.223887c-79.97415 79.97415-209.637745 79.97415-289.611895-0.0256l-126.719604-126.694004c-62.668604-62.668604-75.878163-155.775513-40.217474-231.602476 0.128-0.281599 0.230399-0.537598 0.332799-0.844797 0.255999-0.537598 0.511998-1.203196 0.742398-1.715195 0.128 0.0512-0.128-0.0512 0 0 1.356796-2.713592 3.07199-5.171184 5.350383-7.449577 11.238365-11.238365 29.491108-11.238365 40.780673 0 8.985572 9.011172 10.572767 22.220731 5.119984 33.049497 0.179199 0.0768-0.128-0.0768 0 0-25.72792 56.601423-15.155153 125.823607 31.385502 172.364261l119.474827 119.449227c60.006212 60.006212 157.234709 60.006212 217.215321 0l28.95351-28.95351c60.006212-60.006212 59.980613-157.234709 0-217.189721l-119.449227-119.474827c-47.283052-47.257452-117.810832-57.292621-174.847454-30.131106-0.0256 0 0.0256 0 0 0-0.204799 0.128 0.230399-0.0768 0 0-0.0256 0 0.0256 0.0256 0 0-10.239968 3.865588-22.707129 2.252793-30.950303-6.015981-11.238365-11.263965-11.238365-29.491108-0.0256-40.755073 2.303993-2.278393 4.889585-4.351986 7.705576-5.734382-0.0256-0.128 0.0256 0.179199 0 0 76.313361-37.222284 170.905066-24.217524 234.290468 39.167878l126.719604 126.719604C1043.359939 717.492158 1043.359939 847.181353 963.411389 927.155503z" p-id="2685"></path></svg>',
+                    "text": __("离线日志") + ("" if node_type == 'Pod' and pod_status != 'Running' and pod_status!='Pending' else '(no)'),
                     "url": offline_pod_log_url
                 }
             ]
         tab2 = [
             {
-                "tabName": "pod信息",
+                "tabName": __("pod信息"),
                 "content": [
                     {
-                        "groupName": "yaml信息",
+                        "groupName": __("yaml信息"),
                         "groupContent": {
                             "value": Markup(pod_yaml),
                             "type": 'text'
@@ -802,12 +839,12 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         tab3 = [
             {
-                "tabName": "在线日志",
+                "tabName": __("在线日志"),
                 "content": [
                     {
-                        "groupName": "在线日志",
+                        "groupName": __("在线日志"),
                         "groupContent": {
-                            "value": f'/k8s/web/log/{cluster_name}/{namespace}/{pod_name}/main' if pod_status == 'Running' else "pod未发现",
+                            "value": f'/k8s/web/log/{cluster_name}/{namespace}/{pod_name}/main' if pod_status == 'Running' else __("pod未发现"),
                             "type": 'iframe' if pod_status == 'Running' else "html"
                         }
                     }
@@ -818,12 +855,12 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         tab4 = [
             {
-                "tabName": "在线调试",
+                "tabName": __("在线调试"),
                 "content": [
                     {
-                        "groupName": "在线调试",
+                        "groupName": __("在线调试"),
                         "groupContent": {
-                            "value": f'/k8s/web/exec/{cluster_name}/{namespace}/{pod_name}/main' if pod_status == 'Running' else "pod已停止运行",
+                            "value": f'/k8s/web/exec/{cluster_name}/{namespace}/{pod_name}/main' if pod_status == 'Running' else __("pod已停止运行"),
                             "type": 'iframe' if pod_status == 'Running' else 'html'
                         }
                     }
@@ -834,15 +871,15 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         tab5 = [
             {
-                "tabName": "相关容器",
+                "tabName": __("相关容器"),
                 "content": [
                     {
-                        "groupName": "相关容器",
+                        "groupName": __("相关容器"),
                         "groupContent": {
                             "value": {
                                 "url": host_url+conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/')+f"#/search?namespace={namespace}&q={pod_name}",
                                 "target": "div.kd-chrome-container.kd-bg-background",
-                            } if pod_status else "pod未发现",
+                            } if pod_status else __("pod未发现"),
                             "type": 'iframe' if pod_status else "html"
                         }
                     }
@@ -853,14 +890,13 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         tab6 = [
             {
-                "tabName": "资源使用情况",
+                "tabName": __("资源使用情况"),
                 "content": [
                     {
-                        "groupName": "资源使用情况",
+                        "groupName": __("资源使用情况"),
                         "groupContent": {
                             "value": {
-                                "url": host_url + conf.get('GRAFANA_TASK_PATH',
-                                                           '/grafana/d/pod-info/pod-info?var-pod=') + pod_name,
+                                "url": host_url + conf.get('GRAFANA_TASK_PATH', '/grafana/d/pod-info/pod-info?var-pod=') + pod_name,
                             },
                             "type": 'iframe'
                         }
@@ -871,13 +907,12 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         ]
         tab7 = [
             {
-                "tabName": "结果可视化",
+                "tabName": __("结果可视化"),
                 "content": [
                     {
                         "groupName": "",
                         "groupContent": {
-                            "value": Markup(
-                                "提示：仅企业版支持任务结果、模型指标、数据集可视化预览"),
+                            "value": Markup("提示：仅企业版支持任务结果、模型指标、数据集可视化预览"),
                             # options的值
                             "type": 'html'
                         }
@@ -896,10 +931,10 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
         tab8 = [
             {
-                "tabName": "workflow信息",
+                "tabName": __("workflow信息"),
                 "content": [
                     {
-                        "groupName": "json信息",
+                        "groupName": __("json信息"),
                         "groupContent": {
                             "value": Markup(json.dumps(layout_config.get("crd_json",{}),indent=4,ensure_ascii=False)),
                             "type": 'text'
@@ -924,6 +959,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         )
 
     @expose("/web/dag/<cluster_name>/<namespace>/<workflow_name>", methods=["GET", ])
+    # @pysnooper.snoop()
     def web_dag(self, cluster_name, namespace, workflow_name):
         layout_config, dag_config, node_detail_config, workflow = self.get_dag(cluster_name, namespace, workflow_name)
         back = {
@@ -969,60 +1005,3 @@ class Workflow_ModelView_Api(Workflow_ModelView_Base, MyappModelRestApi):
 
 appbuilder.add_api(Workflow_ModelView_Api)
 
-#
-#
-# # list正在运行的tfjob
-# class Tfjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
-#     label_title = 'tf分布式任务'
-#     datamodel = SQLAInterface(Tfjob)
-#     crd_name = 'tfjob'
-#     list_columns = ['name','pipeline_url','run_instance','namespace_url','create_time','status','username','stop']
-#
-#
-# appbuilder.add_view(Tfjob_ModelView,"TFjob",href="/tfjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
-# # 添加api
-# class Tfjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
-#     label_title = 'tf分布式任务'
-#     datamodel = SQLAInterface(Tfjob)
-#     route_base = '/tfjob_modelview/api'
-#     crd_name = 'tfjob'
-#
-# appbuilder.add_api(Tfjob_ModelView_Api)
-#
-#
-# # list正在运行的xgb
-# class Xgbjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
-#     label_title = 'xgb分布式任务'
-#     datamodel = SQLAInterface(Xgbjob)
-#     crd_name = 'xgbjob'
-#
-# appbuilder.add_view(Xgbjob_ModelView,"XGBjob",href="/xgbjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
-#
-#
-# # 添加api
-# class Xgbjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
-#     label_title = 'xgb分布式任务'
-#     datamodel = SQLAInterface(Xgbjob)
-#     route_base = '/xgbjob_modelview/api'
-#     crd_name = 'xgbjob'
-#
-# appbuilder.add_api(Xgbjob_ModelView_Api)
-#
-#
-# # list正在运行的pytorch
-# class Pytorchjob_ModelView(Crd_ModelView_Base,MyappModelView,DeleteMixin):
-#     label_title = 'pytorch分布式任务'
-#     datamodel = SQLAInterface(Pytorchjob)
-#     crd_name = 'pytorchjob'
-#
-# appbuilder.add_view(Pytorchjob_ModelView,"Pytorchjob",href="/pytorchjob_modelview/list/?_flt_2_name=",icon = 'fa-tasks',category = '训练')
-#
-#
-# # 添加api
-# class Pytorchjob_ModelView_Api(Crd_ModelView_Base,MyappModelRestApi):
-#     label_title = 'pytorch分布式任务'
-#     datamodel = SQLAInterface(Pytorchjob)
-#     route_base = '/pytorchjob_modelview/api'
-#     crd_name = 'pytorchjob'
-#
-# appbuilder.add_api(Pytorchjob_ModelView_Api)

@@ -110,7 +110,6 @@ class MyUser(User):
 
             global_password = 'myapp'
             encoded_jwt = jwt.encode(payload, global_password, algorithm='HS256')
-            encoded_jwt = encoded_jwt.decode('utf-8')
             return encoded_jwt
         return ''
 
@@ -528,8 +527,8 @@ class MyappSecurityManager(SecurityManager):
         # 查找用户
         user = self.find_user(username=username)
         # 添加以组织同名的角色，同时添加上级角色
-        # 注册rtx同名角色
-        rtx_role = self.add_role(username)
+        # # 注册rtx同名角色
+        # rtx_role = self.add_role(username)
         # 如果用户不存在就注册用户
         if user is None:
             user = self.add_org_user(
@@ -538,8 +537,8 @@ class MyappSecurityManager(SecurityManager):
                 last_name=last_name if last_name else username,
                 password=password,
                 org=org_name,               # 添加组织架构
-                email=username + "@tencent.com" if not email else email,
-                roles=[self.find_role(self.auth_user_registration_role),rtx_role] if self.find_role(self.auth_user_registration_role) else [rtx_role,]  #  org_role   添加gamma默认角色,    组织架构角色先不自动添加
+                email=username + "@cube-studio.com" if not email else email,
+                roles=[self.find_role(self.auth_user_registration_role)] if self.find_role(self.auth_user_registration_role) else []  #  org_role   添加gamma默认角色,    组织架构角色先不自动添加
             )
         elif not user.is_active:  # 如果用户未激活不允许接入
             print(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
@@ -553,14 +552,14 @@ class MyappSecurityManager(SecurityManager):
             gamma_role = self.find_role(self.auth_user_registration_role)
             if gamma_role and gamma_role not in user.roles:
                 user.roles.append(gamma_role)
-            if rtx_role and rtx_role not in user.roles:
-                user.roles.append(rtx_role)
+            # if rtx_role and rtx_role not in user.roles:
+            #     user.roles.append(rtx_role)
             # 更新用户信息
             if org_name:
                 user.org = org_name    # 更新组织架构字段
-                org_role = self.add_role(org_name)
-                if org_role not in user.roles:
-                    user.roles.append(org_role)
+                # org_role = self.add_role(org_name)
+                # if org_role not in user.roles:
+                #     user.roles.append(org_role)
 
             self.update_user_auth_stat(user)
 
@@ -691,7 +690,6 @@ class MyappSecurityManager(SecurityManager):
         # Creating default roles
         self.set_role("Admin", self.is_admin_pvm)
         self.set_role("Gamma", self.is_gamma_pvm)
-        self.set_role("granter", self.is_granter_pvm)
 
 
         # commit role and view menu updates
@@ -759,10 +757,6 @@ class MyappSecurityManager(SecurityManager):
             self.is_user_defined_permission(pvm)
             or self.is_admin_only(pvm)
         ) or self.is_accessible_to_all(pvm)
-
-
-    def is_granter_pvm(self, pvm):
-        return pvm.permission.name in {"can_override_role_permissions", "can_approve"}
 
 
     # 创建视图，创建权限，创建视图-权限绑定记录。

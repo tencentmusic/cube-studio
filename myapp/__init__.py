@@ -115,12 +115,13 @@ if conf.get("SILENCE_FAB"):
 # 获取 kubernetes.client.rest 的日志记录器
 logging.getLogger("kubernetes.client.rest").setLevel(logging.WARNING)
 
-if app.debug:
-    app.logger.setLevel(logging.DEBUG)  # pylint: disable=no-member
-else:
-    # In production mode, add log handler to sys.stderr.
-    app.logger.addHandler(logging.StreamHandler())  # pylint: disable=no-member
-    app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
+# 直接使用全局logging，不针对app设置专门的logging了
+# if app.debug:
+#     app.logger.setLevel(logging.DEBUG)  # pylint: disable=no-member
+# else:
+#     # In production mode, add log handler to sys.stderr.
+#     app.logger.addHandler(logging.StreamHandler())  # pylint: disable=no-member
+#     app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
 
 db = SQLA(app)
 
@@ -143,11 +144,11 @@ migrate = Migrate(app, db, directory=APP_DIR + "/migrations")
 # socketio = SocketIO(app,cors_allowed_origins='*', message_queue=message_queue)
 
 
-# Logging configuration
+# 系统全局性 Logging configuration
 logging.basicConfig(format=app.config.get("LOG_FORMAT"))
 logging.getLogger().setLevel(app.config.get("LOG_LEVEL") if app.config.get("LOG_LEVEL") else 1)
 
-# 系统日志输出，myapp的输出。在gunicor是使用
+# 日志输出到文件的配置
 if conf.get("ENABLE_TIME_ROTATE"):
     logging.getLogger().setLevel(conf.get("TIME_ROTATE_LOG_LEVEL"))
     handler = TimedRotatingFileHandler(
@@ -269,7 +270,7 @@ import jwt
 
 # 先经历flask自己的用户识别，再经历这里的before_request，再进行sm里面的before_request，比如load_user_from_header函数
 @app.before_request
-# @pysnooper.snoop(watch_explode='aa')
+# @pysnooper.snoop()
 def check_login():
     static_urls=['/static','/logout','/login','/health','/wechat']
     for url in static_urls:
@@ -347,14 +348,13 @@ def page_not_found(e):
     )
 
 # 配置werkzeug的日志级别为error，这样就不会频繁的打印访问路径了。
-# log = logging.getLogger('werkzeug')
-# log.setLevel(logging.ERROR)
+# log = logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
-if __name__ != '__main__':
-    # 如果不是直接运行，则将日志输出到 gunicorn 中
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
+# if __name__ != '__main__':
+#     # 如果不是直接运行，则将日志输出到 gunicorn 中
+#     gunicorn_logger = logging.getLogger('gunicorn.error')
+#     app.logger.handlers = gunicorn_logger.handlers
+#     app.logger.setLevel(gunicorn_logger.level)
 
 # 引入视图
 from myapp import views
