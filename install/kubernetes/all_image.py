@@ -64,7 +64,7 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning',
     'ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-deeplearning',
     # 超参搜索的镜像
-    'ccr.ccs.tencentyun.com/cube-studio/nni:20211003',
+    'ccr.ccs.tencentyun.com/cube-studio/nni:20230601',
     # 内部服务镜像
     "ccr.ccs.tencentyun.com/cube-studio/phpmyadmin",
     # "ccr.ccs.tencentyun.com/cube-studio/patrikx3:latest",

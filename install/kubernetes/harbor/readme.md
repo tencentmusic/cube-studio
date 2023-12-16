@@ -27,9 +27,12 @@ data_volume: /data  #这个路径是宿主机的路径，根据实际情况修�
 ```
 
 # 执行安装程序，只安装harbor
+
+安装harbor前需要先安装docker和docker-compose，并且启动docker和docker-compose。
 ```bash
+apt install -y docker
 apt install -y docker-compose
-./install.sh  (前提条件：docker需要启动)
+./install.sh
 ```
 
 # 除了安装harbor外，还可以安装公正服务 notary 以及漏洞扫描器 trivy，

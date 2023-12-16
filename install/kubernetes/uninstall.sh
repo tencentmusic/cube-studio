@@ -91,14 +91,6 @@ if [[ "$answer" == "yes" ]]; then
     kubectl delete -f gpu/nvidia-device-plugin.yml
     kubectl delete -f gpu/dcgm-exporter.yaml
 
-    kubectl delete serviceaccount frameworkbarrier --namespace pipeline
-    kubectl delete serviceaccount frameworkbarrier --namespace automl
-    kubectl delete serviceaccount frameworkbarrier --namespace kubeflow
-    kubectl delete clusterrole frameworkbarrier --verb=get,list,watch --resource=frameworks
-    kubectl delete clusterrolebinding frameworkbarrier-pipeline --clusterrole=frameworkbarrier  --user=system:serviceaccount:pipeline:frameworkbarrier
-    kubectl delete clusterrolebinding frameworkbarrier-automl --clusterrole=frameworkbarrier  --user=system:serviceaccount:automl:frameworkbarrier
-    kubectl delete clusterrolebinding frameworkbarrier-kubeflow --clusterrole=frameworkbarrier  --user=system:serviceaccount:kubeflow:frameworkbarrier
-
     # 部署volcano
     kubectl delete -f volcano/volcano-development.yaml
     kubectl delete secret volcano-admission-secret -n kubeflow

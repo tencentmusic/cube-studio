@@ -37,79 +37,6 @@ from flask_login import login_user, logout_user
 from flask_appbuilder.security.forms import LoginForm_db
 import pysnooper
 
-portal_url = 'https://portal.dito.ph/portal-web/#'
-portal_url = 'https://10.26.4.136/portal-web/#'
-
-# 自定义远程用户视图
-# @pysnooper.snoop()
-class MyCustomRemoteUserView(AuthRemoteUserView):
-
-    @expose('/dito/ai/explorer/login')
-    @pysnooper.snoop(watch_explode=('request_data',))
-    def login(self):
-
-        request_data = request.args.to_dict()
-
-        username = request_data.get('staffCode','').lower().replace('_','-').replace('.','')
-        if not username:
-            print('no find user')
-            return redirect(portal_url)
-        # 处理特殊符号
-        email = ''
-        if '@' in username:
-            email = username
-            username = username[:username.index('@')]
-
-        # 先查询用户是否存在
-        if email:
-            user = self.appbuilder.sm.find_user(email=email)
-        else:
-            user = self.appbuilder.sm.find_user(username=username)
-
-        if user and (not user.is_active):
-            logging.info(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
-            print('用户未激活，联系管理员激活')
-            flash('user not active',category='warning')
-            return redirect(portal_url)
-
-        if not user:
-            # 没有用户的时候自动注册用户
-            user = self.appbuilder.sm.auth_user_remote_org_user(
-                username=username,
-                org_name='',
-                password='123456',
-                email=email,
-                first_name=username.split('.')[0] if '.' in username else username,
-                last_name=username.split('.')[1] if '.' in username else username
-            )
-            flash('发现用户%s不存在，已自动注册' % username, "success")
-        login_user(user, remember=True)
-        # 添加到public项目组
-        from myapp.security import MyUserRemoteUserModelView_Base
-        user_view = MyUserRemoteUserModelView_Base()
-        user_view.post_add(user)
-        return redirect(self.appbuilder.get_url_for_index)
-
-    @expose('/login/')
-    def _login(self):
-        if 'rtx' in request.args:
-            if request.args.get('rtx'):
-                username = request.args.get('rtx')
-                user = self.appbuilder.sm.find_user(username)
-                if user:
-                    login_user(user, remember=True)
-                    return redirect(self.appbuilder.get_url_for_index)
-
-        return redirect(portal_url)
-
-    @expose('/logout')
-    # @pysnooper.snoop()
-    def logout(self):
-        session.pop('user', None)
-        logout_user()
-        return redirect(portal_url)
-
-
 # 账号密码登录方式的登录界面
 
 class Myauthdbview(AuthDBView):
@@ -145,7 +72,6 @@ class Myauthdbview(AuthDBView):
                 })
 
     @expose("/login/", methods=["GET", "POST"])
-    @pysnooper.snoop(watch_explode=('form',))
     def login(self):
         request_data = request.args.to_dict()
         comed_url = request_data.get('login_url', '')

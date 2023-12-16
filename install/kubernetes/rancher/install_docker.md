@@ -29,10 +29,11 @@ sudo apt-get update
 
 # 搜索可用版本
 apt-cache madison docker-ce
-# 安装最新版(最好使用指定版本)
-# sudo apt install -y docker-ce docker-compose
 # 安装指定版本，使用安装指定版本
 apt install -y docker-ce=5:20.10.24~3-0~ubuntu-focal
+
+# 安装最新版(最好使用指定版本)
+# sudo apt install -y docker-ce docker-compose
 apt install -y docker-compose
 ```
 

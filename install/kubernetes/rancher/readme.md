@@ -1,29 +1,29 @@
-# 内网使用rancher自建k8s集群
+# 1、内网使用rancher自建k8s集群
 
 如果可以使用公有云k8s，可以直接构建公有云厂商的容器服务。这里介绍如何在内网使用k8s自建k8s集群
 
-# 建设前准备
+# 2、建设前准备
 
 如果内网无法连接到互联网的话，需要在内网申请一个docker仓库，如果内网没有docker仓库，则可以使用Harbor自建一个内网仓库。比如申请一个地址是docker.oa.com的内网仓库
 
-# 将基础组件推送到内网仓库，并在idc机器拉取
+# 3、将基础组件推送到内网仓库，并在idc机器拉取
 
 大多数情况下，内网是无法连接外网的，需要我们提前拉好镜像。如果你的机器可以连接外网，则可以忽略这一部分的操作。
 
-关于镜像的版本，这与rancher和k8s的版本有关。你可以在这里选择一个能够部署k8s 1.18的rancher版本：https://github.com/rancher/rancher/releases
+关于镜像的版本，这与rancher和k8s的版本有关。你可以在这里选择一个能够部署k8s 1.21的rancher版本：https://github.com/rancher/rancher/releases
 
 比如我这里使用的是rancher_version=v2.6.2，即2.6.2版本，那么这个版本依赖的镜像，可以在https://github.com/rancher/rancher/releases/tag/$rancher_version  中找到其所依赖的镜像txt文件，也就是 https://github.com/rancher/rancher/releases/download/$rancher_version/rancher-images.txt
 
 之后，将依赖的镜像在开发网中拉取下来，然后重新tag成内网仓库镜像，例如docker.oa.com域名下的镜像，推送到docker.oa.com上，接着需要在idc中的每个机器上拉取下来，再tag成原始镜像名。
 参考命令：
 
-## 可以连接外网的机器上
+## 3.1、可以连接外网的机器上
 ```bash
 docker pull rancher/rancher-agent:$rancher_version
 docker tag rancher/rancher-agent:$rancher_version docker.oa.com:8080/public/rancher/rancher-agent:$rancher_version
 ```
 
-## 内网idc机器
+## 3.2、内网idc机器
 ```bash
 docker pull docker.oa.com/public/rancher/rancher-agent:$rancher_version
 docker tag docker.oa.com/public/rancher/rancher-agent:$rancher_version rancher/rancher-agent:$rancher_version
@@ -31,7 +31,7 @@ docker tag docker.oa.com/public/rancher/rancher-agent:$rancher_version rancher/r
 
 由于依赖的镜像比较多，我们可以写一个脚本，批量的去拉取和tag。
 
-# 初始化节点
+# 4、初始化节点
 
 想要初始化节点，我们可以批量下发init_node.sh和reset_docker.sh这两个脚本。
 
@@ -43,7 +43,7 @@ init_node.sh 是为了初始化机器，可以把自己要做的初始化任务�
 
 reset_docker.sh 是为了在机器从rancher集群中踢出以后，把rancher环境清理干净。
 
-# centos8 初始化
+# 5、centos8 初始化
 
 ```bash
 #修改/etc/firewalld/firewalld.conf
@@ -110,7 +110,7 @@ reboot
 ```
 
 
-# ubuntu 22.04
+# 6、ubuntu 22.04
 
 ```bash
 vi /etc/default/grub
@@ -130,15 +130,16 @@ net.bridge.bridge-nf-call-iptables=1
 ```
 
 
-# 部署rancher server
+# 7、部署rancher server
 
 单节点部署rancher server  
 
 ```bash
 # 清理历史部署痕迹
+cd cube-studio/install/kubernetes/rancher/
 sh reset_docker.sh
 
-# 需要拉取镜像(这里以2.6.2版本为例)
+# 需要拉取镜像(非2.6.2版本需要执行wget，2.6.2版本已拉取过了)
 wget https://github.com/rancher/rancher/releases/download/v2.6.2/rancher-images.txt
 
 sh pull_rancher_images.sh 
@@ -150,19 +151,39 @@ sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myran
 docker logs  myrancher  2>&1 | grep "Bootstrap Password:"
 ```
 
-# rancher server 启动可能问题
+# 8、rancher server 启动可能问题
 
 permission denied
 
 mount 查看所属盘是否有noexec 限制
 
-# 部署k8s集群
+# 9、部署k8s集群
 
-部署完rancher server后，进去rancher server的https://xx.xx.xx.xx/ 的web界面，这里的xx取决于你服务器的IP地址，之后选择添加集群->选择自定义集群->填写集群名称
+部署完rancher server后，进去rancher server的https://xx.xx.xx.xx/ 的web界面，这里的xx取决于你服务器的IP地址。
+
+选择“Set a specific password to use”来配置rancher的密码，不选择"Allow collection of anonymous statistics ......"，选择"I agree to the terms and conditions ......"。
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/bf9eb26c1ee14ef4b18b02fbf3c17f7a.png)
+
+之后选择添加集群->选择自定义集群->填写集群名称
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/235de769236b4643b2c9a2eb1b109100.png)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/7693842628df47a7b5aefdd36a000f82.png)
 
 然后选择kubernetes的版本（注意：这个版本在第一次打开选择页面时可能刷新不出来，需要等待1~2分钟再刷新才能显示）
 
-之后选择编辑yaml文件。
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/f67444489647471494fa2d3ed062ee6d.png)
+
+修改Advanced option，主要是禁用nginx ingress，修改端口范围，使用docker info检查服务器上的docker根目录是否和默认的一致，不一致则需要更改。
+
+之后选择编辑yaml文件。 添加kubelet的挂载参数，需要把分布式存储的位置都加入挂载。可以添加一个非根目录的父目录。
+
+```bash
+    kube-api:
+      ...
+    kubelet:
+      extra_binds:
+        - '/data:/data'
+```
 
 这个yaml文件中控制着k8s基础组件的启动方式。比如kubelet的启动参数，api-server的启动参数等等。
 
@@ -192,25 +213,25 @@ services部分的示例（注意缩进对齐）
       pod_security_policy: false
       # 服务node port范围
       service_node_port_range: 10-32767
-      # 服务的ip范围
+      # 服务的ip范围，如果公司ip网段与k8s网段有冲突，则需要改这里
       service_cluster_ip_range: 172.16.0.0/16
-      # 证书 https版本isito需要
+      # 证书 https版本isito需要，k8s在1.21版本以下的，需要加extra_args
       extra_args:     
         service-account-issuer: kubernetes.default.svc
         service-account-signing-key-file: /etc/kubernetes/ssl/kube-service-account-token-key.pem
     kube-controller:
-      # 集群pod的ip范围
+      # 集群pod的ip范围，如果公司ip网段与k8s网段有冲突，则需要改这里
       cluster_cidr: 172.17.0.0/16
-      # 集群服务的 ip 范围
+      # 集群服务的 ip 范围，如果公司ip网段与k8s网段有冲突，则需要改这里
       service_cluster_ip_range: 172.16.0.0/16
     kubelet:
-      # dns服务的ip
+      # dns服务的ip，如果公司ip网段与k8s网段有冲突，则需要改这里
       cluster_dns_server: 172.16.0.10
-      # 主机镜像回收触发门槛
+      # 主机镜像回收触发门槛，如果机器空间小，可以把这两个参数调高
       extra_args:
         image-gc-high-threshold: 90
         image-gc-low-threshold: 85
-      # kubelet挂载主机目录，这样才能使用subpath
+      # kubelet挂载主机目录，这样才能使用subpath，所有情况下部署都必加，且仅此处是必须要加的
       extra_binds:
         - '/data:/data'
     kubeproxy: {}
@@ -230,11 +251,11 @@ services部分的示例（注意缩进对齐）
 
 部署完成后，集群的状态会变为"Active"，之后就可以继续其他的操作了，比如执行sh start.sh xx.xx.xx.xx等等
 
-# rancher server 高可用
+# 10、rancher server 高可用
   
  rancher server 有高可用部署方案，可以参考官网https://rancher.com/docs/rancher/v2.x/en/installation/how-ha-works/
 
-## 单节点的配置高可用
+## 10.1、单节点的配置高可用
 
 由于官方提供的几种高可用方案，要么需要ssh互联，要么需要跳板机账号密码，这些都无法在idc环境实现。
 并且使用单容器模式部署的时候，如果docker service或者机器重启了，rancher server就会报异常。一般会报wait k3s start的错误。
@@ -265,7 +286,7 @@ docker rm $RANCHER_CONTAINER_NAME
 然后就可以把原有容器删除掉了。
 这个新启动的容器，在docker service重启后是可以继续正常工作的。
 
-## 配置认证过期
+## 10.2、配置认证过期
 
 因为rancher server的证书有效期是一年，在一年后，rancher server会报证书过期。因此，可以通过下面的方式，创建新的证书。
 
@@ -284,7 +305,7 @@ docker stop $RANCHER_CONTAINER_NAME
 docker start $RANCHER_CONTAINER_NAME
 ```
 
-# 部署完成后需要部分修正
+# 11、部署完成后需要部分修正
 
 1、因为metric-server默认镜像拉取是Always，所以要修改成imagePullPolicy: IfNotPresent
 2、nginx如果不想使用，或者因为端口占用只在部分机器上使用，可以添加亲密度不启动或者在部分机器上启动。
@@ -300,7 +321,7 @@ affinity:
                 - "true"
  3、由于coredns在资源limits太小了，因此可以取消coredns的limits限制，不然dns会非常慢，整个集群都会缓慢
 
-# 机器扩容
+# 12、机器扩容
 现在k8s集群已经有了一个master节点，但还没有worker节点，或者想添加更多的master/worker节点就需要机器扩容了。
 
 在集群主机界面，点击编辑集群
@@ -309,10 +330,10 @@ affinity:
 
 之后复制命令到目标主机上运行，等待完成就可以了。
 
-# rancher/k8s 多用户
+# 13、rancher/k8s 多用户
 如果集群部署好了，需要添加多种权限类型的用户来管理，则可以使用rancher来实现k8s的rbac的多用户。
 
-# 客户端kubectl
+# 14、客户端kubectl
 如果你不会使用rancher界面或者不习惯使用rancher界面，可以使用kubectl或者kubernetes-dashboard。
 
 点击Kubeconfig文件可以看到config的内容，通过内容可以看到，kube-apiserver可以使用rancher-server（端口443）的api接口，或者kube-apiserver（端口6443）的接口控制k8s集群。
@@ -321,13 +342,13 @@ affinity:
 
 下载安装不同系统办公电脑对应的kubectl，然后复制config到~/.kube/config文件夹，就可以通过命令访问k8s集群了。
 
-# kubernetes-dashboard
+# 15、kubernetes-dashboard
 如果你喜欢用k8s-dashboard，可以自己安装dashboard。
 可以参考这个：https://kuboard.cn/install/install-k8s-dashboard.html
 
 这样我们就完成了k8s的部署。
 
-# 节点清理
+# 16、节点清理
 当安装失败需要重新安装，或者需要彻底清理节点。由于清理过程比较麻烦，我们可以在rancher界面上把node删除，然后再去机器上执行reset_docker.sh，这样机器就恢复了部署前的状态。
 
 如果web界面上删除不掉，我们也可以通过kubectl的命令  
@@ -336,7 +357,7 @@ affinity:
 kubectl delete node node12
 ```
 
-# rancher server 节点迁移
+# 17、rancher server 节点迁移
 我们可以实现将rancher server 节点迁移到另一台机器，以防止机器废弃后无法使用的情况。
 
 首先，先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl，这里的.tar.gz的文件名称以实际为准
@@ -374,7 +395,7 @@ curl --insecure -sfL https://100.108.176.29/v3/import/d9jzxfz7tmbsnbhf22jbknzlbj
 至此完成
 
 
-# 总结
+# 18、总结
 
 rancher使用**全部容器化**的形式来部署k8s集群，能大幅度降低k8s集群扩部署/缩容的门槛。
 你可以使用rancher来扩缩容 etcd，k8s-master，k8s-worker。
