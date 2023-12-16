@@ -688,44 +688,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         pipeline_name = labels.get('pipeline-name', workflow_name)
         bind_pod_url = f'/k8s/web/search/{cluster_name}/{namespace}/{pipeline_name}'
 
-        echart_option = '''
-{
-  legend: {
-    top: 'bottom'
-  },
-  toolbox: {
-    show: true,
-    feature: {
-      mark: { show: true },
-      dataView: { show: true, readOnly: false },
-      restore: { show: true },
-      saveAsImage: { show: true }
-    }
-  },
-  series: [
-    {
-      name: 'Nightingale Chart',
-      type: 'pie',
-      radius: [25, 100],
-      center: ['50%', '50%'],
-      roseType: 'area',
-      itemStyle: {
-        borderRadius: 8
-      },
-      data: [
-        { value: 40, name: 'rose 1' },
-        { value: 38, name: 'rose 2' },
-        { value: 32, name: 'rose 3' },
-        { value: 30, name: 'rose 4' },
-        { value: 28, name: 'rose 5' },
-        { value: 26, name: 'rose 6' },
-        { value: 22, name: 'rose 7' },
-        { value: 18, name: 'rose 8' }
-      ]
-    }
-  ]
-}
-        '''
+        echart_option = ''
         metric_content = ''
         try:
             if node_detail_config['metric_key']:
@@ -917,17 +880,35 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                             "type": 'html'
                         }
                     },
-                    {
-                        "groupName": "任务结果",
-                        "groupContent": {
-                            "value": echart_option,  # options的值
-                            "type": 'echart'
-                        }
-                    }
+
                 ],
                 "bottomButton": []
             },
         ]
+        if not metric_content:
+            echart_demos_file = os.listdir('myapp/utils/echart/')
+            for file in echart_demos_file:
+                # print(file)
+                file_path = os.path.join('myapp/utils/echart/',file)
+                can = ['area-stack.json', 'rose.json', 'mix-line-bar.json', 'pie-nest.json', 'bar-stack.json',
+                       'candlestick-simple.json', 'graph-simple.json', 'tree-polyline.json', 'sankey-simple.json',
+                       'radar.json', 'sunburst-visualMap.json', 'parallel-aqi.json', 'funnel.json',
+                       'sunburst-visualMap.json', 'scatter-effect.json']
+                not_can = ['bar3d-punch-card.json', 'simple-surface.json']# 不行的。
+
+                # if '.json' in file and file in []:
+                if '.json' in file and file in can:
+                    echart_option = ''.join(open(file_path).readlines())
+                    # print(echart_option)
+                    tab7[0]['content'].append(
+                        {
+                            "groupName": __("任务结果示例：")+file.replace('.json','')+__("类型图表"),
+                            "groupContent": {
+                                "value": echart_option,  # options的值
+                                "type": 'echart'
+                            }
+                        }
+                    )
 
         tab8 = [
             {

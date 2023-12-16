@@ -1,0 +1,107 @@
+{
+  tooltip: {
+    trigger: 'item',
+    triggerOn: 'mousemove'
+  },
+  series: [
+    {
+      type: 'tree',
+      id: 0,
+      name: 'tree1',
+      data: [{
+  name: 'flare',
+  children: [
+    {
+      name: 'data',
+      children: [
+        {
+          name: 'converters',
+          children: [
+            { name: 'Converters', value: 721 },
+            { name: 'DelimitedTextConverter', value: 4294 }
+          ]
+        },
+        {
+          name: 'DataUtil',
+          value: 3322
+        }
+      ]
+    },
+    {
+      name: 'display',
+      children: [
+        { name: 'DirtySprite', value: 8833 },
+        { name: 'LineSprite', value: 1732 },
+        { name: 'RectSprite', value: 3623 }
+      ]
+    },
+    {
+      name: 'flex',
+      children: [{ name: 'FlareVis', value: 4116 }]
+    },
+    {
+      name: 'query',
+      children: [
+        { name: 'AggregateExpression', value: 1616 },
+        { name: 'And', value: 1027 },
+        { name: 'Arithmetic', value: 3891 },
+        { name: 'Average', value: 891 },
+        { name: 'BinaryExpression', value: 2893 },
+        { name: 'Match', value: 3748 },
+        { name: 'Maximum', value: 843 },
+        {
+          name: 'methods',
+          children: [
+            { name: 'add', value: 593 },
+            { name: 'and', value: 330 },
+            { name: 'mod', value: 591 },
+            { name: 'xor', value: 354 },
+            { name: 'x_x', value: 264 }
+          ]
+        },
+        { name: 'Minimum', value: 843 },
+        { name: 'Not', value: 1554 },
+        { name: 'Or', value: 970 },
+        { name: 'Xor', value: 1101 }
+      ]
+    },
+    {
+      name: 'scale',
+      children: [
+        { name: 'IScaleMap', value: 2105 },
+        { name: 'LinearScale', value: 1316 },
+        { name: 'LogScale', value: 3151 },
+        { name: 'TimeScale', value: 5833 }
+      ]
+    }
+  ]
+}],
+      symbolSize: 7,
+      edgeShape: 'polyline',
+      edgeForkPosition: '63%',
+      initialTreeDepth: 3,
+      lineStyle: {
+        width: 2
+      },
+      label: {
+        backgroundColor: '#fff',
+        position: 'left',
+        verticalAlign: 'middle',
+        align: 'right'
+      },
+      leaves: {
+        label: {
+          position: 'right',
+          verticalAlign: 'middle',
+          align: 'left'
+        }
+      },
+      emphasis: {
+        focus: 'descendant'
+      },
+      expandAndCollapse: true,
+      animationDuration: 550,
+      animationDurationUpdate: 750
+    }
+  ]
+}

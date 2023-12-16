@@ -333,7 +333,7 @@ class NNI_ModelView_Base():
         if 'parameters_demo' in form._fields:
             del form._fields['parameters_demo']  # 不处理这个字段
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def make_nnijob(self,k8s_client,namespace,nni):
         image_pull_secrets = conf.get('HUBSECRET', [])
         user_repositorys = db.session.query(Repository).filter(Repository.created_by_fk == g.user.id).all()
@@ -408,7 +408,7 @@ class NNI_ModelView_Base():
         return task_master_spec
 
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def deploy_nni_service(self, nni):
 
         try:
@@ -516,7 +516,7 @@ class NNI_ModelView_Base():
     # 生成实验
     # @pysnooper.snoop()
     @expose('/run/<nni_id>', methods=['GET', 'POST'])
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def run(self, nni_id):
         nni = db.session.query(NNI).filter(NNI.id == nni_id).first()
 

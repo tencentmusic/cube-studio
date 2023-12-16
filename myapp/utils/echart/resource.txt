@@ -1,0 +1,197 @@
+{
+    name: 'MEM_NAME',
+    type: 'gauge',
+    min: 0,
+    max: MEM_MAX,
+    startAngle: 210,
+    endAngle: -30,
+    splitNumber: 5,
+    radius: '36%',
+    center: ['MEM_CENTER_X', '55%'],
+    splitLine: {
+        distance: -4,
+        length: 4,
+        lineStyle: {
+            color: '#000'
+        }
+    },
+    axisTick: {
+        distance: -4,
+        length: 4,
+        lineStyle: {
+            color: '#000',
+            width: 1
+        }
+    },
+    axisLabel: {
+        show: false
+    },
+    anchor: {},
+    pointer: {
+        icon: 'path://M-36.5,23.9L-41,4.4c-0.1-0.4-0.4-0.7-0.7-0.7c-0.5-0.1-1.1,0.2-1.2,0.7l-4.5,19.5c0,0.1,0,0.1,0,0.2v92.3c0,0.6,0.4,1,1,1h9c0.6,0,1-0.4,1-1V24.1C-36.5,24-36.5,23.9-36.5,23.9z M-39.5,114.6h-5v-85h5V114.6z',
+        width: 2,
+        length: '40%',
+        offsetCenter: [0, '-58%'],
+        itemStyle: {
+            color: '#f00',
+            shadowColor: 'rgba(255, 0, 0)',
+            shadowBlur: 2,
+            shadowOffsetY: 1
+        }
+    },
+    title: {
+        color: '#000',
+        fontSize: 15,
+        fontWeight: 200,
+        fontFamily: 'Arial',
+        offsetCenter: [0, '80%']
+    },
+    detail: {
+        offsetCenter: ['0%', '0%'],
+        formatter: '{a|{value}}',
+        rich: {
+            a: {
+                fontSize: 20,
+                color: '#000',
+            },
+        }
+    },
+    data: [{
+        value: MEM_VALUE,
+        name: 'MEM_NAME'
+    }]
+},
+// middle
+{
+    name: 'CPU_NAME',
+    type: 'gauge',
+    min: 0,
+    max: CPU_MAX,
+    z: 10,
+    startAngle: 210,
+    endAngle: -30,
+    splitNumber: 5,
+    radius: '60%',
+    center: ['CPU_CENTER_X', '50%'],
+    splitLine: {
+        distance: 5,
+        length: 5,
+        lineStyle: {
+            color: '#000'
+        }
+    },
+    axisLine: {
+        show: true,
+        lineStyle: {
+            width: 1,
+            color: [[1, '#000000'], ]
+        }
+    },
+    axisTick: {
+        distance: 7,
+        length: 3
+    },
+    axisLabel: {
+        distance: 2,
+        fontSize: 10,
+        color: '#000'
+    },
+    anchor: {},
+    pointer: {
+        icon: 'path://M-36.5,23.9L-41,4.4c-0.1-0.4-0.4-0.7-0.7-0.7c-0.5-0.1-1.1,0.2-1.2,0.7l-4.5,19.5c0,0.1,0,0.1,0,0.2v92.3c0,0.6,0.4,1,1,1h9c0.6,0,1-0.4,1-1V24.1C-36.5,24-36.5,23.9-36.5,23.9z M-39.5,114.6h-5v-85h5V114.6z',
+        width: 3,
+        length: '60%',
+        offsetCenter: [0, '-10%'],
+        itemStyle: {
+            color: '#f00',
+            shadowColor: 'rgba(255, 0, 0)',
+            shadowBlur: 3,
+            shadowOffsetY: 1
+        }
+    },
+    title: {
+        color: '#000',
+        fontSize: 15,
+        fontWeight: 200,
+        fontFamily: 'Arial',
+        offsetCenter: ['0%', '70%']
+    },
+    data: [{
+        value: CPU_VALUE,
+        name: 'CPU_NAME'
+    }],
+    detail: {
+        offsetCenter: ['0%', '25%'],
+        formatter: '{a|{value}}',
+        rich: {
+            a: {
+                fontSize: 20,
+                color: '#000',
+            },
+        }
+    },
+},
+// right
+{
+    name: 'GPU_NAME',
+    type: 'gauge',
+    min: 0,
+    max: GPU_MAX,
+    startAngle: 210,
+    endAngle: -30,
+    splitNumber: 5,
+    radius: '36%',
+    center: ['GPU_CENTER_X', '55%'],
+    splitLine: {
+        distance: -4,
+        length: 4,
+        lineStyle: {
+            color: '#000'
+        }
+    },
+    axisTick: {
+        distance: -4,
+        length: 4,
+        lineStyle: {
+            color: '#000',
+            width: 1
+        }
+    },
+    axisLabel: {
+        show: false
+    },
+    anchor: {},
+    pointer: {
+        icon: 'path://M-36.5,23.9L-41,4.4c-0.1-0.4-0.4-0.7-0.7-0.7c-0.5-0.1-1.1,0.2-1.2,0.7l-4.5,19.5c0,0.1,0,0.1,0,0.2v92.3c0,0.6,0.4,1,1,1h9c0.6,0,1-0.4,1-1V24.1C-36.5,24-36.5,23.9-36.5,23.9z M-39.5,114.6h-5v-85h5V114.6z',
+        width: 2,
+        length: '40%',
+        offsetCenter: [0, '-58%'],
+        itemStyle: {
+            color: '#f00',
+            shadowColor: 'rgba(255, 0, 0)',
+            shadowBlur: 2,
+            shadowOffsetY: 1
+        }
+    },
+    title: {
+        color: '#000',
+        fontSize: 15,
+        fontWeight: 200,
+        fontFamily: 'Arial',
+        offsetCenter: [0, '80%']
+    },
+    detail: {
+        offsetCenter: ['0%', '0%'],
+        formatter: '{a|{value}}',
+        rich: {
+            a: {
+                fontSize: 20,
+                color: '#000',
+            },
+        }
+    },
+    data: [{
+        value: GPU_VALUE,
+        name: 'GPU_NAME'
+    }]
+}
