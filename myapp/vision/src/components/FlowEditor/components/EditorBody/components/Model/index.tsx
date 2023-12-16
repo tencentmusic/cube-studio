@@ -280,7 +280,7 @@ const Model: React.FC<ModelProps> = props => {
               handleOnChange('resource_rdma', value ? value : '');
             }}
             value={task?.resource_rdma || ''}
-            required
+            disabled
           />
           <div className={style.splitLine}></div>
           <TextField
