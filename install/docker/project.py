@@ -5,22 +5,6 @@ from flask_appbuilder.const import LOGMSG_WAR_SEC_LOGIN_FAILED
 from flask import send_file, jsonify
 import os
 
-# 推送资源申请消息
-def push_resource_apply(notebook_id=None,pipeline_id=None,task_id=None,service_id=None,**kwargs):
-    from myapp.models.model_job import Task,Pipeline
-    from myapp.models.model_notebook import Notebook
-    from myapp.models.model_serving import InferenceService
-
-    pass
-
-# 推送资源审批消息
-def push_resource_approve(notebook_id=None,pipeline_id=None,task_id=None,service_id=None,**kwargs):
-    from myapp.models.model_job import Task,Pipeline
-    from myapp.models.model_notebook import Notebook
-    from myapp.models.model_serving import InferenceService
-
-    pass
-
 # 推送给管理员消息的函数
 def push_admin(message):
     pass
@@ -36,6 +20,10 @@ from flask import flash, g, redirect, request, session
 from flask_login import login_user, logout_user
 from flask_appbuilder.security.forms import LoginForm_db
 import pysnooper
+
+# 自定义远程用户视图
+class MyCustomRemoteUserView(AuthRemoteUserView):
+    pass
 
 # 账号密码登录方式的登录界面
 
