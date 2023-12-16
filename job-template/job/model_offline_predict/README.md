@@ -23,9 +23,7 @@ TASK_RESOURCE_GPU=0
             "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
             "placeholder": "",
             "describe": "worker镜像，直接运行你代码的环境镜像<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--working_dir": {
             "type": "str",
@@ -37,9 +35,7 @@ TASK_RESOURCE_GPU=0
             "default": "/mnt/xx",
             "placeholder": "",
             "describe": "启动目录",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--command": {
             "type": "str",
@@ -51,9 +47,7 @@ TASK_RESOURCE_GPU=0
             "default": "/mnt/xx/../start.sh",
             "placeholder": "",
             "describe": "环境安装和任务启动命令",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--num_worker": {
             "type": "str",
@@ -65,9 +59,7 @@ TASK_RESOURCE_GPU=0
             "default": "3",
             "placeholder": "",
             "describe": "占用机器个数",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         }
     }
 }

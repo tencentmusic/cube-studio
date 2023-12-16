@@ -14,9 +14,7 @@
             "default": "demo推理服务",
             "placeholder": "",
             "describe": "推理服务描述",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_name": {
             "type": "str",
@@ -28,9 +26,7 @@
             "default": "",
             "placeholder": "",
             "describe": "模型名",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_version": {
             "type": "str",
@@ -42,9 +38,7 @@
             "default": "v2022.10.01.1",
             "placeholder": "",
             "describe": "模型版本号",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_path": {
             "type": "str",
@@ -56,9 +50,7 @@
             "default": "",
             "placeholder": "",
             "describe": "模型地址",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         }
     },
     "部署信息": {
@@ -78,9 +70,7 @@
             "default": "service",
             "placeholder": "",
             "describe": "推理服务类型",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--images": {
             "type": "str",
@@ -92,9 +82,7 @@
             "default": "",
             "placeholder": "",
             "describe": "推理服务镜像",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--working_dir": {
             "type": "str",
@@ -106,9 +94,7 @@
             "default": "",
             "placeholder": "",
             "describe": "推理容器工作目录,个人工作目录/mnt/$username",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--command": {
             "type": "str",
@@ -120,9 +106,7 @@
             "default": "",
             "placeholder": "",
             "describe": "推理容器启动命令",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--args": {
             "type": "str",
@@ -134,9 +118,7 @@
             "default": "",
             "placeholder": "",
             "describe": "推理容器启动参数",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--env": {
             "type": "text",
@@ -148,9 +130,7 @@
             "default": "",
             "placeholder": "",
             "describe": "推理容器环境变量",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--ports": {
             "type": "str",
@@ -162,9 +142,7 @@
             "default": "80",
             "placeholder": "",
             "describe": "推理容器暴露端口",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--replicas": {
             "type": "str",
@@ -176,9 +154,7 @@
             "default": "1",
             "placeholder": "",
             "describe": "pod副本数",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--resource_memory": {
             "type": "str",
@@ -190,9 +166,7 @@
             "default": "2G",
             "placeholder": "",
             "describe": "每个pod占用内存",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--resource_cpu": {
             "type": "str",
@@ -204,9 +178,7 @@
             "default": "2",
             "placeholder": "",
             "describe": "每个pod占用cpu",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--resource_gpu": {
             "type": "str",
@@ -218,9 +190,7 @@
             "default": "0",
             "placeholder": "",
             "describe": "每个pod占用gpu",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         }
     }
 }

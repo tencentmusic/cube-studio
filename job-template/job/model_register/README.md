@@ -14,9 +14,7 @@
             "default": "public",
             "placeholder": "",
             "describe": "部署项目名",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_name": {
             "type": "str",
@@ -28,9 +26,7 @@
             "default": "",
             "placeholder": "",
             "describe": "模型名",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_version": {
             "type": "str",
@@ -42,9 +38,7 @@
             "default": "v2022.10.01.1",
             "placeholder": "",
             "describe": "模型版本号",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_metric": {
             "type": "str",
@@ -56,9 +50,7 @@
             "default": "",
             "placeholder": "",
             "describe": "模型指标",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_path": {
             "type": "str",
@@ -70,9 +62,7 @@
             "default": "",
             "placeholder": "",
             "describe": "模型地址",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--describe": {
             "type": "str",
@@ -84,9 +74,7 @@
             "default": "",
             "placeholder": "",
             "describe": "模型描述",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--framework": {
             "type": "str",
@@ -106,9 +94,7 @@
             "default": "tf",
             "placeholder": "",
             "describe": "模型框架",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--inference_framework": {
             "type": "str",
@@ -116,7 +102,8 @@
             "label": "推理框架",
             "require": 1,
             "choice": [
-                "sklearn",
+                "serving",
+                "ml-server",
                 "tfserving",
                 "torch-server",
                 "onnxruntime",
@@ -127,9 +114,7 @@
             "default": "tfserving",
             "placeholder": "",
             "describe": "推理框架",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         }
     }
 }

@@ -16,7 +16,7 @@ KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '0')
 host = os.getenv('HOST',os.getenv('KFJ_MODEL_REPO_API_URL','http://kubeflow-dashboard.infra')).strip('/')
 
-# @pysnooper.snoop()
+@pysnooper.snoop()
 def deploy(**kwargs):
     # print(kwargs)
     headers = {
@@ -124,6 +124,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('--inference_framework', type=str, help="推理框架", default='tfserving')
 
     args = arg_parser.parse_args()
+    print(args)
     # print("{} args: {}".format(__file__, args))
 
     deploy(**args.__dict__)

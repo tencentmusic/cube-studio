@@ -18,9 +18,7 @@
         "default": "",
         "placeholder": "",
         "describe": "训练数据集",
-        "editable": 1,
-        "condition": "",
-        "sub_args": {}
+        "editable": 1
       },
       "--val_dataset": {
         "type": "str",
@@ -32,9 +30,7 @@
         "default": "",
         "placeholder": "",
         "describe": "评估数据集",
-        "editable": 1,
-        "condition": "",
-        "sub_args": {}
+        "editable": 1
       },
       "--feature_columns": {
         "type": "str",
@@ -46,9 +42,7 @@
         "default": "",
         "placeholder": "",
         "describe": "特征列，逗号分隔",
-        "editable": 1,
-        "condition": "",
-        "sub_args": {}
+        "editable": 1
       },
       "--label_columns": {
         "type": "str",
@@ -60,9 +54,7 @@
         "default": "",
         "placeholder": "",
         "describe": "标签列，逗号分割",
-        "editable": 1,
-        "condition": "",
-        "sub_args": {}
+        "editable": 1
       },
       "--model_params": {
         "type": "json",
@@ -74,9 +66,7 @@
         "default": "",
         "placeholder": "",
         "describe": "模型参数",
-        "editable": 1,
-        "condition": "",
-        "sub_args": {}
+        "editable": 1
       },
       "--save_model_dir": {
         "type": "str",
@@ -88,9 +78,7 @@
         "default": "",
         "placeholder": "",
         "describe": "模型保存目录",
-        "editable": 1,
-        "condition": "",
-        "sub_args": {}
+        "editable": 1
       },
       "--inference_dataset": {
         "type": "str",
@@ -102,9 +90,7 @@
         "default": "",
         "placeholder": "",
         "describe": "推理数据集",
-        "editable": 1,
-        "condition": "",
-        "sub_args": {}
+        "editable": 1
       }
     }
 }

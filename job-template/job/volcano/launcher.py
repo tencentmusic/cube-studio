@@ -216,19 +216,7 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
                             {
                                 "name": "NCCL_DEBUG",
                                 "value":"INFO"
-                            },
-                            # {
-                            #     "name": "NCCL_IB_DISABLE",
-                            #     "value": "1"
-                            # },
-                            # {
-                            #     "name": "NCCL_DEBUG_SUBSYS",
-                            #     "value": "ALL"
-                            # },
-                            # {
-                            #     "name": "NCCL_SOCKET_IFNAME",
-                            #     "value": "eth0"
-                            # }
+                            }
                         ],
                         "command": ['bash','-c',command],
                         "volumeMounts": k8s_volume_mounts,

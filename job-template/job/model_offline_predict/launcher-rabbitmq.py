@@ -239,22 +239,7 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
                         "imagePullPolicy": "Always",
                         "workingDir":working_dir,
                         "env":[
-                            # {
-                            #     "name": "NCCL_DEBUG",
-                            #     "value":"INFO"
-                            # },
-                            # {
-                            #     "name": "NCCL_IB_DISABLE",
-                            #     "value": "1"
-                            # },
-                            # {
-                            #     "name": "NCCL_DEBUG_SUBSYS",
-                            #     "value": "ALL"
-                            # },
-                            # {
-                            #     "name": "NCCL_SOCKET_IFNAME",
-                            #     "value": "eth0"
-                            # }
+
                         ],
                         "command": ['bash','-c',command],
                         "volumeMounts": k8s_volume_mounts,
@@ -287,6 +272,12 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
     if int(gpu_num):
         task_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
         task_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
+    else:
+        # 添加禁用指令
+        task_spec['template']['spec']['containers'][0]['env'].append({
+            "name": "NVIDIA_VISIBLE_DEVICES",
+            "value": "none"
+        })
 
     worker_pod_spec = copy.deepcopy(task_spec)
     worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker
@@ -389,7 +380,14 @@ def create_rabbitmq(name,create=True):
             "metadata": {
                 "name": name,
                 "labels": {
-                    "app": name
+                    "app": name,
+                    "run-id": KFJ_RUN_ID,
+                    "run-rtx": KFJ_RUNNER,
+                    "pipeline-rtx": KFJ_CREATOR,
+                    "pipeline-id": KFJ_PIPELINE_ID,
+                    "pipeline-name": KFJ_PIPELINE_NAME,
+                    "task-id": KFJ_TASK_ID,
+                    "task-name": KFJ_TASK_NAME,
                 }
             },
             "spec": {

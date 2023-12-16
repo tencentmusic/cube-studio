@@ -25,9 +25,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "训练集csv，|分割符，首行是列名",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--predict_csv_file_path": {
             "type": "str",
@@ -39,9 +37,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "预测数据集csv，格式和训练集一致，默认为空，需要predict时填",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--label_name": {
             "type": "str",
@@ -53,9 +49,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "label的列名，必填",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_name": {
             "type": "str",
@@ -67,9 +61,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "训练用到的模型名称，如LogisticRegression，必填。常用的都支持，要加联系管理员",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_args_dict": {
             "type": "str",
@@ -81,9 +73,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "模型参数，json格式，默认为空",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_file_path": {
             "type": "str",
@@ -95,9 +85,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "模型文件保存文件名，必填",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--predict_result_path": {
             "type": "str",
@@ -109,9 +97,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "预测结果保存文件名，默认为空，需要predict时填",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--worker_num": {
             "type": "str",
@@ -123,9 +109,7 @@ TASK_RESOURCE_GPU=0
             "default": "",
             "placeholder": "",
             "describe": "ray worker数量",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         }
     }
 }

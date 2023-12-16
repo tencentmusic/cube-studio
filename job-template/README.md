@@ -56,10 +56,7 @@
         "default":"",        # 默认值
         "placeholder":"",    # 输入提示内容
         "describe":"这里是这个字段的描述和备注",
-        "editable":1,        # 是否可修改
-        "condition":"",      # 显示的条件
-        "sub_args": {        # 如果type是dict或者list对应下面的参数
-        }
+        "editable":1        # 是否可修改
       },
       "attr2":{
        ...

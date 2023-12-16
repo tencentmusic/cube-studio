@@ -26,9 +26,7 @@
            "default": "BiLSTM_CRF",
            "placeholder": "",
            "describe": "训练的基础模型名称，这里固定为: BiLSTM_CRF",
-           "editable": 1,
-           "condition": "",
-           "sub_args": {}
+           "editable": 1
        },
        "--path": {
            "type": "str",
@@ -40,9 +38,7 @@
            "default": "/mnt/admin/NER/zdata/",
            "placeholder": "",
            "describe": "训练数据存放目录",
-           "editable": 1,
-           "condition": "",
-           "sub_args": {}
+           "editable": 1
        },
        "--filename": {
            "type": "str",
@@ -57,9 +53,7 @@
            "default": "resume_BIO.txt",
            "placeholder": "",
            "describe": " 数据集的名字",
-           "editable": 1,
-           "condition": "",
-           "sub_args": {}
+           "editable": 1
        },
        "--epochs": {
            "type": "str",
@@ -71,9 +65,7 @@
            "default": "5",
            "placeholder": "",
            "describe": "训练的次数，次数越大效果越好，建议 5 以上",
-           "editable": 1,
-           "condition": "",
-           "sub_args": {}
+           "editable": 1
        },
        
        "-pp": {
@@ -86,9 +78,7 @@
            "default": "/mnt/admin/model.pkl",
            "placeholder": "",
            "describe": "模型保存地址",
-           "editable": 1,
-           "condition": "",
-           "sub_args": {}
+           "editable": 1
        }
    }
 }

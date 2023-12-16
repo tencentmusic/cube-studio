@@ -268,12 +268,7 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
     if int(gpu_num):
         pod_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
         pod_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
-    else:
-        # 添加禁用指令
-        pod_spec['template']['spec']['containers'][0]['env'].append({
-            "name":"NVIDIA_VISIBLE_DEVICES",
-            "value":"none"
-        })
+
 
 
     worker_pod_spec = copy.deepcopy(pod_spec)
