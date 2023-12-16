@@ -357,12 +357,6 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
                 resources_requests[gpu_resource_name] = str(int(gpu_num))
                 resources_limits[gpu_resource_name] = str(int(gpu_num))
 
-            if 0 == gpu_num:
-                # 没要gpu的容器，就要加上可视gpu为空，不然gpu镜像能看到和使用所有gpu
-                for gpu_alias in conf.get('GPU_NONE', {}):
-                    container_envs.append((conf.get('GPU_NONE',{})[gpu_alias][0], conf.get('GPU_NONE',{})[gpu_alias][1]))
-
-
         # 配置host
         hostAliases = {}
 

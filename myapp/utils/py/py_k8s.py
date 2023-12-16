@@ -968,36 +968,6 @@ class K8s():
                 resources_requests[resource_name] = str(int(gpu_num))
                 resources_limits[resource_name] = str(int(gpu_num))
 
-        if 0 < gpu_num < 1:
-            # 虚拟gpu
-            vgpu_drive_type = self.vgpu_drive_type
-            if vgpu_drive_type == 'mgpu':
-                gpu_memory = int(gpu_num*64) if gpu_type=='T4' else int(gpu_num*128) if gpu_type=='V100' else int(gpu_num*160) if gpu_type=='A100' else int(gpu_num*64)
-                resources_requests['tencent.com/vcuda-core'] = str(int(gpu_num*100))
-                resources_requests['tencent.com/vcuda-memory'] = str(gpu_memory)   # 每个1表示256M显存
-                resources_limits['tencent.com/vcuda-core'] = str(int(gpu_num * 100))
-                resources_limits['tencent.com/vcuda-memory'] = str(gpu_memory)
-            elif vgpu_drive_type == 'qgpu':
-                gpu_memory = int(gpu_num*16) if gpu_type=='T4' else int(gpu_num*32) if gpu_type=='V100' else int(gpu_num*40) if gpu_type=='A100' else int(gpu_num*16)
-                resources_requests['tke.cloud.tencent.com/qgpu-core'] = str(int(gpu_num*100))
-                resources_requests['tke.cloud.tencent.com/qgpu-memory'] = str(gpu_memory)  # 每个1代表1G 显存
-                resources_limits['tke.cloud.tencent.com/qgpu-core'] = str(int(gpu_num * 100))
-                resources_limits['tke.cloud.tencent.com/qgpu-memory'] = str(gpu_memory)
-            else:
-                vgpu_resource_name = conf.get('VGPU_RESOURCE',{}).get(vgpu_drive_type,'')
-                if vgpu_resource_name:
-                    resources_requests[vgpu_resource_name] = '1'  # 其他的只要写虚拟化，就是按1算，后面需要针对性改动，就写成上面的模式
-                    resources_limits[vgpu_resource_name] = '1'   # 其他的只要写虚拟化，就是按1算，后面需要针对性改动，就写成上面的模式
-
-        if 0==gpu_num:
-            # 没要gpu的容器，就要加上可视gpu为空，不然gpu镜像能看到和使用所有gpu
-            for gpu_alias in conf.get('GPU_NONE',{}):
-                env_list.append(client.V1EnvVar(name=conf.get('GPU_NONE',{})[gpu_alias][0], value=conf.get('GPU_NONE',{})[gpu_alias][1]))
-
-        # if -1==gpu_num:
-        #     # 没要gpu的容器，就要加上可视gpu为空，不然gpu镜像能看到和使用所有gpu，默认就是能使用全部卡
-        #     env_list.append(client.V1EnvVar(name='NVIDIA_VISIBLE_DEVICES', value='all'))
-
         DEFAULT_POD_RESOURCES = conf.get('DEFAULT_POD_RESOURCES',{})
         for resource_name in DEFAULT_POD_RESOURCES:
             if resource_name not in resources_limits:
@@ -1085,14 +1055,8 @@ class K8s():
         # 设置卡型
         if gpu_type and gpu_type.strip():
             nodeSelector['gpu-type'] = gpu_type
-        if gpu_num >= 1 or gpu_num==-1:
+        if gpu_num >= 1:
             nodeSelector['gpu'] = 'true'
-        if 1 > gpu_num > 0:
-            nodeSelector['vgpu'] = 'true'
-            if not annotations:
-                annotations = {}
-            if conf.get('VGPU_DRIVE_TYPE','')=='mgpu':
-                annotations['tencent.com/vcuda-core-limit']=str(int(gpu_num * 100))
 
         k8s_volumes, k8s_volume_mounts = self.get_volume_mounts(volume_mount, username)
 
@@ -1285,14 +1249,7 @@ class K8s():
 
                 ) for label in labels.items()]
             ))
-        # 目前虚拟化gpu需要一个pod一个pod的启动
-        # gpu_num, gpu_type, resource_name = self.get_gpu(resource_gpu)
-        # if 1 > gpu_num > 0:
-        #     command = 'sleep $((RANDOM % 10 + 1))'   # 目前vgpu的每个pod不能同时启动
-        #     # command = "until nslookup %s-$(expr $(echo $HOSTNAME | awk -F'-' '{print $(NF-1)}') - 1).%s.%s.svc.cluster.local; do sleep 5; done"%(name,name,namespace)
-        #     print(command)
-        #     init_containers = client.V1Container(name='init-wait',image="ubuntu:20.04",command=["sh","-c",command],image_pull_policy='IfNotPresent')
-        #     pod_spec.init_containers=[init_containers]
+
         return pod,pod_spec
 
     # 删除deployment

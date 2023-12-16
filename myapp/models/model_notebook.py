@@ -100,20 +100,6 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         return self.ide_type
 
     @property
-    def password(self):
-        import hashlib
-        src_str = f'cube-studio-{self.id}'
-
-        # 计算字符串的MD5哈希值
-        hash_object = hashlib.md5(src_str.encode())
-        hash_str = hash_object.hexdigest()
-
-        # 从哈希值中提取6个字符作为密钥
-        key = hash_str[:6]
-
-        return key
-
-    @property
     def mount(self):
         # if "(hostpath)" in self.volume_mount:
         #     mount = self.volume_mount[self.volume_mount.index('(hostpath)'):]
