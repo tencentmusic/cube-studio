@@ -37,9 +37,9 @@ engine_impls = {
 }
 db_uri_demo = {
     'mysql': ['mysql+pymysql://username:password@host:port/database'],
+    'postgres': ['postgresql+psycopg2://username:password@host:port/database'],
     'presto': ['presto://username:password@host:port/database'],
     'clikchouse': ['clickhouse+native://username:password@host:port/database'],
-    'postgres': ['postgresql+psycopg2://username:password@host:port/database'],
     "impala": ['impala://host:port/database'],
     "oracle": ['oracle://username:password@host:port/database'],
     "mssql": ['mssql+pymssql://username:password@host:port/database']

@@ -93,8 +93,7 @@ class Service_ModelView_base():
     }
 
     edit_form_extra_fields = copy.deepcopy(add_form_extra_fields)
-    # 服务的名称是不能变的，因为变了还要删除
-    edit_form_extra_fields['name'] = StringField(_('名称'), description= _('英文名(小写字母、数字、- 组成)，最长50个字符'), widget=MyBS3TextFieldWidget(readonly=True), validators=[DataRequired(), Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54)])
+
 
     def set_column(self, service=None):
         host_field = StringField(_('域名'), default=Service.host.default.arg,description= _('访问域名，') + self.host_rule, widget=BS3TextFieldWidget())

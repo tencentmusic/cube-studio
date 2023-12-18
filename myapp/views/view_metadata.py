@@ -98,6 +98,15 @@ class Metadata_table_ModelView_base():
         "visits_thirty": {"type": "ellip2", "width": 200}
     }
 
+    import_data = True
+    download_data = True
+
+    def pre_upload(self,data):
+
+        if not data.get('recent_visit',None):
+            data['recent_visit']=None
+        return data
+
     add_form_extra_fields = {
         "table": StringField(
             label= _('表名'),
@@ -225,7 +234,7 @@ class Metadata_table_ModelView_base():
         item.creator = g.user.username
 
     # @event_logger.log_this
-    @action("ddl", "update remote", "If the update fails, please manually modify the remote database table structure.", "fa-save", multiple=False, single=True)
+    @action("ddl", "更新远程表", "如果更新失败，请手动更改远程数据库的表结构", "fa-save", multiple=False, single=True)
     def ddl(self, item):
         pass
         # 自己实现更新到hive表
