@@ -9712,7 +9712,7 @@ metadata:
     operator.istio.io/component: "IngressGateways"
 spec:
   # type: LoadBalancer
-  type: NodePort
+  # type: NodePort
   selector:
     app: istio-ingressgateway
     istio: ingressgateway
@@ -9725,12 +9725,12 @@ spec:
       port: 80
       protocol: TCP
       targetPort: 8888
-      nodePort: 80
+      # nodePort: 80
     - name: http3
       port: 8080
       protocol: TCP
       targetPort: 8889
-      nodePort: 8080
+      # nodePort: 8080
 #    - name: https
 #      port: 443
 #      protocol: TCP
