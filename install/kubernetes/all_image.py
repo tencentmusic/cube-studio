@@ -142,10 +142,7 @@ pull_harbor_file = open('pull_harbor.sh', mode='w')
 pull_save_file = open('image_save.sh',mode='w')
 load_image_file = open('image_load.sh',mode='w')
 
-pull_file.write('docker login --username xxxx --password xxxx ccr.ccs.tencentyun.com\n',)
-push_harbor_file.write('docker login --username xxxxx --password xxxxx ccr.ccs.tencentyun.com\n',)
 push_harbor_file.write(f'准备登录: {harbor_repo}\n')
-pull_save_file.write('docker login --username xxxxx --password xxxx ccr.ccs.tencentyun.com\n',)
 push_harbor_file.write('docker login '+harbor_repo[:harbor_repo.index('/')]+"\n")
 pull_harbor_file.write('docker login '+harbor_repo[:harbor_repo.index('/')]+"\n")
 
