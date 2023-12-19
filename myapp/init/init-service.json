@@ -72,18 +72,6 @@
       "help_url": "https://github.com/tencentmusic/cube-studio/blob/master/docs/example/service.md"
     }
   },
-  "rstudio": {
-    "project_name": "public",
-    "service_name": "rstudio",
-    "service_describe": "rstudio的notebook",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/notebook-enterprise:rstudio-ubuntu-bigdata",
-    "command": "/init.sh && mkdir -p /home/rstudio/.local && chmod -R 777 /home/rstudio/.local/ && /init",
-    "env": "DISABLE_AUTH=true\nROOT=true",
-    "ports": "8787",
-    "expand": {
-      "help_url": "https://github.com/tencentmusic/cube-studio/wiki"
-    }
-  },
   "es": {
     "project_name": "public",
     "service_name": "es",
