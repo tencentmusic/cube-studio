@@ -740,7 +740,7 @@ HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,AUTOML_NAMESPACE,NOTEBOOK_NAMESPACE,SERV
 NOTEBOOK_IMAGES=[
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base', 'vscode（cpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base', 'vscode（gpu）'],
-    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04', 'jupyter（gpu）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04', 'jupyter（cpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04-cuda11.8.0-cudnn8','jupyter（gpu）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-bigdata', 'jupyter（bigdata）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning', 'jupyter（machinelearning）'],
