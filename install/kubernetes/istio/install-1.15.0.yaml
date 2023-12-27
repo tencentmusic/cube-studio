@@ -9702,7 +9702,6 @@ kind: Service
 metadata:
   name: istio-ingressgateway
   namespace: istio-system
-  annotations:
   labels:
     app: istio-ingressgateway
     istio: ingressgateway
