@@ -208,6 +208,7 @@ class Docker_ModelView_Base():
                                         name=pod_name,
                                         command=command,
                                         labels={"app": "docker", "user": g.user.username, "pod-type": "docker"},
+                                        annotations={'project':docker.project.name},
                                         args=None,
                                         volume_mount=json.loads(docker.expand).get('volume_mount',default_volume_mount) if docker.expand else default_volume_mount,
                                         working_dir='/mnt/%s'%docker.created_by.username,
@@ -307,13 +308,18 @@ class Docker_ModelView_Base():
             flash(__('构建推送镜像前，请先添加镜像仓库信息')+docker.target_image[:docker.target_image.index('/')],'warning')
             return redirect(conf.get('MODEL_URLS', {}).get('repository'))
         repo = max(all_repositorys, key=lambda repo: len(repo.server)+1000*int(repo.created_by.username==g.user.username))  # 优先使用自己创建的，再使用最匹配的，最后使用别人创建的
+        cli = conf.get('CONTAINER_CLI','docker')
+
         if repo:
             server = repo.server[:repo.server.index('/')] if '/' in repo.server else repo.server
-            login_command = 'docker login --username %s --password %s %s' % (repo.user, repo.password, server)
+            login_command = f'{cli} login --username {repo.user} --password {repo.password} {server}'
+
+        if cli=='nerdctl':
+            cli = 'nerdctl --namespace k8s.io'
         if login_command:
-            command = ['sh', '-c', 'docker commit %s %s && %s && docker push %s' % (container_id, docker.target_image, login_command, docker.target_image)]
+            command = ['sh', '-c', f'{login_command} && {cli} commit {container_id} {docker.target_image} && {cli} push {docker.target_image}']
         else:
-            command = ['sh', '-c', 'docker commit %s %s && docker push %s' % (container_id, docker.target_image, docker.target_image)]
+            command = ['sh', '-c', f'{cli} commit {container_id} {docker.target_image} && {cli} push {docker.target_image}']
 
         hostAliases = conf.get('HOSTALIASES')
 
@@ -326,16 +332,17 @@ class Docker_ModelView_Base():
             name=pod_name,
             command=command,
             labels={"app": "docker", "user": g.user.username, "pod-type": "docker"},
+            annotations={'project': docker.project.name},
             args=None,
-            volume_mount='/var/run/docker.sock(hostpath):/var/run/docker.sock',
+            volume_mount='/var/run/docker.sock(hostpath):/var/run/docker.sock' if 'docker' in cli else '/run/containerd/containerd.sock(hostpath):/run/containerd/containerd.sock',
             working_dir='/mnt/%s' % docker.created_by.username,
             node_selector=None,
-            resource_memory='0~4G',
-            resource_cpu='0~4',
+            resource_memory='0~10G',
+            resource_cpu='0~10',
             resource_gpu='0',
             image_pull_policy='IfNotPresent',
             image_pull_secrets=image_pull_secrets,
-            image=conf.get('DOCKER_IMAGES', 'ccr.ccs.tencentyun.com/cube-studio/docker'),
+            image=conf.get('NERDCTL_IMAGES', f'{cli}:xx') if cli!='docker' else conf.get('DOCKER_IMAGES', f'{cli}:xx'),
             hostAliases=hostAliases,
             env={
                 "USERNAME": docker.created_by.username

@@ -69,7 +69,7 @@ const Model: React.FC<ModelProps> = props => {
   // 处理 task 跳转事件
   const handleTaskEvent = (type: string) => {
     if (props.model.id) {
-      window.open(`${window.location.origin}/task_modelview/${type}/${props.model.id}`);
+      window.open(`${window.location.origin}/task_modelview/api/${type}/${props.model.id}`);
     }
   };
   // 配置变化事件

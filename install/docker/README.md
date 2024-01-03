@@ -113,7 +113,7 @@ cd myapp/vision && yarn && yarn build
 以主要前端项目`myapp/frontend`为例，到这里前端开发环境已经准备好了
 
 1. `cd myapp/frontend` 进入目录
-2. `npm run start` 进入调试模式
+2. `npm run start` 进入调试模式。需要现在本地启动后端才行
 3. `npm run build` 打包编译静态资源
 #### 前端配置代理
 

@@ -841,7 +841,7 @@ output %s
             except Exception as e:
                 print(e)
         # 因为所有的服务流量通过ingress实现，所以没有isito的envoy代理
-        labels = {"app": name, "user": service.created_by.username, 'pod-type': "inference"}
+        labels = {"app": name,  "user": service.created_by.username, 'pod-type': "inference"}
 
         try:
             pod_ports = copy.deepcopy(ports)
@@ -862,17 +862,19 @@ output %s
 
             pod_ports = list(set(pod_ports))
             print('create deployment')
-            annotations = {}
             # https://istio.io/latest/docs/reference/config/annotations/
-            if service.sidecar and 'istio' in service.sidecar and service.service_type == 'serving':
+            if service.sidecar and 'istio' in service.sidecar:  #  and service.service_type == 'serving'
                 labels['sidecar.istio.io/inject'] = 'true'
 
+            pod_annotations = {
+                'project': service.project.name
+            }
             k8s_client.create_deployment(
                 namespace=namespace,
                 name=name,
                 replicas=deployment_replicas,
                 labels=labels,
-                annotations=annotations,
+                annotations=pod_annotations,
                 command=['sh', '-c', command] if command else None,
                 args=None,
                 volume_mount=volume_mount,

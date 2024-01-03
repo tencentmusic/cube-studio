@@ -613,15 +613,6 @@ class K8s():
             except Exception as e:
                 print(e)
 
-            # 删除framework
-            try:
-                crd_info = all_crd_info['framework']
-                self.delete_crd(group=crd_info['group'], version=crd_info['version'],
-                                plural=crd_info['plural'], namespace=namespace,
-                                labels={"run-id": str(run_id)})
-            except Exception as e:
-                print(e)
-
             # 删除pytorchjob
             try:
                 crd_info = all_crd_info['pytorchjob']

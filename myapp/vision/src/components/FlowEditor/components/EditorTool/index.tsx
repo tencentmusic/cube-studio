@@ -73,7 +73,7 @@ const EditorTool: React.FC = () => {
       onClick: () => {
         if (pipelineId) {
           window.open(
-            `${window.location.origin}/pipeline_modelview/web/workflow/${pipelineId}`,
+            `${window.location.origin}/pipeline_modelview/api/web/workflow/${pipelineId}`,
           );
         }
       },
@@ -89,7 +89,7 @@ const EditorTool: React.FC = () => {
       text: t('日志'),
       onClick: () => {
         if (pipeline?.id) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/log/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/log/${pipelineId}`);
         }
       },
     },
@@ -104,7 +104,7 @@ const EditorTool: React.FC = () => {
       text: t('容器'),
       onClick: () => {
         if (pipeline?.name) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/pod/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/pod/${pipelineId}`);
         }
       },
     },
@@ -119,7 +119,7 @@ const EditorTool: React.FC = () => {
       text: t('定时记录'),
       onClick: () => {
         if (pipeline?.name) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/runhistory/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/runhistory/${pipelineId}`);
         }
       },
     },
@@ -163,7 +163,7 @@ const EditorTool: React.FC = () => {
       text: t('监控'),
       onClick: () => {
         if (pipeline?.id) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/monitoring/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/monitoring/${pipelineId}`);
         }
       },
     },

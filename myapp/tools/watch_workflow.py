@@ -74,7 +74,7 @@ def deliver_message(workflow, dbsession):
         if finish_time:
             finish_time = (datetime.datetime.strptime(finish_time, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=0)).strftime(
                 '%Y-%m-%d %H:%M:%S')
-        help_url='http://%s/pipeline_modelview/web/pod/%s'%(conf.get('HOST'),pipeline_id)
+        help_url='http://%s/pipeline_modelview/api/web/pod/%s'%(conf.get('HOST'),pipeline_id)
         message = "workflow: %s \npipeline: %s(%s) \nnamespace: %s\nstatus: % s \nstart_time: %s\nfinish_time: %s\n" % (workflow.name,info_json.get('pipeline_name',''),info_json.get('describe',''),workflow.namespace,workflow.status,start_time,finish_time)
         message+='\n'
         link={
@@ -260,7 +260,7 @@ def push_task_time(workflow, dbsession):
                 dbsession.commit()
                 message += "\n"
                 link = {
-                    "点击查看资源的使用": "http://%s/pipeline_modelview/web/monitoring/%s" % (conf.get('HOST'), pipeline_id)
+                    "点击查看资源的使用": "http://%s/pipeline_modelview/api/web/monitoring/%s" % (conf.get('HOST'), pipeline_id)
                 }
                 # 有单任务运行时长超过4个小时才通知
                 if max_task_run_time > 4:
@@ -380,8 +380,8 @@ def deal_event(event, workflow_info, namespace):
 
             if 'run-rtx' in back_object['labels']:
                 back_object['username'] = back_object['labels']['run-rtx']
-            elif 'upload-rtx' in back_object:
-                back_object['username'] = back_object['labels']['upload-rtx']
+            elif 'pipeline-rtx' in back_object:
+                back_object['username'] = back_object['labels']['pipeline-rtx']
             workflow = save_workflow(back_object, dbsession)
             if workflow:
                 has_push = check_has_push(back_object, dbsession)

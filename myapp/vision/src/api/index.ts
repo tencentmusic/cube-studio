@@ -31,12 +31,12 @@ const pipeline_modelview_add = (data: IPipelineAdd): Promise<any> => {
 
 // 获取流水线列表
 const pipeline_modelview_demo = (): Promise<any> => {
-  return ajax.get('/pipeline_modelview/demo/list/');
+  return ajax.get('/pipeline_modelview/api/demo/list/');
 };
 
 // 获取流水线列表
 const pipeline_modelview_list = (): Promise<any> => {
-  return ajax.get('/pipeline_modelview/my/list/');
+  return ajax.get('/pipeline_modelview/api/my/list/');
 };
 
 const pipeline_modelview_all = (filters: string): Promise<any> => {

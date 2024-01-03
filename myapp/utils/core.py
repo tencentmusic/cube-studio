@@ -1516,6 +1516,8 @@ def checkip(ip):
     import re
     if ":" in ip:
         ip = ip[:ip.index(':')]
+    if '|' in ip:
+        ip = ip.split('|')[0]   # 内网ip|公网域名
     p = re.compile('^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$')
     if p.match(ip):
         return True
@@ -1899,3 +1901,30 @@ def decode_unicode_escape(data):
         return [decode_unicode_escape(item) for item in data]
     else:
         return data
+
+
+# 获取一个host 配置中的url信息
+def split_url(url):
+    if not url:
+        return '','',''
+    if url[0]=='/':
+        return '','',url
+    if url[0]==':':
+        url=url[1:]
+        port = url.split("/")[0]
+        return '',port,url[len(port):]
+    url=url.replace('http://','').replace('https://','')
+    if '/' in url:
+        host_port = url[:url.index('/')]
+        path = url.replace(host_port,'')
+        if ':' in host_port:
+            host,port = host_port.split(":")[0],host_port.split(":")[1]
+        else:
+            host, port = host_port,''
+        return host,port,path
+    else:
+        if ':' in url:
+            host,port = url.split(":")[0],url.split(":")[1]
+        else:
+            host, port = url,''
+        return host,port,''

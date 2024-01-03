@@ -282,10 +282,13 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
         arguments = ops_args
         file_outputs = json.loads(task.outputs) if task.outputs and json.loads(task.outputs) else None
 
+        # 如果模板配置了images参数，那直接用模板的这个参数
+        if json.loads(task.args).get('images',''):
+            images = json.loads(task.args).get('images')
+
         # 自定义节点
         if task.job_template.name == conf.get('CUSTOMIZE_JOB'):
             working_dir = json.loads(task.args).get('workdir')
-            images = json.loads(task.args).get('images')
             command = ['bash', '-c', json.loads(task.args).get('command')]
             arguments = []
 
@@ -310,16 +313,18 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
         pod_label = {
             "pipeline-id": str(pipeline.id),
             "pipeline-name": str(pipeline.name),
+            "task-id": str(task.id),
             "task-name": str(task.name),
             "run-id": global_envs.get('KFJ_RUN_ID', ''),
-            "task-id": str(task.id),
-            'upload-rtx': g.user.username if g and g.user and g.user.username else pipeline.created_by.username,
             'run-rtx': g.user.username if g and g.user and g.user.username else pipeline.created_by.username,
             'pipeline-rtx': pipeline.created_by.username
+
         }
         pod_annotations = {
-            "task-label": str(task.label).encode("unicode_escape").decode('utf-8'),
-            'job-template': task.job_template.describe.encode("unicode_escape").decode('utf-8'),
+            'project': pipeline.project.name,
+            'pipeline': pipeline.describe,
+            "task": task.label,
+            'job-template': task.job_template.describe
         }
 
         # 设置资源限制
@@ -504,7 +509,6 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
     if not workflow_label:
         workflow_label = {}
 
-    workflow_label['upload-rtx'] = pipeline.created_by.username
     workflow_label['run-rtx'] = g.user.username if g and g.user and g.user.username else pipeline.created_by.username
     workflow_label['pipeline-rtx'] = pipeline.created_by.username
     workflow_label['save-time'] = datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
@@ -527,7 +531,8 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
 
 
 # @pysnooper.snoop(watch_explode=())
-def run_pipeline(cluster, workflow_json):
+def run_pipeline(pipeline, workflow_json):
+    cluster = pipeline.project.cluster
     crd_name = workflow_json.get('metadata', {}).get('name', '')
     from myapp.utils.py.py_k8s import K8s
     k8s_client = K8s(cluster.get('KUBECONFIG', ''))
@@ -1013,8 +1018,8 @@ class Pipeline_ModelView_Base():
                     labels = json.loads(crd['labels'])
                     if 'run-rtx' in labels:
                         username = labels['run-rtx']
-                    elif 'upload-rtx' in labels:
-                        username = labels['upload-rtx']
+                    elif 'pipeline-rtx' in labels:
+                        username = labels['pipeline-rtx']
 
                     workflow = Workflow(name=crd['name'], namespace=crd['namespace'], create_time=crd['create_time'],
                                         cluster=labels.get("cluster", ''),
@@ -1040,7 +1045,7 @@ class Pipeline_ModelView_Base():
         tasks = db.session.query(Task).filter_by(pipeline_id=pipeline_id).all()
         if not tasks:
             flash('no task', 'warning')
-            return redirect('/pipeline_modelview/web/%s' % pipeline.id)
+            return redirect('/pipeline_modelview/api/web/%s' % pipeline.id)
 
         time.sleep(1)
 
@@ -1062,7 +1067,7 @@ class Pipeline_ModelView_Base():
         # return
         print('begin upload and run pipeline %s' % pipeline.name)
         pipeline.version_id = ''
-        crd_name = run_pipeline(pipeline.project.cluster, json.loads(pipeline.pipeline_file))  # 会根据版本号是否为空决定是否上传
+        crd_name = run_pipeline(pipeline, json.loads(pipeline.pipeline_file))  # 会根据版本号是否为空决定是否上传
         pipeline.pipeline_argo_id = crd_name
         db.session.commit()  # 更新
         # back_crds = pipeline.get_workflow()
@@ -1070,7 +1075,7 @@ class Pipeline_ModelView_Base():
         # if back_crds:
         #     self.save_workflow(back_crds)
 
-        return redirect("/pipeline_modelview/web/log/%s" % pipeline_id)
+        return redirect("/pipeline_modelview/api/web/log/%s" % pipeline_id)
         # return redirect(run_url)
 
 
@@ -1124,7 +1129,7 @@ class Pipeline_ModelView_Base():
             return redirect(url)
         else:
             flash('no running instance', 'warning')
-            return redirect('/pipeline_modelview/web/%s' % pipeline.id)
+            return redirect('/pipeline_modelview/api/web/%s' % pipeline.id)
 
     # # @event_logger.log_this
     @expose("/web/pod/<pipeline_id>", methods=["GET"])
@@ -1162,6 +1167,8 @@ class Pipeline_ModelView_Base():
         new_pipeline = pipeline.clone()
         expand = json.loads(pipeline.expand) if pipeline.expand else {}
         new_pipeline.name = new_pipeline.name.replace('_', '-') + "-" + uuid.uuid4().hex[:4]
+        if 'copy' not in new_pipeline.describe:
+            new_pipeline.describe = new_pipeline.describe+"(copy)"
         new_pipeline.created_on = datetime.datetime.now()
         new_pipeline.changed_on = datetime.datetime.now()
         db.session.add(new_pipeline)
@@ -1202,7 +1209,7 @@ class Pipeline_ModelView_Base():
             pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
             new_pipeline = self.copy_db(pipeline)
             # return jsonify(new_pipeline.to_json())
-            return redirect('/pipeline_modelview/web/%s'%new_pipeline.id)
+            return redirect('/pipeline_modelview/api/web/%s'%new_pipeline.id)
         except InvalidRequestError:
             db.session.rollback()
         except Exception as e:

@@ -372,7 +372,7 @@ class MyappModelRestApi(ModelRestApi):
 
     # 建构响应体
     @staticmethod
-    # @pysnooper.snoop()
+    # @pysnooper.snoop(watch_explode='kwargs')
     def response(code, **kwargs):
         """
             Generic HTTP JSON response method
@@ -383,10 +383,13 @@ class MyappModelRestApi(ModelRestApi):
         """
         # 添flash的信息
         flashes = session.get("_flashes", [])
-
         # flashes.append((category, message))
         session["_flashes"] = []
-        _ret_json = jsonify(kwargs)
+        _ret_json='unknow error'
+        if 'message' in kwargs and 'status' in kwargs and kwargs['status']!=0 and type(kwargs['message'])==str:
+            _ret_json = json.dumps(kwargs,ensure_ascii=False,indent=4)
+        else:
+            _ret_json = jsonify(kwargs)
         resp = make_response(_ret_json, code)
         flash_json = []
         for f in flashes:
@@ -1416,7 +1419,7 @@ class MyappModelRestApi(ModelRestApi):
                 "message": str(e),
                 "result": {}
             }
-            return self.response(200, **back)
+            return self.response(500, **back)
 
     @event_logger.log_this
     @expose("/multi_action/<string:name>", methods=["POST"])

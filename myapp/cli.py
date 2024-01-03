@@ -85,12 +85,12 @@ def init():
                     db.session.rollback()
 
         # 添加一些默认的记录
-        add_project('org', 'public', __('公共项目组'))
-        add_project('org', __('推荐中心'), __('推荐项目组'))
-        add_project('org', __('搜索中心'), __('搜索项目组'))
-        add_project('org', __('广告中心'), __('广告项目组'))
-        add_project('org', __('安全中心'), __('安全项目组'))
-        add_project('org', __('多媒体中心'), __('多媒体项目组'))
+        add_project('org', 'public', __('公共项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('推荐中心'), __('推荐项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('搜索中心'), __('搜索项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('广告中心'), __('广告项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('安全中心'), __('安全项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('多媒体中心'), __('多媒体项目组'),expand={'cluster':'dev','org':'public'})
 
         add_project('job-template', __('基础命令'), __('python/bash等直接在服务器命令行中执行命令的模板'), {"index": 1})
         add_project('job-template', __('数据导入导出'), __('集群与用户机器或其他集群之间的数据迁移'), {"index": 2})

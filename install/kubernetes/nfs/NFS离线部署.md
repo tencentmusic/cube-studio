@@ -37,7 +37,7 @@ rpm -ivh *.rpm --force --nodeps
 
 ```shell
 
-# 修改配置文件，增加下面这一行数据，指定的ip地址为客户端的地址
+# 修改配置文件，增加下面这一行数据
 # /data/nfs/ 代表nfs server本地存储目录
 mkdir -p /data/nfs
 echo "/data/nfs/ *(rw,no_root_squash,async)" >> /etc/exports

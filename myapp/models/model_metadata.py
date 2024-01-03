@@ -1,3 +1,5 @@
+import datetime
+
 from flask_appbuilder import Model
 from sqlalchemy import Float
 from sqlalchemy import Text

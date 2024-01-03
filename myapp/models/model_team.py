@@ -113,6 +113,10 @@ class Project(Model,AuditMixinNullable,MyappModelBase):
             return default
 
     @property
+    def cluster_name(self):
+        return self.cluster['NAME']
+
+    @property
     def org(self):
         expand = json.loads(self.expand) if self.expand else {}
         return expand.get('org','public')

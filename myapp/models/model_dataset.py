@@ -104,16 +104,6 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
         return Markup('<div>%s</div>'%html)
 
     @property
-    def ops_html(self):
-        if '*' in self.owner or g.user.username in self.owner:
-            dom = f'''
-            <a target=_blank href="/dataset_modelview/api/explore/{self.id}">{__("探索")}</a>
-            '''
-            return Markup(dom)
-        else:
-            return __("探索")
-
-    @property
     # @pysnooper.snoop()
     def card(self):
         label_url = f"/dataset_modelview/api/label/{self.id}"

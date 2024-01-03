@@ -48,7 +48,14 @@ const EditorHead: React.FC = () => {
     if (pipelineId) {
       await dispatch(await saveTaskList());
       dispatch(savePipeline());
-      window.open(`${window.location.origin}/pipeline_modelview/run_pipeline/${pipelineId}`);
+      window.open(`${window.location.origin}/pipeline_modelview/api/run_pipeline/${pipelineId}`);
+    }
+  };
+
+  // pipeline copy
+  const handleCopy = async () => {
+    if (pipelineId) {
+      window.open(`${window.location.origin}/pipeline_modelview/api/copy_pipeline/${pipelineId}`);
     }
   };
 
@@ -102,37 +109,9 @@ const EditorHead: React.FC = () => {
               <PrimaryButton onClick={handleSubmit}>{t('运行')}</PrimaryButton>
             </Item>
             <Item styles={style.buttonItemStyle}>
-              <DefaultButton
-                onClick={() => {
-                  api
-                    .pipeline_modelview_copy(pipelineId)
-                    .then((res: any) => {
-                      if (res?.id) {
-                        if (window.self === window.top) {
-                          window.location.search = `?pipeline_id=${res.id}`;
-                        } else {
-                          window.parent.postMessage(
-                            {
-                              type: 'copy',
-                              message: {
-                                pipelineId: res.id,
-                              },
-                            },
-                            `${window.location.origin}`,
-                          );
-                        }
-                      }
-                    })
-                    .catch(err => {
-                      if (err.response) {
-                        dispatch(updateErrMsg({ msg: err.response.data.message }));
-                      }
-                    });
-                }}
-              >
-                {(t('复制'))}
-              </DefaultButton>
+                <PrimaryButton onClick={handleCopy}>{t('复制')}</PrimaryButton>
             </Item>
+
           </Stack>
         </Item>
       </Stack>

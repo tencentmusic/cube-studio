@@ -364,17 +364,22 @@ class Notebook_ModelView_Base():
         if SERVICE_EXTERNAL_IP:
             env["SERVICE_EXTERNAL_IP"] = SERVICE_EXTERNAL_IP[0]
 
+
+        annotations={
+            'project': notebook.project.name
+        }
         k8s_client.create_debug_pod(
             namespace=namespace,
             name=notebook.name,
             labels=labels,
+            annotations=annotations,
             command=command,
             args=None,
             volume_mount=volume_mount,
             working_dir=workingDir,
             node_selector=notebook.get_node_selector(),
-            resource_memory="0G~" + notebook.resource_memory,
-            resource_cpu="0G~" + notebook.resource_cpu,
+            resource_memory=notebook.resource_memory if conf.get('NOTEBOOK_EXCLUSIVE',False) else ("0G~" + notebook.resource_memory),
+            resource_cpu=notebook.resource_cpu if conf.get('NOTEBOOK_EXCLUSIVE',False) else ("0G~" + notebook.resource_cpu),
             resource_gpu=notebook.resource_gpu,
             image_pull_policy=conf.get('IMAGE_PULL_POLICY', 'Always'),
             image_pull_secrets=image_pull_secrets,
@@ -459,6 +464,7 @@ class Notebook_ModelView_Base():
         # 边缘模式时，需要根据项目组中的配置设置代理ip
 
         if SERVICE_EXTERNAL_IP and SERVICE_EXTERNAL_IP[0]!='127.0.0.1':
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
             ports = [port]
             # if notebook.ide_type=='bigdata':
             for index in range(1, 4):

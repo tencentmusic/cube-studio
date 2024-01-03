@@ -103,8 +103,8 @@ def delete_old_crd(object_info):
                                 pipeline_id = label.get('pipeline-id','')
                                 if 'run-rtx' in label:
                                     username = label['run-rtx']
-                                elif 'upload-rtx' in label:
-                                    username = label['upload-rtx']
+                                elif 'pipeline-rtx' in label:
+                                    username = label['pipeline-rtx']
                                 if username:
                                     push_message([username]+conf.get('ADMIN_USER','').split(','),__('%s %s %s %s 创建时间 %s， 已经运行时间过久，注意修正') % (username,object_info['plural'],crd_object['name'],pipeline_id,crd_object['create_time']))
                     else:
@@ -130,7 +130,7 @@ def delete_old_crd(object_info):
 @celery_app.task(name="task.delete_workflow", bind=True)
 def delete_workflow(task):
     logging.info('============= begin run delete_workflow task')
-    for crd_name in ["workflow","tfjob",'pytorchjob','xgbjob','mpijob','vcjob','sparkjob','paddlejob','mxjob','framework']:
+    for crd_name in ["workflow","tfjob",'pytorchjob','xgbjob','mpijob','vcjob','sparkjob','paddlejob','mxjob']:
         crd_info = conf.get("CRD_INFO", {}).get(crd_name, {})
         if crd_info:
             try:
@@ -610,7 +610,7 @@ def upload_workflow(task,timerun_id,pipeline_id):
                                                         execution_date=timerun.execution_date)  # 合成workflow
                 dbsession.commit()
                 # logging.error(e)
-            crd_name = run_pipeline(cluster=pipeline.project.cluster,workflow_json=json.loads(timerun.pipeline_file))
+            crd_name = run_pipeline(pipeline=pipeline,workflow_json=json.loads(timerun.pipeline_file))
             timerun.pipeline_argo_id = crd_name  # pipeline_argo_id用来存储workflow的name
             timerun.status='created'
 

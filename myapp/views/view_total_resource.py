@@ -216,7 +216,8 @@ def pod_resource():
                                 all_tasks_json[cluster_name][namespace][org][pod['name']]['used_memory'] = '0'
                                 all_tasks_json[cluster_name][namespace][org][pod['name']]['used_cpu'] = '0'
                                 all_tasks_json[cluster_name][namespace][org][pod['name']]['used_gpu'] = '0'
-                                all_tasks_json[cluster_name][namespace][org][pod['name']]['label'] = json.dumps(pod['labels'])
+                                all_tasks_json[cluster_name][namespace][org][pod['name']]['label'] = pod['labels']
+                                all_tasks_json[cluster_name][namespace][org][pod['name']]['annotations'] = pod['annotations']
                                 # print(namespace,org,pod['name'])
 
                     # 获取pod的资源使用
@@ -248,7 +249,8 @@ def pod_resource():
                     node_grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_NODE_PATH')
                     pod_resource={
                         "cluster":cluster_name,
-                        "project":org,
+                        'project':pod['annotations'].get('project','public'),
+                        "resource_group":org,
                         "namespace":Markup('<a target="blank" href="%s">%s</a>' % (dashboard_url, namespace)),
                         "pod":Markup('<a target="blank" href="%s">%s</a>' % (task_grafana_url + pod_name, pod_name)),
                         "pod_info":f"{cluster_name}:{namespace}:{org}:{pod_name}",
@@ -270,11 +272,12 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
     primary_key = 'pod_info'
     cols_width = {
         "cluster": {"type": "ellip2", "width": 100},
+        "resource_group": {"type": "ellip2", "width": 100},
         "project": {"type": "ellip2", "width": 100},
         "namespace": {"type": "ellip2", "width": 100},
         "node": {"type": "ellip2", "width": 150},
-        "pod": {"type": "ellip2", "width": 500},
-        "username": {"type": "ellip2", "width": 150},
+        "pod": {"type": "ellip2", "width": 400},
+        "username": {"type": "ellip2", "width": 100},
         "cpu": {"type": "ellip2", "width": 100},
         "memory": {"type": "ellip2", "width": 100},
         "gpu": {"type": "ellip2", "width": 100}
@@ -282,6 +285,7 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
     label_columns = {
         "cluster": _("集群"),
         "project": _("项目组"),
+        "resource_group": _("资源组"),
         "namespace": _("类型"),
         "label": _("标签"),
         "pod": _("容器(资源使用)"),
@@ -306,7 +310,7 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
     page_size = 1000
     enable_echart = True
     base_permissions = ['can_list']
-    list_columns = ['cluster', 'project', 'namespace', 'pod', 'username', 'node', 'cpu', 'memory', 'gpu']
+    list_columns = ['cluster', 'resource_group', 'namespace', 'pod', 'username', 'node', 'cpu', 'memory', 'gpu']
 
     alert_config = {
         conf.get('MODEL_URLS', {}).get('total_resource', ''): node_traffic

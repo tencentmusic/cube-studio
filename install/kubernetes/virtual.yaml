@@ -88,3 +88,57 @@ spec:
         host: grafana.monitoring.svc.cluster.local
         port:
           number: 8080
+#---
+#apiVersion: networking.istio.io/v1alpha3
+#kind: VirtualService
+#metadata:
+#  name: monitoring-prometheus
+#  namespace: monitoring
+#spec:
+#  gateways:
+#  - kubeflow/kubeflow-gateway
+#  hosts:
+#  - "*"  # 配置自己管理的域名 kubeflow.local.com
+#  http:
+#  - match:
+#    - uri:
+#        prefix: /prometheus/
+#    rewrite:
+#      uri: /prometheus/
+#    route:
+#    - destination:
+#        host: prometheus-k8s.monitoring.svc.cluster.local
+#        port:
+#          number: 9090
+---
+## 私有云环境minio存放public所有静态资源vs
+#apiVersion: networking.istio.io/v1beta1
+#kind: VirtualService
+#metadata:
+#  name: minio
+#  namespace: kubeflow
+#spec:
+#  gateways:
+#  - kubeflow/kubeflow-gateway
+#  hosts:
+#  - '*'
+#  http:
+#  - corsPolicy:
+#      allowHeaders:
+#      - '*'
+#      allowMethods:
+#      - POST
+#      - GET
+#      allowOrigin:
+#      - '*'
+#    match:
+#    - uri:
+#        prefix: /minio/
+#    rewrite:
+#      uri: /
+#    route:
+#    - destination:
+#        host: minio.kubeflow.svc.cluster.local
+#        port:
+#          number: 9000
+

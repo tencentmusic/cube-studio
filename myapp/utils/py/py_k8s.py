@@ -149,7 +149,8 @@ class K8s():
                     'status': status,  # 每个容器都正常才算正常
                     'status_more': pod.status.to_dict(),  # 无法json序列化
                     'node_name': pod.spec.node_name,
-                    "labels": metadata.labels,
+                    "labels": metadata.labels if metadata.labels else {},
+                    "annotations": metadata.annotations if metadata.annotations else {},
                     "memory": sum(memory),
                     "cpu": sum(cpu),
                     # "gpu": sum(gpu) + sum(vgpu),
@@ -579,16 +580,6 @@ class K8s():
                     group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
                     namespace=namespace, labels={'run-id': run_id}
                 )
-            except Exception as e:
-                print(e)
-                logging.error('Traceback: %s', traceback.format_exc())
-
-            # 删除framework
-            try:
-                crd_info = all_crd_info['framework']
-                self.delete_crd(group=crd_info['group'], version=crd_info['version'],
-                                plural=crd_info['plural'], namespace=namespace,
-                                labels={"run-id": str(run_id)})
             except Exception as e:
                 print(e)
                 logging.error('Traceback: %s', traceback.format_exc())
@@ -1038,7 +1029,8 @@ class K8s():
                  resource_memory, resource_cpu, resource_gpu, image_pull_policy, image_pull_secrets, image, hostAliases,
                  env, privileged, accounts, username, ports=None, restart_policy='OnFailure',
                  scheduler_name='default-scheduler', node_name='', health=None, annotations={}, hostPort=[],resource_rdma=0):
-
+        if not labels:
+            labels={}
         if scheduler_name == 'kube-batch':
             annotations['scheduling.k8s.io/group-name'] = name
         metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)

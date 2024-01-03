@@ -184,19 +184,19 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def pipeline_url(self):
-        pipeline_url="/pipeline_modelview/web/" +str(self.id)
+        pipeline_url="/pipeline_modelview/api/web/" +str(self.id)
         return Markup(f'<a target=_blank href="{pipeline_url}">{self.describe}</a>')
 
     @property
     def run_pipeline(self):
-        pipeline_run_url = "/pipeline_modelview/run_pipeline/" +str(self.id)
+        pipeline_run_url = "/pipeline_modelview/api/run_pipeline/" +str(self.id)
         return Markup(f'<a target=_blank href="{pipeline_run_url}">run</a>')
 
 
     @property
     def log(self):
         if self.run_id:
-            pipeline_url = "/pipeline_modelview/web/log/%s"%self.id
+            pipeline_url = "/pipeline_modelview/api/web/log/%s"%self.id
             return Markup(f'<a target=_blank href="{pipeline_url}">{__("日志")}</a>')
         else:
             return Markup(__('日志'))
@@ -204,7 +204,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def pod(self):
-        url = "/pipeline_modelview/web/pod/%s" % self.id
+        url = "/pipeline_modelview/api/web/pod/%s" % self.id
         return Markup(f'<a target=_blank href="{url}">pod</a>')
 
 
@@ -498,19 +498,19 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def debug(self):
-        return Markup(f'<a target=_blank href="/task_modelview/debug/{self.id}">debug</a>')
+        return Markup(f'<a target=_blank href="/task_modelview/api/debug/{self.id}">debug</a>')
 
     @property
     def run(self):
-        return Markup(f'<a target=_blank href="/task_modelview/run/{self.id}">run</a>')
+        return Markup(f'<a target=_blank href="/task_modelview/api/run/{self.id}">run</a>')
 
     @property
     def clear(self):
-        return Markup(f'<a href="/task_modelview/clear/{self.id}">clear</a>')
+        return Markup(f'<a href="/task_modelview/api/clear/{self.id}">clear</a>')
 
     @property
     def log(self):
-        return Markup(f'<a target=_blank href="/task_modelview/log/{self.id}">log</a>')
+        return Markup(f'<a target=_blank href="/task_modelview/api/log/{self.id}">log</a>')
 
     def get_node_selector(self):
         project_node_selector = self.get_default_node_selector(self.pipeline.project.node_selector,self.resource_gpu,'train')

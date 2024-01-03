@@ -838,12 +838,18 @@ class Task_ModelView_Base():
         return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
 
-class Task_ModelView(Task_ModelView_Base, CompactCRUDMixin, MyappModelView):
+#
+# class Task_ModelView(Task_ModelView_Base, CompactCRUDMixin, MyappModelView):
+#     datamodel = SQLAInterface(Task)
+#
+#
+# appbuilder.add_view_no_menu(Task_ModelView)
+
+class Task_ModelView(Task_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Task)
+    route_base = '/task_modelview'
 
-
-appbuilder.add_view_no_menu(Task_ModelView)
-
+appbuilder.add_api(Task_ModelView)
 
 # # 添加api
 class Task_ModelView_Api(Task_ModelView_Base, MyappModelRestApi):

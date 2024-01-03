@@ -153,18 +153,22 @@ class Service_ModelView_base():
         env += "\nRESOURCE_MEMORY=" + service.resource_memory
         env += "\nUSERNAME=" + service.created_by.username
 
+        annotations = {
+            'project': service.project.name
+        }
         k8s_client.create_deployment(namespace=namespace,
                                      name=service.name,
                                      replicas=service.replicas,
                                      labels=labels,
+                                     annotations=annotations,
                                      command=['bash', '-c', service.command] if service.command else None,
                                      args=None,
                                      volume_mount=volume_mount,
                                      working_dir=service.working_dir,
                                      node_selector=service.get_node_selector(),
-                                     resource_memory="0~" + service.resource_memory,
-                                     resource_cpu="0~" + service.resource_cpu,
-                                     resource_gpu=service.resource_gpu if service.resource_gpu else '',
+                                     resource_memory= service.resource_memory if conf.get('SERVICE_EXCLUSIVE',False) else ("0~" + service.resource_memory),
+                                     resource_cpu=service.resource_cpu if conf.get('SERVICE_EXCLUSIVE',False) else ("0~" + service.resource_cpu),
+                                     resource_gpu=service.resource_gpu if service.resource_gpu else '0',
                                      image_pull_policy=conf.get('IMAGE_PULL_POLICY', 'Always'),
                                      image_pull_secrets=image_pull_secrets,
                                      image=service.images,

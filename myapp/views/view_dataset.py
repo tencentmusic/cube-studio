@@ -290,6 +290,13 @@ class Dataset_ModelView_base():
     def pre_update(self, item):
         self.pre_add(item)
 
+
+    def check_edit_permission(self, item):
+        if not g.user.is_admin() and g.user.username != item.created_by.username and g.user.username not in item.owner:
+            return False
+        return True
+    check_delete_permission = check_edit_permission
+
     # 将外部存储保存到本地存储中心
     @action("save_store", "备份", "备份数据到当前集群?", "fa-trash", single=True)
     def save_store(self, dataset_id):

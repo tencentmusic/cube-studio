@@ -81,8 +81,8 @@ class Crd_ModelView_Base():
                     labels = json.loads(crd['labels'])
                     if 'run-rtx' in labels:
                         crd['username'] = labels['run-rtx']
-                    elif 'upload-rtx' in labels:
-                        crd['username'] = labels['upload-rtx']
+                    elif 'pipeline-rtx' in labels:
+                        crd['username'] = labels['pipeline-rtx']
                 except Exception as e:
                     logging.error(e)
                 crd_model = self.datamodel.obj(**crd)
@@ -337,7 +337,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         layout_config['right_button'].append(
             {
                 "label": __("任务流"),
-                "url": f'/pipeline_modelview/web/{pipeline.id}'
+                "url": f'/pipeline_modelview/api/web/{pipeline.id}'
             }
         )
         layout_config['detail'] = [
@@ -451,7 +451,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                         if len(match) > 0:
                             retry_index = match[0].replace("(", '').replace(")", '')
                             displayName = displayName.replace(match[0], __('(第%s次重试)')%retry_index)
-                        title = nodes_spec[task_name].get('metadata', {}).get("annotations", {}).get("task-label", pod_name).encode('utf-8').decode('unicode_escape')+f"({displayName})"
+                        title = nodes_spec[task_name].get('metadata', {}).get("annotations", {}).get("task", pod_name)+f"({displayName})"
                         node_type = status_more['nodes'][child]['type']
                         if node_type == "Retry":
                             title += __("(有%s次重试机会)")%retry
@@ -492,7 +492,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                             "color": status_color.get(status, default_status_color),
                             "task_name": task_name,
                             "task_id": nodes_spec[task_name].get('metadata', {}).get("labels", {}).get("task-id", ''),
-                            "task_label": nodes_spec[task_name].get('metadata', {}).get("annotations", {}).get("task-label", '').encode('utf-8').decode('unicode_escape'),
+                            "task_label": nodes_spec[task_name].get('metadata', {}).get("annotations", {}).get("task", ''),
                             "volumeMounts": nodes_spec[task_name].get('container', {}).get("volumeMounts", []),
                             "volumes": nodes_spec[task_name].get('volumes', []),
                             "node_selector": node_selector,
@@ -610,7 +610,6 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         return content
 
     @expose("/web/node_detail/<cluster_name>/<namespace>/<workflow_name>/<node_name>", methods=["GET", ])
-    
     def web_node_detail(self,cluster_name,namespace,workflow_name,node_name):
         layout_config, dag_config,node_detail_config,workflow = self.get_dag(cluster_name, namespace, workflow_name,node_name)
         # print(node_detail_config)

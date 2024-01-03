@@ -782,6 +782,8 @@ STORE_CONFIG = {
 
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
 K8S_NETWORK_MODE = 'iptables'   # iptables ipvs
+NOTEBOOK_EXCLUSIVE = False   # notebook 启动是否独占资源
+SERVICE_EXCLUSIVE = False   # 内部服务 启动是否独占资源
 
 MINIO_HOST = 'minio.kubeflow:9000'
 
@@ -809,7 +811,6 @@ ALL_LINKS=[
 ]
 
 # 推理服务的各种配置
-ML_SERVER_IMAGE=['ccr.ccs.tencentyun.com/cube-studio/xx:xxx']
 TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0-gpu']
 TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu']
 ONNXRUNTIME_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda']
@@ -847,7 +848,12 @@ INFERNENCE_HEALTH={
     "torch-server":"8080:/ping",
     "triton-server":"8000:/v2/health/ready"
 }
+
+CONTAINER_CLI='docker'   # 或者 docker nerdctl
+
 DOCKER_IMAGES='docker:23.0.4'
+NERDCTL_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nerdctl:1.7.2'
+
 WAIT_POD_IMAGES='ccr.ccs.tencentyun.com/cube-studio/wait-pod:v1'
 # notebook，pipeline镜像拉取策略
 IMAGE_PULL_POLICY='Always'    # IfNotPresent   Always

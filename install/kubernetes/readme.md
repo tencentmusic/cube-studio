@@ -110,9 +110,7 @@ kubectl create -f kube-batch/deploy.yaml
   
 # 部署efk生态组件  
 参考efk/readme.md  
-  
-# 部署frameworkercontroller组件  
-参考frameworkercontroller/readme.md  
+
   
 # 部署volcano组件  
 ```bash

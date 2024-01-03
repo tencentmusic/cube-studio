@@ -230,12 +230,24 @@ def upgrade_service(task,service_id,name,namespace):
                 time.sleep(60)
 
 
-            # 切换还完，做旧服务的清理
+            # 切换还完，做旧服务的清理。 同域名的只能保留一个，这样能让客户端使用同一个域名总是请求到最新的一个服务。但是要避免service.host配置的不是域名的情况
+            def get_inference_host(inference):
+
+                service_host = inference.name + "." +inference.project.cluster.get('SERVICE_DOMAIN', conf.get('SERVICE_DOMAIN', ''))
+
+                if service.host:
+                    from myapp.utils.core import split_url
+                    host, port, path = split_url(inference.host)
+                    if host:
+                        service_host = host
+
+                return service_host
+
             old_services = dbsession.query(InferenceService)\
                 .filter(InferenceService.model_status=='online')\
                 .filter(InferenceService.model_name==service.model_name)\
-                .filter(InferenceService.name!=service.name)\
-                .filter(InferenceService.host==service.host).all()
+                .filter(InferenceService.name!=service.name).all()
+            old_services = [service1 for service1 in old_services if get_inference_host(service1)==get_inference_host(service)]
 
             if old_services:
                 for old_service in old_services:

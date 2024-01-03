@@ -277,19 +277,15 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
             # 处理业务自己配置的host的特殊配置
             if self.host:
-                url = self.host
-                # 如果只配置了路径，则用前面的域名+配置的路径
-                if self.host[0] == '/':
-                    # 只配置了路径的话，就用原来的host
-                    url = host + self.host
+                from myapp.utils.core import split_url
+                host_temp, port_temp, path_temp = split_url(self.host)
 
-            return Markup(f'<a target=_blank href="//{url}">{host}</a>')
-
-        elif TKE_EXISTED_LBID:
-            TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')
-            if len(TKE_EXISTED_LBID)>1:
-                host = TKE_EXISTED_LBID[1] + ":" + str(port)
-                return Markup(f'<a target=_blank href="//{host}">{host}</a>')
+                if port_temp and port_temp in self.ports:
+                    # 查看是第几个端口
+                    if self.ports.find(port_temp) > self.ports.find(','):
+                        port = port + 1
+                url = SERVICE_EXTERNAL_IP+":"+str(port)+path_temp
+            return Markup(f'<a target=_blank href="http://{url}">{host}</a>')
 
         return __("未开通")
 
@@ -301,30 +297,31 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def inference_host_url(self):
         # 泛域名先使用http
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
-        link = url
-        if self.host:
-            if 'http://' in self.host or 'https://' in self.host:
-                link = url = self.host
-            elif self.host[0]=='/':
-                # 只配置了路径的话，就用原来的host
-                link = url + self.host
-            else:
-                link = "http://"+self.host
-
+        host = self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
+        link = host
 
         if not self.host and self.service_type=='tfserving':
-            link+=f"/v1/models/{self.model_name}/metadata"
+            link=host+f"/v1/models/{self.model_name}/metadata"
         if not self.host and self.service_type=='torch-server':
-            link+=":8080/models"
+            link=host+":8080/models"
 
-        hosts=f'''
-        <a target=_blank href="{link}">{url}</a>
-        <br><a target=_blank href="{link.replace('http://','http://debug.').replace('https://','https://debug.')}">{url.replace('http://','http://debug.').replace('https://','https://debug.')}</a>
-        <br><a target=_blank href="{link.replace('http://','http://test.').replace('https://','https://test.')}">{url.replace('http://','http://test.').replace('https://','https://test.')}</a>
-        '''
+        if self.host:
+            from myapp.utils.core import split_url
+            host_temp, port_temp, path_temp = split_url(self.host)
 
-        hosts=f'<a target=_blank href="{link}">{url}</a>'
+            if host_temp:
+                host=host_temp
+            if port_temp and port_temp in self.ports:
+                # 查看是第几个端口
+                if self.ports.find(port_temp) > self.ports.find(','):
+                    link = host+":8080"+path_temp
+            else:
+                if port_temp:
+                    link = host+":"+port_temp+path_temp
+                else:
+                    link = host+path_temp
+
+        hosts=f'<a target=_blank href="http://{link}">{host}</a>'
         return Markup(hosts)
 
 
@@ -364,6 +361,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
             resource_gpu = self.resource_gpu,
             deploy_time = '',
             host = self.host,
+            inference_config=self.inference_config,
             expand = '{}',
             canary = '',
             shadow = '',
