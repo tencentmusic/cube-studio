@@ -680,8 +680,9 @@ GLOBAL_ENV={
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
 }
 
-# 各种环节使用的gpu驱动类型
-GPU_RESOURCE={}
+GPU_RESOURCE={
+    "gpu":"nvidia.com/gpu"
+}
 DEFAULT_GPU_RESOURCE_NAME='nvidia.com/gpu'
 
 # 配置禁用gpu的方法，不然对复合共用型机器，gpu会被共享使用
