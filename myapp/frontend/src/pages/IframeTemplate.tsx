@@ -11,7 +11,7 @@ export default function IframeTemplate(props?: IAppMenuItem) {
                 allowFullScreen
                 allow="microphone;camera;midi;encrypted-media;"
                 className="w100 h100 fade-in"
-                style={{ border: 0 }}>
+                style={{ border: 0, display: 'block'}}>
             </iframe>
         </>
     )
