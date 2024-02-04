@@ -355,6 +355,7 @@ const AppWrapper = (props: IProps) => {
             </div>
           </div>
 
+          <div className="d-f ac plr16 h100">
             {
               headerConfig.map(config => {
                 if (config.icon) {

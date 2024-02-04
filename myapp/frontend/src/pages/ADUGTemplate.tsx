@@ -158,6 +158,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
             if (type === 'select2') {
                 type = 'select'
             }
+            if (type === 'file') {
+                type = 'fileUpload'
+            }
             const label = item.label || label_columns[item.name]
 
             // 校验规则
@@ -1142,7 +1145,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                             },
                                             onCancel() { },
                                         });
-                                    }}>批量导出  <ExportOutlined /></Button> : null
+                                    }}>{t('批量导出')}  <ExportOutlined /></Button> : null
                                 }
 
                             </div>}

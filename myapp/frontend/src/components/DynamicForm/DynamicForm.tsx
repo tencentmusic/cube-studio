@@ -8,6 +8,7 @@ import InputSearch from '../InputSearch/InputSearch';
 import 'moment/locale/zh-cn';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { useTranslation } from 'react-i18next';
+import FileUploadPlus from '../FileUploadPlus/FileUploadPlus';
 
 interface IProps {
     primaryKey?: string
@@ -51,7 +52,7 @@ export interface IDynamicFormConfigItem {
     data: Record<string, any>
 }
 
-export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select'
+export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select' | 'fileUpload'
 
 export function calculateId(strList: string[]): number {
     const str2Num = (str: string) => {
@@ -166,6 +167,20 @@ export default function DynamicForm(props: IProps) {
     const prev = () => {
         setCurrent(current - 1);
     };
+
+    const renderFileUpload = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
+        return <Form.Item
+            key={`dynamicForm_${config.name}`}
+            label={config.label}
+            name={config.name}
+            rules={config.rules}
+            initialValue={config.defaultValue}
+            extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            {...itemProps}
+        >
+            <FileUploadPlus />
+        </Form.Item>
+    }
 
     const renderInput = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
         // const rules: Rule[] = [
@@ -424,6 +439,8 @@ export default function DynamicForm(props: IProps) {
                 return renderRangePicker(item, itemProps)
             case 'radio':
                 return renderRadio(item, itemProps)
+            case 'fileUpload':
+                return renderFileUpload(item, itemProps)
             default:
                 return null
         }
@@ -550,10 +567,10 @@ export default function DynamicForm(props: IProps) {
                         </div>
                     </div>
                 </> : <div style={{ width: 680 }}>
-                        {
-                            renderFormItem(currentConfig || [])
-                        }
-                    </div>
+                    {
+                        renderFormItem(currentConfig || [])
+                    }
+                </div>
             }
         </>
     )

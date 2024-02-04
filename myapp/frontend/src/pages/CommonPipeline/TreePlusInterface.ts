@@ -37,7 +37,6 @@ export interface ILayoutConfig {
     "run-rtx": string,
     "save-time": string,
     "schedule_type": string,
-    "upload-rtx": string,
     "workflow-name": string,
     "workflows.argoproj.io/completed": string,
     "workflows.argoproj.io/phase": string,
