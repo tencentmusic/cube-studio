@@ -44,15 +44,16 @@
 # 平台部署流程
 
 基础环境依赖
- - docker >= 19.03  
- - kubernetes = 1.18  
- - kubectl >=1.18  
- - cfs/ceph  挂载到每台机器的 /data/k8s/  
- - 单机 磁盘>=200G   单机磁盘容量要求不大，仅做镜像容器的存储  
- - 控制端机器 cpu>=16 mem>=32G 
- - 任务端机器，根据需要自行配置  
-
-本平台依赖k8s/kubeflow/prometheus/efk相关组件，请参考install/kubenetes/README.md 部署依赖组件。
+ - docker == 20.x docker 存储目录>1T
+ - kubernetes = 1.21~1.25
+ - kubectl == 1.24
+ - nfs/ceph等分布式文件系统 挂载到每台机器的 /data/k8s/ （单机可忽略）
+ - 数据库接口地址 mysql，没有可忽略使用cube-studio自带的
+ - 单机 磁盘>=1000G 单机磁盘容量要求不大，仅做镜像容器的的存储
+ - 控制端机器 cpu>=16 mem>=32G
+ - 任务端cpu/gpu机器 根据需要自行配置,gpu安装对应厂商的要求安装好机器驱动
+ - IB/RDMA网络 自动安装机器驱动和IB卡
+ - 系统 ubuntu 20.04 ubuntu 22.04 或者centos7或者centos8
 
 平台完成部署之后如下:
 
