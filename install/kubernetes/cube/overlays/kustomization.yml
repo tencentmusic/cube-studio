@@ -36,10 +36,10 @@ resources:
 images:
 - name: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
   newName: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
-  newTag: 2023.12.01
+  newTag: 2024.03.01
 - name: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend
   newName: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend
-  newTag: 2023.12.01
+  newTag: 2024.03.01
 
 
 # kustomize build . | kubectl apply -f -

@@ -1,4 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.12.01 -f install/docker/Dockerfile .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.03.01 -f install/docker/Dockerfile .
 
 FROM ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9-amd64-20231001
 
@@ -13,8 +13,10 @@ ENV PATH=/home/myapp/myapp/bin:$PATH
 ENV PYTHONPATH=/home/myapp:$PYTHONPATH
 
 COPY install/docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /home/myapp/myapp/bin/myapp /entrypoint.sh
 
-# ENTRYPOINT ["/entrypoint.sh"]
+# ENTRYPOINT ["bash","/entrypoint.sh"]
+
 # HEALTHCHECK CMD ["curl", "-f", "http://localhost:80/health"]
 
 

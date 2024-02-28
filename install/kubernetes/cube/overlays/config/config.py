@@ -683,7 +683,6 @@ GLOBAL_ENV={
 GPU_RESOURCE={
     "gpu":"nvidia.com/gpu"
 }
-
 DEFAULT_GPU_RESOURCE_NAME='nvidia.com/gpu'
 
 # 配置禁用gpu的方法，不然对复合共用型机器，gpu会被共享使用
@@ -735,8 +734,8 @@ REPOSITORY_ORG='ccr.ccs.tencentyun.com/cube-studio/'
 # 用户常用默认镜像
 USER_IMAGE = 'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9'
 # notebook每个pod使用的用户账号
-JUPYTER_ACCOUNTS='jupyter-user'
-HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,AUTOML_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE]
+JUPYTER_ACCOUNTS=''
+HUBSECRET_NAMESPACE=[PIPELINE_NAMESPACE,AUTOML_NAMESPACE,NOTEBOOK_NAMESPACE,SERVICE_NAMESPACE,AIHUB_NAMESPACE]
 
 # notebook使用的镜像
 NOTEBOOK_IMAGES=[
@@ -747,6 +746,9 @@ NOTEBOOK_IMAGES=[
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-bigdata', 'jupyter（bigdata）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning', 'jupyter（machinelearning）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-deeplearning', 'jupyter（deeplearning）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-jupyter-ubuntu-cpu-pro', 'jupyter-conda-pro（企业版）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-matlab-ubuntu-deeplearning', 'matlab（企业版）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-rstudio-ubuntu-bigdata', 'rstudio（企业版）'],
 ]
 
 # 定时检查大小的目录列表。需要再celery中启动检查任务
@@ -771,7 +773,7 @@ NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
 
 # 数据集的存储地址
 DATASET_SAVEPATH = '/dataset/'
-STORE_TYPE="cos"
+STORE_TYPE=""   # 目前不支持备份到云上
 STORE_CONFIG = {
     "appid": "xx",
     "secret_id": "xx",
@@ -783,6 +785,8 @@ STORE_CONFIG = {
 }
 
 K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
+BLACK_PORT = [10250]   # 黑名单端口，cube-studio将不会占用这些端口，10250是kubelet的端口。
+
 K8S_NETWORK_MODE = 'iptables'   # iptables ipvs
 NOTEBOOK_EXCLUSIVE = False   # notebook 启动是否独占资源
 SERVICE_EXCLUSIVE = False   # 内部服务 启动是否独占资源
@@ -813,10 +817,10 @@ ALL_LINKS=[
 ]
 
 # 推理服务的各种配置
-TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:1.14.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.0.0-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.1.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.2.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.4.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.2-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.0-gpu']
-TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.6.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.5.3-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.4.2-gpu']
+TFSERVING_IMAGES=['tensorflow/serving:2.14.1-gpu','tensorflow/serving:2.14.1','tensorflow/serving:2.13.1-gpu','tensorflow/serving:2.13.1','tensorflow/serving:2.12.2-gpu','tensorflow/serving:2.12.2','tensorflow/serving:2.11.1-gpu','tensorflow/serving:2.11.1','tensorflow/serving:2.10.1-gpu','tensorflow/serving:2.10.1','tensorflow/serving:2.9.3-gpu','tensorflow/serving:2.9.3','tensorflow/serving:2.8.4-gpu','tensorflow/serving:2.8.4','tensorflow/serving:2.7.4-gpu','tensorflow/serving:2.7.4','tensorflow/serving:2.6.5-gpu','tensorflow/serving:2.6.5','tensorflow/serving:2.5.4-gpu','tensorflow/serving:2.5.4']
+TORCHSERVER_IMAGES=['pytorch/torchserve:0.9.0-gpu','pytorch/torchserve:0.9.0-cpu','pytorch/torchserve:0.8.2-gpu','pytorch/torchserve:0.8.2-cpu','pytorch/torchserve:0.7.1-gpu','pytorch/torchserve:0.7.1-cpu']
 ONNXRUNTIME_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda']
-TRITONSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.09-py3']
+TRITONSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tritonserver:24.01-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:23.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:20.12-py3']
 
 INFERNENCE_IMAGES={
     "tfserving":TFSERVING_IMAGES,
@@ -920,7 +924,5 @@ CLUSTERS={
         # "SERVICE_DOMAIN": 'service.local.com',
     }
 }
-
-
 
 HOST = CLUSTERS[ENVIRONMENT].get('HOST',None)

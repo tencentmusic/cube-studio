@@ -2,7 +2,7 @@
 
 set -ex
 
-rm -rf /home/myapp/myapp/static/assets
+rm -f /home/myapp/myapp/static/assets
 ln -s /home/myapp/myapp/assets /home/myapp/myapp/static/
 rm -f /home/myapp/myapp/static/mnt
 mkdir -p /data/k8s/kubeflow/pipeline/workspace
@@ -12,6 +12,9 @@ mkdir -p /data/k8s/kubeflow/dataset
 ln -s /data/k8s/kubeflow/dataset /home/myapp/myapp/static/
 rm -f /home/myapp/myapp/static/aihub
 ln -s /cube-studio/aihub /home/myapp/myapp/static/
+
+rm -f /home/myapp/myapp/static/global
+ln -s /data/k8s/kubeflow/global /home/myapp/myapp/static/
 
 export FLASK_APP=myapp:app
 python myapp/create_db.py
