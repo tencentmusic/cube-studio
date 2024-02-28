@@ -14,6 +14,7 @@ from flask_appbuilder.security.views import (
     RoleModelView,
     UserModelView
 )
+from werkzeug.security import generate_password_hash,check_password_hash
 from flask_appbuilder.security.sqla.models import assoc_user_role
 
 from flask_appbuilder.security.decorators import has_access
@@ -82,6 +83,9 @@ from sqlalchemy import Column, String
 class MyUser(User):
     __tablename__ = 'ab_user'
     org = Column(String(200))   # Organization
+    quota = Column(String(2000))  # 资源配额
+
+
     def get_full_name(self):
         return self.username
 
@@ -126,9 +130,13 @@ class MyRoleModelView(RoleModelView):
 class MyUserRemoteUserModelView_Base():
     datamodel = SQLAInterface(MyUser)
     list_columns = ["username", "active", "roles", ]
-    edit_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]
-    add_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]
+    edit_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles", 'org', 'quota' ]
+    add_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles", 'org', 'quota']
     show_columns = ["username", "active", "roles", "login_count"]
+    describe_columns={
+        "org":"组织架构，自行填写",
+        "quota": '资源限额，额度填写方式 $集群名,$资源组名,$命名空间,$资源类型,$限制类型,$限制值，其中$命名空间包含all,jupyter,pipeline,service,automl,aihub,$资源类型包含cpu,memory,gpu,$限制类型包含single,concurrent,total'
+    }
     list_widget = MyappSecurityListWidget
     label_columns = {
         "get_full_name": lazy_gettext("Full Name"),
@@ -147,8 +155,9 @@ class MyUserRemoteUserModelView_Base():
         "changed_on": lazy_gettext("Changed on"),
         "changed_by": lazy_gettext("Changed by"),
         "secret": lazy_gettext("Authorization"),
+        "quota": lazy_gettext("quota"),
     }
-
+    # 用户show页面
     show_fieldsets = [
         (
             lazy_gettext("User info"),
@@ -156,7 +165,7 @@ class MyUserRemoteUserModelView_Base():
         ),
         (
             lazy_gettext("Personal Info"),
-            {"fields": ["first_name", "last_name", "email",'org'], "expanded": True},
+            {"fields": ["first_name", "last_name", "email",'org','quota'], "expanded": True},
         ),
         (
             lazy_gettext("Audit Info"),
@@ -173,7 +182,7 @@ class MyUserRemoteUserModelView_Base():
             },
         ),
     ]
-
+    # 个人查看详情额展示的信息
     user_show_fieldsets = [
         (
             lazy_gettext("User info"),
@@ -181,7 +190,7 @@ class MyUserRemoteUserModelView_Base():
         ),
         (
             lazy_gettext("Personal Info"),
-            {"fields": ["first_name", "last_name", "email"], "expanded": True},
+            {"fields": ["first_name", "last_name", "email",'org','quota'], "expanded": True},
         ),
     ]
 
@@ -489,14 +498,13 @@ class MyappSecurityManager(SecurityManager):
             user.email = email
             user.active = True
             user.roles+=roles   # 添加默认注册角色
-            user.password=password
-            # if hashed_password:
-            #     user.password = hashed_password
-            # else:
-            #     user.password = generate_password_hash(password)
+            if password:
+                user.password=password
+            if hashed_password:
+                user.password = generate_password_hash(hashed_password)
             self.get_session.add(user)
             self.get_session.commit()
-
+            # 在项目组中添加用户
             try:
                 from myapp.models.model_team import Project_User, Project
                 public_project = self.get_session.query(Project).filter(Project.name == "public").filter(Project.type == "org").first()
@@ -525,6 +533,7 @@ class MyappSecurityManager(SecurityManager):
         if not username:
             return None
         # 查找用户
+        from myapp import conf
         user = self.find_user(username=username)
         # 添加以组织同名的角色，同时添加上级角色
         # # 注册rtx同名角色
@@ -537,7 +546,7 @@ class MyappSecurityManager(SecurityManager):
                 last_name=last_name if last_name else username,
                 password=password,
                 org=org_name,               # 添加组织架构
-                email=username + "@cube-studio.com" if not email else email,
+                email=username + f"@{conf.get('APP_NAME','cube-studio').replace(' ','').lower()}.com" if not email else email,
                 roles=[self.find_role(self.auth_user_registration_role)] if self.find_role(self.auth_user_registration_role) else []  #  org_role   添加gamma默认角色,    组织架构角色先不自动添加
             )
         elif not user.is_active:  # 如果用户未激活不允许接入
