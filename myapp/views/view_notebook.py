@@ -64,7 +64,7 @@ class Notebook_ModelView_Base():
     order_columns = ['id']
     search_columns = ['created_by', 'name']
     add_columns = ['project', 'name', 'describe', 'images', 'working_dir', 'volume_mount', 'resource_memory','resource_cpu', 'resource_gpu']
-    list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe','reset', 'resource', 'renew']
+    list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe','reset', 'resource', 'renew', 'save']
     cols_width = {
         "project": {"type": "ellip2", "width": 150},
         "ide_type_html": {"type": "ellip2", "width": 200},
@@ -72,7 +72,8 @@ class Notebook_ModelView_Base():
         "describe": {"type": "ellip2", "width": 300},
         "resource": {"type": "ellip2", "width": 300},
         "status": {"type": "ellip2", "width": 100},
-        "renew": {"type": "ellip2", "width": 200}
+        "renew": {"type": "ellip2", "width": 200},
+        "save": {"type": "ellip2", "width": 200}
     }
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -159,7 +160,7 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['resource_gpu'] = StringField(
             _('gpu'),
             default='0',
-            description= _('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100'),
+            description= _('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，<span style="color:red;">虚拟化占用和共享模式占用仅企业版支持</span>'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
@@ -313,13 +314,15 @@ class Notebook_ModelView_Base():
         workingDir = None
         volume_mount = notebook.volume_mount
         # 端口+0是jupyterlab  +1是sshd   +2 +3 是预留的用户自己启动应用占用的端口
+
+        meet_ports = core.get_not_black_port(10000 + 10 * notebook.id)
         env = {
             "NO_AUTH": "true",
             "USERNAME": notebook.created_by.username,
             "NODE_OPTIONS": "--max-old-space-size=%s" % str(int(notebook.resource_memory.replace("G", '')) * 1024),
-            "SSH_PORT": str(10000 + 10 * notebook.id + 1),
-            "PORT1": str(10000 + 10 * notebook.id + 2),
-            "PORT2": str(10000 + 10 * notebook.id + 3),
+            "SSH_PORT": str(meet_ports[1]),
+            "PORT1": str(meet_ports[2]),
+            "PORT2": str(meet_ports[3]),
             "NOTEBOOK_NAME":notebook.name
         }
 
@@ -468,10 +471,10 @@ class Notebook_ModelView_Base():
             ports = [port]
             # if notebook.ide_type=='bigdata':
             for index in range(1, 4):
-                ports.append(10000 + 10 * notebook.id + index)
+                ports.append(meet_ports[index])
 
             # ports = list(set(ports))  # 这里会乱序
-            service_ports = [[10000 + 10 * notebook.id + index, port] for index, port in enumerate(ports)]
+            service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (notebook.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
                 namespace=namespace,
