@@ -60,7 +60,7 @@ class Dataset_ModelView_base():
     add_columns = ['name', 'version', 'label', 'describe', 'source_type', 'source', 'field',
                    'usage', 'storage_class', 'file_type', 'url', 'download_url', 'path',
                    'storage_size', 'entries_num', 'duration', 'price', 'status', 'icon', 'owner', 'features']
-    show_columns = ['id', 'name', 'version', 'label', 'describe', 'subdataset', 'segment', 'source_type', 'source',
+    show_columns = ['id', 'name', 'version', 'label', 'describe', 'segment', 'source_type', 'source',
                     'industry', 'field', 'usage', 'storage_class', 'file_type', 'status', 'url',
                     'path', 'download_url', 'storage_size', 'entries_num', 'duration', 'price', 'status', 'icon',
                     'owner', 'features']
@@ -298,9 +298,9 @@ class Dataset_ModelView_base():
     check_delete_permission = check_edit_permission
 
     # 将外部存储保存到本地存储中心
-    @action("save_store", "备份", "备份数据到当前集群?", "fa-trash", single=True)
-    def save_store(self, dataset_id):
-        dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
+    @action("save_store", "备份", "备份数据到当前集群?", "fa-trash", single=True, multiple=False)
+    # @pysnooper.snoop()
+    def save_store(self, dataset):
         from myapp.tasks.async_task import update_dataset
         kwargs = {
             "dataset_id": dataset.id,

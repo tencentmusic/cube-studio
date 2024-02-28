@@ -969,7 +969,7 @@ select * from other_db::other_table partition(p_${YYYYMMDD}) t;
         ]
 
     # todo 任务流编排 运行按钮触发函数
-    @pysnooper.snoop(watch_explode=())
+    # @pysnooper.snoop(watch_explode=())
     def submit_pipeline(self):
         # todo 检查任务是否存在，提交创建新的任务或修改旧任务，或者删除任务
         # todo 保存到调度平台，并发起远程调度

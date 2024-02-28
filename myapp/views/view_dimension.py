@@ -193,7 +193,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
             default="",
             description= _('链接串地址： <br> 示例：mysql+pymysql://$账号:$密码@$ip:$端口/$库名?charset=utf8 <br> 示例：postgresql+psycopg2://$账号:$密码@$ip:$端口/$库名'),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), Regexp("^(mysql\+pymysql|postgresql\+psycopg2)")]
+            validators=[DataRequired(), Regexp("^(mysql\+pymysql|postgresql\+psycopg2)://.*:.*@.*:[0-9]*/[a-zA-Z_\-]*")]
         ),
         "table_name": StringField(
             label= _('表名'),
@@ -331,7 +331,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         return Markup(ddl_sql.replace('\n', '<br>'))
 
     # @expose("/clear/<dim_id>", methods=["GET"])
-    @action("clear", "清空", "清空选中维表的所有远程数据?", "fa-trash", single=True)
+    @action("clear", "清空", "清空选中维表的所有远程数据?", "fa-trash", single=True, multiple=False)
     def delete_all(self, items):
         if not items:
             abort(404)

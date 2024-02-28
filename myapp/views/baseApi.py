@@ -1265,7 +1265,7 @@ class MyappModelRestApi(ModelRestApi):
         if not request.is_json:
             return self.response_error(400, message="Request is not JSON")
         try:
-            json_data = request.json
+            json_data = request.get_json(silent=True)
             for key in json_data:
                 if type(json_data[key]) == str:
                     json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入
@@ -1325,7 +1325,7 @@ class MyappModelRestApi(ModelRestApi):
         if not item:
             return self.response_error(404, message='Not found')
         try:
-            json_data = request.json
+            json_data = request.get_json(silent=True)
             for key in json_data:
                 if type(json_data[key]) == str:
                     json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入

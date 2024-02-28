@@ -40,7 +40,7 @@ def expose(url="/", methods=("GET",)):
 
 import pysnooper
 # 在响应体重添加字段和数据
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def merge_response_func(func, key):
     """
         Use this decorator to set a new merging

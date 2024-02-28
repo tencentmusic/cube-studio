@@ -114,7 +114,7 @@ class InferenceService_ModelView_base():
     INFERNENCE_IMAGES = list(conf.get('INFERNENCE_IMAGES', {}).values())
     for item in INFERNENCE_IMAGES:
         images += item
-    service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server']
+    service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（企业版）','llm-server（企业版）',]
     spec_label_columns = {
         # "host": __("域名：测试环境test.xx，调试环境 debug.xx"),
     }
@@ -136,7 +136,7 @@ class InferenceService_ModelView_base():
                                     validators=[DataRequired()]),
         "host": StringField(_('域名'), default=InferenceService.host.default.arg,description= _('访问域名，')+host_rule,widget=BS3TextFieldWidget()),
         "transformer":StringField(_('前后置处理'), default=InferenceService.transformer.default.arg,description= _('前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架'),widget=BS3TextFieldWidget()),
-        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100,或虚拟gpu，例如0.2(T4)'),
+        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，<span style="color:red;">虚拟化占用和共享模式占用仅企业版支持</span>'),
                                                         widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
@@ -225,6 +225,7 @@ class InferenceService_ModelView_base():
             default='',
             description= _('''
 serving：自定义镜像的推理服务，模型地址随意<br>
+ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件<br>
 tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/<br>
 torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型<br>
 onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx<br>
@@ -477,7 +478,19 @@ output %s
         # print(self.src_item_json)
         model_version = item.model_version.replace('v', '').replace('.', '').replace(':', '')
         model_path = "/" + item.model_path.strip('/') if item.model_path else ''
-        # 对网络地址先同一在命令中下载
+
+        if not item.ports:
+            item.ports = conf.get('INFERNENCE_PORTS',{}).get(item.service_type,item.ports)
+        if not item.env:
+            item.env = '\n'.join(conf.get('INFERNENCE_ENV', {}).get(item.service_type, item.env.split('\n') if item.env else []))
+        if not item.metrics:
+            item.metrics = conf.get('INFERNENCE_METRICS', {}).get(item.service_type, item.metrics)
+        if not item.health:
+            item.health = conf.get('INFERNENCE_HEALTH', {}).get(item.service_type, item.health).replace('$model_name',item.model_name).replace('$model_version',item.model_version)
+        else:
+            item.health = item.health.replace('$model_name',item.model_name).replace('$model_version', item.model_version)
+
+        # 对网络地址先统一在命令中下载
         download_command = ''
         if 'http:' in item.model_path or 'https:' in item.model_path:
             model_file = item.model_path[item.model_path.rindex('/') + 1:]
@@ -515,6 +528,26 @@ output %s
                     self.tfserving_platform_config()
                 )
 
+        if item.service_type == 'ml-server':
+            if not item.inference_config:
+                item.inference_config = '''
+---config.json
+[
+    {
+        "name": "%s",
+        "model_path": "%s",
+        "framework": "sklearn",
+        "version": "%s",
+        "enable": true
+    }
+]
+
+'''%(item.model_name,model_path,item.model_version)
+            if not item.command:
+                item.command = 'python server.py --config_path /config/config.json'
+            if not item.host:
+                item.host = f'/v1/models/{item.model_name}/metadata'
+            item.health = '80:/v1/models/%s/metadata' % (item.model_name,)
         if item.service_type == 'torch-server':
             if not item.working_dir:
                 item.working_dir = '/models'
@@ -583,25 +616,29 @@ output %s
             if not item.id or not item.command:
                 item.command = download_command + './onnxruntime_server --log_level info --model_path  %s' % model_path
 
-        item.name = item.model_name + "-" + model_version
+        if not item.name:
+            item.name = item.model_name + "-" + model_version
+
         if len(item.name)>60:
             item.name = item.name[:60]
         # item.expand = json.dumps(expand,indent=4,ensure_ascii=False)
 
-    # @pysnooper.snoop()
+    @pysnooper.snoop()
     def pre_add(self, item):
+        if item.name:
+            item.name = item.name.replace("_", "-")
         if not item.model_path:
             item.model_path = ''
         if not item.volume_mount:
             item.volume_mount = item.project.volume_mount
         self.use_expand(item)
-
-        if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
-            try:
+        # 初始化时没有回话但是也要调用flash，所以会报错
+        try:
+            if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
                 flash(__('检测到模型地址为网络压缩文件，需压缩文件名和解压后文件夹名相同'), 'warning')
-            except Exception as e:
-                pass
-                print(e)
+        except Exception as e:
+            pass
+
 
     def delete_old_service(self, service_name, cluster):
         try:
@@ -623,19 +660,8 @@ output %s
 
     # @pysnooper.snoop(watch_explode=('item',))
     def pre_update(self, item):
-        if not item.volume_mount:
-            item.volume_mount=item.project.volume_mount
-        item.name = item.name.replace("_","-")
-        if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
-            flash(__('检测到模型地址为网络压缩文件，需压缩文件名和解压后文件夹名相同'),'warning')
 
-        # if ('http://' in item.model_path or 'https://' in item.model_path) and item.model_path!=self.src_item_json.get('model_path',''):
-        #     # self.download_model(item)
-        #     if '.zip' not in item.model_path and '.tar.gz' not in item.model_path:
-        #         flash('未识别的模型网络地址','warning')
-
-        # 修改了名称的话，要把之前的删掉
-        self.use_expand(item)
+        self.pre_add(item)
 
         # 如果模型版本和模型名称变了，需要把之前的服务删除掉
         if self.src_item_json.get('name','') and item.name!=self.src_item_json.get('name',''):
@@ -927,15 +953,15 @@ output %s
         # 如果域名配置的gateway，就用这个
         host = service.name + "." + service.project.cluster.get('SERVICE_DOMAIN', conf.get('SERVICE_DOMAIN', ''))
 
-        if service.host:
+        # 如果系统配置了host，并且不是ip
+        if service.host and not core.checkip(service.host):
             config_host = service.host.replace('http://', '').replace('https://', '').strip()
             if "/" in config_host:
                 config_host = config_host[:config_host.index("/")]
             if config_host:
                 host=config_host
-
         # 前缀来区分不同的环境服务
-        if env == 'debug' or env == 'test':
+        if host and (env == 'debug' or env == 'test'):
             host = env + '.' + host
         try:
             print('deploy istio ingressgateway')
@@ -980,8 +1006,8 @@ output %s
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
             SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
-
-            service_ports = [[20000 + 10 * service.id + index, port] for index, port in enumerate(ports)]
+            meet_ports = core.get_not_black_port(20000 + 10 * service.id)
+            service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             print('deploy proxy ip')
             # 监控
@@ -1014,7 +1040,8 @@ output %s
 
         if not SERVICE_EXTERNAL_IP and TKE_EXISTED_LBID:
             TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')[0]
-            service_ports = [[20000 + 10 * service.id + index, port] for index, port in enumerate(ports)]
+            meet_ports = core.get_not_black_port(20000 + 10 * self.id)
+            service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
                 namespace=namespace,
@@ -1109,7 +1136,7 @@ output %s
                         break
 
                 new_services.model_version=model_version
-                new_services.name = new_services.service_type+"-"+new_services.model_name+"-"+new_services.model_version.replace('v','').replace('.','')
+                new_services.name = new_services.model_name+"-"+new_services.model_version.replace('v','').replace('.','')
                 new_services.created_on = datetime.datetime.now()
                 new_services.changed_on = datetime.datetime.now()
                 db.session.add(new_services)
@@ -1291,6 +1318,7 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base, MyappModel
     def set_columns_related(self, exist_add_args, response_add_columns):
         exist_service_type = exist_add_args.get('service_type', '')
         service_model_path = {
+            "ml-server": "/mnt/.../$model_name.pkl",
             "tfserving": "/mnt/.../saved_model",
             "torch-server": "/mnt/.../$model_name.mar",
             "onnxruntime": "/mnt/.../$model_name.onnx",
