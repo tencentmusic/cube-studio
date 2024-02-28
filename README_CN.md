@@ -2,12 +2,66 @@
 
 ### 整体架构
 
-<img width="1437" alt="image" src="https://user-images.githubusercontent.com/20157705/182564530-2c965f5f-407d-4baa-8772-73cb2645901b.png">
-
+![image](https://github.com/tencentmusic/cube-studio/assets/20157705/a07b1742-3413-4957-bd15-0f2b3c30f66f)
 
 cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目前主要包含
 
-![231695906-5b1da227-8455-4274-8857-624093cf574b](https://user-images.githubusercontent.com/20157705/231781297-4eb49101-0997-4a2b-ac21-f3e92602d6ea.png)
+|模块分组|功能|功能明细|
+|:-|:--|:--|
+|基础能力|项目组管理|<li>AI平台需要通过项目划分，<li>支持配置相应项目组用户的权限，<li>任务/服务的挂载，资源组，集群，服务代理，<li><u>项目组内角色应用|
+|基础能力|网络|<li>支持非80端口，<li>支持公网/域名，<li>支持反向代理和内网穿透方式访问，<li><u>支持https</u>|
+|基础能力|用户管理 角色管理/权限管理|<li>管理平台用户的基本信息，组织架构，支持账号密码，rbac权限体系。<li> <u>增加修改和删除，清理等操作的历史记录</u>|
+|基础能力|计量计费功能|<u><li>1、支持平台资源限制的分配和查看；项目组资源限制，租户资源限制、任务资源限制，项目组下个人的资源限制，包括开发资源，训练资源、推理资源等。   额度限制限制在notebook，docker构建，pipeline，超参搜索，内部服务，推理服务中的生效。限制支持单任务，并行任务总和和历史任务总和等方法<li>2、提供统一的开发、训练、推理服务资源监控，从租户、项目、任务角度分析模型资源分配及使用情况。<li> 3、支持自定义计费模式，通过计量结果自定义获取计费值</u>|
+|基础能力|SSO单点登录|<li>账号密码注册自动登录，<li><u>支持对接公司账号体系AUTH_OID/AUTH_LDAP/AUTH_REMOTE_USER等登录注册方式，<li><u>支持消息推送。  <li><u>增加登录验证，强密码，远程用户，登录频率限制，密码密文传输等|
+|基础能力|支持多种算力|<li>提供多种规格的资源支持不同的使用场景，cpu/gpu等 支持T4/V100/A100等多种卡型，<li><u>支持arm64芯片，<li><u>支持vgpu等模式。<li><u>支持国产gpu，支持海光gpu，海飞科dcu，华为npu，<li><u>支持rdma调度，mellanox。<li><u>支持gpu禁用模型，共享模式，独占模式|
+|基础能力|多资源组/多集群|<li>支持划分多资源组，<li>支持ipvs的k8s网络模式，<li><u>支持多k8s集群，<li><u>支持containerd容器运行态|
+|基础能力|边缘集群|<li><u>支持边缘集群模式，支持边缘节点开发，训练，推理|
+|基础能力|serverless集群模式|<li><u>支持腾讯云serverless集群模式，（notebook,pipeline,推理服务模块支持）<li><u>阿里云serverless集群模式（notebook,pipeline,推理服务模块支持）|
+|基础能力|数据库存储|<li>支持外部mysql作为元数据库<li><u>支持外部postgres作为元数据库|
+|基础能力|存储盘管理|<li><u>支持web界面添加存储盘，支持项目组绑定，notebook pipeline 推理服务，直接在pod中挂载外部分布式存储。<li><u>支持nfs，cfs，oss，nas，cos，glusterfs，cephfs，s3/minio|
+|基础能力|国际化能力|<li><u>mlops支持配置多语言配置，目前支持中英文|
+|数据管理|数据地图|<li>元数据库表管理，指标，维表|
+|数据管理|数据计算|<li>sqllab交互查询，支持mysql，postgresql等计算引擎|
+|数据管理|ETL编排|<li>数据ETL任务流编排，任务管理等对接公司数据中台相应计算/调度引擎|
+|数据管理|数据集管理|<li>允许用户随时上传样本集（图片、音频、文本等），<li><u>支持sdk进行数据集对接，<li><u>支持数据集一键探索功能|
+|数据管理|数据标注|<li><u>支持标注平台，图/文/音/多模态各类型标注能力，<li><u>对接一站式机器学习平台，支持自动化标注(需购买aihub)：<li><u>支持目标识别，目标边界识别，目标遮罩识别，图片分类，图片描述，ocr，关键点检测。支持大模型自动化标注：文本分类，文本翻译，命名实体识别，阅读理解，问答，摘要提取。|
+|开发环境|镜像功能|<li>镜像仓库/镜像管理/在线构建镜像。同时提供平台所有镜像，包括模板镜像/服务镜像/notebook镜像/gpu基础环境的构建方法和构建后镜像，<li><u>支持dockerfile在线构建 <li><u>支持同一仓库多个秘钥配置|
+|开发环境|notebook|<li>支持基于开源的Jupyterlab/vscode，提供在线的交互式开发调试工具；<li>提供多种可选环境ide和开发示例，支持资源类型选择 支持大数据版本，机器学习版本，深度学习版本 <li><u>大数据版本支持用户信息和内网spark链接 <li>支持ssh remote与notebook对接远程开发，方便快速将本地代码提交到平台的训练环境。<li><u>ssh隧道代理，单端口开放 <li><u>支持matlab，Rstudio等在线ide <li><u>支持gpu，cpu，内存，监控，支持git交互 <li><u>支持自定义notebook镜像，便于封装公司自己的notebook <li><u>多环境notebook，支持R语言/julia语言/python2.7/python3.6/python3.7/python3.8/python3.9/python3.10环境和cube-studio专有环境 <li><u>支持tensorboard任务可视化 <li><u>notebook支持环境镜像保存 <li><u>jupyter支持密码保护 <li><u>notebook支持整卡占用，虚拟卡占用，gpu共享占用 <li>支持notebook启动自动初始化环境|
+|模型训练|拖拉拽任务流编排调试|<li>提供拖拽式交互开发环境，支持开发者以拖拽的方式完成业务逻辑的PIPLINE； <li>支持单任务调试，<li>训练支持多种资源规格（CPU、GPU等），支持卡型的选择，超时重试等。<li><u>分布式任务模板支持单任务调试用户镜像而非模板镜像</u>  <li><u>分布式任务模板支持gpu型号透传，rdma高速通信，拉取秘钥透传  </u><li>pipeline调试，支持定时调度，补录，并发限制，超时，实例依赖等，<li>任务管理，<li>workflow实例管理，<li>资源监控，<li><u>支持任务输入输出，<li><u>任务流全局变量，<li><u>文本/图片/echart结果可视化，<li><u>支持workflow暂停和恢复。 <li><u>支持单任务和pipeline运行中任务监听端口提供运行中服务监听能力 <li><u>任务流支持任务推荐|
+|模型训练|主流功能算子|基础算子：<li>自定义镜像，<li><u>逻辑节点，</u><li><u>python</u></li> 数据同步：<li>数据集导入，<li>datax，<li>模型导入</li>  数据处理工具：<li>hadoop/spark作业提交，<li>volcanojob/ray分布式数据处理，<li>sparkjob  </li> 特征处理： <u><li>-数据合并，包含union、join操作 <li>-去除重复样本 <li>-数据变换，包括boxcox转换、二值化、数据类型转换、dct变换、根据函数转换、ma移动平均、多项式展开 <li>-非数值型变量处理，包括hash、根据统计量转换、one-hot <li>-异常值检测 <li>-获取变量的统计量 <li>-去除值过于单一的变量 <li>-删除缺失率过高的值 <li>-删除缺失率过高的值 <li>-填充缺失值 <li>-数据离散化，等宽、等频、聚类离散化 <li> -标准化、正则化、归一化，有最大绝对值归一化、最大最小归一化、z_score标准化 <li>-索引处理，包含增加索引、索引转列、列索引重命名 <li> -排序 <li> -执行sql <li> -hadamard乘积 <li> -特征组合，用于衍生特征 <li> -降维，包括pca降维和卡方降维 <li> -特征重要性，通过随机森林、逻辑回归、xgboost等模型计算特征重要性，可计算特征的iv值、互信息值、方差等 <li> -特征向量间的相关性计算 <li> -数据拆分，包括列内拆分、列间拆分、行间拆分、svd奇异值分解 <li> -采样，包括随机采样、分层采样、过采样、欠采样</li></u>  传统机器学习：<li>ray-sklearn分布式，<li>xgb单机训练推理 </li>传统机器学习算法：<u><li>ar/arima时间序列算法/random-forest/random-forest-regression/lr/lightgbm/knn/kmean/gbdt/decision-tree/pca/lda/catboost/xgb/超参搜索 </u></li>分布式深度学习框架：<li>tf/pytorch/<u>mxnet/horovod/paddlejob/mindspore分布式训练</u></li> 分布式加速框架：<li><u>mpi/colossalai/deepspeed/horovod/megatron </u></li>模型处理：<u><li>模型评估，<li>模型格式转换 </li></u>模型服务化：<li>模型注册，<li><u>模型离线推理</u>，<li>模型部署 </li>媒体分布式处理：<li>分布式媒体下载，<li>视频提取图片，<li>视频提取图片|
+|模型训练|算子自定义|支持算子自定义，通过web界面操作将自定义算法代码镜像，注册为可被他人复用的pipeline算子|
+|模型训练|自动学习|面向非AI背景的用户提供自动学习服务，用户选择某一个场景之后，上传训练数据即可自动开始训练和模型部署，<u>支持示例automl任务流导入导出|
+|模型训练|自定义镜像|面向高级 AI 开发者，提供自定义训练作业（执行环境 + 代码）功能；|
+|模型训练|自动调参|基于单机/<u>分布式自动超参搜索|
+|模型训练|TensorBoard作业|<u>实时/离线观察模型训练过程中的参数和指标变化情况|
+|模型管理 推理服务|内部服务|支持开发或运维工具快捷部署，提供mysql-web，postgresql web，mobgo web， redis web，neo4j，rstudio等开源工具|
+|模型管理 推理服务|模型管理|模型管理用于对模型多版本管理，支持模型发布为推理服务|
+|模型管理 推理服务|推理服务|<li>支持<u>ml</u>/tf/pytorch/tentortrt/onnx常规模型的多版本的0代码发布。 <li>支持gpu卡型选择，<u>支持vgpu，独占，共享占用</u>，<li>支持cpu/mem/<u>gpu等弹性伸缩，<li>支持服务优先级，</u><li>支持远程模型路径,支持流量分流，流量复制，sidecar配置，支持泛域名配置，支持配置文件挂载，启动目录/命令/环境变量/端口/指标/健康检查等 支持调试环境/测试环境/生产环境 支持域名/ip代理多种形式 <li>支持服务负载指标监控 <li>支持多版本服务滚动升级和回滚，<li><u>支持单pod滚动发布 </u><li><u>支持禁用k8s service负载均衡器 </u><li>提供<u>ml</u>/tf/pytorch/tentortrt/onnx常规模型推理服务镜像 支持用户自定义模型推理镜像|
+|监控|整体资源|<li>所有集群，所有计算机器的使用情况，包括机器的所属集群，所属资源组，机器ip，cpu/gpu类型和卡型，当前cpu/内存/gpu的使用率<li> 所有集群，所有计算pod的使用情况，包括pod所属集群，所属资源组，所属命名空间，调度ip，pod名称，启动用户，cpu，gpu，内存的申请使用率 <li><u>整体资源页面，支持管理员批量删除|
+|监控|监控体系|<li>所有机器的gpu资源的使用情况， <li>所有机器的内存/cpu/网络io/磁盘io的负载情况， <li>所有pod的内存/cpu/gpu/网络io负载情况 <li>所有推理服务的内存/cpu/gpu/qps/吞吐/vgpu负载情况 <li><u>支持ib流量监控|
+|模型应用市场|模型应用管理方案|<li><u>提供cubestudio sdk，提供模型开发规范和使用规范|
+|模型应用市场| 模型应用管理方案|<li><u>提供web端模型应用体验，支持同步/异步推理|
+|模型应用市场| 模型应用管理方案|<li><u>提供开发多个python cuda版本的基础镜像|
+|模型应用市场|预训练模型|<li><u>提供视觉，听觉，nlp，多模态等400+预训练模型，提供预训练模型的模型加载和推理能力，可直接一键部署服务，并提供api|
+|模型应用市场|模型市场|<li><u>aihub应用对接cube-studio平台进行卡片式展示|
+|模型应用市场|模型一键开发|<li><u>提供一键转notebook开发，提供符合当前模型所需环境的jupyter|
+|模型应用市场|模型一键微调|<li><u>支持一键转pipeline微调链路，包括示例数据集下载，微调，模型注册，模型部署，支持微调后模型部署|
+|模型应用市场|模型一键部署web|<li><u>提供模型一键部署提供手机端和pc端web界面和api，和demo示例弹窗演示|
+|模型应用市场|模型自动化标注|<li><u>支持部署对接labelstudio自动化标注|
+|模型应用市场|数据集sdk|<li><u>支持通过python sdk搜索上传下载数据集，支持数据集的加解密/解压缩/数据集基础信息查看等|
+|模型应用市场|notebook sdk|<li><u>支持通过api，对接cube-studio创建notebook，并跳转到指定目录，用于其他算法平台在当前平台的调试和演示|
+|模型应用市场|pipeline训练sdk|<li><u>支持AI开发主流语言 Python，提供Python SDK支持用户通过SDK来进行pipeline任务流管理和训练任务启动以及任务流编排|
+|模型应用市场|推理服务sdk|<li><u>提供python sdk，对接cube tudio进行推理服务的发布，服务升级|
+|大模型|大模型分布式多机多卡|<li><u>支持分布式多机多卡训练，例如mpi/deepspeed/Colossal-AI|
+|大模型|支持大模型推理|<li><u>支持chatglm/chatglm2/lalma/llama2/通义千问部署|
+|大模型|支持大模型微调|<li><u>支持chatglm2/llama2/baichuan2 lora微调|
+|大模型|智能对话|<li><u>提供支持多场景对话，支持提示词构建，推理接口配置，llm问答，支持问询中模型切换，清理，历史上下文|
+|大模型|私有知识库|<li><u>私有知识库配置，私有知识库召回|
+|大模型|私有知识库|<li><u>支持召回列表模式|
+|大模型|私有知识库|<li><u>支持aigc模式|
+|大模型|私有知识库|<li><u>支持微信公众号服务号对接|
+|大模型|私有知识库|<li><u>支持企业微信群聊机器人对接|
+|大模型|私有知识库|<li><u>支持钉钉群聊机器人对接|
 
 
 # 帮助文档
@@ -84,7 +138,7 @@ https://github.com/tencentmusic/cube-studio/wiki
  - 3、基础能力(tf/pytorch/mxnet/valcano/ray等分布式，nni/katib超参搜索)
  - 4、平台web部分(oa/权限/项目组、在线构建镜像、在线开发、pipeline拖拉拽、超参搜索、推理服务管理等)
 
-![image](https://github.com/tencentmusic/cube-studio/assets/20157705/a07b1742-3413-4957-bd15-0f2b3c30f66f)
+<img width="1437" alt="image" src="https://user-images.githubusercontent.com/20157705/182564530-2c965f5f-407d-4baa-8772-73cb2645901b.png">
 
 
 # 算力/存储/用户管理
