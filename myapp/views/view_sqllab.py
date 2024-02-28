@@ -45,7 +45,7 @@ db_uri_demo = {
     "mssql": ['mssql+pymssql://username:password@host:port/database']
 }
 
-
+# @pysnooper.snoop()
 def add_task(req_data):
     try:
         engine_arg1 = req_data['engine_arg1']
@@ -146,6 +146,8 @@ class Sqllab_Query_View(BaseMyappView):
                 }
             ]
         }
+        if 'SQLLAB' in conf:
+            config['result']=conf.get('SQLLAB')
         # print(config)
         return jsonify(config)
 
@@ -156,6 +158,9 @@ class Sqllab_Query_View(BaseMyappView):
             req_data = args_in
         else:
             req_data = request.get_json(silent=True)
+        if conf.get('SQLLAB_ARGS',{}):
+            req_data.update(conf.get('SQLLAB_ARGS',{}))
+
         qid, engine_impl = add_task(req_data)
         res = engine_impl.submit_task(qid)
         res_keys = ["err_msg", "task_id"]
