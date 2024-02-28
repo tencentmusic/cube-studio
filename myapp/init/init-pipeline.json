@@ -1,7 +1,7 @@
 {
-  "darknet-yolov3": {
+  "yolov7": {
     "pipeline": {
-      "name": "imageAI",
+      "name": "imageai",
       "describe": "图像预测+物体检测+视频跟踪",
       "project": "public",
       "parameter": {
@@ -12,14 +12,14 @@
         "download-data": {
           "upstream": []
         },
-        "yolov3-object-recognition": {
+        "yolov7-object-recognition": {
           "upstream": [
             "download-data"
           ]
         },
-        "deploy-darknet-web-service": {
+        "deploy-yolov7-web-service": {
           "upstream": [
-            "yolov3-object-recognition"
+            "yolov7-object-recognition"
           ]
         }
       }
@@ -32,39 +32,43 @@
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
         "args": {
           "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
-          "workdir": "/mnt/admin/",
-          "command": "wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/pipeline/coco_data_sample.zip && unzip -o coco_data_sample.zip && cd  coco_data_sample && bash reset_file.sh"
+          "workdir": "/mnt/{{creator}}/",
+          "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/coco.zip && unzip -o coco.zip && cd  coco_data_sample && bash reset_file.sh"
         }
       },
       {
-        "job_templete": "object-detection-on-darknet",
-        "name": "yolov3-object-recognition",
+        "job_templete": "yolov7",
+        "name": "yolov7-object-recognition",
         "label": "目标识别训练",
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
         "resource_memory": "5G",
         "resource_cpu": "5",
         "args": {
-          "--train_cfg": "[net]\n# Testing\n# batch=1\n# subdivisions=1\n# Training\nbatch=64\nsubdivisions=16\nwidth=608\nheight=608\nchannels=3\nmomentum=0.9\ndecay=0.0005\nangle=0\nsaturation = 1.5\nexposure = 1.5\nhue=.1\n\nlearning_rate=0.001\nburn_in=1000\nmax_batches = 50023\npolicy=steps\nsteps=400000,450000\nscales=.1,.1\n\n[convolutional]\nbatch_normalize=1\nfilters=32\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=32\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=64\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n# Downsample\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=2\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=1024\nsize=3\nstride=1\npad=1\nactivation=leaky\n\n[shortcut]\nfrom=-3\nactivation=linear\n\n######################\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=1024\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=1024\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=512\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=1024\nactivation=leaky\n\n[convolutional]\nsize=1\nstride=1\npad=1\nfilters=255\nactivation=linear\n\n\n[yolo]\nmask = 6,7,8\nanchors = 10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326\nclasses=80\nnum=9\njitter=.3\nignore_thresh = .7\ntruth_thresh = 1\nrandom=1\n\n\n[route]\nlayers = -4\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[upsample]\nstride=2\n\n[route]\nlayers = -1, 61\n\n\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=512\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=512\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=256\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=512\nactivation=leaky\n\n[convolutional]\nsize=1\nstride=1\npad=1\nfilters=255\nactivation=linear\n\n\n[yolo]\nmask = 3,4,5\nanchors = 10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326\nclasses=80\nnum=9\njitter=.3\nignore_thresh = .7\ntruth_thresh = 1\nrandom=1\n\n\n\n[route]\nlayers = -4\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[upsample]\nstride=2\n\n[route]\nlayers = -1, 36\n\n\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=256\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=256\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nfilters=128\nsize=1\nstride=1\npad=1\nactivation=leaky\n\n[convolutional]\nbatch_normalize=1\nsize=3\nstride=1\npad=1\nfilters=256\nactivation=leaky\n\n[convolutional]\nsize=1\nstride=1\npad=1\nfilters=255\nactivation=linear\n\n\n[yolo]\nmask = 0,1,2\nanchors = 10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326\nclasses=80\nnum=9\njitter=.3\nignore_thresh = .7\ntruth_thresh = 1\nrandom=1\n\n",
-          "--data_cfg": "classes= 80\ntrain = /mnt/admin/coco_data_sample/train.txt\nvalid = /mnt/admin/coco_data_sample/valid.txt\nnames = /mnt/admin/coco_data_sample/coco.names\nbackup = /mnt/admin/coco_data_sample/yolo\neval=coco\n\n",
-          "--weights": "/mnt/admin/coco_data_sample/yolov3.weights"
+            "--train": "/mnt/{{creator}}/coco_data_sample/train.txt",
+            "--val": "/mnt/{{creator}}/coco_data_sample/valid.txt",
+            "--classes": "person,bicycle,car,motorcycle,airplane,bus,train,truck,boat,trafficlight,firehydrant,stopsign,parkingmeter,bench,bird,cat,dog,horse,sheep,cow,elephant,bear,zebra,giraffe,backpack,umbrella,handbag,tie,suitcase,frisbee,skis,snowboard,sportsball,kite,baseballbat,baseballglove,skateboard,surfboard,tennisracket,bottle,wineglass,cup,fork,knife,spoon,bowl,banana,apple,sandwich,orange,broccoli,carrot,hotdog,pizza,donut,cake,chair,couch,pottedplant,bed,diningtable,toilet,tv,laptop,mouse,remote,keyboard,cellphone,microwave,oven,toaster,sink,refrigerator,book,clock,vase,scissors,teddybear,hairdrier,toothbrush",
+            "--batch_size": "1",
+            "--epoch": "1",
+            "--weights": "/yolov7/weights/yolov7_training.pt",
+            "--save_model_path": "/mnt/{{creator}}/coco_data_sample/yolov7_best.pt"
         }
       },
       {
         "job_templete": "deploy-service",
-        "name": "deploy-darknet-web-service",
+        "name": "deploy-yolov7-web-service",
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
         "label": "部署模型web服务",
         "args": {
           "--label": "目标识别推理服务",
-          "--model_name": "yolov3",
-          "--model_version": "v2022.10.01.1",
-          "--model_path": "",
+          "--model_name": "yolov7",
+          "--model_version": "v2024.01.01.1",
+          "--model_path": "/mnt/{{creator}}/coco_data_sample/yolov7_best.pt",
           "--service_type": "serving",
-          "--images": "ccr.ccs.tencentyun.com/cube-studio/target-detection",
-          "--working_dir": "",
-          "--command": "",
+          "--images": "ccr.ccs.tencentyun.com/cube-studio/yolov7:2024.01",
+          "--working_dir": "/yolov7",
+          "--command": "python server.py",
           "--args": "",
-          "--env": "YOLO_DATA_PATH=/mnt/admin/coco_data_sample/yolo/coco.data\nYOLO_CFG_PATH=/mnt/admin/coco_data_sample/yolo/yolov3.cfg\nYOLO_WEIGHTS_PATH=/mnt/admin/coco_data_sample/yolo/yolov3.weights",
+          "--env": "MODELPATH=/mnt/{{creator}}/coco_data_sample/yolov7_best.pt",
           "--ports": "8080",
           "--replicas": "1",
           "--resource_memory": "5G",

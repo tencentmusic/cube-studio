@@ -31,7 +31,7 @@
     "model_path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/resnet50.mar",
     "service_type": "torch-server",
     "env": "",
-    "host": "/models",
+    "host": ":8081/models",
     "ports": "8080,8081",
     "metrics": "8082:/metrics",
     "workdir": "/models",
