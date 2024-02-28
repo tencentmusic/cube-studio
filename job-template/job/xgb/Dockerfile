@@ -4,7 +4,7 @@ ENV TZ Asia/Shanghai
 ENV DEBIAN_FRONTEND noninteractive
 
 WORKDIR /app
-
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
 RUN pip3 install xgboost pandas numpy joblib scikit-learn  matplotlib pysnooper
 
 COPY job/xgb/* /app/

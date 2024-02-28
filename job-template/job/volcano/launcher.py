@@ -31,6 +31,7 @@ for task_node_selector in task_node_selectors:
     KFJ_TASK_NODE_SELECTOR[task_node_selector.split('=')[0]] = task_node_selector.split('=')[1]
 
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '')
+KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME', 'public')
 KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', '')
 KFJ_RUNNER = os.getenv('KFJ_RUNNER','')
@@ -62,6 +63,14 @@ gpu_num,gpu_type,_ = k8s_client.get_gpu(GPU_RESOURCE)
 if gpu_type:
     KFJ_TASK_NODE_SELECTOR['gpu-type']=gpu_type
 
+RDMA_RESOURCE_NAME= os.getenv('RDMA_RESOURCE_NAME', '')
+RDMA_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_RDMA', '0')
+
+HUBSECRET = os.getenv('HUBSECRET','hubsecret')
+HUBSECRET=[{"name":hubsecret} for hubsecret in HUBSECRET.split(',')]
+
+DEFAULT_POD_RESOURCES = os.getenv('DEFAULT_POD_RESOURCES','')
+DEFAULT_POD_RESOURCES = json.loads(DEFAULT_POD_RESOURCES) if DEFAULT_POD_RESOURCES else {}
 
 def default_job_name():
     name = "volcanojob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
@@ -161,16 +170,15 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
                     "component": name,
                     "type": "volcanojob",
                     "run-id": KFJ_RUN_ID,
+                },
+                "annotations": {
+                    "project": KFJ_TASK_PROJECT_NAME
                 }
             },
             "spec": {
                 "restartPolicy": "Never",
                 "volumes": k8s_volumes,
-                "imagePullSecrets": [
-                    {
-                        "name": "hubsecret"
-                    }
-                ],
+                "imagePullSecrets": HUBSECRET,
                 "affinity": {
                     "nodeAffinity": {
                         "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -222,12 +230,18 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
                         "volumeMounts": k8s_volume_mounts,
                         "resources": {
                             "requests": {
-                                "cpu": KFJ_TASK_RESOURCE_CPU,
-                                "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                **{
+                                    "cpu": KFJ_TASK_RESOURCE_CPU,
+                                    "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                },
+                                **DEFAULT_POD_RESOURCES
                             },
                             "limits": {
-                                "cpu": KFJ_TASK_RESOURCE_CPU,
-                                "memory": KFJ_TASK_RESOURCE_MEMORY
+                                **{
+                                    "cpu": KFJ_TASK_RESOURCE_CPU,
+                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                },
+                                **DEFAULT_POD_RESOURCES
                             }
                         }
                     }
@@ -240,7 +254,12 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
     if int(gpu_num):
         task_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
         task_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
-
+    else:
+        # 添加禁用指令
+        task_spec['template']['spec']['containers'][0]['env'].append({
+            "name":"NVIDIA_VISIBLE_DEVICES",
+            "value":"none"
+        })
     worker_pod_spec = copy.deepcopy(task_spec)
     worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker
 
@@ -258,6 +277,9 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
                 "pipeline-name": KFJ_PIPELINE_NAME,
                 "task-id": KFJ_TASK_ID,
                 "task-name": KFJ_TASK_NAME,
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {

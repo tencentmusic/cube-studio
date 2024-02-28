@@ -1,0 +1,9 @@
+
+train: TRAIN_DATATSE  # 118287 images
+val: VAL_DATASET  # 5000 images
+
+# number of classes
+nc: CLASSES_NUM
+
+# class names
+names: CLASSES

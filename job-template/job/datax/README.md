@@ -17,9 +17,7 @@
             "default": "/usr/local/datax/job/job.json",
             "placeholder": "",
             "describe": "job.json文件地址，<a target='_blank' href='https://github.com/alibaba/DataX'>书写格式参考</a>",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         }
     }
 }

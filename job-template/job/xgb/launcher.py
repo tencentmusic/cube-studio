@@ -98,6 +98,7 @@ def val(save_model_dir, val_dataset, label_columns, feature_columns):
         metrics = [
             {
                 "metric_type": "image",
+                "describe":"验证集ROC曲线",
                 "image": os.path.join(save_model_dir, 'val_roc.png')
             }
         ]
@@ -160,10 +161,12 @@ def train(save_model_dir, train_dataset, label_columns, feature_columns, model_p
     metrics = [
         {
             "metric_type": "image",
+            "describe":"训练集ROC曲线",
             "image": os.path.join(save_model_dir, 'train_roc.png')
         },
         {
             "metric_type": "image",
+            "describe":"测试集ROC曲线",
             "image": os.path.join(save_model_dir, 'test_roc.png')
         }
     ]

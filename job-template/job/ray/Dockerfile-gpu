@@ -14,6 +14,7 @@ RUN apt update -y && apt install -y --force-yes --fix-missing --no-install-recom
 RUN apt install -y python3.8-dev gcc automake autoconf libtool make ffmpeg build-essential
 
 # 安装pip库
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
 RUN pip install kubernetes==21.7.0 pysnooper psutil requests numpy  pyinstaller argparse numba cython
 
 # 安装当前代码
@@ -24,7 +25,8 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:$LD_LIBRARY_PATH
 WORKDIR /app
-ENTRYPOINT ["bash", "/app/start.sh"]
+# ENTRYPOINT ["bash", "/app/start.sh"]
+ENTRYPOINT ["python", "launcher.py"]
 
 
 

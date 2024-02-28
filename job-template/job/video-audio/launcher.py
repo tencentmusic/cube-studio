@@ -3,7 +3,7 @@ import ray
 import re
 
 import os
-import sys
+import sys, json
 import time
 from kubernetes import client, config, watch
 
@@ -23,6 +23,7 @@ for task_node_selector in task_node_selectors:
     KFJ_TASK_NODE_SELECTOR[task_node_selector.split('=')[0]] = task_node_selector.split('=')[1]
 
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '')
+KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME', 'public')
 KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', '')
 KFJ_RUNNER = os.getenv('KFJ_RUNNER')
@@ -35,6 +36,13 @@ NUM_WORKER = 3
 HEADER_NAME = os.getenv('RAY_HOST', '')
 WORKER_NAME = HEADER_NAME.replace('header', 'worker')
 INIT_FILE=''
+
+HUBSECRET = os.getenv('HUBSECRET','hubsecret')
+HUBSECRET=[{"name":hubsecret} for hubsecret in HUBSECRET.split(',')]
+
+DEFAULT_POD_RESOURCES = os.getenv('DEFAULT_POD_RESOURCES','')
+DEFAULT_POD_RESOURCES = json.loads(DEFAULT_POD_RESOURCES) if DEFAULT_POD_RESOURCES else {}
+
 
 def get_volume_mounts(volume_mount,username):
     k8s_volumes = []
@@ -134,6 +142,9 @@ def create_header_service(name):
                 "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -178,6 +189,9 @@ def create_header_deploy(name):
                 "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -197,16 +211,15 @@ def create_header_deploy(name):
                         'rtx-user': KFJ_RUNNER,
                         "component": name,
                         "type": "ray"
+                    },
+                    "annotations": {
+                        "project": KFJ_TASK_PROJECT_NAME
                     }
                 },
                 "spec": {
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
-                    "imagePullSecrets": [
-                        {
-                            "name": "hubsecret"
-                        }
-                    ],
+                    "imagePullSecrets": HUBSECRET,
                     "affinity": {
                         "nodeAffinity": {
                             "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -306,6 +319,9 @@ def create_worker_deploy(header_name,worker_name):
                 "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -325,7 +341,9 @@ def create_worker_deploy(header_name,worker_name):
                         'rtx-user': KFJ_RUNNER,
                         "component": worker_name,
                         "type": "ray"
-
+                    },
+                    "annotations": {
+                        "project": KFJ_TASK_PROJECT_NAME
                     }
                 },
 
@@ -398,12 +416,18 @@ def create_worker_deploy(header_name,worker_name):
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 },
                                 "limits": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 }
                             }
                         }

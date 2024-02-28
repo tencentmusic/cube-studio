@@ -21,11 +21,13 @@ echo "python command:" $command
 echo -e "\n\n\n===================begin create ray cluster\n\n\n"
 if [ $initsh ];then
   python /app/launcher.py --num_worker ${num_worker} --deal 'create'  --workdir ${workdir} --init ${initsh}
+  ${initsh}
 else
   python /app/launcher.py --num_worker ${num_worker} --deal 'create' --workdir ${workdir}
 fi
 echo -e "\n\n\n===================begin run python file\n\n\n"
 
+cd $workdir
 $command
 
 if [ $? -ne 0 ]; then

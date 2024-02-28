@@ -9,7 +9,7 @@ import time
 from job.pkgs.k8s.py_k8s import K8s
 k8s_client = K8s()
 
-import argparse
+import argparse, json
 import datetime, time
 import pysnooper
 
@@ -24,6 +24,7 @@ for task_node_selector in task_node_selectors:
     KFJ_TASK_NODE_SELECTOR[task_node_selector.split('=')[0]] = task_node_selector.split('=')[1]
 
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '')
+KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME', 'public')
 KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', '')
 KFJ_RUNNER = os.getenv('KFJ_RUNNER','')
@@ -33,10 +34,12 @@ KFJ_TASK_VOLUME_MOUNT = os.getenv('KFJ_TASK_VOLUME_MOUNT', '')
 KFJ_TASK_RESOURCE_CPU = os.getenv('KFJ_TASK_RESOURCE_CPU', '')
 KFJ_TASK_RESOURCE_MEMORY = os.getenv('KFJ_TASK_RESOURCE_MEMORY', '')
 NUM_WORKER = 3
-HEADER_NAME = os.getenv('RAY_HOST', '')
+RAY_HOST = f'ray-header-{KFJ_PIPELINE_NAME}-{KFJ_TASK_ID}'
+HEADER_NAME = RAY_HOST[0:54]
 WORKER_NAME = HEADER_NAME.replace('header', 'worker')
 INIT_FILE=''
-workingDir='/'
+COMMAND = ''
+WORKDIR='/'
 
 
 k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CREATOR)
@@ -51,6 +54,15 @@ gpu_num,gpu_type,_ = k8s_client.get_gpu(GPU_RESOURCE)
 if gpu_type:
     KFJ_TASK_NODE_SELECTOR['gpu-type']=gpu_type
 
+RDMA_RESOURCE_NAME= os.getenv('RDMA_RESOURCE_NAME', '')
+RDMA_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_RDMA', '0')
+
+HUBSECRET = os.getenv('HUBSECRET','hubsecret')
+HUBSECRET=[{"name":hubsecret} for hubsecret in HUBSECRET.split(',')]
+
+DEFAULT_POD_RESOURCES = os.getenv('DEFAULT_POD_RESOURCES','')
+DEFAULT_POD_RESOURCES = json.loads(DEFAULT_POD_RESOURCES) if DEFAULT_POD_RESOURCES else {}
+
 def create_header_service(name):
     service_json = {
         "apiVersion": "v1",
@@ -64,6 +76,9 @@ def create_header_service(name):
                 "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -108,6 +123,9 @@ def create_header_deploy(name):
                 "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -128,16 +146,15 @@ def create_header_deploy(name):
                         "component": name,
                         "type": "ray",
                         "run-id": os.getenv('KFJ_RUN_ID', 'unknown'),
+                    },
+                    "annotations": {
+                        "project": KFJ_TASK_PROJECT_NAME
                     }
                 },
                 "spec": {
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
-                    "imagePullSecrets": [
-                        {
-                            "name": "hubsecret"
-                        }
-                    ],
+                    "imagePullSecrets": HUBSECRET,
                     "affinity": {
                         "nodeAffinity": {
                             "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -178,7 +195,7 @@ def create_header_deploy(name):
                             "name": "ray-head",
                             "image": KFJ_TASK_IMAGES,
                             "imagePullPolicy": "Always",
-                            "workingDir": workingDir,
+                            "workingDir": WORKDIR,
                             "command": [
                                 "/bin/bash",
                                 "-c",
@@ -208,12 +225,18 @@ def create_header_deploy(name):
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 },
                                 "limits": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 }
                             }
                         }
@@ -239,6 +262,9 @@ def create_worker_deploy(header_name,worker_name):
                 "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -259,7 +285,9 @@ def create_worker_deploy(header_name,worker_name):
                         "component": worker_name,
                         "type": "ray",
                         "run-id": os.getenv('KFJ_RUN_ID', 'unknown'),
-
+                    },
+                    "annotations": {
+                        "project": KFJ_TASK_PROJECT_NAME
                     }
                 },
 
@@ -298,11 +326,7 @@ def create_worker_deploy(header_name,worker_name):
                             ]
                         }
                     },
-                    "imagePullSecrets": [
-                        {
-                            "name": "hubsecret"
-                        }
-                    ],
+                    "imagePullSecrets": HUBSECRET,
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
                     "containers": [
@@ -310,7 +334,7 @@ def create_worker_deploy(header_name,worker_name):
                             "name": "ray-worker",
                             "image": KFJ_TASK_IMAGES,
                             "imagePullPolicy": "Always",
-                            "workingDir": workingDir,
+                            "workingDir": WORKDIR,
                             "command": [
                                 "/bin/bash",
                                 "-c",
@@ -333,12 +357,18 @@ def create_worker_deploy(header_name,worker_name):
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 },
                                 "limits": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 }
                             }
                         }
@@ -351,7 +381,12 @@ def create_worker_deploy(header_name,worker_name):
     if int(gpu_num):
         worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
         worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
-
+    else:
+        # 添加禁用指令
+        worker_deploy['spec']['template']['spec']['containers'][0]['env'].append({
+            "name":"NVIDIA_VISIBLE_DEVICES",
+            "value":"none"
+        })
 
     return worker_deploy
 
@@ -448,8 +483,9 @@ if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description="build component")
     arg_parser.add_argument('--num_workers', type=int, required=False, help="workers的数量", default=3)
     arg_parser.add_argument('--workdir', type=str, required=False, help="启动目录", default='/')
-    arg_parser.add_argument('--deal', type=str, required=False, help="创建集群还是删除集群", default='create')
     arg_parser.add_argument('--init', type=str, required=False, help="每个worker的初始化脚本，用来安装环境", default='')
+    arg_parser.add_argument('--command', type=str, help="运行job的命令", default='python3 mnist.py')
+
     args = arg_parser.parse_args()
     print('NUM_WORKER',args.num_workers)
     print('INIT_FILE',args.init)
@@ -457,8 +493,37 @@ if __name__ == '__main__':
     if args.init.strip() and not os.path.exists(args.init):
         print('init file not exist')
         exit(1)
-    workingDir = args.workdir
+    WORKDIR = args.workdir
     NUM_WORKER = int(args.num_workers)
     if args.init.strip():
         INIT_FILE = "bash "+args.init.strip()+" && "
-    launcher_cluster(deal=args.deal)
+
+    COMMAND = args.command.strip()
+    # 先启动集群
+    print('准备启动集群')
+    launcher_cluster(deal='create')
+    # 开始调用集群启动用户任务
+    import subprocess
+    def execute_command(command):
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        while True:
+            output = process.stdout.readline().decode('utf-8')
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
+        return process.returncode
+
+    # 在当前节点安装初始化环境
+    print('准备安装初始化环境')
+    return_code = execute_command(args.init.strip())
+    # 执行用户命令
+    print('准备执行用户任务')
+    os.environ['RAY_HOST']=HEADER_NAME
+    return_code = execute_command(f"cd {WORKDIR} && "+COMMAND)
+    print('准备删除ray集群')
+    launcher_cluster(deal='delete')
+    print(f'退出码为{return_code}')
+    exit(return_code)
+
+

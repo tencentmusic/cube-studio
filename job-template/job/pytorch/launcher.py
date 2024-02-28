@@ -31,6 +31,7 @@ for task_node_selector in task_node_selectors:
     KFJ_TASK_NODE_SELECTOR[task_node_selector.split('=')[0]] = task_node_selector.split('=')[1]
 
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '')
+KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME', 'public')
 KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', '')
 KFJ_RUNNER = os.getenv('KFJ_RUNNER','')
@@ -60,6 +61,15 @@ GPU_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
 gpu_num,gpu_type,_ = k8s_client.get_gpu(GPU_RESOURCE)
 if gpu_type:
     KFJ_TASK_NODE_SELECTOR['gpu-type']=gpu_type
+
+RDMA_RESOURCE_NAME= os.getenv('RDMA_RESOURCE_NAME', '')
+RDMA_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_RDMA', '0')
+
+HUBSECRET = os.getenv('HUBSECRET','hubsecret')
+HUBSECRET=[{"name":hubsecret} for hubsecret in HUBSECRET.split(',')]
+
+DEFAULT_POD_RESOURCES = os.getenv('DEFAULT_POD_RESOURCES','')
+DEFAULT_POD_RESOURCES = json.loads(DEFAULT_POD_RESOURCES) if DEFAULT_POD_RESOURCES else {}
 
 schedulerName = os.getenv('SCHEDULER', 'default-scheduler')
 
@@ -172,35 +182,35 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                     "component": name,
                     "type": "pytorchjob",
                     "run-id": KFJ_RUN_ID,
+                },
+                "annotations": {
+                    "project": KFJ_TASK_PROJECT_NAME
                 }
             },
             "spec": {
                 "schedulerName": schedulerName,
                 "restartPolicy": "Never",
                 "volumes": k8s_volumes,
-                "imagePullSecrets": [
-                    {
-                        "name": "hubsecret"
-                    }
-                ],
+                "imagePullSecrets": HUBSECRET,
+                "nodeSelector": KFJ_TASK_NODE_SELECTOR,
                 "affinity": {
-                    "nodeAffinity": {
-                        "requiredDuringSchedulingIgnoredDuringExecution": {
-                            "nodeSelectorTerms": [
-                                {
-                                    "matchExpressions": [
-                                        {
-                                            "key": node_selector_key,
-                                            "operator": "In",
-                                            "values": [
-                                                KFJ_TASK_NODE_SELECTOR[node_selector_key]
-                                            ]
-                                        } for node_selector_key in KFJ_TASK_NODE_SELECTOR
-                                    ]
-                                }
-                            ]
-                        }
-                    },
+                    # "nodeAffinity": {
+                    #     "requiredDuringSchedulingIgnoredDuringExecution": {
+                    #         "nodeSelectorTerms": [
+                    #             {
+                    #                 "matchExpressions": [
+                    #                     {
+                    #                         "key": node_selector_key,
+                    #                         "operator": "In",
+                    #                         "values": [
+                    #                             KFJ_TASK_NODE_SELECTOR[node_selector_key]
+                    #                         ]
+                    #                     } for node_selector_key in KFJ_TASK_NODE_SELECTOR
+                    #                 ]
+                    #             }
+                    #         ]
+                    #     }
+                    # },
                     "podAntiAffinity": {
                         "preferredDuringSchedulingIgnoredDuringExecution": [
                             {
@@ -233,29 +243,23 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                                 "name":"GPU_NUM",
                                 "value": str(int(gpu_num))
                             }
-                            # {
-                            #     "name": "NCCL_IB_DISABLE",
-                            #     "value": "1"
-                            # },
-                            # {
-                            #     "name": "NCCL_DEBUG_SUBSYS",
-                            #     "value": "ALL"
-                            # },
-                            # {
-                            #     "name": "NCCL_SOCKET_IFNAME",
-                            #     "value": "eth0"
-                            # }
                         ],
                         "command": ['bash','-c',command],
                         "volumeMounts": k8s_volume_mounts,
                         "resources": {
                             "requests": {
-                                "cpu": KFJ_TASK_RESOURCE_CPU,
-                                "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                **{
+                                    "cpu": KFJ_TASK_RESOURCE_CPU,
+                                    "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                },
+                                **DEFAULT_POD_RESOURCES
                             },
                             "limits": {
-                                "cpu": KFJ_TASK_RESOURCE_CPU,
-                                "memory": KFJ_TASK_RESOURCE_MEMORY
+                                **{
+                                    "cpu": KFJ_TASK_RESOURCE_CPU,
+                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                },
+                                **DEFAULT_POD_RESOURCES
                             }
                         }
                     }
@@ -268,7 +272,24 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
     if int(gpu_num):
         pod_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
         pod_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
+    else:
+        # 添加禁用指令
+        pod_spec['template']['spec']['containers'][0]['env'].append({
+            "name":"NVIDIA_VISIBLE_DEVICES",
+            "value":"none"
+        })
 
+    if RDMA_RESOURCE_NAME and RDMA_RESOURCE and int(RDMA_RESOURCE):
+        pod_spec['template']['spec']['containers'][0]['resources']['requests'][RDMA_RESOURCE_NAME] = int(RDMA_RESOURCE)
+        pod_spec['template']['spec']['containers'][0]['resources']['limits'][RDMA_RESOURCE_NAME] = int(RDMA_RESOURCE)
+
+        pod_spec['template']['spec']['containers'][0]['securityContext']={
+            "capabilities": {
+                "add": [
+                    "IPC_LOCK"
+                ]
+            }
+        }
 
 
     worker_pod_spec = copy.deepcopy(pod_spec)
@@ -288,6 +309,9 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                 "pipeline-name": KFJ_PIPELINE_NAME,
                 "task-id": KFJ_TASK_ID,
                 "task-name": KFJ_TASK_NAME,
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {

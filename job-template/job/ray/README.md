@@ -15,19 +15,19 @@ TASK_RESOURCE_GPU=0
 ```bash
 {
     "参数": {
-        "-n": {
-            "type": "str",
-            "item_type": "",
-            "label": "分布式任务worker的数量",
-            "require": 1,
-            "choice": [],
-            "range": "$min,$max",
-            "default": "3",
-            "placeholder": "",
-            "describe": "分布式任务worker的数量",
-            "editable": 1
+        "images": {
+          "type": "str",
+          "item_type": "str",
+          "label": "启动镜像",
+          "require": 0,
+          "choice": [],
+          "range": "",
+          "default": "ccr.ccs.tencentyun.com/cube-studio/ray:gpu-20240101",
+          "placeholder": "",
+          "describe": "启动镜像，基础镜像需为该镜像，可自行添加封装自己的环境",
+          "editable": 1
         },
-        "-w": {
+        "--workdir": {
             "type": "str",
             "item_type": "",
             "label": "工作目录",
@@ -39,7 +39,7 @@ TASK_RESOURCE_GPU=0
             "describe": "分布式任务worker的数量",
             "editable": 1
         },
-        "-i": {
+        "--init": {
             "type": "str",
             "item_type": "str",
             "label": "每个worker的初始化脚本文件地址，用来安装环境",
@@ -51,7 +51,7 @@ TASK_RESOURCE_GPU=0
             "describe": "每个worker的初始化脚本文件地址，用来安装环境",
             "editable": 1
         },
-        "-f": {
+        "--command": {
             "type": "str",
             "item_type": "str",
             "label": "python启动命令，例如 python3 /mnt/xx/xx.py",
@@ -61,6 +61,18 @@ TASK_RESOURCE_GPU=0
             "default": "python demo.py",
             "placeholder": "",
             "describe": "python启动命令，例如 python3 /mnt/xx/xx.py",
+            "editable": 1
+        },
+        "--num_worker": {
+            "type": "str",
+            "item_type": "",
+            "label": "分布式任务worker的数量",
+            "require": 1,
+            "choice": [],
+            "range": "$min,$max",
+            "default": "3",
+            "placeholder": "",
+            "describe": "分布式任务worker的数量",
             "editable": 1
         }
     }
