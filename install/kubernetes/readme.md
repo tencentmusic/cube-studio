@@ -1,5 +1,5 @@
 # 机器/k8s环境/ceph环境准备  
-机器环境准备：准备docker，准备rancher，部署k8s兼容到v.1.18~1.22。如果已经有可以忽略，没有可以参考rancher/readme.md  
+机器环境准备：准备docker，准备rancher，部署k8s兼容到v.1.18~1.25。如果已经有可以忽略，没有可以参考rancher/readme.md  
 
 如果使用tke选择独立集群(非托管集群)，这样方便自行管理api server启动参数，部署istio
 
@@ -30,7 +30,6 @@ sh start.sh xx.xx.xx.xx
 - kubeflow-dashboard=true 部署cube服务的机器
 - kubeflow=true 部署kubeflow的机器
 - istio=true 部署istio的机器
-- knative=true 部署knative的机器
 - monitoring=true 部署prometheus的机器
 
 # 分布式存储
