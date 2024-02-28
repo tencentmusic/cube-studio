@@ -157,7 +157,7 @@ class Project_User(Model,AuditMixinNullable,MyappModelBase):
         foreign_keys=[user_id],
     )
     role = Column(Enum('dev', 'ops','creator',name='role'),nullable=False,default='dev',comment='角色')
-    # role = Column(String(50), nullable=False, default='dev')
+    quota = Column(String(2000), nullable=True, default='',comment='用户在该项目中可以使用的资源额度')
     export_parent = "project"
 
     def __repr__(self):

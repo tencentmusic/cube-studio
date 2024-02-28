@@ -291,7 +291,8 @@ class MyappModelBase():
         "help": _("帮助"),
         "method": _("方式"),
         "icon": _("图标"),
-        "doc": _("文档")
+        "doc": _("文档"),
+        "quota": _("资源额度")
     }
 
     # print(label_columns)

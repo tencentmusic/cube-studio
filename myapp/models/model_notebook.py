@@ -79,8 +79,9 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         # 对于有边缘节点，直接使用边缘集群的代理ip
         if SERVICE_EXTERNAL_IP:
             SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip()
-            service_ports = 10000 + 10 * self.id
-            host = "//%s:%s"%(SERVICE_EXTERNAL_IP,str(service_ports))
+            from myapp.utils import core
+            meet_ports = core.get_not_black_port(10000 + 10 * self.id)
+            host = "//%s:%s"%(SERVICE_EXTERNAL_IP,str(meet_ports[0]))
             if self.ide_type=='theia':
                 url = "/" + "#/mnt/" + self.created_by.username
             elif self.ide_type == 'matlab':
@@ -165,4 +166,10 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     @property
     def reset(self):
         return Markup(f'<a href="/notebook_modelview/api/reset/{self.id}">reset</a>')
+
+
+    # 镜像保存
+    @property
+    def save(self):
+        return Markup(f'<span style="color:red;">环境保存(企业版)</span>')
 

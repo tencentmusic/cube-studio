@@ -603,7 +603,7 @@ class RunHistory(Model,MyappModelBase):
 
     @property
     def pipeline_url(self):
-        return Markup(f'<a target=_blank href="/pipeline_modelview/web/{self.pipeline.id}">{self.pipeline.describe}</a>')
+        return Markup(f'<a target=_blank href="/pipeline_modelview/api/web/{self.pipeline.id}">{self.pipeline.describe}</a>')
 
 
 class Crd:
@@ -771,7 +771,7 @@ class Workflow(Model,Crd,MyappModelBase):
                     pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
                     if pipeline:
                         # return Markup(f'{pipeline.describe}')
-                        return Markup(f'<a href="/pipeline_modelview/web/{pipeline.id}">{pipeline.describe}</a>')
+                        return Markup(f'<a href="/pipeline_modelview/api/web/{pipeline.id}">{pipeline.describe}</a>')
 
                 pipeline_name = self.name[:-6]
                 pipeline = db.session.query(Pipeline).filter_by(name=pipeline_name).first()
