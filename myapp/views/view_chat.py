@@ -889,7 +889,6 @@ AI:
                 }
                 upload_knowledge.apply_async(kwargs=kwargs)
 
-
     all_chat_knowledge = {}
     # 根据配置获取远程的先验知识
     # @pysnooper.snoop()
@@ -958,7 +957,6 @@ AI:
             print(e)
 
         return knowledge
-
 
     # @pysnooper.snoop()
     # 获取header和url
@@ -1122,8 +1120,6 @@ AI:
                 }
             ]
         })
-
-
 
     # 调用chatgpt接口
     # @pysnooper.snoop()

@@ -34,10 +34,8 @@
     "prompt": "{{history}}\nHuman:{{query}}\nAI:",
     "service_type": "openai",
     "service_config": {
-        "llm_url": "https://lonlie.plus7.plus/v1/chat/completions",
-        "llm_tokens": [
-            "sk-kP5Dir9AFXHFb4HY1426E702267c49C89976A866755a17E0"
-        ],
+        "llm_url": "",
+        "llm_tokens": [],
         "llm_data": {
             "model": "gpt-4-0613"
         }
