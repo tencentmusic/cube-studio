@@ -249,7 +249,7 @@ def pod_resource():
                     node_grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_NODE_PATH')
                     pod_resource={
                         "cluster":cluster_name,
-                        'project':pod['annotations'].get('project','public'),
+                        'project':pod['annotations'].get('project','unknown'),
                         "resource_group":org,
                         "namespace":Markup('<a target="blank" href="%s">%s</a>' % (dashboard_url, namespace)),
                         "pod":Markup('<a target="blank" href="%s">%s</a>' % (task_grafana_url + pod_name, pod_name)),
@@ -319,6 +319,11 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
     def query_list(self, order_column, order_direction, page_index, page_size, filters=None, **kargs):
 
         lst = pod_resource()
+
+        # 非管理员只查看自己的
+        if not g.user.is_admin():
+            lst = [pod for pod in lst if pod['username']==g.user.username]
+
         if order_column and lst:
             lst = sorted(lst, key=lambda d:float(d[order_column].split('/')[0])/float(d[order_column].split('/')[1]) if '/0' not in d[order_column] else 0, reverse = False if order_direction=='asc' else True)
         total_count=len(lst)
@@ -431,7 +436,7 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                 k8s_client.delete_istio_ingress(namespace=namespace, name=pod_name)
             # 如果是service命名空间，需要删除deployment和service和虚拟服务
             if namespace=='service':
-                service_name = json.loads(pod['label']).get("app",'')
+                service_name = pod['label'].get("app",'')
                 if service_name:
                     service_external_name = (service_name + "-external").lower()[:60].strip('-')
                     k8s_client.delete_deployment(namespace=namespace, name=service_name)
@@ -440,7 +445,7 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                     k8s_client.delete_istio_ingress(namespace=namespace, name=service_name)
             # 如果是aihub命名空间，需要删除 deployemnt和service和虚拟服务
             if namespace == 'aihub':
-                service_name = json.loads(pod['label']).get("app", '')
+                service_name = pod['label'].get("app", '')
                 if service_name:
                     k8s_client.delete_deployment(namespace=namespace, name=service_name)
                     k8s_client.delete_service(namespace=namespace, name=service_name)
@@ -450,9 +455,13 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                 k8s_client.delete_pods(namespace=namespace, pod_name=pod_name)
 
             if namespace == 'automl':
-                vcjob_name = json.loads(pod['label']).get("app", '')
+                vcjob_name = pod['label'].get("app", '')
                 if vcjob_name:
                     k8s_client.delete_volcano(namespace=namespace, name=vcjob_name)
+                    k8s_client.delete_pods(namespace=namespace,pod_name=pod['name'])
+                    k8s_client.delete_service(namespace=namespace,labels={'app':vcjob_name})
+                    k8s_client.delete_istio_ingress(namespace=namespace,name=pod['name'])
+
 
         return json.dumps(
             {
@@ -460,10 +469,10 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
             }, indent=4, ensure_ascii=False
         )
 
-    # @pysnooper.snoop()
-    def add_more_info(self, response, **kwargs):
-        if not g.user or not g.user.is_admin():
-            response['action'] = {}
+    # # @pysnooper.snoop()
+    # def add_more_info(self, response, **kwargs):
+    #     if not g.user or not g.user.is_admin():
+    #         response['action'] = {}
 
 appbuilder.add_api(Total_Resource_ModelView_Api)
 

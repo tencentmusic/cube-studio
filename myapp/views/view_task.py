@@ -607,17 +607,20 @@ class Task_ModelView_Base():
         if not pod or pod['status'] != 'Running':
             run_id = "debug-" + str(uuid.uuid4().hex)
             command=['sh','-c','sleep 7200 && hour=`date +%H` && while [ $hour -ge 06 ];do sleep 3600;hour=`date +%H`;done']
-            self.run_pod(
-                task=task,
-                k8s_client=k8s_client,
-                run_id=run_id,
-                namespace=namespace,
-                pod_name=pod_name,
-                image=image,
-                working_dir=None,
-                command=command,
-                args=None
-            )
+            try:
+                self.run_pod(
+                    task=task,
+                    k8s_client=k8s_client,
+                    run_id=run_id,
+                    namespace=namespace,
+                    pod_name=pod_name,
+                    image=image,
+                    working_dir=None,
+                    command=command,
+                    args=None
+                )
+            except Exception as e:
+                return self.response(400, **{"status": 1, "result": {}, "message": str(e)})
 
         try_num = 30
         message = __('启动时间过长，一分钟后刷新此页面')
@@ -705,10 +708,10 @@ class Task_ModelView_Base():
         # 没有历史或者没有运行态，直接创建
         if not pod:
             command = None
-            if task.job_template.entrypoint:
-                command = task.job_template.entrypoint
-            if task.command:
-                command = task.command
+            if task.job_template.entrypoint.strip():
+                command = task.job_template.entrypoint.strip()
+            if task.command.strip():
+                command = task.command.strip()
             if command:
                 command = command.split(" ")
                 command = [com for com in command if com]
@@ -748,17 +751,20 @@ class Task_ModelView_Base():
                 command = ['python', '-c', json.loads(task.args)['code']]
             can_customize_args = [conf.get('CUSTOMIZE_JOB'),conf.get('PYTHON_JOB')]
             args=None if task.job_template.name in can_customize_args else ops_args
-            self.run_pod(
-                task=task,
-                k8s_client=k8s_client,
-                run_id=run_id,
-                namespace=namespace,
-                pod_name=pod_name,
-                image=json.loads(task.args).get('images',task.job_template.images.name),
-                working_dir=json.loads(task.args).get('workdir',task.job_template.workdir),
-                command=command,
-                args=args
-            )
+            try:
+                self.run_pod(
+                    task=task,
+                    k8s_client=k8s_client,
+                    run_id=run_id,
+                    namespace=namespace,
+                    pod_name=pod_name,
+                    image=json.loads(task.args).get('images',task.job_template.images.name),
+                    working_dir=json.loads(task.args).get('workdir',task.job_template.workdir),
+                    command=command,
+                    args=args
+                )
+            except Exception as e:
+                return self.response(400, **{"status": 1, "result": {}, "message": str(e)})
 
         try_num = 5
         while (try_num > 0):
@@ -819,7 +825,7 @@ class Task_ModelView_Base():
         self.delete_task_run(task)
         flash(__("删除完成"), category='success')
         # self.update_redirect()
-        return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
+        return redirect('/pipeline_modelview/api/web/%s' % str(task.pipeline.id))
 
     @expose("/log/<task_id>", methods=["GET", "POST"])
     def log_task(self, task_id):
@@ -835,8 +841,7 @@ class Task_ModelView_Base():
             return redirect("/k8s/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'], namespace, pod_name))
 
         flash(__("未检测到当前task正在运行的容器"), category='success')
-        return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
-
+        return redirect('/pipeline_modelview/api/web/%s' % str(task.pipeline.id))
 
 #
 # class Task_ModelView(Task_ModelView_Base, CompactCRUDMixin, MyappModelView):
