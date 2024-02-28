@@ -215,6 +215,12 @@ class Metadata_table_ModelView_base():
 
     edit_form_extra_fields = add_form_extra_fields
 
+    def check_edit_permission(self,item):
+        if not g.user.is_admin() and g.user.username not in item.owner:
+            return False
+        return True
+    check_delete_permission = check_edit_permission
+
     @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
     def muldelete(self, items):
         if not items:
@@ -233,11 +239,12 @@ class Metadata_table_ModelView_base():
         item.node_id = item.db + "::" + item.table
         item.creator = g.user.username
 
-    # @event_logger.log_this
-    @action("ddl", "更新远程表", "如果更新失败，请手动更改远程数据库的表结构", "fa-save", multiple=False, single=True)
-    def ddl(self, item):
-        pass
-        # 自己实现更新到hive表
+
+    # # @event_logger.log_this
+    # @action("ddl", "更新远程表", "如果更新失败，请手动更改远程数据库的表结构", "fa-save", multiple=False, single=True)
+    # def ddl(self, item):
+    #     pass
+    #     # 自己实现更新到hive表
 
 
 
