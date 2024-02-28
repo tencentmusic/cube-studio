@@ -897,7 +897,7 @@ MODEL_URLS = {
     "pipeline": "/frontend/train/train_task/pipeline",
     "runhistory": "/frontend/train/train_task/runhistory",
     "workflow": "/frontend/train/train_task/workflow",
-    "nni": "/frontend/train/train_hyperparameter/nni",
+    "nni": "/frontend/train/automl/hyperparameter_search",
 
     "total_resource": "/frontend/service/total_resource",
     "service": "/frontend/service/k8s_service",
