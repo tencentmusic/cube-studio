@@ -86,6 +86,15 @@ systemctl start docker
 
 ```
 
+替换国内的docker源
+vi /etc/docker/daemon.json
+```bash
+{
+	"registry-mirrors": ["https://registry.docker-cn.com","https://pee6w651.mirror.aliyuncs.com"]
+}
+```
+
+
 ## yum安装k8s的源
 ```bash
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo

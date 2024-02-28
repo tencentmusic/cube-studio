@@ -13,8 +13,8 @@ iptables -P INPUT ACCEPT
 iptables -P OUTPUT ACCEPT
 
 mkdir -p /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives /data/k8s/infra/mysql /data/k8s/kubeflow/minio/mlpipeline /data/k8s/kubeflow/global
-mkdir -p /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/
-chmod -R 777 /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/
+mkdir -p /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/ /data/k8s/kubeflow/labelstudio/
+chmod -R 777 /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/ /data/k8s/kubeflow/labelstudio/
 
 # 关闭swap分区
 swapoff -a

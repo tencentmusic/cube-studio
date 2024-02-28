@@ -36,7 +36,8 @@ wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/
 
 也可以使用命令推荐安装ubuntu-drivers devices，
 ```bash
-sudo apt install nvidia-driver-535-server
+sudo apt install -y nvidia-driver-535-server
+重启机器
 ```
 
 # fabricmanager 必须和驱动版本一直，并且不能自动更新

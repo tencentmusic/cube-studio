@@ -153,9 +153,16 @@ docker logs  myrancher  2>&1 | grep "Bootstrap Password:"
 
 # 8、rancher server 启动可能问题
 
-permission denied
+8.1、permission denied
 
 mount 查看所属盘是否有noexec 限制
+
+8.2、重启机器，rancher server无法正常启动。
+
+如果是一直等待k3s 启动，按照下面的高可用方法。  
+如果是k3s启动失败，docker exec -it myrancher cat k3s.log > k3s.log  查看k3s的日志  
+如果k3s日志报错 iptable的问题，那就按照上面的centos8或者ubuntu22.04配置iptable，  
+如果k3s日志报错 containerd的问题，那就 docker exec -it myrancher mv /var/lib/rancher/k3s/agent/containerd /varllib/rancher/k3slagent/_containerd  
 
 # 9、部署k8s集群
 

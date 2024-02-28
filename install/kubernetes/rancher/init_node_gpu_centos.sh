@@ -25,6 +25,7 @@ rm -rf /etc/docker/ && mkdir -p /etc/docker/
 (
 cat << EOF
 {
+    "registry-mirrors": ["https://registry.docker-cn.com","https://pee6w651.mirror.aliyuncs.com"]
     "insecure-registries":["docker.oa.com:8080"],
     "default-runtime": "nvidia",
     "data-root": "/data/docker",
@@ -38,6 +39,8 @@ cat << EOF
 EOF
 )> /etc/docker/daemon.json
 
+
+service docker stop
 systemctl daemon-reload
 systemctl start docker
 
