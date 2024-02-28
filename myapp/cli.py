@@ -650,7 +650,6 @@ def init():
                 try:
                     inference = inferences[inference_name]
                     create_inference(**inference)
-                    print('add inference %s' % inference_name)
                 except Exception as e1:
                     print(e1)
     except Exception as e:
@@ -720,8 +719,57 @@ def init():
     from myapp.tasks.schedules import cp_cubestudio
     cp_cubestudio()
 
+    def add_chat(chat_path):
+        from myapp.models.model_chat import Chat
+        if not os.path.exists(chat_path):
+            return
+        chats = json.load(open(chat_path, mode='r'))
 
+        try:
+            if len(chats) > 0:
+                for data in chats:
+                    # print(data)
+                    name = data.get('name', '')
+                    label = data.get('label', '')
+                    if name and label:
+                        chat = db.session.query(Chat).filter_by(name=name).first()
+                        if not chat:
+                            knowledge = data.get('knowledge', '')
+                            if type(knowledge)==dict:
+                                knowledge = json.dumps(knowledge,indent=4,ensure_ascii=False)
+                            chat = Chat()
+                            chat.doc = data.get('doc', '')
+                            chat.name = name
+                            chat.label = label
+                            chat.icon = data.get('icon', '')
+                            chat.session_num = int(data.get('session_num', '0'))
+                            chat.chat_type = data.get('chat_type', 'text')
+                            chat.hello = data.get('hello', '这里是cube-studio开源社区，请问有什么可以帮你的么？')
+                            chat.tips = data.get('tips', '')
+                            chat.prompt = data.get('prompt', '')
+                            chat.knowledge = knowledge
+                            chat.service_type = data.get('service_type', 'chatgpt3.5')
+                            chat.service_config = json.dumps(data.get('service_config', {}), indent=4, ensure_ascii=False)
+                            chat.owner = data.get('owner', 'admin')
+                            chat.expand = json.dumps(data.get('expand', {}), indent=4,ensure_ascii=False)
 
+                            if not chat.id:
+                                db.session.add(chat)
+                            db.session.commit()
+        except Exception as e:
+            print(e)
+            # traceback.print_exc()
+
+    try:
+        print('begin add chat')
+        init_file = os.path.join(init_dir, 'init-chat.json')
+        if os.path.exists(init_file):
+            add_chat(init_file)
+    except Exception as e:
+        print(e)
+            # traceback.print_exc()
+    # 添加chat
+    # if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh':
     try:
         SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE', '')
         if SQLALCHEMY_DATABASE_URI:
