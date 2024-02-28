@@ -99,6 +99,10 @@ class K8s():
                 # print(pod)
                 metadata = pod.metadata
                 status = pod.status.phase if pod and hasattr(pod, 'status') and hasattr(pod.status, 'phase') else ''
+                # 如果是running 也分为重启运行中
+                if status.lower()=='running':
+                    status = 'Running' if [x.status for x in pod.status.conditions if x.type == 'Ready' and x.status == 'True'] else 'CrashLoopBackOff'
+
                 containers = pod.spec.containers
                 # mem = [container.resources.requests for container in containers]
                 memory = [self.to_memory_GB(container.resources.requests.get('memory','0G')) for container in containers if container.resources and container.resources.requests]
@@ -792,6 +796,21 @@ class K8s():
                                 "subPath": username
                             }
                         )
+                    if "(pvc-share)" in volume:
+                        pvc_name = volume.replace('(pvc-share)', '').replace(' ', '')
+                        volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
+                        k8s_volumes.append({
+                            "name": volumn_name,
+                            "persistentVolumeClaim": {
+                                "claimName": pvc_name
+                            }
+                        })
+                        k8s_volume_mounts.append(
+                            {
+                                "name": volumn_name,
+                                "mountPath": mount
+                            }
+                        )
 
                     # 外部挂载盘不挂载子目录
                     if "(storage)" in volume:
@@ -1033,9 +1052,11 @@ class K8s():
             labels={}
         if scheduler_name == 'kube-batch':
             annotations['scheduling.k8s.io/group-name'] = name
-        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)
+
+
         image_pull_secrets = [client.V1LocalObjectReference(image_pull_secret) for image_pull_secret in image_pull_secrets]
-        nodeSelector = None
+        affinity = None
+        nodeSelector = {}
         if node_selector and '=' in node_selector:
             nodeSelector = {}
             for selector in re.split(',|;|\n|\t', node_selector):
@@ -1083,9 +1104,10 @@ class K8s():
                     host_aliases.append(host_aliase)
 
         service_account = accounts if accounts else None
-        spec = v1_pod_spec.V1PodSpec(image_pull_secrets=image_pull_secrets, node_selector=nodeSelector,node_name=node_name if node_name else None,
+        spec = v1_pod_spec.V1PodSpec(affinity=affinity,image_pull_secrets=image_pull_secrets, node_selector=nodeSelector,node_name=node_name if node_name else None,
                                      volumes=k8s_volumes, containers=containers, restart_policy=restart_policy,
                                      host_aliases=host_aliases, service_account=service_account,scheduler_name=scheduler_name)
+        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)
         pod = v1_pod.V1Pod(api_version='v1', kind='Pod', metadata=metadata, spec=spec)
         return pod, spec
 
@@ -1223,24 +1245,25 @@ class K8s():
         )
 
         pod_spec.restart_policy = 'Always'  # dp里面必须是Always
+        # cpu任务， # 控制pod尽量分散到不同的机器上
+        if not resource_gpu or resource_gpu=='0':
+            pod_spec.affinity = client.V1Affinity(
+                pod_anti_affinity=client.V1PodAntiAffinity(
+                    preferred_during_scheduling_ignored_during_execution=[client.V1WeightedPodAffinityTerm(
+                        weight=10,
+                        pod_affinity_term=client.V1PodAffinityTerm(
+                            label_selector=client.V1LabelSelector(
+                                match_expressions=[client.V1LabelSelectorRequirement(
+                                    key=label[0],
+                                    operator='In',
+                                    values=[label[1]]
+                                )]
+                            ),
+                            topology_key="kubernetes.io/hostname"
+                        )
 
-        pod_spec.affinity = client.V1Affinity(
-            pod_anti_affinity=client.V1PodAntiAffinity(
-                preferred_during_scheduling_ignored_during_execution=[client.V1WeightedPodAffinityTerm(
-                    weight=10,
-                    pod_affinity_term=client.V1PodAffinityTerm(
-                        label_selector=client.V1LabelSelector(
-                            match_expressions=[client.V1LabelSelectorRequirement(
-                                key=label[0],
-                                operator='In',
-                                values=[label[1]]
-                            )]
-                        ),
-                        topology_key="kubernetes.io/hostname"
-                    )
-
-                ) for label in labels.items()]
-            ))
+                    ) for label in labels.items()]
+                ))
 
         return pod,pod_spec
 
@@ -1280,9 +1303,9 @@ class K8s():
             hostAliases=hostAliases,env=env,privileged=privileged,accounts=accounts,username=username,ports=ports,scheduler_name=scheduler_name,
             health=health,annotations=annotations
         )
-        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
+        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)
         selector = client.models.V1LabelSelector(match_labels=labels)
-        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels)
+        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels,annotations=annotations)
         template = client.models.V1PodTemplateSpec(metadata=template_metadata, spec=pod_spec)
         dp_spec = v1_deployment_spec.V1DeploymentSpec(replicas=int(replicas), selector=selector, template=template)
         dp = v1_deployment.V1Deployment(api_version='apps/v1', kind='Deployment', metadata=metadata, spec=dp_spec)
@@ -1714,7 +1737,7 @@ class K8s():
         hpa = re.split(',|;', hpa)
 
         hpa_json = {
-            "apiVersion": "autoscaling/v2beta1",
+            "apiVersion": "autoscaling/v2beta1",  # 需要所使用的k8s集群启动了这个版本的hpa，可以通过 kubectl api-resources  查看使用的版本
             "kind": "HorizontalPodAutoscaler",
             "metadata": {
                 "name": name,
@@ -2016,7 +2039,7 @@ class K8s():
     # 读取pvc
     def get_pvc(self,name,namespace):
         try:
-            pvc = k8s_client.v1.read_namespaced_persistent_volume_claim(name,namespace)
+            pvc = self.v1.read_namespaced_persistent_volume_claim(name,namespace)
             pvc = {
                 "status":pvc.status.phase if pvc.status and pvc.status.phase else 'unknown'
             }

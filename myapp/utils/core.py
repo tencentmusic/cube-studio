@@ -44,7 +44,7 @@ from sqlalchemy import event, exc, select, Text
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.sql.type_api import Variant
 from sqlalchemy.types import TEXT, TypeDecorator
-
+import math
 from myapp.exceptions import MyappException, MyappTimeoutException
 from myapp.utils.dates import datetime_to_epoch, EPOCH
 import re
@@ -1392,20 +1392,11 @@ def pic2html(image_arr,max_num=4):
         html = html % one_img_html
     return html
 
+import pysnooper
 
 # @pysnooper.snoop()
 def check_resource_memory(resource_memory, src_resource_memory=None):
     from myapp import conf
-    def set_host_max(resource):
-        return resource
-        # resource_int =0
-        # if resource and 'G' in resource:
-        #     resource_int = int(float(resource.replace('G',''))*1000)
-        # if resource and 'M' in resource:
-        #     resource_int = int(resource.replace('M', ''))
-        # if resource_int>160*1000:
-        #     resource = '160G'
-        # return resource
 
     # @pysnooper.snoop()
     def check_max_memory(resource, src_resource=None):
@@ -1414,22 +1405,35 @@ def check_resource_memory(resource_memory, src_resource_memory=None):
         src_resource_int = 0
         if src_resource and 'G' in src_resource:
             src_resource_int = int(float(src_resource.replace('G', '')) * 1000)
-        if src_resource and 'M' in src_resource:
+        elif src_resource and 'M' in src_resource:
             src_resource_int = int(src_resource.replace('M', ''))
+        elif src_resource:
+            src_resource_int = float(src_resource)
+
+        src_resource_int = math.ceil(src_resource_int/1000)
 
         resource_int = 0
         if resource and 'G' in resource:
             resource_int = int(float(resource.replace('G', '')) * 1000)
         if resource and 'M' in resource:
             resource_int = int(resource.replace('M', ''))
+
+        resource_int = math.ceil(resource_int/1000)
+
+        MAX_TASK_MEM = conf.get('MAX_TASK_MEM', 100)
         #  如果是变小了，可以直接使用，这是因为最大值可能是admin设置的。普通用户只能调小
         if resource_int <= src_resource_int:
             return resource
 
-        if resource_int > conf.get('MAX_TASK_MEM',100):
-            return '100G'
-        else:
-            return resource
+        if resource_int >= MAX_TASK_MEM >= src_resource_int:
+            # flash(_('占用memory算力超过管理员设定的最大值，系统已自动配置memory为最大值') + str(MAX_TASK_MEM), category='warning')
+            return f"{MAX_TASK_MEM}G"
+
+        if resource_int >=src_resource_int >=MAX_TASK_MEM:
+            # flash(_('占用memory算力超过管理员设定的最大值，系统已自动配置memory为原有值') + str(math.ceil(src_resource_int))+"G",category='warning')
+            return f"{math.ceil(src_resource_int)}G"
+
+        return resource
 
     resource = resource_memory.upper().replace('-', '~').replace('_', '~').strip()
     if not "~" in resource:
@@ -1437,47 +1441,46 @@ def check_resource_memory(resource_memory, src_resource_memory=None):
         match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource memory input not valid')
-        if not g.user.is_admin():
-            resource = set_host_max(check_max_memory(resource, src_resource_memory))
+        if hasattr(g,'user') and not g.user.is_admin():
+            resource = check_max_memory(resource, src_resource_memory)
         else:
-            resource = set_host_max(resource)
+            resource = resource
         return resource
     else:
         pattern = '^[0-9]+[GM]~[0-9]+[GM]$'  # 匹配字符串
         match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource memory input not valid')
-        if not g.user.is_admin():
-            min = set_host_max(check_max_memory(resource.split('~')[0]))
-            max = set_host_max(check_max_memory(resource.split('~')[1]))
+        if hasattr(g,'user') and not g.user.is_admin():
+            min = check_max_memory(resource.split('~')[0])
+            max = check_max_memory(resource.split('~')[1])
             resource = str(min) + "~" + str(max)
         else:
-            min = set_host_max(resource.split('~')[0])
-            max = set_host_max(resource.split('~')[1])
+            min = resource.split('~')[0]
+            max = resource.split('~')[1]
             resource = str(min) + "~" + str(max)
         return resource
 
 
 def check_resource_cpu(resource_cpu, src_resource_cpu=None):
     from myapp import conf
-    def set_host_max(resource):
-        return resource
-        # resource_int =0
-        # resource_int = float(resource) if resource else 0
-        # if resource_int>80:
-        #     resource = 80
-        # return resource
 
     def check_max_cpu(resource, src_resource=None):
         resource_int = float(resource) if resource else 0
         src_resource_int = float(src_resource) if src_resource else 0
+        MAX_TASK_CPU = float(conf.get('MAX_TASK_CPU',50))
 
         if resource_int <= src_resource_int:
             return resource
 
-        if resource_int > conf.get('MAX_TASK_CPU',50):
-            return '50'
-            # raise MyappException('resource cpu max 50')
+        if resource_int >= src_resource_int >= MAX_TASK_CPU:
+            # flash(_('占用cpu算力超过管理员设定的最大值，系统已自动配置cpu为原有值') + str(src_resource), category='warning')
+            return src_resource
+
+        if resource_int >=MAX_TASK_CPU >=src_resource_int:
+            # flash(_('占用cpu算力超过管理员设定的最大值，系统已自动配置cpu为最大值') + str(MAX_TASK_CPU),category='warning')
+            return str(MAX_TASK_CPU)
+
         return resource
 
     resource = resource_cpu.upper().replace('-', '~').replace('_', '~').strip()
@@ -1486,10 +1489,10 @@ def check_resource_cpu(resource_cpu, src_resource_cpu=None):
         match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource cpu input not valid')
-        if not g.user.is_admin():
-            resource = set_host_max(check_max_cpu(resource, src_resource_cpu))
+        if hasattr(g,'user') and not g.user.is_admin():
+            resource = check_max_cpu(resource, src_resource_cpu)
         else:
-            resource = set_host_max(resource)
+            resource = resource
         return resource
     else:
         pattern = '^[0-9\\.]+~[0-9\\.]+$'  # 匹配字符串
@@ -1500,17 +1503,62 @@ def check_resource_cpu(resource_cpu, src_resource_cpu=None):
             resource = "%.1f~%.1f" % (float(resource.split("~")[0]), float(resource.split("~")[1]))
         except Exception:
             raise MyappException('resource cpu input not valid')
-        if not g.user.is_admin():
-            min = set_host_max(check_max_cpu(resource.split('~')[0]))
-            max = set_host_max(check_max_cpu(resource.split('~')[1]))
+        if hasattr(g,'user') and not g.user.is_admin():
+            min = check_max_cpu(resource.split('~')[0])
+            max = check_max_cpu(resource.split('~')[1])
             resource = str(min) + "~" + str(max)
         else:
-            min = set_host_max(resource.split('~')[0])
-            max = set_host_max(resource.split('~')[1])
+            min = resource.split('~')[0]
+            max = resource.split('~')[1]
             resource = str(min) + "~" + str(max)
         return resource
 
 
+def check_resource_gpu(resource_gpu, src_resource_gpu=None):
+    from myapp import conf
+
+    def check_max_gpu(gpu_num, src_gpu_num=0):
+
+        MAX_TASK_GPU = int(conf.get('MAX_TASK_GPU',8))
+
+        if gpu_num <= src_gpu_num:
+            return gpu_num
+
+        if gpu_num >= src_gpu_num >= MAX_TASK_GPU:
+            return src_gpu_num
+
+        if gpu_num >=MAX_TASK_GPU >=src_gpu_num:
+            return str(MAX_TASK_GPU)
+
+        return gpu_num
+
+    gpu_num, gpu_type, resource_name = get_gpu(resource_gpu)
+    src_gpu_num,_,_ = get_gpu(src_resource_gpu) if src_resource_gpu else 0,0,0
+
+    if hasattr(g,'user')  and not g.user.is_admin():
+        resource_gpu = check_max_gpu(gpu_num, src_gpu_num)
+        if math.ceil(float(resource_gpu))==resource_gpu:
+            resource_gpu = math.ceil(float(resource_gpu))
+        if gpu_type:
+            resource_gpu +=f'({gpu_type})'
+    else:
+        resource_gpu = resource_gpu
+
+    return str(resource_gpu)
+
+
+
+def check_resource(resource_memory,resource_cpu,resource_gpu,src_resource_memory=None,src_resource_cpu=None,src_resource_gpu=None):
+    new_resource_memory = check_resource_memory(resource_memory,src_resource_memory)
+    new_resource_memory = str(math.ceil(float(str(new_resource_memory).replace('G',''))))+"G"
+    new_resource_cpu = str(math.ceil(float(check_resource_cpu(resource_cpu,src_resource_cpu))))
+    new_resource_gpu = str(check_resource_gpu(resource_gpu, src_resource_gpu))
+
+    if str(new_resource_memory).replace('G', '') != str(resource_memory).replace('G', '') or str(new_resource_cpu) != str(resource_cpu) or str(new_resource_gpu) != str(resource_gpu):
+        message = _('占用算力超过管理员设定的最大值，系统已自动调整算力为:') + f"cpu({new_resource_cpu}),memory({new_resource_memory}),gpu({new_resource_gpu})"
+        flash(message=message,category='warning')
+
+    return new_resource_memory,new_resource_cpu,new_resource_gpu
 
 def checkip(ip):
     import re
@@ -1902,7 +1950,6 @@ def decode_unicode_escape(data):
     else:
         return data
 
-
 # 获取一个host 配置中的url信息
 def split_url(url):
     if not url:
@@ -1928,3 +1975,260 @@ def split_url(url):
         else:
             host, port = url,''
         return host,port,''
+
+
+# @pysnooper.snoop()
+def get_all_resource(cluster='all',namespace='all',exclude_pod=[]):
+    import pandas
+    from myapp.utils.py.py_k8s import K8s
+    from myapp import conf
+    if cluster=='all':
+        clusters=conf.get('CLUSTERS')
+    else:
+        clusters={
+            cluster:conf.get('CLUSTERS').get(cluster,{})
+        }
+    if namespace=='all':
+        namespaces=conf.get('HUBSECRET_NAMESPACE',[])
+    else:
+        namespaces=[namespace]
+
+    all_resource = []
+    for cluser_name in clusters:
+        cluster = clusters[cluser_name]
+        k8s_client = K8s(cluster.get('KUBECONFIG', ''))
+        for namespace in namespaces:
+            pods = k8s_client.get_pods(namespace=namespace)
+            for pod in pods:
+                # 集群，资源组，空间，项目组，用户，resource，值
+                user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('rtx-user','admin'))))
+                project = pod['annotations'].get('project', 'public')
+                all_resource.append([cluser_name,pod['node_selector'].get('org','public'),namespace,project,user,pod['name'],pod['labels'],'cpu',float(pod['cpu'])])
+                all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], 'memory',float(pod['memory'])])
+                gpu_resource = conf.get('GPU_RESOURCE', {})
+                for ai_device in gpu_resource:
+                    all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], ai_device,float(pod.get(ai_device,''))])
+    columns = ['cluster', 'org', 'namespace', 'project', 'user', 'name','labels','resource', 'value']
+    all_resource =[dict(zip(columns,resource)) for resource in all_resource]
+    # print(all_resource)
+    if type(exclude_pod) == str:
+        exclude_pod = [exclude_pod]
+    # 直接指定排除的pod名称
+    if type(exclude_pod)==list:
+        all_resource = [pod for pod in all_resource if pod['name'] not in exclude_pod]
+    # 通过字典过滤排除pod
+    elif type(exclude_pod)==dict:
+        all_resource = [pod for pod in all_resource if not all(item in pod['labels'].items() for item in exclude_pod.items())]
+        # all_resource_temp = []
+        # for pod in all_resource:
+        #     can_add=False
+        #     for key in exclude_pod:
+        #         # 写的简洁些
+        #         if key not in pod['labels'] or pod['labels'][key]!=exclude_pod[key]:
+        #             can_add = True
+        #             break
+        #     if can_add:
+        #         all_resource_temp.append(pod)
+        # all_resource = all_resource_temp
+    return all_resource
+
+# 获取指定端口以后的5个非黑名单端口
+def get_not_black_port(port):
+    from myapp import conf
+    black_port = conf.get('BLACK_PORT',[10250])
+    meet_port = []
+    while len(meet_port)<5:
+        if port not in black_port:
+            meet_port.append(port)
+        port+=1
+    return meet_port
+
+# 验证用户资源额度限制
+@pysnooper.snoop()
+def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclude_pod=[],req_resource={},replicas=1):
+    # 管理员不受限制
+    if req_user.is_admin():
+        return True,''
+    # resource为{"cpu":1,"memory":1,"gpu":1}格式
+    # quota 书写格式，cluster_name，org,namespace，resource，single_total,value
+    # exclude_pod数组格式表示忽略的名称数组，字典格式表述忽略的pod标签，字符串表示原始的pod名
+
+    # 添加对gpu型号的处理
+    req_resource={
+        "cpu": str(req_resource.get('cpu','0')),
+        "memory": str(req_resource.get('memory','0')),
+        "gpu": str(req_resource.get('gpu','0')),
+    }
+    if '(' in req_resource['gpu']:
+        req_resource['gpu'] = req_resource['gpu'][:req_resource['gpu'].index('(')]
+
+    all_resources = None
+    # req_total_resource={key:float(str(req_resource[key]).replace('G',''))*replicas for key in req_resource}
+    # 验证用户username在集群cluster_name的namespace空闲下运行value大的resource(cpu,memory,gpu)资源是否允许
+    # 先来验证是否有个人用户额度限制，单集群限制，单空闲限制
+    if req_user.quota:
+        if not all_resources:
+            all_resources = get_all_resource(exclude_pod=exclude_pod)
+
+        quota_confg = req_user.quota
+        quotas_array = re.split(';|\n',quota_confg.strip())
+        quotas=[]
+        for quota in quotas_array:
+            quota = quota.replace(' ','').strip()
+            if len(quota.split(','))==6:
+                quotas.append(dict(zip(['cluser','org','namespace','resource','type','value'],quota.split(','))))
+
+        for quota in quotas:
+            if quota['namespace']=='notebook':
+                quota['namespace']='jupyter'
+
+            # 查看单个任务是否满足资源限制
+            if quota['type']=='single':
+                if req_cluster_name == quota['cluser'] or quota['cluser'] == 'all':
+                    if req_org == quota['org'] or quota['org'] == 'all':
+                        if req_namespace==quota['namespace'] or quota['namespace']=='all':
+                            limit_resource = float(quota['value'])
+                            request_resource = float(str(req_resource.get(quota['resource'],'0')).replace('G',''))
+                            message = f'user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource}, user limit {limit_resource}'
+                            print(message)
+                            if request_resource>limit_resource:
+                                return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            # 查看正在运行的整体资源是否满足资源限制
+            if quota['type']=='concurrent':
+                if req_cluster_name == quota['cluser'] or quota['cluser'] == 'all':
+                    if req_org == quota['org'] or quota['org'] == 'all':
+                        if req_namespace==quota['namespace'] or quota['namespace']=='all':
+                            exist_pod = all_resources
+                            # 过滤个人名下的pod
+                            exist_pod = [pod for pod in exist_pod if pod['user'] == req_user.username]
+
+                            if quota['cluser']!='all':
+                                exist_pod = [pod for pod in exist_pod if pod['cluster']==quota['cluser']]
+                            if quota['namespace']!='all':
+                                exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
+                            if quota['org']!='all':
+                                exist_pod = [pod for pod in exist_pod if pod['org'] == quota['org']]
+
+                            exist_resource = sum([float(str(pod.get('value','0')).replace('G','')) for pod in exist_pod])
+                            limit_resource = float(quota['value'])
+                            request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                            message = f'user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource} * {replicas}, user limit {limit_resource}, exist {exist_resource}'
+                            message += "\nexist pod:\n" + '\n'.join([pod['labels'].get('pod-type', 'task') + ":" + pod['name'] for pod in exist_pod])
+
+                            print(message)
+                            if request_resource*replicas>(limit_resource-exist_resource):
+                                return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            if quota['type']=='total':
+                pass
+
+    # 或者这个项目下的限制，比如对每个人的限制和对项目组的总和设置，已经确保了申请项目组，与额度配置项目组相同
+    if req_project.quota():
+        if not all_resources:
+            all_resources = get_all_resource(exclude_pod=exclude_pod)
+
+        quota_confg = req_project.quota()
+        quotas_array = re.split(';|\n', quota_confg.strip())
+        quotas = []
+        for quota in quotas_array:
+            if len(quota.split(',')) == 4:
+                quota = quota.replace(' ', '').strip()
+                quotas.append(dict(zip(['namespace', 'resource', 'type', 'value'], quota.split(','))))
+
+        for quota in quotas:
+            if quota['namespace']=='notebook':
+                quota['namespace']='jupyter'
+
+            # 查看单个任务是否满足资源限制
+            if quota['type'] == 'single':
+                if req_namespace==quota['namespace'] or quota['namespace']=='all':
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource}, project limit {limit_resource}'
+                    print(message)
+                    if request_resource > limit_resource:
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            # 查看正在运行的整体资源是否满足资源限制
+            if quota['type'] == 'concurrent':
+                if req_namespace == quota['namespace'] or quota['namespace'] == 'all':
+                    exist_pod = all_resources
+                    # 过滤该项目组下的pod
+                    exist_pod = [pod for pod in exist_pod if pod['project'] == req_project.name]
+
+                    # print(exist_pod)
+                    if quota['namespace'] != 'all':
+                        exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
+
+                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
+                    # print(exist_pod)
+                    # print(quota['resource'])
+                    exist_resource = sum([float(str(pod.get('value', '0')).replace('G', '')) for pod in exist_pod])
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource} * {replicas}, project limit {limit_resource}, exist {exist_resource}'
+                    message +="\nexist pod:\n"+'\n'.join([pod['labels'].get('pod-type','task')+":"+pod['name'] for pod in exist_pod])
+                    print(message)
+                    # message += '\n<a target="_blank" href="https://www.w3schools.com">申请资源</a>'
+                    if request_resource*replicas > (limit_resource - exist_resource):
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            if quota['type'] == 'total':
+                pass
+
+    # 获取项目组下对个人的额度限制，已经确保了申请项目组，与额度配置项目组相同
+    if req_project.quota(userid=req_user.id):
+
+        if not all_resources:
+            all_resources = get_all_resource(exclude_pod=exclude_pod)
+
+        quota_confg = req_project.quota(userid=req_user.id)
+        quotas_array = re.split(';|\n', quota_confg.strip())
+        quotas = []
+        for quota in quotas_array:
+            quota = quota.replace(' ', '').strip()
+            if len(quota.split(',')) == 4:
+                quotas.append(dict(zip(['namespace', 'resource', 'type', 'value'], quota.split(','))))
+
+        for quota in quotas:
+            if quota['namespace']=='notebook':
+                quota['namespace']='jupyter'
+
+            # 查看单个任务是否满足资源限制
+            if quota['type'] == 'single':
+                if req_namespace == quota['namespace'] or quota['namespace'] == 'all':
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource}, project limit {limit_resource}'
+                    print(message)
+                    if request_resource > limit_resource:
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            # 查看正在运行的整体资源是否满足资源限制，
+            if quota['type'] == 'concurrent':
+                if req_namespace == quota['namespace'] or quota['namespace'] == 'all':
+                    exist_pod = all_resources
+                    # 过滤该项目组下的pod
+                    exist_pod = [pod for pod in exist_pod if pod['project'] == req_project.name and pod['user']==req_user.username]
+                    if quota['namespace'] != 'all':
+                        exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
+
+                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
+
+                    # print(exist_pod)
+                    # print(quota['resource'])
+                    exist_resource = sum([float(str(pod.get('value', '0')).replace('G', '')) for pod in exist_pod])
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource} * {replicas}, project limit {limit_resource}, exist {exist_resource}'
+                    message +="\nexist pod:\n"+'\n'.join([pod['labels'].get('pod-type','task')+":"+pod['name'] for pod in exist_pod])
+
+                    print(message)
+                    if request_resource*replicas > (limit_resource - exist_resource):
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            if quota['type'] == 'total':
+                pass
+
+    return True,''

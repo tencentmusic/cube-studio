@@ -183,7 +183,7 @@ class Base_Impl():
                 f.write(data.replace(deli, separator))
                 f.close()
 
-        url = f'{request.host_url.rstrip("/")}/static/mnt/admin/sqllab/result/{qid}.{name_map[separator]}.csv'
+        url = f'{request.host_url.rstrip("/")}/static/global/sqllab/result/{qid}.{name_map[separator]}.csv'
 
         # 获取数据库记录
         q = db.session.query(Sqllab_Query).filter(Sqllab_Query.id == int(qid)).first()

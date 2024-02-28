@@ -403,9 +403,9 @@ def listen_workflow():
     workflow_info = conf.get('CRD_INFO')['workflow']
     namespace = conf.get('PIPELINE_NAMESPACE')  # 不仅这一个命名空间
     w = watch.Watch()
-    print('begin listen')
     while (True):
         try:
+            print('begin listen')
             for event in w.stream(client.CustomObjectsApi().list_namespaced_custom_object, group=workflow_info['group'],
                                   version=workflow_info["version"],
                                   namespace=namespace, plural=workflow_info["plural"]):  # label_selector=label,
