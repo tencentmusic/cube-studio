@@ -169,6 +169,14 @@ const Setting: React.FC = () => {
           /> */}
           <div className={style.splitLine}></div>
           <Dropdown
+            label={t('调度优先级')}
+            options={[
+              { key: '高优先级', text: '高优先级' },
+              { key: '低优先级', text: '低优先级' },
+            ]}
+          />
+          <div className={style.splitLine}></div>
+          <Dropdown
             label={t('调度类型')}
             options={[
               { key: 'once', text: 'once' },
