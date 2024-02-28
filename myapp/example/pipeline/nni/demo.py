@@ -7,18 +7,26 @@ from nni.utils import merge_parameter
 import pysnooper
 time.sleep(10)
 
+def get_acc(epoch):
+    # 填写你的训练代码，生成准确率的值，下面的只是示例
+    acc=random.randint(10*epoch,10*(epoch+1))
+    return acc
+
+# 平台只关注上报每次epoch的目标值(准确率)和最终的目标值(准确率)，关于如何得到的这两个值，用户自己把控
 @pysnooper.snoop()
 def main(args):
-    test_acc=random.randint(30,50)
+    total_acc = 0
     for epoch in range(1, 11):
-        test_acc_epoch= random.randint(3,5)
+        test_acc_epoch= get_acc(epoch)
         time.sleep(3)
-        # if os.path.exists('train')
-        test_acc+=test_acc_epoch
+
         # 上报当前迭代目标值
-        nni.report_intermediate_result(test_acc)
+        nni.report_intermediate_result(test_acc_epoch)
+        # 计算最终准确率，这里试试个示例
+        total_acc = test_acc_epoch
+
     # 上报最总目标值
-    nni.report_final_result(test_acc)
+    nni.report_final_result(total_acc)
 
 
 def get_params():

@@ -1,4 +1,5 @@
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
+
 # pip install tensorboardX torch torchvision --no-cache-dir
 # pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2 tensorboardX --index-url https://download.pytorch.org/whl/cu118
 pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 tensorboardX

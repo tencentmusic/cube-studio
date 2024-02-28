@@ -12,8 +12,6 @@ import urllib.parse
 VC_TASK_INDEX = int(os.environ.get('VC_TASK_INDEX', '0'))
 VC_WORKER_NUM = int(os.environ.get('VC_WORKER_NUM', '1')) - 1  # 0 作为生产者
 
-print(VC_TASK_INDEX, VC_WORKER_NUM)
-
 
 class Rabbit_Producer():
 
@@ -21,7 +19,8 @@ class Rabbit_Producer():
                  virtual_host='/'):  # 默认端口5672，可不写
         credentials = pika.PlainCredentials(user, password)
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=host, port=port, credentials=credentials, virtual_host=virtual_host, heartbeat=10))  # virtual_host='/'
+            pika.ConnectionParameters(host=host, port=port, credentials=credentials, virtual_host=virtual_host,
+                                      heartbeat=10))  # virtual_host='/'
         self.channel = self.connection.channel()  # 声明一个管道
         self.properties = pika.BasicProperties(  # 需要将消息发送到exchange，exchange会把消息分发给queue。queue会把消息分发给消费者
             delivery_mode=2,  # 消息持久化
@@ -215,16 +214,23 @@ class Offline_Predict():
 
     # @pysnooper.snoop()
     def callback(self, ch, method, properties, body):  # 四个参数为标准格式
-        value = body.decode(encoding='utf-8')
-        self.predict(value)
-        ch.basic_ack(delivery_tag=method.delivery_tag)  # 告诉生成者，消息处理完成
+        try:
+            value = body.decode(encoding='utf-8')
+            self.predict(value)
+            ch.basic_ack(delivery_tag=method.delivery_tag)  # 告诉生成者，消息处理完成
+        except Exception as e:
+            print(e)
 
     # @pysnooper.snoop()
     def consumer(self):
-        consumer = Rabbit_Consumer()
-        consumer.set_queue()
-        consumer.set_receive_config(callback=self.callback, auto_ack=False)
-        consumer.start_receive()
+        while True:
+            try:
+                consumer = Rabbit_Consumer()
+                consumer.set_queue()
+                consumer.set_receive_config(callback=self.callback, auto_ack=False)
+                consumer.start_receive()
+            except Exception as e:
+                print(e)
 
     # @pysnooper.snoop()
     def producter(self):
@@ -253,14 +259,15 @@ class Offline_Predict():
             print(e)
             # exit(1)
 
-    # 计算升级数量
+    # 计算剩余数量
+    # @pysnooper.snoop()
     def wait_finish(self):
+        rabbit_client = Rabbit_info()
         while (True):
             try:
-                rabbit_client = Rabbit_info()
+                time.sleep(60)
                 left_msg_num = int(rabbit_client.get_msg_count())
                 print("======================= left: {}".format(left_msg_num))
-                time.sleep(60)
                 if not left_msg_num:
                     break
 
@@ -282,12 +289,12 @@ class Offline_Predict():
                 self.predict(item)
         # 分布式启动方式
         else:
-            self.create_queue()
             VC_TASK_INDEX = int(VC_TASK_INDEX)
             if VC_TASK_INDEX == 0 and local_rank == 0:
-                t = threading.Thread(target=self.consumer)
-                # 启动子线程
-                t.start()
+                self.create_queue()
+                # t = threading.Thread(target=self.consumer)
+                # # 启动子线程
+                # t.start()
                 # 主线程为监控消费是否结束
                 self.producter()
                 self.wait_finish()
@@ -298,7 +305,7 @@ class Offline_Predict():
     def run(self):
         VC_TASK_INDEX = os.environ.get('VC_TASK_INDEX', None)
         local_rank = int(os.environ.get('LOCAL_RANK', 0))
-        print('!!!!!!!! task_index=%s,local_rank=%s' % (VC_TASK_INDEX,local_rank))
+        print('!!!!!!!! task_index=%s,local_rank=%s' % (VC_TASK_INDEX, local_rank))
         self.start_predict(local_rank)
 
 
