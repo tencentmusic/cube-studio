@@ -2541,6 +2541,26 @@
     "job_template_args": {
     }
   },
+  "chatglm3": {
+    "project_name": "大模型",
+    "image_name": "python:3.9",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm3",
+    "image_describe": "chatglm3",
+    "job_template_name": "chatglm3",
+    "job_template_describe": "chatglm3 lora微调(企业版)",
+    "job_template_version": "Release",
+    "job_template_workdir": "/root/chatglm",
+    "job_template_command": "deepspeed --master_port 520 train.py --mode glm2 --train_type lora --gradient_checkpointing",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 3,
+      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm3"
+    },
+    "job_template_args": {
+    }
+  },
   "llama2": {
     "project_name": "大模型",
     "image_name": "python:3.9",
@@ -2555,7 +2575,7 @@
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 2,
+      "index": 4,
       "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/llama2"
     },
     "job_template_args": {
@@ -2575,7 +2595,7 @@
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 3,
+      "index": 5,
       "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/baichuan2"
     },
     "job_template_args": {
