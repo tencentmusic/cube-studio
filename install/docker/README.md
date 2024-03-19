@@ -1,6 +1,18 @@
 
 # 本地调试
 
+## windows 系统下基础环境
+1. 安装docker desktop
+下载Docker Desktop Installer，安装最新版docker desktop。 windows 10 版本需要启用 Hyper-V ，安装配置流程可参考在线文档https://zhuanlan.zhihu.com/p/441965046
+
+2. 安装 Power Shell
+之后的脚本需要在Power Shell 中执行
+
+3. 安装python > 3.9.16
+
+## mac和linux系统基础环境
+参考/install/README.md
+
 ## deploy mysql
 
 ```
@@ -40,7 +52,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.
 注意：前后端代码生产环境均在容器中运行。
 
 后端开发调试：代码通过挂载，在本机ide中修改，在docker-compose中运行调试，debug模式自动热更新。
-前端调试：本机ide开发调试，最后编译为静态文件，也可以在docker中编译成静态文件，最后统一打包成docker镜像
+前端调试：大部分功能在本机ide开发调试即可，支持热更新。完整的平台前端调试需要本地ide开发完成后打包编译为静态文件，也可以在docker中编译成静态文件，在docker-compose中运行验证，不同于后端，这种场景下前端不支持热更新。
 
 #### 本地后端python代码开发
 
@@ -155,3 +167,17 @@ yarn配置镜像命令
 ```
 yarn config set registry https://registry.npmmirror.com
 ```
+
+3）windows 系统下执行pip3 install -r requirements.txt 失败
+Power Shell 单独安装失败的部分，但要确保安装的版本号与requirements.txt保持一致，安装成功后再重新执行pip3 install -r requirements.txt
+
+4）windows 环境，执行docker-compose报UnicodeDecodeError: 'gbk' codec问题
+编码类型问题可参考 https://cloud.tencent.com/developer/article/1530430 修改本地文件 encoding.py  大概位置为：XXX\AppData\Local\Programs\Python\Python312\Lib\site-packages\pip\_internal\utils\encoding.py
+
+5）windows 环境，执行docker-compose，报 Python——/usr/bin/env: ‘python(3)\r’: No such file or directory
+原因：在Windows系统中，文本文件的行尾通常以回车符(CR)和换行符(LF)的组合表示（称为CRLF），而在Linux和Unix系统中，行尾仅以换行符(LF)表示。当你在Windows环境下编写或编辑Shell脚本，然后尝试在Linux系统上运行时，就可能会遇到这个问题。
+解决方案： vscode 打开项目，全文搜索报错文本关键字，比如/usr/bin/env，打开对应文件，将VSCode 右下角的CRLF 切换为 LF 保存对应文件
+
+6）windows 环境，打包visionPlus 编译过程报错
+/myapp/visionPlus/.eslintrc 文件中 注释行："linebreak-style": ["error", "unix"]，取消注释行："linebreak-style": ["error", "windows"]
+
