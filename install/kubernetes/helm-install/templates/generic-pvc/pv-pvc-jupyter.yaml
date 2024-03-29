@@ -1,0 +1,70 @@
+
+# 模型训练
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jupyter-kubeflow-user-workspace
+  labels:
+    jupyter-pvname: jupyter-kubeflow-user-workspace
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/workspace
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-user-workspace
+  namespace: jupyter
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+#  selector:
+#    matchLabels:
+#      jupyter-pvname: jupyter-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: jupyter-kubeflow-user-workspace
+
+# 模型归档
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jupyter-kubeflow-archives
+  labels:
+    jupyter-pvname: jupyter-kubeflow-archives
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/archives
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-archives
+  namespace: jupyter
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+#  selector:
+#    matchLabels:
+#      jupyter-pvname: jupyter-kubeflow-archives
+  storageClassName: ""
+  volumeName: jupyter-kubeflow-archives

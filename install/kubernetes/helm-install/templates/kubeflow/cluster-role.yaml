@@ -1,0 +1,99 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: training-operator
+  name: training-operator
+rules:
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - tfjobs
+      - mxjobs
+      - pytorchjobs
+      - xgboostjobs
+      - paddlejobs
+      - mpijobs/status
+      - tfjobs/status
+      - pytorchjobs/status
+      - mxjobs/status
+      - xgboostjobs/status
+      - paddlejobs/status
+      - mpijobs/finalizers
+      - tfjobs/finalizers
+      - pytorchjobs/finalizers
+      - mxjobs/finalizers
+      - xgboostjobs/finalizers
+      - paddlejobs/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - services
+      - endpoints
+      - events
+    verbs:
+      - "*"
+  - apiGroups:
+      - apps
+      - extensions
+    resources:
+      - deployments
+    verbs:
+      - "*"
+  # This is needed for the launcher role of the MPI operator.
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    verbs:
+      - create
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+      - rolebindings
+    verbs:
+      - create
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+    - configmaps
+    - secrets
+    - serviceaccounts
+    verbs:
+      - create
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - scheduling.volcano.sh
+    resources:
+      - podgroups
+    verbs:
+      - "*"
+  - apiGroups:
+      - autoscaling
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - "*"
+  - apiGroups:
+      - scheduling.sigs.k8s.io
+    resources:
+      - podgroups
+    verbs:
+      - "*"

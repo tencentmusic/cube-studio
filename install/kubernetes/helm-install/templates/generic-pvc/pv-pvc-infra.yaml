@@ -1,0 +1,68 @@
+# 平台上传需要
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: infra-kubeflow-global-pv
+  labels:
+    infra-pvname: infra-kubeflow-global-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/global
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-global-pvc
+  namespace: infra
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+#  selector:
+#    matchLabels:
+#      infra-pvname: infra-kubeflow-global-pv
+  storageClassName: ""
+  volumeName: infra-kubeflow-global-pv
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: infra-kubeflow
+  labels:
+    infra-pvname: infra-kubeflow
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: infra-kubeflow
+  namespace: infra
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+#  selector:
+#    matchLabels:
+#      infra-pvname: infra-kubeflow
+  storageClassName: ""
+  volumeName: infra-kubeflow

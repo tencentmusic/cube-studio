@@ -1,0 +1,71 @@
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: service-kubeflow-user-workspace
+  labels:
+    service-pvname: service-kubeflow-user-workspace
+spec:
+#  storageClassName: pipeline
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/workspace
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-user-workspace
+  namespace: service
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+#  selector:
+#    matchLabels:
+#      service-pvname: service-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: service-kubeflow-user-workspace
+
+# 模型归档
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: service-kubeflow-archives
+  labels:
+    service-pvname: service-kubeflow-archives
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/archives
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-archives
+  namespace: service
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+#  selector:
+#    matchLabels:
+#      service-pvname: service-kubeflow-archives
+  storageClassName: ""
+  volumeName: service-kubeflow-archives
+

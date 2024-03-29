@@ -1,0 +1,73 @@
+{{ if .Values.installPrometheus }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prometheus-setup
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      serviceAccountName: istio-installer
+      containers:
+      - name: setup
+        # 使用你的自定义镜像，假设镜像标签为my-kubectl-with-istio:latest
+        image: gaoxin2020/kubectl-cube:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          kubectl delete -f /prometheus/operator/operator-crd.yml
+          sleep 5
+          kubectl apply -f /prometheus/operator/operator-crd.yml
+          kubectl apply -f /prometheus/operator/operator-rbac.yml
+          kubectl wait crd/podmonitors.monitoring.coreos.com --for condition=established --timeout=60s
+          kubectl apply -f /prometheus/operator/operator-dp.yml
+          kubectl apply -f /prometheus/node-exporter/node-exporter-sa.yml
+          kubectl apply -f /prometheus/node-exporter/node-exporter-rbac.yml
+          kubectl apply -f /prometheus/node-exporter/node-exporter-svc.yml
+          kubectl apply -f /prometheus/node-exporter/node-exporter-ds.yml
+
+          kubectl apply -f /prometheus/grafana/pv-pvc-hostpath.yml
+          kubectl apply -f /prometheus/grafana/grafana-sa.yml
+          kubectl apply -f /prometheus/grafana/grafana-source.yml
+          kubectl apply -f /prometheus/grafana/grafana-datasources.yml
+          kubectl apply -f /prometheus/grafana/grafana-admin-secret.yml
+          kubectl apply -f /prometheus/grafana/grafana-svc.yml
+          kubectl delete configmap grafana-config all-grafana-dashboards --namespace=monitoring
+          kubectl create configmap grafana-config --from-file=./grafana/grafana.ini --namespace=monitoring
+          kubectl create configmap all-grafana-dashboards --from-file=./grafana/dashboard --namespace=monitoring
+          kubectl delete -f /prometheus/grafana/grafana-dp.yml
+          sleep 5
+          kubectl apply -f /prometheus/grafana/grafana-dp.yml
+          kubectl apply -f /prometheus/service-discovery/kube-controller-manager-svc.yml
+          kubectl apply -f /prometheus/service-discovery/kube-scheduler-svc.yml
+          kubectl apply -f /prometheus/prometheus/prometheus-secret.yml
+          kubectl apply -f /prometheus/prometheus/prometheus-rules.yml
+          kubectl apply -f /prometheus/prometheus/prometheus-rbac.yml
+          kubectl apply -f /prometheus/prometheus/prometheus-svc.yml
+          kubectl wait crd/prometheuses.monitoring.coreos.com --for condition=established --timeout=60s
+          kubectl delete -f /prometheus/prometheus/prometheus-main.yml
+          sleep 5
+          kubectl apply -f /prometheus/prometheus/pv-pvc-hostpath.yaml
+          kubectl apply -f /prometheus/prometheus/prometheus-main.yml
+          sleep 5
+
+          kubectl apply -f /prometheus/servicemonitor/alertmanager-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/coredns-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/kube-apiserver-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/kube-controller-manager-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/kube-scheduler-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/kubelet-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/kubestate-metrics-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/node-exporter-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/prometheus-operator-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/prometheus-sm.yml
+          kubectl apply -f /prometheus/servicemonitor/pushgateway-sm.yml
+
+          kubectl apply -f /prometheus/prometheus_adapter/metric_rule.yaml
+          kubectl apply -f /prometheus/prometheus_adapter/prometheus_adapter.yaml
+      restartPolicy: Never
+{{ end }}
