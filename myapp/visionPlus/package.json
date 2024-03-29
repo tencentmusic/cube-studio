@@ -55,7 +55,7 @@
     "@types/react-redux": "^7.1.16",
     "@types/react-router-dom": "^5.1.7",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
-    "@typescript-eslint/parser": "^4.29.1",
+    "@typescript-eslint/parser": "^5.10.0",
     "eslint": "^8.25.0",
     "monaco-editor-webpack-plugin": "^4.1.1",
     "prettier": "^2.2.1",

@@ -623,7 +623,7 @@ output %s
             item.name = item.name[:60]
         # item.expand = json.dumps(expand,indent=4,ensure_ascii=False)
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def pre_add(self, item):
         if item.name:
             item.name = item.name.replace("_", "-")
