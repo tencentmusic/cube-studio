@@ -1,0 +1,68 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mysql
+  name: mysql
+  namespace: infra
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: mysql
+                operator: In
+                values:
+                - "true"
+      initContainers:
+        - name: remove-lost-found
+          image: busybox:1.36.0
+          imagePullPolicy: IfNotPresent
+          command: ["rm", "-rf", "/var/lib/mysql/lost+found"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+      imagePullSecrets:
+      - name: hubsecret
+      containers:
+        - name: mysql
+          image: mysql:8.0.32
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: mysql-configmap
+              mountPath: /etc/mysql/mysql.conf.d/mysqld.cnf
+              subPath: mysqld.cnf
+              readOnly: False
+            - name: mysql-configmap
+              mountPath: /docker-entrypoint-initdb.d/init.sql
+              subPath: init.sql
+              readOnly: False
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          env:
+          - name: MYSQL_ALLOW_EMPTY_PASSWORD
+            value: "true"
+          - name: MYSQL_ROOT_PASSWORD
+            value: admin
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: infra-mysql-pvc
+        - name: mysql-configmap
+          configMap:
+            name: mysql-configmap
+

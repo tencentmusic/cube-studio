@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-installer
+
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-installer-admin-binding
+subjects:
+- kind: ServiceAccount
+  name: istio-installer
+  namespace: default  # 请根据实际ServiceAccount所在的命名空间进行修改
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+

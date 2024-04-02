@@ -1,0 +1,32 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-configmap
+  namespace: infra
+  labels:
+    app: mysql
+data:
+  mysqld.cnf: |-
+    [mysqld]
+    skip-name-resolve
+    #log-bin=mysql-bin #添加这一行就ok
+    #binlog-format=ROW #选择row模式
+    #server_id=1 #配置mysql replaction需要定义，不能和canal的slaveId重复
+    pid-file        = /var/run/mysqld/mysqld.pid
+    socket          = /var/run/mysqld/mysqld.sock
+    datadir         = /var/lib/mysql
+    #log-error      = /var/log/mysql/error.log
+    # Disabling symbolic-links is recommended to prevent assorted security risks
+    symbolic-links=0
+    bind-address    = 0.0.0.0
+    max_connections = 1000
+    innodb_buffer_pool_size=2G
+    explicit_defaults_for_timestamp = 1
+    character_set_server=utf8
+    init_connect='SET NAMES utf8'
+    skip-grant-tables
+
+  init.sql: |-
+
+    CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;

@@ -1,0 +1,56 @@
+# 训练使用的特殊账号，用来在集群中控制启动分布式
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubeflow-clusterrole
+rules:
+- apiGroups: ["*"]
+  resources: ["pods","pods/exec","pods/log","services","endpoints","events","configmaps","nodes","deployments","mpijobs","tfjobs","pytorchjobs","jobs","sparkapplications","mxjobs","paddlejobs","xgboostjobs"]
+  verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubeflow-pipeline
+  namespace: pipeline
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubeflow-pipeline
+  namespace: pipeline
+subjects:
+- kind: ServiceAccount
+  name: kubeflow-pipeline
+  namespace: pipeline
+roleRef:
+  kind: ClusterRole
+  name: kubeflow-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nni
+  namespace: automl
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: automl-nni-clusterrolebinding
+  namespace: automl
+subjects:
+- kind: ServiceAccount
+  name: nni
+  namespace: automl
+roleRef:
+  kind: ClusterRole
+  name: kubeflow-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+
+
+
+

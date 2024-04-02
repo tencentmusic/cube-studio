@@ -1,0 +1,74 @@
+
+
+# 模型训练
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: automl-kubeflow-user-workspace
+  labels:
+    automl-pvname: automl-kubeflow-user-workspace
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/workspace
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-user-workspace
+  namespace: automl
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: ""
+  volumeName: automl-kubeflow-user-workspace
+#  selector:
+#    matchLabels:
+#      automl-pvname: automl-kubeflow-user-workspace
+
+
+
+# 模型归档
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: automl-kubeflow-archives
+  labels:
+    automl-pvname: automl-kubeflow-archives
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/archives
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-archives
+  namespace: automl
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: ""
+  volumeName: automl-kubeflow-archives
+#  selector:
+#    matchLabels:
+#      automl-pvname: automl-kubeflow-archives
+
