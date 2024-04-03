@@ -52,7 +52,7 @@ spec:
           image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
           imagePullPolicy: Always  # IfNotPresent
           workingDir: /home/myapp
-          command: ["bash","myapp/tools/start.sh"]
+          command: ["supervisord", "-c", "/home/myapp/myapp/tools/supervisord.conf"]
           env:
           - name: REDIS_HOST
             valueFrom:

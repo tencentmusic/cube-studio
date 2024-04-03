@@ -1787,133 +1787,6 @@ def fix_task_position(pipeline, tasks, expand_tasks):
     return expand_tasks
 
 
-import yaml
-
-# @pysnooper.snoop(watch_explode=())
-def merge_job_experiment_template(node_selector, volume_mount, image, image_secrets, hostAliases, workingDir, image_pull_policy, resource_memory, resource_cpu, command):
-    nodeSelector = None
-    if node_selector and '=' in node_selector:
-        nodeSelector = {}
-        for selector in re.split(',|;|\n|\t', node_selector):
-            nodeSelector[selector.strip().split('=')[0].strip()] = selector.strip().split('=')[1].strip()
-    if not "~" in resource_memory:
-        resource_memory = resource_memory + "~" + resource_memory
-    if not "~" in resource_cpu:
-        resource_cpu = resource_cpu + "~" + resource_cpu
-    requests_memory, limits_memory = resource_memory.strip().split('~')
-    requests_cpu, limits_cpu = resource_cpu.strip().split('~')
-    commands = command.split(' ')
-    commands = [command for command in commands if command]
-    commands.append('$replace')
-
-    volumes = []
-    volumeMounts = []
-    if volume_mount and ":" in volume_mount:
-        volume_mount = volume_mount.strip()
-        if volume_mount:
-            volume_mounts = volume_mount.split(',')
-            for volume_mount in volume_mounts:
-                volume, mount = volume_mount.split(":")[0].strip(), volume_mount.split(":")[1].strip()
-                if "(pvc)" in volume:
-                    pvc_name = volume.replace('(pvc)', '').replace(' ', '')
-                    volumn_name = pvc_name.replace('_', '-')
-                    volumes.append(
-                        {
-                            "name": volumn_name,
-                            "persistentVolumeClaim": {
-                                "claimName": pvc_name
-                            }
-                        }
-                    )
-                    volumeMounts.append({
-                        "name": volumn_name,
-                        "mountPath": mount
-                    })
-
-    if hostAliases:
-        hostAliases = [host.strip() for host in re.split('\r\n',hostAliases) if host.strip() and len(host.strip().split(' '))>1]
-        hostAliases = [
-            {
-                "ip": host.split(' ')[0],
-                "hostnames": [
-                    host.split(' ')[1]
-                ]
-            } for host in hostAliases
-        ]
-    else:
-        hostAliases = []
-
-    raw_json = {
-        "apiVersion": "batch/v1",
-        "kind": "Job",
-        "metadata": {
-            "name": "{{.Trial}}",
-            "namespace": "{{.NameSpace}}"
-        },
-        "spec": {
-            "template": {
-                "spec": {
-                    "hostAliases": hostAliases,
-                    "imagePullSecrets": image_secrets,
-                    "restartPolicy": "Never",
-                    "nodeSelector": nodeSelector,
-                    "volumes": volumes if volumes else None,
-                    "containers": [
-                        {
-                            "name": "{{.Trial}}",
-                            "image": image,
-                            "workingDir": workingDir if workingDir else None,
-                            "imagePullPolicy": image_pull_policy,
-                            "volumeMounts": volumeMounts if volumeMounts else None,
-                            "resources": {
-                                "requests": {
-                                    "cpu": float(requests_cpu),
-                                    "memory": requests_memory
-                                },
-                                "limits": {
-                                    "cpu": float(limits_cpu),
-                                    "memory": limits_memory
-                                }
-                            },
-                            "command": commands if command else None
-                        }
-                    ]
-                }
-            }
-        }
-    }
-
-    # # print(raw_json)
-    # @pysnooper.snoop(watch_explode=('data'))
-    # def clean_key(data):
-    #     temp = copy.deepcopy(data)
-    #     for key in temp:
-    #         if temp[key]==None or temp[key]==[] or temp[key]=={} or temp[key]=='':
-    #             del data[key]
-    #         elif type(temp[key])==dict:
-    #             data[key]=clean_key(data[key])
-    #     return data
-    #
-    # raw_json=clean_key(raw_json)
-    # print(yaml.dump(raw_json))
-
-    global_commands = '''
-    {{- with .HyperParameters}}
-    {{- range .}}
-    - "{{.Name}}={{.Value}}"
-    {{- end}}
-    {{- end}}
-    '''
-    global_commands = global_commands.strip().split('\n')
-    global_commands = [global_command.strip() for global_command in global_commands if global_command.strip()]
-    replace_str = ''
-    for global_command in global_commands:
-        replace_str += global_command + '\n' + '        '
-
-    rawTemplate = yaml.dump(raw_json).replace('- $replace', replace_str)
-
-    return rawTemplate
-
 
 def hive_create_sql_demo():
     sql = '''create table if not exists test_table(
@@ -2232,3 +2105,15 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
                 pass
 
     return True,''
+
+
+def test_database_connection(url):
+    from sqlalchemy import create_engine
+    from sqlalchemy.exc import OperationalError
+    try:
+        engine = create_engine(url)
+        conn = engine.connect()
+        conn.close()
+        return True
+    except OperationalError:
+        return False

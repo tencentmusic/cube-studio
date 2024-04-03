@@ -61,10 +61,12 @@
             "require": 1,
             "choice": [
                 "serving",
+                "ml-server",
                 "tfserving",
                 "torch-server",
                 "onnxruntime",
-                "triton-server"
+                "triton-server",
+                "llm-server"
             ],
             "range": "",
             "default": "service",
@@ -106,18 +108,6 @@
             "default": "",
             "placeholder": "",
             "describe": "推理容器启动命令",
-            "editable": 1
-        },
-        "--args": {
-            "type": "str",
-            "item_type": "str",
-            "label": "推理容器启动参数",
-            "require": 0,
-            "choice": [],
-            "range": "",
-            "default": "",
-            "placeholder": "",
-            "describe": "推理容器启动参数",
             "editable": 1
         },
         "--env": {
