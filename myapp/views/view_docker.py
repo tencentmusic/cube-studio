@@ -136,8 +136,7 @@ class Docker_ModelView_Base():
         self.add_form_extra_fields['base_image'] = StringField(
             _('基础镜像'),
             default=conf.get('USER_IMAGE',''),
-            description=f'{__("基础镜像和构建方法可参考：")}<a target="_blank" href="%s">{__("点击打开")}</a>' % (
-                conf.get('HELP_URL').get('docker', '')),
+            description=f'{__("基础镜像和构建方法可参考：")}<a target="_blank" href="%s">{__("点击打开")}</a>' % (conf.get('HELP_URL').get('docker', '')),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(), ]
         )
@@ -180,7 +179,7 @@ class Docker_ModelView_Base():
     def debug(self, docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG', ''))
+        k8s_client = K8s(docker.project.cluster.get('KUBECONFIG', ''))
         namespace = json.loads(docker.expand).get("namespace", conf.get('NOTEBOOK_NAMESPACE'))
         pod_name = "docker-%s-%s" % (docker.created_by.username, str(docker.id))
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
@@ -273,7 +272,7 @@ class Docker_ModelView_Base():
     def save(self, docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG', ''))
+        k8s_client = K8s(docker.project.cluster.get('KUBECONFIG', ''))
         namespace = json.loads(docker.expand).get("namespace", conf.get('NOTEBOOK_NAMESPACE'))
         pod_name = "docker-%s-%s" % (docker.created_by.username, str(docker.id))
         pod = None
@@ -359,7 +358,7 @@ class Docker_ModelView_Base():
         }
         check_docker_commit.apply_async(kwargs=kwargs)
 
-        return redirect("/k8s/web/log/%s/%s/%s" % (conf.get('ENVIRONMENT'), namespace, pod_name))
+        return redirect("/k8s/web/log/%s/%s/%s" % (docker.project.cluster.get('NAME', ''), namespace, pod_name))
 
 
 # 添加api

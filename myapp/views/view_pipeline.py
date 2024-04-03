@@ -78,7 +78,7 @@ class Pipeline_Filter(MyappFilter):
 
 
 
-def make_workflow_yaml(pipeline,workflow_label,hubsecret_list,dag_templates,containers_templates):
+def make_workflow_yaml(pipeline,workflow_label,hubsecret_list,dag_templates,containers_templates,dbsession=db.session):
     name = pipeline.name+"-"+uuid.uuid4().hex[:4]
     workflow_label['workflow-name']=name
     workflow_crd_json={
@@ -139,7 +139,7 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
     for task_name in dag:
         # 使用临时连接，避免连接中断的问题
         # try:
-        # db.session().ping()
+
         task = dbsession.query(Task).filter_by(name=task_name, pipeline_id=pipeline.id).first()
         if not task:
             raise MyappException('task %s not exist ' % task_name)
@@ -491,7 +491,7 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
 
     # 添加个人创建的所有仓库秘钥
     image_pull_secrets = conf.get('HUBSECRET', [])
-    user_repositorys = db.session.query(Repository).filter(Repository.created_by_fk == pipeline.created_by.id).all()
+    user_repositorys = dbsession.query(Repository).filter(Repository.created_by_fk == pipeline.created_by.id).all()
     hubsecret_list = list(set(image_pull_secrets + [rep.hubsecret for rep in user_repositorys]))
 
     # 配置拉取秘钥
@@ -521,7 +521,7 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
     for task_name in dag:
         containers_template.append(make_container_template(task_name=task_name,hubsecret_list=hubsecret_list))
 
-    workflow_json = make_workflow_yaml(pipeline=pipeline, workflow_label=workflow_label, hubsecret_list=hubsecret_list, dag_templates=make_dag_template(), containers_templates=containers_template)
+    workflow_json = make_workflow_yaml(pipeline=pipeline, workflow_label=workflow_label, hubsecret_list=hubsecret_list, dag_templates=make_dag_template(), containers_templates=containers_template,dbsession=dbsession)
     # 先这是某个模板变量不进行渲染，一直向后传递到argo
     pipeline_file = json.dumps(workflow_json,ensure_ascii=False,indent=4)
     # print(pipeline_file)

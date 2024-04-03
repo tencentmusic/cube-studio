@@ -294,20 +294,19 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         layout_config["start_time"] = k8s_client.to_local_time(status_more.get('startedAt',''))
         layout_config['finish_time'] = k8s_client.to_local_time(status_more.get('finishedAt',''))
 
-        layout_config['crd_json'] = core.decode_unicode_escape(
-            {
-                "apiVersion": "argoproj.io/v1alpha1",
-                "kind": "Workflow",
-                "metadata": {
-                    "annotations": annotations,
-                    "name": workflow_name,
-                    "labels": labels,
-                    "namespace": namespace
-                },
-                "spec": spec,
-                "status": status_more
-            }
-        )
+        layout_config['crd_json'] = {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Workflow",
+            "metadata": {
+                "annotations": core.decode_unicode_escape(annotations),
+                "name": workflow_name,
+                "labels": labels,
+                "namespace": namespace
+            },
+            "spec": spec,
+            "status": status_more
+        }
+
 
         if int(layout_config.get("pipeline-id", '0')):
             pipeline = db.session.query(Pipeline).filter_by(id=int(layout_config.get("pipeline-id", '0'))).first()
@@ -666,12 +665,11 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                         containers.append(container_temp)
 
                 pod['spec']['containers'] = containers
-                pod = core.decode_unicode_escape(pod)
                 pod_yaml = json.dumps(pod, indent=4, ensure_ascii=False, default=str)
 
-                import yaml
-                pod_yaml = yaml.safe_dump(yaml.load(pod_yaml), default_flow_style=False, indent=4)
-                # print(pod)
+                # import yaml
+                # pod_yaml = yaml.safe_dump(yaml.load(pod_yaml, Loader=yaml.SafeLoader), default_flow_style=False, indent=4)
+                # # print(pod)
 
         except Exception as e:
             print(e)
