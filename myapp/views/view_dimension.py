@@ -28,6 +28,7 @@ from flask import (
 )
 from .base import MyappFilter
 from myapp.models.model_dimension import Dimension_table
+from myapp.utils import core
 from flask_appbuilder import expose
 import pysnooper, datetime, json
 
@@ -191,7 +192,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         "sqllchemy_uri": StringField(
             _('链接串地址'),
             default="",
-            description= _('链接串地址： <br> 示例：mysql+pymysql://$账号:$密码@$ip:$端口/$库名?charset=utf8 <br> 示例：postgresql+psycopg2://$账号:$密码@$ip:$端口/$库名'),
+            description= _('链接串地址： <br> 示例：mysql+pymysql://账号:密码@ip:端口/库名?charset=utf8 <br> 示例：postgresql+psycopg2://账号:密码@ip:端口/库名'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(), Regexp("^(mysql\+pymysql|postgresql\+psycopg2)://.*:.*@.*:[0-9]*/[a-zA-Z_\-]*")]
         ),
@@ -236,7 +237,6 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
-
     }
     edit_form_extra_fields = add_form_extra_fields
 
@@ -290,6 +290,21 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         if "dimension_%s" % item.id in all_dimension:
             del all_dimension["dimension_%s" % item.id]
 
+    # 验证是否可以联通
+    def post_add(self, item):
+        # 测试连接
+        try:
+            if not core.test_database_connection(item.sqllchemy_uri):
+                flash(__('数据库连接串地址无法访问'),'error')
+                item.sqllchemy_uri=''
+                db.session.commit()
+        except Exception as e:
+            flash(__('测试数据库连通性失败，请重新配置数据库连接串'),'error')
+            item.sqllchemy_uri = ''
+            db.session.commit()
+
+    def post_update(self, item):
+        self.post_add(item)
     # 转换为前端list
     def pre_show_res(self, _response):
         data = _response['data']
@@ -955,6 +970,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
     @expose("/<dim_id>/api/", methods=["GET"])
     def dim_api_list(self, dim_id, **kwargs):
+
         view_instance = self.set_model(dim_id)
         try:
             return view_instance.api_list(**kwargs)
