@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deploy-config
+  namespace: infra
+data:
+  STAGE: "prod"
+  REDIS_HOST: "redis-master.infra"
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: "admin"
+  MYSQL_SERVICE: "mysql+pymysql://root:admin@mysql-service.infra:3306/kubeflow?charset=utf8"
+  ENVIRONMENT: "DEV"

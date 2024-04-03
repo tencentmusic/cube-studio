@@ -1,0 +1,144 @@
+# encoding: utf-8
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeflow-dashboard
+  namespace: infra
+  labels:
+    app: kubeflow-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeflow-dashboard
+  template:
+    metadata:
+      name: kubeflow-dashboard
+      labels:
+        app: kubeflow-dashboard
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubeflow-dashboard
+                operator: In
+                values:
+                - "true"
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: kubeflow-dashboard-config
+          configMap:
+            name: kubeflow-dashboard-config
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
+              - key: config.py
+                path: config.py
+              - key: project.py
+                path: project.py
+        - name: kubernetes-config
+          configMap:
+            name: kubernetes-config
+        - name: infra-kubeflow
+          persistentVolumeClaim:
+            claimName: infra-kubeflow
+
+      serviceAccountName: kubeflow-dashboard
+
+      imagePullSecrets:
+        - name: hubsecret
+      containers:
+        - name: kubeflow-dashboard
+          image: {{ .Values.image.backend }}
+          imagePullPolicy: Always  # IfNotPresent   Always
+          command: ["bash","/entrypoint.sh"]
+          env:
+          - name: STAGE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: STAGE
+
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_HOST
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PORT
+          - name: REDIS_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PASSWORD
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: ENVIRONMENT
+
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/project.py
+              subPath: project.py
+            - name: tz-config
+              mountPath: /etc/localtime
+            - name: infra-kubeflow
+              mountPath: /data/k8s/kubeflow/
+            - name: kubernetes-config
+              mountPath: /home/myapp/kubeconfig
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 10
+              memory: 10Gi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 500
+            periodSeconds: 60
+            timeoutSeconds: 10
+
+---
+# encoding: utf-8
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeflow-dashboard
+  namespace: infra
+  labels:
+    app: kubeflow-dashboard
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: kubeflow-dashboard

@@ -1,0 +1,106 @@
+# 训练调用需要
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pipeline-kubeflow-global-pv
+  labels:
+    pipeline-pvname: pipeline-kubeflow-global-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/global
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-global-pvc
+  namespace: pipeline
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+#  selector:
+#    matchLabels:
+#      pipeline-pvname: pipeline-kubeflow-global-pv
+  storageClassName: ""
+  volumeName: pipeline-kubeflow-global-pv
+
+# 模型训练
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pipeline-kubeflow-user-workspace
+  labels:
+    pipeline-pvname: pipeline-kubeflow-user-workspace
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/workspace
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-user-workspace
+  namespace: pipeline
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+#  selector:
+#    matchLabels:
+#      pipeline-pvname: pipeline-kubeflow-user-workspace
+  storageClassName: ""
+  volumeName: pipeline-kubeflow-user-workspace
+# 模型归档
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pipeline-kubeflow-archives
+  labels:
+    pipeline-pvname: pipeline-kubeflow-archives
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/kubeflow/pipeline/archives
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: kubeflow-archives
+  namespace: pipeline
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+#  selector:
+#    matchLabels:
+#      pipeline-pvname: pipeline-kubeflow-archives
+  storageClassName: ""
+  volumeName: pipeline-kubeflow-archives
+
+

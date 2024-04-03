@@ -1,0 +1,72 @@
+---
+# Source: redis/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master
+  namespace: infra
+  labels:
+    helm.sh/chart: redis-0.1.1
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "6.0.8.9"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - name: redis
+    port: 6379
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+---
+# Source: redis/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: infra
+  labels:
+    helm.sh/chart: redis-0.1.1
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "6.0.8.9"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/instance: redis
+    spec:
+      containers:
+        - name: redis
+          securityContext:
+            {}
+          image: "bitnami/redis:6.2.12"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 6379
+            name: redis
+          resources:
+            requests:
+              cpu: 20m
+              memory: 512Mi
+          env:
+            - name: REDIS_PASSWORD
+              value: admin
+            - name: REDIS_PORT
+              value: "6379"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      nodeSelector:
+        redis: 'true'
+      volumes:
+        - name: redis-data
+          emptyDir: { }

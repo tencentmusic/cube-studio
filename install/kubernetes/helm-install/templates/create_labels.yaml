@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: label-nodes-job
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ default (include "chart.fullname" .) .Values.serviceAccount.name }}
+      containers:
+      - name: kubectl-apply-labels
+        image: bitnami/kubectl:latest # Using a public kubectl image
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            set -e
+            labelArgs=""
+            labelArgs+=" --overwrite cpu=true"
+            labelArgs+=" --overwrite istio=true"
+            labelArgs+=" --overwrite kubeflow=true"
+            labelArgs+=" --overwrite kubeflow-dashboard=true"
+            labelArgs+=" --overwrite logging=true"
+            labelArgs+=" --overwrite monitoring=true"
+            labelArgs+=" --overwrite mysql=true"
+            labelArgs+=" --overwrite notebook=true"
+            labelArgs+=" --overwrite org=public"
+            labelArgs+=" --overwrite redis=true"
+            labelArgs+=" --overwrite service=true"
+            labelArgs+=" --overwrite train=true"
+            kubectl label nodes nfstest ${labelArgs}
+      restartPolicy: Never
+  backoffLimit: 2

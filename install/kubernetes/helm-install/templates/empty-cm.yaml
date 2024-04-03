@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-config
+  namespace: infra
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-config
+  namespace: pipeline
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-config
+  namespace: automl
+
