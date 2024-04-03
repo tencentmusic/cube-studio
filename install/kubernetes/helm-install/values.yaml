@@ -38,6 +38,6 @@ dockerRegistry:
   password: "xxxx"
 
 image:
-  frontend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.03.01
-  backend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.03.01
+  frontend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.04.01
+  backend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.04.01
   training_operator: kubeflow/training-operator:v1-8a066f9 

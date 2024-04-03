@@ -27,7 +27,7 @@ services:
 #      retries: 10
 
   frontend:
-    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.03.01
+    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.04.01
     restart: unless-stopped
     command: ['sh','-c','nginx -g "daemon off;"']
     ports:
@@ -38,7 +38,7 @@ services:
       - ../../install/docker/dockerFrontend/nginx.80.conf:/etc/nginx/conf.d/default.conf
 
   myapp:
-    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.03.01
+    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.04.01
     restart: unless-stopped
     command: [ 'bash','-c','/entrypoint.sh' ]
     environment:
@@ -63,7 +63,7 @@ services:
 
 #
 #  beat:
-#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.03.01
+#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.04.01
 #    restart: "no"
 #    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app beat --loglevel=info"]
 #    shm_size: '100gb'
@@ -85,7 +85,7 @@ services:
 ##
 #
 #  worker:
-#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.03.01
+#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.04.01
 #    restart: unless-stopped
 #    # 默认的prefork池针对长时间的任务支持不是很好，如果任务运行时间有数分钟/小时，建议启用 Celery 的 -Ofair 命令参数
 #    command: ["bash","-c","celery --app=myapp.tasks.celery_app:celery_app worker --loglevel=info --pool=prefork -Ofair -c 2 -n worker@%h"]
