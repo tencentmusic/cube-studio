@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(format='%(asctime)s:watch-pod:%(levelname)s:%(message)s', level=logging.INFO,datefmt = '%Y-%m-%d %H:%M:%S')
+logging.basicConfig(format='%(asctime)s:watch-service:%(levelname)s:%(message)s', level=logging.INFO,datefmt = '%Y-%m-%d %H:%M:%S')
 import time, os
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _

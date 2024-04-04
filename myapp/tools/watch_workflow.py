@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(format='%(asctime)s:watch-pod:%(levelname)s:%(message)s', level=logging.INFO,datefmt = '%Y-%m-%d %H:%M:%S')
+logging.basicConfig(format='%(asctime)s:watch-workflow:%(levelname)s:%(message)s', level=logging.INFO,datefmt = '%Y-%m-%d %H:%M:%S')
 import pysnooper
 import time, datetime, os
 from flask_babel import gettext as __
