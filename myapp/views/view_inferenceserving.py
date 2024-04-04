@@ -486,7 +486,7 @@ output %s
         if not item.metrics:
             item.metrics = conf.get('INFERNENCE_METRICS', {}).get(item.service_type, item.metrics)
         if not item.health:
-            item.health = conf.get('INFERNENCE_HEALTH', {}).get(item.service_type, item.health).replace('$model_name',item.model_name).replace('$model_version',item.model_version)
+            item.health = conf.get('INFERNENCE_HEALTH', {}).get(item.service_type, '').replace('$model_name',item.model_name).replace('$model_version',item.model_version)
         else:
             item.health = item.health.replace('$model_name',item.model_name).replace('$model_version', item.model_version)
 
