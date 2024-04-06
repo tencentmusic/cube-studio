@@ -486,7 +486,7 @@ output %s
         if not item.metrics:
             item.metrics = conf.get('INFERNENCE_METRICS', {}).get(item.service_type, item.metrics)
         if not item.health:
-            item.health = conf.get('INFERNENCE_HEALTH', {}).get(item.service_type, item.health).replace('$model_name',item.model_name).replace('$model_version',item.model_version)
+            item.health = conf.get('INFERNENCE_HEALTH', {}).get(item.service_type, '').replace('$model_name',item.model_name).replace('$model_version',item.model_version)
         else:
             item.health = item.health.replace('$model_name',item.model_name).replace('$model_version', item.model_version)
 
@@ -632,6 +632,12 @@ output %s
         if not item.volume_mount:
             item.volume_mount = item.project.volume_mount
         self.use_expand(item)
+        if not item.resource_memory:
+            item.resource_memory = '2G'
+        if not item.resource_cpu:
+            item.resource_cpu='2'
+        if not item.resource_gpu:
+            item.resource_gpu='0'
         # 初始化时没有回话但是也要调用flash，所以会报错
         try:
             if ('http:' in item.model_path or 'https:' in item.model_path) and ('.zip' in item.model_path or '.tar.gz' in item.model_path):
@@ -845,17 +851,18 @@ output %s
             k8s_client.create_configmap(namespace=namespace, name=name, data=config_data, labels={'app': name})
             volume_mount += ",%s(configmap):/config/" % name
         ports = [int(port) for port in service.ports.split(',')]
+        gpu_num, gpu_type, resource_name = core.get_gpu(service.resource_gpu)
 
         pod_env = service.env
         pod_env += "\nKUBEFLOW_ENV=" + env
-        pod_env += '\nKUBEFLOW_MODEL_PATH=' + service.model_path if service.model_path else ''
+        pod_env += '\nKUBEFLOW_MODEL_PATH=' + (service.model_path if service.model_path else '')
         pod_env += '\nKUBEFLOW_MODEL_VERSION=' + service.model_version
         pod_env += '\nKUBEFLOW_MODEL_IMAGES=' + service.images
         pod_env += '\nKUBEFLOW_MODEL_NAME=' + service.model_name
         pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area', 'guangzhou')
         pod_env += "\nRESOURCE_CPU=" + service.resource_cpu
         pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
-        pod_env += "\nRESOURCE_GPU=" + service.resource_gpu
+        pod_env += "\nRESOURCE_GPU=" + str(int(gpu_num))
         pod_env += "\nMODEL_PATH=" + service.model_path
         pod_env = pod_env.strip(',')
 

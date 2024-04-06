@@ -1,3 +1,5 @@
+import logging
+logging.basicConfig(format='%(asctime)s:watch-service:%(levelname)s:%(message)s', level=logging.INFO,datefmt = '%Y-%m-%d %H:%M:%S')
 import time, os
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
@@ -7,12 +9,11 @@ from myapp.utils.py.py_k8s import K8s
 from myapp.project import push_message
 from myapp import app
 from myapp.utils.celery import session_scope
-
 conf = app.config
 
 cluster = os.getenv('ENVIRONMENT', '').lower()
 if not cluster:
-    print('no cluster %s' % cluster)
+    logging.info('no cluster %s' % cluster)
     exit(1)
 else:
     clusters = conf.get('CLUSTERS', {})
@@ -20,7 +21,7 @@ else:
         kubeconfig = clusters[cluster].get('KUBECONFIG', '')
         K8s(kubeconfig)
     else:
-        print('no kubeconfig in cluster %s' % cluster)
+        logging.error('no kubeconfig in cluster %s' % cluster)
         exit(1)
 
 from myapp.models.model_serving import InferenceService
@@ -33,7 +34,7 @@ def listen_service():
     w = watch.Watch()
     while (True):
         try:
-            print('begin listen')
+            logging.info('begin listen')
             for event in w.stream(client.CoreV1Api().list_namespaced_pod, namespace=namespace,timeout_seconds=60):  # label_selector=label,
                 with session_scope(nullpool=True) as dbsession:
                     try:
@@ -51,6 +52,7 @@ def listen_service():
                                     finished_at = int(terminated.finished_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间
                                     if (datetime.now().timestamp() - finished_at) < 5:
                                         message = "cluster: %s, pod: %s, user: %s, status: %s" % (cluster,event['object'].metadata.name,inferenceserving.created_by.username, 'terminated')
+                                        logging.info(message)
                                         push_message([inferenceserving.created_by.username], message)
                                 # if running and running.started_at:  # 任务重启运行
                                 #     start_time = int(running.started_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间
@@ -59,10 +61,10 @@ def listen_service():
                                 #         push_message([inferenceserving.created_by.username]+conf.get('ADMIN_USER').split(','), message)
 
                     except Exception as e:
-                        print(e)
+                        logging.error(e)
 
         except Exception as ee:
-            print(ee)
+            logging.error(ee)
             time.sleep(5)
 
 

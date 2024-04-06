@@ -64,21 +64,22 @@ def handle_task(qid, username=""):
             # 发起远程sql查询
             from sqlalchemy import create_engine
             import pandas as pd
-
-            engine = create_engine(q.engine_arg2)
-            df = pd.read_sql_query(q.qsql, engine)
             save_path = f"/data/k8s/kubeflow/global/sqllab/result/{qid}.csv"
-            print(save_path)
+            logging.info(save_path)
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            df.to_csv(save_path, encoding='utf-8-sig', index=None, header=True)
-            print(df)
+
+            if q.engine_arg1 in ['mysql','postgres']:
+                engine = create_engine(q.engine_arg2)
+                result = pd.read_sql_query(q.qsql, engine)
+                result.to_csv(save_path, encoding='utf-8-sig', index=None, header=True)
+                logging.info(result)
 
             q.stage = 'end'
             q.status = 'success'
             dbsession.commit()
 
         except Exception as e:
-            print(e)
+            logging.error(e)
             # 记录异常信息
             err_msg = traceback.format_exc()
             q.err_msg = err_msg

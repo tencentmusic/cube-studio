@@ -1,5 +1,5 @@
 # dataset 模板
-镜像：ccr.ccs.tencentyun.com/cube-studio/dataset
+镜像：ccr.ccs.tencentyun.com/cube-studio/dataset:20230801
 
 参数
 ```bash

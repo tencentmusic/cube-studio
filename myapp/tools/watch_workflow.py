@@ -1,3 +1,5 @@
+import logging
+logging.basicConfig(format='%(asctime)s:watch-workflow:%(levelname)s:%(message)s', level=logging.INFO,datefmt = '%Y-%m-%d %H:%M:%S')
 import pysnooper
 import time, datetime, os
 from flask_babel import gettext as __
@@ -18,13 +20,12 @@ from myapp.models.model_job import (
 )
 
 from myapp.utils.celery import session_scope
-
 conf = app.config
 prometheus = Prometheus(conf.get('PROMETHEUS', ''))
 
 cluster = os.getenv('ENVIRONMENT', '').lower()
 if not cluster:
-    print('no cluster %s' % cluster)
+    logging.info('no cluster %s' % cluster)
     exit(1)
 else:
     clusters = conf.get('CLUSTERS', {})
@@ -33,7 +34,7 @@ else:
         K8s(kubeconfig)
         # k8s_config.kube_config.load_kube_config(config_file=kubeconfig)
     else:
-        print('no kubeconfig in cluster %s' % cluster)
+        logging.error('no kubeconfig in cluster %s' % cluster)
         exit(1)
 
 
@@ -54,7 +55,7 @@ def deliver_message(workflow, dbsession):
         receivers += alert_user
 
     if not receivers:
-        print('no receivers')
+        logging.info('no receivers')
         return
 
     info_json = json.loads(workflow.info_json)
@@ -81,6 +82,7 @@ def deliver_message(workflow, dbsession):
             __("pod详情"):help_url
         }
         if message:
+            logging.info(message)
             push_message(receivers, message, link)
 
 
@@ -97,13 +99,13 @@ def save_workflow(crd, dbsession):
     if pipeline and pipeline.alert_status:
         alert_status = pipeline.alert_status
     username = crd['username']
-    print("Event: % s %s %s %s %s %s" % (crd['name'], pipeline.describe,pipeline.name,crd['username'],crd['status'],run_id))
+    logging.info("Event: % s %s %s %s %s %s" % (crd['name'], pipeline.describe,pipeline.name,crd['username'],crd['status'],run_id))
     # print("%s status %s"%(crd['name'], crd['status']))
 
     # print(crd['name'],crd['namespace'])
     workflow = dbsession.query(Workflow).filter(Workflow.name == crd['name']).filter(Workflow.namespace == crd['namespace']).first()
     if workflow:
-        print('exist workflow')
+        logging.info('exist workflow')
         workflow.status = crd['status']
         workflow.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         workflow.annotations = json.dumps(crd['annotations'], indent=4, ensure_ascii=False)
@@ -121,7 +123,7 @@ def save_workflow(crd, dbsession):
             "alert_status": alert_status,
             "has_push": ''
         }
-        print('new workflow')
+        logging.info('new workflow')
         workflow = Workflow(name=crd['name'], cluster=cluster, namespace=crd['namespace'], create_time=crd['create_time'],
                             status=crd['status'],
                             annotations=json.dumps(crd['annotations'], indent=4, ensure_ascii=False),
@@ -195,7 +197,7 @@ def push_resource_rec(workflow, dbsession):
             alert_user = [user.strip() for user in alert_user if user.strip()]
             receivers = alert_user + [pipeline.created_by.username]
             receivers = list(set(receivers))
-
+            logging.info(message)
             push_message(receivers, message)
 
 
@@ -248,7 +250,7 @@ def push_task_time(workflow, dbsession):
                         if float(task_pod['run_time']) > max_task_run_time:
                             max_task_run_time = float(task_pod['run_time'])
                     except Exception as e:
-                        print(e)
+                        logging.error(e)
 
             # 记录是否已经推送，不然反复推送不好
             info_json = json.loads(workflow.info_json)
@@ -264,13 +266,14 @@ def push_task_time(workflow, dbsession):
                 }
                 # 有单任务运行时长超过4个小时才通知
                 if max_task_run_time > 4:
+                    logging.info(message)
                     push_message(conf.get('ADMIN_USER').split(','), message, link)
 
                 alert_user = pipeline.alert_user.split(',') if pipeline.alert_user else []
                 alert_user = [user.strip() for user in alert_user if user.strip()]
                 receivers = alert_user + [workflow.username]
                 receivers = list(set(receivers))
-
+                logging.info(message)
                 push_message(receivers, message, link)
 
 
@@ -287,7 +290,7 @@ def save_monitoring(workflow, dbsession):
             pipeline_id = json.loads(workflow.labels).get('pipeline-id', '')
             if pipeline_id and pods:
                 for pod_name in pods:
-                    print(pods[pod_name])
+                    logging.info(pods[pod_name])
                     task_name = pods[pod_name]['displayName']
                     task_name = task_name[:task_name.index('(')] if '(' in task_name else task_name
 
@@ -317,7 +320,7 @@ def save_monitoring(workflow, dbsession):
                     monitoring_new['task'] = task_monitoring_new
                     monitoring_new['tfjob'] = monitoring.get('tfjob', [])
 
-                    print(monitoring_new)
+                    logging.info(monitoring_new)
                     if task:
                         task.monitoring = json.dumps(monitoring_new, ensure_ascii=False, indent=4)
                         dbsession.commit()
@@ -327,7 +330,7 @@ def save_monitoring(workflow, dbsession):
             push_resource_rec(workflow, dbsession)
 
     except Exception as e:
-        print(e)
+        logging.error(e)
 
 
 # @pysnooper.snoop()
@@ -355,7 +358,7 @@ def deal_event(event, workflow_info, namespace):
             crd_object = event['object']
             exist_crd = check_crd_exist(group=workflow_info['group'], version=workflow_info["version"], namespace=namespace,plural=workflow_info["plural"], name=crd_object['metadata']['name'])
             if not exist_crd:
-                print('not exist in k8s')
+                logging.info('not exist in k8s')
                 return
             creat_time = crd_object['metadata']['creationTimestamp'].replace('T', ' ').replace('Z', '')
             creat_time = (datetime.datetime.strptime(creat_time,'%Y-%m-%d %H:%M:%S')+datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
@@ -389,13 +392,13 @@ def deal_event(event, workflow_info, namespace):
                     try:
                         deliver_message(workflow, dbsession)
                     except Exception as e1:
-                        print('push fail:', e1)
+                        logging.error('push fail:'+str(e1))
                         push_message(conf.get('ADMIN_USER').split(','), 'push fail' + str(e1))
                 save_history(workflow, dbsession)
                 save_monitoring(workflow, dbsession)
 
         except Exception as e:
-            print(e)
+            logging.error(e)
 
 
 # @pysnooper.snoop()
@@ -405,7 +408,7 @@ def listen_workflow():
     w = watch.Watch()
     while (True):
         try:
-            print('begin listen')
+            logging.info('begin listen')
             for event in w.stream(client.CustomObjectsApi().list_namespaced_custom_object, group=workflow_info['group'],
                                   version=workflow_info["version"],
                                   namespace=namespace, plural=workflow_info["plural"]):  # label_selector=label,
@@ -416,7 +419,7 @@ def listen_workflow():
                     time.sleep(60)
 
         except Exception as ee:
-            print(ee)
+            logging.error(ee)
 
 
 # 不能使用异步io，因为stream会阻塞

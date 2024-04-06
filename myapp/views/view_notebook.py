@@ -220,16 +220,19 @@ class Notebook_ModelView_Base():
         self.pre_add(item)
 
     def post_add(self, item):
-        flash(__('自动reset 一分钟后生效'), 'warning')
+
         try:
             self.reset_notebook(item)
         except Exception as e:
             print(e)
-            flash(__('reset后查看运行运行状态'), 'warning')
+            flash(__('start fail, please manually reset: ')+str(e), 'warning')
+            return
+
+        flash(__('自动reset 一分钟后生效'), 'info')
 
     # @pysnooper.snoop(watch_explode=('item'))
     def post_update(self, item):
-        flash(__('reset以后配置方可生效'), 'warning')
+        flash(__('reset以后配置方可生效'), 'info')
 
         # item.changed_on = datetime.datetime.now()
         # db.session.commit()
@@ -237,9 +240,13 @@ class Notebook_ModelView_Base():
 
         # flash('自动reset 一分钟后生效', 'warning')
         if self.src_item_json:
-            item.changed_by_fk = int(self.src_item_json.get('changed_by_fk'))
+            changed_by_fk = self.src_item_json.get('changed_by_fk','')
+            if changed_by_fk:
+                item.changed_by_fk = int(self.src_item_json.get('changed_by_fk'))
         if self.src_item_json:
-            item.created_by_fk = int(self.src_item_json.get('created_by_fk'))
+            created_by_fk = self.src_item_json.get('created_by_fk','')
+            if created_by_fk:
+                item.created_by_fk = int(self.src_item_json.get('created_by_fk'))
 
         db.session.commit()
 

@@ -35,6 +35,7 @@ if [ "$STAGE" = "build" ]; then
 elif [ "$STAGE" = "dev" ]; then
   export FLASK_APP=myapp:app
 #  FLASK_ENV=development  flask run -p 80 --with-threads  --host=0.0.0.0
+  python myapp/check_tables.py
   python myapp/run.py
 
 elif [ "$STAGE" = "prod" ]; then

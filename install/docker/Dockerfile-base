@@ -16,6 +16,8 @@ RUN apt-get clean all && apt-get update -y
 # 安装运维工具
 RUN apt install -y --force-yes --fix-missing --no-install-recommends apt-utils ca-certificates software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip
 
+RUN mkdir -p /var/log/supervisor && apt install -y supervisor
+
 # 安装python
 RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip python3.9-distutils
 RUN set -x; rm -rf /usr/bin/python /usr/bin/python3; apt install -y --fix-missing ${PYTHON_VERSION} ${PYTHON_VERSION}-dev && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python && ln -s /usr/bin/${PYTHON_VERSION} /usr/bin/python3 && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip && pip3 install --upgrade pip setuptools wheel

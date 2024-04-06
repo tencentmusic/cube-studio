@@ -1,5 +1,6 @@
 
 """Utility functions used across Myapp"""
+import copy
 import logging
 import random
 import traceback
@@ -1150,8 +1151,8 @@ def get_deployment_node_selector(name,namespace):
 def adjust_service_resource(task):
     logging.info(f'============= begin run adjust_service_resource task')
     from kubernetes import client
-    cluster_name='tke'
-    namespace = conf.get('SERVICE_NAMESPACE')
+    cluster_name=conf.get('ENVIRONMENT','dev')
+    namespace = conf.get('SERVICE_NAMESPACE','service')
     cluster = conf.get('CLUSTERS', {})[cluster_name]
     with session_scope(nullpool=True) as dbsession:
         try:
