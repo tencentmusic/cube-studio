@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: image-pull
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.nodeLabels.nodeNames }}
+
+      hostPID: true
+      hostNetwork: true
+      containers:
+        - name: image-pull
+          image: docker
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              docker pull busybox:1.36.0
+              docker pull mysql:8.0.32
+
+      restartPolicy: OnFailure
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+
+
+
