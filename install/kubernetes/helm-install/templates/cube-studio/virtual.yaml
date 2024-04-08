@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: infra-kubeflow-dashboard
+  namespace: infra
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - "{{ .Values.host }}"    # 管理平台的域名   kubeflow.local.com
+  http:
+  - route:
+    - destination:
+        host: kubeflow-dashboard-frontend.infra.svc.cluster.local
+        port:
+          number: 80

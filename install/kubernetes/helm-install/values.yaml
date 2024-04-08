@@ -1,25 +1,5 @@
-installPrometheus: false
-serviceAccount:
-  create: true
-  name: ""
-
-nodeLabels:
-  nodeNames:  "nfstest"
-  nodeIP: "172.16.210.4"
-  labels:
-    train: "true"
-    cpu: "true"
-    notebook: "true"
-    service: "true"
-    org: "public"
-    istio: "true"
-    kubeflow: "true"
-    kubeflow-dashboard: "true"
-    mysql: "true"
-    redis: "true"
-    monitoring: "true"
-    logging: "true"
-
+installPrometheus: true
+installIstio: true
 namespaces:
   - infra
   - kubeflow
@@ -29,15 +9,15 @@ namespaces:
   - jupyter
   - service
   - monitoring
-  - logging
   - aihub
+
 
 dockerRegistry:
   server: https://index.docker.io/v1/
   username: "xxx"
   password: "xxxx"
 
+host: "*"
 image:
-  frontend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.04.01
-  backend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.04.01
-  training_operator: kubeflow/training-operator:v1-8a066f9 
+  frontend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.03.01
+  backend: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.03.01

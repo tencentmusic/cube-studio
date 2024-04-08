@@ -1,0 +1,72 @@
+{{- if .Values.installPrometheus }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: node-exporter
+  name: node-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: no-node-exporter
+                operator: DoesNotExist
+      serviceAccountName: node-exporter
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      containers:
+      - name: node-exporter
+        image: prom/node-exporter:v1.5.0   # quay.io/prometheus/node-exporter:v0.15.2
+        args:
+        - --web.listen-address=127.0.0.1:9101
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        resources:
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        volumeMounts:
+        - mountPath: /host/proc
+          name: proc
+          readOnly: false
+        - mountPath: /host/sys
+          name: sys
+          readOnly: false
+      - name: kube-rbac-proxy
+        image: bitnami/kube-rbac-proxy:0.14.1
+        args:
+        - --secure-listen-address=:9100
+        - --upstream=http://127.0.0.1:9101/
+        ports:
+        - containerPort: 9100
+          hostPort: 9100
+          name: https
+        resources:
+          requests:
+            cpu: 10m
+            memory: 20Mi
+      hostNetwork: true
+      hostPID: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      volumes:
+      - hostPath:
+          path: /proc
+        name: proc
+      - hostPath:
+          path: /sys
+        name: sys
+{{- end }}

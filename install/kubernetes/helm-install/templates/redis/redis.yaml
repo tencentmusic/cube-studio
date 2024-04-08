@@ -65,8 +65,6 @@ spec:
           volumeMounts:
             - name: redis-data
               mountPath: /data
-      nodeSelector:
-        redis: 'true'
       volumes:
         - name: redis-data
           emptyDir: { }

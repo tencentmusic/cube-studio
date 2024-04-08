@@ -1,0 +1,89 @@
+# encoding: utf-8
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeflow-dashboard-schedule
+  namespace: infra
+  labels:
+    app: kubeflow-dashboard-schedule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeflow-dashboard-schedule
+  template:
+    metadata:
+      name: kubeflow-dashboard-schedule
+      labels:
+        app: kubeflow-dashboard-schedule
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: kubeflow-dashboard-config
+          configMap:
+            name: kubeflow-dashboard-config
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
+              - key: config.py
+                path: config.py
+      serviceAccountName: kubeflow-dashboard
+      imagePullSecrets:
+        - name: hubsecret
+      containers:
+        - name: kubeflow-dashboard-schedule
+          image: {{ .Values.image.backend }}
+          imagePullPolicy: Always
+          command: ["bash","-c",'celery --app=myapp.tasks.celery_app:celery_app beat --loglevel=info']
+          resources:       
+            limits:
+              cpu: 6
+              memory: 6Gi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          env:
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_HOST
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PORT
+          - name: REDIS_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PASSWORD
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: ENVIRONMENT
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: tz-config
+              mountPath: /etc/localtime
+
+          readinessProbe:
+            failureThreshold: 1
+            exec:
+              command: ["bash","-c","python3 /home/myapp/myapp/tools/check_celery.py"]
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 60

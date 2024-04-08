@@ -1,0 +1,281 @@
+- job_name: prometheus
+  static_configs:
+  - targets:
+    - localhost:9090
+
+- job_name: 'istio-mesh'
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - istio-system
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: istio-telemetry;prometheus
+
+# Scrape config for envoy stats
+- job_name: 'envoy-stats'
+  metrics_path: /stats/prometheus
+  kubernetes_sd_configs:
+  - role: pod
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_pod_container_port_name]
+    action: keep
+    regex: '.*-envoy-prom'
+  - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+    action: replace
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:15090
+    target_label: __address__
+  - action: labelmap
+    regex: __meta_kubernetes_pod_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    action: replace
+    target_label: pod_name
+
+  metric_relabel_configs:
+  # Exclude some of the envoy metrics that have massive cardinality
+  # This list may need to be pruned further moving forward, as informed
+  # by performance and scalability testing.
+  - source_labels: [ cluster_name ]
+    regex: '(outbound|inbound|prometheus_stats).*'
+    action: drop
+  - source_labels: [ tcp_prefix ]
+    regex: '(outbound|inbound|prometheus_stats).*'
+    action: drop
+  - source_labels: [ listener_address ]
+    regex: '(.+)'
+    action: drop
+  - source_labels: [ http_conn_manager_listener_prefix ]
+    regex: '(.+)'
+    action: drop
+  - source_labels: [ http_conn_manager_prefix ]
+    regex: '(.+)'
+    action: drop
+  - source_labels: [ __name__ ]
+    regex: 'envoy_tls.*'
+    action: drop
+  - source_labels: [ __name__ ]
+    regex: 'envoy_tcp_downstream.*'
+    action: drop
+  - source_labels: [ __name__ ]
+    regex: 'envoy_http_(stats|admin).*'
+    action: drop
+  - source_labels: [ __name__ ]
+    regex: 'envoy_cluster_(lb|retry|bind|internal|max|original).*'
+    action: drop
+
+- job_name: 'istio-policy'
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - istio-system
+
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: istio-policy;http-monitoring
+
+- job_name: 'istio-telemetry'
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - istio-system
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: istio-telemetry;http-monitoring
+
+- job_name: 'pilot'
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - istio-system
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: istio-pilot;http-monitoring
+
+- job_name: 'galley'
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - istio-system
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: istio-galley;http-monitoring
+
+- job_name: 'citadel'
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - istio-system
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: istio-citadel;http-monitoring
+
+# scrape config for API servers
+- job_name: 'kubernetes-apiservers'
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: kubernetes;https
+
+# scrape config for nodes (kubelet)
+- job_name: 'kubernetes-nodes'
+  scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+  kubernetes_sd_configs:
+  - role: node
+  relabel_configs:
+  - action: labelmap
+    regex: __meta_kubernetes_node_label_(.+)
+  - target_label: __address__
+    replacement: kubernetes.default.svc:443
+  - source_labels: [__meta_kubernetes_node_name]
+    regex: (.+)
+    target_label: __metrics_path__
+    replacement: /api/v1/nodes/${1}/proxy/metrics
+
+# scrape config for service endpoints.
+# 其中通过 kubernetes_sd_configs 支持监控其各种资源
+- job_name: 'kubernetes-service-endpoints'
+  kubernetes_sd_configs:
+  - role: endpoints
+  relabel_configs:
+  # 重新打标仅抓取到的具有 "prometheus.io/scrape: true" 的annotation的端点，意思是说如果某个service具有prometheus.io/scrape = true annotation声明则抓取
+  # annotation本身也是键值结构，所以这里的源标签设置为键，而regex设置值，当值匹配到regex设定的内容时则执行keep动作也就是保留，其余则丢弃.
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+  # 匹配源标签__meta_kubernetes_service_annotation_prometheus_io_scheme也就是prometheus.io/scheme annotation
+  # 如果源标签的值匹配到regex则把值替换为__scheme__对应的值
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+    action: replace
+    target_label: __scheme__
+    regex: (https?)
+  # 获取service的 annotation 中定义的"prometheus.io/path: XXX"定义的值，这个值就是你的程序暴露符合prometheus规范的metrics的地址
+  # 如果你的metrics的地址不是 /metrics 的话，通过这个标签说，那么这里就会把这个值赋值给 __metrics_path__这个变量，
+  # 因为prometheus是通过这个变量获取路径然后进行拼接出来一个完整的URL，并通过这个URL来获取metrics值的，因为prometheus默认使用的就是 http(s)://X.X.X.X/metrics这样一个路径来获取的。
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+    action: replace
+    target_label: __metrics_path__
+    regex: (.+)
+  # 获取service的 annotation 中定义的"prometheus.io/port: XXX"定义的值，这个值就是你的程序暴露符合prometheus规范的metrics的地址
+  - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+    action: replace
+    target_label: __address__
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+  # 下面主要是为了给样本添加额外信息
+  - action: labelmap
+    regex: __meta_kubernetes_service_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: kubernetes_namespace
+  - source_labels: [__meta_kubernetes_service_name]
+    action: replace
+    target_label: kubernetes_name
+
+- job_name: 'kubernetes-pods'
+  kubernetes_sd_configs:
+  - role: pod
+  relabel_configs:  # If first two labels are present, pod should be scraped  by the istio-secure job.
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+  # Keep target if there's no sidecar or if prometheus.io/scheme is explicitly set to "http"
+  - source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status, __meta_kubernetes_pod_annotation_prometheus_io_scheme]
+    action: keep
+    regex: ((;.*)|(.*;http))
+  - source_labels: [__meta_kubernetes_pod_annotation_istio_mtls]
+    action: drop
+    regex: (true)
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+    action: replace
+    target_label: __metrics_path__
+    regex: (.+)
+  - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+    action: replace
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+    target_label: __address__
+  - action: labelmap
+    regex: __meta_kubernetes_pod_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    action: replace
+    target_label: pod_name
+
+- job_name: 'kubernetes-pods-istio-secure'
+  scheme: https
+  tls_config:
+    ca_file: /etc/istio-certs/root-cert.pem
+    cert_file: /etc/istio-certs/cert-chain.pem
+    key_file: /etc/istio-certs/key.pem
+    insecure_skip_verify: true  # prometheus does not support secure naming.
+  kubernetes_sd_configs:
+  - role: pod
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+  # sidecar status annotation is added by sidecar injector and
+  # istio_workload_mtls_ability can be specifically placed on a pod to indicate its ability to receive mtls traffic.
+  - source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status, __meta_kubernetes_pod_annotation_istio_mtls]
+    action: keep
+    regex: (([^;]+);([^;]*))|(([^;]*);(true))
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+    action: drop
+    regex: (http)
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+    action: replace
+    target_label: __metrics_path__
+    regex: (.+)
+  - source_labels: [__address__]  # Only keep address that is host:port
+    action: keep    # otherwise an extra target with ':443' is added for https scheme
+    regex: ([^:]+):(\d+)
+  - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+    action: replace
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+    target_label: __address__
+  - action: labelmap
+    regex: __meta_kubernetes_pod_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    action: replace
+    target_label: pod_name

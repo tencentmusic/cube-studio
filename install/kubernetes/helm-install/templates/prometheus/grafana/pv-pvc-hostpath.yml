@@ -1,0 +1,35 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: monitoring-grafana-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+#  selector:
+#    matchLabels:
+#      monitoring-pvname: monitoring-grafana-pv
+  storageClassName: ""
+  volumeName: monitoring-grafana-pv
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: monitoring-grafana-pv
+  namespace: monitoring
+  labels:
+    monitoring-pvname: monitoring-grafana-pv
+spec:     # 定义pv属性
+  capacity:         # 容量
+    storage: 1Gi   # 存储容量
+  accessModes:    # 访问模式
+    - ReadWriteMany  
+  hostPath:
+    path: /data/k8s/monitoring/grafana   # /mnt/ceph_fuse/k8s/monitoring/grafana
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+
+

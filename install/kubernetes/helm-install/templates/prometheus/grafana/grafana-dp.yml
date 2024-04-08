@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image:  grafana/grafana:9.1.5
+        env:
+        - name: GRAFANA_PORT
+          value: "3000"
+        - name: GF_AUTH_BASIC_ENABLED
+          value: "false"
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "true"
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: grafana-credentials
+              key: user
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-credentials
+              key: password
+        ports:
+        - containerPort: 3000
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /var/lib/grafana/
+          name: grafana-storage
+          readOnly: false
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: grafana-config
+          mountPath: /etc/grafana/grafana.ini
+          readOnly: false
+          subPath: grafana.ini
+        - mountPath: /etc/grafana/provisioning/datasources
+          name: grafana-datasources
+          readOnly: false
+        - mountPath: /etc/grafana/provisioning/dashboards
+          name: grafana-dashboards
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/
+          name: all-grafana-dashboards
+          readOnly: false
+#      securityContext:
+#        fsGroup: 472
+#        runAsNonRoot: true
+#        runAsUser: 65534
+      serviceAccountName: grafana
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: monitoring-grafana-pvc   
+#      - emptyDir: {}
+#        name: grafana-storage
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+      - name: grafana-datasources
+        secret:
+          secretName: grafana-datasources
+      - configMap:
+          name: grafana-dashboards
+        name: grafana-dashboards
+      - configMap:
+          name: all-grafana-dashboards
+        name: all-grafana-dashboards
+      - configMap:
+          name: grafana-config
+          items:
+            - key: grafana.ini
+              path: grafana.ini
+        name: grafana-config

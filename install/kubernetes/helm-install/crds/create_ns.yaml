@@ -1,0 +1,91 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infra
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled
+---
+
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubeflow
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-system
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled
+---
+
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pipeline
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled
+---
+
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: automl
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled
+---
+
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jupyter
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: service
+  annotations:
+    helm.sh/resource-policy: keep
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aihub
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    istio-injection: disabled

@@ -1,0 +1,35 @@
+#kind: PersistentVolumeClaim
+#apiVersion: v1
+#metadata:
+#  name: monitoring-prometheus-pvc
+#  namespace: monitoring
+#spec:
+#  accessModes:
+#    - ReadWriteMany
+#  resources:
+#    requests:
+#      storage: 10Gi
+##  selector:
+##    matchLabels:
+##      monitoring-pvname: monitoring-prometheus-pv
+#  storageClassName: ""
+#  volumeName: monitoring-prometheus-pv
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: monitoring-prometheus-pv
+  namespace: monitoring
+  labels:
+    monitoring-pvname: monitoring-prometheus-pv
+spec:     # 定义pv属性
+  capacity:         # 容量
+    storage: 10Gi   # 存储容量
+  accessModes:    # 访问模式
+    - ReadWriteMany
+  hostPath:
+    path: /data/k8s/monitoring/prometheus   # /nfs_share/k8s/monitoring/grafana   需要在主机上设置777权限
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+
+

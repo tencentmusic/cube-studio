@@ -1,0 +1,104 @@
+# encoding: utf-8
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeflow-dashboard-worker
+  namespace: infra
+  labels:
+    app: kubeflow-dashboard-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeflow-dashboard-worker
+  template:
+    metadata:
+      name: kubeflow-dashboard-worker
+      labels:
+        app: kubeflow-dashboard-worker
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: kubeflow-dashboard-config
+          configMap:
+            name: kubeflow-dashboard-config
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
+              - key: config.py
+                path: config.py
+              - key: project.py
+                path: project.py
+        - name: kubernetes-config
+          configMap:
+            name: kubernetes-config
+        - name: infra-kubeflow
+          persistentVolumeClaim:
+            claimName: infra-kubeflow
+      serviceAccountName: kubeflow-dashboard
+      imagePullSecrets:
+        - name: hubsecret
+      containers:
+        - name: kubeflow-dashboard-worker
+          image: {{ .Values.image.backend }}
+          imagePullPolicy: Always
+          command: ["bash","-c",'celery --app=myapp.tasks.celery_app:celery_app worker --loglevel=info --pool=prefork -Ofair -c 20 -n worker@%h']
+          resources:       
+            limits:
+              cpu: 6
+              memory: 6Gi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          env:
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_HOST
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PORT
+          - name: REDIS_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: REDIS_PASSWORD
+          - name: MYSQL_SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: MYSQL_SERVICE
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: deploy-config
+                key: ENVIRONMENT
+          volumeMounts:
+            - name: kubeflow-dashboard-config
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/config.py
+              subPath: config.py
+            - name: kubeflow-dashboard-config
+              mountPath: /home/myapp/myapp/project.py
+              subPath: project.py
+            - name: tz-config
+              mountPath: /etc/localtime
+            - name: kubernetes-config
+              mountPath: /home/myapp/kubeconfig
+            - name: infra-kubeflow
+              mountPath: /data/k8s/kubeflow/
+
+#          livenessProbe:
+#            failureThreshold: 1
+#            exec:
+#              command: ["bash","-c","hour=`date +%H`; if [ $hour -eq 03 ]; then exit 1; fi"]
+#            initialDelaySeconds: 3600
+#            periodSeconds: 3600
+#            timeoutSeconds: 3600

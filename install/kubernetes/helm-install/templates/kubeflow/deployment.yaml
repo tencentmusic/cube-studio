@@ -20,7 +20,7 @@ spec:
       containers:
         - command:
             - /manager
-          image: {{ .Values.image.training_operator }}
+          image: kubeflow/training-operator:v1-8a066f9
           name: training-operator
           ports:
             - containerPort: 8080

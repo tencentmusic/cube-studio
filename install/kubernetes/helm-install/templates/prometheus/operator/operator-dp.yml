@@ -1,0 +1,64 @@
+{{- if .Values.installPrometheus }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app-name: prometheus-operator
+    app-version: 0.46.0
+  name: prometheus-operator
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app-name: prometheus-operator
+      app-version: 0.46.0
+  template:
+    metadata:
+      labels:
+        app-name: prometheus-operator
+        app-version: 0.46.0
+    spec:
+      containers:
+      - args:
+        - --kubelet-service=kube-system/kubelet
+        - --prometheus-config-reloader=quay.io/prometheus-operator/prometheus-config-reloader:v0.46.0
+        image: quay.io/prometheus-operator/prometheus-operator:v0.46.0  # 这个包含了arm64版本
+        name: prometheus-operator
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+#          limits:
+#            cpu: 200m
+#            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      serviceAccountName: prometheus-operator
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app-name: prometheus-operator
+    app-version: 0.46.0
+  name: prometheus-operator
+  namespace: monitoring
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+  selector:
+    app-name: prometheus-operator
+    app-version: 0.46.0
+{{- end }}

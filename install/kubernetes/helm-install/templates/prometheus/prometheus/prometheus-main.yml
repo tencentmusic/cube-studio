@@ -1,0 +1,51 @@
+{{- if .Values.installPrometheus }}
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  labels:
+    prometheus: k8s
+  name: k8s
+  namespace: monitoring
+spec:
+#  alerting:
+#    alertmanagers:
+#    - name: alertmanager-main
+#      namespace: monitoring
+#      port: web
+  image: prom/prometheus:v2.27.1 # quay.io/prometheus/prometheus:v2.27.1
+#  args:
+#    - '--web.route-prefix=/prometheus' # 添加这一行，添加后grafana就没法正常访问资源了
+  replicas: 1
+  retention: 3d
+  resources:
+    requests:
+      memory: 400Mi
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 10Gi
+        selector:
+          matchLabels:
+            monitoring-pvname: monitoring-prometheus-pv
+      status: {}
+  ruleSelector:
+    matchLabels:
+      prometheus: k8s
+      role: alert-rules
+#  routePrefix: /prometheus   # 配置前缀后 grafana没法正常访问数据源了
+
+  serviceAccountName: prometheus-k8s
+  serviceMonitorSelector:
+    matchExpressions:
+    - key: k8s-app
+      operator: Exists
+#  version: v2.3.1
+
+  additionalScrapeConfigs:
+    name: prometheus-config
+    key: prometheus-additional.yaml
+{{- end }}

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubeflow-dashboard-config
+  namespace: infra
+data:
+  {{- (.Files.Glob "cube-config/*").AsConfig | nindent 2 }}
+

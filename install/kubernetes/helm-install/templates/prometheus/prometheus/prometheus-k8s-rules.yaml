@@ -1,0 +1,2 @@
+
+{{ $.Files.Get (printf "%s" "prometheus-config/prometheus-k8s-rules.yaml") }}

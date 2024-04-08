@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: host-setup
+spec:
+  template:
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+      - name: host-commands
+        image: alpine
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: root-volume
+          mountPath: /host
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          #!/bin/sh
+          chroot /host /bin/sh <<'EOF'
+          systemctl stop firewalld
+          systemctl disable firewalld
+          systemctl stop iptables
+          systemctl disable iptables
+          systemctl stop ip6tables
+          systemctl disable ip6tables
+          systemctl stop nftables
+          systemctl disable nftables
+
+          iptables -P FORWARD ACCEPT
+          iptables -P INPUT ACCEPT
+          iptables -P OUTPUT ACCEPT
+
+          mkdir -p /data/k8s/kubeflow/pipeline/workspace /data/k8s/kubeflow/pipeline/archives /data/k8s/infra/mysql /data/k8s/kubeflow/minio/mlpipeline /data/k8s/kubeflow/global
+          mkdir -p /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/ /data/k8s/kubeflow/labelstudio/
+          chmod -R 777 /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/ /data/k8s/kubeflow/labelstudio/
+          swapoff -a
+          EOF
+      restartPolicy: OnFailure
+      volumes:
+      - name: root-volume
+        hostPath:
+          path: /
