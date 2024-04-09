@@ -1,5 +1,5 @@
 #!/bin/bash
-# shc -v -r -f start.sh -o start -e 01/07/2024 -m '激活码已过期'
+
 bash init_node.sh
 mkdir -p ~/.kube /etc/kubernetes/ && rm -rf ~/.kube/config /etc/kubernetes/admin.conf && cp config ~/.kube/config && cp ~/.kube/config /etc/kubernetes/admin.conf
 mkdir -p kubeconfig && echo "" > kubeconfig/dev-kubeconfig
@@ -22,6 +22,10 @@ kubectl label node $node train=true cpu=true notebook=true service=true org=publ
 sh create_ns_secret.sh
 kubectl apply -f sa-rbac.yaml
 # 部署dashboard
+#kubectl apply -f dashboard/v2.2.0-cluster.yaml
+# 高版本k8s部署2.6.1版本
+# kubectl delete -f dashboard/v2.6.1-cluster.yaml
+# kubectl delete -f dashboard/v2.6.1-user.yaml
 kubectl apply -f dashboard/v2.6.1-cluster.yaml
 kubectl apply -f dashboard/v2.6.1-user.yaml
 # 部署mysql
@@ -35,6 +39,16 @@ kubectl create -f redis/redis.yaml
 
 # 部署prometheus
 cd prometheus
+kubectl delete -f ./operator/operator-crd.yml
+sleep 5
+kubectl apply -f ./operator/operator-crd.yml
+kubectl apply -f ./operator/operator-rbac.yml
+kubectl wait crd/podmonitors.monitoring.coreos.com --for condition=established --timeout=60s
+kubectl apply -f ./operator/operator-dp.yml
+kubectl apply -f ./node-exporter/node-exporter-sa.yml
+kubectl apply -f ./node-exporter/node-exporter-rbac.yml
+kubectl apply -f ./node-exporter/node-exporter-svc.yml
+kubectl apply -f ./node-exporter/node-exporter-ds.yml
 
 kubectl apply -f ./grafana/pv-pvc-hostpath.yml
 kubectl apply -f ./grafana/grafana-sa.yml
@@ -48,16 +62,37 @@ kubectl create configmap all-grafana-dashboards --from-file=./grafana/dashboard 
 kubectl delete -f ./grafana/grafana-dp.yml
 sleep 5
 kubectl apply -f ./grafana/grafana-dp.yml
+kubectl apply -f ./service-discovery/kube-controller-manager-svc.yml
+kubectl apply -f ./service-discovery/kube-scheduler-svc.yml
+kubectl apply -f ./prometheus/prometheus-secret.yml
+kubectl apply -f ./prometheus/prometheus-rules.yml
+kubectl apply -f ./prometheus/prometheus-rbac.yml
+kubectl apply -f ./prometheus/prometheus-svc.yml
+kubectl wait crd/prometheuses.monitoring.coreos.com --for condition=established --timeout=60s
+kubectl delete -f ./prometheus/prometheus-main.yml
+sleep 5
+kubectl apply -f ./prometheus/pv-pvc-hostpath.yaml
+kubectl apply -f ./prometheus/prometheus-main.yml
+sleep 5
+# 部署sm
+kubectl apply -f ./servicemonitor/coredns-sm.yml
+kubectl apply -f ./servicemonitor/kube-apiserver-sm.yml
+kubectl apply -f ./servicemonitor/kube-controller-manager-sm.yml
+kubectl apply -f ./servicemonitor/kube-scheduler-sm.yml
+kubectl apply -f ./servicemonitor/kubelet-sm.yml
+kubectl apply -f ./servicemonitor/kubestate-metrics-sm.yml
+kubectl apply -f ./servicemonitor/node-exporter-sm.yml
+kubectl apply -f ./servicemonitor/prometheus-operator-sm.yml
+kubectl apply -f ./servicemonitor/prometheus-sm.yml
 
 # 部署prometheus_adapter
 kubectl apply -f ./prometheus_adapter/metric_rule.yaml
 kubectl apply -f ./prometheus_adapter/prometheus_adapter.yaml
 cd ../
 
+
 # 部署gpu的监控
 kubectl apply -f gpu/nvidia-device-plugin.yml
-#kubectl apply -f gpu/gpu-quota-admission.yaml
-kubectl apply -f gpu/tke-gpu-manager-1.1.5.yaml
 kubectl apply -f gpu/dcgm-exporter.yaml
 
 # 部署volcano
@@ -89,17 +124,7 @@ kubectl apply -f argo/install-3.4.3-all.yaml
 kubectl apply -f kubeflow/sa-rbac.yaml
 
 kubectl apply -k kubeflow/train-operator/manifests/overlays/standalone
-# 部署sparkjob
-kubectl apply -f spark/install.yaml
-sleep 10
-kubectl apply -f spark/install.yaml
-kubectl apply -f spark/spark-operator-with-webhook.yaml
 
-# 部署labelstudio
-kubectl apply -f labelstudio/pv-pvc-hostpath.yaml
-
-kubectl apply -f labelstudio/postgresql.yaml
-kubectl apply -f labelstudio/labelstudio.yaml
 
 # 部署管理平台
 kubectl delete configmap kubernetes-config -n infra
@@ -123,16 +148,6 @@ kubectl apply -k cube/overlays
 # 配置入口
 #ip=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1`
 kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec":{"externalIPs":["'"$1"'"]}}'
-
-# 拷贝aihub所需代码
-mkdir -p /data/k8s/kubeflow/global
-cp -r ../../../cube-studio /data/k8s/kubeflow/global/
-cp -r /data/k8s/kubeflow/global/cube-studio/aihub/modelscope/* /data/k8s/kubeflow/global/cube-studio/aihub/deep-learning/
-
-# 修改labelstudio 代理ip
-kubectl patch deployment labelstudio -n kubeflow -p '{"spec":{"template":{"spec":{"containers":[{"name":"frontend","env":[{"name":"LABEL_STUDIO_HOST","value":"http://'$1'/labelstudio"}]}]}}}}'
-kubectl patch deployment labelstudio -n kubeflow -p '{"spec":{"template":{"spec":{"containers":[{"name":"backend","env":[{"name":"LABEL_STUDIO_HOST","value":"http://'$1'/labelstudio"}]}]}}}}'
-kubectl patch deployment kubeflow-dashboard -n infra -p '{"spec":{"template":{"spec":{"containers":[{"name":"kubeflow-dashboard","env":[{"name":"HOST","value":"'$1'"}]}]}}}}'
 
 # 本地电脑手动host
 echo "打开网址：http://$1"
