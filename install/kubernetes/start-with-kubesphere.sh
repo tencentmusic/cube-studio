@@ -22,10 +22,6 @@ kubectl label node $node train=true cpu=true notebook=true service=true org=publ
 sh create_ns_secret.sh
 kubectl apply -f sa-rbac.yaml
 # 部署dashboard
-#kubectl apply -f dashboard/v2.2.0-cluster.yaml
-# 高版本k8s部署2.6.1版本
-# kubectl delete -f dashboard/v2.6.1-cluster.yaml
-# kubectl delete -f dashboard/v2.6.1-user.yaml
 kubectl apply -f dashboard/v2.6.1-cluster.yaml
 kubectl apply -f dashboard/v2.6.1-user.yaml
 # 部署mysql
@@ -39,16 +35,6 @@ kubectl create -f redis/redis.yaml
 
 # 部署prometheus
 cd prometheus
-kubectl delete -f ./operator/operator-crd.yml
-sleep 5
-kubectl apply -f ./operator/operator-crd.yml
-kubectl apply -f ./operator/operator-rbac.yml
-kubectl wait crd/podmonitors.monitoring.coreos.com --for condition=established --timeout=60s
-kubectl apply -f ./operator/operator-dp.yml
-kubectl apply -f ./node-exporter/node-exporter-sa.yml
-kubectl apply -f ./node-exporter/node-exporter-rbac.yml
-kubectl apply -f ./node-exporter/node-exporter-svc.yml
-kubectl apply -f ./node-exporter/node-exporter-ds.yml
 
 kubectl apply -f ./grafana/pv-pvc-hostpath.yml
 kubectl apply -f ./grafana/grafana-sa.yml
@@ -62,34 +48,11 @@ kubectl create configmap all-grafana-dashboards --from-file=./grafana/dashboard 
 kubectl delete -f ./grafana/grafana-dp.yml
 sleep 5
 kubectl apply -f ./grafana/grafana-dp.yml
-kubectl apply -f ./service-discovery/kube-controller-manager-svc.yml
-kubectl apply -f ./service-discovery/kube-scheduler-svc.yml
-kubectl apply -f ./prometheus/prometheus-secret.yml
-kubectl apply -f ./prometheus/prometheus-rules.yml
-kubectl apply -f ./prometheus/prometheus-rbac.yml
-kubectl apply -f ./prometheus/prometheus-svc.yml
-kubectl wait crd/prometheuses.monitoring.coreos.com --for condition=established --timeout=60s
-kubectl delete -f ./prometheus/prometheus-main.yml
-sleep 5
-kubectl apply -f ./prometheus/pv-pvc-hostpath.yaml
-kubectl apply -f ./prometheus/prometheus-main.yml
-sleep 5
-# 部署sm
-kubectl apply -f ./servicemonitor/coredns-sm.yml
-kubectl apply -f ./servicemonitor/kube-apiserver-sm.yml
-kubectl apply -f ./servicemonitor/kube-controller-manager-sm.yml
-kubectl apply -f ./servicemonitor/kube-scheduler-sm.yml
-kubectl apply -f ./servicemonitor/kubelet-sm.yml
-kubectl apply -f ./servicemonitor/kubestate-metrics-sm.yml
-kubectl apply -f ./servicemonitor/node-exporter-sm.yml
-kubectl apply -f ./servicemonitor/prometheus-operator-sm.yml
-kubectl apply -f ./servicemonitor/prometheus-sm.yml
 
 # 部署prometheus_adapter
 kubectl apply -f ./prometheus_adapter/metric_rule.yaml
 kubectl apply -f ./prometheus_adapter/prometheus_adapter.yaml
 cd ../
-
 
 # 部署gpu的监控
 kubectl apply -f gpu/nvidia-device-plugin.yml
