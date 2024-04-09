@@ -85,8 +85,8 @@ spec:
         hostPath:
           path: /usr/share/zoneinfo/Asia/Shanghai
       - name: grafana-datasources
-        secret:
-          secretName: grafana-datasources
+        configMap:
+          name: grafana-datasources
       - configMap:
           name: grafana-dashboards
         name: grafana-dashboards

@@ -49,5 +49,5 @@ bleach==6.0.0               # HTML清理和链接化库
 pandas==2.1.1               # 数据处理
 beautifulsoup4==4.12.2      # 用于解析HTML和XML文档
 cffi==1.16.0
-
+clickhouse-driver==0.2.7    # sqllab对接clickhouse
 

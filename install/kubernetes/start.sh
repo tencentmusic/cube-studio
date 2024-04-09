@@ -75,7 +75,6 @@ kubectl apply -f ./prometheus/pv-pvc-hostpath.yaml
 kubectl apply -f ./prometheus/prometheus-main.yml
 sleep 5
 # 部署sm
-kubectl apply -f ./servicemonitor/alertmanager-sm.yml
 kubectl apply -f ./servicemonitor/coredns-sm.yml
 kubectl apply -f ./servicemonitor/kube-apiserver-sm.yml
 kubectl apply -f ./servicemonitor/kube-controller-manager-sm.yml
@@ -85,7 +84,6 @@ kubectl apply -f ./servicemonitor/kubestate-metrics-sm.yml
 kubectl apply -f ./servicemonitor/node-exporter-sm.yml
 kubectl apply -f ./servicemonitor/prometheus-operator-sm.yml
 kubectl apply -f ./servicemonitor/prometheus-sm.yml
-kubectl apply -f ./servicemonitor/pushgateway-sm.yml
 
 # 部署prometheus_adapter
 kubectl apply -f ./prometheus_adapter/metric_rule.yaml
