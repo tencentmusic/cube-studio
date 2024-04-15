@@ -416,7 +416,7 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
 
     message = '如果是pipeline命名空间，按照run-id进行删除。\n如果是jupyter命名空间，直接删除pod\n'
     @action("muldelete", "清理", "清理选中的pipeline，service，notebook的pod，但并不删除他们?", "fa-trash", single=False)
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def muldelete(self, items):
         pod_resource()
         all_task_resource = pipeline_resource_used['data']
