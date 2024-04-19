@@ -213,7 +213,7 @@ class Chat_View_Base():
             description= _('接口类型，并不一定是openai，只需要符合http请求响应格式即可'),
             widget=Select2Widget(),
             default='openai',
-            choices=[[x, x] for x in ["chatgpt3.5",'chatgpt4','chatglm','belle', 'llama','AIGC','autogpt',_('召回列表')]],
+            choices=[[x, x] for x in ["openai",'AIGC','chatbi','autogpt',_('召回列表')]],
             validators=[]
         ),
         "service_config": StringField(
@@ -1167,7 +1167,11 @@ AI:
                         message = event.data
                         finish = False
                         if message != '[DONE]':
-                            message = json.loads(event.data)['choices'][0].get('delta', {}).get('content', '')
+                            choices = json.loads(event.data)['choices']
+                            if choices:
+                                message = choices[0].get('delta', {}).get('content', '')
+                            else:
+                                message=''
                             print(message, flush=True, end='')
                         # print(message)
                         if message == '[DONE]':
