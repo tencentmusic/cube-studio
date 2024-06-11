@@ -41,7 +41,7 @@ spec:
       # See https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/
       priorityClassName: "system-node-critical"
       containers:
-      - image: nvidia/k8s-device-plugin:v0.11.0-ubuntu20.04
+      - image: nvidia/k8s-device-plugin:v0.11.0-ubuntu20.04   # nvcr.io/nvidia/k8s-device-plugin:v0.14.2-ubuntu20.04  # nvidia/k8s-device-plugin:v0.11.0-ubuntu20.04 新版本
         imagePullPolicy: IfNotPresent
         name: nvidia-device-plugin-ctr
         args: ["--fail-on-init-error=false"]

@@ -238,9 +238,11 @@ services部分的示例（注意缩进对齐）
       extra_args:
         image-gc-high-threshold: 90
         image-gc-low-threshold: 85
+        resolv-conf: "/etc/resolv-src.conf"
       # kubelet挂载主机目录，这样才能使用subpath，所有情况下部署都必加，且仅此处是必须要加的
       extra_binds:
         - '/data:/data'
+        - '/etc/resolv-src.conf:/etc/resolv-src.conf'
     kubeproxy: {}
     scheduler: {}
 ```

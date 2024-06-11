@@ -8,6 +8,8 @@ systemctl disable ip6tables
 systemctl stop nftables
 systemctl disable nftables
 
+ufw disable
+
 iptables -P FORWARD ACCEPT
 iptables -P INPUT ACCEPT
 iptables -P OUTPUT ACCEPT

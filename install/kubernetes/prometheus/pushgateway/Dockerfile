@@ -1,4 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/prometheus:pushgateway .
+# docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/prometheus:pushgateway .
 FROM ubuntu:18.04
 RUN apt update && \
     apt install -y python3.6-dev python3-pip curl iputils-ping net-tools python3-setuptools && \

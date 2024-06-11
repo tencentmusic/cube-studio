@@ -6,7 +6,7 @@ arr=("tritonserver:24.01-py3" "tritonserver:23.12-py3" "tritonserver:22.12-py3" 
 for value in ${arr[@]}
 do
     echo $value
-    docker build -t $hubhost/$value --build-arg FROM_IMAGES=nvcr.io/nvidia/$value .
+    docker build --network=host -t $hubhost/$value --build-arg FROM_IMAGES=nvcr.io/nvidia/$value .
     docker push $hubhost/$value
 done
 

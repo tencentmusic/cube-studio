@@ -89,13 +89,24 @@ systemctl start docker
 
 ```
 
-替换国内的docker源
-vi /etc/docker/daemon.json
+# 配置docker
+
 ```bash
+vi /etc/docker/daemon.json
+
+添加如下配置
+
 {
-	"registry-mirrors": ["https://registry.docker-cn.com","https://pee6w651.mirror.aliyuncs.com"]
+	"registry-mirrors": ["https://registry.docker-cn.com","https://pee6w651.mirror.aliyuncs.com"],
+    "dns": ["114.114.114.114","8.8.8.8"],
+    "data-root": "/data/docker",
 }
+
+systemctl stop docker
+systemctl daemon-reload
+systemctl start docker
 ```
+
 
 
 ## yum安装k8s的源

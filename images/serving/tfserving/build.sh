@@ -6,7 +6,7 @@ arr=("1.14.0" "1.14.0-gpu" "2.0.0" "2.0.0-gpu" "2.1.4" "2.1.4-gpu" "2.2.3" "2.2.
 for value in ${arr[@]}
 do
     echo $value
-    docker build -t $hubhost/tfserving:$value --build-arg FROM_IMAGES=tensorflow/serving:$value .
+    docker build --network=host -t $hubhost/tfserving:$value --build-arg FROM_IMAGES=tensorflow/serving:$value .
     docker push $hubhost/tfserving:$value
 done
 

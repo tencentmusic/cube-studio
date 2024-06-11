@@ -7,6 +7,8 @@ sudo apt-get --purge remove -y *nvidia*
 sudo apt autoremove  
 sudo apt-get --purge remove -y "*cublas*" "cuda*"  
 sudo apt-get --purge remove -y "*nvidia*"  
+sudo rm -rf /usr/bin/*nvidia*
+sudo rm -rf /usr/local/bin/*nvidia*
 ```
 
 centos 卸载gpu包
@@ -32,12 +34,16 @@ sudo apt-get install -y freeglut3-dev build-essential libx11-dev libxmu-dev libx
 wget https://us.download.nvidia.com/tesla/520.61.05/NVIDIA-Linux-x86_64-520.61.05.run
 bash ./NVIDIA-Linux-x86_64-520.61.05.run
 
+安装后再重启
+
 wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
 bash ./cuda_11.8.0_520.61.05_linux.run
 
 # 安装550的驱动
 wget https://us.download.nvidia.com/tesla/550.54.14/NVIDIA-Linux-x86_64-550.54.14.run
 bash ./NVIDIA-Linux-x86_64-550.54.14.run
+
+安装后再重启
 
 wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_550.54.14_linux.run
 bash ./cuda_12.4.0_550.54.14_linux.run

@@ -7,7 +7,7 @@ arr=("torchserve:0.7.1-cpu" "torchserve:0.7.1-gpu" "torchserve:0.8.2-cpu" "torch
 for value in ${arr[@]}
 do
     echo $value
-    docker build -t $hubhost/$value --build-arg FROM_IMAGES=pytorch/$value .
+    docker build --network=host -t $hubhost/$value --build-arg FROM_IMAGES=pytorch/$value .
     docker push $hubhost/$value
 done
 

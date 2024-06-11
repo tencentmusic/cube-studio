@@ -210,7 +210,6 @@ spec:
         - /adapter
         - --secure-port=6443
         - --cert-dir=/tmp/cert
-        - --logtostderr=true
         - --prometheus-url=http://prometheus-k8s.monitoring.svc:9090
         - --metrics-relist-interval=1m
         - --v=4
