@@ -692,40 +692,43 @@ class Pipeline_ModelView_Base():
     related_views = [Task_ModelView, ]
 
     def delete_task_run(self, task):
-        from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG', ''))
-        namespace = task.pipeline.namespace
-        # 删除运行时容器
-        pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
-        pod_name = pod_name.lower()[:60].strip('-')
-        pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
-        # print(pod)
-        if pod:
-            pod = pod[0]
-        # 有历史，直接删除
-        if pod:
-            k8s_client.delete_pods(namespace=namespace, pod_name=pod['name'])
-            run_id = pod['labels'].get('run-id', '')
-            if run_id:
-                k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace=namespace, run_id=run_id)
-                k8s_client.delete_pods(namespace=namespace, labels={"run-id": run_id})
-                time.sleep(2)
+        try:
+            from myapp.utils.py.py_k8s import K8s
+            k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG', ''))
+            namespace = task.pipeline.namespace
+            # 删除运行时容器
+            pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
+            pod_name = pod_name.lower()[:60].strip('-')
+            pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
+            # print(pod)
+            if pod:
+                pod = pod[0]
+            # 有历史，直接删除
+            if pod:
+                k8s_client.delete_pods(namespace=namespace, pod_name=pod['name'])
+                run_id = pod['labels'].get('run-id', '')
+                if run_id:
+                    k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace=namespace, run_id=run_id)
+                    k8s_client.delete_pods(namespace=namespace, labels={"run-id": run_id})
+                    time.sleep(2)
 
-        # 删除debug容器
-        pod_name = "debug-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
-        pod_name = pod_name.lower()[:60].strip('-')
-        pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
-        # print(pod)
-        if pod:
-            pod = pod[0]
-        # 有历史，直接删除
-        if pod:
-            k8s_client.delete_pods(namespace=namespace, pod_name=pod['name'])
-            run_id = pod['labels'].get('run-id', '')
-            if run_id:
-                k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace=namespace, run_id=run_id)
-                k8s_client.delete_pods(namespace=namespace, labels={"run-id": run_id})
-                time.sleep(2)
+            # 删除debug容器
+            pod_name = "debug-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
+            pod_name = pod_name.lower()[:60].strip('-')
+            pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
+            # print(pod)
+            if pod:
+                pod = pod[0]
+            # 有历史，直接删除
+            if pod:
+                k8s_client.delete_pods(namespace=namespace, pod_name=pod['name'])
+                run_id = pod['labels'].get('run-id', '')
+                if run_id:
+                    k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}), namespace=namespace, run_id=run_id)
+                    k8s_client.delete_pods(namespace=namespace, labels={"run-id": run_id})
+                    time.sleep(2)
+        except Exception as e:
+            print(e)
 
     # 检测是否具有编辑权限，只有creator和admin可以编辑
     def check_edit_permission(self, item):
@@ -900,6 +903,7 @@ class Pipeline_ModelView_Base():
     # 删除前先把下面的task删除了，把里面的运行实例也删除了，把定时调度删除了
     # @pysnooper.snoop()
     def pre_delete(self, pipeline):
+
         db.session.commit()
         if __("(废弃)") not in pipeline.describe:
             pipeline.describe += __("(废弃)")
