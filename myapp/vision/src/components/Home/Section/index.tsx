@@ -100,6 +100,14 @@ const Section: React.FC<ISectionProps> = props => {
           url: curVideo,
           width: 800,
           height: 500,
+          videoInit: true,
+          playbackRate: [0.5, 0.75, 1, 1.5, 2],
+          defaultPlaybackRate: 1,
+          download: true,
+          pip: true,
+          disableProgress:false,
+          allowPlayAfterEnded: true,
+          allowSeekAfterEnded: true,
         });
         setCurPlayer(player);
       }, 0);
