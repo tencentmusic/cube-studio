@@ -470,7 +470,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     job_template = relationship(
         "Job_Template", foreign_keys=[job_template_id]
     )
-    pipeline_id = Column(Integer, ForeignKey('pipeline.id'),comment='项目组id')
+    pipeline_id = Column(Integer, ForeignKey('pipeline.id'),comment='任务流id')
     pipeline = relationship(
         "Pipeline", foreign_keys=[pipeline_id]
     )

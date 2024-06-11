@@ -786,7 +786,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 "tabName": __("pod信息"),
                 "content": [
                     {
-                        "groupName": __("yaml信息"),
+                        "groupName": __("pod信息"),
                         "groupContent": {
                             "value": Markup(pod_yaml),
                             "type": 'text'

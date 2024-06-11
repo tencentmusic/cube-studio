@@ -169,7 +169,7 @@ class Task_ModelView_Base():
         ),
     }
 
-    add_form_extra_fields['resource_gpu'] = StringField('gpu', default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，目前支持T4/V100/A100/VGPU'),widget=BS3TextFieldWidget())
+    add_form_extra_fields['resource_gpu'] = StringField('gpu', default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),widget=BS3TextFieldWidget())
     add_form_extra_fields['resource_rdma'] = StringField('rdma', default='0', description= _('RDMA的资源使用限制，示例 0，1，10，填写方式咨询管理员'), widget=BS3TextFieldWidget())
 
     edit_form_extra_fields = add_form_extra_fields
@@ -451,9 +451,7 @@ class Task_ModelView_Base():
         # 将哈希值映射到指定范围
         hostPort = 40000 + 10*(hash_value % 1000)
 
-        if HostNetwork:
-            task_env += 'PORT1=' + str(hostPort + 1)+ "\n"
-            task_env += 'PORT2=' + str(hostPort + 2)+ "\n"
+
 
         _, _, resource_name = core.get_gpu(task.resource_gpu)
 

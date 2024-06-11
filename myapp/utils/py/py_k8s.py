@@ -74,14 +74,21 @@ class K8s():
                     pod_name_temp = address.target_ref.name
                     pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
                     all_pods.append(pod)
-            elif (namespace and status and status.lower()=='running'):
-                all_endpoints = self.v1.list_namespaced_endpoints(namespace=namespace)  # 先查询入口点，
-                subsets = all_endpoints.subsets
-                addresses = subsets[0].addresses  # 只取第一个子网
-                for address in addresses:
-                    pod_name_temp = address.target_ref.name
-                    pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
-                    all_pods.append(pod)
+            elif (namespace and status):
+                if status.lower()=='running':
+                    all_endpoints = self.v1.list_namespaced_endpoints(namespace=namespace)  # 先查询入口点，
+                    subsets = all_endpoints.subsets
+                    addresses = subsets[0].addresses  # 只取第一个子网
+                    for address in addresses:
+                        pod_name_temp = address.target_ref.name
+                        pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
+                        all_pods.append(pod)
+                else:
+                    src_pods = self.v1.list_namespaced_pod(namespace).items
+                    for pod in src_pods:
+                        if pod.status and pod.status.phase == status:
+                            all_pods.append(pod)
+
 
             elif (namespace and labels):
                 src_pods = self.v1.list_namespaced_pod(namespace).items
@@ -1068,9 +1075,27 @@ class K8s():
         # 设置卡型
         if gpu_type and gpu_type.strip():
             nodeSelector['gpu-type'] = gpu_type
+        # 独占模式，尽量聚集在一个，避免卡零碎
         if gpu_num >= 1:
             nodeSelector['gpu'] = 'true'
-
+            labels['gpu']='true'
+            # 优先选择gpu卡占用的地方，这样不容易造成卡的零碎化占用
+            affinity = client.V1Affinity(
+                node_affinity=None,
+                pod_anti_affinity=None,
+                pod_affinity=client.V1PodAffinity(
+                preferred_during_scheduling_ignored_during_execution=[
+                    client.V1WeightedPodAffinityTerm(
+                        pod_affinity_term=client.V1PodAffinityTerm(
+                            topology_key="kubernetes.io/hostname",
+                            label_selector = client.V1LabelSelector(
+                                match_labels={
+                                    "gpu": 'true'
+                                }
+                            )
+                        ),
+                        weight=10)])
+                )
         k8s_volumes, k8s_volume_mounts = self.get_volume_mounts(volume_mount, username)
 
         containers = [self.make_container(name=name,
@@ -1289,6 +1314,15 @@ class K8s():
                     print(api_e)
             except Exception as e:
                 print(e)
+
+    # deploymnet伸缩容
+    def scale_deployment(self,namespace, name, replicas):
+        try:
+            deployment = self.AppsV1Api.read_namespaced_deployment(name=name, namespace=namespace)
+            deployment.spec.replicas = int(replicas)
+            self.AppsV1Api.replace_namespaced_deployment(name=name, namespace=namespace, body=deployment)
+        except Exception as e:
+            print(e)
 
     # @pysnooper.snoop()
     def create_deployment(self, namespace, name, replicas, labels, command, args, volume_mount,working_dir,

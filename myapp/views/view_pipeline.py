@@ -921,8 +921,12 @@ class Pipeline_ModelView_Base():
             db.session.delete(task)
 
         # 删除所有的workflow
-        db.session.query(Workflow).filter_by(foreign_key=str(pipeline.id)).delete()
-        db.session.query(RunHistory).filter_by(pipeline_id=pipeline.id).delete()
+        # 只是删除了数据库记录，但是实例并没有删除，会重新监听更新的。
+        db.session.query(Workflow).filter_by(foreign_key=str(pipeline.id)).delete(synchronize_session=False)
+        db.session.commit()
+        db.session.query(Workflow).filter(Workflow.labels.contains(f'"pipeline-id": "{str(pipeline.id)}"')).delete(synchronize_session=False)
+        db.session.commit()
+        db.session.query(RunHistory).filter_by(pipeline_id=pipeline.id).delete(synchronize_session=False)
         db.session.commit()
 
 
@@ -1067,6 +1071,10 @@ class Pipeline_ModelView_Base():
         # return
         print('begin upload and run pipeline %s' % pipeline.name)
         pipeline.version_id = ''
+        if not pipeline.pipeline_file:
+            flash("请先编排任务，并进行保存后再运行整个任务流",'warning')
+            return redirect('/pipeline_modelview/api/web/%s' % pipeline.id)
+
         crd_name = run_pipeline(pipeline, json.loads(pipeline.pipeline_file))  # 会根据版本号是否为空决定是否上传
         pipeline.pipeline_argo_id = crd_name
         db.session.commit()  # 更新
@@ -1124,12 +1132,12 @@ class Pipeline_ModelView_Base():
     @expose("/web/monitoring/<pipeline_id>", methods=["GET"])
     def web_monitoring(self, pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
-        if pipeline.run_id:
-            url = "http://"+pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
-            return redirect(url)
-        else:
-            flash('no running instance', 'warning')
-            return redirect('/pipeline_modelview/api/web/%s' % pipeline.id)
+
+        url = "http://"+pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
+        return redirect(url)
+        # else:
+        #     flash('no running instance', 'warning')
+        #     return redirect('/pipeline_modelview/api/web/%s' % pipeline.id)
 
     # # @event_logger.log_this
     @expose("/web/pod/<pipeline_id>", methods=["GET"])
@@ -1197,6 +1205,7 @@ class Pipeline_ModelView_Base():
             change_node(task.id, new_task.id)
 
         new_pipeline.expand = json.dumps(expand)
+        new_pipeline.parameter="{}" # 扩展参数不进行复制，这样demo的pipeline不会被复制一遍
         db.session.commit()
         return new_pipeline
 

@@ -352,8 +352,7 @@ class NNI_ModelView_Base():
                 "name": nni.name,
                 "namespace": namespace,
                 "labels": {
-                    "type": "nni",
-                    "component": "nni",
+                    "pod-type": "nni",
                     "role": "master",
                     "app": nni.name,
                     "username": nni.created_by.username
@@ -725,7 +724,7 @@ class NNI_ModelView_Api(NNI_ModelView_Base, MyappModelRestApi):
                    'parallel_trial_count', 'max_trial_count', 'objective_type',
                    'objective_goal', 'objective_metric_name', 'algorithm_name',
                    'algorithm_setting', 'parameters', 'job_json', 'working_dir', 'node_selector',
-                   'resource_memory', 'resource_cpu', 'alert_status', 'job_worker_image', 'job_worker_command']
+                   'resource_memory', 'resource_cpu','resource_gpu', 'alert_status', 'job_worker_image', 'job_worker_command']
     edit_columns = add_columns
 
 

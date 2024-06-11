@@ -1849,6 +1849,8 @@ class MyappModelRestApi(ModelRestApi):
 
             local_validators.append(val)
         ret['validators'] = local_validators
+        # 去除重复
+        ret['validators'] = [json.loads(x) for x in list(set([json.dumps(x) for x in ret['validators']]))]
 
         # 统一规范前端type和选择时value
         # 选择器

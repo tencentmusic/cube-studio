@@ -59,7 +59,12 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def deploy(self):
-        ops=f'''
+        download_url = ''
+        if self.path or self.download_url:
+            download_url = f'<a href="/training_model_modelview/api/download/{self.id}">{__("下载")}</a> |'
+        else:
+            download_url = f'{__("下载")} |'
+        ops=download_url+f'''
         <a href="/training_model_modelview/api/deploy/{self.id}">{__("发布")}</a> 
         '''
         return Markup(ops)

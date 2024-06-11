@@ -14,7 +14,7 @@ from myapp.forms import MyBS3TextFieldWidget
 from flask import (
     flash,
     g,
-    redirect
+    redirect, request
 )
 from .base import (
     DeleteMixin,
@@ -163,6 +163,24 @@ triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torc
         if not item.path:
             item.path = self.src_item_json['path']
         self.pre_add(item)
+
+    import pysnooper
+    @expose("/download/<model_id>", methods=["GET", 'POST'])
+    # @pysnooper.snoop()
+    def download_model(self, model_id):
+        train_model = db.session.query(Training_Model).filter_by(id=model_id).first()
+        if train_model.download_url:
+            return redirect(train_model.download_url)
+        if train_model.path:
+            if 'http://' in train_model.path or 'https://' in train_model.path:
+                return redirect(train_model.path)
+            if '/mnt' in train_model.path:
+                download_url = request.host_url + 'static/' + train_model.path.strip('/')
+                return redirect(download_url)
+        flash(__('未发现模型存储地址'),'warning')
+
+        return redirect(conf.get('train_model'))
+
 
     @expose("/deploy/<model_id>", methods=["GET", 'POST'])
     def deploy(self, model_id):

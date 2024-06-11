@@ -89,12 +89,13 @@ class Project_User_ModelView_Base():
     }
     edit_form_extra_fields = add_form_extra_fields
 
-    # @pysnooper.snoop()
     def pre_add_req(self,req_json):
         user_roles = [role.name.lower() for role in list(get_user_roles())]
         if "admin" in user_roles:
             return req_json
         creators = db.session().query(Project_User).filter_by(project_id=req_json.get('project')).all()
+        creators = [creator.user.username for creator in creators]
+
         if g.user.username not in creators:
             raise MyappException('just creator can add/edit user')
 
@@ -184,7 +185,7 @@ class Project_ModelView_Base():
 
     }
     edit_form_extra_fields = add_form_extra_fields
-
+    pre_update_more=None
 
     # @pysnooper.snoop()
     def pre_add_web(self):
@@ -196,7 +197,11 @@ class Project_ModelView_Base():
         )
         self.add_form_extra_fields = self.edit_form_extra_fields
 
+    # @pysnooper.snoop()
     def pre_update(self, item):
+        if self.pre_add:
+            self.pre_add(item)
+
         if not item.type:
             item.type = self.project_type
         if item.expand:

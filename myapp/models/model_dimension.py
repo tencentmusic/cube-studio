@@ -36,16 +36,21 @@ class Dimension_table(Model,ImportMixin,MyappModelBase):
         users = [user.strip() for user in users if user.strip()]
         url_path = conf.get('MODEL_URLS',{}).get("dimension")
         if g.user.is_admin() or g.user.username in users or '*' in self.owner:
-            return Markup(f'<a target=_blank href="{url_path}?targetId={self.id}">{self.table_name}</a>')
-        else:
-            return self.table_name
+            if self.sqllchemy_uri:
+                return Markup(f'<a target=_blank href="{url_path}?targetId={self.id}">{self.table_name}</a>')
+
+        return self.table_name
 
     @property
     def operate_html(self):
-        url=f'''
-        <a target=_blank href="/dimension_table_modelview/api/create_external_table/%s">{__("更新远程表")}</a>  | <a target=_blank href="/dimension_table_modelview/api/external/%s">{__("建外表示例")}</a>
-        '''%(self.id,self.id)
-        return Markup(url)
+        if self.sqllchemy_uri:
+            url=f'''
+            <a target=_blank href="/dimension_table_modelview/api/create_external_table/%s">{__("更新远程表")}</a>  | <a target=_blank href="/dimension_table_modelview/api/external/%s">{__("建外表示例")}</a>
+            '''%(self.id,self.id)
+            return Markup(url)
+        else:
+            return __("更新远程表")+" | "+__("建外表示例")
+
 
 
 

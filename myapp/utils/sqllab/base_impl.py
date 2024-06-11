@@ -103,7 +103,7 @@ class Base_Impl():
                 async_task = handle_task.delay(qid, username=g.user.username)
             else:
                 stage, status, _err_msg = handle_task(qid, username=g.user.username)
-                if _err_msg != "":
+                if _err_msg:
                     raise RuntimeError(_err_msg)
 
                 res = self.get_result(qid)

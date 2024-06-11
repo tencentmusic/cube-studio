@@ -174,7 +174,7 @@ class Service_ModelView_base():
                                      image=service.images,
                                      hostAliases=conf.get('HOSTALIASES', ''),
                                      env=env,
-                                     privileged=False,
+                                     privileged=True,
                                      accounts=None,
                                      username=service.created_by.username,
                                      ports=[int(port) for port in service.ports.split(',')]

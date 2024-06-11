@@ -29,20 +29,19 @@ from myapp.utils.sqllab.base_impl import Base_Impl
 engine_impls = {
     'mysql': Base_Impl(),
     'presto': Base_Impl(),
-    'clikchouse': Base_Impl(),
+    'clickhouse': Base_Impl(),
     'postgres': Base_Impl(),
     "impala": Base_Impl(),
-    "oracle": Base_Impl(),
-    "mssql": Base_Impl()
+    "hive": Base_Impl()
 }
 db_uri_demo = {
-    'mysql': ['mysql+pymysql://username:password@host:port/database'],
-    'postgres': ['postgresql+psycopg2://username:password@host:port/database'],
-    'presto': ['presto://username:password@host:port/database'],
-    'clikchouse': ['clickhouse+native://username:password@host:port/database'],
+    'mysql': ['mysql+pymysql://$username:$password@$host:3306/$database'],
+    'postgres': ['postgresql+psycopg2://$username:$password@$host:5432/$database'],
+    'presto': ['presto://$username:$password@$host:8080/$catalog/$schema'],   # presto://presto-coordinator-service.default:8080/hive/default
+    'clickhouse': ['clickhouse+native://$username:$password@$host:9000/$database'],
+    # "hive":['hive://username:passwd@host:10000/default?auth=LDAP'],
+    "hive":['hive://$host:10000/default?auth=NOSASL'],
     "impala": ['impala://host:port/database'],
-    "oracle": ['oracle://username:password@host:port/database'],
-    "mssql": ['mssql+pymssql://username:password@host:port/database']
 }
 
 # @pysnooper.snoop()

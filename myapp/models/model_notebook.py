@@ -59,15 +59,6 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
 
         if self.ide_type=='theia':
             url = "/notebook/"+self.namespace + "/" + self.name+"/" + "#"+self.mount
-        elif self.ide_type=='matlab':
-            url = "/notebook/"+self.namespace + "/" + self.name+"/index.html"
-        elif self.ide_type=='rstudio' and not SERVICE_EXTERNAL_IP:
-            url1 = host+"/notebook/" + self.namespace + "/" + self.name + "/auth-sign-in?appUri=%2F"
-            url2 = host+"/notebook/" + self.namespace + "/" + self.name+"/"
-            a_html='''<a onclick="(function (){window.open('%s','_blank');window.open('%s','_blank')})()">%s</a>'''%(url1,url2,self.name)
-            return Markup(a_html)
-
-            # url = "/notebook/" + self.namespace + "/" + self.name+"/"
         else:
             if root:
                 url = '/notebook/jupyter/%s/lab/tree/%s' % (self.name,root.lstrip('/'))

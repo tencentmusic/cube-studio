@@ -73,7 +73,7 @@ class Notebook_ModelView_Base():
         "resource": {"type": "ellip2", "width": 300},
         "status": {"type": "ellip2", "width": 100},
         "renew": {"type": "ellip2", "width": 200},
-        "save": {"type": "ellip2", "width": 200}
+        "save": {"type": "ellip2", "width": 100}
     }
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]

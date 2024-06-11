@@ -95,7 +95,7 @@ class InferenceService_ModelView_base():
         "model_status": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
         "operate_html": {"type": "ellip2", "width": 350},
-        "resource": {"type": "ellip2", "width": 300},
+        "resource": {"type": "ellip2", "width": 350},
     }
     search_columns = ['name', 'created_by', 'project', 'service_type', 'label', 'model_name', 'model_version',
                       'model_path', 'host', 'model_status', 'resource_gpu']
@@ -187,7 +187,7 @@ class InferenceService_ModelView_base():
         ),
         "hpa": StringField(
             _('弹性伸缩'),
-            default='cpu:50%,gpu:50%',
+            default='',
             description= _('弹性伸缩容的触发条件：可以使用cpu/mem/gpu/qps等信息，可以使用其中一个指标或者多个指标，示例：cpu:50%,mem:50%,gpu:50%'),
             widget=BS3TextFieldWidget()
         ),

@@ -1533,19 +1533,20 @@ def check_resource_gpu(resource_gpu, src_resource_gpu=None):
         return gpu_num
 
     gpu_num, gpu_type, resource_name = get_gpu(resource_gpu)
-    src_gpu_num,_,_ = get_gpu(src_resource_gpu) if src_resource_gpu else 0,0,0
+    src_gpu_num = 0
+    if src_resource_gpu:
+        src_gpu_num, _, _ = get_gpu(src_resource_gpu)
 
-    if hasattr(g,'user')  and not g.user.is_admin():
+    if hasattr(g,'user') and not g.user.is_admin():
         resource_gpu = check_max_gpu(gpu_num, src_gpu_num)
         if math.ceil(float(resource_gpu))==resource_gpu:
             resource_gpu = math.ceil(float(resource_gpu))
         if gpu_type:
-            resource_gpu +=f'({gpu_type})'
+            resource_gpu = str(resource_gpu)+f'({gpu_type})'
     else:
         resource_gpu = resource_gpu
 
     return str(resource_gpu)
-
 
 
 def check_resource(resource_memory,resource_cpu,resource_gpu,src_resource_memory=None,src_resource_cpu=None,src_resource_gpu=None):
