@@ -40,7 +40,7 @@ wget https://us.download.nvidia.com/tesla/550.54.14/NVIDIA-Linux-x86_64-550.54.1
 bash ./NVIDIA-Linux-x86_64-550.54.14.run
 
 wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_550.54.14_linux.run
-bash .cuda_12.4.0_550.54.14_linux.run
+bash ./cuda_12.4.0_550.54.14_linux.run
 
 ```
 安装后再重启

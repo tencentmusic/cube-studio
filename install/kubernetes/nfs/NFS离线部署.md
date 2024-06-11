@@ -27,7 +27,7 @@ dpkg -i nfs-kernel-server
 ### centos使用rpm包方式安装(所有节点)
 
 ```shell
-wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/deploy/nfs/nfsrpm.tar.gz
+wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/nfsrpm.tar.gz
 tar -zxvf nfsrpm.tar.gz
 cd nfs
 rpm -ivh *.rpm --force --nodeps
@@ -68,7 +68,7 @@ ln -s /data/nfs/k8s /data/
 客户端的配置依据以下的步骤，需要注意的是客户端和服务端的挂载不能在同一台机器上，否则挂载会出现问题。
 
 ```shell
-export server=10.101.135.101
+export server=192.168.3.100
 
 #查看nfs server 信息
 
@@ -101,3 +101,10 @@ Filesystem                Size  Used Avail Use% Mounted on
 
 ```
 
+# 性能压测
+
+```bash
+time dd if=/dev/zero of=/data/nfs/test bs=2M count=1000
+time dd if=/data/nfs/test of=/dev/null bs=2M
+
+```

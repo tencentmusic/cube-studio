@@ -7504,6 +7504,8 @@ spec:
         app: volcano-controller
     spec:
       serviceAccount: volcano-controllers
+      nodeSelector:
+        kubeflow: 'true'
       containers:
           - name: volcano-controllers
             image: volcanosh/vc-controller-manager:v1.7.0
@@ -7658,6 +7660,8 @@ spec:
         app: volcano-scheduler
     spec:
       serviceAccount: volcano-scheduler
+      nodeSelector:
+        kubeflow: 'true'
       containers:
         - name: volcano-scheduler
           image: volcanosh/vc-scheduler:v1.7.0

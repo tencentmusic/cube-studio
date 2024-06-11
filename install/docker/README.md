@@ -61,7 +61,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.
 注意：前后端代码生产环境均在容器中运行。
 
 后端开发调试：代码通过挂载，在本机ide中修改，在docker-compose中运行调试，debug模式自动热更新。
-前端调试：大部分功能在本机ide开发调试即可，支持热更新。完整的平台前端调试需要本地ide开发完成后打包编译为静态文件，也可以在docker中编译成静态文件，在docker-compose中运行验证，不同于后端，这种场景下前端不支持热更新。
+前端调试：大部分功能在本机ide开发调试即可，支持热更新。完整的平台前端调试需要本地ide开发完成后打包编译为静态文件，也可以在docker中编译成静态文件，在docker-compose中运行验证，不同于后端，这种docker中调试的话前端不支持热更新。
 
 #### 本地后端python代码开发
 
@@ -96,6 +96,12 @@ docker-compose -f docker-compose.yml  up
 部署以后，登录首页 会自动创建用户，绑定角色（Gamma和username同名角色）。
 
 可根据自己的需求为角色授权。
+
+2）本地连接k8s开发集群
+
+需要先在k8s开发集群部署一遍cube-studio，然后才能在本地连接并调度
+
+![k8s配置](https://img-blog.csdnimg.cn/direct/fa582b82e228432188d8db1b942238ce.png)
 
 #### 前端页面本机开发和构建
 

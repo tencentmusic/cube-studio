@@ -3,7 +3,10 @@
 
 ##  卸载旧版本docker
 ```bash
-apt-get remove docker docker-engine docker-ce docker.io docker-ce docker-ce-cli docker-compose
+sudo systemctl stop docker
+apt-get --purge remove -y *docker*  
+sudo apt-get autoremove -y
+dpkg -l | grep docker
 ```
 
 ## 安装docker

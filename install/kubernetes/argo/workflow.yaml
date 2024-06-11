@@ -1209,7 +1209,7 @@ spec:
         - mountPath: /tmp
           name: tmp
       nodeSelector:
-        kubernetes.io/os: linux
+        kubeflow: 'true'
       securityContext:
         runAsNonRoot: true
       serviceAccountName: argo-server
@@ -1233,6 +1233,8 @@ spec:
       labels:
         app: minio
     spec:
+      nodeSelector:
+        kubeflow: 'true'
       containers:
       - command:
         - minio
@@ -1325,7 +1327,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
       nodeSelector:
-        kubernetes.io/os: linux
+        kubeflow: 'true'
       securityContext:
         runAsNonRoot: true
       serviceAccountName: argo

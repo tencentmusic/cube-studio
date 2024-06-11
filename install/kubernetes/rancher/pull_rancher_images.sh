@@ -19,5 +19,6 @@ docker pull rancher/hyperkube:v1.21.5-rancher1 &
 docker pull rancher/mirrored-kube-rbac-proxy:v0.5.0 &
 docker pull rancher/mirrored-calico-node:v3.19.2 &
 docker pull rancher/rancher-webhook:v0.2.1 &
+docker pull rancher/fleet-agent:v0.3.7
 
 wait

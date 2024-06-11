@@ -35,6 +35,8 @@ spec:
       labels:
         app: minio
     spec:
+      nodeSelector:
+        kubeflow: 'true'
       containers:
       - args:
         - server
