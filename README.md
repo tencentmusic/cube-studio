@@ -6,8 +6,21 @@
 
 ![image](https://github.com/tencentmusic/cube-studio/assets/20157705/a07b1742-3413-4957-bd15-0f2b3c30f66f)
 
-cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目前主要包含
 
+# 帮助文档
+
+https://github.com/tencentmusic/cube-studio/wiki
+
+# 开源共建
+
+ 学习、部署、体验、开源建设、商业合作 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>
+
+ <img border="0" width="20%" src="https://user-images.githubusercontent.com/20157705/219829986-66384e34-7ae9-4511-af67-771c9bbe91ce.jpg" />
+ 
+
+# 功能清单
+
+cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目前主要包含
 
 |模块分组|功能模块|功能清单|
 |:-|:--|:--|
@@ -68,16 +81,7 @@ cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目�
 |大模型|私有知识库|<li><u>支持企业微信群聊机器人对接|
 |大模型|私有知识库|<li><u>支持钉钉群聊机器人对接|
 
-# 帮助文档
 
-https://github.com/tencentmusic/cube-studio/wiki
-
-# 开源共建
-
- 学习、部署、体验、开源建设、商业合作 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>
-
- <img border="0" width="20%" src="https://user-images.githubusercontent.com/20157705/219829986-66384e34-7ae9-4511-af67-771c9bbe91ce.jpg" />
- 
 # 支持模板
 
 提示：
