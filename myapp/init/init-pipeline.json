@@ -2,7 +2,7 @@
   "yolov7": {
     "pipeline": {
       "name": "imageai",
-      "describe": "图像预测+物体检测+视频跟踪",
+      "describe": "深度学习：目标识别训练部署",
       "project": "public",
       "parameter": {
         "demo": "true",
