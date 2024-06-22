@@ -6,29 +6,31 @@
 
 cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目前主要包含
 
-|模块分组|功能|功能明细|
+
+|模块分组|功能模块|功能清单|
 |:-|:--|:--|
 |基础能力|项目组管理|<li>AI平台需要通过项目划分，<li>支持配置相应项目组用户的权限，<li>任务/服务的挂载，资源组，集群，服务代理，<li><u>项目组内角色应用|
 |基础能力|网络|<li>支持非80端口，<li>支持公网/域名，<li>支持反向代理和内网穿透方式访问，<li><u>支持https</u>|
 |基础能力|用户管理 角色管理/权限管理|<li>管理平台用户的基本信息，组织架构，支持账号密码，rbac权限体系。<li> <u>增加修改和删除，清理等操作的历史记录</u>|
 |基础能力|计量计费功能|<u><li>1、支持平台资源限制的分配和查看；项目组资源限制，租户资源限制、任务资源限制，项目组下个人的资源限制，包括开发资源，训练资源、推理资源等。   额度限制限制在notebook，docker构建，pipeline，超参搜索，内部服务，推理服务中的生效。限制支持单任务，并行任务总和和历史任务总和等方法<li>2、提供统一的开发、训练、推理服务资源监控，从租户、项目、任务角度分析模型资源分配及使用情况。<li> 3、支持自定义计费模式，通过计量结果自定义获取计费值</u>|
 |基础能力|SSO单点登录|<li>账号密码注册自动登录，<li><u>支持对接公司账号体系AUTH_OID/AUTH_LDAP/AUTH_REMOTE_USER等登录注册方式，<li><u>支持消息推送。  <li><u>增加登录验证，强密码，远程用户，登录频率限制，密码密文传输等|
-|基础能力|支持多种算力|<li>提供多种规格的资源支持不同的使用场景，cpu/gpu等 支持T4/V100/A100等多种卡型，<li><u>支持arm64芯片，<li><u>支持vgpu等模式。<li><u>支持国产gpu，支持海光gpu，海飞科dcu，华为npu，<li><u>支持rdma调度，mellanox。<li><u>支持gpu禁用模型，共享模式，独占模式|
-|基础能力|多资源组/多集群|<li>支持划分多资源组，<li>支持ipvs的k8s网络模式，<li><u>支持多k8s集群，<li><u>支持containerd容器运行态|
+|基础能力|支持多种算力|<li>提供多种规格的资源支持不同的使用场景，cpu/gpu等 支持T4/V100/A100等多种卡型，<li><u>支持arm64芯片，<li><u>支持vgpu等模式。<li><u>支持国产gpu，支持调度海光dcu，华为npu，寒武纪mlu，天数智芯GPU，<li><u>支持rdma调度，mellanox。<li><u>支持gpu禁用模型，共享模式，独占模式|
+|基础能力|多资源组/多集群|<li>支持划分多资源组，<li>支持ipvs的k8s网络模式，<li><u>支持多k8s集群，<li>支持containerd容器运行态|
 |基础能力|边缘集群|<li><u>支持边缘集群模式，支持边缘节点开发，训练，推理|
 |基础能力|serverless集群模式|<li><u>支持腾讯云serverless集群模式，（notebook,pipeline,推理服务模块支持）<li><u>阿里云serverless集群模式（notebook,pipeline,推理服务模块支持）|
 |基础能力|数据库存储|<li>支持外部mysql作为元数据库<li><u>支持外部postgres作为元数据库|
+|基础能力|机器资源管理|<li><u>web界面控制机器调度类型，所属资源组，是否启动rdma，是否启动vgpu，可用任务场景等|
 |基础能力|存储盘管理|<li><u>支持web界面添加存储盘，支持项目组绑定，notebook pipeline 推理服务，直接在pod中挂载外部分布式存储。<li><u>支持nfs，cfs，oss，nas，cos，glusterfs，cephfs，s3/minio|
 |基础能力|国际化能力|<li><u>mlops支持配置多语言配置，目前支持中英文|
 |数据管理|数据地图|<li>元数据库表管理，指标，维表|
-|数据管理|数据计算|<li>sqllab交互查询，支持mysql，postgresql等计算引擎|
+|数据管理|数据计算|<li>sqllab交互查询，支持mysql，<u>postgresql，clickhouse，hive，presto</u>等计算引擎|
 |数据管理|ETL编排|<li>数据ETL任务流编排，任务管理等对接公司数据中台相应计算/调度引擎|
 |数据管理|数据集管理|<li>允许用户随时上传样本集（图片、音频、文本等），<li><u>支持sdk进行数据集对接，<li><u>支持数据集一键探索功能|
 |数据管理|数据标注|<li><u>支持标注平台，图/文/音/多模态各类型标注能力，<li><u>对接一站式机器学习平台，支持自动化标注(需购买aihub)：<li><u>支持目标识别，目标边界识别，目标遮罩识别，图片分类，图片描述，ocr，关键点检测。支持大模型自动化标注：文本分类，文本翻译，命名实体识别，阅读理解，问答，摘要提取。|
 |开发环境|镜像功能|<li>镜像仓库/镜像管理/在线构建镜像。同时提供平台所有镜像，包括模板镜像/服务镜像/notebook镜像/gpu基础环境的构建方法和构建后镜像，<li><u>支持dockerfile在线构建 <li><u>支持同一仓库多个秘钥配置|
-|开发环境|notebook|<li>支持基于开源的Jupyterlab/vscode，提供在线的交互式开发调试工具；<li>提供多种可选环境ide和开发示例，支持资源类型选择 支持大数据版本，机器学习版本，深度学习版本 <li><u>大数据版本支持用户信息和内网spark链接 <li>支持ssh remote与notebook对接远程开发，方便快速将本地代码提交到平台的训练环境。<li><u>ssh隧道代理，单端口开放 <li><u>支持matlab，Rstudio等在线ide <li><u>支持gpu，cpu，内存，监控，支持git交互 <li><u>支持自定义notebook镜像，便于封装公司自己的notebook <li><u>多环境notebook，支持R语言/julia语言/python2.7/python3.6/python3.7/python3.8/python3.9/python3.10环境和cube-studio专有环境 <li><u>支持tensorboard任务可视化 <li><u>notebook支持环境镜像保存 <li><u>jupyter支持密码保护 <li><u>notebook支持整卡占用，虚拟卡占用，gpu共享占用 <li>支持notebook启动自动初始化环境|
-|模型训练|拖拉拽任务流编排调试|<li>提供拖拽式交互开发环境，支持开发者以拖拽的方式完成业务逻辑的PIPLINE； <li>支持单任务调试，<li>训练支持多种资源规格（CPU、GPU等），支持卡型的选择，超时重试等。<li><u>分布式任务模板支持单任务调试用户镜像而非模板镜像</u>  <li><u>分布式任务模板支持gpu型号透传，rdma高速通信，拉取秘钥透传  </u><li>pipeline调试，支持定时调度，补录，并发限制，超时，实例依赖等，<li>任务管理，<li>workflow实例管理，<li>资源监控，<li><u>支持任务输入输出，<li><u>任务流全局变量，<li><u>文本/图片/echart结果可视化，<li><u>支持workflow暂停和恢复。 <li><u>支持单任务和pipeline运行中任务监听端口提供运行中服务监听能力 <li><u>任务流支持任务推荐|
-|模型训练|主流功能算子|基础算子：<li>自定义镜像，<li><u>逻辑节点，</u><li><u>python</u></li> 数据同步：<li>数据集导入，<li>datax，<li>模型导入</li>  数据处理工具：<li>hadoop/spark作业提交，<li>volcanojob/ray分布式数据处理，<li>sparkjob  </li> 特征处理： <u><li>-数据合并，包含union、join操作 <li>-去除重复样本 <li>-数据变换，包括boxcox转换、二值化、数据类型转换、dct变换、根据函数转换、ma移动平均、多项式展开 <li>-非数值型变量处理，包括hash、根据统计量转换、one-hot <li>-异常值检测 <li>-获取变量的统计量 <li>-去除值过于单一的变量 <li>-删除缺失率过高的值 <li>-删除缺失率过高的值 <li>-填充缺失值 <li>-数据离散化，等宽、等频、聚类离散化 <li> -标准化、正则化、归一化，有最大绝对值归一化、最大最小归一化、z_score标准化 <li>-索引处理，包含增加索引、索引转列、列索引重命名 <li> -排序 <li> -执行sql <li> -hadamard乘积 <li> -特征组合，用于衍生特征 <li> -降维，包括pca降维和卡方降维 <li> -特征重要性，通过随机森林、逻辑回归、xgboost等模型计算特征重要性，可计算特征的iv值、互信息值、方差等 <li> -特征向量间的相关性计算 <li> -数据拆分，包括列内拆分、列间拆分、行间拆分、svd奇异值分解 <li> -采样，包括随机采样、分层采样、过采样、欠采样</li></u>  传统机器学习：<li>ray-sklearn分布式，<li>xgb单机训练推理 </li>传统机器学习算法：<u><li>ar/arima时间序列算法/random-forest/random-forest-regression/lr/lightgbm/knn/kmean/gbdt/decision-tree/pca/lda/catboost/xgb/超参搜索 </u></li>分布式深度学习框架：<li>tf/pytorch/<u>mxnet/horovod/paddlejob/mindspore分布式训练</u></li> 分布式加速框架：<li><u>mpi/colossalai/deepspeed/horovod/megatron </u></li>模型处理：<u><li>模型评估，<li>模型格式转换 </li></u>模型服务化：<li>模型注册，<li><u>模型离线推理</u>，<li>模型部署 </li>媒体分布式处理：<li>分布式媒体下载，<li>视频提取图片，<li>视频提取图片|
+|开发环境|notebook|<li>支持基于开源的Jupyterlab/vscode，提供在线的交互式开发调试工具；<li>提供多种可选环境ide和开发示例，支持资源类型选择 支持大数据版本，机器学习版本，深度学习版本 <li><u>大数据版本支持用户信息，hdfs客户端，hive客户端和spark客户端 <li>支持ssh remote与notebook对接远程开发，方便快速将本地代码提交到平台的训练环境。<li><u>ssh隧道代理，单端口开放 <li><u>支持matlab，Rstudio等在线ide <li><u>支持gpu，cpu，内存，监控，支持git交互 <li><u>支持自定义notebook镜像，便于封装公司自己的notebook <li><u>多环境notebook，支持R语言/julia语言/python2.7/python3.6/python3.7/python3.8/python3.9/python3.10环境和cube-studio专有环境 <li><u>支持tensorboard任务可视化 <li><u>notebook支持环境镜像保存 <li><u>jupyter支持密码保护 <li><u>notebook支持整卡占用，虚拟卡占用，gpu共享占用 <li>支持notebook启动自动初始化环境|
+|模型训练|拖拉拽任务流编排调试|<li>提供拖拽式交互开发环境，支持开发者以拖拽的方式完成业务逻辑的PIPLINE； <li>支持单任务调试，<li>训练支持多种资源规格（CPU、GPU等），支持卡型的选择，超时重试等。<li><u>任务支持独占和共享占用gpu</u></li><li><u>分布式任务模板支持单任务调试用户镜像而非模板镜像</u>  <li><u>支持rdma资源占用 <li><u>支持gpu不同厂商，不同卡型的占用 <li><u>分布式任务模板支持gpu型号透传，rdma资源透传，拉取秘钥透传  </u><li>pipeline调试，支持定时调度，补录，并发限制，超时，实例依赖等，<li>任务管理，<li>workflow实例管理，<li>资源监控，<li><u>支持任务输入输出，<li><u>任务流全局变量，<li><u>文本/图片/echart结果可视化，<li><u>支持workflow暂停和恢复。<li><u>支持任务流优先级 <li><u>支持单任务和pipeline运行中任务监听端口提供运行中服务监听能力 <li><u>任务流支持任务推荐<li><u>定时调度支持最大保留实例数<li><u>pipeline支持任务流优先级|
+|模型训练|主流功能算子|基础算子：<li>自定义镜像，<li><u>逻辑节点，</u><li><u>python</u></li> 数据同步：<li>数据集导入，<u>(支持huggingface数据集)</u><li>datax，<u>datax-import</u></li><li>模型导入<u>(支持huggingface模型)</u></li>  数据处理工具：<li>hadoop/spark作业提交，<li>volcanojob/ray分布式数据处理，<li>sparkjob  </li> <li><u>hadoop支持hadfs，hive命令，spark命令</u></li> 特征处理： <u><li>-数据合并，包含union、join操作 <li>-去除重复样本 <li>-数据变换，包括boxcox转换、二值化、数据类型转换、dct变换、根据函数转换、ma移动平均、多项式展开 <li>-非数值型变量处理，包括hash、根据统计量转换、one-hot <li>-异常值检测 <li>-获取变量的统计量 <li>-去除值过于单一的变量 <li>-删除缺失率过高的值 <li>-删除缺失率过高的值 <li>-填充缺失值 <li>-数据离散化，等宽、等频、聚类离散化 <li> -标准化、正则化、归一化，有最大绝对值归一化、最大最小归一化、z_score标准化 <li>-索引处理，包含增加索引、索引转列、列索引重命名 <li> -排序 <li> -执行sql <li> -hadamard乘积 <li> -特征组合，用于衍生特征 <li> -降维，包括pca降维和卡方降维 <li> -特征重要性，通过随机森林、逻辑回归、xgboost等模型计算特征重要性，可计算特征的iv值、互信息值、方差等 <li> -特征向量间的相关性计算 <li> -数据拆分，包括列内拆分、列间拆分、行间拆分、svd奇异值分解 <li> -采样，包括随机采样、分层采样、过采样、欠采样</li></u>  传统机器学习：<li>ray-sklearn分布式，<li>xgb单机训练推理 </li>传统机器学习算法：<u><li>ar/arima时间序列算法/random-forest/random-forest-regression/lr/lightgbm/knn/kmean/gbdt/decision-tree/pca/lda/catboost/xgb/超参搜索 </u></li>分布式深度学习框架：<li>tf/pytorch/<u>mxnet/horovod/paddlejob/mindspore分布式训练</u></li> 分布式加速框架：<li><u>mpi/colossalai/deepspeed/horovod/megatron </u></li>模型处理：<u><li>模型评估，<li>模型格式转换 </li></u>模型服务化：<li>模型注册，<li><u>模型离线推理</u>，<li>模型部署 </li>媒体分布式处理：<li>分布式媒体下载，<li>视频提取图片，<li>视频提取图片|
 |模型训练|算子自定义|支持算子自定义，通过web界面操作将自定义算法代码镜像，注册为可被他人复用的pipeline算子|
 |模型训练|自动学习|面向非AI背景的用户提供自动学习服务，用户选择某一个场景之后，上传训练数据即可自动开始训练和模型部署，<u>支持示例automl任务流导入导出|
 |模型训练|自定义镜像|面向高级 AI 开发者，提供自定义训练作业（执行环境 + 代码）功能；|
@@ -36,7 +38,7 @@ cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目�
 |模型训练|TensorBoard作业|<u>实时/离线观察模型训练过程中的参数和指标变化情况|
 |模型管理 推理服务|内部服务|支持开发或运维工具快捷部署，提供mysql-web，postgresql web，mobgo web， redis web，neo4j，rstudio等开源工具|
 |模型管理 推理服务|模型管理|模型管理用于对模型多版本管理，支持模型发布为推理服务|
-|模型管理 推理服务|推理服务|<li>支持<u>ml</u>/tf/pytorch/tentortrt/onnx常规模型的多版本的0代码发布。 <li>支持gpu卡型选择，<u>支持vgpu，独占，共享占用</u>，<li>支持cpu/mem/<u>gpu等弹性伸缩，<li>支持服务优先级，</u><li>支持远程模型路径,支持流量分流，流量复制，sidecar配置，支持泛域名配置，支持配置文件挂载，启动目录/命令/环境变量/端口/指标/健康检查等 支持调试环境/测试环境/生产环境 支持域名/ip代理多种形式 <li>支持服务负载指标监控 <li>支持多版本服务滚动升级和回滚，<li><u>支持单pod滚动发布 </u><li><u>支持禁用k8s service负载均衡器 </u><li>提供<u>ml</u>/tf/pytorch/tentortrt/onnx常规模型推理服务镜像 支持用户自定义模型推理镜像|
+|模型管理 推理服务|推理服务|<li>支持<u>ml</u>/tf/pytorch/tentortrt/onnx常规模型的多版本的0代码发布。 <li>支持gpu卡型选择，<u>支持vgpu，独占，共享占用</u>，<li>支持cpu/mem/<u>gpu等弹性伸缩，<li>支持服务优先级，</u><li>支持远程模型路径,支持流量分流，流量复制，sidecar配置，支持泛域名配置，支持配置文件挂载，启动目录/命令/环境变量/端口/指标/健康检查等 支持调试环境/测试环境/生产环境 支持域名/ip代理多种形式 <li>支持服务负载指标监控 <li>支持多版本服务滚动升级和回滚，<li><u>支持单pod滚动发布 </u><li><u>支持禁用k8s service负载均衡器 </u><li><u>支持大模型分布式推理 </u><li>提供<u>ml</u>/tf/pytorch/tentortrt/onnx常规模型推理服务镜像 支持用户自定义模型推理镜像<li><u>支持定时伸缩容</li><li><u>支持配置服务的jwt认证功能</li>|
 |监控|整体资源|<li>所有集群，所有计算机器的使用情况，包括机器的所属集群，所属资源组，机器ip，cpu/gpu类型和卡型，当前cpu/内存/gpu的使用率<li> 所有集群，所有计算pod的使用情况，包括pod所属集群，所属资源组，所属命名空间，调度ip，pod名称，启动用户，cpu，gpu，内存的申请使用率 <li><u>整体资源页面，支持管理员批量删除|
 |监控|监控体系|<li>所有机器的gpu资源的使用情况， <li>所有机器的内存/cpu/网络io/磁盘io的负载情况， <li>所有pod的内存/cpu/gpu/网络io负载情况 <li>所有推理服务的内存/cpu/gpu/qps/吞吐/vgpu负载情况 <li><u>支持ib流量监控|
 |模型应用市场|模型应用管理方案|<li><u>提供cubestudio sdk，提供模型开发规范和使用规范|
@@ -53,8 +55,9 @@ cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目�
 |模型应用市场|pipeline训练sdk|<li><u>支持AI开发主流语言 Python，提供Python SDK支持用户通过SDK来进行pipeline任务流管理和训练任务启动以及任务流编排|
 |模型应用市场|推理服务sdk|<li><u>提供python sdk，对接cube tudio进行推理服务的发布，服务升级|
 |大模型|大模型分布式多机多卡|<li><u>支持分布式多机多卡训练，例如mpi/deepspeed/Colossal-AI|
-|大模型|支持大模型推理|<li><u>支持chatglm/chatglm2/lalma/llama2/通义千问部署|
-|大模型|支持大模型微调|<li><u>支持chatglm2/llama2/baichuan2 lora微调|
+|大模型|支持大模型推理aihub形式|<li><u>支持openjourney/gpt3/yuan/sd-v1.5/sd-v2/sd-v3/Stable Cascade/Stable Diffusion XL/chatglm/chatglm2/chatglm3/chatglm4/llama/llama2/llama3/chinese-llama2/chinese-alpaca/llama2-chinese/qwen/baichuan2/qwen2/gemma/yi/aquilachat2部署|
+|大模型|支持大模型推理openai接口|<li><u>支持fastchat+vllm大模型推理，支持推理加速+流式接口|
+|大模型|支持大模型微调|<li><u>支持chatglm2/chatglm3/chatglm4/llama2-chinese/llama3-chinese/baichuan2/qwen2 lora微调，支持llama-factory 100+llm微调|
 |大模型|智能对话|<li><u>提供支持多场景对话，支持提示词构建，推理接口配置，llm问答，支持问询中模型切换，清理，历史上下文|
 |大模型|私有知识库|<li><u>私有知识库配置，私有知识库召回|
 |大模型|私有知识库|<li><u>支持召回列表模式|
@@ -62,7 +65,6 @@ cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目�
 |大模型|私有知识库|<li><u>支持微信公众号服务号对接|
 |大模型|私有知识库|<li><u>支持企业微信群聊机器人对接|
 |大模型|私有知识库|<li><u>支持钉钉群聊机器人对接|
-
 
 # 帮助文档
 
@@ -79,51 +81,53 @@ https://github.com/tencentmusic/cube-studio/wiki
 提示：
 - 1、可自由定制任务插件，更适用当前业务需求
 
-| 模块     | 模板 | 类型 | 文档地址 |
-|:-------| :---- | :---- |:---- |
-| 数据导入导出 | datax | 单机 | job-template/job/datax/README.md
-| 数据导入导出 | 数据集导入 | 单机 | job-template/job/dataset/README.md
-| 数据导入导出 | 模型导入 | 单机 | job-template/job/model_download/README.md
-| 数据预处理  | data-process | 单机 | job-template/job/data-process/README.md
-| 数据处理工具 | hadoop | 单机 | job-template/job/hadoop/README.md
-| 数据处理工具   | spark | 分布式 | job-template/job/spark/README.md
-| 数据处理工具   | ray | 分布式 | job-template/job/ray/README.md
-| 数据处理工具   | volcanojob | 分布式 | job-template/job/volcano/README.md
-| 特征处理   | feature-process | 单机 | job-template/job/feature-process/README.md
-| 机器学习框架 | ray-sklearn | 分布式 | job-template/job/ray_sklearn/README.md
-| 机器学习算法 | random_forest | 单机 | job-template/job/random_forest/README.md
-| 机器学习算法 | lr | 单机 | job-template/job/lr/README.md
-| 机器学习算法 | lightgbm | 单机 | job-template/job/lightgbm/README.md
-| 机器学习算法 | knn | 单机 | job-template/job/knn/README.md
-| 机器学习算法 | kmeans | 单机 | job-template/job/kmeans/README.md
-| 机器学习算法 | nni | 单机 | job-template/job/hyperparam-search-nni/README.md
-| 机器学习算法 | xgb | 单机 | job-template/job/xgb/README.md
-| 机器学习算法 | gbdt | 单机 | job-template/job/gbdt/README.md
-| 机器学习算法 | decision-tree | 单机 | job-template/job/decision_tree/README.md
-| 机器学习算法 | bayesian | 单机 | job-template/job/bayesian/README.md
-| 机器学习算法 | adaboost | 单机 | job-template/job/adaboost/README.md
-| 深度学习   | tfjob | 分布式 | job-template/job/tf/README.md
-| 深度学习   | pytorchjob | 分布式 | job-template/job/pytorch/README.md
-| 深度学习   | paddle | 分布式 | job-template/job/paddle/README.md
-| 深度学习   | mxnet | 分布式 | job-template/job/mxnet/README.md
-| 深度学习   | mindspore | 分布式 | job-template/job/mindspore/README.md
-| 深度学习   | horovod | 分布式 | job-template/job/horovod/README.md
-| 深度学习   | mpi | 分布式 | job-template/job/mpi/README.md
-| 深度学习   | colossalai | 分布式 | job-template/job/colossalai/README.md
-| 深度学习   | deepspeed | 分布式 | job-template/job/deepspeed/README.md
-| 深度学习   | megatron | 分布式 | job-template/job/megatron/README.md
-| 模型处理   | model-evaluation | 单机 | job-template/job/model_evaluation/README.md
-| 模型服务化  | model-convert | 单机 | job-template/job/model_convert/README.md
-| 模型服务化  | model-register | 单机 | job-template/job/model_register/README.md
-| 模型服务化  | deploy-service | 单机 | job-template/job/deploy-service/README.md
+| 模块     | 模板                    | 类型 | 文档地址 |
+|:-------|:----------------------| :---- |:---- |
+| 数据导入导出 | datax                 | 单机 | job-template/job/datax/README.md
+| 数据导入导出 | 数据集导入                 | 单机 | job-template/job/dataset/README.md
+| 数据导入导出 | 模型导入                  | 单机 | job-template/job/model_download/README.md
+| 数据预处理  | data-process          | 单机 | job-template/job/data-process/README.md
+| 数据处理工具 | hadoop                | 单机 | job-template/job/hadoop/README.md
+| 数据处理工具   | ray                   | 分布式 | job-template/job/ray/README.md
+| 数据处理工具   | volcanojob            | 分布式 | job-template/job/volcano/README.md
+| 特征处理   | feature-process       | 单机 | job-template/job/feature-process/README.md
+| 机器学习框架 | ray-sklearn           | 分布式 | job-template/job/ray_sklearn/README.md
+| 机器学习算法 | random_forest         | 单机 | job-template/job/random_forest/README.md
+| 机器学习算法 | lr                    | 单机 | job-template/job/lr/README.md
+| 机器学习算法 | lightgbm              | 单机 | job-template/job/lightgbm/README.md
+| 机器学习算法 | knn                   | 单机 | job-template/job/knn/README.md
+| 机器学习算法 | kmeans                | 单机 | job-template/job/kmeans/README.md
+| 机器学习算法 | nni                   | 单机 | job-template/job/hyperparam-search-nni/README.md
+| 机器学习算法 | xgb                   | 单机 | job-template/job/xgb/README.md
+| 机器学习算法 | gbdt                  | 单机 | job-template/job/gbdt/README.md
+| 机器学习算法 | decision-tree         | 单机 | job-template/job/decision_tree/README.md
+| 机器学习算法 | bayesian              | 单机 | job-template/job/bayesian/README.md
+| 机器学习算法 | adaboost              | 单机 | job-template/job/adaboost/README.md
+| 深度学习   | tfjob                 | 分布式 | job-template/job/tf/README.md
+| 深度学习   | pytorchjob            | 分布式 | job-template/job/pytorch/README.md
+| 深度学习   | paddle                | 分布式 | job-template/job/paddle/README.md
+| 深度学习   | mxnet                 | 分布式 | job-template/job/mxnet/README.md
+| 深度学习   | mindspore             | 分布式 | job-template/job/mindspore/README.md
+| 深度学习   | horovod               | 分布式 | job-template/job/horovod/README.md
+| 深度学习   | mpi                   | 分布式 | job-template/job/mpi/README.md
+| 深度学习   | colossalai            | 分布式 | job-template/job/colossalai/README.md
+| 深度学习   | deepspeed             | 分布式 | job-template/job/deepspeed/README.md
+| 深度学习   | megatron              | 分布式 | job-template/job/megatron/README.md
+| 模型处理   | model-evaluation      | 单机 | job-template/job/model_evaluation/README.md
+| 模型服务化  | model-convert         | 单机 | job-template/job/model_convert/README.md
+| 模型服务化  | model-register        | 单机 | job-template/job/model_register/README.md
+| 模型服务化  | deploy-service        | 单机 | job-template/job/deploy-service/README.md
 | 模型服务化  | model-offline-predict | 分布式 | job-template/job/model_offline_predict/README.md
-| 多媒体类   | media-download | 分布式 | job-template/job/video-audio/README.md
-| 多媒体类   | video-img | 分布式 | job-template/job/video-audio/README.md
-| 多媒体类   | video-audio | 分布式 | job-template/job/video-audio/README.md
-| 大模型    | llama2 | 单机多卡 | job-template/job/llama2/README.md
-| 大模型    | chatglm2 | 单机多卡 | job-template/job/chatglm2/README.md
-| 大模型    | baichuan2 | 单机多卡 | job-template/job/baichuan2/README.md
-
+| 多媒体类   | media-download        | 分布式 | job-template/job/video-audio/README.md
+| 多媒体类   | video-img             | 分布式 | job-template/job/video-audio/README.md
+| 多媒体类   | video-audio           | 分布式 | job-template/job/video-audio/README.md
+| 大模型    | llama2                | 单机多卡 | job-template/job/llama2/README.md
+| 大模型    | chatglm2              | 单机多卡 | job-template/job/chatglm2/README.md
+| 大模型    | chatglm3              | 单机多卡 | job-template/job/chatglm3/README.md
+| 大模型    | chatglm4              | 单机多卡 | job-template/job/chatglm4/README.md
+| 大模型    | baichuan2             | 单机多卡 | job-template/job/baichuan2/README.md
+| 大模型    | qwen2                 | 单机多卡 | job-template/job/qwen2/README.md
+| 大模型    | llama-factory         | 单机多卡 | job-template/job/llama_factory/README.md
 
 # 公司
 
