@@ -77,6 +77,490 @@
         }
       }
     ]
+  },
+  "ml": {
+    "pipeline": {
+      "name": "ml",
+      "describe": "机器学习：决策树训练部署",
+      "project": "public",
+      "parameter": {
+        "demo": "true",
+        "img": "/static/assets/images/pipeline/tree.jpg"
+      },
+      "dag_json": {
+        "data-import": {},
+        "data-process": {
+          "upstream": [
+            "data-import"
+          ]
+        },
+        "model-train": {
+          "upstream": [
+            "data-process"
+          ]
+        },
+        "model-val": {
+          "upstream": [
+            "model-train"
+          ]
+        },
+        "model-register": {
+          "upstream": [
+            "model-val"
+          ]
+        },
+        "model-offline-inference": {
+          "upstream": [
+            "model-val"
+          ]
+        },
+        "deploy-service": {
+          "upstream": [
+            "model-register"
+          ]
+        }
+      },
+      "global_env": "",
+      "expand": [
+        {
+          "id": "model-train",
+          "type": "dataSet",
+          "position": {
+            "x": 384,
+            "y": 232
+          },
+          "data": {
+            "info": {
+              "describe": "decision-tree算法"
+            },
+            "name": "model-train",
+            "label": "模型训练"
+          }
+        },
+        {
+          "id": "model-val",
+          "type": "dataSet",
+          "position": {
+            "x": 384,
+            "y": 328
+          },
+          "data": {
+            "info": {
+              "describe": "decision-tree算法"
+            },
+            "name": "model-val",
+            "label": "模型评估"
+          }
+        },
+        {
+          "id": "model-offline-inference",
+          "type": "dataSet",
+          "position": {
+            "x": 224,
+            "y": 440
+          },
+          "data": {
+            "info": {
+              "describe": "decision-tree算法"
+            },
+            "name": "model-offline-inference",
+            "label": "模型离线推理"
+          }
+        },
+        {
+          "id": "data-import",
+          "type": "dataSet",
+          "position": {
+            "x": 380,
+            "y": -16
+          },
+          "data": {
+            "info": {
+              "describe": "datax异构数据源同步"
+            },
+            "name": "data-import",
+            "label": "数据导入"
+          }
+        },
+        {
+          "id": "data-process",
+          "type": "dataSet",
+          "position": {
+            "x": 380,
+            "y": 111
+          },
+          "data": {
+            "info": {
+              "describe": "使用用户自定义镜像作为运行镜像"
+            },
+            "name": "data-process",
+            "label": "数据处理"
+          }
+        },
+        {
+          "id": "model-register",
+          "type": "dataSet",
+          "position": {
+            "x": 524,
+            "y": 447
+          },
+          "data": {
+            "info": {
+              "describe": "注册模型"
+            },
+            "name": "model-register",
+            "label": "模型注册"
+          }
+        },
+        {
+          "id": "deploy-service",
+          "type": "dataSet",
+          "position": {
+            "x": 524,
+            "y": 556
+          },
+          "data": {
+            "info": {
+              "describe": "模型部署推理服务"
+            },
+            "name": "deploy-service",
+            "label": "服务部署"
+          }
+        },
+        {
+          "source": "data-import",
+          "arrowHeadType": "arrow",
+          "target": "data-process",
+          "id": "logic__edge-data-importnull-data-processnull"
+        },
+        {
+          "source": "data-process",
+          "arrowHeadType": "arrow",
+          "target": "model-train",
+          "id": "logic__edge-data-processnull-model-trainnull"
+        },
+        {
+          "source": "model-train",
+          "arrowHeadType": "arrow",
+          "target": "model-val",
+          "id": "logic__edge-model-trainnull-model-valnull"
+        },
+        {
+          "source": "model-val",
+          "arrowHeadType": "arrow",
+          "target": "model-offline-inference",
+          "id": "logic__edge-model-valnull-model-offline-inferencenull"
+        },
+        {
+          "source": "model-val",
+          "arrowHeadType": "arrow",
+          "target": "model-register",
+          "id": "logic__edge-model-valnull-model-registernull"
+        },
+        {
+          "source": "model-register",
+          "arrowHeadType": "arrow",
+          "target": "deploy-service",
+          "id": "logic__edge-model-registernull-deploy-servicenull"
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "job_templete": "decision-tree",
+        "name": "model-train",
+        "label": "模型训练",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--train_dataset": "/mnt/{{creator}}/pipeline/example/ml/train.csv",
+          "--label_columns": "y",
+          "--save_model_dir": "/mnt/{{creator}}/pipeline/example/ml/",
+          "--feature_columns": "age,duration,campaign,pdays,previous,emp_var_rate,cons_price_idx,cons_conf_idx,euribor3m,nr_employed",
+          "--model_params": {
+            "max_depth": 5,
+            "min_samples_leaf": 10
+          },
+          "--inference_dataset": "",
+          "--val_dataset": ""
+        }
+      },
+      {
+        "job_templete": "decision-tree",
+        "name": "model-val",
+        "label": "模型评估",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--train_dataset": "",
+          "--label_columns": "y",
+          "--save_model_dir": "/mnt/{{creator}}/pipeline/example/ml/",
+          "--feature_columns": "age,duration,campaign,pdays,previous,emp_var_rate,cons_price_idx,cons_conf_idx,euribor3m,nr_employed",
+          "--model_params": "",
+          "--inference_dataset": "",
+          "--val_dataset": "/mnt/{{creator}}/pipeline/example/ml/train.csv"
+        }
+      },
+      {
+        "job_templete": "decision-tree",
+        "name": "model-offline-inference",
+        "label": "模型离线推理",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--train_dataset": "",
+          "--label_columns": "",
+          "--save_model_dir": "/mnt/{{creator}}/pipeline/example/ml/",
+          "--feature_columns": "age,duration,campaign,pdays,previous,emp_var_rate,cons_price_idx,cons_conf_idx,euribor3m,nr_employed",
+          "--model_params": "",
+          "--inference_dataset": "/mnt/{{creator}}/pipeline/example/ml/inference.csv",
+          "--val_dataset": ""
+        }
+      },
+      {
+        "job_templete": "datax",
+        "name": "data-import",
+        "label": "数据导入",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "-f": "/mnt/{{creator}}/pipeline/example/ml/mysql-csv.json"
+        }
+      },
+      {
+        "job_templete": "自定义镜像",
+        "name": "data-process",
+        "label": "数据处理",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
+          "workdir": "/mnt/{{creator}}/pipeline/example/ml/",
+          "command": "sh fix.sh"
+        }
+      },
+      {
+        "job_templete": "model-register",
+        "name": "model-register",
+        "label": "模型注册",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--project_name": "public",
+          "--model_name": "decision-tree",
+          "--model_version": "{{ datetime.datetime.now().strftime('v%Y.%m.%d.1') }}",
+          "--model_path": "/mnt/{{creator}}/pipeline/example/ml/decisionTree_model.pkl",
+          "--model_metric": "",
+          "--describe": "决策树模型",
+          "--framework": "sklearn",
+          "--inference_framework": "ml-server"
+        }
+      },
+      {
+        "job_templete": "deploy-service",
+        "name": "deploy-service",
+        "label": "服务部署",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--project_name": "public",
+          "--label": "决策树模型",
+          "--model_name": "decisiontree",
+          "--model_version": "v2023.11.01.1",
+          "--model_path": "/mnt/{{creator}}/pipeline/example/ml/decisionTree_model.pkl",
+          "--service_type": "ml-server",
+          "--images": "ccr.ccs.tencentyun.com/cube-studio/ml-server:20240601",
+          "--working_dir": "",
+          "--command": "",
+          "--env": "",
+          "--host": "",
+          "--ports": "80",
+          "--replicas": "1",
+          "--resource_memory": "2G",
+          "--resource_cpu": "2",
+          "--resource_gpu": "0",
+          "--volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+          "--inference_config": "---config.json\n\n[\n    {\n        \"name\": \"decisiontree\",\n        \"model_path\": \"/mnt/admin/pipeline/example/ml/decisionTree_model.pkl\",\n        \"framework\": \"sklearn\",\n        \"version\": \"v2023.10.01.1\",\n        \"output\": [\n            { \"name\": \"y\", \"type\": \"enum\", \"choices\": [0,1] }\n        ],\n        \"input\": [\n            { \"name\": \"age\", \"type\": \"int\" },\n            { \"name\": \"duration\", \"type\": \"int\" },\n            { \"name\": \"campaign\", \"type\": \"int\" },\n            { \"name\": \"pdays\", \"type\": \"int\" },\n            { \"name\": \"previous\", \"type\": \"enum\", \"choices\": [0,1,2,3,4,5,6] },\n            { \"name\": \"emp_var_rate\", \"type\": \"float\" },\n            { \"name\": \"cons_price_idx\", \"type\": \"float\" },\n            { \"name\": \"cons_conf_idx\", \"type\": \"float\" },\n            { \"name\": \"euribor3m\", \"type\": \"float\" },\n            { \"name\": \"nr_employed\", \"type\": \"float\" }\n        ],\n        \"example\": [\n            { \"age\": 30, \"duration\": 487, \"campaign\": 2, \"pdays\": 999, \"previous\": 0, \"emp_var_rate\": -1.8, \"cons_price_idx\": 92.893, \"cons_conf_idx\": -46.2, \"euribor3m\": 1.313, \"nr_employed\": 5099.1 }\n        ],\n        \"enable\": true\n    }\n]"
+        }
+      }
+    ]
+  },
+  "chatglm4": {
+    "pipeline": {
+      "name": "chatglm4",
+      "describe": "大模型：chatglm4微调部署",
+      "project": "public",
+      "parameter": {
+        "demo": "true",
+        "img": "/static/assets/images/pipeline/chatglm.png"
+      },
+      "dag_json": {
+        "task-data-process": {},
+        "chatglm4": {
+          "upstream": [
+            "task-data-process"
+          ]
+        },
+        "deploy-chatglm4": {
+          "upstream": [
+            "chatglm4"
+          ]
+        }
+      },
+      "global_env": "",
+      "expand": [
+        {
+          "id": "deploy-chatglm4",
+          "type": "dataSet",
+          "position": {
+            "x": 224,
+            "y": 442
+          },
+          "data": {
+            "info": {
+              "describe": "模型部署推理服务"
+            },
+            "name": "deploy-chatglm4",
+            "label": "部署chatglm4"
+          }
+        },
+        {
+          "id": "task-data-process",
+          "type": "dataSet",
+          "position": {
+            "x": 224,
+            "y": 133
+          },
+          "data": {
+            "info": {
+              "describe": "使用用户自定义镜像作为运行镜像"
+            },
+            "name": "task-data-process",
+            "label": "数据准备"
+          }
+        },
+        {
+          "id": "chatglm4",
+          "type": "dataSet",
+          "position": {
+            "x": 224,
+            "y": 272
+          },
+          "data": {
+            "info": {
+              "describe": "chatglm4 微调"
+            },
+            "name": "chatglm4",
+            "label": "chatglm4 lora微调"
+          }
+        },
+        {
+          "source": "task-data-process",
+          "arrowHeadType": "arrow",
+          "target": "chatglm4",
+          "id": "logic__edge-task-null-chatglm4-null"
+        },
+        {
+          "source": "chatglm4",
+          "arrowHeadType": "arrow",
+          "target": "deploy-chatglm4",
+          "id": "logic__edge-chatglm4-null-deploy-chatglm4null"
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "job_templete": "deploy-service",
+        "name": "deploy-chatglm4",
+        "label": "部署chatglm4",
+        "volume_mount": "kubeflow-archives(pvc):/archives,kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "resource_rdma": "0",
+        "args": {
+          "--project_name": "public",
+          "--label": "chatglm4推理部署",
+          "--model_name": "chatglm4",
+          "--model_version": "v2024.06.01.1",
+          "--model_path": "/mnt/{{creator}}/pipeline/example/chatglm/result/exported_model",
+          "--service_type": "llm-server",
+          "--images": "ccr.ccs.tencentyun.com/cube-studio/llm-server:20240601",
+          "--working_dir": "/FastChat",
+          "--command": "python -m vllm.entrypoints.openai.api_server --trust-remote-code --model $KUBEFLOW_MODEL_PATH --host 0.0.0.0 --port 8000 --dtype float16 --tensor-parallel-size $RESOURCE_GPU --served-model-name $KUBEFLOW_MODEL_NAME",
+          "--env": "HF_ENDPOINT=https://hf-mirror.com",
+          "--host": "/v1/models/",
+          "--ports": "8000",
+          "--replicas": "1",
+          "--resource_memory": "20G",
+          "--resource_cpu": "10",
+          "--resource_gpu": "2",
+          "--volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+          "--inference_config": "",
+          "--metrics": "",
+          "--health": "8000:/v1/models/"
+        }
+      },
+      {
+        "job_templete": "自定义镜像",
+        "name": "task-data-process",
+        "label": "数据准备",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "resource_rdma": "0",
+        "args": {
+          "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
+          "workdir": "/mnt/{{creator}}/pipeline/example/chatglm/",
+          "command": "python data-process-identiy.py"
+        }
+      },
+      {
+        "job_templete": "chatglm4",
+        "name": "chatglm4",
+        "label": "chatglm4 lora微调",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "resource_memory": "40G",
+        "resource_cpu": "10",
+        "resource_gpu": "2",
+        "resource_rdma": "0",
+        "args": {
+          "--model_name": "THUDM/glm-4-9b-chat",
+          "--model_path": "/mnt/{{creator}}/pipeline/example/chatglm/glm-4-9b-chat",
+          "--dataset": "/mnt/{{creator}}/pipeline/example/chatglm/identity.json",
+          "--template": "glm4",
+          "--finetuning_type": "lora",
+          "--lora_target": "query_key_value,dense_h_to_4h,dense_4h_to_h,dense",
+          "--output_dir": "/mnt/{{creator}}/pipeline/example/chatglm/result/",
+          "--per_device_train_batch_size": "4",
+          "--gradient_accumulation_steps": "4",
+          "--lr_scheduler_type": "cosine",
+          "--logging_steps": "10",
+          "--save_steps": "100",
+          "--learning_rate": "5e-5",
+          "--num_train_epochs": "5",
+          "--max_samples": "500",
+          "--max_grad_norm": "1",
+          "--fp16": "true",
+          "--merge_lora": "true"
+        }
+      }
+    ]
   }
 }
 

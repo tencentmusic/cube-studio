@@ -84,13 +84,13 @@ prompt_default= __('''
 class Chat_View_Base():
     datamodel = SQLAInterface(Chat)
     route_base = '/chat_modelview/api'
-    label_title = _('聊天窗配置')
+    label_title = _('智能体配置')
     base_order = ("id", "desc")
     order_columns = ['id']
     base_filters = [["id", Chat_Filter, lambda: []]]  # 设置权限过滤器
 
     spec_label_columns = {
-        "chat_type": _("聊天窗类型"),
+        "chat_type": _("交互类型"),
         "hello": _("欢迎语"),
         "tips": _("输入示例"),
         "knowledge": _("知识库"),
@@ -284,69 +284,72 @@ class Chat_View_Base():
     # 如果传上来的有文件
     # @pysnooper.snoop()
     def pre_add_req(self, req_json=None):
+        # 针对chat界面的页面处理
+        # chat界面前端，会有files参数
+        if req_json and 'files' in req_json:
+            expand = json.loads(req_json.get('expand', '{}'))
+            name=req_json.get('name','')
+            # 在添加的时候做一些特殊处理
+            if request.method=='POST':
+                name = f'{g.user.username}-faq-{uuid.uuid4().hex[:4]}'
+                req_json['name'] = name
+                req_json['hello'] = __('自动为您创建的私人对话，不使用上下文，左下角可以清理会话和修改知识库配置')
+                req_json['session_num'] = '0'
+                req_json['icon'] = default_icon
 
-        expand = json.loads(req_json.get('expand','{}'))
+            files_path = []
+            files = req_json['files']
+            if type(files) != list:
+                files = [files]
 
-        # 私有项目做特殊处理
-        if not expand.get('isPublic',True):
-            name = f'{g.user.username}-faq-{uuid.uuid4().hex[:4]}'
-            req_json['name'] = name
-            req_json['hello']= __('自动为您创建的私人对话，不使用上下文，左下角可以清理会话和修改知识库配置')
-            req_json['session_num']='0'
-            req_json['icon'] = default_icon
+            exist_knowledge = {}
+            if name:
+                chat = db.session.query(Chat).filter_by(name=name).first()
+                if chat:
+                    try:
+                        exist_knowledge = json.loads(chat.knowledge)
+                    except:
+                        exist_knowledge = {}
 
-            if req_json and 'files' in req_json:
-                files_path = []
-                files = req_json['files']
-                if type(files) != list:
-                    files = [files]
-                id = req_json.get('id', '')
-                exist_knowledge = {}
-                if id:
-                    chat = db.session.query(Chat).filter_by(id=id).first()
-                    if chat:
-                        try:
-                            exist_knowledge = json.loads(chat.knowledge)
-                        except:
-                            exist_knowledge = {}
-
-                file_arr = []
-                for file in files:
-                    file_name = file.get('name', '')
-                    file_type = file.get("type", '')
-                    file_content = file.get("content", '')   # 最优最新一次上传的才有这个。
-                    file_arr.append({
-                        "name": file_name,
-                        "type": file_type
-                    })
-                    # 拼接文件保存路径
-                    file_path = f'/data/k8s/kubeflow/global/knowledge/{name}/{file_name}'
-                    files_path.append(file_path)
-                    # 如果有新创建的文件内容
-                    if file_content:
-                        content = base64.b64decode(file_content)
-                        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                        file = open(file_path, mode='wb')
-                        file.write(content)
-                        file.close()
+            file_arr = []
+            for file in files:
+                file_name = file.get('name', '')
+                file_type = file.get("type", '')
+                file_content = file.get("content", '')   # 最优最新一次上传的才有这个。
+                file_arr.append({
+                    "name": file_name,
+                    "type": file_type
+                })
+                # 拼接文件保存路径
+                file_path = f'/data/k8s/kubeflow/global/knowledge/{name}/{file_name}'
+                files_path.append(file_path)
+                # 如果有新创建的文件内容
+                if file_content:
+                    content = base64.b64decode(file_content)
+                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                    file = open(file_path, mode='wb')
+                    file.write(content)
+                    file.close()
 
 
-                knowledge = {
-                    "type": "file",
-                    "file": files_path,
-                    # "file_arr": file_arr,
-                    "upload_url": "http://chat-embedding.aihub:80/aihub/chat-embedding/api/upload_files",
-                    "recall_url": "http://chat-embedding.aihub:80/aihub/chat-embedding/api/recall"
-                }
-                expand['fileMetaList']=file_arr
+            knowledge = {
+                "type": "file",
+                "file": files_path,
+                # "file_arr": file_arr,
+                "upload_url": "http://chat-embedding.aihub:80/aihub/chat-embedding/api/upload_files",
+                "recall_url": "http://chat-embedding.aihub:80/aihub/chat-embedding/api/recall"
+            }
+            expand['fileMetaList']=file_arr
 
-                if exist_knowledge.get('status',''):
-                    knowledge['status']=exist_knowledge.get('status','')
-                    knowledge['update_time'] = exist_knowledge.get('update_time','')
+            if exist_knowledge.get('status',''):
+                knowledge['status']=exist_knowledge.get('status','')
+                knowledge['update_time'] = exist_knowledge.get('update_time','')
+                knowledge['upload_url'] = exist_knowledge.get('upload_url', '')
+                knowledge['recall_url'] = exist_knowledge.get('recall_url', '')
 
-                req_json['knowledge'] = json.dumps(knowledge, indent=4, ensure_ascii=False)
-                req_json['expand']=json.dumps(expand, indent=4, ensure_ascii=False)
-                del req_json['files']
+            req_json['knowledge'] = json.dumps(knowledge, indent=4, ensure_ascii=False)
+            req_json['expand']=json.dumps(expand, indent=4, ensure_ascii=False)
+            del req_json['files']
 
         return req_json
 
@@ -477,7 +480,7 @@ AI:
             knowledge_config = json.loads(item.knowledge) if item.knowledge else {}
             exist_file = knowledge_config.get("file", '')
             # 文件变了，或者更新时间过期了，都要重新更新
-            if exist_file and src_file != exist_file or not last_time or (datetime.datetime.now()-last_time).total_seconds()>3600:
+            if exist_file and (src_file != exist_file or not last_time or (datetime.datetime.now()-last_time).total_seconds()>3600):
                 self.upload_knowledge(chat=item, knowledge_config=knowledge_config)
 
         except Exception as e:
@@ -752,7 +755,7 @@ AI:
             try:
                 canswar = "\n".join(item.get('text','') for item in return_result)
                 chatlog.query = search_text
-                chatlog.answer = canswar
+                # chatlog.answer = canswar   # 内容太多了
                 chatlog.answer_cost = str((datetime.datetime.now()-begin_time).total_seconds())
                 chatlog.answer_status=answer_status,
                 chatlog.err_msg = return_message
@@ -889,6 +892,7 @@ AI:
                 }
                 upload_knowledge.apply_async(kwargs=kwargs)
 
+
     all_chat_knowledge = {}
     # 根据配置获取远程的先验知识
     # @pysnooper.snoop()
@@ -957,6 +961,7 @@ AI:
             print(e)
 
         return knowledge
+
 
     # @pysnooper.snoop()
     # 获取header和url
@@ -1068,7 +1073,7 @@ AI:
             "id": "chatcmpl-7OPUNz80uRGVKLcBMW8aKZT9dg938",
             "object": "chat.completion.chunk" if stream else 'chat.completion',
             "created": int(time.time()),
-            "model": "gpt-3.5-turbo-16k-0613",
+            "model": "gpt-4-turbo-2024-04-09",
             "choices": [
                 {
                     "index": 0,
@@ -1131,19 +1136,21 @@ AI:
             message = self.generate_prompt(chat=chat, search_text=search_text, enable_history=enable_history, history=history)
             service_config = json.loads(chat.service_config)
             data = {
-                'model': 'gpt-3.5-turbo-16k-0613',
+                'model': 'gpt-4-turbo-2024-04-09',
                 'messages': message,
                 'temperature': service_config.get("temperature",1),  # 问答发散度 0-2 越高越发散 较高的值（如0.8）将使输出更随机，较低的值（如0.2）将使其更集中和确定性
                 'top_p': service_config.get("top_p",0.5),  # 同temperature，如果设置 0.1 意味着只考虑构成前 10% 概率质量的 tokens
                 'n': 1,  # top n可选值
                 'stream': stream,
                 'stop': 'elit proident sint',  #
-                'max_tokens': service_config.get("max_tokens",1500),  # 最大返回数
+                'max_tokens': service_config.get("max_tokens",2500),  # 最大返回数
                 'presence_penalty': service_config.get("presence_penalty",1),  # [控制主题的重复度]，-2.0（抓住一个主题使劲谈论） ~ 2.0（最大程度避免谈论重复的主题） 之间的数字，正值会根据到目前为止是否出现在文本中来惩罚新 tokens，从而增加模型谈论新主题的可能性
                 'frequency_penalty': 0, # [重复度惩罚因子], -2.0(可以尽情出现相同的词汇) ~ 2.0 (尽量不要出现相同的词汇)
                 'user': 'user',
             }
             data.update(json.loads(chat.service_config).get("llm_data", {}))
+
+
             if stream:
                 # 返回流响应
                 import sseclient
@@ -1180,7 +1187,7 @@ AI:
                             if chatlog_id:
                                 chatlog = db.session.query(ChatLog).filter_by(id=int(chatlog_id)).first()
                                 chatlog.answer_status = '成功'
-                                chatlog.answer = back_message
+                                # chatlog.answer = back_message  # 内容太多了
                                 db.session.commit()
                                 if history != None:
                                     history.append((search_text, back_message))

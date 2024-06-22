@@ -527,6 +527,127 @@
       }
     }
   },
+  "datax-import": {
+    "project_name": "数据导入导出",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/datax:20240501",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/master/job-template/job/datax",
+    "image_describe": "datax mysql postgresql 数据导入",
+    "job_template_name": "datax-import",
+    "job_template_describe": "datax mysql postgresql 数据导入",
+    "job_template_command": "python start.py",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 1,
+      "rec_job_template": "自定义镜像",
+      "help_url": "https://github.com/data-infra/cube-studio/tree/master/job-template/job/datax"
+    },
+    "job_template_args": {
+      "数据导入": {
+        "--db_type": {
+          "type": "str",
+          "item_type": "str",
+          "label": "数据库类型",
+          "require": 1,
+          "choice": [
+            "mysql",
+            "postgresql",
+            "clickhouse"
+          ],
+          "range": "",
+          "default": "mysql",
+          "placeholder": "",
+          "describe": "远程数据库的类型",
+          "editable": 1
+        },
+        "--host": {
+          "type": "str",
+          "item_type": "str",
+          "label": "数据库地址",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "mysql-service.infra:3306",
+          "placeholder": "",
+          "describe": "数据库地址",
+          "editable": 1
+        },
+        "--username": {
+          "type": "str",
+          "item_type": "str",
+          "label": "数据库用户名",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "root",
+          "placeholder": "",
+          "describe": "数据库用户名",
+          "editable": 1
+        },
+        "--password": {
+          "type": "str",
+          "item_type": "str",
+          "label": "数据库密码",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "admin",
+          "placeholder": "",
+          "describe": "数据库密码",
+          "editable": 1
+        },
+        "--database": {
+          "type": "str",
+          "item_type": "str",
+          "label": "数据库，库名",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "example",
+          "placeholder": "",
+          "describe": "数据库，库名",
+          "editable": 1
+        },
+        "--table": {
+          "type": "str",
+          "item_type": "str",
+          "label": "数据库，表名",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "train",
+          "placeholder": "",
+          "describe": "数据库，表名",
+          "editable": 1
+        },
+        "--columns": {
+          "type": "str",
+          "item_type": "str",
+          "label": "要导入的列名，逗号分隔",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "age,duration,campaign,pdays,previous,emp_var_rate,cons_price_idx,cons_conf_idx,euribor3m,nr_employed,y",
+          "placeholder": "",
+          "describe": "要导入的列名，逗号分隔",
+          "editable": 1
+        },
+        "--save_path": {
+          "type": "str",
+          "item_type": "str",
+          "label": "csv存储目的地",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "/mnt/admin/pipeline/example/ml/data-test.csv",
+          "placeholder": "",
+          "describe": "csv存储目的地",
+          "editable": 1
+        }
+      }
+    }
+  },
   "dataset": {
     "project_name": "数据导入导出",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/dataset:20230501",
@@ -880,139 +1001,6 @@
           "default": "python demo.py",
           "placeholder": "",
           "describe": "python启动命令，例如 python3 /mnt/xx/xx.py",
-          "editable": 1
-        }
-      }
-    }
-  },
-  "sparkjob": {
-    "project_name": "数据处理工具",
-    "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/spark",
-    "image_describe": "spark serverless分布式任务",
-    "job_template_name": "sparkjob",
-    "job_template_describe": "spark serverless分布式任务(企业版)",
-    "job_template_command": "",
-    "job_template_volume": "",
-    "job_template_account": "kubeflow-pipeline",
-    "job_template_expand": {
-      "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/spark"
-    },
-    "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
-    "job_template_args": {
-      "分布式任务": {
-        "--image": {
-          "type": "str",
-          "item_type": "str",
-          "label": "执行镜像",
-          "require": 1,
-          "choice": [],
-          "range": "",
-          "default": "ccr.ccs.tencentyun.com/cube-studio/spark-operator:spark-v3.1.1",
-          "placeholder": "",
-          "describe": "执行镜像",
-          "editable": 1
-        },
-        "--num_worker": {
-          "type": "str",
-          "item_type": "str",
-          "label": "executor 数目",
-          "require": 1,
-          "choice": [],
-          "range": "",
-          "default": "3",
-          "placeholder": "",
-          "describe": "executor 数目",
-          "editable": 1
-        },
-        "--code_type": {
-          "type": "str",
-          "item_type": "str",
-          "label": "语言类型",
-          "require": 1,
-          "choice": [
-            "Java",
-            "Python",
-            "Scala",
-            "R"
-          ],
-          "range": "",
-          "default": "Python",
-          "placeholder": "",
-          "describe": "语言类型",
-          "editable": 1
-        },
-        "--code_class": {
-          "type": "str",
-          "item_type": "str",
-          "label": "Java/Scala类名",
-          "require": 0,
-          "choice": [],
-          "range": "",
-          "default": "",
-          "placeholder": "",
-          "describe": "Java/Scala类名，其他语言下不填",
-          "editable": 1
-        },
-        "--code_file": {
-          "type": "str",
-          "item_type": "str",
-          "label": "代码文件地址",
-          "require": 1,
-          "choice": [],
-          "range": "",
-          "default": "local:///opt/spark/examples/src/main/python/pi.py",
-          "placeholder": "",
-          "describe": "代码文件地址，支持local://,http://,hdfs://,s3a://,gcs://",
-          "editable": 1
-        },
-        "--code_arguments": {
-          "type": "str",
-          "item_type": "str",
-          "label": "代码参数",
-          "require": 0,
-          "choice": [],
-          "range": "",
-          "default": "",
-          "placeholder": "",
-          "describe": "代码参数",
-          "editable": 1
-        },
-        "--sparkConf": {
-          "type": "text",
-          "item_type": "str",
-          "label": "spark配置",
-          "require": 0,
-          "choice": [],
-          "range": "",
-          "default": "",
-          "placeholder": "",
-          "describe": "spark配置，每行一个配置，xx=yy",
-          "editable": 1
-        },
-        "--hadoopConf": {
-          "type": "text",
-          "item_type": "str",
-          "label": "hadoop配置，每行一个配置，xx=yy",
-          "require": 0,
-          "choice": [],
-          "range": "",
-          "default": "",
-          "placeholder": "",
-          "describe": "hadoop配置",
-          "editable": 1
-        },
-        "--sparkenv": {
-          "type": "text",
-          "item_type": "str",
-          "label": "环境变量，每行一个配置，xx=yy",
-          "require": 0,
-          "choice": [],
-          "range": "",
-          "default": "",
-          "placeholder": "",
-          "describe": "环境变量",
           "editable": 1
         }
       }
@@ -2535,7 +2523,7 @@
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 2,
+      "index": 1,
       "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm2"
     },
     "job_template_args": {
@@ -2555,8 +2543,27 @@
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 3,
+      "index": 2,
       "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm3"
+    },
+    "job_template_args": {
+    }
+  },
+  "chatglm4": {
+    "project_name": "大模型",
+    "image_name": "python:3.9",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm4",
+    "image_describe": "chatglm4",
+    "job_template_name": "chatglm4",
+    "job_template_describe": "chatglm4 lora微调(企业版)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 3
     },
     "job_template_args": {
     }
@@ -2581,6 +2588,25 @@
     "job_template_args": {
     }
   },
+  "llama3": {
+    "project_name": "大模型",
+    "image_name": "python:3.9",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/llama3",
+    "image_describe": "llama3",
+    "job_template_name": "llama3",
+    "job_template_describe": "llama3 lora微调(企业版)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "xxxx ",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 5
+    },
+    "job_template_args": {
+    }
+  },
   "baichuan2": {
     "project_name": "大模型",
     "image_name": "python:3.9",
@@ -2589,14 +2615,51 @@
     "job_template_name": "baichuan2",
     "job_template_describe": "baichuan2 微调(企业版)",
     "job_template_version": "Release",
-    "job_template_workdir": "/root/baichuan2/fine-tune/",
-    "job_template_command": "deepspeed --hostfile='' fine-tune.py --report_to 'none'  --save_strategy epoch --lr_scheduler_type constant ",
+    "job_template_workdir": "",
+    "job_template_command": "",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/baichuan2"
+      "index": 6
+    },
+    "job_template_args": {
+    }
+  },
+  "qwen2": {
+    "project_name": "大模型",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/llama-factory:20240410",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/qwen2",
+    "image_describe": "qwen2",
+    "job_template_name": "qwen2",
+    "job_template_describe": "qwen2 lora微调(企业版)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 7
+    },
+    "job_template_args": {
+    }
+  },
+  "llama-factory": {
+    "project_name": "大模型",
+    "image_name": "python:3.9",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/llama_factory",
+    "image_describe": "llama-factory",
+    "job_template_name": "llama-factory",
+    "job_template_describe": "llama-factory 100+llm大模型微调(企业版)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 8
     },
     "job_template_args": {
     }
