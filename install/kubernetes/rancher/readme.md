@@ -147,6 +147,10 @@ wget https://github.com/rancher/rancher/releases/download/v2.6.2/rancher-images.
 sh pull_rancher_images.sh 
 
 export RANCHER_CONTAINER_TAG=v2.6.2
+
+docker pull ccr.ccs.tencentyun.com/cube-rancher/rancher:$RANCHER_CONTAINER_TAG 
+docker tag ccr.ccs.tencentyun.com/cube-rancher/rancher:$RANCHER_CONTAINER_TAG rancher/rancher:$RANCHER_CONTAINER_TAG
+
 sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 rancher/rancher:$RANCHER_CONTAINER_TAG
 # 打开 https://xx.xx.xx.xx:443/ 等待web界面可以打开。预计要1~10分钟
 # 查看登陆密码
