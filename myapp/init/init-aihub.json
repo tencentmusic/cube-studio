@@ -7958,6 +7958,34 @@
   {
     "doc": "https://github.com/tencentmusic/cube-studio",
     "field": "大模型",
+    "scenes": "图像创作",
+    "frameworks": "",
+    "type": "dateset,notebook,train,evaluate,inference,web",
+    "name": "stable-diffusion-v3",
+    "status": "online",
+    "version": "v20221122",
+    "uuid": "stable-diffusion-v3-v20221122",
+    "label": "Stable Diffusion v3 是一个强大的图像生成模型",
+    "describe": "Stable Diffusion v3 是一个强大的图像生成模型",
+    "pic": "example.png",
+    "hot": "1000000",
+    "price": "0",
+    "dataset": {},
+    "notebook": {
+      "jupyter": [],
+      "appendix": []
+    },
+    "train": {
+      "resource_gpu": "1"
+    },
+    "inference": {
+      "resource_gpu": "1"
+    },
+    "images": "xx"
+  },
+  {
+    "doc": "https://github.com/tencentmusic/cube-studio",
+    "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
     "type": "dateset,notebook,train,evaluate,inference,web",
