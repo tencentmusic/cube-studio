@@ -106,13 +106,15 @@ class MyUser(User):
             # timestamp = int(func.date_format(self.changed_on))
             timestamp = int(self.changed_on.timestamp())
             payload = {
-                "iss": self.username
+                "iss": "cube-studio",
+                "sub":self.username
                 # "iat": timestamp,  # Issue period
                 # "nbf": timestamp,  # Effective Date
                 # "exp": timestamp + 60 * 60 * 24 * 30 * 12,  # Valid for 12 months
             }
 
-            global_password = 'myapp'
+            from myapp import conf
+            global_password = conf.get('JWT_PASSWORD','cube-studio')
             encoded_jwt = jwt.encode(payload, global_password, algorithm='HS256')
             return encoded_jwt
         return ''
@@ -129,7 +131,11 @@ class MyRoleModelView(RoleModelView):
 
 class MyUserRemoteUserModelView_Base():
     datamodel = SQLAInterface(MyUser)
+
+    base_permissions = ['can_list', 'can_edit', 'can_add', 'can_show','can_userinfo']
+
     list_columns = ["username", "active", "roles", ]
+
     edit_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles", 'org', 'quota' ]
     add_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles", 'org', 'quota']
     show_columns = ["username", "active", "roles", "login_count"]
@@ -342,15 +348,15 @@ class MyappSecurityManager(SecurityManager):
         # 添加从header中进行认证的方式
         self.lm.header_loader(self.load_user_from_header)
 
-    # 使用header 认证，通过rtx名获取用户
+    # 使用header 认证，通过username名获取用户
     # @pysnooper.snoop()
     def load_user_from_header(self, authorization_value):
         # token=None
         # if 'token' in request.headers:
         #     token = request.headers['token']
         if authorization_value:
-            # rtx 免认证
-            if len(authorization_value) < 20:
+            # username 免认证
+            if len(authorization_value) < 40:
                 username = authorization_value
                 if username:
                     user = self.find_user(username)
@@ -358,13 +364,14 @@ class MyappSecurityManager(SecurityManager):
                     return user
             else:  # token 认证
                 encoded_jwt = authorization_value.encode('utf-8')
-                payload = jwt.decode(encoded_jwt, 'myapp', algorithms=['HS256'])
+                from myapp import conf
+                payload = jwt.decode(encoded_jwt, conf.get('JWT_PASSWORD','cube-studio'), algorithms=['HS256'])
                 # if payload['iat'] > time.time():
                 #     return
                 # elif payload['exp'] < time.time():
                 #     return
                 # else:
-                user = self.find_user(payload['iss'])
+                user = self.find_user(payload['sub'])
                 g.user = user
                 return user
 
@@ -536,8 +543,7 @@ class MyappSecurityManager(SecurityManager):
         from myapp import conf
         user = self.find_user(username=username)
         # 添加以组织同名的角色，同时添加上级角色
-        # # 注册rtx同名角色
-        # rtx_role = self.add_role(username)
+
         # 如果用户不存在就注册用户
         if user is None:
             user = self.add_org_user(
@@ -561,8 +567,7 @@ class MyappSecurityManager(SecurityManager):
             gamma_role = self.find_role(self.auth_user_registration_role)
             if gamma_role and gamma_role not in user.roles:
                 user.roles.append(gamma_role)
-            # if rtx_role and rtx_role not in user.roles:
-            #     user.roles.append(rtx_role)
+
             # 更新用户信息
             if org_name:
                 user.org = org_name    # 更新组织架构字段

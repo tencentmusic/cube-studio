@@ -20,10 +20,15 @@ sudo apt-get install -y ca-certificates curl gnupg lsb-release vim git wget net-
 
 sudo mkdir -p /etc/apt/keyrings
 rm -rf /etc/apt/keyrings/docker.gpg
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+rm -rf /etc/apt/sources.list.d/docker.list
 
-### 稳定存储库
+### 使用docker 官方源
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+### 国内使用阿里源
+curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -
+sudo add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
 
 ### 安装docker
 sudo apt-get update
@@ -97,7 +102,7 @@ vi /etc/docker/daemon.json
 添加如下配置
 
 {
-	"registry-mirrors": ["https://registry.docker-cn.com","https://pee6w651.mirror.aliyuncs.com"],
+	"registry-mirrors": ["https://docker.m.daocloud.io", "https://dockerproxy.com", "https://docker.mirrors.ustc.edu.cn", "https://docker.nju.edu.cn"],
     "dns": ["114.114.114.114","8.8.8.8"],
     "data-root": "/data/docker",
 }
@@ -107,7 +112,19 @@ systemctl daemon-reload
 systemctl start docker
 ```
 
+# 切换docker根目录
 
+```bash
+mkdir -p /data/docker/
+# 将源docker目录下文件，复制到新目录下
+cp -R /var/lib/docker/* /data/docker/
+```
+然后按照上面的配置daemon.json，配置根目录为/data/docker/
+
+就可以把之前的目录删掉了
+```bash
+rm -rf /var/lib/docker
+```
 
 ## yum安装k8s的源
 ```bash

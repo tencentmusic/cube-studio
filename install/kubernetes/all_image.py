@@ -8,7 +8,6 @@ kubeflow = [
     "kubeflow/training-operator:v1-8a066f9",  # 分布式训练
     'ccr.ccs.tencentyun.com/cube-studio/spark-operator:1.3.8-3.1.1',  # spark serverless
     'alpine:3.10',
-    "mpioperator/kubectl-delivery:latest"
 ]
 
 kubernetes_dashboard = [
@@ -148,7 +147,7 @@ pull_harbor_file = open('pull_harbor.sh', mode='w')
 pull_save_file = open('image_save.sh',mode='w')
 load_image_file = open('image_load.sh',mode='w')
 
-push_harbor_file.write(f'准备登录: {harbor_repo}\n')
+# push_harbor_file.write(f'准备登录: {harbor_repo}\n')
 push_harbor_file.write('docker login '+harbor_repo[:harbor_repo.index('/')]+"\n")
 pull_harbor_file.write('docker login '+harbor_repo[:harbor_repo.index('/')]+"\n")
 
