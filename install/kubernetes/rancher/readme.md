@@ -126,6 +126,8 @@ net.bridge.bridge-nf-call-iptables=1
 桌面版还要禁用大内存页
 设置vm.nr_hugepages=0
 
+sysctl -p
+
 重启
 ```
 
@@ -153,16 +155,24 @@ docker logs  myrancher  2>&1 | grep "Bootstrap Password:"
 
 # 8、rancher server 启动可能问题
 
-8.1、permission denied
+ 8.1 如果是ubuntu 20.04以上，按照文章上面的方法修改系统配置
 
-mount 查看所属盘是否有noexec 限制
+ 8.2 如果是centos 8的配置，按照文章上面的方法修改配置
 
-8.2、重启机器，rancher server无法正常启动。
+ 8.3 机器docker 存储目录要>100G，内存>8G
 
-如果是一直等待k3s 启动，按照下面的高可用方法。  
-如果是k3s启动失败，docker exec -it myrancher cat k3s.log > k3s.log  查看k3s的日志  
-如果k3s日志报错 iptable的问题，那就按照上面的centos8或者ubuntu22.04配置iptable，  
-如果k3s日志报错 containerd的问题，那就 docker exec -it myrancher mv /var/lib/rancher/k3s/agent/containerd /varllib/rancher/k3slagent/_containerd  
+ 8.4 要提前拉取镜像sh pull_rancher_images.sh  不然会因为拉取时间过长造成失败。如果拉取不了，可配置docker镜像源 	"registry-mirrors": ["https://docker.m.daocloud.io", "https://dockerproxy.com", "https://docker.mirrors.ustc.edu.cn", "https://docker.nju.edu.cn"],
+
+ 8.5、permission denied类型的报错，mount 查看所属盘是否有noexec 限制
+
+ 8.6 查看rancher server的报错，`docker logs -f myrancher` 查看报错原因，忽略其中同步数据的错误。
+ 
+ 8.7 查看k3s的日志报错，在容器刚重启后，执行 `docker exec -it myrancher cat k3s.log > k3s.log` 将报错日志保存到本地，在日志中搜索error相关内容。
+
+    如果是k3s启动失败，docker exec -it myrancher cat k3s.log > k3s.log  查看k3s的日志  
+    如果k3s日志报错 iptable的问题，那就按照上面的centos8或者ubuntu22.04配置iptable，  
+    如果k3s日志报错 containerd的问题，那就 docker exec -it myrancher mv /var/lib/rancher/k3s/agent/containerd /varllib/rancher/k3slagent/_containerd  
+    如果k3s日志报错系统内容中没有xx模块，那就降低linux系统内容
 
 # 9、部署k8s集群
 
