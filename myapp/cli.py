@@ -97,6 +97,10 @@ def init():
         add_project('job-template', __('数据预处理'), __('结构化话数据特征处理'), {"index": 3})
         add_project('job-template', __('数据处理工具'), __('数据的单机或分布式处理任务,ray/spark/hadoop/volcanojob'), {"index": 4})
         add_project('job-template', __('特征处理'), __('特征处理相关功能'), {"index": 5})
+        add_project('job-template', __('图像处理'), __('图像处理相关功能'), {"index": 5.1})
+        add_project('job-template', __('视频处理'), __('视频处理相关功能'), {"index": 5.2})
+        add_project('job-template', __('音频处理'), __('音频处理相关功能'), {"index": 5.3})
+        add_project('job-template', __('文本处理'), __('文本处理相关功能'), {"index": 5.4})
         add_project('job-template', __('机器学习框架'), __('传统机器学习框架，sklearn'), {"index": 6})
         add_project('job-template', __('机器学习算法'), __('传统机器学习，lr/决策树/gbdt/xgb/fm等'), {"index": 7})
         add_project('job-template', __('深度学习'), __('深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等'), {"index": 8})
@@ -452,7 +456,7 @@ def init():
                 dataset = Dataset()
                 dataset.name = kwargs['name']
                 dataset.field = kwargs.get('field', '')
-                dataset.version = 'latest'
+                dataset.version = kwargs.get('version', 'latest')
                 dataset.label = kwargs.get('label', '')
                 dataset.status = kwargs.get('status', '')
                 dataset.describe = kwargs.get('describe', '')
@@ -472,7 +476,8 @@ def init():
                 dataset.storage_class = kwargs.get('storage_class', '')
                 dataset.storage_size = kwargs.get('storage_size', '')
                 dataset.download_url = kwargs.get('download_url', '')
-                dataset.owner = 'admin'
+                dataset.owner = kwargs.get('owner', 'admin')
+                dataset.features = kwargs.get('features', '{}')
                 dataset.created_by_fk = 1
                 dataset.changed_by_fk = 1
                 db.session.add(dataset)
@@ -631,7 +636,7 @@ def init():
                 from myapp.views.view_inferenceserving import InferenceService_ModelView_base
                 inference_class = InferenceService_ModelView_base()
                 inference_class.src_item_json = {}
-                inference_class.pre_add(service)
+                inference_class.use_expand(service)
 
                 db.session.add(service)
                 db.session.commit()
@@ -756,10 +761,13 @@ def init():
                             if not chat.id:
                                 db.session.add(chat)
                             db.session.commit()
+                            print(f'add chat {name} success')
         except Exception as e:
             print(e)
             # traceback.print_exc()
 
+    # 添加chat
+    # if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh':
     try:
         print('begin add chat')
         init_file = os.path.join(init_dir, 'init-chat.json')
@@ -768,7 +776,7 @@ def init():
     except Exception as e:
         print(e)
             # traceback.print_exc()
-    # 添加chat
+
     # if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh':
     try:
         SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE', '')
@@ -819,6 +827,7 @@ def init():
         # traceback.print_exc()
     # 添加ETL pipeline
     try:
+        print('begin add etl pipeline')
         from myapp.models.model_etl_pipeline import ETL_Pipeline
         tables = db.session.query(ETL_Pipeline).all()
         if len(tables) == 0:
@@ -840,6 +849,7 @@ def init():
 
     # 添加nni超参搜索
     try:
+        print('begin add nni')
         from myapp.models.model_nni import NNI
         nni = db.session.query(NNI).all()
         if len(nni) == 0:
@@ -862,7 +872,7 @@ def init():
                         resource_gpu=nni.get('resource_gpu', '0'),
                     ))
                     db.session.commit()
-                    print('添加etl pipeline成功')
+                    print('添加nni 超参搜索成功')
     except Exception as e:
         print(e)
         # traceback.print_exc()
@@ -870,6 +880,7 @@ def init():
 
     # 添加镜像在线构建
     try:
+        print('begin add docker')
         from myapp.models.model_docker import Docker
         docker = db.session.query(Docker).all()
         if len(docker) == 0:

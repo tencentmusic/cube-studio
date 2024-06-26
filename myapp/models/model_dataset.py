@@ -70,15 +70,37 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
                 html+='<a target=_blank href="%s">%s</a><br>'%(url.strip(),url.strip())
         return Markup('<div>%s</div>'%html)
 
+    def label_html(self):
+        urls = self.url.split('\n') if self.url else []
+        urls = [url.strip() for url in urls if url.strip()]
+        if urls:
+            url = urls[0]
+            return Markup('<a target=_blank href="%s">%s</a>'%(url.strip(), self.label))
+        return self.label
+
     @property
     def path_html(self):
         paths= self.path.split('\n')
 
         html = ''
         for path in paths:
+            exist_file=False
             if path.strip():
+                host_path = path.replace('/mnt/','/data/k8s/kubeflow/pipeline/workspace/').strip()
+                if os.path.exists(host_path):
+                    if os.path.isdir(host_path):
+                        data_csv_path = os.path.join(host_path,'data.csv')
+                        if os.path.exists(data_csv_path):
+                            path = os.path.join(path,'data.csv')
+                            exist_file = True
+                    else:
+                        exist_file=True
+            if exist_file:
                 download_url = request.host_url+'/static/'+path.replace('/data/k8s/kubeflow/','')
                 html += f'<a target=_blank href="{download_url}">{path.strip()}</a><br>'
+            else:
+                html += f'{path.strip()}<br>'
+
         return Markup('<div>%s</div>'%html)
 
 

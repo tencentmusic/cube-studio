@@ -68,7 +68,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         # url= url + "#"+self.mount
 
         # 对于有边缘节点，直接使用边缘集群的代理ip
-        if SERVICE_EXTERNAL_IP:
+        if SERVICE_EXTERNAL_IP and conf.get('ENABLE_EDGE_K8S',False):
             SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip()
             from myapp.utils import core
             meet_ports = core.get_not_black_port(10000 + 10 * self.id)

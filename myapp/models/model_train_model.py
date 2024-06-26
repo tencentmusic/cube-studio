@@ -1,5 +1,6 @@
 import json
-
+import os.path
+import re
 from flask_appbuilder import Model
 from sqlalchemy.orm import relationship
 from sqlalchemy import Text
@@ -14,7 +15,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from flask import Markup
 metadata = Model.metadata
 conf = app.config
-
+import pysnooper
 
 class Training_Model(Model,AuditMixinNullable,MyappModelBase):
     __tablename__ = 'model'
@@ -59,11 +60,17 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def deploy(self):
-        download_url = ''
-        if self.path or self.download_url:
+        download_url = f'{__("下载")} |'
+        if self.download_url and self.download_url.strip():
             download_url = f'<a href="/training_model_modelview/api/download/{self.id}">{__("下载")}</a> |'
-        else:
-            download_url = f'{__("下载")} |'
+        if self.path and self.path.strip():
+            if re.match('^/mnt/', self.path):
+                local_path = f'/data/k8s/kubeflow/pipeline/workspace/{self.path.strip().replace("/mnt/","")}'
+                if os.path.exists(local_path):
+                    download_url = f'<a href="/training_model_modelview/api/download/{self.id}">{__("下载")}</a> |'
+            if 'http://' in self.path or 'https://' in self.path:
+                download_url = f'<a href="/training_model_modelview/api/download/{self.id}">{__("下载")}</a> |'
+
         ops=download_url+f'''
         <a href="/training_model_modelview/api/deploy/{self.id}">{__("发布")}</a> 
         '''
