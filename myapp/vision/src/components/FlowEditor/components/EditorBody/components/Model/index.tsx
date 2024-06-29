@@ -7,6 +7,9 @@ import {
   IDropdownOption,
   ActionButton,
   Label,
+  Toggle,
+  Slider,
+  SpinButton
 } from '@fluentui/react';
 import api from '@src/api';
 import { updateErrMsg } from '@src/models/app';
@@ -34,7 +37,7 @@ const Model: React.FC<ModelProps> = props => {
   const [templateArgs, setTemplateArgs] = useState<any>({});
   const [taskArgs, setTaskArgs] = useState<any>({});
   const { t, i18n } = useTranslation();
-
+  const [message, setMessage] = useState('clear');
   const _overflowItems: ICommandBarItemProps[] = [
     {
       key: 'debug',
@@ -59,24 +62,36 @@ const Model: React.FC<ModelProps> = props => {
     },
     {
       key: 'clear',
-      text: 'clear',
+      text: message || 'clear',
       // iconOnly: true,
-      onClick: () => handleTaskEvent('clear'),
+      onClick: () => handleTaskClearEvent('clear'),
       iconProps: { iconName: 'Unsubscribe' },
     },
   ];
 
   // 处理 task 跳转事件
   const handleTaskEvent = (type: string) => {
+    setMessage('clear');
     if (props.model.id) {
       window.open(`${window.location.origin}/task_modelview/api/${type}/${props.model.id}`);
     }
   };
+  // 处理 task 清理 事件
+  const handleTaskClearEvent = (type: string) => {
+    if (props.model.id) {
+      setMessage('cleaning');
+      api.task_modelview_clear(props.model.id).then((res: any) => {
+        setMessage('cleared');
+      })
+      // window.open(`${window.location.origin}/task_modelview/api/${type}/${props.model.id}`);
+    }
+  };
   // 配置变化事件
-  const handleOnChange = (key: string, value: string | number | boolean, type?: string) => {
+  const handleOnChange = (key: string, value: string | number | boolean | object, type?: string) => {
     const obj: any = {};
     let res = null;
-
+    // console.log(key)
+    // console.log(value)
     switch (type) {
       case 'json':
         try {
@@ -86,6 +101,9 @@ const Model: React.FC<ModelProps> = props => {
         }
         break;
       case 'int':
+        res = +value;
+        break;
+      case 'float':
         res = +value;
         break;
       default:
@@ -266,7 +284,7 @@ const Model: React.FC<ModelProps> = props => {
           <div className={style.splitLine}></div>
           <TextField
             label={t('GPU申请')}
-            description={t('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU')}
+            description={t('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_gpu', value ? value : '');
             }}
@@ -280,7 +298,7 @@ const Model: React.FC<ModelProps> = props => {
               handleOnChange('resource_rdma', value ? value : '');
             }}
             value={task?.resource_rdma || ''}
-            disabled
+            required
           />
           <div className={style.splitLine}></div>
           <TextField
@@ -316,13 +334,147 @@ const Model: React.FC<ModelProps> = props => {
               const args = current[key];
               const { choice } = args;
               const options = choice.map((option: string) => {
-                return {
-                  key: option,
-                  text: option,
-                };
+                if(typeof option === 'string') {
+                  return {
+                    key: option,
+                    text: option,
+                  };
+                }else{
+                  return {
+                    key: option['key'],
+                    text: option['text'],
+                  };
+                }
               });
+              console.log(options)
               const keyArgs = taskArgs && taskArgs[key];
               const keyValue = args.type === 'json' ? JSON.stringify(keyArgs, undefined, 4) : keyArgs;
+
+              if(args.type==='float'){
+                const range = typeof args.range === 'string' ? args.range.split(',') : args.range;
+                return (<React.Fragment key={key}>
+                  {
+                    <>
+                    <Slider
+                        styles={{ valueLabel: { margin: '0', width: 'auto' } }}
+                        label={`${key}`}
+                        min={range[0] || 0}
+                        max={range[1] || 1}
+                        step= {args.step || 0.1 }
+                        onChange={(value?: number) => {
+                          handleOnChange(key, value ? value : 0, args.type);
+                        }}
+                        value={keyValue}
+                        disabled={args.editable !== 1}
+                        showValue
+                      />
+                      <div className={style.argsDescription} dangerouslySetInnerHTML={{ __html: args.describe }}></div>
+                    </>
+                  }
+                  </React.Fragment>
+                )
+              }
+              if(args.type==='int'){
+                const range = typeof args.range === 'string' ? args.range.split(',') : args.range;
+                return (<React.Fragment key={key}>
+                  {
+                    <div style={{ width: '100%' }}>
+                      <SpinButton
+                          styles={
+                            {
+                                root: {
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'flex-start',
+                                  width: "100%"
+                                },
+                                spinButtonWrapper: {
+                                  width: '100%',
+                                },
+                                labelWrapper: {
+                                  marginBottom: '4px', // 调整标签与输入框之间的间距
+                                },
+                              }
+                          }
+                          label={`${key}`}
+                          min={range || 0}
+                          max={range || 100}
+                          step= {args.step || 1 }
+                          onIncrement={(value?: string) => {
+                            handleOnChange(key, value ? parseInt(value,10)+1 : 1, args.type);
+                          }}
+                          onDecrement={(value?: string) => {
+                            handleOnChange(key, value ? parseInt(value,10)-1 : -1, args.type);
+                          }}
+                          value={keyValue}
+                          disabled={args.editable !== 1}
+                        />
+                        <div className={style.argsDescription} dangerouslySetInnerHTML={{ __html: args.describe }}></div>
+
+                    </div>
+
+                  }
+                  </React.Fragment>
+                )
+              }
+              if(args.type==='bool'){
+                return (<React.Fragment key={key}>
+                  {
+                    <>
+                    <Toggle
+                        label={`${key}`}
+                        checked={keyValue}
+                        onChange={(event: FormEvent, value?: boolean) => {
+                          handleOnChange(key, value ? value : false, args.type);
+                        }}
+                        onText="On"
+                        offText="Off"
+                        disabled={args.editable !== 1}
+
+                      />
+                      <div className={style.argsDescription} dangerouslySetInnerHTML={{ __html: args.describe }}></div>
+                    </>
+                  }
+                  </React.Fragment>
+                )
+              }
+
+              if(args.type==='list'){
+                const selectedKeys = (typeof keyValue === 'string' ? keyValue : args.default).split(',');
+
+                return (<React.Fragment key={key}>
+                  {
+                    <>
+                      <Dropdown
+                        label={`${key}`}
+                        onChange={(event: FormEvent, option?: IDropdownOption) => {
+                          let currentSelectedKeys =  (typeof keyValue === 'string' ? keyValue : args.default).split(',');
+                          // 去除空白字符串
+                          currentSelectedKeys = currentSelectedKeys.filter((str: string) => str.trim() !== '');
+                          let newSelectedKeys=currentSelectedKeys
+                          if(option?.selected){
+                            // 去重
+                            if(!currentSelectedKeys.includes(option.key)){
+                              newSelectedKeys = [...currentSelectedKeys, option.key as string]
+                            }
+                          }else{
+                             newSelectedKeys = currentSelectedKeys.filter((key: string)=> key !== option?.key)
+                          }
+                          const newSelectedKeys_str = newSelectedKeys?.join(',');
+                          handleOnChange(key, newSelectedKeys_str || '', args.type);
+                        }}
+                        selectedKeys={selectedKeys}  // 这里有bug，无效
+                        options={options}
+                        required={args.require === 1}
+                        disabled={args.editable !== 1}
+                        multiSelect
+                      />
+                      <div className={style.argsDescription} dangerouslySetInnerHTML={{ __html: args.describe }}></div>
+                    </>
+                  }
+                  </React.Fragment>
+                )
+              }
 
               return (
                 <React.Fragment key={key}>
@@ -331,7 +483,7 @@ const Model: React.FC<ModelProps> = props => {
                       <Dropdown
                         label={`${key}`}
                         onChange={(event: FormEvent, option?: IDropdownOption) => {
-                          handleOnChange(key, `${option?.text}` || '', args.type);
+                          handleOnChange(key, `${option?.key}` || '', args.type);
                         }}
                         defaultSelectedKey={keyValue || args.default}
                         options={options}
@@ -346,7 +498,7 @@ const Model: React.FC<ModelProps> = props => {
                           return (
                             <div className={style.textLabelStyle}>
                               {`${key}`}
-                              {args.type === 'json' ? (
+                              {args.type === 'json' || args.type === 'text' ? (
                                 <ActionButton
                                   iconProps={{ iconName: 'FullWidthEdit' }}
                                   onClick={() => {
@@ -354,6 +506,7 @@ const Model: React.FC<ModelProps> = props => {
                                       updateKeyValue({
                                         key,
                                         value: keyValue,
+                                        type: args.type ==='json'?'json':(args.item_type || 'str')
                                       }),
                                     );
                                     dispatch(updateShowEditor(true));
@@ -373,8 +526,8 @@ const Model: React.FC<ModelProps> = props => {
                             ></div>
                           );
                         }}
-                        multiline={args.type !== 'str'}
-                        autoAdjustHeight={args.type !== 'str'}
+                        multiline={args.type === 'json' || args.type === 'text'}
+                        autoAdjustHeight={args.type === 'json' || args.type === 'text'}
                         onChange={(event: FormEvent, value?: string) => {
                           handleOnChange(key, value ? value : '', args.type);
                         }}

@@ -178,7 +178,11 @@ export default function DynamicForm(props: IProps) {
             extra={config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
             {...itemProps}
         >
-            <FileUploadPlus />
+            <FileUploadPlus
+                filetype={config.data.type}
+                format={config.data.format}
+                maxCount={config.data.maxCount || 1}
+            />
         </Form.Item>
     }
 

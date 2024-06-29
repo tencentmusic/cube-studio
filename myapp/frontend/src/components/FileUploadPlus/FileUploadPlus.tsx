@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import './FileUploadPlus.less';
 
 interface Iprops {
-    type?: TFileType
+    filetype?: TFileType
     onChange?: (value: any) => void
     value?: string[]
     maxCount?: number
@@ -33,9 +33,9 @@ export default function FileUploadPlus(props: Iprops) {
         reader.addEventListener('load', () => callback(reader.result));
         reader.readAsDataURL(img);
     }
-
+    // console.log('props', props);
     function beforeUpload(file: RcFile) {
-        console.log('file', file);
+        // console.log('file', file);
 
         const maxCount = props.maxCount || 1
         if (fileList.length >= maxCount) {
@@ -103,10 +103,10 @@ export default function FileUploadPlus(props: Iprops) {
         return url;
     }
 
-    const createMediaPreview = (file: UploadFile<any>, fileIndex: number, type: TFileType) => {
+    const createMediaPreview = (file: UploadFile<any>, fileIndex: number, filetype: TFileType) => {
         const url = getObjectURL(file)
         const key = Math.random().toString(36).substring(2);
-        if (type === 'video') {
+        if (filetype === 'video') {
             return <div className="p-r" key={key}>
                 <span
                     onClick={() => {
@@ -121,7 +121,7 @@ export default function FileUploadPlus(props: Iprops) {
                 </span>
                 <video className="w100 mb8" src={url} controls></video>
             </div>
-        } else if (type === 'audio') {
+        } else if (filetype === 'audio') {
             return <div className="d-f ac mb8" key={key}>
                 <audio className="w100 flex1" src={url} controls></audio>
                 <span
@@ -145,7 +145,7 @@ export default function FileUploadPlus(props: Iprops) {
             <div>
                 {
                     fileList.map((file, fileIndex) => {
-                        return createMediaPreview(file, fileIndex, props.type || 'file')
+                        return createMediaPreview(file, fileIndex, props.filetype || 'file')
                     })
                 }
             </div>
@@ -154,8 +154,9 @@ export default function FileUploadPlus(props: Iprops) {
                 fileList={fileList}
                 showUploadList={false}
                 customRequest={(options) => {
-                    console.log(options.file);
+                    console.log("options.file",options.file);
                     const tarList = [...fileList, options.file as RcFile]
+                    console.log("tarList",tarList);
                     setFileList(tarList)
 
                     Promise.all(tarList.map((item: any) => file2Bin(item))).then(res => {
@@ -176,13 +177,13 @@ export default function FileUploadPlus(props: Iprops) {
             >
                 <p className="ant-upload-drag-icon">
                     {
-                        (props.type === 'file' || !props.type) ? <InboxOutlined /> : null
+                        (props.filetype === 'file' || !props.filetype) ? <InboxOutlined /> : null
                     }
                     {
-                        props.type === 'video' ? <VideoCameraAddOutlined /> : null
+                        props.filetype === 'video' ? <VideoCameraAddOutlined /> : null
                     }
                     {
-                        props.type === 'audio' ? <AudioOutlined /> : null
+                        props.filetype === 'audio' ? <AudioOutlined /> : null
                     }
                 </p>
                 <p className="ant-upload-text">点击或拖拽文件上传</p>

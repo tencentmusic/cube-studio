@@ -171,9 +171,13 @@ const Setting: React.FC = () => {
           <Dropdown
             label={t('调度优先级')}
             options={[
-              { key: '高优先级', text: '高优先级' },
-              { key: '低优先级', text: '低优先级' },
+              { key: "high", text: 'high' },
+              { key: "low", text: 'low' },
             ]}
+            selectedKey={current?.priority || "high"}
+            onChange={(event: FormEvent, option?: IDropdownOption) => {
+              handleOnChange('priority', `${option?.text}` || '');
+            }}
           />
           <div className={style.splitLine}></div>
           <Dropdown
@@ -301,6 +305,15 @@ const Setting: React.FC = () => {
             }}
             value={current?.max_active_runs || ''}
             required
+          />
+          <div className={style.splitLine}></div>
+          <TextField
+            label={t('保留实例数目')}
+            description={t('定时调度只保留最新的n次实例运行，0表示不限制')}
+            onChange={(event: FormEvent, value?: string) => {
+              handleOnChange('expired_limit', value ? +value : '0');
+            }}
+            value={current?.expired_limit || '0'}
           />
           <div className={style.splitLine}></div>
           <TextField

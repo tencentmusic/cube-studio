@@ -74,7 +74,7 @@ const translation = {
   "CPU申请": "CPU req",
   "CPU的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管理员": "CPU resource usage limit (in units of cores), example 0.4, 10, maximum 50 cores, contact administrator for more.",
   "GPU申请": "GPU req",
-  "gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU": "GPU resource usage limit (in units of cards), example: 1, 2, training tasks occupy the entire card per container. To apply for specific card models, you can use something like 1(V100). Currently supports T4/V100/A100/VGPU.",
+  "gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)": "GPU resource usage limit (in units of cards), example: 1, 2, training tasks occupy the entire card per container. To apply for specific card models, you can use something like 1(V100).",
   "RDMA申请": "RDMA req",
   "RDMA的资源使用限制，示例 0，1，10，填写方式咨询管理员": "RDMA resource usage limit, example 0, 1, 10, consult administrator for filling method.",
   "超时中断": "timeout",
@@ -213,7 +213,8 @@ const translation = {
   "项目设置": "setting",
   "智能推荐下游节点":"Intelligent recommendation of downstream nodes",
   "请先选择推荐节点":"Please select the recommended node first.",
-  "导出数据": "Export data"
+  "导出数据": "Export data",
+  "备份":"backup"
 }
 
 export default translation

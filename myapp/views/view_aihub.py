@@ -71,7 +71,6 @@ class Aihub_base():
 
 
     def post_list(self,items):
-        flash('AIHub内容使用，请使用<a target="_blank" href="https://github.com/tencentmusic/cube-studio/blob/master/README_CN.md">企业版</a>',category='success')
         return items
 
 

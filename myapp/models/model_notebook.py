@@ -162,5 +162,5 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     # 镜像保存
     @property
     def save(self):
-        return Markup(f'<span style="color:red;">环境保存(企业版)</span>')
+        return Markup(f'<span style="color:red;">环境保存(todo)</span>')
 

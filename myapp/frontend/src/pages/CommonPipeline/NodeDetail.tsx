@@ -146,7 +146,7 @@ export default function NodeDetail(props: IProps) {
                                     {
                                         tab.content.map((group, groupIndex) => {
                                             return <div className="mb32" key={`nodeGroup${groupIndex}`}>
-                                                <div className="fs16 mb16 bor-l b-theme pl4" style={{ borderLeftWidth: 2 }}>{group.groupName}</div>
+                                                <div className="fs16 mb16 bor-l b-theme pl4" style={{ borderLeftWidth: 2 }} dangerouslySetInnerHTML={{ __html: group.groupName }}></div>
                                                 <div>
                                                     {handleGroupContent(group.groupContent.type, group.groupContent.value, tab.tabName, group.groupName)}
                                                 </div>

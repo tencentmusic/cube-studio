@@ -225,6 +225,14 @@ const ModuleTree: React.FC = () => {
                   }
                 }}
               ></IconButton>
+              <IconButton
+                iconProps={{
+                  iconName: 'Add',
+                }}
+                onClick={() => {
+                  window.open('/frontend/train/train_template/job_template?isVisableAdd=true')
+                }}
+              ></IconButton>
             </FocusZone>
           </div>
           {/* 模板列表 */}

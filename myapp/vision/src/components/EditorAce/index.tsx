@@ -2,15 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Icon, IconButton, PrimaryButton, DefaultButton, Stack, MessageBar, MessageBarType } from '@fluentui/react';
 import MonacoEditor from 'react-monaco-editor';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
-import { selectShowEditor, updateShowEditor, selectValue, updateValue } from '@src/models/editor';
+import { selectShowEditor, updateShowEditor, selectValue, updateValue, selectType } from '@src/models/editor';
 import { isJsonString } from '@src/utils/index';
 import style from './style';
 import { useTranslation } from 'react-i18next';
-
-const EditorAce: React.FC = () => {
+interface IProps {
+  isStrictJson?: boolean
+  language?: string
+}
+const EditorAce: React.FC<IProps> = (props: IProps) => {
   const dispatch = useAppDispatch();
   const showModal = useAppSelector(selectShowEditor);
   const value = useAppSelector(selectValue);
+  const type = useAppSelector(selectType);
   const [current, setCurrent] = useState('');
   const [codeWidth, setCodeWidth] = useState<string | number>('100%');
   const [dragging, setDragging] = useState(false);
@@ -19,7 +23,7 @@ const EditorAce: React.FC = () => {
   const { t, i18n } = useTranslation();
 
   const handleConfirm = () => {
-    if (!isJsonString(current)) {
+    if (type==='json' && !isJsonString(current)) {
       setIsError(true);
       return;
     }
@@ -55,7 +59,7 @@ const EditorAce: React.FC = () => {
     >
       <Stack className={style.contentStyles.container}>
         <div className={style.contentStyles.header}>
-          <span>JSON Editor</span>
+          <span>{t('编辑')}</span>
           <IconButton iconProps={style.cancelIcon} onClick={handleCancel} />
         </div>
         <div
@@ -71,7 +75,7 @@ const EditorAce: React.FC = () => {
             }}
           >
             <MonacoEditor
-              language="json"
+              language={type || 'json'}
               theme="vs"
               value={current}
               onChange={value => {
@@ -82,9 +86,9 @@ const EditorAce: React.FC = () => {
               options={{
                 renderValidationDecorations: 'on',
                 automaticLayout: true,
-                formatOnPaste: true,
-                formatOnType: true,
-                renderLineHighlight: 'none',
+                // formatOnPaste: true,
+                // formatOnType: true,
+                // renderLineHighlight: 'none',
                 autoClosingOvertype: 'always',
                 cursorStyle: 'block',
                 quickSuggestions: false,
@@ -120,7 +124,7 @@ const EditorAce: React.FC = () => {
               }}
               isMultiline={false}
             >
-              {t('JSON 格式错误')}
+              {t('格式错误')}
             </MessageBar>
           ) : null}
           <PrimaryButton styles={{ root: { marginRight: 10 } }} onClick={handleConfirm}>

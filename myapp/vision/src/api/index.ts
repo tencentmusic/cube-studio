@@ -102,6 +102,11 @@ const task_modelview_del = (taskId: string | number): Promise<any> => {
   return ajax.delete(`/task_modelview/api/${taskId}`);
 };
 
+// 清理对应的 task
+const task_modelview_clear = (taskId: string | number): Promise<any> => {
+  return ajax.get(`/task_modelview/api/clear/${taskId}`);
+};
+
 // 编辑 task
 const task_modelview_edit = (pipelineId: string | number, taskId: string | number, data: ITaskEdit): Promise<any> => {
   return ajax.put({
@@ -135,6 +140,7 @@ const api = {
   task_modelview_add,
   task_modelview_get,
   task_modelview_del,
+  task_modelview_clear,
   task_modelview_edit,
 };
 
