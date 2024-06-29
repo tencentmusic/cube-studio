@@ -607,7 +607,7 @@ class Task_ModelView_Base():
             working_dir = json.loads(task.args)['workdir']
         if json.loads(task.args).get('--workdir', ''):
             working_dir = json.loads(task.args)['--workdir']
-        if json.loads(task.args).get('-working_dir', ''):
+        if json.loads(task.args).get('--working_dir', ''):
             working_dir = json.loads(task.args)['--working_dir']
 
         if not pod or pod['status'] != 'Running':
