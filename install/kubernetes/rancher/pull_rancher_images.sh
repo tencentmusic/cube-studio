@@ -4,6 +4,7 @@ docker pull ccr.ccs.tencentyun.com/cube-rancher/rancher:v2.6.2 && docker tag ccr
 docker pull ccr.ccs.tencentyun.com/cube-rancher/mirrored-pause:3.4.1 && docker tag ccr.ccs.tencentyun.com/cube-rancher/mirrored-pause:3.4.1 rancher/mirrored-pause:3.4.1 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/mirrored-calico-pod2daemon-flexvol:v3.19.2 && docker tag ccr.ccs.tencentyun.com/cube-rancher/mirrored-calico-pod2daemon-flexvol:v3.19.2 rancher/mirrored-calico-pod2daemon-flexvol:v3.19.2 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/rke-tools:v0.1.78 && docker tag ccr.ccs.tencentyun.com/cube-rancher/rke-tools:v0.1.78 rancher/rke-tools:v0.1.78 &
+docker pull ccr.ccs.tencentyun.com/cube-rancher/rke-tools:v0.1.87 && docker tag ccr.ccs.tencentyun.com/cube-rancher/rke-tools:v0.1.87 rancher/rke-tools:v0.1.87 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/mirrored-calico-cni:v3.19.2 && docker tag ccr.ccs.tencentyun.com/cube-rancher/mirrored-calico-cni:v3.19.2 rancher/mirrored-calico-cni:v3.19.2 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/fleet-agent:v0.3.7 && docker tag ccr.ccs.tencentyun.com/cube-rancher/fleet-agent:v0.3.7 rancher/fleet-agent:v0.3.7 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/kube-api-auth:v0.1.5 && docker tag ccr.ccs.tencentyun.com/cube-rancher/kube-api-auth:v0.1.5 rancher/kube-api-auth:v0.1.5 &
