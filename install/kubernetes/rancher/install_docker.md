@@ -102,7 +102,7 @@ vi /etc/docker/daemon.json
 添加如下配置
 
 {
-	"registry-mirrors": ["https://docker.m.daocloud.io", "https://dockerproxy.com", "https://docker.mirrors.ustc.edu.cn", "https://docker.nju.edu.cn"],
+	"registry-mirrors": ["https://hub.uuuadc.top", "https://docker.anyhub.us.kg", "https://dockerhub.jobcher.com", "https://dockerhub.icu", "https://docker.ckyl.me", "https://docker.awsl9527.cn"],
     "dns": ["114.114.114.114","8.8.8.8"],
     "data-root": "/data/docker",
 }
