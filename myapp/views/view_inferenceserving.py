@@ -136,16 +136,16 @@ class InferenceService_ModelView_base():
                                     validators=[DataRequired()]),
         "host": StringField(_('域名'), default=InferenceService.host.default.arg,description= _('访问域名，')+host_rule,widget=BS3TextFieldWidget()),
         "transformer":StringField(_('前后置处理'), default=InferenceService.transformer.default.arg,description= _('前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架'),widget=BS3TextFieldWidget()),
-        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
+        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，或虚拟gpu，例如0.2(T4)'),
                                                         widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
             _('sidecar'),
             default='',
-            description= _('容器的agent代理,istio用于服务网格'),
+            description = _('容器的agent代理,istio用于服务网格，jwt用于统一认证(需要客户端在请求头中添加开发者生成的token)'),
             widget=Select2ManyWidget(),
             validators=[],
-            choices=[['istio', 'istio']]
+            choices=[['istio', 'istio'],['jwt','jwt']]
         ),
         "priority": SelectField(
             _('服务优先级'),
@@ -217,7 +217,7 @@ class InferenceService_ModelView_base():
         'volume_mount': StringField(
             _('挂载'),
             default='',
-            description= _('外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人rtx子目录'),
+            description= _('外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人username子目录'),
             widget=BS3TextFieldWidget()
         ),
         'model_path': StringField(
@@ -230,6 +230,7 @@ tfserving：仅支持添加了服务签名的saved_model目录地址，例如：
 torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型<br>
 onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx<br>
 triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
+llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推理加速和openai流式接口
 '''.strip()),
             widget=BS3TextFieldWidget(),
             validators=[]
@@ -467,11 +468,6 @@ output %s
 
     # @pysnooper.snoop(watch_explode=('item'))
     def use_expand(self, item):
-        #
-        # item.ports = conf.get('INFERNENCE_PORTS',{}).get(item.service_type,item.ports)
-        # item.env = '\n'.join(conf.get('INFERNENCE_ENV', {}).get(item.service_type, item.env.split('\n') if item.env else []))
-        # item.metrics = conf.get('INFERNENCE_METRICS', {}).get(item.service_type, item.metrics)
-        # item.health = conf.get('INFERNENCE_HEALTH', {}).get(item.service_type, item.health)
 
         # 先存储特定参数到expand
         expand = json.loads(item.expand) if item.expand else {}
@@ -625,12 +621,17 @@ output %s
 
     # @pysnooper.snoop()
     def pre_add(self, item):
+        if not item.expand:
+            item.expand= '{}'
+        if item.sidecar:
+            item.sidecar = item.sidecar.strip().strip(',')
         if item.name:
             item.name = item.name.replace("_", "-")
         if not item.model_path:
             item.model_path = ''
         if not item.volume_mount:
             item.volume_mount = item.project.volume_mount
+
         self.use_expand(item)
         if not item.resource_memory:
             item.resource_memory = '2G'
@@ -661,6 +662,8 @@ output %s
                     k8s_client.delete_istio_ingress(namespace=namespace, name=name)
                     k8s_client.delete_hpa(namespace=namespace, name=name)
                     k8s_client.delete_configmap(namespace=namespace, name=name)
+                    k8s_client.delete_crd(group='security.istio.io',version='v1beta1',plural='requestauthentications',namespace=namespace,name=name)
+                    k8s_client.delete_crd(group='security.istio.io',version='v1beta1',plural='authorizationpolicies',namespace=namespace,name=name)
         except Exception as e:
             print(e)
 
@@ -697,6 +700,12 @@ output %s
                                 k8s_client.delete_istio_ingress(namespace=namespace, name=name)
                                 k8s_client.delete_hpa(namespace=namespace, name=name)
                                 k8s_client.delete_configmap(namespace=namespace, name=name)
+                                k8s_client.delete_crd(group='security.istio.io', version='v1beta1',
+                                                      plural='requestauthentications',
+                                                      namespace=namespace, name=name)
+                                k8s_client.delete_crd(group='security.istio.io', version='v1beta1',
+                                                      plural='authorizationpolicies',
+                                                      namespace=namespace, name=name)
                 # 域名后缀如果不一样也要变了
                 if src_project and src_project.cluster['SERVICE_DOMAIN'] != item.project.cluster['SERVICE_DOMAIN']:
                     item.host=item.host.replace(src_project.cluster['SERVICE_DOMAIN'],item.project.cluster['SERVICE_DOMAIN'])
@@ -879,14 +888,14 @@ output %s
         try:
             pod_ports = copy.deepcopy(ports)
             try:
-                if service.metrics.strip():
+                if service.metrics and service.metrics.strip():
                     metrics_port = int(service.metrics[:service.metrics.index(":")])
                     pod_ports.append(metrics_port)
             except Exception as e:
                 print(e)
 
             try:
-                if service.health.strip():
+                if service.health and service.health.strip():
                     health_port = int(service.health[:service.health.index(":")])
                     pod_ports.append(health_port)
             except Exception as e:

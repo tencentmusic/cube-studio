@@ -714,9 +714,9 @@ class Task_ModelView_Base():
         # 没有历史或者没有运行态，直接创建
         if not pod:
             command = None
-            if task.job_template.entrypoint.strip():
+            if task.job_template.entrypoint and task.job_template.entrypoint.strip():
                 command = task.job_template.entrypoint.strip()
-            if task.command.strip():
+            if task.command and task.command.strip():
                 command = task.command.strip()
             if command:
                 command = command.split(" ")

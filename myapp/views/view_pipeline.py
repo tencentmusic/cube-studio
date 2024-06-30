@@ -127,9 +127,10 @@ def make_workflow_yaml(pipeline,workflow_label,hubsecret_list,dag_templates,cont
 # 转化为worfklow的yaml
 # @pysnooper.snoop()
 def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
-    pipeline.dag_json = pipeline.fix_dag_json(dbsession)
+    dag_json = pipeline.fix_dag_json(dbsession)
+    pipeline.dag_json=dag_json
     dbsession.commit()
-    dag = json.loads(pipeline.dag_json)
+    dag = json.loads(dag_json)
 
     # 如果dag为空，就直接退出
     if not dag:
@@ -1028,6 +1029,10 @@ class Pipeline_ModelView_Base():
                         username = labels['run-rtx']
                     elif 'pipeline-rtx' in labels:
                         username = labels['pipeline-rtx']
+                    elif 'run-username' in labels:
+                        username = labels['run-username']
+                    elif 'pipeline-username' in labels:
+                        username = labels['pipeline-username']
 
                     workflow = Workflow(name=crd['name'], namespace=crd['namespace'], create_time=crd['create_time'],
                                         cluster=labels.get("cluster", ''),
@@ -1046,8 +1051,9 @@ class Pipeline_ModelView_Base():
     # @event_logger.log_this
     @expose("/run_pipeline/<pipeline_id>", methods=["GET", "POST"])
     @check_pipeline_perms
+    # @pysnooper.snoop()
     def run_pipeline(self, pipeline_id):
-        print(pipeline_id)
+        # print(pipeline_id)
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
         pipeline.delete_old_task()
         tasks = db.session.query(Task).filter_by(pipeline_id=pipeline_id).all()
@@ -1116,7 +1122,7 @@ class Pipeline_ModelView_Base():
         #         print(e)
 
         db.session.commit()
-        print(pipeline_id)
+        # print(pipeline_id)
         url = '/static/appbuilder/vison/index.html?pipeline_id=%s' % pipeline_id  # 前后端集成完毕，这里需要修改掉
         return redirect('/frontend/showOutLink?url=%s' % urllib.parse.quote(url, safe=""))
         # 返回模板
@@ -1164,13 +1170,13 @@ class Pipeline_ModelView_Base():
     @expose("/web/runhistory/<pipeline_id>", methods=["GET"])
     def web_runhistory(self,pipeline_id):
         url = conf.get('MODEL_URLS', {}).get('runhistory', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "pipeline", "value": int(pipeline_id)}], ensure_ascii=False))
-        print(url)
+        # print(url)
         return redirect(url)
 
     @expose("/web/workflow/<pipeline_id>", methods=["GET"])
     def web_workflow(self,pipeline_id):
         url = conf.get('MODEL_URLS', {}).get('workflow', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "labels", "value": '"pipeline-id": "%s"'%pipeline_id}], ensure_ascii=False))
-        print(url)
+        # print(url)
         return redirect(url)
 
 
@@ -1216,7 +1222,7 @@ class Pipeline_ModelView_Base():
     # # @event_logger.log_this
     @expose("/copy_pipeline/<pipeline_id>", methods=["GET", "POST"])
     def copy_pipeline(self, pipeline_id):
-        print(pipeline_id)
+        # print(pipeline_id)
         message = ''
         try:
             pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
