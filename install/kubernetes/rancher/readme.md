@@ -141,9 +141,6 @@ sysctl -p
 cd cube-studio/install/kubernetes/rancher/
 sh reset_docker.sh
 
-# 需要拉取镜像(非2.6.2版本需要执行wget，2.6.2版本已拉取过了)
-wget https://github.com/rancher/rancher/releases/download/v2.6.2/rancher-images.txt
-
 sh pull_rancher_images.sh 
 
 export RANCHER_CONTAINER_TAG=v2.6.2
@@ -165,7 +162,7 @@ docker logs  myrancher  2>&1 | grep "Bootstrap Password:"
 
  8.3 机器docker 存储目录要>100G，内存>8G
 
- 8.4 要提前拉取镜像sh pull_rancher_images.sh  不然会因为拉取时间过长造成失败。如果拉取不了，可配置docker镜像源,
+ 8.4 要提前拉取镜像sh pull_rancher_images.sh  不然会因为拉取时间过长造成失败。如果拉取不了，可配置docker镜像源 	"registry-mirrors":  [ "https://hub.uuuadc.top", "https://docker.anyhub.us.kg", "https://dockerhub.jobcher.com", "https://dockerhub.icu", "https://docker.ckyl.me", "https://docker.awsl9527.cn" ],
 
  8.5、permission denied类型的报错，mount 查看所属盘是否有noexec 限制
 

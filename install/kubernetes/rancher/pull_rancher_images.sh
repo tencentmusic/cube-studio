@@ -10,6 +10,7 @@ docker pull ccr.ccs.tencentyun.com/cube-rancher/fleet-agent:v0.3.7 && docker tag
 docker pull ccr.ccs.tencentyun.com/cube-rancher/kube-api-auth:v0.1.5 && docker tag ccr.ccs.tencentyun.com/cube-rancher/kube-api-auth:v0.1.5 rancher/kube-api-auth:v0.1.5 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/mirrored-kube-rbac-proxy:v0.5.0 && docker tag ccr.ccs.tencentyun.com/cube-rancher/mirrored-kube-rbac-proxy:v0.5.0 rancher/mirrored-kube-rbac-proxy:v0.5.0 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/hyperkube:v1.21.5-rancher1 && docker tag ccr.ccs.tencentyun.com/cube-rancher/hyperkube:v1.21.5-rancher1 rancher/hyperkube:v1.21.5-rancher1 &
+docker pull ccr.ccs.tencentyun.com/cube-rancher/hyperkube:v1.21.14-rancher1 && docker tag ccr.ccs.tencentyun.com/cube-rancher/hyperkube:v1.21.14-rancher1 rancher/hyperkube:v1.21.14-rancher1 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/kubectl:v1.20.2 && docker tag ccr.ccs.tencentyun.com/cube-rancher/kubectl:v1.20.2 rancher/kubectl:v1.20.2 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/mirrored-cluster-proportional-autoscaler:1.8.3 && docker tag ccr.ccs.tencentyun.com/cube-rancher/mirrored-cluster-proportional-autoscaler:1.8.3 rancher/mirrored-cluster-proportional-autoscaler:1.8.3 &
 docker pull ccr.ccs.tencentyun.com/cube-rancher/mirrored-metrics-server:v0.5.0 && docker tag ccr.ccs.tencentyun.com/cube-rancher/mirrored-metrics-server:v0.5.0 rancher/mirrored-metrics-server:v0.5.0 &
