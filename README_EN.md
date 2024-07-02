@@ -18,7 +18,7 @@ cube-studio is a one-stop cloud-native machine learning platform open sourced by
 
 https://github.com/tencentmusic/cube-studio/wiki
 
-
+ 
 # Job Template
 
 tips: 
