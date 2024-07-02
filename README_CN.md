@@ -70,12 +70,7 @@ cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目�
 
 https://github.com/tencentmusic/cube-studio/wiki
 
-# 开源共建
 
- 学习、部署、体验、开源建设、商业合作 欢迎来撩。或添加微信luanpeng1234，备注<开源建设>
-
- <img border="0" width="20%" src="https://user-images.githubusercontent.com/20157705/219829986-66384e34-7ae9-4511-af67-771c9bbe91ce.jpg" />
- 
 # 支持模板
 
 提示：
