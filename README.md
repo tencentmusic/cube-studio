@@ -4,13 +4,7 @@
 
 ### 整体架构
 
-![image](https://github.com/tencentmusic/cube-studio/assets/20157705/a07b1742-3413-4957-bd15-0f2b3c30f66f)
-
-
-# 帮助文档
-
-https://github.com/tencentmusic/cube-studio/wiki
-
+![image](https://img-blog.csdnimg.cn/direct/e5648520aada4995858a9a7205904600.png)
 
 # 功能清单
 
@@ -74,6 +68,11 @@ cube studio是 腾讯音乐 开源的一站式云原生机器学习平台，目�
 |大模型|私有知识库|<li><u>支持微信公众号服务号对接|
 |大模型|私有知识库|<li><u>支持企业微信群聊机器人对接|
 |大模型|私有知识库|<li><u>支持钉钉群聊机器人对接|
+
+
+# 帮助文档
+
+https://github.com/tencentmusic/cube-studio/wiki
 
 
 # 支持模板
@@ -368,12 +367,6 @@ export MLP_WORKER_0_PORT=$MASTER_PORT
 
 ![image](https://github.com/tencentmusic/cube-studio/assets/20157705/a9a0b399-8d02-4d19-8198-4e3681074f2f)
 
-
-### 实时训练
-
-tmeps支持tf框架实时训练，秒级上线，能应对embedding稀疏大模型推荐场景
-
-![image](https://user-images.githubusercontent.com/20157705/167534836-418855cf-daef-45a5-85c9-3bb1b7135f4f.png)
 
 # 三种方式部署
 
