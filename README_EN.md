@@ -18,12 +18,7 @@ cube-studio is a one-stop cloud-native machine learning platform open sourced by
 
 https://github.com/tencentmusic/cube-studio/wiki
 
-# WeChat group
 
- learning、deploy、consult、contribution、cooperation, join group, wechart id luanpeng1234 remark`<open source>`, [construction guide](https://github.com/tencentmusic/cube-studio/blob/master/CONTRIBUTING.md)
- 
- <img border="0" width="20%" src="https://user-images.githubusercontent.com/20157705/219829986-66384e34-7ae9-4511-af67-771c9bbe91ce.jpg" />
- 
 # Job Template
 
 tips: 
