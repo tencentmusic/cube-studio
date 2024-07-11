@@ -566,9 +566,9 @@ class CeleryConfig(object):
     }
 
  # 帮助文档地址，显示在web导航栏
-DOCUMENTATION_URL='https://github.com/tencentmusic/cube-studio/wiki'
-BUG_REPORT_URL = 'https://github.com/tencentmusic/cube-studio/issues/new'
-GIT_URL = 'https://github.com/tencentmusic/cube-studio/tree/master'
+DOCUMENTATION_URL='https://github.com/data-infra/cube-studio/wiki'
+BUG_REPORT_URL = 'https://github.com/data-infra/cube-studio/issues/new'
+GIT_URL = 'https://github.com/data-infra/cube-studio/tree/main'
 
 
 ROBOT_PERMISSION_ROLES=[]   # 角色黑名单
@@ -746,9 +746,9 @@ NOTEBOOK_IMAGES=[
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-bigdata', 'jupyter（bigdata）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning', 'jupyter（machinelearning）'],
     ['ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-deeplearning', 'jupyter（deeplearning）'],
-    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-jupyter-ubuntu-cpu-pro', 'jupyter-conda-pro（todo）'],
-    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-matlab-ubuntu-deeplearning', 'matlab（todo）'],
-    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-rstudio-ubuntu-bigdata', 'rstudio（todo）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-jupyter-ubuntu-cpu-pro', 'jupyter-conda-pro（企业版）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-matlab-ubuntu-deeplearning', 'matlab（企业版）'],
+    ['ccr.ccs.tencentyun.com/cube-studio/notebook:enterprise-rstudio-ubuntu-bigdata', 'rstudio（企业版）'],
 ]
 
 # 定时检查大小的目录列表。需要再celery中启动检查任务

@@ -106,7 +106,7 @@ kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --
 # 在k8s 1.21-部署
 #kubectl apply -f istio/install.yaml
 # 在k8s 1.21+部署
-# kubectl delete -f istio/install.yaml
+kubectl delete -f istio/install-1.15.0.yaml
 kubectl apply -f istio/install-1.15.0.yaml
 
 kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s
@@ -146,11 +146,13 @@ kubectl delete -k cube/overlays
 kubectl apply -k cube/overlays
 
 # 配置入口
-#ip=`ifconfig eth1 | grep 'inet '| awk '{print $2}' | head -n 1`
 kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec":{"externalIPs":["'"$1"'"]}}'
-
-# 本地电脑手动host
 echo "打开网址：http://$1"
+
+# ipvs模式启动配置入口
+# kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec":{"type":"NodePort"}}'
+# nodeport=`kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.spec.ports[?(@.port==80)].nodePort}'`
+# echo "打开网址：http://$1:$nodeport"
 
 
 

@@ -10,7 +10,6 @@ pull_harbor_file = open('pull_rancher_harbor.sh', mode='w')
 pull_save_file = open('rancher_image_save.sh',mode='w')
 load_image_file = open('rancher_image_load.sh',mode='w')
 
-# push_harbor_file.write(f'准备登录: {harbor_repo}\n')
 push_harbor_file.write('docker login '+harbor_repo[:harbor_repo.index('/')]+"\n")
 pull_harbor_file.write('docker login '+harbor_repo[:harbor_repo.index('/')]+"\n")
 

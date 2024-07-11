@@ -65,8 +65,8 @@ python server内部存储结构
 post访问接口`/{client}/webhook`
 
 参数
-sender_type：字符串。推送类型（目前支持wechat和rtx_group）
+sender_type：字符串。推送类型（目前支持wechat和username_group）
 sender：字符串。推送者（TME_DataInfra或企业微信机器人key）
-username：字符串。接收用户(逗号分隔多用户)(微信推送时为rtx，企业微信群推送时为空)
+username：字符串。接收用户(逗号分隔多用户)(微信推送时为username，企业微信群推送时为空)
 message: 推送字符串，如果有message字段，则仅推送message字段，否则除上面之外的所有字段会json序列化为message推送
 
