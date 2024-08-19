@@ -173,6 +173,11 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
     for env in pipeline_global_env:
         key, value = env[:env.index('=')], env[env.index('=') + 1:]
         global_envs[key] = value
+    # 全局环境变量可以在任务的参数中引用
+    for global_env in pipeline_global_env:
+        key,value = global_env.split('=')[0],global_env.split('=')[1]
+        if key not in kwargs:
+            template_kwargs[key]=value
 
     def make_dag_template():
         dag_template = []
@@ -363,6 +368,10 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
                 resources_requests[gpu_resource_name] = str(int(gpu_num))
                 resources_limits[gpu_resource_name] = str(int(gpu_num))
 
+            if 0 == gpu_num:
+                # 没要gpu的容器，就要加上可视gpu为空，不然gpu镜像能看到和使用所有gpu
+                for gpu_alias in conf.get('GPU_NONE', {}):
+                    container_envs.append((conf.get('GPU_NONE',{})[gpu_alias][0], conf.get('GPU_NONE',{})[gpu_alias][1]))
         # 配置host
         hostAliases = {}
 

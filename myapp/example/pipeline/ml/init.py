@@ -17,7 +17,7 @@ def init_db(SQLALCHEMY_DATABASE_URI):
         if 'mysql' in SQLALCHEMY_DATABASE_URI:
             import pymysql
             # 创建连接
-            conn = pymysql.connect(host=uri.host, port=uri.port, user=uri.username, password=uri.password, charset='utf8')
+            conn = pymysql.connect(host=uri.host, port=uri.port, user=uri.username, password=uri.password, charset='utf8mb4')
             sql = "CREATE DATABASE IF NOT EXISTS example DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"
         elif 'postgre' in SQLALCHEMY_DATABASE_URI:
             import psycopg2
@@ -70,7 +70,7 @@ def csv_table(csv_path,SQLALCHEMY_DATABASE_URI):
     print('导入成功...')
 
 def init():
-    mysql_sql_uri='mysql+pymysql://root:admin@mysql-service.infra:3306/example?charset=utf8'
+    mysql_sql_uri='mysql+pymysql://root:admin@mysql-service.infra:3306/example?charset=utf8mb4'
     postgres_sql_uri = 'postgresql+psycopg2://postgres:postgres@postgresql.kubeflow:5432/example'
     current_work_dir = os.path.dirname(__file__)
     try:

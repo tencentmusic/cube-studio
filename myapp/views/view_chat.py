@@ -61,6 +61,59 @@ class Chat_Filter(MyappFilter):
         )
 
 
+# @pysnooper.snoop(watch_explode=('url','headers','data'))
+def aihub_get_result(url, headers, data):
+    res = requests.post(
+        url,
+        headers=headers,
+        json=data
+    )
+    if res.status_code == 200:
+        back = res.json()
+        status = back['status']
+        if not status:
+            result = res.json().get("result", [])
+            if result:
+                for res in result:
+                    image = res.get('image','')
+                    if 'http:' not in image and 'https://' not in image:
+                        image = urllib.parse.urljoin(url, image)
+                        res['image']=image
+                    audio = res.get('audio','')
+                    if 'http:' not in audio and 'https://' not in audio:
+                        audio = urllib.parse.urljoin(url, audio)
+                        res['audio']=audio
+                    video = res.get('video','')
+                    if 'http:' not in video and 'https://' not in video:
+                        video = urllib.parse.urljoin(url, video)
+                        res['video']=video
+                return 0, result
+    else:
+        return 1, f'请求{url}失败'
+
+
+# @pysnooper.snoop(watch_explode=('url','headers','data'))
+def aigc_get_pic(url, headers, data):
+    res = requests.post(
+        url,
+        headers=headers,
+        json=data
+    )
+    if res.status_code == 200:
+        back = res.json()
+        status = back['status']
+        if not status:
+            result = res.json().get("result", [])
+            if result:
+                image = result[0]['image']
+                if 'http:' not in image and 'https://' not in image:
+                    image = urllib.parse.urljoin(url, image)
+                    print(image)
+                return 0, image
+    else:
+        return 1, f'请求{url}失败'
+
+
 default_icon = '<svg t="1708691376697" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4274" width="50" height="50"><path d="M512 127.0272c-133.4144 0-192.4864 72.1792-192.4864 192.4864V656.384h384.9856V319.5136c-0.0128-120.3072-78.72-192.4864-192.4992-192.4864z" fill="#A67C52" p-id="4275"></path><path d="M560.128 487.9488h-96.256l-24.0512 96.2432v312.8064h144.3584V584.192z" fill="#DBB59A" p-id="4276"></path><path d="M223.2576 704.4992c-45.2352 45.2352-48.128 192.4864-48.128 192.4864H512L415.7568 608.256s-169.8944 73.6256-192.4992 96.2432z m577.4848 0C778.112 681.8688 608.256 608.256 608.256 608.256L512 896.9984h336.8576s-2.88-147.264-48.1152-192.4992z" fill="#48A0DC" p-id="4277"></path><path d="M584.1792 584.192L512 896.9984h24.064l72.1792-168.4352 120.3072-24.064-144.3712-120.3072z m-288.7296 120.3072l120.3072 24.064 72.1792 168.4352H512L439.8208 584.192l-144.3712 120.3072z" fill="#FFFFFF" p-id="4278"></path><path d="M578.2144 270.976c-18.8288 41.6384-83.7888 72.6016-162.4576 72.6016h-47.7824c1.0496 47.1424 5.44 83.7248 23.7312 120.3072 24.064 48.128 73.1648 96.2432 120.3072 96.2432S608.256 512 632.32 463.8848c21.4272-42.8416 23.7696-85.696 24.0256-145.5232-1.4208-27.0464-52.48-47.3856-78.1312-47.3856z" fill="#F6CBAD" p-id="4279"></path><path d="M723.6864 283.8912c-21.0176-75.904-107.8016-132.8-211.6864-132.8s-190.6688 56.896-211.6864 132.8c-16.0512 8.8064-28.928 21.504-28.928 35.6224v48.128c0 26.5728 45.6064 48.128 72.1792 48.128v-96.2432c0-66.4448 75.4048-120.3072 168.4352-120.3072s168.4352 53.8624 168.4352 120.3072v48.128c0 51.5712-32.448 95.552-78.0288 112.6656-6.4384-9.8816-17.5872-16.4224-30.2464-16.4224h-48.128c-19.9296 0-36.096 16.1664-36.096 36.096 0 19.9296 16.1664 36.096 36.096 36.096H572.16c3.52 0 6.912-0.512 10.1248-1.4464 70.9888-9.3312 128.0512-62.8608 142.6432-132.0576 15.4752-8.768 27.6992-21.1712 27.6992-34.9184v-48.128c-0.0128-14.144-12.8896-26.8416-28.9408-35.648z" fill="#4D4D4D" p-id="4280"></path></svg>'
 icon_choices=[
     '<svg t="1682394317506" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2833" width="50" height="50"><path d="M431.207059 2.199998C335.414129 13.19899 257.420186 72.593947 219.024215 163.78688l-6.199996 14.797989-19.997985 5.799996C104.233299 210.582846 38.840347 279.776795 15.041364 372.369727c-6.999995 27.39698-8.999993 71.393948-4.199997 99.990927 7.399995 44.996967 26.597981 88.592935 53.795961 121.989911l9.198993 11.399991-5.199996 19.597986c-6.799995 26.597981-8.598994 74.593945-3.799997 103.190924 14.799989 87.392936 75.193945 163.58688 155.587886 196.383857 46.395966 18.998986 95.99193 24.797982 142.187895 16.798987l11.599992-1.999998 18.597986 17.598987c30.396978 28.596979 66.593951 48.395965 108.789921 59.994956 25.998981 6.999995 83.193939 8.999993 111.391918 3.599997 53.194961-9.799993 98.391928-33.797975 137.1889-72.794946 27.996979-28.196979 51.194963-64.393953 59.794956-93.591932 2.199998-6.999995 3.599997-8.599994 8.798993-9.799993 12.798991-2.598998 42.595969-13.39799 56.194959-20.196985 35.996974-17.998987 72.793947-49.195964 94.792931-80.593941 19.797985-28.197979 36.196973-65.993952 44.395967-102.990924 1.799999-7.799994 2.799998-24.997982 2.799998-48.995965 0-33.997975-0.6-38.796972-5.799996-58.995956-9.998993-38.795972-25.997981-71.993947-48.395964-100.190927l-10.198993-12.799991 4.399997-17.597987c26.79698-102.790925-16.798988-217.181841-105.391923-276.576797-30.996977-20.598985-58.194957-31.997977-95.59193-40.196971-22.397984-4.999996-70.993948-5.799996-91.991932-1.799998-12.399991 2.399998-12.99999 2.399998-15.799989-1.599999-4.598997-7.199995-34.795975-31.596977-52.794961-42.995969C548.196973 9.598993 486.603019-4.199997 431.207059 2.199998z m45.395967 67.793951c25.197982 2.399998 40.39697 6.399995 61.394955 16.198988 16.797988 7.799994 41.995969 23.397983 41.995969 25.997981 0 0.799999-45.595967 27.79798-101.390926 59.794956-55.995959 32.196976-104.591923 60.794955-108.19092 63.394954-14.799989 10.998992-14.399989 8.399994-14.59999 97.591928-0.2 43.995968-0.999999 110.389919-1.599998 147.387892l-1.199 67.393951-42.596968-24.397982-42.595969-24.397982 0.599999-134.988902c0.799999-154.386887 0.2-147.987892 19.597986-187.383862 29.797978-60.395956 86.792936-100.191927 151.987889-106.591922 8.199994-0.799999 15.398989-1.599999 15.998988-1.599999 0.6-0.2 9.798993 0.6 20.597985 1.599999z m268.977803 82.992939c73.393946 15.399989 132.189903 74.193946 147.387892 147.987892 3.599997 16.998988 4.599997 62.394954 1.599999 67.79495-1.199999 2.399998-22.797983-9.399993-108.590921-59.394957-105.391923-61.394955-107.191921-62.394954-117.989913-62.394954-10.799992 0-13.19999 1.399999-137.989899 73.593946l-126.989907 73.393946-0.599-49.395963c-0.2-27.19798 0.2-49.995963 1-50.795963 3.799997-3.599997 209.182847-121.189911 223.581836-127.989906 35.796974-16.797988 77.992943-21.397984 118.589913-12.798991z m-537.955606 362.369735c3.199998 4.599997 37.596972 25.398981 130.389904 78.993942 69.393949 39.796971 125.988908 72.993947 125.988908 73.593946 0 0.6-5.599996 4.199997-12.598991 8.199994-6.799995 3.799997-25.997981 14.797989-42.596968 24.397982l-30.196978 17.597987-107.790921-62.194954c-59.194957-34.196975-114.589916-67.393951-122.78991-73.793946-29.397978-22.597983-56.395959-63.793953-66.194952-101.190926-6.199995-24.197982-7.199995-60.794955-2.199998-84.992938 7.599994-36.996973 23.397983-66.994951 49.195964-93.792931 17.398987-17.997987 33.197976-29.396978 55.195959-40.195971l16.997988-8.199994 0.999999 127.589907 0.999999 127.589906 4.599997 6.398996zM750.379825 367.169731c56.394959 32.596976 108.389921 62.994954 115.589916 67.593951 43.396968 28.597979 73.593946 75.793944 81.99294 127.989906 3.599997 21.597984 1.599999 61.994955-3.999997 80.992941-8.998993 31.397977-24.996982 58.995957-47.594966 82.593939-17.598987 18.397987-48.195965 38.995971-65.794951 44.395967l-4.599997 1.399999v-124.189909c0-138.188899 0.4-133.389902-13.59899-143.387895-4.399997-2.999998-62.393954-37.196973-128.988906-75.593944-66.594951-38.596972-121.189911-70.393948-121.189911-70.993948-0.2-0.799999 83.592939-49.795964 85.192938-49.995964 0.4 0 46.595966 26.597981 102.991924 59.194957z m-181.385867 50.195963l54.99596 31.596977v127.989906l-55.19596 31.596977-55.194959 31.797977-39.196971-22.598983c-21.797984-12.398991-46.795966-26.99698-55.994959-32.196977l-16.398988-9.799993 0.399999-63.393953 0.6-63.394954 53.99496-31.396977c29.797978-17.198987 54.79596-31.397977 55.59596-31.397977 0.799999-0.2 26.197981 13.99999 56.394958 31.197977z m147.587892 85.592938l41.39697 23.797982v127.389907c0 139.787898-0.4 146.187893-11.999991 178.384869-11.597992 31.796977-36.595973 65.394952-64.593953 86.592937-6.799995 5.199996-21.397984 13.79899-32.396976 18.997986-51.995962 24.997982-109.59092 25.597981-162.586881 1.799999-12.598991-5.799996-40.39697-23.397983-40.396971-25.797982 0-0.6 46.996966-28.196979 104.191924-61.194955 57.394958-32.996976 107.190921-62.794954 110.789919-66.193951 3.799997-3.799997 7.399995-9.999993 8.799993-15.399989 1.599999-6.398995 2.199998-50.994963 2.199999-151.386889 0-78.392943 0.799999-141.987896 1.599999-141.587896 0.799999 0.2 20.197985 11.398992 42.995968 24.597982zM622.590919 732.139464c-3.799997 3.599997-205.38285 119.189913-221.781838 126.989907-26.597981 12.798991-47.995965 17.397987-79.792941 17.397987-19.798985 0-30.197978-0.999999-43.596968-4.199997-68.59395-16.997988-120.589912-66.193952-140.587897-133.787902-5.599996-18.798986-8.599994-57.395958-5.999996-75.193945l1.399999-9.199993 50.395963 29.197979c174.185872 100.391926 165.185879 95.59193 176.185871 95.591929 9.598993-0.2 16.597988-3.799997 137.1879-73.393946l126.989907-73.393946 0.599999 49.395964c0.2 26.99798-0.2 49.795964-0.999999 50.595963z" p-id="2834"></path></svg>',
@@ -167,6 +220,33 @@ aihub接口类型
     test_api_resonse = {
         # "text":"这里是文本响应体",
         "echart": json.dumps(options_demo)
+        # "echart":open('myapp/utils/echart/radar.json').read()
+    }
+
+    expand_columns1 = {
+        "knowledge": {
+            'volume_mount': StringField(
+                label= _('挂载'),
+                default='kubeflow-user-workspace(pvc):/mnt/',
+                description= _('构建镜像时添加的挂载'),
+                widget=BS3TextFieldWidget(),
+                validators=[]
+            ),
+            'resource_memory': StringField(
+                label= _('内存'),
+                default='8G',
+                description= _('限制的内存大小'),
+                widget=BS3TextFieldWidget(),
+                validators=[]
+            ),
+            'resource_cpu': StringField(
+                label= _('cpu'),
+                default='4',
+                description= _('限制的cpu大小'),
+                widget=BS3TextFieldWidget(),
+                validators=[]
+            )
+        }
     }
 
     add_fieldsets = [
@@ -207,7 +287,7 @@ aihub接口类型
             description= _('svg格式图标，图标宽高设置为50*50，<a target="_blank" href="https://www.iconfont.cn/">iconfont</a>'),
             widget=BS3TextFieldWidget(),
             # choices=[[str(x),Markup(icon_choices[x])] for x in range(len(icon_choices))],
-            validators=[DataRequired()]
+            validators=[DataRequired(),Regexp("^<svg.*")]
         ),
         "owner": StringField(
             label= _('责任人'),
@@ -465,9 +545,9 @@ AI:
 '''.strip()
 
 
-        # item.icon = item.icon.replace('width="200"','width="50"').replace('height="200"','height="50"')
-        item.icon = re.sub(r'width="\d+(\.\d+)?(px)?"', f'width="50px"', item.icon)
-        item.icon = re.sub(r'height="\d+(\.\d+)?(px)?"', f'height="50px"', item.icon)
+        item.icon = item.icon.replace('width="200"','width="50"').replace('height="200"','height="50"')
+        # item.icon = re.sub(r'width="\d+(\.\d+)?(px)?"', f'width="50px"', item.icon)
+        # item.icon = re.sub(r'height="\d+(\.\d+)?(px)?"', f'height="50px"', item.icon)
         if '{{query}}' not in item.prompt:
             item.prompt = item.prompt+"\n{{query}}\n"
 
@@ -535,6 +615,18 @@ AI:
             raise e
 
         return redirect(request.referrer)
+
+
+    @expose('/clear/<session_id>', methods=['DELETE', 'GET'])
+    def clear_session(self, session_id=None):
+        cache.set('chat_' + session_id,[])  # 所有需要的上下文
+        return jsonify({
+            "status": 0,
+            "message": 'success',
+            "result": {
+                "session_id":session_id
+            }
+        })
 
     @expose('/chat/<chat_name>', methods=['POST', 'GET'])
     # @pysnooper.snoop()
@@ -645,87 +737,54 @@ AI:
             print(e)
 
         if chat.service_type.lower() == 'openai' or chat.service_type.lower() == 'chatgpt4' or chat.service_type.lower() == 'chatgpt3.5':
-            if stream:
-                if chatlog:
-                    chatlog.answer_status = 'push chatgpt'
-                    db.session.commit()
-                res = self.chatgpt(
+            model = json.loads(chat.service_config).get('llm_data', {}).get("model", '')
+            if 'dall' in model:
+                res = self.chatgpt_dall_e(
                     chat=chat,
-                    session_id=session_id,
                     search_text=search_text,
-                    enable_history=enable_history,
-                    history=history,
-                    chatlog_id=chatlog.id,
-                    stream=True
-                )
-                if chatlog:
-                    chatlog.answer_status = '成功'
-                    db.session.commit()
-                return res
-
-            else:
-                if chatlog:
-                    chatlog.answer_status = 'push chatgpt'
-                    db.session.commit()
-
-                return_status, text = self.chatgpt(
-                    chat=chat,
-                    session_id=session_id,
-                    search_text=search_text,
-                    enable_history=enable_history,
-                    history=history,
-                    chatlog_id=chatlog.id,
                     stream=False
                 )
-                return_message = __('失败') if return_status else __("成功")
-                answer_status = return_message
-                return_result = [
-                    {
-                        "text": text
-                    }
-                ]
-
-
-        if chat.service_type.lower() == 'openai' or chat.service_type.lower() == 'chatgpt4' or chat.service_type.lower() == 'chatgpt3.5':
-            if stream:
-                if chatlog:
-                    chatlog.answer_status = 'push chatgpt'
-                    db.session.commit()
-                res = self.chatgpt(
-                    chat=chat,
-                    session_id=session_id,
-                    search_text=search_text,
-                    enable_history=enable_history,
-                    history=history,
-                    chatlog_id=chatlog.id,
-                    stream=True
-                )
-                if chatlog:
-                    chatlog.answer_status = __('成功')
-                    db.session.commit()
                 return res
-
             else:
-                if chatlog:
-                    chatlog.answer_status = 'push chatgpt'
-                    db.session.commit()
+                if stream:
+                    if chatlog:
+                        chatlog.answer_status = 'push chatgpt'
+                        db.session.commit()
+                    res = self.chatgpt(
+                        chat=chat,
+                        session_id=session_id,
+                        search_text=search_text,
+                        enable_history=enable_history,
+                        history=history,
+                        chatlog_id=chatlog.id,
+                        stream=True
+                    )
+                    if chatlog:
+                        chatlog.answer_status = '成功'
+                        db.session.commit()
+                    return res
 
-                return_status, text = self.chatgpt(
-                    chat=chat,
-                    session_id=session_id,
-                    search_text=search_text,
-                    enable_history=enable_history,
-                    history=history,
-                    chatlog_id=chatlog.id,
-                    stream=False
-                )
-                return_message = __('失败') if return_status else __("成功")
-                answer_status = return_message
-                return_result = [
-                    {
-                        "text": text
-                    }
-                ]
+                else:
+                    if chatlog:
+                        chatlog.answer_status = 'push chatgpt'
+                        db.session.commit()
+
+                    return_status, text = self.chatgpt(
+                        chat=chat,
+                        session_id=session_id,
+                        search_text=search_text,
+                        enable_history=enable_history,
+                        history=history,
+                        chatlog_id=chatlog.id,
+                        stream=False
+                    )
+                    return_message = __('失败') if return_status else __("成功")
+                    answer_status = return_message
+                    return_result = [
+                        {
+                            "text": text
+                        }
+                    ]
 
         # 仅返回召回列表
         if __('召回列表') in chat.service_type.lower():
@@ -766,9 +825,100 @@ AI:
                 ]
 
         if chat.service_type.lower() == 'aihub':
+            config = json.loads(chat.service_config)
+            req_num = int(config.get("req_num",1))
+            input_type = config.get('input', '')
+            output_type = config.get("output", '')
+            url = config.get('url', '')
+
             return_status, return_res = self.aigc4(chat=chat, search_text=search_text)
             if not return_status:
                 return return_res
+
+        if chat.service_type.lower() == '图文音':
+
+            # @pysnooper.snoop()
+            def run(search_text,search_audio,search_image,search_video):
+                return_result = [{},{}]
+                # 如果没有文字，只有语音，那先asr出来
+                if not search_text and search_audio:
+                    return_status, asr_answer = self.asr(chat=chat, search_audio=search_audio)
+
+                    if return_status:
+                        return return_status,'asr出错：'+asr_answer,[]
+                    return_result[0]['asr_answer']=asr_answer
+                    search_text = asr_answer
+
+                if search_text:
+
+                    # 如果没有图片，但是文本第一个字是画，那就直接画画
+                    if (search_text[0]=='画' or '帮我画' in search_text or '给我画' in search_text or '帮忙画' in search_text or '为我画' in search_text) and not search_image:
+                        return_status, aigc_answer_image = self.aigc(chat=chat, search_text=search_text)
+                        return_message = 'aigc fail' if return_status else "aigc success"
+                        return_result[0]['image'] = aigc_answer_image
+                        return_result[0]['text'] = __('按照您的要求"') + search_text+__('"，绘制的图片')
+
+                        return return_status,return_message,return_result
+
+                    else:
+                        # 有图片先解析出来图片内容
+                        if search_image:
+                            return_status, image_describe = self.image_to_text(chat=chat, search_image=search_image)
+                            if return_status:
+                                return return_status, 'image_to_text error：' + image_describe, []
+
+                            search_text = f'这里有一幅画，画的内容是：{image_describe}\n，{search_text}'
+
+                        if chatlog:
+                            chatlog.answer_status = 'push chatgpt'
+                            db.session.commit()
+
+                        return_status, gpt_answer = self.chatgpt(
+                            chat=chat,
+                            session_id=session_id,
+                            search_text=search_text,
+                            enable_history=enable_history,
+                            history=history,
+                            chatlog_id=chatlog.id if chatlog else None,
+                            stream=False
+                        )
+                        return_message = 'gpt fail' if return_status else "gpt success"
+                        return_result[0]['text'] = gpt_answer
+
+                        if return_status:
+                            return return_status, return_message + gpt_answer, []
+
+                    # 如果输入是音频，输出中包含文字，那就把文字转为音频
+                    answer_text = ''
+                    if len(return_result)>0:
+                        answer_text = return_result[0].get("text",'')
+                    if answer_text and enable_tts:
+                        tts_status, tts_answer_audio = self.tts(chat=chat, search_text=answer_text)
+                        tts_message = 'tts fail' if tts_status else  "tts success"
+                        if tts_status:
+                            return_result[0]['text'] = answer_text
+                            return_result[1]['text'] = tts_message
+
+                        else:
+                            return_result[0]['text'] = answer_text
+                            return_result[0]['audio'] = tts_answer_audio
+
+                    return return_status,return_message,return_result
+
+
+            return_status,return_message,return_result = run(
+                search_text=search_text,
+                search_audio=search_audio,
+                search_image=search_image,
+                search_video=search_video
+            )
+            # 如果返回结果不对，那就直接把报错信息，返回到前端
+            if return_status:
+                return_result = [
+                    {
+                        "text":return_message
+                    }
+                ]
 
         # 添加数据库记录
         if chatlog:
@@ -1146,6 +1296,14 @@ AI:
             ]
         })
 
+
+    # 调用chatgpt接口
+    @pysnooper.snoop()
+    def chatgpt_dall_e(self, chat,search_text, stream=True):
+        pass
+
+
+
     # 调用chatgpt接口
     # @pysnooper.snoop()
     def chatgpt(self, chat, session_id, search_text, enable_history,history=[], chatlog_id=None, stream=True):
@@ -1272,26 +1430,11 @@ AI:
                     db.session.commit()
                     return 1, f'请求{url}失败'
 
+
     # @pysnooper.snoop()
     def aigc4(self, chat, search_text):
-        """
-        aigc 文本转图片
-        @param chat:
-        @param search_text:
-        @return:
-        """
         try:
-            url = json.loads(chat.service_config).get("aigc_url", '')
-            if 'http:' not in url and 'https://' not in url:
-                url = urllib.parse.urljoin(request.host_url, url)
-            pic_num = json.loads(chat.service_config).get("pic_num", 4)
-            headers = json.loads(chat.service_config).get("aigc_headers", {})
-            data = {
-                "text": search_text,
-                "prompt": search_text,
-                "steps":50
-            }
-            data.update(json.loads(chat.service_config).get("aigc_data", {}))
+            pic_num=4
             # @pysnooper.snoop()
             from myapp.utils.core import pic2html
             def generate():
@@ -1329,8 +1472,6 @@ AI:
 
 # 添加api
 class Chat_View(Chat_View_Base, MyappModelRestApi):
-
-
     datamodel = SQLAInterface(Chat)
 
 # 添加api

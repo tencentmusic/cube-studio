@@ -70,6 +70,7 @@ const AppWrapper = (props: IProps) => {
   useEffect(() => {
     getAppMenu().then(res => {
       const remoteRoute = res.data
+
       const dynamicRoute = formatRoute([...remoteRoute])
       const tarRoute = [...dynamicRoute, ...routerConfigPlus]
       const tarRouteMap = getRouterMap(tarRoute)
@@ -137,6 +138,7 @@ const AppWrapper = (props: IProps) => {
   }
 
   const handleClickNav = (app: IRouterConfigPlusItem, subPath?: string) => {
+
     if (app.path === '/') {
       navigate(app.path || '/')
     } else if (app.menu_type === 'iframe' && app.path) {
@@ -146,10 +148,12 @@ const AppWrapper = (props: IProps) => {
     } else if (app.menu_type === 'in_link' && app.path) {
       window.open(app.url, 'blank')
     } else {
+
       const currentApp = sourceAppMap[subPath || '']
+
       let currentItem = subPath ? currentApp : app
 
-      while (currentItem && currentItem.children) {
+      while (currentItem && currentItem.children?.length) {
         currentItem = currentItem.children[0]
       }
 

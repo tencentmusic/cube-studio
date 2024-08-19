@@ -1,6 +1,6 @@
-import { Button, Col, Collapse, DatePicker, Form, FormInstance, Input, message, Radio, Row, Space, Steps, Tooltip } from 'antd'
+import { Button, Col, Collapse, DatePicker, Form, FormInstance, Input, message, Radio, Row, Space, Cascader, Steps, Tooltip } from 'antd'
 import { Rule, RuleObject } from 'antd/lib/form'
-import Select, { LabeledValue } from 'antd/lib/select'
+import Select from 'antd/lib/select'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import moment from "moment";
 import { MinusCircleOutlined, PlusOutlined, QuestionCircleOutlined, SyncOutlined } from '@ant-design/icons';
@@ -17,6 +17,7 @@ interface IProps {
     configGroup?: IDynamicFormGroupConfigItem[]
     formChangeRes?: IFormChangeRes
     linkageConfig?: ILinkageConfig[]
+    dataOptions?: any
     onRetryInfoChange?: (value?: string) => void
 }
 
@@ -36,6 +37,13 @@ export interface IDynamicFormGroupConfigItem {
     config: IDynamicFormConfigItem[]
 }
 
+export interface LabeledValue {
+    key?: string;
+    value: string | number;
+    label: React.ReactNode;
+    children?: LabeledValue[]
+}
+
 export interface IDynamicFormConfigItem {
     name: string
     label: string
@@ -52,7 +60,7 @@ export interface IDynamicFormConfigItem {
     data: Record<string, any>
 }
 
-export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select' | 'fileUpload'
+export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select' | 'fileUpload' | 'cascader'
 
 export function calculateId(strList: string[]): number {
     const str2Num = (str: string) => {
@@ -64,6 +72,7 @@ export function calculateId(strList: string[]): number {
 }
 
 export default function DynamicForm(props: IProps) {
+    const { dataOptions } = props;
     const { t, i18n } = useTranslation();
     const [current, setCurrent] = useState(0);
     const [currentConfig, _setCurrentConfig] = useState(props.config)
@@ -158,7 +167,7 @@ export default function DynamicForm(props: IProps) {
                 resetFieldProps(key, props.linkageConfig || [])
             }
         })
-    }, [props.configGroup, props.config])
+    }, [props.configGroup, props.config, dataOptions])
 
     const next = () => {
         setCurrent(current + 1);
@@ -385,13 +394,26 @@ export default function DynamicForm(props: IProps) {
         // const rules = [
         //     { required: config.required, message: `${t('请选择')}${config.label}` },
         // ]
-        const options: LabeledValue[] = config.options || []
+        const options = config.options || []
         return <Form.Item
             key={`dynamicForm_${config.name}`}
             label={config.label}
             name={config.name}
             rules={config.rules}
             initialValue={config.defaultValue}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">{t('详情')}</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
             {...itemProps}
         >
             <Radio.Group options={options} />
@@ -403,6 +425,19 @@ export default function DynamicForm(props: IProps) {
             label={config.label}
             name={config.name}
             rules={[{ required: true, message: t('请选择时间') }]}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">{t('详情')}</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
             {...itemProps}
         >
             <DatePicker style={{ width: '100%' }} locale={locale} showTime={!!config.data.showTime} disabledDate={(current) => {
@@ -416,6 +451,19 @@ export default function DynamicForm(props: IProps) {
             label={config.label}
             name={config.name}
             rules={[{ required: true, message: t('请选择时间范围') }]}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">{t('详情')}</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
             {...itemProps}
         >
             <DatePicker style={{ width: '100%' }} locale={locale} showTime={!!config.data.showTime} disabledDate={(current) => {
@@ -423,7 +471,35 @@ export default function DynamicForm(props: IProps) {
             }} />
         </Form.Item>
     }
+    // 多级选择器
+    const renderCascader = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
+        const options = config.options || []
+        console.log(options)
+        return <Form.Item
+            key={`dynamicForm_${config.name}`}
+            label={config.label}
+            name={config.name}
+            rules={config.rules}
+            initialValue={config.defaultValue}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">{t('详情')}</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
+            {...itemProps}
+        >
 
+            <Cascader placeholder="select" options={options} />
+        </Form.Item>
+    }
     const dispatchRenderFormItem = (item: IDynamicFormConfigItem, itemProps: Record<string, any> = {}): JSX.Element | null => {
         switch (item.type) {
             case 'input':
@@ -433,6 +509,8 @@ export default function DynamicForm(props: IProps) {
             // return renderMatchInput(item, itemProps)
             case 'input-select':
                 return renderInputSelect(item, itemProps)
+            case 'cascader':
+                return renderCascader(item, itemProps)
             case 'textArea':
                 return renderTextArea(item, itemProps)
             case 'select':

@@ -136,7 +136,7 @@ axios.interceptors.response.use(
             const { data } = error.response;
 
             let errMsg = data
-            errMsg = `${data ? data.msg || data.message : error.response.status}`;
+            errMsg = `${data ? data.msg || data.message || data.error : error.response.status}`;
 
             if (data && Object.prototype.toString.call(data.msg || data.message) === '[object Object]') {
                 errMsg = JSON.stringify(data.msg || data.message)

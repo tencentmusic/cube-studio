@@ -316,7 +316,7 @@ class MyappModelRestApi(ModelRestApi):
     ops_link = [
         # {
         #     "text": "git",
-        #     "url": "https://github.com/tencentmusic/cube-studio"
+        #     "url": "https://github.com/data-infra/cube-studio"
         # }
     ]
 
@@ -1347,7 +1347,7 @@ class MyappModelRestApi(ModelRestApi):
         if isinstance(item, dict):
             return self.response_error(422, message=item.errors)
         self.pre_update(item)
-
+        import traceback
         try:
             self.datamodel.edit(item, raise_exception=True)
             if self.post_update:
@@ -1366,8 +1366,12 @@ class MyappModelRestApi(ModelRestApi):
                 **back_data,
             )
         except IntegrityError as e:
+            traceback.print_exc()  
             return self.response_error(422, message=str(e.orig))
-
+        except Exception as e:
+            print("An error occurred:", e)
+            traceback.print_exc()  # 打印完整的错误堆栈跟踪
+            return self.response_error(500, message="An unexpected error occurred.")
     @event_logger.log_this
     @expose("/<int:pk>", methods=["DELETE"])
     # @pysnooper.snoop()
@@ -1381,10 +1385,9 @@ class MyappModelRestApi(ModelRestApi):
             if not has_permission:
                 flash('no permission to delete',category='warning')
                 return self.response_error(422, message='no permission to delete')
-
-        if self.pre_delete:
-            self.pre_delete(item)
         try:
+            if self.pre_delete:
+                self.pre_delete(item)
             self.datamodel.delete(item, raise_exception=True)
             self.post_delete(item)
             back_data = {
@@ -1395,7 +1398,13 @@ class MyappModelRestApi(ModelRestApi):
             return self.response(200, **back_data)
         except IntegrityError as e:
             return self.response_error(422, message=str(e.orig))
-
+        except Exception as e:
+            back = {
+                "status": -1,
+                "message": str(e),
+                "result": {}
+            }
+            return self.response(500, **back)
     @event_logger.log_this
     @expose("/action/<string:name>/<int:pk>", methods=["GET"])
     def single_action(self, name, pk):
@@ -1860,11 +1869,18 @@ class MyappModelRestApi(ModelRestApi):
             if choices:
                 values = []
                 for choice in choices:
-                    if choice and len(choice) == 2:
+                    if choice and type(choice)==list and (len(choice) == 1 or len(choice) == 2):
+                        choice = choice if len(choice)==2 else [choice,choice]
                         values.append({
                             "id": choice[0],
                             "value": choice[1]
                         })
+                    # 多级选择
+                    if choice and type(choice)==dict:
+                        values.append(choice)
+                        ret['ui-type']='cascader'
+                        ret['type'] = 'cascader'
+
             ret['values'] = values
             if not ret.get('ui-type', ''):
                 ret['ui-type'] = 'select2' if 'SelectMultiple' in ret['type'] else 'select'

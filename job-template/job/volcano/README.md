@@ -60,7 +60,7 @@ TASK_RESOURCE_GPU=0
             "range": "",
             "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
             "placeholder": "",
-            "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+            "describe": "worker镜像，直接运行你代码的环境镜像<a href='https://github.com/data-infra/cube-studio/tree/main/images'>基础镜像</a>",
             "editable": 1
         }
     }

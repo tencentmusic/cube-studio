@@ -94,11 +94,12 @@ class MyBS3TextAreaFieldWidget(widgets.TextArea):
 
 
 class MyBS3TextFieldWidget(widgets.TextInput):
-    def __init__(self, value='', readonly=0, is_date=False, is_date_range=False):
+    def __init__(self, value='', readonly=0, is_date=False, is_date_range=False,tips=None):
         self.value = value
         self.readonly = readonly
         self.is_date = is_date
         self.is_date_range = is_date_range
+        self.tips = tips
         return super(MyBS3TextFieldWidget, self).__init__()
 
     def __call__(self, field, **kwargs):
@@ -249,7 +250,6 @@ class MySelect2ManyWidget(widgets.Select):
 
 
 from wtforms.fields.core import SelectField
-
 
 class MySelectMultipleField(SelectField):
     """

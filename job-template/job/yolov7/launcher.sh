@@ -29,4 +29,14 @@ python train.py --weights $weights --cfg /yolov7/yolov7.yaml --data /yolov7/data
 
 rm -rf $save_model_path
 
-cp /yolov7/runs/train/exp2/weights/best.pt $save_model_path
+sleep 5
+
+if [ -f "/yolov7/runs/train/exp/weights/best.pt" ];then
+  cp /yolov7/runs/train/exp/weights/best.pt $save_model_path
+fi
+if [ -f "/yolov7/runs/train/exp1/weights/best.pt" ];then
+  cp /yolov7/runs/train/exp1/weights/best.pt $save_model_path
+fi
+if [ -f "/yolov7/runs/train/exp2/weights/best.pt" ];then
+  cp /yolov7/runs/train/exp2/weights/best.pt $save_model_path
+fi

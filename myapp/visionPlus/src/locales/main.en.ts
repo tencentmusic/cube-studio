@@ -212,7 +212,9 @@ const translation = {
   "版本": "version",
   "项目设置": "setting",
   "智能推荐下游节点":"Intelligent recommendation of downstream nodes",
-  "请先选择推荐节点":"Please select the recommended node first."
+  "请先选择推荐节点":"Please select the recommended node first.",
+  "编辑":"edit",
+  "确认":"confirm"
 }
 
 export default translation

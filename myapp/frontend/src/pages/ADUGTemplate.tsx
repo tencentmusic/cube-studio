@@ -4,7 +4,7 @@ import { Content } from 'antd/lib/layout/layout';
 import TitleHeader from '../components/TitleHeader/TitleHeader';
 import TableBox from '../components/TableBox/TableBox';
 import moment from "moment";
-import { CopyOutlined, DownOutlined, ExclamationCircleOutlined, ExportOutlined, PlusOutlined, QuestionCircleOutlined, RollbackOutlined, UploadOutlined } from '@ant-design/icons'
+import { InfoCircleOutlined, CopyOutlined, DownOutlined, ExclamationCircleOutlined, ExportOutlined, PlusOutlined, QuestionCircleOutlined, RollbackOutlined, UploadOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getParam, getTableScroll } from '../util';
 import ModalForm from '../components/ModalForm/ModalForm';
@@ -194,7 +194,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 required: item.required,
                 defaultValue: item.default === '' ? undefined : item.default,
                 multiple: item['ui-type'] && item['ui-type'] === 'select2',
-                options: (item.values || []).map((item: any) => ({ label: item.value, value: item.id })),
+                options: (item.values || []).map((item: any) => ({ label: item.value, value: item.id, children: item.children })),
                 data: { ...item }
             }
             return res
@@ -248,8 +248,11 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 }]), [])
 
             const listColumns = list_columns.map(column => {
+                const columnTitle = label_columns[column] || column;
+                const [before, after] = columnTitle.split(":");
+
                 return {
-                    title: label_columns[column] || column,
+                    title: after?<Tooltip placement="top" title={after}>{before}<InfoCircleOutlined /></Tooltip>:before,
                     dataIndex: column,
                     key: column,
                     sorter: order_columns.includes(column) ? (a: any, b: any) => a[column] - b[column] : undefined,

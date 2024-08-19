@@ -1,6 +1,7 @@
 """Utility functions used across Myapp"""
 from datetime import date, datetime, time, timedelta
 import decimal
+import pandas, io
 from email.mime.application import MIMEApplication
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -31,7 +32,6 @@ from flask_babel import lazy_gettext as _
 from flask_caching import Cache
 import markdown as md
 import numpy
-import pandas as pd
 import parsedatetime
 from jinja2 import Environment, BaseLoader, DebugUndefined
 
@@ -331,7 +331,7 @@ def json_iso_dttm_ser(obj, pessimistic: Optional[bool] = False):
     val = base_json_conv(obj)
     if val is not None:
         return val
-    if isinstance(obj, (datetime, date, time, pd.Timestamp)):
+    if isinstance(obj, (datetime, date, time, pandas.Timestamp)):
         obj = obj.isoformat()
     else:
         if pessimistic:
@@ -355,7 +355,7 @@ def json_int_dttm_ser(obj):
     val = base_json_conv(obj)
     if val is not None:
         return val
-    if isinstance(obj, (datetime, pd.Timestamp)):
+    if isinstance(obj, (datetime, pandas.Timestamp)):
         obj = datetime_to_epoch(obj)
     elif isinstance(obj, date):
         obj = (obj - EPOCH.date()).total_seconds() * 1000
@@ -500,10 +500,12 @@ def job_template_args_definition():
 {{
     "group1":{{               # {_('参数分组，仅做web显示使用')}
        "--attr1":{{           # {_('参数名')}
-        "type":"str",        # str,text,list,json
+        "type":"str",         # str,text,json,int,float,bool,list
+        "item_type": "str",   # {_('在type为text，item_type可为python，java，json，sql')}
         "label":"{_('参数1')}",      # {_('中文名')}
         "require":1,         # {_('是否必须')}
         "choice":[],         # {_('设定输入的可选值，可选值')}
+        "range":"",          # {_('int和float型时设置最小最大值,"min,max"')}
         "default":"",        # {_('默认值')}
         "placeholder":"",    # {_('输入提示内容')}
         "describe":"{_('这里是这个参数的描述和备注')}",
@@ -583,14 +585,6 @@ default_args = {
     "describe": "",
     "editable": 1  # 是否可修改
 }
-
-
-# 渲染字符串模板变量
-def template_command(command):
-    rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(command)
-    des_str = rtemplate.render(rtx=g.user.username)
-    return des_str
-
 
 # @pysnooper.snoop()
 def validate_job_args(job_template):
@@ -704,15 +698,10 @@ def validate_task_args(task_args, job_args):  # 两个都是字典
 
         # 检验list的每个元素
         if job_attr['type'] == 'list':
-            if job_attr['item_type'] == 'dict':
-                validate_attr = []
-                for sub_task_attr in task_attr:
-                    validate_sub_attr = {}
-                    for sub_attr_name in sub_task_attr:
-                        validate_sub_attr[sub_attr_name] = check_attr(sub_task_attr[sub_attr_name],job_attr['sub_args'][sub_attr_name])
-                    validate_attr.append(validate_sub_attr)
-            else:
-                validate_attr = [to_value(sub_task_attr, job_attr['item_type']) for sub_task_attr in task_attr]
+            # 使用逗号分隔的数组
+            validate_attr = task_attr.strip(',').split(',')
+            validate_attr = [x.strip() for x in validate_attr if x.strip()]
+            validate_attr = ','.join(validate_attr)
 
         return validate_attr
 
@@ -1342,8 +1331,9 @@ def get_stacktrace():
     if current_app.config.get("SHOW_STACKTRACE"):
         return traceback.format_exc()
 
-
-def pic2html(image_arr,max_num=4):
+import pysnooper
+# @pysnooper.snoop()
+def pic2html(output_arr,max_num=4,output_type="image"):
     # 要定格写，不然markdown不识别
     html = '''
 <table> 
@@ -1352,45 +1342,58 @@ def pic2html(image_arr,max_num=4):
 </tbody>
 </table>
     '''
-    if len(image_arr)==1:
-        one_img_html = f'''
+    if output_type == "audio":
+        audio_html = ''
+        for i in range(len(output_arr)):
+            one_audio_html = f'''
 <tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>'%(image_arr[0],image_arr[0])}
+ {'<td> <audio controls><source src="%s" type="audio/mpeg"></audio> </td>' % (output_arr[i],)}
+</tr> 
+            '''
+            audio_html+=one_audio_html
+        html = html % audio_html
+        return html
+
+    if output_type=="image":
+        if len(output_arr)==1:
+            one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>'%(output_arr[0],output_arr[0])}
 </tr> 
         '''
-        html = html%one_img_html
-    if len(image_arr)==2:
-        one_img_html = f'''
+            html = html%one_img_html
+        if len(output_arr)==2:
+            one_img_html = f'''
 <tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[0], output_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[1], output_arr[1])}
 </tr> 
         '''
-        html = html % one_img_html
-    if len(image_arr)==3 and max_num<5:
-        one_img_html = f'''
+            html = html % one_img_html
+        if len(output_arr)==3 and max_num<5:
+            one_img_html = f'''
 <tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[0], output_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[1], output_arr[1])}
 </tr> 
 <tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[2], image_arr[2])}
-</tr> 
-        '''
-        html = html % one_img_html
-    if len(image_arr)==4 and max_num<5:
-        one_img_html = f'''
-<tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
-</tr> 
-<tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[2], image_arr[2])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[3], image_arr[3])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[2], output_arr[2])}
 </tr> 
         '''
-        html = html % one_img_html
-    return html
+            html = html % one_img_html
+        if len(output_arr)==4 and max_num<5:
+            one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[0], output_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[1], output_arr[1])}
+</tr> 
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[2], output_arr[2])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[3], output_arr[3])}
+</tr> 
+        '''
+            html = html % one_img_html
+        return html
 
 import pysnooper
 
@@ -1703,7 +1706,7 @@ def fix_task_position(pipeline, tasks, expand_tasks):
             dag_json[task_name]['total_down_num'] = get_down_node_num(task_name)
 
     root_nodes = sorted(root_nodes, key=lambda task_name: dag_json[task_name]['total_down_num'], reverse=True)  # 按子孙数量排序
-    print(root_nodes)
+    # print(root_nodes)
     for i in range(len(root_nodes)):
         dag_json[root_nodes[i]]['index'] = i
 
@@ -1853,7 +1856,6 @@ def split_url(url):
 
 # @pysnooper.snoop()
 def get_all_resource(cluster='all',namespace='all',exclude_pod=[]):
-    import pandas
     from myapp.utils.py.py_k8s import K8s
     from myapp import conf
     if cluster=='all':
@@ -1875,7 +1877,7 @@ def get_all_resource(cluster='all',namespace='all',exclude_pod=[]):
             pods = k8s_client.get_pods(namespace=namespace)
             for pod in pods:
                 # 集群，资源组，空间，项目组，用户，resource，值
-                user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('rtx-user','admin'))))
+                user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('run-username','admin'))))
                 project = pod['annotations'].get('project', 'public')
                 all_resource.append([cluser_name,pod['node_selector'].get('org','public'),namespace,project,user,pod['name'],pod['labels'],'cpu',float(pod['cpu'])])
                 all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], 'memory',float(pod['memory'])])
@@ -2118,3 +2120,122 @@ def test_database_connection(url):
         return True
     except OperationalError:
         return False
+
+import zipfile
+def read_zip_csv(zip_path,csv_path):
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            # 读取ZIP文件中的csv文件
+            with zip_ref.open(csv_path) as csv_file:
+                string_data = io.StringIO(csv_file.read().decode('utf-8'))
+                df = pandas.read_csv(string_data).head(10)
+                return df
+    except Exception as e:
+        print(e)
+    return None
+
+# @pysnooper.snoop()
+def table_html(csv_path,features=None,zip_file=None):  # zip_file 用来表示文件是不是相对于某个压缩文件来说的
+
+    # 使用Styler进行样式定制
+    style =  [
+        {'selector': 'thead th', 'props': [('background-color', '#4CAF50'), ('color', 'white')]},
+        {'selector': 'tbody tr:nth-child(even)', 'props': [('background-color', '#f2f2f2')]},
+        {'selector': 'tbody tr:hover', 'props': [('background-color', '#ddd')]}
+    ]
+    properties = {
+        'border': '1px solid black',
+        'padding': '10px',
+        'text-align': 'left'
+    }
+
+
+    if zip_file and os.path.exists(zip_file):
+        # 打开ZIP文件
+        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            # 读取ZIP文件中的csv文件
+            with zip_ref.open(csv_path) as csv_file:
+                string_data = io.StringIO(csv_file.read().decode('utf-8'))
+                df = pandas.read_csv(string_data).head(10)
+
+    else:
+        df = pandas.read_csv(csv_path).head(10)
+
+    if not features:
+        return df.style.set_table_styles(style).set_properties(**properties).to_html(bold_headers=True)
+        # return df.to_html()
+    import base64
+
+    def image_to_html(path):
+
+        if "http://" in path or "https://" in path:
+            img_tag = f'<img src="{path}" width="100"/>'
+            return img_tag
+
+        if not zip_file:
+            real_path = os.path.join(os.path.dirname(csv_path),path)
+            if os.path.exists(real_path):
+                name, extension = os.path.splitext(real_path)
+                extension=extension.strip('.')
+                with open(real_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+                img_tag = f'<img src="data:image/{extension};base64,{encoded_string}" width="100"/>'
+                return img_tag
+        else:
+            # 打开ZIP文件
+            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                real_path = os.path.join(os.path.dirname(csv_path),path)
+                with zip_ref.open(name=real_path,mode='r') as image_file:
+                    name, extension = os.path.splitext(real_path)
+                    extension = extension.strip('.')
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+                    img_tag = f'<img src="data:image/{extension};base64,{encoded_string}" width="100"/>'
+                    return img_tag
+
+        return path
+
+    @pysnooper.snoop()
+    def audio_to_html(path):
+
+        if "http://" in path or "https://" in path:
+            img_tag = f'<audio controls><source src="{path}" type="audio/mpeg"></audio>'
+            return img_tag
+
+        if not zip_file:
+            real_path = os.path.join(os.path.dirname(csv_path), path)
+            if os.path.exists(real_path):
+                name, extension = os.path.splitext(real_path)
+                extension = extension.strip('.')
+                with open(real_path, "rb") as audio_file:
+                    encoded_string = base64.b64encode(audio_file.read()).decode()
+                audio_tag = f'<audio controls><source src="data:audio/{extension};base64,{encoded_string}" type="audio/mpeg"></audio>'
+                return audio_tag
+        else:
+            # 打开ZIP文件
+            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                real_path = os.path.join(os.path.dirname(csv_path), path)
+                with zip_ref.open(name=real_path,mode='r') as image_file:
+                    name, extension = os.path.splitext(real_path)
+                    extension = extension.strip('.')
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+                    audio_tag = f'<audio controls><source src="data:audio/{extension};base64,{encoded_string}" type="audio/mpeg"></audio>'
+                    return audio_tag
+        return path
+
+    def video_to_html(url):
+        return f'<video src="{url}" width="320" height="240" controls>video</video>'
+
+    columns = df.columns
+    for col in columns:
+        _type = features.get(col,{}).get('_type','Value')
+        if _type.lower()=='image':
+            df[col] = df[col].apply(image_to_html)
+        if _type.lower()=='audio':
+            df[col] = df[col].apply(audio_to_html)
+        if _type.lower()=='video':
+            df[col] = df[col].apply(video_to_html)
+
+    if style:
+        return df.style.set_table_styles(style).set_properties(**properties).to_html(bold_headers=True)
+    else:
+        return df.to_html(escape=False,bold_rows=False,border=1)

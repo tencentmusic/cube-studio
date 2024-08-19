@@ -231,7 +231,7 @@
     "image_describe": "计算列的相关性计算",
     "job_template_name": "calculate-correlation",
     "job_template_describe": "特征向量间的相关性计算(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
@@ -249,7 +249,7 @@
     "image_describe": "特征组合",
     "job_template_name": "feature-combine",
     "job_template_describe": "特征组合，用于衍生特征(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
@@ -267,7 +267,7 @@
     "image_describe": "特征重要性",
     "job_template_name": "feature-importance",
     "job_template_describe": "特征重要性，通过随机森林、逻辑回归、xgboost等模型计算特征重要性，可计算特征的iv值、互信息值、方差等(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
@@ -285,7 +285,7 @@
     "image_describe": "hadamard乘积",
     "job_template_name": "hadamard-multiply",
     "job_template_describe": "hadamard乘积(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
@@ -496,12 +496,12 @@
   },
   "datax": {
     "project_name": "数据导入导出",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/datax:20230601",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/datax:20240501",
     "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/datax",
     "image_describe": "datax异构数据源同步",
     "job_template_name": "datax",
     "job_template_describe": "datax异构数据源同步",
-    "job_template_command": "",
+    "job_template_command": "bash start.sh",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
@@ -655,10 +655,10 @@
     "image_describe": "数据集导入",
     "job_template_name": "dataset",
     "job_template_describe": "数据集导入",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
-    "job_template_env": "",
+    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com\nHF_HUB_ENABLE_HF_TRANSFER=1",
     "job_template_expand": {
       "index": 3,
       "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dataset"
@@ -738,10 +738,10 @@
     "image_describe": "模型导入",
     "job_template_name": "model-download",
     "job_template_describe": "模型导入",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
-    "job_template_env": "",
+    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com\nexport HF_HUB_ENABLE_HF_TRANSFER=1",
     "job_template_expand": {
       "index": 4,
       "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_download"
@@ -870,7 +870,7 @@
     "image_describe": "有序分布式任务",
     "job_template_name": "volcanojob",
     "job_template_describe": "有序分布式任务",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_expand": {
@@ -937,12 +937,12 @@
   },
   "ray": {
     "project_name": "数据处理工具",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/ray:gpu-20230801",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/ray:gpu-20240101",
     "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray",
     "image_describe": "ray分布式任务",
     "job_template_name": "ray",
     "job_template_describe": "python多机分布式任务",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_expand": {
@@ -951,56 +951,64 @@
     },
     "job_template_args": {
       "分布式任务": {
-        "-n": {
+        "images": {
           "type": "str",
-          "item_type": "",
-          "label": "分布式任务worker的数量",
-          "require": 1,
-          "choice": [
-          ],
-          "range": "$min,$max",
-          "default": "3",
+          "item_type": "str",
+          "label": "启动镜像",
+          "require": 0,
+          "choice": [],
+          "range": "",
+          "default": "ccr.ccs.tencentyun.com/cube-studio/ray:gpu-20240101",
           "placeholder": "",
-          "describe": "分布式任务worker的数量",
+          "describe": "启动镜像，基础镜像需为该镜像，可自行添加封装自己的环境",
           "editable": 1
         },
-        "-w": {
+        "--workdir": {
           "type": "str",
           "item_type": "",
           "label": "工作目录",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "/mnt/{{creator}}/pipeline/example/ray/",
           "placeholder": "",
           "describe": "分布式任务worker的数量",
           "editable": 1
         },
-        "-i": {
+        "--init": {
           "type": "str",
           "item_type": "str",
           "label": "每个worker的初始化脚本文件地址，用来安装环境",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "每个worker的初始化脚本文件地址，用来安装环境",
           "describe": "每个worker的初始化脚本文件地址，用来安装环境",
           "editable": 1
         },
-        "-f": {
+        "--command": {
           "type": "str",
           "item_type": "str",
           "label": "python启动命令，例如 python3 /mnt/xx/xx.py",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "python demo.py",
           "placeholder": "",
           "describe": "python启动命令，例如 python3 /mnt/xx/xx.py",
+          "editable": 1
+        },
+        "--num_worker": {
+          "type": "str",
+          "item_type": "",
+          "label": "分布式任务worker的数量",
+          "require": 1,
+          "choice": [],
+          "range": "$min,$max",
+          "default": "3",
+          "placeholder": "",
+          "describe": "分布式任务worker的数量",
           "editable": 1
         }
       }
@@ -1008,12 +1016,12 @@
   },
   "ray-sklearn": {
     "project_name": "机器学习框架",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/ray-sklearn:20230801",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/ray-sklearn:20240101",
     "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray_sklearn",
     "image_describe": "sklearn基于ray的分布式",
     "job_template_name": "ray-sklearn",
     "job_template_describe": "sklearn基于ray的分布式",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true",
@@ -1110,7 +1118,7 @@
           "choice": [
           ],
           "range": "",
-          "default": "/mnt/{{creator}}/pipeline/example/sklearn/model.pkl",
+          "default": "/mnt/{{creator}}/pipeline/example/sklearn/model.joblib",
           "placeholder": "",
           "describe": "模型文件保存文件名，必填",
           "editable": 1
@@ -1145,7 +1153,7 @@
         }
       },
       "公共配置": {
-        "--worker_num": {
+        "--num_worker": {
           "type": "str",
           "item_type": "str",
           "label": "ray worker数量",
@@ -1452,7 +1460,7 @@
     "image_describe": "tf 分布式训练",
     "job_template_name": "tfjob",
     "job_template_describe": "tf 分布式训练",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
@@ -1520,7 +1528,7 @@
     "image_describe": "pytorch分布式训练",
     "job_template_name": "pytorchjob",
     "job_template_describe": "pytorch 分布式训练",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
@@ -1772,7 +1780,7 @@
     "image_describe": "注册模型",
     "job_template_name": "model-register",
     "job_template_describe": "注册模型",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
@@ -1860,7 +1868,7 @@
           "label": "模型框架",
           "require": 1,
           "choice": [
-            "lr",
+            "sklearn",
             "xgb",
             "tf",
             "pytorch",
@@ -1880,11 +1888,13 @@
           "label": "推理框架",
           "require": 1,
           "choice": [
-            "sklearn",
+            "serving",
+            "ml-server",
             "tfserving",
             "torch-server",
             "onnxruntime",
             "triton-server",
+            "llm-server",
             "aihub"
           ],
           "range": "",
@@ -1903,7 +1913,7 @@
     "image_describe": "分布式离线推理",
     "job_template_name": "model-offline-predict",
     "job_template_describe": "分布式离线推理",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher-rabbitmq.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
@@ -1970,12 +1980,12 @@
   },
   "deploy-service": {
     "project_name": "模型服务化",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/deploy-service:20211001",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/deploy-service:20240601",
     "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deploy-service",
     "image_describe": "模型部署推理服务",
     "job_template_name": "deploy-service",
     "job_template_describe": "模型部署推理服务",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "",
@@ -1990,8 +2000,7 @@
           "item_type": "str",
           "label": "项目组名称",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "public",
           "placeholder": "",
@@ -2003,8 +2012,7 @@
           "item_type": "str",
           "label": "中文描述描述",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "demo推理服务",
           "placeholder": "",
@@ -2016,8 +2024,7 @@
           "item_type": "str",
           "label": "模型名",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2029,8 +2036,7 @@
           "item_type": "str",
           "label": "模型版本号",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "v2022.10.01.1",
           "placeholder": "",
@@ -2042,8 +2048,7 @@
           "item_type": "str",
           "label": "模型地址",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2059,10 +2064,12 @@
           "require": 1,
           "choice": [
             "serving",
+            "ml-server",
             "tfserving",
             "torch-server",
             "onnxruntime",
-            "triton-server"
+            "triton-server",
+            "llm-server"
           ],
           "range": "",
           "default": "service",
@@ -2075,8 +2082,7 @@
           "item_type": "str",
           "label": "推理服务镜像",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2088,8 +2094,7 @@
           "item_type": "str",
           "label": "推理容器工作目录",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2101,25 +2106,11 @@
           "item_type": "str",
           "label": "推理容器启动命令",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
           "describe": "推理容器启动命令",
-          "editable": 1
-        },
-        "--args": {
-          "type": "str",
-          "item_type": "str",
-          "label": "推理容器启动参数",
-          "require": 0,
-          "choice": [
-          ],
-          "range": "",
-          "default": "",
-          "placeholder": "",
-          "describe": "推理容器启动参数",
           "editable": 1
         },
         "--env": {
@@ -2127,8 +2118,7 @@
           "item_type": "str",
           "label": "推理容器环境变量",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2140,8 +2130,7 @@
           "item_type": "str",
           "label": "部署域名",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2153,8 +2142,7 @@
           "item_type": "str",
           "label": "推理容器暴露端口",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "80",
           "placeholder": "",
@@ -2166,8 +2154,7 @@
           "item_type": "str",
           "label": "pod副本数",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "1",
           "placeholder": "",
@@ -2179,8 +2166,7 @@
           "item_type": "str",
           "label": "每个pod占用内存",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "2G",
           "placeholder": "",
@@ -2192,8 +2178,7 @@
           "item_type": "str",
           "label": "每个pod占用cpu",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "2",
           "placeholder": "",
@@ -2205,8 +2190,7 @@
           "item_type": "str",
           "label": "每个pod占用gpu",
           "require": 1,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "0",
           "placeholder": "",
@@ -2218,12 +2202,23 @@
           "item_type": "str",
           "label": "挂载",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "kubeflow-user-workspace(pvc):/mnt",
           "placeholder": "",
           "describe": "容器的挂载，支持pvc/hostpath/configmap三种形式,格式示例:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人rtx子目录",
+          "editable": 1
+        },
+        "--inference_config": {
+          "type": "text",
+          "item_type": "str",
+          "label": "配置文件",
+          "require": 0,
+          "choice": [],
+          "range": "",
+          "default": "",
+          "placeholder": "",
+          "describe": "会配置文件的形式挂载到容器/config/目录下。<font color='#FF0000'>留空时将被自动重置</font>，格式：<br>---文件名<br>多行文件内容<br>---文件名<br>多行文件内容",
           "editable": 1
         },
         "--metrics": {
@@ -2231,8 +2226,7 @@
           "item_type": "str",
           "label": "指标采集接口",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2244,8 +2238,7 @@
           "item_type": "str",
           "label": "健康检查",
           "require": 0,
-          "choice": [
-          ],
+          "choice": [],
           "range": "",
           "default": "",
           "placeholder": "",
@@ -2422,90 +2415,90 @@
     },
     "job_template_args": {
       "训练参数": {
-          "--train": {
-              "type": "str",
-              "item_type": "str",
-              "label": "训练数据集",
-              "require": 1,
-              "choice": [],
-              "range": "",
-              "default": "/mnt/{{creator}}/coco_data_sample/train.txt",
-              "placeholder": "",
-              "describe": "训练数据集，txt配置地址",
-              "editable": 1
-          },
-          "--val": {
-              "type": "str",
-              "item_type": "str",
-              "label": "验证数据集",
-              "require": 1,
-              "choice": [],
-              "range": "",
-              "default": "/mnt/{{creator}}/coco_data_sample/valid.txt",
-              "placeholder": "",
-              "describe": "验证数据集，txt配置地址",
-              "editable": 1
-          },
-          "--classes": {
-              "type": "text",
-              "item_type": "str",
-              "label": "目标分类",
-              "require": 1,
-              "choice": [],
-              "range": "",
-              "default": "person,bicycle,car,motorcycle,airplane,bus,train,truck,boat,trafficlight,firehydrant,stopsign,parkingmeter,bench,bird,cat,dog,horse,sheep,cow,elephant,bear,zebra,giraffe,backpack,umbrella,handbag,tie,suitcase,frisbee,skis,snowboard,sportsball,kite,baseballbat,baseballglove,skateboard,surfboard,tennisracket,bottle,wineglass,cup,fork,knife,spoon,bowl,banana,apple,sandwich,orange,broccoli,carrot,hotdog,pizza,donut,cake,chair,couch,pottedplant,bed,diningtable,toilet,tv,laptop,mouse,remote,keyboard,cellphone,microwave,oven,toaster,sink,refrigerator,book,clock,vase,scissors,teddybear,hairdrier,toothbrush",
-              "placeholder": "",
-              "describe": "目标分类,逗号分割",
-              "editable": 1
-          },
-          "--batch_size": {
-              "type": "str",
-              "item_type": "str",
-              "label": "batch-size",
-              "require": 1,
-              "choice": [],
-              "range": "",
-              "default": "1",
-              "placeholder": "",
-              "describe": "batch-size",
-              "editable": 1
-          },
-          "--epoch": {
-              "type": "str",
-              "item_type": "str",
-              "label": "epoch",
-              "require": 1,
-              "choice": [],
-              "range": "",
-              "default": "1",
-              "placeholder": "",
-              "describe": "epoch",
-              "editable": 1
-          },
-          "--weights": {
-              "type": "str",
-              "item_type": "str",
-              "label": "权重文件",
-              "require": 1,
-              "choice": [],
-              "range": "",
-              "default": "/yolov7/weights/yolov7_training.pt",
-              "placeholder": "",
-              "describe": "权重文件",
-              "editable": 1
-          },
-          "--save_model_path": {
-              "type": "str",
-              "item_type": "str",
-              "label": "模型保存地址",
-              "require": 1,
-              "choice": [],
-              "range": "",
-              "default": "/mnt/{{creator}}/coco_data_sample/yolov7_best.pt",
-              "placeholder": "",
-              "describe": "模型保存地址",
-              "editable": 1
-          }
+        "--train": {
+          "type": "str",
+          "item_type": "str",
+          "label": "训练数据集",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "/mnt/{{creator}}/coco_data_sample/train.txt",
+          "placeholder": "",
+          "describe": "训练数据集，txt配置地址",
+          "editable": 1
+        },
+        "--val": {
+          "type": "str",
+          "item_type": "str",
+          "label": "验证数据集",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "/mnt/{{creator}}/coco_data_sample/valid.txt",
+          "placeholder": "",
+          "describe": "验证数据集，txt配置地址",
+          "editable": 1
+        },
+        "--classes": {
+          "type": "text",
+          "item_type": "str",
+          "label": "目标分类",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "person,bicycle,car,motorcycle,airplane,bus,train,truck,boat,trafficlight,firehydrant,stopsign,parkingmeter,bench,bird,cat,dog,horse,sheep,cow,elephant,bear,zebra,giraffe,backpack,umbrella,handbag,tie,suitcase,frisbee,skis,snowboard,sportsball,kite,baseballbat,baseballglove,skateboard,surfboard,tennisracket,bottle,wineglass,cup,fork,knife,spoon,bowl,banana,apple,sandwich,orange,broccoli,carrot,hotdog,pizza,donut,cake,chair,couch,pottedplant,bed,diningtable,toilet,tv,laptop,mouse,remote,keyboard,cellphone,microwave,oven,toaster,sink,refrigerator,book,clock,vase,scissors,teddybear,hairdrier,toothbrush",
+          "placeholder": "",
+          "describe": "目标分类,逗号分割",
+          "editable": 1
+        },
+        "--batch_size": {
+          "type": "str",
+          "item_type": "str",
+          "label": "batch-size",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "1",
+          "placeholder": "",
+          "describe": "batch-size",
+          "editable": 1
+        },
+        "--epoch": {
+          "type": "str",
+          "item_type": "str",
+          "label": "epoch",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "1",
+          "placeholder": "",
+          "describe": "epoch",
+          "editable": 1
+        },
+        "--weights": {
+          "type": "str",
+          "item_type": "str",
+          "label": "权重文件",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "/yolov7/weights/yolov7_training.pt",
+          "placeholder": "",
+          "describe": "权重文件",
+          "editable": 1
+        },
+        "--save_model_path": {
+          "type": "str",
+          "item_type": "str",
+          "label": "模型保存地址",
+          "require": 1,
+          "choice": [],
+          "range": "",
+          "default": "/mnt/{{creator}}/coco_data_sample/yolov7_best.pt",
+          "placeholder": "",
+          "describe": "模型保存地址",
+          "editable": 1
+        }
       }
     }
   },

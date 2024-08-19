@@ -383,8 +383,12 @@ def deal_event(event, workflow_info, namespace):
 
             if 'run-rtx' in back_object['labels']:
                 back_object['username'] = back_object['labels']['run-rtx']
-            elif 'pipeline-rtx' in back_object:
+            elif 'pipeline-rtx' in back_object['labels']:
                 back_object['username'] = back_object['labels']['pipeline-rtx']
+            elif 'run-username' in back_object['labels']:
+                back_object['username'] = back_object['labels']['run-username']
+            elif 'pipeline-username' in back_object['labels']:
+                back_object['username'] = back_object['labels']['pipeline-username']
             workflow = save_workflow(back_object, dbsession)
             if workflow:
                 has_push = check_has_push(back_object, dbsession)

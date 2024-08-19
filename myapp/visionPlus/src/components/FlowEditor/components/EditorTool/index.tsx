@@ -33,136 +33,12 @@ const EditorTool: React.FC = () => {
   const selectedElements = useAppSelector(selectSelected);
   const { t, i18n } = useTranslation();
 
-  const commandItem: ICommandBarItemProps[] = [
-    {
-      // buttonStyles: style.commonButton,
-      // iconOnly: true,
-      key: 'expand',
-      iconProps: {
-        iconName: 'Library',
-        styles: style.commonIcon,
-      },
-      text: t('展开/关闭菜单'),
-      onClick: e => {
-        e?.preventDefault();
-        dispatch(toggle());
-      },
-    },
-    {
-      // buttonStyles: style.commonButton,
-      // iconOnly: true,
-      key: 'save',
-      iconProps: {
-        iconName: 'save',
-        styles: style.commonIcon,
-      },
-      text: t('保存'),
-      onClick: async e => {
-        e?.preventDefault();
-        // dispatch(await saveTaskList());
-        dispatch(savePipeline());
-      },
-    },
-    // {
-    //   // buttonStyles: style.commonButton,
-    //   // iconOnly: true,
-    //   key: 'example',
-    //   iconProps: {
-    //     iconName: 'FastForward',
-    //     styles: style.commonIcon,
-    //   },
-    //   text: '调度实例',
-    //   onClick: () => {
-    //     if (pipelineId) {
-    //       window.open(
-    //         `${window.location.origin}/workflow_modelview/list/?_flt_2_labels=%22pipeline-id%22%3A+%22${pipelineId}%22`,
-    //       );
-    //     }
-    //   },
-    // },
-    // {
-    //   // buttonStyles: style.commonButton,
-    //   // iconOnly: true,
-    //   key: 'log',
-    //   iconProps: {
-    //     iconName: 'ComplianceAudit',
-    //     styles: style.commonIcon,
-    //   },
-    //   text: '日志',
-    //   onClick: () => {
-    //     if (pipeline?.id) {
-    //       window.open(`${window.location.origin}/pipeline_modelview/web/log/${pipelineId}`);
-    //     }
-    //   },
-    // },
-    // {
-    //   // buttonStyles: style.commonButton,
-    //   // iconOnly: true,
-    //   key: 'docker',
-    //   iconProps: {
-    //     iconName: 'WebAppBuilderFragment',
-    //     styles: style.commonIcon,
-    //   },
-    //   text: '容器',
-    //   onClick: () => {
-    //     if (pipeline?.name) {
-    //       window.open(`${window.location.origin}/pipeline_modelview/web/pod/${pipelineId}`);
-    //     }
-    //   },
-    // },
-    // {
-    //   // buttonStyles: style.commonButton,
-    //   // iconOnly: true,
-    //   key: 'timer',
-    //   iconProps: {
-    //     iconName: 'TimeEntry',
-    //     styles: style.commonIcon,
-    //   },
-    //   text: '定时记录',
-    //   onClick: () => {
-    //     if (pipeline?.name) {
-    //       window.open(`${window.location.origin}/runhistory_modelview/list/?_flt_0_pipeline=${pipelineId}`);
-    //     }
-    //   },
-    // },
-    {
-      // buttonStyles: style.commonButton,
-      // iconOnly: true,
-      key: 'delete',
-      iconProps: {
-        iconName: 'Delete',
-        styles: style.commonIcon,
-      },
-      text: t('删除节点'),
-      onClick: () => {
-        if (isNode(selectedElements[0])) {
-          const taskId = +selectedElements[0]?.id;
-          dispatch(savePipeline());
-          // api
-          //   .task_modelview_del(taskId)
-          //   .then(() => {
-          //     setTimeout(() => {
-          //       dispatch(savePipeline());
-          //     }, 2000);
-          //   })
-          //   .catch(err => {
-          //     if (err.response) {
-          //       dispatch(updateErrMsg({ msg: err.response.data.message }));
-          //     }
-          //   });
-        }
-        dispatch(updateEditing(true));
-        dispatch(updateElements(removeElements(selectedElements, elements)));
-      },
-    },
-  ];
-
   const [commandList, setCommandList] = useState<any[]>([])
 
   useEffect(() => {
     if (info) {
       const config = (info?.pipeline_jump_button || []).map((item: any) => {
-        const target = (<Button type="text" key={Math.random().toString(36).substring(2)} onClick={() => {
+        const target = (<Button className={style.commandButtonStyle} type="text" key={Math.random().toString(36).substring(2)} onClick={() => {
           window.open(`${window.location.origin}${item.action_url}`);
         }}>
           <div className={style.btnIcon}><span dangerouslySetInnerHTML={{ __html: item.icon_svg }}></span><span>{item.name}</span></div>
@@ -187,14 +63,14 @@ const EditorTool: React.FC = () => {
     <Item shrink styles={style.editorToolStyle}>
       {/* <CommandBar id="authoring-page-toolbar" styles={style.commandBarStyle} items={commandList}></CommandBar> */}
       <div className={style.commandBarStyleCustom}>
-        <Button type="text" icon={<AppstoreOutlined />} onClick={() => {
+        <Button className={style.commandButtonStyle} type="text" icon={<AppstoreOutlined className={style.commonIcon}/>} onClick={() => {
           dispatch(toggle());
         }}>{t('展开/关闭菜单')}</Button>
-        <Button type="text" icon={<SaveOutlined />} onClick={() => {
+        <Button className={style.commandButtonStyle} type="text" icon={<SaveOutlined className={style.commonIcon}/>} onClick={() => {
           message.success(t('保存成功'))
           dispatch(savePipeline());
         }}>{t('保存')}</Button>
-        <Button type="text" icon={<DeleteOutlined />} onClick={() => {
+        <Button className={style.commandButtonStyle} type="text" icon={<DeleteOutlined className={style.commonIcon}/>} onClick={() => {
           if (isNode(selectedElements[0])) {
             dispatch(savePipeline());
           }

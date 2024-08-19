@@ -68,7 +68,7 @@ class InferenceService_ModelView_base():
     add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path',
                    'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa', 'priority',
                    'canary', 'shadow', 'host', 'inference_config', 'working_dir', 'command', 'volume_mount', 'env',
-                   'ports', 'metrics', 'health', 'expand', 'sidecar']
+                   'ports', 'metrics', 'health', 'sidecar']
     show_columns = ['service_type', 'project', 'name', 'label', 'model_name', 'model_version', 'images', 'model_path',
                     'images', 'volume_mount', 'sidecar', 'working_dir', 'command', 'env', 'resource_memory',
                     'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'inference_host_url',
@@ -116,10 +116,20 @@ class InferenceService_ModelView_base():
         images += item
     service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（todo）','llm-server（todo）',]
     spec_label_columns = {
-        # "host": __("域名：测试环境test.xx，调试环境 debug.xx"),
+        "inference_host_url": _("域名:需要泛域名支持，测试(test.xx)/调试(debug.xx)"),
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
     host_rule=",<br>".join([cluster+"cluster:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
+    model_path_describe = _('''
+serving：自定义镜像的推理服务，模型地址随意
+ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件
+tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/
+torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型
+onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx
+triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
+llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推理加速和openai流式接口
+'''.strip())
+
     add_form_extra_fields={
         "project": QuerySelectField(
             _('项目组'),
@@ -217,22 +227,14 @@ class InferenceService_ModelView_base():
         'volume_mount': StringField(
             _('挂载'),
             default='',
-            description= _('外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人username子目录'),
+            description= _('外部挂载，格式:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),
             widget=BS3TextFieldWidget()
         ),
         'model_path': StringField(
             _('模型地址'),
             default='',
-            description= _('''
-serving：自定义镜像的推理服务，模型地址随意<br>
-ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件<br>
-tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/<br>
-torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型<br>
-onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx<br>
-triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
-llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推理加速和openai流式接口
-'''.strip()),
-            widget=BS3TextFieldWidget(),
+            description= '模型文件的容器地址或下载地址，格式参考详情',
+            widget=MyBS3TextFieldWidget(tips=model_path_describe),
             validators=[]
         ),
         'images': SelectField(

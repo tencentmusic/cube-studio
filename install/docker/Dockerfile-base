@@ -34,9 +34,9 @@ ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
 
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /etc/profile && \
-	echo "alias la='ls -A'" >> /etc/profile && \
-	echo "alias vi='vim'" >> /etc/profile
+RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+	echo "alias la='ls -A'" >> ~/.bashrc && \
+	echo "alias vi='vim'" >> ~/.bashrc
 
 COPY install/docker/requirements.txt /requirements.txt
 

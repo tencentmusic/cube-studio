@@ -314,8 +314,7 @@ class MyappFormRestApi(BaseView):
 
         return jsonify({})
 
-
-
+    @event_logger.log_this
     @expose("/action/<string:name>/<int:pk>", methods=["GET"])
     def single_action(self, name, pk):
         """
@@ -339,6 +338,7 @@ class MyappFormRestApi(BaseView):
             }
             return self.response(200, **back)
 
+    @event_logger.log_this
     @expose("/multi_action/<string:name>", methods=["POST"])
     def multi_action(self, name):
         """

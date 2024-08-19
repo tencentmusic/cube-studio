@@ -333,19 +333,19 @@ const Model: React.FC<ModelProps> = props => {
             const mapCurrent = Object.keys(current).map(key => {
               const args = current[key];
               const { choice } = args;
-              const options = choice.map((option: string) => {
-                if(typeof option === 'string') {
-                  return {
-                    key: option,
-                    text: option,
-                  };
-                }else{
-                  return {
-                    key: option['key'],
-                    text: option['text'],
-                  };
-                }
-              });
+              type Option = {
+                key: string;
+                text: string;
+              };
+              let options: Option[] = [];
+              if(Array.isArray(choice)) {
+                // 如果 a 是字符串数组
+                  options= choice.map(option => ({ key: option,text: option }));
+
+              } else if (typeof choice === 'object' && choice !== null) {
+                // 如果 a 是字典
+                  options=Object.keys(choice).map(key => ({ key:key, text: choice[key] }));
+              }
               console.log(options)
               const keyArgs = taskArgs && taskArgs[key];
               const keyValue = args.type === 'json' ? JSON.stringify(keyArgs, undefined, 4) : keyArgs;

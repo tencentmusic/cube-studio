@@ -212,7 +212,7 @@ def init():
             try:
                 repository = Repository()
                 repository.name = 'hubsecret'
-                repository.server='registry.docker-cn.com'
+                repository.server='ccr.ccs.tencentyun.com/xx/'
                 repository.user = 'yourname'
                 repository.password = 'yourpassword'
                 repository.hubsecret = 'hubsecret'
@@ -776,55 +776,55 @@ def init():
     except Exception as e:
         print(e)
             # traceback.print_exc()
+    if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh':
+        try:
+            SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE', '')
+            if SQLALCHEMY_DATABASE_URI:
+                import sqlalchemy.engine.url as url
+                uri = url.make_url(SQLALCHEMY_DATABASE_URI)
+                database = uri.database
+                from myapp.models.model_metadata import Metadata_table
+                tables = db.session.query(Metadata_table).all()
+                if len(tables)==0:
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='project', owner='admin',describe='项目分组，模板分组，模型分组'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='project_user', owner='admin',describe='项目组用户'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='idex_query', owner='admin',describe='sqllab的查询记录'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='metadata_table', owner='admin',describe='离线库表管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='metadata_metric', owner='admin',describe='指标管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='dimension', owner='admin',describe='维表管理'))
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='dataset',owner='admin',describe='数据集市场'))
 
-    # if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh':
-    try:
-        SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE', '')
-        if SQLALCHEMY_DATABASE_URI:
-            import sqlalchemy.engine.url as url
-            uri = url.make_url(SQLALCHEMY_DATABASE_URI)
-            database = uri.database
-            from myapp.models.model_metadata import Metadata_table
-            tables = db.session.query(Metadata_table).all()
-            if len(tables)==0:
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='project', owner='admin',describe='项目分组，模板分组，模型分组'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='project_user', owner='admin',describe='项目组用户'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='idex_query', owner='admin',describe='sqllab的查询记录'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='metadata_table', owner='admin',describe='离线库表管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='metadata_metric', owner='admin',describe='指标管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='dimension', owner='admin',describe='维表管理'))
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='dataset',owner='admin',describe='数据集市场'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='repository', owner='admin',describe='docker仓库管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='docker', owner='admin', describe='在线docker镜像构建'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='images', owner='admin',describe='镜像管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='notebook', owner='admin', describe='notebook在线开发'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='etl_pipeline', owner='admin',describe='数据ETL的任务流管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='etl_task', owner='admin',describe='数据ETL的任务管理'))
 
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='repository', owner='admin',describe='docker仓库管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='docker', owner='admin', describe='在线docker镜像构建'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='images', owner='admin',describe='镜像管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='notebook', owner='admin', describe='notebook在线开发'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='etl_pipeline', owner='admin',describe='数据ETL的任务流管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='etl_task', owner='admin',describe='数据ETL的任务管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='job_template', owner='admin',describe='任务模板'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='pipeline', owner='admin',describe='ml任务流'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='task', owner='admin', describe='ml任务管理'))
 
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='job_template', owner='admin',describe='任务模板'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='pipeline', owner='admin',describe='ml任务流'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='task', owner='admin', describe='ml任务管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='run', owner='admin',describe='定时调度记录'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='workflow', owner='admin',describe='任务流实例'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='nni', owner='admin', describe='nni超参搜索'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='service', owner='admin',describe='内部服务管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='model', owner='admin', describe='模型管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='inferenceservice', owner='admin', describe='推理服务'))
 
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='run', owner='admin',describe='定时调度记录'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='workflow', owner='admin',describe='任务流实例'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='nni', owner='admin', describe='nni超参搜索'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='service', owner='admin',describe='内部服务管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='model', owner='admin', describe='模型管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='inferenceservice', owner='admin', describe='推理服务'))
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='aihub',owner='admin',describe='模型应用市场，打通自动化标注，一键开发，一键微调，一建部署'))
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='chat',owner='admin',describe='私有知识库，配置领域知识文档或qa文档，智能机器人问答'))
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='chat_log',owner='admin',describe='所有的聊天日志记录'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='favorite', owner='admin',describe='收藏的数据记录'))
 
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='aihub',owner='admin',describe='模型应用市场，打通自动化标注，一键开发，一键微调，一建部署'))
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='chat',owner='admin',describe='私有知识库，配置领域知识文档或qa文档，智能机器人问答'))
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='chat_log',owner='admin',describe='所有的聊天日志记录'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='favorite', owner='admin',describe='收藏的数据记录'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='logs', owner='admin',describe='用户行为记录'))
+                    db.session.commit()
+                    print('添加离线表成功')
 
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='logs', owner='admin',describe='用户行为记录'))
-                db.session.commit()
-                print('添加离线表成功')
+        except Exception as e:
+            print(e)
+            # traceback.print_exc()
 
-    except Exception as e:
-        print(e)
-        # traceback.print_exc()
     # 添加ETL pipeline
     try:
         print('begin add etl pipeline')
@@ -862,7 +862,7 @@ def init():
                         job_type=nni.get('job_type','Job'),name=nni.get('name','test'+uuid.uuid4().hex[:4]),namespace=nni.get('namespace','automl'),
                         describe=nni.get('describe', ''),parallel_trial_count=nni.get('parallel_trial_count', 3),max_trial_count=nni.get('max_trial_count', 12),
                         objective_type=nni.get('objective_type', 'maximize'),objective_goal=nni.get('objective_goal', 0.99),objective_metric_name=nni.get('objective_metric_name', 'accuracy'),
-                        algorithm_name=nni.get('algorithm_name','Random'), parameters=json.dumps(nni.get('parameters',{}),indent=4,ensure_ascii=False),
+                        algorithm_name=nni.get('algorithm_name','Random'), parameters=nni.get('parameters','{}'),
                         job_json=json.dumps(nni.get('job_json',{}),indent=4,ensure_ascii=False),
                         job_worker_image = nni.get('job_worker_image', conf.get('NNI_IMAGES','')),
                         working_dir=nni.get('working_dir', '/mnt/admin/nni/demo/'),
@@ -908,3 +908,64 @@ def init():
     except Exception as e:
         print(e)
         # traceback.print_exc()
+
+    # 初始化镜像管理
+    try:
+        print('begin add images')
+        init_file = os.path.join(init_dir, 'init-image.json')
+        if os.path.exists(init_file):
+            images = json.load(open(init_file, mode='r'))
+            for image in images:
+                project = db.session.query(Project).filter_by(name=image['group_name']).filter_by(type='job-template').first()
+                repository = db.session.query(Repository).filter_by(name=image['repository']).first()
+                image_model = db.session.query(Images).filter_by(name=image.get('name')).first()
+                if project and not image_model:
+                    pass
+                    db.session.add(Images(
+                        project_id=project.id, created_by_fk=1,changed_by_fk=1,
+                        name=image.get('name'),
+                        describe=image.get('describe',''),
+                        gitpath=image.get('gitpath',''),
+                        repository_id=repository.id if repository else 1,
+                        dockerfile = image.get('dockerfile','')
+                    ))
+                    db.session.commit()
+                    print('添加镜像管理成功')
+    except Exception as e:
+        print(e)
+        # traceback.print_exc()
+
+    # 初始化notebook
+    try:
+        print('begin add notebook')
+        project = db.session.query(Project).filter_by(name='public').filter_by(type='org').first()
+        notebooks = db.session.query(Notebook).all()
+        if project and not notebooks:
+            pass
+            images = [image for image in [x[0] for x in conf.get('NOTEBOOK_IMAGES',[])] if 'jupyter' in image]
+            db.session.add(Notebook(
+                project_id=project.id, created_by_fk=1,changed_by_fk=1,
+                name='admin-jupyter',
+                describe='jupyter notebook',
+                images=images[0] if images else "",
+                namespace='jupyter',
+                ide_type='jupyter',
+                volume_mount='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+                node_selector='cpu=true,notebook=true',
+                image_pull_policy='Always',
+                resource_cpu='10',
+                resource_memory='10G',
+                resource_gpu='0'
+            ))
+            db.session.commit()
+            print('添加notebook成功')
+    except Exception as e:
+        print(e)
+        # traceback.print_exc()
+    # 初始化示例所需要的测试数据
+    try:
+        import subprocess
+        process = subprocess.Popen('python /home/myapp/myapp/example/pipeline/ml/init.py', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+    except Exception as e:
+        print(e)

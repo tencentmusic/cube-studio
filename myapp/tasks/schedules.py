@@ -106,6 +106,10 @@ def delete_old_crd(object_info):
                                     username = label['run-rtx']
                                 elif 'pipeline-rtx' in label:
                                     username = label['pipeline-rtx']
+                                elif 'run-username' in label:
+                                    username = label['run-username']
+                                elif 'pipeline-username' in label:
+                                    username = label['pipeline-username']
                                 if username:
                                     push_message([username]+conf.get('ADMIN_USER','').split(','),__('%s %s %s %s 创建时间 %s， 已经运行时间过久，注意修正') % (username,object_info['plural'],crd_object['name'],pipeline_id,crd_object['create_time']))
                     else:

@@ -202,9 +202,11 @@ class Myauthdbview(AuthDBView):
 
                     return redirect(self.appbuilder.get_url_for_login)
                 else:
+                    # 不自动创建，联系管理员创建
+                    # flash('未发现%s用户，联系管理员创建' % form.username.data, "warning")
+                    # return redirect(self.appbuilder.get_url_for_login)
                     # 没有用户的时候自动注册用户
-                    user = self.appbuilder.sm.auth_user_remote_org_user(username=form.username.data, org_name='',
-                                                                        password=form.password.data)
+                    user = self.appbuilder.sm.auth_user_remote_org_user(username=form.username.data, org_name='',password=form.password.data)
                     flash('发现用户%s不存在，已自动注册' % form.username.data, "warning")
             login_user(user, remember=True)
             # 添加到public项目组

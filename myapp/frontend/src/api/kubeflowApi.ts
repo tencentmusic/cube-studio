@@ -30,12 +30,23 @@ export const getADUGTemplateList = (url?: string, params?: any): AxiosResFormat<
     return axios.get(url || '', { params })
 }
 
-export const getADUGTemplateDetail = (url: string): AxiosResFormat<any> => {
+export const getData = (url?: string, params?: any): AxiosResFormat<any> => {
+    return axios.get(url || '', { params })
+}
+
+export const postData = (url?: string, params?: any): AxiosResFormat<any> => {
+    return axios.post(url || '', params)
+}
+
+export const putData = (url?: string, params?: {}): AxiosResFormat<any> => {
+    return axios.put(url || '', params)
+}
+
+export const getADUGTemplateDetail = (url: string, form_data?: any): AxiosResFormat<any> => {
+    const formData = form_data || { str_related: 1 };
     return axios.get(`${url}`, {
         params: {
-            form_data: JSON.stringify({
-                str_related: 1
-            })
+            form_data: JSON.stringify(formData)
         }
     })
 }

@@ -10,11 +10,17 @@ from myapp.views.view_team import Project_Join_Filter
 from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
 from flask_appbuilder.fieldwidgets import Select2Widget
-from myapp.forms import MyBS3TextFieldWidget
+from myapp.forms import MyBS3TextFieldWidget, MyBS3TextAreaFieldWidget
 from flask import (
     flash,
     g,
-    redirect, request
+    redirect, request,
+    flash,
+    g,
+    Markup,
+    make_response,
+    redirect,
+    request
 )
 from .base import (
     DeleteMixin,
@@ -77,11 +83,13 @@ class Training_Model_ModelView_Base():
     base_filters = [["id", Training_Model_Filter, lambda: []]]
 
     path_describe = _('''
-serving：自定义镜像的推理服务，模型地址随意<br>
-tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/<br>
-torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型<br>
-onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx<br>
+serving：自定义镜像的推理服务，模型地址随意
+ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件
+tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/
+torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型
+onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx
 triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
+llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推理加速和openai流式接口
 '''.strip())
 
     service_type_choices = [x.replace('_', '-') for x in ['serving','tfserving', 'torch-server', 'onnxruntime', 'triton-server','aihub']]
@@ -90,8 +98,9 @@ triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torc
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description=path_describe,
-            validators=[DataRequired()]
+            description='模型文件的容器地址或下载地址，格式参考详情',
+            validators=[DataRequired()],
+            widget=MyBS3TextFieldWidget(tips=Markup('<pre><code>' + path_describe + "</code></pre>"))
         ),
         "describe": StringField(
             _("描述"),

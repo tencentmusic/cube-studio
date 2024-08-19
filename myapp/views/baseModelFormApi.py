@@ -310,7 +310,7 @@ class MyappFormRestApi(ModelRestApi):
     ops_link = [
         # {
         #     "text": "git",
-        #     "url": "https://github.com/tencentmusic/cube-studio"
+        #     "url": "https://github.com/data-infra/cube-studio"
         # }
     ]
 

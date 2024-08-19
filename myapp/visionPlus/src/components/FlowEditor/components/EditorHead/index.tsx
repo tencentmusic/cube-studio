@@ -22,39 +22,6 @@ const EditorHead: React.FC = () => {
   //   console.log('info', info);
   // }, [info])
 
-  // 新建流水线
-  const handleNewPipeline = () => {
-    api
-      .pipeline_modelview_add({
-        describe: `${t('新建项目')}-${Date.now()}`,
-        name: `${userName}-pipeline-${Date.now()}`,
-        node_selector: 'cpu=true,train=true',
-        schedule_type: 'once',
-        image_pull_policy: 'Always',
-        parallelism: 1,
-        project: 7,
-      })
-      .then((res: any) => {
-        if (res?.status === 0 && res?.message === 'success') {
-          window.location.search = `?pipeline_id=${res?.result?.id}`;
-        }
-      })
-      .catch(err => {
-        if (err.response) {
-          dispatch(updateErrMsg({ msg: err.response.data.message }));
-        }
-      });
-  };
-
-  // pipeline run
-  const handleSubmit = async () => {
-    if (pipelineId) {
-      await dispatch(await saveTaskList());
-      dispatch(savePipeline());
-      window.open(`${window.location.origin}/pipeline_modelview/run_pipeline/${pipelineId}`);
-    }
-  };
-
   return (
     <Item className="editor-head">
       <Stack horizontal horizontalAlign="space-between" verticalAlign="center" styles={style.headStyle}>
@@ -78,7 +45,6 @@ const EditorHead: React.FC = () => {
                         },
                       },
                     }}
-                    onClick={handleNewPipeline}
                   >
                     {t('新建项目')}
                   </PrimaryButton>

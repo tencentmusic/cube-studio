@@ -1,6 +1,6 @@
 [
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/openjourney",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/openjourney",
     "field": "大模型",
     "scenes": "aigc",
     "frameworks": "pytorch",
@@ -12,7 +12,7 @@
     "label": "openjourney文生图",
     "describe": "Openjourney 是一个基于 Midjourney 图像的开源稳定扩散微调模型，由PromptHero提供",
     "pic": "example.png",
-    "hot": "10000014",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -38,7 +38,7 @@
     "label": "百川2-13B-Chat",
     "describe": "Baichuan 2 是百川智能推出的新一代开源大语言模型，采用 2.6 万亿 Tokens 的高质量语料训练",
     "pic": "example.png",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -68,7 +68,7 @@
     "label": "百川2-7B-Chat",
     "describe": "Baichuan 2 是百川智能推出的新一代开源大语言模型，采用 2.6 万亿 Tokens 的高质量语料训练",
     "pic": "example.png",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -86,7 +86,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/chat-embedding",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/chat-embedding",
     "field": "自然语言",
     "scenes": "聊天机器人",
     "frameworks": "pytorch",
@@ -113,7 +113,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/paddlespeech-tts",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/paddlespeech-tts",
     "field": "听觉",
     "scenes": "语音处理",
     "type": "dateset,notebook,train,inference",
@@ -128,7 +128,7 @@
     "price": "1"
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/paddlespeech-asr",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/paddlespeech-asr",
     "field": "听觉",
     "scenes": "语音处理",
     "type": "dateset,notebook,train,inference",
@@ -143,7 +143,7 @@
     "price": "1"
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/paddleocr",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/paddleocr",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -165,7 +165,7 @@
     "inference": {}
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/ddddocr",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/ddddocr",
     "field": "机器视觉",
     "scenes": "图像识别",
     "type": "dateset,notebook,train,inference",
@@ -187,7 +187,7 @@
     "inference": {}
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/paddlespeech-cls",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/paddlespeech-cls",
     "field": "听觉",
     "scenes": "语音处理",
     "type": "dateset,notebook,train,inference",
@@ -205,7 +205,7 @@
     }
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/humanseg",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/humanseg",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -220,7 +220,7 @@
     "price": "1"
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/animegan",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/animegan",
     "field": "机器视觉",
     "scenes": "图像合成",
     "type": "dateset,notebook,train,inference",
@@ -493,7 +493,7 @@
     "field": "机器视觉"
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/cv-unet-person-image-cartoon-3d-compound-models",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/cv-unet-person-image-cartoon-3d-compound-models",
     "field": "机器视觉",
     "scenes": "",
     "frameworks": "TensorFlow",
@@ -670,7 +670,7 @@
     "field": "听觉"
   },
   {
-    "doc": "https://github.com/data-infra/cube-studio/tree/master/aihub/deep-learning/cv-tinynas-object-detection-damoyolo",
+    "doc": "https://github.com/data-infra/cube-studio/tree/main/aihub/deep-learning/cv-tinynas-object-detection-damoyolo",
     "field": "机器视觉",
     "scenes": "",
     "type": "dateset,notebook,train,inference",
@@ -1400,7 +1400,7 @@
     "name": "speech-sambert-hifigan-tts-zhitian-emo-zh-cn-16k",
     "label": "语音合成-中文-多情感领域-16k-发音人Zhitian",
     "describe": "本模型是一种应用于参数TTS系统的后端声学模型及声码器模型。其中后端声学模型的SAM-BERT,将时长模型和声学模型联合进行建模。声码器在HIFI-GAN开源工作的基础上，我们针对16k, 48k采样率下的模型结构进行了调优设计，并提供了基于因果卷积的低时延流式生成和chunk流式生成机制，可与声学模型配合支持CPU、GPU等硬件条件下的实时流式合成。",
-    "hot": 17437,
+    "hot": 10000009,
     "pic": "example.jpg",
     "uuid": "speech-sambert-hifigan-tts-zhitian-emo-zh-cn-16k",
     "images": "xx",
@@ -7582,7 +7582,7 @@
     }
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7608,7 +7608,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7634,7 +7634,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7660,7 +7660,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7672,7 +7672,7 @@
     "label": "中文大模型chatglm3-6b",
     "describe": "中文大模型chatglm3-6b",
     "pic": "example.png",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -7686,7 +7686,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7712,7 +7712,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7738,7 +7738,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7764,7 +7764,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7790,7 +7790,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -7816,7 +7816,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "图像创作",
     "frameworks": "",
@@ -7828,7 +7828,7 @@
     "label": "Stable Diffusion XL (SDXL) 是一个强大的图像生成模型",
     "describe": "Stable Diffusion XL (SDXL) 是一个强大的图像生成模型",
     "pic": "example.jpg",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -7844,7 +7844,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "图像创作",
     "frameworks": "",
@@ -7856,7 +7856,7 @@
     "label": "新一代文生图模型Stable Cascade",
     "describe": "Stable Cascade是基于Wuerstchen架构包含三阶段的文生图扩散模型，相比Stable Diffusion XL，它不仅更快而且效果更好。",
     "pic": "example.jpg",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -7872,7 +7872,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "图像创作",
     "frameworks": "",
@@ -7900,7 +7900,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "图像创作",
     "frameworks": "",
@@ -7928,7 +7928,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "图像创作",
     "frameworks": "",
@@ -7940,7 +7940,7 @@
     "label": "Stable Diffusion v2-depth 是一个强大的图像生成模型",
     "describe": "Stable Diffusion v2-depth 是一个强大的图像生成模型",
     "pic": "example.jpg",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -7956,7 +7956,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "图像创作",
     "frameworks": "",
@@ -7984,7 +7984,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -8010,7 +8010,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -8036,7 +8036,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -8048,7 +8048,7 @@
     "label": "大模型llama3-8b",
     "describe": "大模型llama3-8b",
     "pic": "example.png",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -8062,7 +8062,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -8074,7 +8074,7 @@
     "label": "中文大模型chatglm4-9b",
     "describe": "中文大模型chatglm4-9b",
     "pic": "example.png",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {
@@ -8088,7 +8088,7 @@
     "images": "xx"
   },
   {
-    "doc": "https://github.com/tencentmusic/cube-studio",
+    "doc": "https://github.com/data-infra/cube-studio",
     "field": "大模型",
     "scenes": "聊天机器人",
     "frameworks": "",
@@ -8100,7 +8100,7 @@
     "label": "中文大模型qwen2-7b",
     "describe": "中文大模型qwen2-7b",
     "pic": "example.png",
-    "hot": "1",
+    "hot": "100000",
     "price": "0",
     "dataset": {},
     "notebook": {

@@ -178,6 +178,7 @@ const Setting: React.FC = () => {
             onChange={(event: FormEvent, option?: IDropdownOption) => {
               handleOnChange('priority', `${option?.text}` || '');
             }}
+            disabled
           />
           <div className={style.splitLine}></div>
           <Dropdown

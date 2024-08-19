@@ -46,17 +46,14 @@ const commandBarStyleCustom = mergeStyles({
   backgroundColor: '#fff',
 });
 
-const commonButton: IButtonStyles = {
-  root: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '2px',
-    minWidth: '40px',
-  },
-};
-const commonIcon: IIconStyles = {
-  root: { color: '#015cda', fontSize: 18 },
-};
+const commandButtonStyle = mergeStyles({
+  padding: '4px 10px !important',
+  fontSize: '15px !important',
+});
+
+const commonIcon = mergeStyles({
+    color: '#015cda !important',
+});
 
 const toggleStyle: Partial<IToggleStyles> = {
   root: {
@@ -121,10 +118,10 @@ const btnIcon = mergeStyles({
 export default {
   btnIcon,
   commandBarStyleCustom,
+  commandButtonStyle,
   editorToolStyle,
   autoSavedTips,
   commandBarStyle,
-  commonButton,
   commonIcon,
   toggleStyle,
   comboBoxStyle,

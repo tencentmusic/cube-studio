@@ -1,4 +1,4 @@
-# pip install torch -i https://mirrors.aliyun.com/pypi/simple
+# https://pytorch.org/  根据官网选择自己的系统获取部署命令
 
 import torch
 

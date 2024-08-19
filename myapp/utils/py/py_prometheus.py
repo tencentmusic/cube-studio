@@ -30,7 +30,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
 
         try:
             res = requests.get(url=self.query_range_path, params=params)
@@ -57,7 +57,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
 
         try:
             res = requests.get(url=self.query_range_path, params=params)
@@ -84,7 +84,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
 
             res = requests.get(url=self.query_range_path, params=params)
@@ -110,7 +110,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
 
             res = requests.get(url=self.query_range_path, params=params)
@@ -149,7 +149,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
 
         try:
             res = requests.get(url=self.query_range_path, params=params)
@@ -177,7 +177,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
 
             res = requests.get(url=self.query_range_path, params=params)
@@ -207,7 +207,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
 
             res = requests.get(url=self.query_range_path, params=params)
@@ -247,7 +247,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
 
         try:
             res = requests.get(url=self.query_range_path, params=params)
@@ -274,7 +274,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
 
             res = requests.get(url=self.query_range_path, params=params)
@@ -303,7 +303,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
 
             res = requests.get(url=self.query_range_path, params=params)
@@ -343,7 +343,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
 
         try:
             res = requests.get(url=self.query_range_path, params=params)
@@ -368,7 +368,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
 
             res = requests.get(url=self.query_range_path, params=params)
@@ -392,7 +392,7 @@ class Prometheus():
             'step': "1m",  # 运行小于1分钟的，将不会被采集到
             # 'timeout':"30s"
         }
-        print(params)
+        # print(params)
         try:
             res = requests.get(url=self.query_range_path, params=params)
             metrics = json.loads(res.content.decode('utf8', 'ignore'))
@@ -427,7 +427,7 @@ class Prometheus():
                 'query': metrics[metric_name],
                 'timeout': "30s"
             }
-            print(params)
+            # print(params)
             back[metric_name] = {}
 
             try:

@@ -747,7 +747,12 @@ class Workflow(Model,Crd,MyappModelBase):
         try:
             status_mode = json.loads(self.status_more)
             finish_time=status_mode.get('finishedAt',self.change_time)
-            if not finish_time: finish_time=self.change_time
+            if not finish_time:
+                if self.status.lower() in ['running', 'pending', 'suspended']:
+                    finish_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    finish_time=self.change_time
+
             start_time = status_mode.get('startedAt', '')
             # print(finish_time,start_time)
 

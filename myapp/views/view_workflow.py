@@ -4,6 +4,8 @@ import re
 import time
 
 import flask
+import pandas
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from myapp.utils import core
 from flask_babel import gettext as __
@@ -83,6 +85,10 @@ class Crd_ModelView_Base():
                         crd['username'] = labels['run-rtx']
                     elif 'pipeline-rtx' in labels:
                         crd['username'] = labels['pipeline-rtx']
+                    elif 'run-username' in labels:
+                        crd['username'] = labels['run-username']
+                    elif 'pipeline-username' in labels:
+                        crd['username'] = labels['pipeline-username']
                 except Exception as e:
                     logging.error(e)
                 crd_model = self.datamodel.obj(**crd)
@@ -329,7 +335,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         if workflow_model:
             layout_config["right_button"].append(
                 {
-                    "label": "终止",
+                    "label": __("终止"),
                     "url": f"/workflow_modelview/api/stop/{workflow_model.id}"
                 }
             )
@@ -399,7 +405,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 {
                     "name": "run_user",
                     "label": __("执行人"),
-                    "value": labels.get("run-rtx", '')
+                    "value": labels.get("run-rtx", labels.get('run-username',''))
                 },
 
                 {
@@ -609,6 +615,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         return content
 
     @expose("/web/node_detail/<cluster_name>/<namespace>/<workflow_name>/<node_name>", methods=["GET", ])
+    # @pysnooper.snoop()
     def web_node_detail(self,cluster_name,namespace,workflow_name,node_name):
         layout_config, dag_config,node_detail_config,workflow = self.get_dag(cluster_name, namespace, workflow_name,node_name)
         # print(node_detail_config)

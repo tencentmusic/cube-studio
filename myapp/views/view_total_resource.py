@@ -198,7 +198,7 @@ def pod_resource():
                         org = pod['node_selector'].get("org", 'public')
                         if org not in all_tasks_json[cluster_name][namespace]:
                             all_tasks_json[cluster_name][namespace][org] = {}
-                        if pod['status'] == 'Running' or pod['status_more'].get('phase','')=='Running':
+                        if k8s_client.exist_hold_resource(pod):
                             user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('rtx-user','admin'))))
                             if user:
                                 request_gpu = 0
@@ -256,7 +256,7 @@ def pod_resource():
                         "pod_info":f"{cluster_name}:{namespace}:{org}:{pod_name}",
                         "label":pod['label'],
                         "username":pod['username'],
-                        "node":Markup('<a target="blank" href="%s">%s</a>' % (node_grafana_url + pod["host_ip"], pod["host_ip"])),
+                        "node":Markup('<a target="blank" href="%s">%s</a>' % (node_grafana_url + pod.get("host_ip",""), pod.get("host_ip",""))),
                         "cpu":"%s/%s" % (math.ceil(int(pod.get('used_cpu', '0')) / 1000), int(pod.get('request_cpu', '0'))),
                         "memory":"%s/%s" % (int(pod.get('used_memory', '0')), int(pod.get('request_memory', '0'))),
                         "gpu":"%s" % str(round(float(pod.get('request_gpu', '0')),2)),

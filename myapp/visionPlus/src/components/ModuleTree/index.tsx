@@ -10,7 +10,7 @@ import ModuleDetail from './components/ModuleDetail';
 import ModuleItem from './components/ModuleItem';
 import SearchItem from './components/SearchItem';
 import style from './style';
-import { selectPipelineId } from '@src/models/pipeline';
+import {selectPipelineId, selectPipelineScenes} from '@src/models/pipeline';
 import { useTranslation } from 'react-i18next';
 
 const { Item } = Stack;
@@ -50,6 +50,7 @@ const ModuleTree: React.FC = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchResult, setSearchResult] = useState(new Map());
   const pipelineId = useAppSelector(selectPipelineId);
+  const pipelineScenes = useAppSelector(selectPipelineScenes);
   const { t, i18n } = useTranslation();
 
   const handleTemplateData = (res: any) => {
@@ -133,7 +134,7 @@ const ModuleTree: React.FC = () => {
     setLoading(true);
     setNodeCount(0);
     api
-      .getTemplateCommandConfig(pipelineId)
+      .getTemplateCommandConfig(pipelineId,pipelineScenes)
       .then((res: any) => {
         console.log('job_template_modelview', res);
         if (res?.status === 0 && res?.message === 'success') {

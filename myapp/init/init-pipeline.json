@@ -33,7 +33,7 @@
         "args": {
           "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
           "workdir": "/mnt/{{creator}}/",
-          "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/coco.zip && unzip -o coco.zip && cd  coco_data_sample && bash reset_file.sh"
+          "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/coco.zip --no-check-certificate && unzip -o coco.zip && cd  coco_data_sample && bash reset_file.sh"
         }
       },
       {
@@ -410,14 +410,14 @@
       },
       "dag_json": {
         "task-data-process": {},
-        "chatglm4": {
+        "chatglm4-lora": {
           "upstream": [
             "task-data-process"
           ]
         },
         "deploy-chatglm4": {
           "upstream": [
-            "chatglm4"
+            "chatglm4-lora"
           ]
         }
       },
@@ -454,7 +454,7 @@
           }
         },
         {
-          "id": "chatglm4",
+          "id": "chatglm4-lora",
           "type": "dataSet",
           "position": {
             "x": 224,
@@ -462,20 +462,20 @@
           },
           "data": {
             "info": {
-              "describe": "chatglm4 微调"
+              "describe": "chatglm4 lora微调"
             },
-            "name": "chatglm4",
+            "name": "chatglm4-lora",
             "label": "chatglm4 lora微调"
           }
         },
         {
           "source": "task-data-process",
           "arrowHeadType": "arrow",
-          "target": "chatglm4",
+          "target": "chatglm4-lora",
           "id": "logic__edge-task-null-chatglm4-null"
         },
         {
-          "source": "chatglm4",
+          "source": "chatglm4-lora",
           "arrowHeadType": "arrow",
           "target": "deploy-chatglm4",
           "id": "logic__edge-chatglm4-null-deploy-chatglm4null"
@@ -532,7 +532,7 @@
       },
       {
         "job_templete": "chatglm4",
-        "name": "chatglm4",
+        "name": "chatglm4-lora",
         "label": "chatglm4 lora微调",
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
         "resource_memory": "40G",

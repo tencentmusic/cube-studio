@@ -29,7 +29,7 @@ new_prometheus = [
     'bitnami/kube-rbac-proxy:0.14.1',  # 指标
     'carlosedp/addon-resizer:v1.8.4',  # 指标
 
-    'grafana/grafana:9.1.5',  # 监控看板
+    'grafana/grafana:9.5.20',  # 监控看板
     "ccr.ccs.tencentyun.com/cube-studio/prometheus-adapter:v0.9.1",  # peometheus指标翻译为自定义指标
 ]
 
@@ -63,7 +63,7 @@ cube_studio = [
     'ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-machinelearning',
     'ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-deeplearning',
     # 超参搜索的镜像
-    'ccr.ccs.tencentyun.com/cube-studio/nni:20230601',
+    'ccr.ccs.tencentyun.com/cube-studio/nni:20240501',
     # 内部服务镜像
     "ccr.ccs.tencentyun.com/cube-studio/phpmyadmin",
     # "ccr.ccs.tencentyun.com/cube-studio/patrikx3:latest",

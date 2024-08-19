@@ -282,7 +282,7 @@ const Setting: React.FC = () => {
             acc.push(
               (
                 <React.Fragment key={cur}>
-                  <Label>{t('参数')} {cur}</Label>
+                  <Label>{cur}</Label>
                   {mapCurrent.flat()}
                   <div className={style.splitLine}></div>
                 </React.Fragment>

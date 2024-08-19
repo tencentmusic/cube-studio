@@ -2,7 +2,7 @@ import json,io
 from PIL import Image
 import torch
 import gradio as gr
-import os
+import os,logging
 import datetime
 import pysnooper
 import requests
@@ -31,8 +31,19 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized,
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.getenv('MODELPATH','/yolov7/weights/yolov7.pt')
+device='cpu'
+
 # 加载模型
-device = select_device('cpu')
+# 这里是添加的gpu识别
+resource_gpu = os.getenv('RESOURCE_GPU', '')
+resource_gpu = resource_gpu.split('(')[0]
+resource_gpu = int(resource_gpu) if resource_gpu else 0
+if resource_gpu:
+    resource_gpu = list(range(resource_gpu))
+    resource_gpu = [str(x) for x in resource_gpu]
+    device = ','.join(resource_gpu)
+# 上面是添加的gpu识别
+device = select_device(device)
 
 # Load model
 model = attempt_load(model_path, map_location=device)  # load FP32 model
@@ -162,8 +173,53 @@ with gr.Blocks(title=label,theme=gr.themes.Default(text_size='lg')) as demo:
             #         choices = open(path).readlines()
             #         choices = [x.strip() for x in choices if x.strip()]
             #         gr.Gallery(value=choices,label='其他应用',show_label=False,allow_preview=False)
+        # with gr.Tab("接口"):
+        #     api_markdown = ''
+        #     if os.path.exists(os.path.join(current_dir, 'yolov7_api.md')):
+        #         api_markdown = open(os.path.join(current_dir, 'yolov7_api.md')).read().strip()
+        #     jiekou = gr.Markdown(value=api_markdown)
 
 demo.launch(server_name='0.0.0.0',server_port=8080)
+
+#
+# from fastapi import FastAPI, Request
+# import base64
+#
+# from PIL import Image
+# app = FastAPI()
+#
+# # define your API endpoint
+# @app.post('/v1/models/yolov7/versions/20240101/predict')
+# async def predict(request: Request):
+#     data = await request.json()
+#     image_data = data['image']
+#     # 解码图像
+#     image_bytes = base64.b64decode(image_data)
+#     image = Image.open(io.BytesIO(image_bytes))
+#     save_path = f'input/{int(time.time())}.jpg'
+#     os.makedirs('input',exist_ok=True)
+#     image.save(save_path)
+#     # 推理预测
+#     result = inference(save_path)
+#     logging.info('结果图片地址'+result)
+#     # 返回结果
+#     img = Image.open(result)
+#     # 将图片转换为字节流
+#     buf = io.BytesIO()
+#     img.save(buf, format='JPEG')
+#
+#     # 获取字节流的二进制内容
+#     byte_data = buf.getvalue()
+#     # 将二进制内容编码为base64
+#     base64_str = base64.b64encode(byte_data)
+#
+#     return {"image": base64_str.decode('utf-8')}
+#
+# app = gr.mount_gradio_app(app, demo, path=f"/gradio")
+# uvicorn.run(app, host="0.0.0.0", port=8080)
+# # uvicorn server:app --host '0.0.0.0' --port 8000 --reload
+
+
 
 
 

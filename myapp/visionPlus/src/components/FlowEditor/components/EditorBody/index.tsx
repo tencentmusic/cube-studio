@@ -18,7 +18,7 @@ import api from '@src/api';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { updateErrMsg } from '@src/models/app';
 import { selectElements, updateElements, updateSelected } from '@src/models/element';
-import { selectPipelineId, selectInfo, savePipeline, updateEditing } from '@src/models/pipeline';
+import {selectPipelineId, selectInfo, savePipeline, updateEditing, selectPipelineScenes} from '@src/models/pipeline';
 import { selectShow, toggle } from '@src/models/setting';
 import { updateLoading, selectLoading } from '@src/models/task';
 import Setting from './components/Setting';
@@ -32,6 +32,7 @@ const EditorBody: React.FC = () => {
   const dispatch = useAppDispatch();
   const elements = useAppSelector(selectElements);
   const pipelineId = useAppSelector(selectPipelineId);
+  const pipelineScenes = useAppSelector(selectPipelineScenes);
   const pipelineInfo = useAppSelector(selectInfo);
   const settingShow = useAppSelector(selectShow);
   const taskLoading = useAppSelector(selectLoading);
@@ -77,7 +78,7 @@ const EditorBody: React.FC = () => {
       return acc;
     }, defaultArgs);
 
-    if (pipelineId) {
+    if (pipelineId && pipelineScenes) {
       // dispatch(updateLoading(true));
       //  http://kubeflow.music.woa.com/job_template_modelview/api/_info
       const taskName = `${modelInfo.name.replace(/\.|[\u4e00-\u9fa5]/g, '').replace(/_|\s/g, '-') || 'task'
@@ -173,18 +174,7 @@ const EditorBody: React.FC = () => {
   const onElementsRemove = (elementsToRemove: Elements) => {
     elementsToRemove.forEach(ele => {
       if (ele?.id && isNode(ele)) {
-        api
-          .task_modelview_del(+ele.id)
-          .then(() => {
-            setTimeout(() => {
-              dispatch(savePipeline());
-            }, 2000);
-          })
-          .catch(err => {
-            if (err.response) {
-              dispatch(updateErrMsg({ msg: err.response.data.message }));
-            }
-          });
+        dispatch(savePipeline());
       }
     });
     dispatch(updateEditing(true));
@@ -222,7 +212,7 @@ const EditorBody: React.FC = () => {
   useEffect(() => {
     if (Object.keys(pipelineInfo).length) {
       api
-        .getTemplateCommandConfig(pipelineId)
+        .getTemplateCommandConfig(pipelineId,pipelineScenes)
         .then((res: any) => {
           console.log('job_template_modelview', res);
           if (res?.status === 0 && res?.message === 'success') {

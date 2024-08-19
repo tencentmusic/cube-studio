@@ -10,6 +10,6 @@ RUN set -x; rm -rf /usr/bin/python /usr/bin/python3; apt install -y --fix-missin
 RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ignore-installed" \
     && rm -rf /usr/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
 
-RUN pip install -U pip && pip install flask requests kubernetes numpy pandas tornado pysnooper
+RUN pip install -U pip && pip install flask requests kubernetes numpy pandas tornado pysnooper redis
 
 

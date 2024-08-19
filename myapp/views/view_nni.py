@@ -244,35 +244,16 @@ class NNI_ModelView_Base():
         widget=BS3TextFieldWidget(),
         validators=[DataRequired()]
     )
+    edit_form_extra_fields['resource_gpu'] = StringField(
+        _('gpu'),
+        default='0',
+        description=_('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。-1为共享占用方式，申请具体的卡型号，可以类似 1(V100)'),
+        widget=BS3TextFieldWidget(),
+        validators=[DataRequired()]
+    )
 
     # @pysnooper.snoop()
     def set_column(self, nni=None):
-
-        # 对编辑进行处理
-        # request_data = request.args.to_dict()
-        # job_type = request_data.get('job_type', 'Job')
-        # if nni:
-        #     job_type = nni.job_type
-        #
-        # job_type_choices = ['','Job']
-        # job_type_choices = [[job_type_choice,job_type_choice] for job_type_choice in job_type_choices]
-        #
-        # if nni:
-        #     self.edit_form_extra_fields['job_type'] = SelectField(
-        #         _('任务类型'),
-        #         description="超参搜索的任务类型",
-        #         choices=job_type_choices,
-        #         widget=MySelect2Widget(extra_classes="readonly",value=job_type),
-        #         validators=[DataRequired()]
-        #     )
-        # else:
-        #     self.edit_form_extra_fields['job_type'] = SelectField(
-        #         _('任务类型'),
-        #         description="超参搜索的任务类型",
-        #         widget=MySelect2Widget(new_web=True,value=job_type),
-        #         choices=job_type_choices,
-        #         validators=[DataRequired()]
-        #     )
 
         self.edit_form_extra_fields['parameters'] = StringField(
             _('超参数'),
@@ -293,9 +274,10 @@ class NNI_ModelView_Base():
             _('任务启动命令'),
             default='python xx.py',
             description= _('工作节点启动命令'),
-            widget=MyBS3TextAreaFieldWidget(),
+            widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
+
 
         self.edit_columns = ['project', 'name', 'describe', 'parallel_trial_count', 'max_trial_count',
                              'objective_type', 'objective_goal', 'objective_metric_name',
@@ -305,7 +287,7 @@ class NNI_ModelView_Base():
             {"fields": copy.deepcopy(self.edit_columns), "expanded": True},
         )]
 
-        task_column = ['job_worker_image', 'working_dir', 'job_worker_command', 'resource_memory', 'resource_cpu']
+        task_column = ['job_worker_image', 'working_dir', 'job_worker_command', 'resource_memory', 'resource_cpu', 'resource_gpu']
         self.edit_fieldsets.append((
             lazy_gettext('task args'),
             {"fields": task_column, "expanded": True},
@@ -332,6 +314,8 @@ class NNI_ModelView_Base():
         # from flask_appbuilder.forms import DynamicForm
         if 'parameters_demo' in form._fields:
             del form._fields['parameters_demo']  # 不处理这个字段
+
+
 
     # @pysnooper.snoop()
     def make_nnijob(self,k8s_client,namespace,nni):
@@ -380,6 +364,9 @@ class NNI_ModelView_Base():
                             }
                         ],
                         "command": ['bash','-c','sleep 5 && nnictl create --config /mnt/%s/nni/%s/controll_template.yaml -p 8888 --url_prefix nni/%s && sleep infinity'%(nni.created_by.username,nni.name,nni.name)],
+                        # 不能使用--foreground 因为会结束进程
+                        # "command": ['bash', '-c', 'sleep 5 && nnictl create --config /mnt/%s/nni/%s/controll_template.yaml -p 8888 --url_prefix nni/%s --foreground' % (nni.created_by.username, nni.name, nni.name)],
+
                         "volumeMounts": k8s_volume_mounts
                     }
                 ],
@@ -406,7 +393,6 @@ class NNI_ModelView_Base():
         task_master_spec['spec']['containers'][0]['resources']=resources
         return task_master_spec
 
-
     # @pysnooper.snoop()
     def deploy_nni_service(self, nni):
 
@@ -418,7 +404,7 @@ class NNI_ModelView_Base():
 
         k8s_client = K8s(nni.project.cluster.get('KUBECONFIG', ''))
         namespace = conf.get('AUTOML_NAMESPACE', 'automl')
-        # 创建nnijob
+
         nnijob_json = self.make_nnijob(k8s_client,namespace,nni)
         print(nnijob_json)
         try:
@@ -429,8 +415,7 @@ class NNI_ModelView_Base():
 
         # 创建service
         labels = {
-            "type": "nni",
-            "component":"nni",
+            "pod-type":"nni",
             "role":"master",
             "app":nni.name,
             "username":nni.created_by.username
@@ -499,6 +484,16 @@ class NNI_ModelView_Base():
 
         k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=vs_json)
 
+        # 删除network NetworkPolicy
+        try:
+            # time.sleep(2)
+            k8s_client.NetworkingV1Api.delete_namespaced_network_policy(namespace=namespace,name=nni.name)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
+        except Exception as e:
+            pass
+
     # 生成实验
     # @pysnooper.snoop()
     @event_logger.log_this
@@ -538,16 +533,21 @@ logLevel: info
 #choice: local, remote, pai, kubeflow
 #choice: true, false
 useAnnotation: false
+nniManagerIp: {nni.name}-master-0.{nni.name}
 tuner:
   #choice: TPE, Random, Anneal, Evolution, BatchTuner, MetisTuner, GPTuner
   name: {nni.algorithm_name}
   classArgs:
    optimize_mode: {nni.objective_type}
 
+'''
+
+        trainingService_yaml='''
 trainingService:
   platform: local
   useActiveGpu: false
 '''
+        controll_yaml = controll_yaml+trainingService_yaml
 
         code_dir = "%s/%s/nni/%s" % (conf.get('WORKSPACE_HOST_PATH', ''), nni.created_by.username, nni.name)
         os.makedirs(code_dir,exist_ok=True)
@@ -584,24 +584,11 @@ trainingService:
             } for hubsecret in image_secrets
         ]
 
-        item.job_json = {}
-
-        item.trial_spec = core.merge_job_experiment_template(
-            node_selector=item.get_node_selector(),
-            volume_mount=item.volume_mount,
-            image=item.job_worker_image,
-            image_secrets=image_secrets,
-            hostAliases=conf.get('HOSTALIASES', ''),
-            workingDir=item.working_dir,
-            image_pull_policy=conf.get('IMAGE_PULL_POLICY', 'Always'),
-            resource_memory=item.resource_memory,
-            resource_cpu=item.resource_cpu,
-            command=item.job_worker_command
-        )
+        item.trial_spec = "{}"
 
         item.job_json = {
             "job_worker_image": item.job_worker_image,
-            "job_worker_command": item.job_worker_command,
+            "job_worker_command": item.job_worker_command
         }
 
         item.job_json = json.dumps(item.job_json, indent=4, ensure_ascii=False)
@@ -650,6 +637,12 @@ trainingService:
         # 删除pod
         try:
             k8s_client.delete_pods(namespace=namespace,pod_name=nni.name)
+        except Exception as e:
+            print(e)
+
+        # 删除volcano
+        try:
+            k8s_client.delete_volcano(namespace=namespace,name=nni.name)
         except Exception as e:
             print(e)
 

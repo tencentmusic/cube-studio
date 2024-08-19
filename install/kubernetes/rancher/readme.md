@@ -86,6 +86,9 @@ sh reset_docker.sh
 
 # 提前拉取需要的镜像
 sh pull_rancher_images.sh 
+
+echo "127.0.0.1 localhost" >> /etc/hosts
+
 # 部署rancher server
 export RANCHER_CONTAINER_TAG=v2.8.5
 
@@ -246,19 +249,20 @@ docker start $RANCHER_CONTAINER_NAME
 
  1、由于coredns在资源limits太小了，因此可以取消coredns的limits限制，不然dns会非常慢，整个集群都会缓慢
 
-# 12、机器扩容
+# 机器扩容
+
 现在k8s集群已经有了一个master节点，但还没有worker节点，或者想添加更多的master/worker节点就需要机器扩容了。
 
-在集群主机界面，点击编辑集群
+在集群主机界面，点击编辑集群，然后选择角色为worker（根据自己的需求选择角色）
 
-修改docker目录为上面已修改的docker根目录/data/docker，然后选择角色为worker（根据自己的需求选择角色）
+之后复制命令到目标主机上运行，注意复制的命令后面多添加一个参数--node-name xx.xx.xx.xx，把新加机器的ip信息带进去，等待完成就可以了。
 
-之后复制命令到目标主机上运行，等待完成就可以了。
+# rancher/k8s 多用户
 
-# 13、rancher/k8s 多用户
 如果集群部署好了，需要添加多种权限类型的用户来管理，则可以使用rancher来实现k8s的rbac的多用户。
 
-# 14、客户端kubectl
+# 客户端kubectl
+
 如果你不会使用rancher界面或者不习惯使用rancher界面，可以使用kubectl或者kubernetes-dashboard。
 
 点击Kubeconfig文件可以看到config的内容，通过内容可以看到，kube-apiserver可以使用rancher-server（端口443）的api接口，或者kube-apiserver（端口6443）的接口控制k8s集群。
@@ -267,13 +271,13 @@ docker start $RANCHER_CONTAINER_NAME
 
 下载安装不同系统办公电脑对应的kubectl，然后复制config到~/.kube/config文件夹，就可以通过命令访问k8s集群了。
 
-# 15、kubernetes-dashboard
+# kubernetes-dashboard
 如果你喜欢用k8s-dashboard，可以自己安装dashboard。
 可以参考这个：https://kuboard.cn/install/install-k8s-dashboard.html
 
 这样我们就完成了k8s的部署。
 
-# 16、节点清理
+# 节点清理
 当安装失败需要重新安装，或者需要彻底清理节点。由于清理过程比较麻烦，我们可以在rancher界面上把node删除，然后再去机器上执行reset_docker.sh，这样机器就恢复了部署前的状态。
 
 如果web界面上删除不掉，我们也可以通过kubectl的命令  
@@ -282,7 +286,7 @@ docker start $RANCHER_CONTAINER_NAME
 kubectl delete node node12
 ```
 
-# 17、rancher server 节点迁移
+# rancher server 节点迁移
 我们可以实现将rancher server 节点迁移到另一台机器，以防止机器废弃后无法使用的情况。
 
 首先，先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl，这里的.tar.gz的文件名称以实际为准
@@ -320,7 +324,7 @@ curl --insecure -sfL https://100.108.176.29/v3/import/d9jzxfz7tmbsnbhf22jbknzlbj
 至此完成
 
 
-# 18、总结
+# 总结
 
 rancher使用**全部容器化**的形式来部署k8s集群，能大幅度降低k8s集群扩部署/缩容的门槛。
 你可以使用rancher来扩缩容 etcd，k8s-master，k8s-worker。

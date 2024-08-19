@@ -110,7 +110,7 @@ class Job_Template_ModelView_Base():
         "volume_mount": StringField(
             _('挂载'),
             default='',
-            description= _('使用该模板的task，会在添加时，自动添加该挂载。<br>外部挂载，格式示例:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人username子目录'),
+            description= _('使用该模板的task，会在添加时，自动添加该挂载。格式示例:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         ),
         "workdir": StringField(
@@ -123,6 +123,7 @@ class Job_Template_ModelView_Base():
             description= _('镜像的入口命令，直接写成单行字符串，例如python xx.py，无需添加[]'),
             default='',
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            validators=[DataRequired()]
         ),
         "job_args_definition": StringField(
             _('参数定义'),
@@ -149,7 +150,7 @@ class Job_Template_ModelView_Base():
         "accounts": StringField(
             _('k8s账号'),
             default='',
-            description= _('k8s的ServiceAccount，在此类任务运行时会自动挂载此账号，多用于模板用于k8s pod/cr时使用'),
+            description= _('k8s的ServiceAccount，在此类任务运行时会自动挂载此账号，多用于任务操作k8s pod时使用'),
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
             validators=[]
         ),
@@ -179,8 +180,8 @@ class Job_Template_ModelView_Base():
                     }
                 }
             }, indent=4, ensure_ascii=False),
-            description= _('json格式，此类task使用时需要填写的参数，示例：')+'<br><pre><code>%s</code></pre>' % core.job_template_args_definition(),
-            widget=MyBS3TextAreaFieldWidget(rows=10),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            description= _('json格式，此类task使用时需要填写的参数'),
+            widget=MyBS3TextAreaFieldWidget(rows=10,tips=Markup('<pre><code>' + core.job_template_args_definition() + "</code></pre>")),  # 传给widget函数的是外层的field对象，以及widget函数的参数
             validators=[DataRequired()]
         )
 

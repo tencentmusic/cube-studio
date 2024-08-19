@@ -61,54 +61,8 @@ const DataSet: React.FC<NodeProps> = props => {
           dispatch(updateLoading(true));
           const taskName = `${modelInfo.name.replace(/\.|[\u4e00-\u9fa5]/g, '').replace(/_|\s/g, '-') || 'task'
             }-${Date.now()}`.substring(0, 49);
-          api
-            .task_modelview_add(pipelineId, {
-              job_template: modelInfo.id,
-              pipeline: +pipelineId,
-              name: taskName,
-              label: `${t('新建')} ${modelInfo.name} ${t('任务')}`,
-              volume_mount: 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
-              image_pull_policy: 'Always',
-              working_dir: '',
-              command: '',
-              overwrite_entrypoint: 0,
-              node_selector: 'cpu=true,train=true',
-              resource_memory: '2G',
-              resource_cpu: '2',
-              resource_gpu: '0',
-              resource_rdma: '0',
-              timeout: 0,
-              retry: 0,
-              args: JSON.stringify(defaultArgs),
-            })
-            .then((res: any) => {
-              if (res?.result?.id) {
-                const newNode = {
-                  id: `${res.result.id}`,
-                  type: 'dataSet',
-                  position,
-                  data: {
-                    info: modelInfo,
-                    name: taskName,
-                    label: `${t('新建')} ${modelInfo.name} ${t('任务')}`,
-                  },
-                };
-                dispatch(updateEditing(true));
-                dispatch(updateElements(elements.concat(newNode)));
-                setTimeout(() => {
-                  dispatch(savePipeline());
-                }, 2000);
-              }
-            })
-            .catch(err => {
-              if (err.response) {
-                dispatch(updateErrMsg({ msg: err.response.data.message }));
-              }
-            })
-            .finally(() => {
-              dispatch(updateLoading(false));
-              setVisible(false)
-            });
+          dispatch(updateLoading(false));
+          setVisible(false)
         }
       }}>
         <div>
