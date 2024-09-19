@@ -166,24 +166,22 @@ class NNI_ModelView_Base():
         widget=BS3TextFieldWidget()
     )
 
-    algorithm_name_choices = {
-        'TPE': "TPE",
-        'Random': 'Random',
-        "Anneal": 'Anneal',
-        "Evolution": 'Evolution',
-        "SMAC": "SMAC",
-        "BatchTuner": 'BatchTuner',
-        "GridSearch": 'GridSearch',
-        "Hyperband": "Hyperband",
-        "NetworkMorphism": "NetworkMorphism",
-        "MetisTuner": "MetisTuner",
-        "BOHB": "BOHB Advisor",
-        "GPTuner": "GPTuner",
-        "PPOTuner": "PPOTuner",
-        "PBTTuner": "PBTTuner"
-    }
-
-    algorithm_name_choices = list(algorithm_name_choices.items())
+    algorithm_name_choices = [
+        ['TPE', "TPE"],
+        ['Random', 'Random'],
+        ["Anneal", 'Anneal'],
+        ["Evolution", 'Evolution'],
+        ["SMAC", "SMAC"],
+        ["BatchTuner", 'BatchTuner'],
+        ["GridSearch", 'GridSearch'],
+        ["Hyperband", "Hyperband"],
+        ["NetworkMorphism", "NetworkMorphism"],
+        ["MetisTuner", "MetisTuner"],
+        ["BOHB", "BOHB Advisor"],
+        ["GPTuner", "GPTuner"],
+        ["PPOTuner", "PPOTuner"],
+        ["PBTTuner", "PBTTuner"]
+    ]
 
     edit_form_extra_fields['algorithm_name'] = SelectField(
         _('搜索算法'),
