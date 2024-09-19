@@ -1,15 +1,23 @@
-# 机器初始化
+# 1. 机器初始化
 
 参考install/rancher/install_docker.md部署docker
 
-# 建设前准备
+clone项目，git clone https://github.com/data-infra/cube-studio.git
+
+centos中如果没有git，可以先yum install git安装git
+
+
+
+再执行git clone即可，如果还是不行，直接git clone https://githubfast.com/data-infra/cube-studio.git，通过国内代理拉取。
+
+# 2. 建设前准备
 
 1、自建docker镜像仓库或者直接使用云厂商免费镜像仓库。 如果内网无法连接到互联网的话，则可以使用Harbor自建一个内网仓库，并将私有仓库添加到docker的insecure-registries配置中。
 
 2、如果内网是无法连接外网的，需要我们在机器上提前拉好镜像。 修改install/kubernetes/rancher/all_image.py中内网仓库地址，运行导出推送和拉取脚本。联网机器上运行 pull_rancher_images.sh将镜像推送到内网仓库 或 rancher_image_save.sh将镜像压缩成文件再导入到内网机器。 不能联网机器上运行，每台机器运行 pull_rancher_harbor.sh 从内网仓库中拉取镜像 或 rancher_image_load.sh 从压缩文件中导入镜像 。
 
 
-# 5、centos8/centos8 stream/OpenCloudOS Server 8 系统初始化
+# 3. centos8/centos8 stream/OpenCloudOS Server 8/Redhat 9 系统初始化
 
 ```bash
 #修改/etc/firewalld/firewalld.conf
@@ -75,7 +83,7 @@ reboot
 # ls /lib/modules/`uname -r`/kernel/net/ipv6/netfilter/
 ```
 
-# 部署rancher server
+# 4. 部署rancher server
 
 单节点部署rancher server  
 
@@ -83,9 +91,13 @@ reboot
 # 清理历史部署痕迹
 cd cube-studio/install/kubernetes/rancher/
 sh reset_docker.sh
+执行后
+docker ps -a   查看是否还有剩余没清理干净的，如果有，重启机器，重新 sh reset_docker.sh
 
 # 提前拉取需要的镜像
 sh pull_rancher_images.sh 
+
+如果拉取中碰到拉取失败的问题，可以尝试通过“systemctl restart docker”重启docker，再次执行拉取脚本就可以了。
 
 echo "127.0.0.1 localhost" >> /etc/hosts
 
@@ -98,7 +110,7 @@ sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myran
 docker logs  myrancher  2>&1 | grep "Bootstrap Password:"
 ```
 
-## rancher server 启动可能问题
+## 4.1 rancher server 启动可能问题
 
 - 2 如果是centos 8的配置，按照文章上面的方法修改配置
 
@@ -117,13 +129,13 @@ docker logs  myrancher  2>&1 | grep "Bootstrap Password:"
     如果k3s日志报错 containerd的问题，那就 docker exec -it myrancher mv /var/lib/rancher/k3s/agent/containerd /varllib/rancher/k3slagent/_containerd  
     如果k3s日志报错系统内容中没有xx模块，那就降低linux系统内容
 
-# 部署k8s集群
+# 5. 部署k8s集群
 
 部署完rancher server后，进去rancher server的https://xx.xx.xx.xx/ 的web界面，这里的xx取决于你服务器的IP地址。
 
 选择“Set a specific password to use”来配置rancher的密码，不选择"Allow collection of anonymous statistics ......"，选择"I agree to the terms and conditions ......"。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/bf9eb26c1ee14ef4b18b02fbf3c17f7a.png)
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/ecda7c7b8861482091848e3b7fe22688.png)
 
 之后选择添加集群->选择自定义集群->填写集群名称，集群名称英文小写
 ![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/ec25233e26a749d5bcb62a339e222163.jpeg)
@@ -226,7 +238,7 @@ services部分的示例（注意缩进对齐）
 
 ![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/618cfde682044b77b7103fc811d5060b.jpeg)
 
-## 配置认证过期
+## 5.1 配置认证过期问题
 
 因为rancher server的证书有效期是一年，在一年后，rancher server会报证书过期。因此，可以通过下面的方式，创建新的证书。
 
@@ -245,11 +257,11 @@ docker stop $RANCHER_CONTAINER_NAME
 docker start $RANCHER_CONTAINER_NAME
 ```
 
-# 部署完成后需要部分修正
+# 6. 部署完成后需要部分修正
 
  1、由于coredns在资源limits太小了，因此可以取消coredns的limits限制，不然dns会非常慢，整个集群都会缓慢
 
-# 机器扩容
+# 7. 机器扩容
 
 现在k8s集群已经有了一个master节点，但还没有worker节点，或者想添加更多的master/worker节点就需要机器扩容了。
 
@@ -257,11 +269,11 @@ docker start $RANCHER_CONTAINER_NAME
 
 之后复制命令到目标主机上运行，注意复制的命令后面多添加一个参数--node-name xx.xx.xx.xx，把新加机器的ip信息带进去，等待完成就可以了。
 
-# rancher/k8s 多用户
+# 8. rancher/k8s 多用户
 
 如果集群部署好了，需要添加多种权限类型的用户来管理，则可以使用rancher来实现k8s的rbac的多用户。
 
-# 客户端kubectl
+# 9. 客户端kubectl
 
 如果你不会使用rancher界面或者不习惯使用rancher界面，可以使用kubectl或者kubernetes-dashboard。
 
@@ -271,13 +283,13 @@ docker start $RANCHER_CONTAINER_NAME
 
 下载安装不同系统办公电脑对应的kubectl，然后复制config到~/.kube/config文件夹，就可以通过命令访问k8s集群了。
 
-# kubernetes-dashboard
+# 10. kubernetes-dashboard
 如果你喜欢用k8s-dashboard，可以自己安装dashboard。
 可以参考这个：https://kuboard.cn/install/install-k8s-dashboard.html
 
 这样我们就完成了k8s的部署。
 
-# 节点清理
+# 11. 节点清理
 当安装失败需要重新安装，或者需要彻底清理节点。由于清理过程比较麻烦，我们可以在rancher界面上把node删除，然后再去机器上执行reset_docker.sh，这样机器就恢复了部署前的状态。
 
 如果web界面上删除不掉，我们也可以通过kubectl的命令  
@@ -286,7 +298,7 @@ docker start $RANCHER_CONTAINER_NAME
 kubectl delete node node12
 ```
 
-# rancher server 节点迁移
+# 12. rancher server 节点迁移
 我们可以实现将rancher server 节点迁移到另一台机器，以防止机器废弃后无法使用的情况。
 
 首先，先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl，这里的.tar.gz的文件名称以实际为准
@@ -324,7 +336,7 @@ curl --insecure -sfL https://100.108.176.29/v3/import/d9jzxfz7tmbsnbhf22jbknzlbj
 至此完成
 
 
-# 总结
+# 13. 总结
 
 rancher使用**全部容器化**的形式来部署k8s集群，能大幅度降低k8s集群扩部署/缩容的门槛。
 你可以使用rancher来扩缩容 etcd，k8s-master，k8s-worker。

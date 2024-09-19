@@ -587,8 +587,8 @@ default_args = {
 }
 
 # @pysnooper.snoop()
-def validate_job_args(job_template):
-    validate_json(job_template.args)
+def validate_job_args(args):
+    validate_json(args)
     validate_job_args_type = ['int', 'bool', 'str', 'text', 'enum', 'float', 'multiple', 'dict', 'list', 'file', 'json']
 
     # 校验x修复参数
@@ -630,7 +630,7 @@ def validate_job_args(job_template):
 
         return attr
 
-    args = json.dumps(json.loads(job_template.args), indent=4, ensure_ascii=False)
+    args = json.dumps(json.loads(args), indent=4, ensure_ascii=False)
     job_args = json.loads(args)
 
     for group in job_args:
@@ -2239,3 +2239,41 @@ def table_html(csv_path,features=None,zip_file=None):  # zip_file 用来表示�
         return df.style.set_table_styles(style).set_properties(**properties).to_html(bold_headers=True)
     else:
         return df.to_html(escape=False,bold_rows=False,border=1)
+
+
+def notebook_cascade_demo():
+    options = [
+        {
+            "id": "zhejiang",
+            "value": "Zhejiang",
+            "children": [
+                {
+                    "value": "hangzhou",
+                    "label": "Hangzhou",
+                    "children": [
+                        {
+                            "value": "xihu",
+                            "label": "West Lake",
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            "id": "jiangsu",
+            "value": "Jiangsu",
+            "children": [
+                {
+                    "value": "nanjing",
+                    "label": "Nanjing",
+                    "children": [
+                        {
+                            "value": "zhonghuamen",
+                            "label": "Zhong Hua Men",
+                        },
+                    ],
+                },
+            ],
+        },
+    ]
+    return options

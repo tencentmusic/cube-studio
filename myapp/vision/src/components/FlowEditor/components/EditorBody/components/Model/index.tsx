@@ -6,6 +6,9 @@ import {
   Dropdown,
   IDropdownOption,
   ActionButton,
+  IconButton,
+  PrimaryButton,
+  Link,
   Label,
   Toggle,
   Slider,
@@ -514,7 +517,19 @@ const Model: React.FC<ModelProps> = props => {
                                 >
                                   {t('编辑')}
                                 </ActionButton>
-                              ) : null}
+                              ) : (args.item_type || 'str') === 'workdir' ? (
+                                <ActionButton
+                                  iconProps={{ iconName: 'FabricFolder' }}
+                                  onClick={() => {window.open('/notebook_modelview/api/entry/jupyter?file_path='+keyValue, '_blank')}}>
+                                  {t('打开目录')}
+                                </ActionButton>
+                              ):(args.item_type || 'str') === 'image' ? (
+                                <ActionButton
+                                  iconProps={{ iconName: 'Bug' }}
+                                  onClick={() => {window.open('/docker_modelview/api/entry/docker?image='+keyValue, '_blank')}}>
+                                  {t('调试镜像')}
+                                </ActionButton>
+                              ):null}
                             </div>
                           );
                         }}

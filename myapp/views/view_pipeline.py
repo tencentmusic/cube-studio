@@ -322,8 +322,8 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
             "task-id": str(task.id),
             "task-name": str(task.name),
             "run-id": global_envs.get('KFJ_RUN_ID', ''),
-            'run-rtx': g.user.username if g and g.user and g.user.username else pipeline.created_by.username,
-            'pipeline-rtx': pipeline.created_by.username
+            'run-username': g.user.username if g and g.user and g.user.username else pipeline.created_by.username,
+            'pipeline-username': pipeline.created_by.username
 
         }
         pod_annotations = {
@@ -519,8 +519,8 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
     if not workflow_label:
         workflow_label = {}
 
-    workflow_label['run-rtx'] = g.user.username if g and g.user and g.user.username else pipeline.created_by.username
-    workflow_label['pipeline-rtx'] = pipeline.created_by.username
+    workflow_label['run-username'] = g.user.username if g and g.user and g.user.username else pipeline.created_by.username
+    workflow_label['pipeline-username'] = pipeline.created_by.username
     workflow_label['save-time'] = datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
     workflow_label['pipeline-id'] = str(pipeline.id)
     workflow_label['pipeline-name'] = str(pipeline.name)
@@ -854,11 +854,21 @@ class Pipeline_ModelView_Base():
         # 检测crontab格式
         if item.schedule_type == 'crontab':
             if not re.match("^[0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+", item.cron_time):
+                raise MyappException(__("crontab 格式错误"))
                 item.cron_time = ''
+
+    def pre_update_req(self,req_json=None,src_item=None,*args,**kwargs):
+        if src_item and src_item.parameter:
+            parameter = json.loads(src_item.parameter)
+            if parameter.get("demo", 'false').lower() == 'true':
+                raise MyappException(__("示例pipeline，不允许修改，请复制后编辑"))
+
+        core.validate_json(req_json.get('expand','{}'))
+
+    pre_add_req = pre_update_req
 
     # @pysnooper.snoop()
     def pre_update(self, item):
-
         if item.expand:
             core.validate_json(item.expand)
             item.expand = json.dumps(json.loads(item.expand), indent=4, ensure_ascii=False)
@@ -889,21 +899,23 @@ class Pipeline_ModelView_Base():
         if (item.schedule_type=='crontab' and self.src_item_json.get("schedule_type")=='once') or (item.cron_time!=self.src_item_json.get("cron_time",'')):
             item.cronjob_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # 限制提醒
-        if item.schedule_type == 'crontab':
-            if not item.cron_time or not re.match("^[0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+", item.cron_time.strip().replace('  ', ' ')):
-                item.cron_time = ''
-
-            org = item.project.org
-            if not org or org == 'public':
-                flash(__('无法保障公共集群的稳定性，定时任务请选择专门的日更集群项目组'), 'warning')
-
         # 把没必要的存储去掉
         expand = json.loads(item.expand)
         for node in expand:
             if 'data' in node and 'args' in node['data'].get("info",{}):
                 del node['data']['info']['args']
         item.expand = json.dumps(expand)
+
+        # 限制提醒
+        if item.schedule_type == 'crontab':
+            if not item.cron_time or not re.match("^[0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+ [0-9/*]+", item.cron_time.strip().replace('  ', ' ')):
+                item.cron_time = ''
+                raise MyappException(__("crontab 格式错误"))
+
+            org = item.project.org
+            if not org or org == 'public':
+                flash(__('无法保障公共集群的稳定性，定时任务请选择专门的日更集群项目组'), 'warning')
+
 
     def pre_update_web(self, item):
         item.dag_json = item.fix_dag_json()
@@ -913,7 +925,6 @@ class Pipeline_ModelView_Base():
     # 删除前先把下面的task删除了，把里面的运行实例也删除了，把定时调度删除了
     # @pysnooper.snoop()
     def pre_delete(self, pipeline):
-
         db.session.commit()
         if __("(废弃)") not in pipeline.describe:
             pipeline.describe += __("(废弃)")

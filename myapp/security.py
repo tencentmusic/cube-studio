@@ -125,8 +125,10 @@ class MyRoleModelView(RoleModelView):
 
     datamodel = SQLAInterface(Role)
     order_columns = ["id"]
+    base_order = ('id', 'desc')
     route_base = "/roles"
     list_columns = ["name", "permissions"]
+    base_permissions = ['can_list', 'can_edit', 'can_add', 'can_show']
 
 
 class MyUserRemoteUserModelView_Base():
@@ -221,7 +223,7 @@ class MyUserRemoteUserModelView_Base():
     def post_add(self,user):
         from myapp import security_manager,db
         gamma_role = security_manager.find_role('Gamma')
-        if gamma_role not in user.roles:
+        if gamma_role not in user.roles and not user.roles:
             user.roles.append(gamma_role)
             db.session.commit()
 
@@ -239,6 +241,9 @@ class MyUserRemoteUserModelView_Base():
         except Exception:
             db.session.rollback()
 
+    def post_update(self,user):
+        # 如果修改了账户，要更改labelstudio中的账户
+        self.post_add(user)
 
 
 class MyUserRemoteUserModelView(MyUserRemoteUserModelView_Base,UserModelView):
@@ -665,7 +670,7 @@ class MyappSecurityManager(SecurityManager):
                     .filter(self.user_model.id == g.user.id)
                     .filter(self.permission_model.name == permission_name)
             ).all()
-            return set([s.name for s in view_menu_names])
+            return list(set([s.name for s in view_menu_names]))
 
         # Properly treat anonymous user 匿名用户
         public_role = self.get_public_role()
@@ -676,8 +681,8 @@ class MyappSecurityManager(SecurityManager):
                     self.permission_model.name == permission_name
                 )
             ).all()
-            return set([s.name for s in view_menu_names])
-        return set()
+            return list(set([s.name for s in view_menu_names]))
+        return []
 
 
     # 在视图上添加权限
@@ -704,7 +709,6 @@ class MyappSecurityManager(SecurityManager):
         # Creating default roles
         self.set_role("Admin", self.is_admin_pvm)
         self.set_role("Gamma", self.is_gamma_pvm)
-
 
         # commit role and view menu updates
         self.get_session.commit()
@@ -756,7 +760,6 @@ class MyappSecurityManager(SecurityManager):
             or pvm.permission.name in self.ADMIN_ONLY_PERMISSIONS
         )
 
-
     # 校验权限是否是默认所有人可接受的
     def is_accessible_to_all(self, pvm):
         return pvm.permission.name in self.ACCESSIBLE_PERMS
@@ -774,22 +777,8 @@ class MyappSecurityManager(SecurityManager):
 
 
     # 创建视图，创建权限，创建视图-权限绑定记录。
-    def set_perm(self, mapper, connection, target,permission_name):  # noqa
-        #
-        # connection is sql
-        # target is tables/db  model
-
-        if target.perm != target.get_perm():
-            link_table = target.__table__
-            connection.execute(
-                link_table.update()
-                .where(link_table.c.id == target.id)
-                .values(perm=target.get_perm())
-            )
-
-        # add to view menu if not already exists
-        permission_name = permission_name
-        view_menu_name = target.get_perm()
+    def set_perm(self, view_menu_name,permission_name):
+        connection = self.get_session
         permission = self.find_permission(permission_name)
         view_menu = self.find_view_menu(view_menu_name)
         pv = None
@@ -799,12 +788,14 @@ class MyappSecurityManager(SecurityManager):
                 self.permission_model.__table__  # pylint: disable=no-member
             )
             connection.execute(permission_table.insert().values(name=permission_name))
+            connection.commit()
             permission = self.find_permission(permission_name)
 
         # 如果视图不存在就创建
         if not view_menu:
             view_menu_table = self.viewmenu_model.__table__  # pylint: disable=no-member
             connection.execute(view_menu_table.insert().values(name=view_menu_name))
+            connection.commit()
             view_menu = self.find_view_menu(view_menu_name)
 
         # 获取是否存在 视图-权限绑定  记录
@@ -825,6 +816,7 @@ class MyappSecurityManager(SecurityManager):
                     permission_id=permission.id, view_menu_id=view_menu.id
                 )
             )
+            connection.commit()
             # 重新获取权限视图绑定记录
             pv = (
                 self.get_session.query(self.permissionview_model)
@@ -834,36 +826,19 @@ class MyappSecurityManager(SecurityManager):
         return pv
 
 
-
     # 根据权限，视图，添加到相关pv-role
-    @classmethod
-    def add_pv_role(self,permission_name,view_menu_name,session):
-        permission = session.query(self.permission_model).filter_by(name=permission_name).first()
-        view_menu = session.query(self.viewmenu_model).filter_by(name=view_menu_name).first()
-        # 获取是否存在 视图-权限绑定  记录
-        if permission and view_menu:
-            pv = (
-                session.query(self.permissionview_model)
-                    .filter_by(permission=permission, view_menu=view_menu)
-                    .first()
-            )
+    def add_pv_role(self,permission_name,view_menu_name,role_name):
+        pv = self.set_perm(view_menu_name=view_menu_name,permission_name=permission_name)
+        if pv:
             try:
-                # 为用户所属组织架构都添加该pv
-                if pv and g.user and g.user.org:
-                    roles = session.query(self.role_model).all()  # 获取所有角色，自动在相应角色下面添加pv
-                    if roles:
-                        for role in roles:
-                            if role.name in g.user.org:
-                                # 为pvm-role表中添加记录
-                                pv_role = session.execute(select([assoc_permissionview_role.c.id]).where(assoc_permissionview_role.c.permission_view_id==pv.id)
-                                                          .where(assoc_permissionview_role.c.role_id==role.id)
-                                                          .limit(1)
-                                                          ).fetchall()
-                                if not pv_role:
-                                    session.execute(assoc_permissionview_role.insert().values(
-                                        permission_view_id=pv.id, role_id=role.id
-                                        )
-                                    )
+                session = self.get_session
+                role = session.query(self.role_model).filter_by(name=role_name).first()
+                if role:
+                    # 为pvm-role表中添加记录
+                    pv_role = session.query(select([assoc_permissionview_role.c.id]).where(assoc_permissionview_role.c.permission_view_id==pv.id).where(assoc_permissionview_role.c.role_id==role.id)).first()
+                    if not pv_role:
+                        session.execute(assoc_permissionview_role.insert().values(permission_view_id=pv.id, role_id=role.id))
+                        session.commit()
             except Exception as e:
                 logging.error(e)
 

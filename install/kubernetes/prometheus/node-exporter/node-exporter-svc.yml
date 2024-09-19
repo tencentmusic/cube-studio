@@ -6,7 +6,7 @@ metadata:
   name: node-exporter
   namespace: monitoring
 spec:
-  type: NodePort
+#  type: NodePort
   ports:
   - name: https
     port: 9100

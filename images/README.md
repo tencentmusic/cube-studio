@@ -39,10 +39,9 @@
 	ENV LANGUAGE zh_CN.UTF-8
 
 	# 便捷操作
-	RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-		echo "alias la='ls -A'" >> /root/.bashrc && \
-		echo "alias vi='vim'" >> /root/.bashrc && \
-		/bin/bash -c "source /root/.bashrc"
+	RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+		echo "alias la='ls -A'" >> ~/.bashrc && \
+		echo "alias vi='vim'" >> ~/.bashrc
 
 	# 安装其他工具
 	### 安装kubectl
@@ -60,7 +59,7 @@
 
 # 常用GPU基础镜像
 
-[构建脚本](https://github.com/tencentmusic/cube-studio/blob/master/images/ubuntu-gpu/build.sh)
+[构建脚本](https://github.com/data-infra/cube-studio/blob/main/images/ubuntu-gpu/build.sh)
 
 ### ubuntu
 ```

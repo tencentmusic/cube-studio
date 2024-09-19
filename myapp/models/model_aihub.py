@@ -57,6 +57,10 @@ class Aihub(Model,MyappModelBase):
             <a class="flex1 ta-c" target=_blank style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">训练</a>
             <a class="flex1 ta-c" target=_blank style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href='javascript:void(0)'>部署web</a>
         '''
+        if self.price and int(self.price)>0:
+            ops_html = f'''
+            <a class="flex1 ta-c" style="color:Gray;border-right: 1px solid rgba(0,0,0,.06);" href="javascript:void(0)">企业版</a>
+            '''
 
         return Markup(f'''
 <div style="border: 3px solid rgba({'29,152,29,.6' if self.status=='online' else '0,0,0,.2'});border-radius: 3px;">

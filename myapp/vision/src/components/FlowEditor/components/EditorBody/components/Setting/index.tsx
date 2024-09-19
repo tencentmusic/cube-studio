@@ -195,7 +195,7 @@ const Setting: React.FC = () => {
           <div className={style.splitLine}></div>
           <TextField
             label={t('调度周期')}
-            description={t('周期任务的时间设定 * * * * * 表示为 minute hour day month week')}
+            description={t('周期任务的时间设定按照crontab书写格式')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('cron_time', value ? value : '');
             }}

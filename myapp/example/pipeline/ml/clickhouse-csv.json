@@ -1,0 +1,56 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "clickhousereader",
+                    "parameter": {
+                        "username": "clickhouse",
+                        "password": "c1ickh0use0perator",
+                        "column": [
+                          "event_id",
+                          "user_id",
+                          "event_name",
+                          "event_data"
+                        ],
+                        "connection": [
+                            {
+                                "table": [
+                                    "clickhouse_test"
+                                ],
+                                "jdbcUrl": [
+     "jdbc:clickhouse://clickhouse-clickhouse.default:8123/cdl"
+                                ]
+                            }
+                        ]
+                    }
+                },
+               "writer": {
+                    "name": "txtfilewriter",
+                    "parameter": {
+                        "path": "/mnt/admin/pipeline/example/ml/",
+                        "fileName": "data-clickhouse.csv",
+                        "writeMode": "truncate",
+                        "fileFormat":"csv",
+                        "header": [
+                          "event_id",
+                          "user_id",
+                          "event_name",
+                          "event_data"
+                        ],
+                        "dateFormat": "yyyy-MM-dd"
+                    }
+                }
+            }
+        ]
+    }
+}

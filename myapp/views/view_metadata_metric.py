@@ -182,7 +182,7 @@ class Metadata_metric_ModelView_base():
         if data.get('remark', None):
             data['remark'] = json.loads(data.get('remark', '[]'))
 
-    def pre_add_req(self, req_json=None):
+    def pre_add_req(self, req_json=None, *args, **kwargs):
         if req_json and 'remark' in req_json:
             req_json['remark'] = json.dumps(req_json.get('remark', []), indent=4, ensure_ascii=False)
         return req_json

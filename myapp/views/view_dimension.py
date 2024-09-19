@@ -140,9 +140,9 @@ with (ip='{ip}',port='{port}',db_name='{pg_db_name}',user_name='{user_name}',pwd
             pg_db_name=uri.database,
             pg_table_name=item.table_name
         )
-        return hive_sql
         # 执行创建数据库的sql
         logging.info(hive_sql)
+        return hive_sql
     except Exception as e:
         print(e)
         return str(e)
@@ -317,7 +317,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         data['columns'] = columns_list
 
     # 添加或者更新前将前端columns list转化为字段存储
-    def pre_add_req(self, req_json=None):
+    def pre_add_req(self, req_json=None, *args, **kwargs):
         if req_json and 'columns' in req_json:
             columns = {}
             for col in req_json.get('columns', []):
@@ -365,7 +365,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         except Exception as e:
             flash(__('清空失败：') + str(e), 'error')
 
-        url_path = conf.get('MODEL_URLS', {}).get("dimension") + '?targetId=' + dim_id
+        url_path = conf.get('MODEL_URLS', {}).get("dimension") + f'?targetId={dim_id}'
         return redirect(url_path)
 
     @expose("/create_external_table/<dim_id>", methods=["GET"])
@@ -448,6 +448,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                 cols = json.loads(item.columns)
 
                 import sqlalchemy
+                from sqlalchemy.exc import NoSuchTableError
                 try:
                     table = sqlalchemy.Table(item.table_name, sqlalchemy.MetaData(), autoload=True, autoload_with=engine)
 
@@ -474,7 +475,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                                     flash(__('增加新字段失败：') + str(e), 'error')
 
 
-                except sqlalchemy.exc.NoSuchTableError:
+                except NoSuchTableError:
                     print('表不存在')
                     # 如果表不存在
 
@@ -507,7 +508,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         if "dimension_%s" % dim_id in all_dimension:
             del all_dimension["dimension_%s" % dim_id]
 
-        url_path = conf.get('MODEL_URLS', {}).get("dimension") + '?targetId=' + dim_id
+        url_path = conf.get('MODEL_URLS', {}).get("dimension") + f'?targetId={dim_id}'
         return redirect(url_path)
 
     def add_more_info(self, response, **kwargs):
@@ -906,7 +907,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         req_json = item.to_json()
                         if 'id' in req_json:
                             del req_json["id"]
-                        json_data = self.pre_add_req(req_json)
+                        json_data = self.pre_add_req(req_json=req_json)
                         new_item = self.add_model_schema.load(json_data)
                         self.pre_add(new_item.data)
                         self.datamodel.add(new_item.data, raise_exception=True)

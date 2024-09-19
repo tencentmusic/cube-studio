@@ -266,6 +266,9 @@ class Docker_ModelView_Base():
         flash(__('清理结束，可重新进行调试'), 'success')
         return redirect(conf.get('MODEL_URLS', {}).get('docker', ''))
 
+    def pre_delete(self,item):
+        self.delete_pod(item.id)
+
     # @event_logger.log_this
     @expose("/save/<docker_id>", methods=["GET", "POST"])
     # @pysnooper.snoop(watch_explode='status')
@@ -333,7 +336,7 @@ class Docker_ModelView_Base():
             labels={"app": "docker", "user": g.user.username, "pod-type": "docker"},
             annotations={'project': docker.project.name},
             args=None,
-            volume_mount='/var/run/docker.sock(hostpath):/var/run/docker.sock' if 'docker' in cli else '/run/containerd/containerd.sock(hostpath):/run/containerd/containerd.sock',
+            volume_mount='/var/run/docker.sock(hostpath):/var/run/docker.sock' if 'docker' in cli else '/etc/containerd/(hostpath):/etc/containerd/,/run/containerd/containerd.sock(hostpath):/run/containerd/containerd.sock',
             working_dir='/mnt/%s' % docker.created_by.username,
             node_selector=None,
             resource_memory='0~10G',
@@ -346,7 +349,7 @@ class Docker_ModelView_Base():
             env={
                 "USERNAME": docker.created_by.username
             },
-            privileged=None,
+            privileged=True,
             accounts=None,
             username=docker.created_by.username,
             node_name=node_name

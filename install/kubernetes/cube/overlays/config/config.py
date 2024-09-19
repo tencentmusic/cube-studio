@@ -3,6 +3,7 @@
 import imp
 import json
 import os
+import shutil
 import sys
 
 from dateutil import tz
@@ -298,11 +299,13 @@ ENABLE_FLASK_COMPRESS = True
 # 任务的最小执行间隔min
 PIPELINE_TASK_CRON_RESOLUTION = 10
 
-# Send bcc of all reports to this address. Set to None to disable.
-# This is useful for maintaining an audit trail of all email deliveries.
-# 响应支持中文序列化
-JSON_AS_ASCII = False
-
+# 右上角导航
+# NAVBAR_RIGHT=[
+#     {
+#         "icon": '<svg t="1699698387046" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11066" width="200" height="200"><path d="M512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667s-191.018667 426.666667-426.666667 426.666667S85.333333 747.648 85.333333 512 276.352 85.333333 512 85.333333z m0 85.333334a341.333333 341.333333 0 1 0 0 682.666666 341.333333 341.333333 0 0 0 0-682.666666z m-40.405333 156.586666l121.856 369.706667h-83.968l-27.050667-89.685333H361.898667l-27.648 89.685333H256L378.453333 327.253333h93.141334z m256.213333 0v369.706667h-78.549333V327.253333h78.506666z m-303.36 75.562667H420.693333l-43.306666 144.64h89.898666L424.448 402.773333z" fill="#333333" p-id="11067"></path></svg>',
+#         "link": "/frontend/ai_hub/model_market/model_visual"
+#     }
+# ]
 # User credentials to use for generating reports
 # This user should have permissions to browse all the dashboards and
 # slices.
@@ -392,7 +395,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS=False
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'admin')   # default must set None
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
-SOCKETIO_MESSAGE_QUEUE = 'redis://:%s@%s:%s/2'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))
+SOCKETIO_MESSAGE_QUEUE = 'redis://:%s@%s:%s/2'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/2'%(REDIS_HOST,str(REDIS_PORT))
 
 # 数据库配置地址
 SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','')
@@ -406,7 +409,7 @@ CACHE_CONFIG = {
     'CACHE_TYPE': 'redis', # 使用 Redis
     'CACHE_REDIS_HOST': REDIS_HOST, # 配置域名
     'CACHE_REDIS_PORT': int(REDIS_PORT), # 配置端口号
-    'CACHE_REDIS_URL':'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
+    'CACHE_REDIS_URL':'redis://:%s@%s:%s/1'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
 }
 
 class CeleryConfig(object):
@@ -675,8 +678,6 @@ GLOBAL_ENV={
     "KFJ_ARCHIVE_BASE_PATH":"/archives",
     "KFJ_PIPELINE_NAME":"{{pipeline_name}}",
     "KFJ_NAMESPACE":"pipeline",
-    "KFJ_GPU_MEM_MIN":"13G",
-    "KFJ_GPU_MEM_MAX":"13G",
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
 }
 
@@ -692,9 +693,8 @@ GPU_NONE={
 
 # vgpu的类型方式
 VGPU_RESOURCE={
-    "mgpu":"tencent.com/vcuda-core"
 }
-VGPU_DRIVE_TYPE = "mgpu"   # tke gpumanager的方式
+VGPU_DRIVE_TYPE = "vgpu"   # 第四范式解决方案
 
 
 RDMA_RESOURCE_NAME=''
@@ -769,7 +769,7 @@ ARCHIVES_HOST_PATH = "/data/k8s/kubeflow/pipeline/archives"
 # prometheus地址
 PROMETHEUS = 'prometheus-k8s.monitoring:9090'
 # nni默认镜像
-NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20211003'
+NNI_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nni:20240501'
 
 # 数据集的存储地址
 DATASET_SAVEPATH = '/dataset/'
@@ -800,8 +800,6 @@ HOSTALIASES='''
 # 默认服务代理的ip
 SERVICE_EXTERNAL_IP=[]
 
-# json响应是否按字母顺序排序
-JSON_SORT_KEYS=False
 # 链接菜单
 ALL_LINKS=[
     {
@@ -924,5 +922,7 @@ CLUSTERS={
         # "SERVICE_DOMAIN": 'service.local.com',
     }
 }
+
+
 
 HOST = CLUSTERS[ENVIRONMENT].get('HOST',None)

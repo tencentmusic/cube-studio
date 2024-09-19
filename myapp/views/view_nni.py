@@ -340,6 +340,9 @@ class NNI_ModelView_Base():
                     "role": "master",
                     "app": nni.name,
                     "username": nni.created_by.username
+                },
+                "annotations":{
+                    "project":nni.project.name
                 }
             },
             "spec": {
@@ -657,6 +660,12 @@ trainingService:
             k8s_client.delete_istio_ingress(namespace=namespace,name=nni.name)
         except Exception as e:
             print(e)
+
+
+    def pre_update_req(self,req_json, *args, **kwargs):
+        core.validate_json(req_json.get('parameters','{}'))
+
+    pre_add_req = pre_update_req
 
     # @pysnooper.snoop()
     def pre_add(self, item):

@@ -33,7 +33,7 @@ class Docker(Model,AuditMixinNullable,MyappModelBase):
     expand = Column(Text(65536), default='{}',comment='扩展参数')
 
     def __repr__(self):
-        return self.label
+        return self.describe
 
     @property
     def save(self):

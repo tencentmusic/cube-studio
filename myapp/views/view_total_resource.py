@@ -92,7 +92,7 @@ def node_traffic():
         # 按项目组和设备类型分组
         stored_nodes = {}
         for ip in nodes:
-            org = nodes[ip]['labels'].get('org', 'public')
+            org = nodes[ip]['labels'].get('org', 'unknown')
             device = 'cpu'
             if nodes[ip]['labels'].get('gpu','')=='true':
                 device = 'gpu/' + nodes[ip]['labels'].get('gpu-type', '')
@@ -112,7 +112,7 @@ def node_traffic():
         grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_CLUSTER_PATH')
         for ip in nodes:
             node_dashboard_url = "//"+ cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/node/%s?namespace=default' % nodes[ip]['name']
-            org = nodes[ip]['labels'].get('org', 'public')
+            org = nodes[ip]['labels'].get('org', 'unknown')
             enable_train = nodes[ip]['labels'].get('train', 'true')
             ip_html = '<a target="_blank" href="%s">%s</a>' % (node_dashboard_url, ip if nodes[ip]['status']=='Ready' else f'<del>{ip}</del>')
 
@@ -195,7 +195,7 @@ def pod_resource():
                     all_tasks_json[cluster_name][namespace] = {}
                     all_pods = k8s_client.get_pods(namespace=namespace)
                     for pod in all_pods:
-                        org = pod['node_selector'].get("org", 'public')
+                        org = pod['node_selector'].get("org", 'unknown')
                         if org not in all_tasks_json[cluster_name][namespace]:
                             all_tasks_json[cluster_name][namespace][org] = {}
                         if k8s_client.exist_hold_resource(pod):
@@ -218,6 +218,8 @@ def pod_resource():
                                 all_tasks_json[cluster_name][namespace][org][pod['name']]['used_gpu'] = '0'
                                 all_tasks_json[cluster_name][namespace][org][pod['name']]['label'] = pod['labels']
                                 all_tasks_json[cluster_name][namespace][org][pod['name']]['annotations'] = pod['annotations']
+
+                                all_tasks_json[cluster_name][namespace][org][pod['name']]['start_time'] = pod['start_time'].strftime('%Y-%m-%d %H:%M:%S')
                                 # print(namespace,org,pod['name'])
 
                     # 获取pod的资源使用
@@ -260,6 +262,7 @@ def pod_resource():
                         "cpu":"%s/%s" % (math.ceil(int(pod.get('used_cpu', '0')) / 1000), int(pod.get('request_cpu', '0'))),
                         "memory":"%s/%s" % (int(pod.get('used_memory', '0')), int(pod.get('request_memory', '0'))),
                         "gpu":"%s" % str(round(float(pod.get('request_gpu', '0')),2)),
+                        "start_time":pod['start_time']
                     }
                     all_pod_resource.append(pod_resource)
     return all_pod_resource
@@ -268,7 +271,7 @@ def pod_resource():
 # 添加api
 class Total_Resource_ModelView_Api(MyappFormRestApi):
     route_base = '/total_resource/api/'
-    order_columns = ["cpu", "memory"]
+    order_columns = ["cpu", "memory", "start_time"]
     primary_key = 'pod_info'
     cols_width = {
         "cluster": {"type": "ellip2", "width": 100},
@@ -280,7 +283,8 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
         "username": {"type": "ellip2", "width": 100},
         "cpu": {"type": "ellip2", "width": 100},
         "memory": {"type": "ellip2", "width": 100},
-        "gpu": {"type": "ellip2", "width": 100}
+        "gpu": {"type": "ellip2", "width": 100},
+        "start_time":{"type": "ellip2", "width": 200},
     }
     label_columns = {
         "cluster": _("集群"),
@@ -293,7 +297,8 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
         "node": _("节点(资源使用)"),
         "cpu": _("cpu使用"),
         "memory": _("内存使用"),
-        "gpu": _("AI卡使用")
+        "gpu": _("AI卡使用"),
+        "start_time":_("创建时间")
     }
     ops_link = [
         {
@@ -310,7 +315,7 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
     page_size = 1000
     enable_echart = True
     base_permissions = ['can_list']
-    list_columns = ['cluster', 'resource_group', 'namespace', 'pod', 'username', 'node', 'cpu', 'memory', 'gpu']
+    list_columns = ['cluster','project', 'resource_group', 'namespace', 'pod', 'username', 'node', 'cpu', 'memory', 'gpu', 'start_time']
 
     alert_config = {
         conf.get('MODEL_URLS', {}).get('total_resource', ''): node_traffic
@@ -451,6 +456,13 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                         k8s_client.delete_deployment(namespace=namespace, name=service_name)
                         k8s_client.delete_service(namespace=namespace, name=service_name)
                         k8s_client.delete_istio_ingress(namespace=namespace, name=service_name)
+                    from myapp.models.model_aihub import Aihub
+                    aihub = db.session.query(Aihub).filter_by(name=service_name).first()
+                    if aihub:
+                        expand = json.loads(aihub.expand) if aihub.expand else {}
+                        expand['status'] = 'offline'
+                        aihub.expand = json.dumps(expand)
+                        db.session.commit()
                 # 如果是pipeline命名空间，按照run-id进行删除，这里先只删除pod，也会造成任务停止
                 if namespace == 'pipeline':
                     k8s_client.delete_pods(namespace=namespace, pod_name=pod_name)

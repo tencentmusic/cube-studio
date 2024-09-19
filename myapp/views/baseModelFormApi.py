@@ -260,13 +260,13 @@ class MyappFormRestApi(ModelRestApi):
     def post_add(self, item):
         pass
 
-    def pre_add_req(self, req_json):
+    def pre_add_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_add_res(self, result):
         return result
 
-    def pre_update_req(self, req_json):
+    def pre_update_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_update_res(self, result):
@@ -278,7 +278,7 @@ class MyappFormRestApi(ModelRestApi):
     def post_update(self, item):
         pass
 
-    def pre_list_req(self, req_json):
+    def pre_list_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_list_res(self, result):

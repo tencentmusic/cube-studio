@@ -1,7 +1,7 @@
 
-# ubuntu 安装containerd
+# 1. ubuntu 安装containerd
 
-##  卸载旧版本containerd
+##  1.1 卸载旧版本containerd
 ```bash
 sudo apt-get remove -y docker docker-engine docker.io containerd runc
 sudo rm -rf /var/lib/docker /etc/docker/
@@ -9,7 +9,7 @@ sudo rm -rf /var/lib/containerd /etc/containerd/
 
 ```
 
-## 安装containerd
+## 1.2 安装containerd
 
 ```bash
 
@@ -34,7 +34,7 @@ systemctl status containerd
 
 ```
 
-# centos 安装containerd
+# 2. centos 安装containerd
 
 ```bash
 yum update -y
@@ -49,10 +49,10 @@ systemctl status containerd
 
 ```
 
-# 配置containerd
+# 3. 配置containerd
 
 ```bash
-# 生成默认配置
+# 生成默认配置，如果已经生成了配置文件，先删除再重新生成，因为之前自带的配置文件基本是空的
 mkdir /etc/containerd
 containerd config default | tee /etc/containerd/config.toml
 
@@ -79,7 +79,13 @@ mkdir -p /etc/containerd/certs.d/docker.io
 
 tee /etc/containerd/certs.d/docker.io/hosts.toml << 'EOF'
 server = "https://docker.io"
-[host."https://docker.anyhub.us.kg"]
+[host."https://docker.1panel.live"]
+  capabilities = ["pull", "resolve"]
+[host."https://hub.rat.dev/"]
+  capabilities = ["pull", "resolve"]
+[host."https://docker.chenby.cn"]
+  capabilities = ["pull", "resolve"]
+[host."https://docker.m.daocloud.io"]
   capabilities = ["pull", "resolve"]
 EOF
 
@@ -87,7 +93,7 @@ EOF
 # 只需要编辑下面这段配置即可,给config_path添加对应的地址
 [plugins."io.containerd.grpc.v1.cri".registry]
   config_path = "/etc/containerd/cert.d"
-  
+# ip写成自己内网仓库的ip
 mkdir -p /etc/containerd/certs.d/172.17.0.4:88
 tee /etc/containerd/certs.d/172.17.0.4:88/hosts.toml << 'EOF'
 server = "http://172.17.0.4:88"
@@ -102,16 +108,22 @@ systemctl daemon-reload
 systemctl restart containerd
 ```
 
-# 安装nerdctl
+# 4. 安装nerdctl
 
 首先查看containerd与nerdctl的对应关系，下载对应的版本
 
-获取下载地址 https://github.com/containerd/nerdctl/releases
+查看这个地址的“Compatible containerd versions”部分，查看对应的containerd版本，并获取下载地址：https://github.com/containerd/nerdctl/releases
 
+比如这里查到的适用的nerdctl版本是version=1.7.6，那么nerdctl的下载地址如下：
+
+```
 version=1.7.6
-
 wget https://githubfast.com/containerd/nerdctl/releases/download/v${version}/nerdctl-${version}-linux-amd64.tar.gz
+```
 
+也可以直接在页面上找到相应版本，直接复制链接。
+
+```
 tar zxvf nerdctl-${version}-linux-amd64.tar.gz -C /usr/local/bin
 
 echo "alias docker='nerdctl --namespace k8s.io'"  >> /etc/profile
@@ -124,8 +136,9 @@ cat > /etc/nerdctl/nerdctl.toml << 'EOF'
 namespace      = "k8s.io"
 insecure_registry = true
 EOF
+```
 
-# 安装构建器
+# 5. 安装构建器
 
 首先查看containerd与buildkit的对应关系，下载对应的版本
 
@@ -155,7 +168,7 @@ systemctl enable buildkit --now
 
 ```
 
-# 安装 cni 网络插件
+# 6. 安装 cni 网络插件
 ```bash
 # 创建目录
 sudo mkdir -p /opt/cni/bin
@@ -173,7 +186,7 @@ sudo tar -C /opt/cni/bin -xzvf cni-plugins-linux-amd64-v1.1.1.tgz
 vi /etc/cni/net.d/10-bridge.conf
 
 {
-    "cniVersion": "0.4.0",
+    "cniVersion": "1.1.1",
     "name": "bridge",
     "type": "bridge",
     "bridge": "cni0",
@@ -205,7 +218,7 @@ systemctl daemon-reload
 systemctl restart containerd
 ```
 
-# 注意
+# 7. 注意
 
 1、如果镜像源没有生效，那在拉取dockerhub镜像的前面加上 `docker.anyhub.us.kg/library/`
 

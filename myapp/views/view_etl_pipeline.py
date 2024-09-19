@@ -185,6 +185,11 @@ class ETL_Pipeline_ModelView_Base():
         flash('just creator can edit/delete ', 'warning')
         return False
 
+    def pre_update_req(self,req_json, *args, **kwargs):
+        core.validate_json(req_json.get('expand','{}'))
+
+    pre_add_req = pre_update_req
+
     # @pysnooper.snoop()
     def pre_add(self, item):
         if not item.dag_json:

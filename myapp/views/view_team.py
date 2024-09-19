@@ -89,7 +89,7 @@ class Project_User_ModelView_Base():
     }
     edit_form_extra_fields = add_form_extra_fields
 
-    def pre_add_req(self,req_json):
+    def pre_add_req(self,req_json,*args,**kwargs):
         user_roles = [role.name.lower() for role in list(get_user_roles())]
         if "admin" in user_roles:
             return req_json
@@ -196,6 +196,11 @@ class Project_ModelView_Base():
             default=self.project_type,
         )
         self.add_form_extra_fields = self.edit_form_extra_fields
+
+    def pre_update_req(self,req_json, *args, **kwargs):
+        core.validate_json(req_json.get('expand','{}'))
+
+    pre_add_req = pre_update_req
 
     # @pysnooper.snoop()
     def pre_update(self, item):

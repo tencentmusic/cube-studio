@@ -114,7 +114,7 @@ class InferenceService_ModelView_base():
     INFERNENCE_IMAGES = list(conf.get('INFERNENCE_IMAGES', {}).values())
     for item in INFERNENCE_IMAGES:
         images += item
-    service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（todo）','llm-server（todo）',]
+    service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（企业版）','llm-server（企业版）',]
     spec_label_columns = {
         "inference_host_url": _("域名:需要泛域名支持，测试(test.xx)/调试(debug.xx)"),
     }
@@ -146,7 +146,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
                                     validators=[DataRequired()]),
         "host": StringField(_('域名'), default=InferenceService.host.default.arg,description= _('访问域名，')+host_rule,widget=BS3TextFieldWidget()),
         "transformer":StringField(_('前后置处理'), default=InferenceService.transformer.default.arg,description= _('前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架'),widget=BS3TextFieldWidget()),
-        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，或虚拟gpu，例如0.2(T4)'),
+        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，<span style="color:red;">虚拟化占用和共享模式占用仅企业版支持</span>'),
                                                         widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
@@ -233,7 +233,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
         'model_path': StringField(
             _('模型地址'),
             default='',
-            description= '模型文件的容器地址或下载地址，格式参考详情',
+            description= _('模型文件的容器地址或下载地址，格式参考详情'),
             widget=MyBS3TextFieldWidget(tips=model_path_describe),
             validators=[]
         ),
@@ -1313,6 +1313,29 @@ output %s
         # file.close()
         return option
 
+    # 划分数据历史版本
+    # @pysnooper.snoop()
+    def pre_list_res(self,res):
+        data=res['data']
+        import itertools
+        all_data={item['id']:item for item in data}
+        all_last_data_id=[]
+        # 按name分组，最新数据下包含其他更老的数据作为历史集合
+        data = sorted(data, key=lambda x: re.search(r'>(.*?)</a>',x['model_name_url']).group(1))
+        for name, group in itertools.groupby(data, key=lambda x: re.search(r'>(.*?)</a>',x['model_name_url']).group(1)):
+            group=list(group)
+            online_id = [x['id'] for x in group if x.get("model_status","offline")=='online']
+            max_id = max([x['id'] for x in group]) if not online_id else online_id[0]
+            all_last_data_id.append(max_id)
+            for item in group:
+                if item['id']!=max_id:
+                    if 'children' not in all_data[max_id]:
+                        all_data[max_id]['children']=[all_data[item['id']]]
+                    else:
+                        all_data[max_id]['children'].append(all_data[item['id']])
+        # 顶层只保留最新的数据
+        res['data'] = [all_data[id] for id in all_data if id in all_last_data_id]
+        return res
 
 class InferenceService_ModelView(InferenceService_ModelView_base, MyappModelView):
     datamodel = SQLAInterface(InferenceService)

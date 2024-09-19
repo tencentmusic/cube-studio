@@ -92,13 +92,13 @@ triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torc
 llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推理加速和openai流式接口
 '''.strip())
 
-    service_type_choices = [x.replace('_', '-') for x in ['serving','tfserving', 'torch-server', 'onnxruntime', 'triton-server','aihub']]
+    service_type_choices = [x.replace('_', '-') for x in ['serving','ml-server','tfserving', 'torch-server', 'onnxruntime', 'triton-server','llm-server','aihub']]
 
     add_form_extra_fields = {
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description='模型文件的容器地址或下载地址，格式参考详情',
+            description=_('模型文件的容器地址或下载地址，格式参考详情'),
             validators=[DataRequired()],
             widget=MyBS3TextFieldWidget(tips=Markup('<pre><code>' + path_describe + "</code></pre>"))
         ),
@@ -221,6 +221,29 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
         url = conf.get('MODEL_URLS', {}).get('inferenceservice', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "model_name", "value": exist_inference.model_name}], ensure_ascii=False))
         print(url)
         return redirect(url)
+
+
+    # 划分数据历史版本
+    def pre_list_res(self,res):
+        data=res['data']
+        import itertools
+        all_data={item['id']:item for item in data}
+        all_last_data_id=[]
+        # 按name分组，最新数据下包含其他更老的数据作为历史集合
+        data = sorted(data, key=lambda x: x['name'])
+        for name, group in itertools.groupby(data, key=lambda x: x['name']):
+            group=list(group)
+            max_id = max([x['id'] for x in group])
+            all_last_data_id.append(max_id)
+            for item in group:
+                if item['id']!=max_id:
+                    if 'children' not in all_data[max_id]:
+                        all_data[max_id]['children']=[all_data[item['id']]]
+                    else:
+                        all_data[max_id]['children'].append(all_data[item['id']])
+        # 顶层只保留最新的数据
+        res['data'] = [all_data[id] for id in all_data if id in all_last_data_id]
+        return res
 
 
 class Training_Model_ModelView(Training_Model_ModelView_Base, MyappModelRestApi):

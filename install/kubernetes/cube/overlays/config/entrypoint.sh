@@ -2,14 +2,13 @@
 
 set -ex
 
-rm -f /home/myapp/myapp/static/assets
-ln -s /home/myapp/myapp/assets /home/myapp/myapp/static/
 rm -f /home/myapp/myapp/static/mnt
 mkdir -p /data/k8s/kubeflow/pipeline/workspace
 ln -s /data/k8s/kubeflow/pipeline/workspace /home/myapp/myapp/static/mnt
 rm -f /home/myapp/myapp/static/dataset
 mkdir -p /data/k8s/kubeflow/dataset
 ln -s /data/k8s/kubeflow/dataset /home/myapp/myapp/static/
+
 rm -f /home/myapp/myapp/static/aihub
 ln -s /cube-studio/aihub /home/myapp/myapp/static/
 
@@ -26,12 +25,16 @@ myapp fab create-admin --username admin --firstname admin --lastname admin --ema
 myapp init
 
 if [ "$STAGE" = "build" ]; then
-#  cd /home/myapp/myapp/vision && yarn && yarn build
-  cd /home/myapp/myapp/vision && npm install && yarn build
-
+  # 构建前端主体
+  cd /home/myapp/myapp/frontend && npm install && npm run build
+  # 构建机器学习pipeline
+  cd /home/myapp/myapp/vision && npm install && npm run build
+  # 构建数据ETL pipeline
+  cd /home/myapp/myapp/visionPlus && yarn && npm run build
 elif [ "$STAGE" = "dev" ]; then
   export FLASK_APP=myapp:app
 #  FLASK_ENV=development  flask run -p 80 --with-threads  --host=0.0.0.0
+  python myapp/check_tables.py
   python myapp/run.py
 
 elif [ "$STAGE" = "prod" ]; then

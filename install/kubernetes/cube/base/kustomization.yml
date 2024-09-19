@@ -4,7 +4,7 @@ resources:
 - deploy-watch.yaml
 - deploy-worker.yaml
 - sa-rbac.yaml
-- deploy.yaml
+- deploy-backend.yaml
 - deploy-frontend.yaml
 - deploy-schedule.yaml
 - virtual.yaml

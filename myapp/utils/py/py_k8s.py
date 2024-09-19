@@ -29,7 +29,6 @@ class K8s():
         else:
             config.load_incluster_config()
         self.v1 = client.CoreV1Api()
-        self.v1beta1 = client.ExtensionsV1beta1Api()
         self.AppsV1Api = client.AppsV1Api()
         self.NetworkingV1Api = client.NetworkingV1Api()
         self.CustomObjectsApi = client.CustomObjectsApi()
@@ -49,7 +48,7 @@ class K8s():
         addresses = subsets[0].addresses  # 只取第一个子网
         for address in addresses:
             pod_name_temp = address.target_ref.name
-            pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
+            pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace,_request_timeout=5)
             all_pods.append(pod)
 
     def exist_hold_resource(self,pod):
@@ -76,19 +75,19 @@ class K8s():
             all_pods = []
             # 如果只有命名空间
             if (namespace and not service_name and not pod_name and not labels):
-                all_pods = self.v1.list_namespaced_pod(namespace).items
+                all_pods = self.v1.list_namespaced_pod(namespace=namespace).items
             # 如果有命名空间和pod名，就直接查询pod
             elif (namespace and pod_name):
-                pod = self.v1.read_namespaced_pod(name=pod_name, namespace=namespace)
+                pod = self.v1.read_namespaced_pod(name=pod_name, namespace=namespace,_request_timeout=5)
                 all_pods.append(pod)
             # 如果只有命名空间和服务名，就查服务下绑定的pod
             elif (namespace and service_name):  # 如果有命名空间和服务名
-                all_endpoints = self.v1.read_namespaced_endpoints(service_name, namespace)  # 先查询入口点，
+                all_endpoints = self.v1.read_namespaced_endpoints(service_name, namespace,_request_timeout=5)  # 先查询入口点，
                 subsets = all_endpoints.subsets
                 addresses = subsets[0].addresses  # 只取第一个子网
                 for address in addresses:
                     pod_name_temp = address.target_ref.name
-                    pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
+                    pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
                     all_pods.append(pod)
             elif (namespace and status):
                 if status.lower()=='running':
@@ -97,7 +96,7 @@ class K8s():
                     addresses = subsets[0].addresses  # 只取第一个子网
                     for address in addresses:
                         pod_name_temp = address.target_ref.name
-                        pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
+                        pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
                         all_pods.append(pod)
                 else:
                     src_pods = self.v1.list_namespaced_pod(namespace).items
@@ -179,7 +178,7 @@ class K8s():
                 temp = {
                     'name': metadata.name,
                     "username": username,
-                    'host_ip': pod.status.host_ip,
+                    'host_ip': pod.status.host_ip if pod.status.host_ip else '',
                     'pod_ip': pod.status.pod_ip,
                     'status': status,  # 每个容器都正常才算正常
                     'status_more': pod.status.to_dict(),  # 无法json序列化
@@ -216,7 +215,7 @@ class K8s():
     # 获取 指定服务，指定命名空间的下面的endpoint
     def get_pod_humanized(self, namespace, pod_name):
         try:
-            pod = self.v1.read_namespaced_pod(namespace=namespace, name=pod_name)
+            pod = self.v1.read_namespaced_pod(namespace=namespace, name=pod_name,_request_timeout=5)
             if pod:
                 from kubernetes.client import ApiClient
                 pod = ApiClient().sanitize_for_serialization(pod)
@@ -234,7 +233,7 @@ class K8s():
         try:
             all_pods = self.get_pods(namespace=namespace, service_name=service_name)
             all_pod_ip = []
-            if (all_pods):
+            if all_pods:
                 for pod in all_pods:
                     all_pod_ip.append(pod['pod_ip'])
                 # print(all_pod_ip)
@@ -379,21 +378,21 @@ class K8s():
             for node in all_node:
                 # print(node)
                 adresses = node.status.addresses
-                Hostname = ''
-                InternalIP = ''
+                hostname = ''
+                internalIP = ''
                 for address in adresses:
                     if address.type == 'Hostname':
-                        Hostname = address.address
+                        hostname = address.address
                     if address.type == 'InternalIP':
-                        InternalIP = address.address
+                        internalIP = address.address
 
-                if InternalIP in ips:
+                if internalIP in ips:
                     body = {
                         "metadata": {
                             "labels": labels
                         }
                     }
-                    self.v1.patch_node(Hostname, body)
+                    self.v1.patch_node(hostname, body)
 
             return all_node_ip
         except Exception as e:
@@ -1212,7 +1211,7 @@ class K8s():
     # @pysnooper.snoop()
     def apply_hubsecret(self, namespace, name, user, password, server):
         try:
-            hubsecrest = self.v1.read_namespaced_secret(name=name, namespace=namespace)
+            hubsecrest = self.v1.read_namespaced_secret(name=name, namespace=namespace,_request_timeout=5)
             if hubsecrest:
                 self.v1.delete_namespaced_secret(name, namespace=namespace)
         except ApiException as api_e:
@@ -1479,7 +1478,7 @@ class K8s():
         #     print(e)
 
         try:
-            self.v1.read_namespaced_service(name=name, namespace=namespace)
+            self.v1.read_namespaced_service(name=name, namespace=namespace,_request_timeout=5)
             self.v1.replace_namespaced_service(name=name, namespace=namespace, body=service)
         except ApiException as e:
             if e.status == 404:
@@ -1505,32 +1504,6 @@ class K8s():
             service = self.v1.create_namespaced_service(namespace, service)
         except Exception as e:
             print(e)
-
-    # 创建pod
-    # @pysnooper.snoop()
-    def create_ingress(self, namespace, name, host, username, port):
-        self.v1beta1 = client.ExtensionsV1beta1Api()
-        ingress_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username},annotations={"nginx.ingress.kubernetes.io/proxy-connect-timeout":"3000","nginx.ingress.kubernetes.io/proxy-send-timeout":"3000","nginx.ingress.kubernetes.io/proxy-read-timeout":"3000","nginx.ingress.kubernetes.io/proxy-body-size":"1G"})
-        backend = client.ExtensionsV1beta1IngressBackend(service_name=name,service_port=port)
-        path = client.ExtensionsV1beta1HTTPIngressPath(backend=backend,path='/')
-        http = client.ExtensionsV1beta1HTTPIngressRuleValue(paths=[path])
-        rule = client.ExtensionsV1beta1IngressRule(host=host, http=http)
-        ingress_spec = client.ExtensionsV1beta1IngressSpec(rules=[rule])
-        ingress = client.ExtensionsV1beta1Ingress(api_version='extensions/v1beta1', kind='Ingress', metadata=ingress_metadata, spec=ingress_spec)
-        # print(ingress.to_dict())
-        try:
-            self.v1beta1.delete_namespaced_ingress(name=name, namespace=namespace)
-        except ApiException as api_e:
-            if api_e.status != 404:
-                print(api_e)
-        except Exception as e:
-            print(e)
-
-        try:
-            ingress = self.v1beta1.create_namespaced_ingress(namespace=namespace, body=ingress)
-        except Exception as e:
-            print(e)
-
     #
     def delete_istio_ingress(self, namespace, name):
         crd_info = {
@@ -1777,7 +1750,7 @@ class K8s():
 
     def delete_hpa(self, namespace, name):
         try:
-            client.AutoscalingV2beta1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
+            client.AutoscalingV2beta2Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
         except ApiException as api_e:
             if api_e.status != 404:
                 print(api_e)
@@ -1797,7 +1770,7 @@ class K8s():
         hpa = re.split(',|;', hpa)
 
         hpa_json = {
-            "apiVersion": "autoscaling/v2beta1",  # 需要所使用的k8s集群启动了这个版本的hpa，可以通过 kubectl api-resources  查看使用的版本
+            "apiVersion": "autoscaling/v2beta2",  # 需要所使用的k8s集群启动了这个版本的hpa，可以通过 kubectl api-resources  查看使用的版本
             "kind": "HorizontalPodAutoscaler",
             "metadata": {
                 "name": name,
@@ -1880,9 +1853,9 @@ class K8s():
         #     ),
         #     status=status
         # )
-        print(json.dumps(hpa_json, indent=4, ensure_ascii=4))
+        print(json.dumps(hpa_json, indent=4, ensure_ascii=False))
         try:
-            client.AutoscalingV2beta1Api().create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=hpa_json, pretty=True)
+            client.AutoscalingV2beta2Api().create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=hpa_json, pretty=True)
         except ValueError as e:
             if str(e) == 'Invalid value for `conditions`, must not be `None`':
                 print(e)
@@ -1957,7 +1930,7 @@ class K8s():
     # @pysnooper.snoop()
     def exec_command(self, name, namespace, command):
         try:
-            self.v1.read_namespaced_pod(name=name, namespace=namespace)
+            self.v1.read_namespaced_pod(name=name, namespace=namespace,_request_timeout=5)
         except ApiException as e:
             if e.status != 404:
                 print("Unknown error: %s" % e)
@@ -2105,7 +2078,7 @@ class K8s():
     # 读取pvc
     def get_pvc(self,name,namespace):
         try:
-            pvc = self.v1.read_namespaced_persistent_volume_claim(name,namespace)
+            pvc = self.v1.read_namespaced_persistent_volume_claim(name=name,namespace=namespace,_request_timeout=5)
             pvc = {
                 "status":pvc.status.phase if pvc.status and pvc.status.phase else 'unknown'
             }

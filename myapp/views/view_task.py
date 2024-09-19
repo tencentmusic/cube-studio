@@ -289,7 +289,9 @@ class Task_ModelView_Base():
 
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_add(self, item):
-
+        parameter = json.loads(item.pipeline.parameter)
+        if parameter.get("demo", 'false').lower() == 'true':
+            raise MyappException(__("示例pipeline，不允许修改，请复制后编辑"))
         item.name = item.name.replace('_', '-')[0:54].lower()
         if item.job_template is None:
             raise MyappException(__("Job Template 为必选"))
@@ -313,8 +315,15 @@ class Task_ModelView_Base():
         else:
             item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
 
+    def pre_update_req(self,req_json=None,src_item=None,*args,**kwargs):
+        if src_item and src_item.pipeline and src_item.pipeline.parameter:
+            parameter = json.loads(src_item.pipeline.parameter)
+            if parameter.get("demo", 'false').lower() == 'true':
+                raise MyappException(__("示例pipeline，不允许修改，请复制后编辑"))
+
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_update(self, item):
+
         item.name = item.name.replace('_', '-')[0:54].lower()
         if item.resource_gpu:
             item.resource_gpu = str(item.resource_gpu).upper()

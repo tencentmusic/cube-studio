@@ -251,6 +251,7 @@ class MySelect2ManyWidget(widgets.Select):
 
 from wtforms.fields.core import SelectField
 
+
 class MySelectMultipleField(SelectField):
     """
     No different from a normal select field, except this one can take (and

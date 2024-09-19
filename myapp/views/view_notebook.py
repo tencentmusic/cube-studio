@@ -65,6 +65,7 @@ class Notebook_ModelView_Base():
     search_columns = ['created_by', 'name']
     add_columns = ['project', 'name', 'describe', 'images', 'working_dir', 'volume_mount', 'resource_memory','resource_cpu', 'resource_gpu']
     list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe','reset', 'resource', 'renew', 'save']
+    show_columns = ['project', 'name', 'namespace', 'describe', 'images', 'working_dir', 'env', 'volume_mount','resource_memory', 'resource_cpu', 'resource_gpu', 'expand']
     cols_width = {
         "project": {"type": "ellip2", "width": 150},
         "ide_type_html": {"type": "ellip2", "width": 200},
@@ -73,7 +74,7 @@ class Notebook_ModelView_Base():
         "resource": {"type": "ellip2", "width": 300},
         "status": {"type": "ellip2", "width": 100},
         "renew": {"type": "ellip2", "width": 200},
-        "save": {"type": "ellip2", "width": 100}
+        "save": {"type": "ellip2", "width": 200}
     }
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -160,7 +161,7 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['resource_gpu'] = StringField(
             _('gpu'),
             default='0',
-            description= _('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
+            description= _('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，<span style="color:red;">虚拟化占用和共享模式占用仅企业版支持</span>'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
@@ -595,5 +596,5 @@ class Notebook_ModelView_SDK_Api(Notebook_ModelView_Base, MyappModelRestApi):
     add_columns = ['project', 'name', 'describe', 'images', 'working_dir', 'volume_mount', 'resource_memory','resource_cpu', 'resource_gpu','volume_mount','image_pull_policy','expand']
     edit_columns = add_columns
     list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe', 'reset', 'resource', 'renew']
-    show_columns = ['project', 'name', 'namespace', 'describe', 'images', 'working_dir', 'env', 'volume_mount','resource_memory', 'resource_cpu', 'resource_gpu', 'status', 'ide_type', 'image_pull_policy','node_selector', 'expand']
+    show_columns = ['project', 'name', 'namespace', 'describe', 'images', 'working_dir', 'env', 'volume_mount','resource_memory', 'resource_cpu', 'resource_gpu', 'status', 'ide_type', 'image_pull_policy', 'expand']
 appbuilder.add_api(Notebook_ModelView_SDK_Api)

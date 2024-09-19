@@ -191,6 +191,12 @@ class Job_Template_ModelView_Base():
     pre_add_web = set_columns
     pre_update_web = set_columns
 
+    def pre_update_req(self,req_json, *args, **kwargs):
+        core.validate_job_args(req_json['args'])
+        core.validate_json(req_json['expand'])
+
+    pre_add_req = pre_update_req
+
     # 校验是否是json
     # @pysnooper.snoop(watch_explode=('job_args'))
     def pre_add(self, item):
@@ -201,7 +207,7 @@ class Job_Template_ModelView_Base():
         item.env = '\n'.join(envs)
         if not item.args:
             item.args = '{}'
-        item.args = core.validate_job_args(item)
+        item.args = core.validate_job_args(item.args)
 
         if not item.expand or not item.expand.strip():
             item.expand = '{}'

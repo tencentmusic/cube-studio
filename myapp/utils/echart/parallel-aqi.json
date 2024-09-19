@@ -42,8 +42,7 @@
     max: 150,
     dimension: 2,
     inRange: {
-      color: ['#d94e5d', '#eac736', '#50a3ba'].reverse()
-      // colorAlpha: [0, 1]
+      color: ['#50a3ba','#d94e5d','#eac736']
     }
   },
   parallel: {
@@ -82,9 +81,9 @@
       name: 'Beijing',
       type: 'parallel',
       lineStyle: {
-  width: 1,
-  opacity: 0.5
-},
+        width: 1,
+        opacity: 0.5
+      },
       data: [
   [1, 55, 9, 56, 0.46, 18, 6, '良'],
   [2, 25, 11, 21, 0.65, 34, 9, '优'],
@@ -123,9 +122,9 @@
       name: 'Shanghai',
       type: 'parallel',
       lineStyle: {
-  width: 1,
-  opacity: 0.5
-},
+        width: 1,
+        opacity: 0.5
+      },
       data: [
   [1, 91, 45, 125, 0.82, 34, 23, '良'],
   [2, 65, 27, 78, 0.86, 45, 29, '良'],
@@ -164,9 +163,9 @@
       name: 'Guangzhou',
       type: 'parallel',
       lineStyle: {
-  width: 1,
-  opacity: 0.5
-},
+        width: 1,
+        opacity: 0.5
+      },
       data: [
   [1, 26, 37, 27, 1.163, 27, 13, '优'],
   [2, 85, 62, 71, 1.195, 60, 8, '良'],

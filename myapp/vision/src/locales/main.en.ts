@@ -190,7 +190,7 @@ const translation = {
   "每个用户使用英文逗号分隔": "each user separated by an English comma",
   "报警人": "alarm person",
   "监控状态": "monitoring status",
-  "周期任务的时间设定 * * * * * 表示为 minute hour day month week": "crontab task * * * * * represents minute hour day month week",
+  "周期任务的时间设定按照crontab书写格式": "The time setting for periodic tasks should follow the crontab format.",
   "调度周期": "scheduling cycle",
   "调度类型": "scheduling type",
   "调度优先级": "priority",
@@ -215,8 +215,12 @@ const translation = {
   "智能推荐下游节点":"Intelligent recommendation of downstream nodes",
   "请先选择推荐节点":"Please select the recommended node first.",
   "保存中":"saving",
-  "设置":"set"
-
+  "设置":"set",
+  "自定义任务模板":"custom task template",
+  "打开目录":"open",
+  "调试镜像":"debug",
+  "确认":"confirm",
+  "编辑":"edit"
 }
 
 export default translation

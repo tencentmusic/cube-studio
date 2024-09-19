@@ -561,6 +561,196 @@
         }
       }
     ]
-  }
+  },
+  "electric-bicycle": {
+        "pipeline": {
+            "name": "electric-bicycle",
+            "describe": "示例：电瓶车全流程(自动化标注-微调-部署)",
+            "project": "public",
+            "parameter": {},
+            "dag_json": {
+                "download-model": {},
+                "labelstudio-train": {
+                    "upstream": [
+                        "download-model"
+                    ]
+                },
+                "yolov8-object-recognition": {
+                    "upstream": [
+                        "labelstudio-train"
+                    ]
+                },
+                "deploy-yolov8-web-service": {
+                    "upstream": [
+                        "yolov8-object-recognition"
+                    ]
+                }
+            },
+            "global_env": "YYYYMMDD={{datetime.datetime.now().strftime('%Y-%m-%d')}}",
+            "expand": [
+                {
+                    "id": "labelstudio-train",
+                    "type": "dataSet",
+                    "position": {
+                        "x": 400,
+                        "y": 247
+                    },
+                    "data": {
+                        "info": {
+                            "describe": "使用用户自定义镜像作为运行镜像"
+                        },
+                        "name": "labelstudio-train",
+                        "label": "标注结果转为训练数据"
+                    }
+                },
+                {
+                    "id": "yolov8-object-recognition",
+                    "type": "dataSet",
+                    "position": {
+                        "x": 400,
+                        "y": 363
+                    },
+                    "data": {
+                        "info": {
+                            "describe": "yolo目标识别"
+                        },
+                        "name": "yolov8-object-recognition",
+                        "label": "目标识别训练"
+                    }
+                },
+                {
+                    "id": "deploy-yolov8-web-service",
+                    "type": "dataSet",
+                    "position": {
+                        "x": 400,
+                        "y": 463
+                    },
+                    "data": {
+                        "info": {
+                            "describe": "模型部署推理服务"
+                        },
+                        "name": "deploy-yolov8-web-service",
+                        "label": "部署模型web服务"
+                    }
+                },
+                {
+                    "id": "download-model",
+                    "type": "dataSet",
+                    "position": {
+                        "x": 400,
+                        "y": 127
+                    },
+                    "data": {
+                        "info": {
+                            "describe": "使用用户自定义镜像作为运行镜像"
+                        },
+                        "name": "download-model",
+                        "label": "下载校验数据和预训练模型"
+                    }
+                },
+                {
+                    "source": "download-model",
+                    "arrowHeadType": "arrow",
+                    "target": "labelstudio-train",
+                    "id": "logic__edge-download-modelnull-labelstudio-trainnull"
+                },
+                {
+                    "source": "labelstudio-train",
+                    "arrowHeadType": "arrow",
+                    "target": "yolov8-object-recognition",
+                    "id": "logic__edge-labelstudio-trainnull-yolov8-object-recognitionnull"
+                },
+                {
+                    "source": "yolov8-object-recognition",
+                    "arrowHeadType": "arrow",
+                    "target": "deploy-yolov8-web-service",
+                    "id": "logic__edge-yolov8-object-recognitionnull-deploy-yolov8-web-servicenull"
+                }
+            ]
+        },
+        "tasks": [
+            {
+                "job_templete": "自定义镜像",
+                "name": "labelstudio-train",
+                "label": "标注结果转为训练数据",
+                "volume_mount": "kubeflow-user-workspace(pvc):/mnt/,/data/k8s/kubeflow/labelstudio(hostpath):/labelstudio/",
+                "resource_memory": "2G",
+                "resource_cpu": "2",
+                "resource_gpu": "0",
+                "resource_rdma": "0",
+                "args": {
+                    "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
+                    "workdir": "/mnt/{{creator}}/pipeline/example/yolo/electric-bicycle",
+                    "command": "python yolo-data-process.py"
+                }
+            },
+            {
+                "job_templete": "yolov8",
+                "name": "yolov8-object-recognition",
+                "label": "目标识别训练",
+                "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
+                "resource_memory": "5G",
+                "resource_cpu": "5",
+                "resource_gpu": "1",
+                "resource_rdma": "0",
+                "args": {
+                    "--train": "/mnt/{{creator}}/pipeline/example/yolo/electric-bicycle/dataset/train.txt",
+                    "--val": "/mnt/{{creator}}/pipeline/example/yolo/electric-bicycle/val1.txt",
+                    "--classes": "Electric-bicycle",
+                    "--batch_size": "1",
+                    "--epoch": "1",
+                    "--weights": "/mnt/{{creator}}/pipeline/example/yolo/electric-bicycle/electric-bicycle-new.pt",
+                    "--save_model_path": "/mnt/{{creator}}/pipeline/example/yolo/electric-bicycle/electric-bicycle-new.pt"
+                }
+            },
+            {
+                "job_templete": "deploy-service",
+                "name": "deploy-yolov8-web-service",
+                "label": "部署模型web服务",
+                "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
+                "resource_memory": "2G",
+                "resource_cpu": "2",
+                "resource_gpu": "0",
+                "resource_rdma": "0",
+                "args": {
+                    "--project_name": "public",
+                    "--label": "目标识别推理服务",
+                    "--model_name": "electric-bicycle",
+                    "--model_version": "v20240701",
+                    "--model_path": "/mnt/{{creator}}/pipeline/example/yolo/electric-bicycle/electric-bicycle-new.pt",
+                    "--service_type": "serving",
+                    "--images": "ccr.ccs.tencentyun.com/cube-studio/yolov8:2024.07",
+                    "--working_dir": "/yolov8",
+                    "--command": "python server.py",
+                    "--env": "MODELPATH=/mnt/admin/pipeline/example/yolo/electric-bicycle/electric-bicycle-new.pt\nYOLO_SAVE_DIR=/mnt/admin/pipeline/example/yolo/inference/\nYOLO_EXAMPLE=https://cube-studio.oss-cn-hangzhou.aliyuncs.com/labelstudio/vision/electric-bicycle/2020_2582.jpg",
+                    "--host": "",
+                    "--ports": "8080",
+                    "--replicas": "1",
+                    "--resource_memory": "5G",
+                    "--resource_cpu": "5",
+                    "--resource_gpu": "1",
+                    "--volume_mount": "kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/labelstudio(hostpath):/labelstudio/",
+                    "--inference_config": "",
+                    "--metrics": "",
+                    "--health": ""
+                }
+            },
+            {
+                "job_templete": "自定义镜像",
+                "name": "download-model",
+                "label": "下载校验数据和预训练模型",
+                "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+                "resource_memory": "2G",
+                "resource_cpu": "2",
+                "resource_gpu": "0",
+                "resource_rdma": "0",
+                "args": {
+                    "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
+                    "workdir": "/mnt/{{creator}}/pipeline/example/yolo/",
+                    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/electric-bicycle/electric-bicycle.zip --no-check-certificate && unzip -n electric-bicycle.zip && cd electric-bicycle && sh reset.sh"
+                }
+            }
+        ]
+    }
 }
 

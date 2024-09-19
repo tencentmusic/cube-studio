@@ -678,8 +678,6 @@ GLOBAL_ENV={
     "KFJ_ARCHIVE_BASE_PATH":"/archives",
     "KFJ_PIPELINE_NAME":"{{pipeline_name}}",
     "KFJ_NAMESPACE":"pipeline",
-    "KFJ_GPU_MEM_MIN":"13G",
-    "KFJ_GPU_MEM_MAX":"13G",
     "KFJ_ENVIRONMENT":"{{cluster_name}}",
 }
 
@@ -695,9 +693,8 @@ GPU_NONE={
 
 # vgpu的类型方式
 VGPU_RESOURCE={
-    "mgpu":"tencent.com/vcuda-core"
 }
-VGPU_DRIVE_TYPE = "mgpu"   # tke gpumanager的方式
+VGPU_DRIVE_TYPE = "vgpu"
 
 
 RDMA_RESOURCE_NAME=''

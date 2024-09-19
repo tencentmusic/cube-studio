@@ -266,13 +266,13 @@ class MyappModelRestApi(ModelRestApi):
     def post_add(self, item):
         pass
 
-    def pre_add_req(self, req_json):
+    def pre_add_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_add_res(self, result):
         return result
 
-    def pre_update_req(self, req_json):
+    def pre_update_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_update_res(self, result):
@@ -284,7 +284,7 @@ class MyappModelRestApi(ModelRestApi):
     def post_update(self, item):
         pass
 
-    def pre_list_req(self, req_json):
+    def pre_list_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_list_res(self, result):
@@ -1120,7 +1120,7 @@ class MyappModelRestApi(ModelRestApi):
                 _args[key.replace('form_data','').replace('[','').replace(']','')]=request.args[key]
 
         if self.pre_list_req:
-            _args = self.pre_list_req(_args)
+            _args = self.pre_list_req(req_json=_args)
 
         # handle select columns
         select_cols = _args.get(API_SELECT_COLUMNS_RIS_KEY, [])
@@ -1331,7 +1331,9 @@ class MyappModelRestApi(ModelRestApi):
                     json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入
 
             if self.pre_update_req:
-                json_data = self.pre_update_req(json_data)
+                new_json_data = self.pre_update_req(req_json=json_data, src_item = item)
+                if new_json_data:
+                    json_data = new_json_data
 
             # 将扩展字段先合并在一起
             if self.expand_columns:
@@ -1339,16 +1341,18 @@ class MyappModelRestApi(ModelRestApi):
 
             data = self._merge_update_item(item, json_data)
             data = {key: data[key] for key in data if key in self.edit_columns}
-            item = self.edit_model_schema.load(data, instance=item)
+            item = self.edit_model_schema.load(data, instance=item)   # 执行到这一句就会在数据库中更新了，后面的只是做修改
+
         except Exception as err:
             return self.response_error(422, message=str(err))
             # return self.response_error(422, message=err.messages)
         # This validates custom Schema with custom validations
         if isinstance(item, dict):
             return self.response_error(422, message=item.errors)
-        self.pre_update(item)
+
         import traceback
         try:
+            self.pre_update(item)
             self.datamodel.edit(item, raise_exception=True)
             if self.post_update:
                 self.post_update(item)
@@ -1368,10 +1372,11 @@ class MyappModelRestApi(ModelRestApi):
         except IntegrityError as e:
             traceback.print_exc()  
             return self.response_error(422, message=str(e.orig))
-        except Exception as e:
-            print("An error occurred:", e)
+        except Exception as e1:
+            print("An error occurred:", e1)
             traceback.print_exc()  # 打印完整的错误堆栈跟踪
-            return self.response_error(500, message="An unexpected error occurred.")
+            return self.response_error(500, message=str(e1))
+
     @event_logger.log_this
     @expose("/<int:pk>", methods=["DELETE"])
     # @pysnooper.snoop()

@@ -1146,7 +1146,7 @@ def get_deployment_node_selector(name,namespace):
         node_selector.update(exist_dp.spec.template.spec.node_selector)
 
     logging.info(node_selector)
-
+    return node_selector
     pass
 
 
@@ -1161,7 +1161,7 @@ def adjust_service_resource(task):
     with session_scope(nullpool=True) as dbsession:
         try:
             k8s_client = K8s(cluster.get('KUBECONFIG',''))
-            hpas = client.AutoscalingV2beta1Api().list_namespaced_horizontal_pod_autoscaler(namespace=namespace).items
+            hpas = client.AutoscalingV2beta2Api().list_namespaced_horizontal_pod_autoscaler(namespace=namespace).items
             for hpa in hpas:
                 inferenceserving = dbsession.query(InferenceService).filter_by(name=hpa.metadata.name).filter_by(model_status='online').first()
                 if not inferenceserving:

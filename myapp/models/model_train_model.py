@@ -53,8 +53,6 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
     def project_url(self):
         if self.project:
             return Markup(f'{self.project.name}({self.project.describe})')
-        elif self.pipeline and self.pipeline.project:
-            return Markup(f'{self.pipeline.project.name}({self.pipeline.project.describe})')
         else:
             return Markup('unknown')
 

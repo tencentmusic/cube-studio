@@ -454,7 +454,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             node_selector=self.node_selector,
             image_pull_policy=self.image_pull_policy,
             parallelism=self.parallelism,
-            alert_status='',
+            alert_status=self.alert_status,
             expand=self.expand,
             parameter=self.parameter
         )

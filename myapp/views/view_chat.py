@@ -380,7 +380,7 @@ aihub接口类型
 
     # 如果传上来的有文件
     # @pysnooper.snoop()
-    def pre_add_req(self, req_json=None):
+    def pre_add_req(self, req_json=None,*args,**kwargs):
         # 针对chat界面的页面处理
         # chat界面前端，会有files参数
         if req_json and 'files' in req_json:
@@ -532,13 +532,15 @@ aihub接口类型
 
             # 如果有知识库
             if knowledge.get('file',[]) or knowledge.get('url',''):
-                item.prompt = prompt_default
+                if not item.prompt:
+                    item.prompt = prompt_default
             # 如果没有，就自动多轮对话
             else:
                 knowledge['status']='在线'
                 knowledge['update_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 item.session_num=10
-                item.prompt = '''
+                if not item.prompt:
+                    item.prompt = '''
 {{history}}
 Human:{{query}}
 AI:
@@ -1150,14 +1152,14 @@ AI:
             headers['Accept'] = 'application/json'
 
         if not url:
-            llm_url = conf.get('CHATGPT_CHAT_URL', 'https://api.openai.com/v1/chat/completions')
+            llm_url = conf.get('CHATGPT_CHAT_URL', 'https://api.openai.com/v1')
             if llm_url:
                 if type(llm_url) == list:
                     llm_url = random.choice(llm_url)
                 else:
                     llm_url = llm_url
                 url=llm_url
-
+        url = url.strip('/')+"/chat/completions"
         llm_tokens = json.loads(chat.service_config).get("llm_tokens", [])
         llm_token = ''
         if llm_tokens:
