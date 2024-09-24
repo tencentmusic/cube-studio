@@ -1,16 +1,5 @@
 # 在线构建镜像
 
-![image](https://user-images.githubusercontent.com/20157705/167538625-39c19c33-a63d-44fa-a16a-2aaa7b480190.png)
-
-扩展字段高级配置(例如)：
-```
-{
-  "volume_mount":"kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
-  "resource_memory":"8G",
-  "resource_cpu": "4"
-}
-```
-
 # 修改默认python版本
 
 	rm /usr/bin/python
@@ -55,105 +44,109 @@
 	RUN apt-get install -y nodejs && npm config set unicode false
 
 
-
-
 # 常用GPU基础镜像
 
 [构建脚本](https://github.com/data-infra/cube-studio/blob/main/images/ubuntu-gpu/build.sh)
 
-### ubuntu
-```
-cuda12.1.0-cudnn8
-- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda12.1.0-cudnn8
+## ubuntu
+
+### cuda12.1.0-cudnn8
+
+- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda12.1.0-cudnn8-amd64
+
+python3.11
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda12.1.0-cudnn8-python3.11-amd64
+
+python3.10
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda12.1.0-cudnn8-python3.10-amd64
 
 python3.9
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9
- 
-cuda11.8.0-cudnn8
-- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8
-	
-python3.7
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.7
-	
-python3.8
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9-amd64
+
+### cuda11.8.0-cudnn8
+
+- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-amd64
+
+python3.11
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.11-amd64
+
+python3.10
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.10-amd64
 
 python3.9
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9
- 
- 
-cuda11.0.3-cudnn8
-- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8
-	
+
+python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.8
+
 python3.7
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8-python3.7
-	
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.7
+
+### cuda11.0.3-cudnn8
+- ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8
+
 python3.8
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8-python3.8
 	
+python3.7
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.0.3-cudnn8-python3.7
 
-cuda10.2-cudnn7
+### cuda10.2-cudnn7
 - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7
+
+python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7-python3.8
 	
 python3.7
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7-python3.7
 	
-python3.8
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.2-cudnn7-python3.8
-	
-	
-cuda10.1-cudnn7
+### cuda10.1-cudnn7
 - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7
-	
-python3.6
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6
-	
+
+python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.8
+
 python3.7
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.7
 	
-python3.8
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.8
-	
-	
-cuda10.0-cudnn7
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7
-	
 python3.6
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.6
-	
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.1-cudnn7-python3.6
+
+### cuda10.0-cudnn7
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7
+
+python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.8
+
 python3.7
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.7
 	
-python3.8
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.8
-	
-	
-cuda9.1-cudnn7
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7
-	
 python3.6
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6
-	
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda10.0-cudnn7-python3.6
+
+### cuda9.1-cudnn7
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7
+
+python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8
+
 python3.7
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.7
 	
-python3.8
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.8
-	
+python3.6
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.1-cudnn7-python3.6
 
-cuda9.0-cudnn7
+### cuda9.0-cudnn7
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7
+
+python3.8
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.8
+
+python3.7
+ - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.7
 	
 python3.6
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.6
 	
-python3.7
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.7
-	
-python3.8
- - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.8
-	
-	
-cuda10.1-cuda10.0-cuda9.0-cudnn7.6
+### cuda10.1-cuda10.0-cuda9.0-cudnn7.6
  - ccr.ccs.tencentyun.com/cube-studio/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base
-```

@@ -11,6 +11,10 @@
 
 3. 安装python > 3.9.16
 
+4. git 要配置一下不要进行换行符修改
+
+`git config --global core.autocrlf false`
+
 ## mac系统基础环境
 
 1. 安装docker desktop

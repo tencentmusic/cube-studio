@@ -6,7 +6,12 @@ clone项目，git clone https://github.com/data-infra/cube-studio.git
 
 centos中如果没有git，可以先yum install git安装git
 
+## 1.1 git clone遇到问题“GnuTLS recv error (-110): The TLS connection was non-properly terminated.”
 
+解决方案为依次执行以下命令：
+apt-get install gnutls-bin
+git config --global http.sslVerify false
+git config --global http.postBuffer 1048576000
 
 再执行git clone即可，如果还是不行，直接git clone https://githubfast.com/data-infra/cube-studio.git，通过国内代理拉取。
 
