@@ -134,7 +134,13 @@ yarn: npm install yarn -g
 ```
 ```sh
 # 初始化安装可能会遇到依赖包的版本选择，直接回车默认即可
-cd myapp/vision && yarn && yarn build
+如果本地环境有偏差，可以在容器内进行构建，参考entrypoint.sh中的构建命令
+# 构建前端主体
+cd /home/myapp/myapp/frontend && npm install && npm run build
+# 构建机器学习pipeline
+cd /home/myapp/myapp/vision && npm install && npm run build
+# 构建数据ETL pipeline
+cd /home/myapp/myapp/visionPlus && yarn && npm run build
 ```
 输出路径：`myapp/static/appbuilder`
 #### 纯前端开发（本地）
