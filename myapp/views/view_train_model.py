@@ -6,11 +6,13 @@ from flask_babel import lazy_gettext as _
 from myapp import app, appbuilder, db
 import uuid
 from myapp.views.view_team import Project_Join_Filter
-
+from myapp.utils import core
 from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
 from flask_appbuilder.fieldwidgets import Select2Widget
+from flask_appbuilder.actions import action
 from myapp.forms import MyBS3TextFieldWidget, MyBS3TextAreaFieldWidget
+from myapp import security_manager
 from flask import (
     flash,
     g,
@@ -43,7 +45,9 @@ class Training_Model_Filter(MyappFilter):
         user_roles = [role.name.lower() for role in list(self.get_user_roles())]
         if "admin" in user_roles:
             return query
-        return query.filter(self.model.created_by_fk == g.user.id)
+        join_projects_id = security_manager.get_join_projects_id(db.session)
+        return query.filter(self.model.project_id.in_(join_projects_id))
+        # return query.filter(self.model.created_by_fk == g.user.id)
 
 
 class Training_Model_ModelView_Base():
@@ -173,6 +177,18 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
             item.path = self.src_item_json['path']
         self.pre_add(item)
 
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        if g.user and g.user.is_admin():
+            return True
+        if g.user and g.user.username and hasattr(item, 'created_by'):
+            if g.user.username == item.created_by.username:
+                return True
+        # flash('just creator can edit/delete ', 'warning')
+        return False
+
+    check_delete_permission = check_edit_permission
+
     import pysnooper
     @expose("/download/<model_id>", methods=["GET", 'POST'])
     # @pysnooper.snoop()
@@ -245,6 +261,9 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
         res['data'] = [all_data[id] for id in all_data if id in all_last_data_id]
         return res
 
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
+    def muldelete(self, items):
+        return self._muldelete(items)
 
 class Training_Model_ModelView(Training_Model_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Training_Model)

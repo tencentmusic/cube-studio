@@ -1,9 +1,21 @@
 # deploy-service 模板
-镜像：ccr.ccs.tencentyun.com/cube-studio/deploy-service:20211001
+镜像：ccr.ccs.tencentyun.com/cube-studio/deploy-service:20240601
 启动参数：
 ```bash
 {
     "模型信息": {
+        "--project_name": {
+            "type": "str",
+            "item_type": "str",
+            "label": "项目组名称",
+            "require": 1,
+            "choice": [],
+            "range": "",
+            "default": "public",
+            "placeholder": "",
+            "describe": "项目组名称",
+            "editable": 1
+        },
         "--label": {
             "type": "str",
             "item_type": "str",
@@ -122,6 +134,18 @@
             "describe": "推理容器环境变量",
             "editable": 1
         },
+        "--host": {
+            "type": "str",
+            "item_type": "str",
+            "label": "部署域名",
+            "require": 0,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "部署域名，留空自动生成",
+            "editable": 1
+        },
         "--ports": {
             "type": "str",
             "item_type": "str",
@@ -180,6 +204,54 @@
             "default": "0",
             "placeholder": "",
             "describe": "每个pod占用gpu",
+            "editable": 1
+        },
+        "--volume_mount": {
+            "type": "str",
+            "item_type": "str",
+            "label": "挂载",
+            "require": 0,
+            "choice": [],
+            "range": "",
+            "default": "kubeflow-user-workspace(pvc):/mnt",
+            "placeholder": "",
+            "describe": "容器的挂载，支持pvc/hostpath/configmap三种形式,格式示例:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,注意pvc会自动挂载对应目录下的个人username子目录",
+            "editable": 1
+        },
+        "--inference_config": {
+            "type": "text",
+            "item_type": "str",
+            "label": "配置文件",
+            "require": 0,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "会配置文件的形式挂载到容器/config/目录下。<font color='#FF0000'>留空时将被自动重置</font>，格式：<br>---文件名<br>多行文件内容<br>---文件名<br>多行文件内容",
+            "editable": 1
+        },
+        "--metrics": {
+            "type": "str",
+            "item_type": "str",
+            "label": "指标采集接口",
+            "require": 0,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "请求指标采集，配置端口+url，示例：8080:/metrics",
+            "editable": 1
+        },
+        "--health": {
+            "type": "str",
+            "item_type": "str",
+            "label": "健康检查",
+            "require": 0,
+            "choice": [],
+            "range": "",
+            "default": "",
+            "placeholder": "",
+            "describe": "健康检查接口，使用http接口或者shell命令，示例：8080:/health或者 shell:python health.py",
             "editable": 1
         }
     }

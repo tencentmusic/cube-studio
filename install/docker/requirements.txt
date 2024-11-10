@@ -35,7 +35,7 @@ jieba==0.42.1               # 中文分词
 sseclient-py==1.8.0         # openai 流式客户端
 simplejson==3.19.1          # 是一个处理JSON数据的库
 PySnooper==1.2.0            # 函数调用跟踪
-kubernetes==21.7.0          #  Kubernetes Python客户端库
+kubernetes==25.3.0          #  Kubernetes Python客户端库
 statsd==4.0.1               # 是一个用于发送统计数据到StatsD服务器的库。
 redis==5.0.1                # redis数据库连接
 pymysql==1.1.0              # 连接mysql数据库
@@ -46,7 +46,7 @@ contextlib2==21.6.0         # 用于提供与contextlib模块相似的功能
 parsedatetime==2.6          # 日期时间解析库
 pylint==3.0.0               # Python源代码分析器，用于查找编程错误、遵循代码风格指南
 bleach==6.0.0               # HTML清理和链接化库
-pandas==2.1.1               # 数据处理
+pandas==2.1.2               # 数据处理
 beautifulsoup4==4.12.2      # 用于解析HTML和XML文档
 cffi==1.16.0
 clickhouse-driver==0.2.7    # sqllab对接clickhouse

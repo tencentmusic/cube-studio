@@ -373,7 +373,7 @@ class Notebook_ModelView_Base():
         if notebook_env:
             env.update(notebook_env)
         if SERVICE_EXTERNAL_IP:
-            env["SERVICE_EXTERNAL_IP"] = SERVICE_EXTERNAL_IP[0]
+            env["SERVICE_EXTERNAL_IP"] = SERVICE_EXTERNAL_IP[0].split('|')[-1]
 
 
         annotations={
@@ -571,6 +571,9 @@ class Notebook_ModelView_Base():
         self.update_redirect()
         return redirect(self.get_redirect())
 
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
+    def muldelete(self, items):
+        return self._muldelete(items)
 
 class Notebook_ModelView(Notebook_ModelView_Base, MyappModelView, DeleteMixin):
     datamodel = SQLAInterface(Notebook)

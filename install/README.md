@@ -45,7 +45,7 @@
 
 基础环境依赖
  - docker >= 19.03  
- - kubernetes = 1.21 ~ 1.25 
+ - kubernetes = 1.21 ~ 1.28  
  - kubectl ==1.24
  - cfs/ceph  挂载到每台机器的 /data/k8s/  
  - 单机 磁盘>=200G   单机磁盘容量要求不大，仅做镜像容器的存储  

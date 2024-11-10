@@ -1,0 +1,56 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "hdfsreader",
+                    "parameter": {
+                        "path": "/user/hive/warehouse/test/*",
+                        "defaultFS": "hdfs://hadoop-hadoop-hdfs-nn.default:9000",
+                        "column": [
+                            {
+                                "index": 0,
+                                "type": "STRING"
+                            },
+                            {
+                                "index": 1,
+                                "type": "LONG"
+                            },
+                            {
+                                "index": 2,
+                                "type": "STRING"
+                            }
+                        ],
+                        "fileType": "TEXT",
+                        "encoding": "UTF-8",
+                        "fieldDelimiter": ","
+                    }
+                },
+               "writer": {
+                    "name": "txtfilewriter",
+                    "parameter": {
+                        "path": "/mnt/admin/pipeline/example/ml/",
+                        "fileName": "data-hive.csv",
+                        "writeMode": "truncate",
+                        "fileFormat":"csv",
+                        "header": [
+                            "name ",
+                            "num",
+                            "date"
+                        ],
+                        "dateFormat": "yyyy-MM-dd"
+                    }
+                }
+            }
+        ]
+    }
+}

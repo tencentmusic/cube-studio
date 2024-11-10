@@ -248,7 +248,7 @@ class Metadata_table_ModelView_base():
 
 
 
-class Metadata_table_ModelView_Api(Metadata_table_ModelView_base, MyappModelRestApi, DeleteMixin):
+class Metadata_table_ModelView_Api(Metadata_table_ModelView_base, MyappModelRestApi):
     datamodel = SQLAInterface(Metadata_table)
     route_base = '/metadata_table_modelview/api'
 

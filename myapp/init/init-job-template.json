@@ -2760,5 +2760,195 @@
     },
     "job_template_args": {
     }
+  },
+  "nlp-clean-data": {
+    "project_name": "文本处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/nlp-process",
+    "image_describe": "文本算法类的数据处理",
+    "job_template_name": "nlp-clean-data",
+    "job_template_describe": "异常数据清洗(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 1
+    },
+    "job_template_args": {
+    }
+  },
+  "nlp-filter-data": {
+    "project_name": "文本处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/nlp-process",
+    "image_describe": "文本算法类的数据处理",
+    "job_template_name": "nlp-filter-data",
+    "job_template_describe": "过滤异常文档(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 2
+    },
+    "job_template_args": {
+    }
+  },
+  "nlp-replace-private-data": {
+    "project_name": "文本处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/nlp-process",
+    "image_describe": "文本算法类的数据处理",
+    "job_template_name": "nlp-replace-private-data",
+    "job_template_describe": "去除隐私信息(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 3
+    },
+    "job_template_args": {
+    }
+  },
+  "vision-image-blur": {
+    "project_name": "图像处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "image_describe": "视觉算法类的数据处理",
+    "job_template_name": "vision-image-blur",
+    "job_template_describe": "图片去噪声(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 1
+    },
+    "job_template_args": {
+    }
+  },
+  "vision-image-resize": {
+    "project_name": "图像处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "image_describe": "视觉算法类的数据处理",
+    "job_template_name": "vision-image-resize",
+    "job_template_describe": "图片缩放(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 2
+    },
+    "job_template_args": {
+    }
+  },
+  "vision-image-normalize": {
+    "project_name": "图像处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "image_describe": "视觉算法类的数据处理",
+    "job_template_name": "vision-image-normalize",
+    "job_template_describe": "图片标准化(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 3
+    },
+    "job_template_args": {
+    }
+  },
+  "vision-image-cropping": {
+    "project_name": "图像处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "image_describe": "视觉算法类的数据处理",
+    "job_template_name": "vision-image-cropping",
+    "job_template_describe": "图片裁剪(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 4
+    },
+    "job_template_args": {
+    }
+  },
+  "vision-image-equalize": {
+    "project_name": "图像处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "image_describe": "视觉算法类的数据处理",
+    "job_template_name": "vision-image-equalize",
+    "job_template_describe": "图片均衡化，增强对比度(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 5
+    },
+    "job_template_args": {
+    }
+  },
+  "vision-image-cvtcolor": {
+    "project_name": "图像处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "image_describe": "视觉算法类的数据处理",
+    "job_template_name": "vision-image-cvtcolor",
+    "job_template_describe": "图片的空间转换(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 6
+    },
+    "job_template_args": {
+    }
+  },
+  "vision-image-augmentation": {
+    "project_name": "图像处理",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "image_describe": "视觉算法类的数据处理",
+    "job_template_name": "vision-image-augmentation",
+    "job_template_describe": "图片变换，图像增强(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 7
+    },
+    "job_template_args": {
+    }
   }
 }

@@ -2,6 +2,8 @@
 """Utility functions used across Myapp"""
 import os.path
 import logging
+import shutil
+
 import pysnooper
 import datetime
 import time
@@ -34,6 +36,7 @@ def check_docker_commit(task,docker_id):  # 在页面中测试时会自定接收
             now_time=datetime.datetime.now()
             while((now_time-begin_time).total_seconds()<1800):   # 也就是最多commit push 30分钟
                 time.sleep(60)
+                now_time = datetime.datetime.now()
                 commit_pods = k8s_client.get_pods(namespace=namespace,pod_name=pod_name)
                 if commit_pods:
                     commit_pod=commit_pods[0]
@@ -282,7 +285,6 @@ def update_dataset(task,dataset_id):
             remote_dir = os.path.join('/data/k8s/kubeflow/global/', remote_dir)
             if os.path.exists(remote_dir):
                 # 先清理干净，因为有可能存在旧的不对的数据
-                import shutil
                 shutil.rmtree(remote_dir, ignore_errors=True)
             os.makedirs(remote_dir, exist_ok=True)
 

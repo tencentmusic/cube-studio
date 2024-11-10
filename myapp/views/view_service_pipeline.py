@@ -1,6 +1,7 @@
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
+from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-
+import logging
 from myapp.models.model_service_pipeline import Service_Pipeline
 from myapp.models.model_job import Repository
 from flask import jsonify
@@ -39,7 +40,6 @@ from flask_appbuilder import expose
 import pysnooper, datetime, json
 
 conf = app.config
-logging = app.logger
 
 
 class Service_Pipeline_Filter(MyappFilter):
@@ -61,7 +61,7 @@ class Service_Pipeline_Filter(MyappFilter):
 
 
 class Service_Pipeline_ModelView_Base():
-    label_title = '任务流'
+    label_title = _('任务流')
     datamodel = SQLAInterface(Service_Pipeline)
     check_redirect_list_url = conf.get('MODEL_URLS', {}).get('service_pipeline', '')
 
@@ -83,76 +83,76 @@ class Service_Pipeline_ModelView_Base():
     add_form_extra_fields = {
 
         "name": StringField(
-            _(datamodel.obj.lab('name')),
-            description="英文名(小写字母、数字、- 组成)，最长50个字符",
+            _('名称'),
+            description= _("英文名(小写字母、数字、- 组成)，最长50个字符"),
             widget=BS3TextFieldWidget(),
             validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54), DataRequired()]
         ),
         "project": QuerySelectField(
-            _(datamodel.obj.lab('project')),
+            _('项目组'),
             query_factory=filter_join_org_project,
             allow_blank=True,
             widget=Select2Widget()
         ),
         "dag_json": StringField(
-            _(datamodel.obj.lab('dag_json')),
+            _('上下游关系'),
             widget=MyBS3TextAreaFieldWidget(rows=10),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         ),
         "namespace": StringField(
-            _(datamodel.obj.lab('namespace')),
-            description="部署task所在的命名空间(目前无需填写)",
+            _('命名空间'),
+            description= _("部署task所在的命名空间(目前无需填写)"),
             default='service',
             widget=BS3TextFieldWidget()
         ),
         "images": StringField(
-            _(datamodel.obj.lab('images')),
+            _('镜像'),
             default='ccr.ccs.tencentyun.com/cube-studio/service-pipeline',
-            description="推理服务镜像",
+            description= _("推理服务镜像"),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
         "node_selector": StringField(
-            _(datamodel.obj.lab('node_selector')),
-            description="部署task所在的机器(目前无需填写)",
+            _('节点选择'),
+            description= _("部署task所在的机器(目前无需填写)"),
             widget=BS3TextFieldWidget(),
             default=datamodel.obj.node_selector.default.arg
         ),
         "image_pull_policy": SelectField(
-            _(datamodel.obj.lab('image_pull_policy')),
-            description="镜像拉取策略(always为总是拉取远程镜像，IfNotPresent为若本地存在则使用本地镜像)",
+            _('拉取策略'),
+            description= _("镜像拉取策略(always为总是拉取远程镜像，IfNotPresent为若本地存在则使用本地镜像)"),
             widget=Select2Widget(),
             choices=[['Always', 'Always'], ['IfNotPresent', 'IfNotPresent']]
         ),
 
         "alert_status": MySelectMultipleField(
-            label=_(datamodel.obj.lab('alert_status')),
+            label= _('监听状态'),
             widget=Select2ManyWidget(),
             choices=[[x, x] for x in
                      ['Created', 'Pending', 'Running', 'Succeeded', 'Failed', 'Unknown', 'Waiting', 'Terminated']],
-            description="选择通知状态"
+            description= _("选择通知状态")
         ),
         "alert_user": StringField(
-            label=_(datamodel.obj.lab('alert_user')),
+            label= _('报警用户'),
             widget=BS3TextFieldWidget(),
-            description="选择通知用户，每个用户使用逗号分隔"
+            description= _("选择通知用户，每个用户使用逗号分隔")
         ),
 
-        "label": StringField(_(datamodel.obj.lab('label')), description='中文名', widget=BS3TextFieldWidget(),
+        "label": StringField(_('标签'), description= _('中文名'), widget=BS3TextFieldWidget(),
                              validators=[DataRequired()]),
-        "resource_memory": StringField(_(datamodel.obj.lab('resource_memory')),
+        "resource_memory": StringField('memory',
                                        default=Service_Pipeline.resource_memory.default.arg,
-                                       description='内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管理员', widget=BS3TextFieldWidget(),
+                                       description= _('内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管路员'), widget=BS3TextFieldWidget(),
                                        validators=[DataRequired()]),
-        "resource_cpu": StringField(_(datamodel.obj.lab('resource_cpu')), default=Service_Pipeline.resource_cpu.default.arg,
-                                    description='cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管理员',
+        "resource_cpu": StringField('cpu', default=Service_Pipeline.resource_cpu.default.arg,
+                                    description= _('cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管路员'),
                                     widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "resource_gpu": StringField(_(datamodel.obj.lab('resource_gpu')), default='0',
-                                    description='gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100),目前支持T4/V100/A100/VGPU',
+        "resource_gpu": StringField('gpu', default='0',
+                                    description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
                                     widget=BS3TextFieldWidget()),
-        "replicas": StringField(_(datamodel.obj.lab('replicas')), default=Service_Pipeline.replicas.default.arg,
-                                description='pod副本数，用来配置高可用', widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "env": StringField(_(datamodel.obj.lab('env')), default=Service_Pipeline.env.default.arg,
-                           description='使用模板的task自动添加的环境变量，支持模板变量。书写格式:每行一个环境变量env_key=env_value',
+        "replicas": StringField(_('副本数'), default=Service_Pipeline.replicas.default.arg,
+                                description= _('pod副本数，用来配置高可用'), widget=BS3TextFieldWidget(), validators=[DataRequired()]),
+        "env": StringField(_('环境变量'), default=Service_Pipeline.env.default.arg,
+                           description= _('使用模板的task自动添加的环境变量，支持模板变量。书写格式:每行一个环境变量env_key=env_value'),
                            widget=MyBS3TextAreaFieldWidget()),
 
     }
@@ -171,7 +171,7 @@ class Service_Pipeline_ModelView_Base():
         return False
 
     # 验证args参数
-    @pysnooper.snoop(watch_explode=('item'))
+    # @pysnooper.snoop(watch_explode=('item'))
     def service_pipeline_args_check(self, item):
         core.validate_str(item.name, 'name')
         if not item.dag_json:
@@ -213,8 +213,9 @@ class Service_Pipeline_ModelView_Base():
                         tasks_name.remove(task_name)
 
             if list(dag_json.keys()).sort() != list(order_dag.keys()).sort():
-                flash('dag service pipeline 存在循环或未知上游', category='warning')
-                raise MyappException('dag service pipeline 存在循环或未知上游')
+                message = f'dag service pipeline {__("存在循环或未知上游")}'
+                flash(message, category='warning')
+                raise MyappException(message)
             return order_dag
 
         # 配置上缺少的默认上游
@@ -291,7 +292,7 @@ class Service_Pipeline_ModelView_Base():
         pass
 
     # 构建异步服务
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def build_mq_consumer(self, service_pipeline):
         namespace = conf.get('SERVICE_PIPELINE_NAMESPACE')
         name = service_pipeline.name
@@ -317,6 +318,9 @@ class Service_Pipeline_ModelView_Base():
             env['SERVICE_NAME'] = name
 
         labels = {"app": name, "user": service_pipeline.created_by.username, "pod-type": "service-pipeline"}
+        annotations = {
+            'porject': service_pipeline.project.name
+        }
         k8s_client.create_deployment(
             namespace=namespace,
             name=name,
@@ -339,7 +343,8 @@ class Service_Pipeline_ModelView_Base():
             privileged=False,
             accounts=None,
             username=service_pipeline.created_by.username,
-            ports=None
+            ports=None,
+            annotations=annotations
         )
 
         pass
@@ -424,7 +429,7 @@ class Service_Pipeline_ModelView_Base():
         namespace = conf.get('SERVICE_PIPELINE_NAMESPACE')
         k8s_client.delete_deployment(namespace=namespace, name=service_pipeline.name)
 
-        flash('服务清理完成', category='success')
+        flash(__('服务清理完成'), category='success')
         return redirect('/service_pipeline_modelview/list/')
 
     @expose("/config/<service_pipeline_id>", methods=("GET", 'POST'))
@@ -434,7 +439,7 @@ class Service_Pipeline_ModelView_Base():
         if not pipeline:
             return jsonify({
                 "status": 1,
-                "message": "服务流不存在",
+                "message": __("服务流不存在"),
                 "result": {}
             })
         if request.method.lower() == 'post':
@@ -456,22 +461,20 @@ class Service_Pipeline_ModelView_Base():
                     "alert_user": {
                         "type": "str",
                         "item_type": "str",
-                        "label": "报警用户",
+                        "label": __("报警用户"),
                         "require": 1,
                         "choice": [],
                         "range": "",
                         "default": "",
-                        "placeholder": "报警用户名，逗号分隔",
-                        "describe": "报警用户，逗号分隔",
-                        "editable": 1,
-                        "condition": "",
-                        "sub_args": {}
+                        "placeholder": "",
+                        "describe": __("报警用户，逗号分隔"),
+                        "editable": 1
                     }
                 }
             },
             "pipeline_jump_button": [
                 {
-                    "name": "资源查看",
+                    "name": __("资源查看"),
                     "action_url": "",
                     "icon_svg": '<svg t="1644980982636" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2611" width="128" height="128"><path d="M913.937279 113.328092c-32.94432-32.946366-76.898391-51.089585-123.763768-51.089585s-90.819448 18.143219-123.763768 51.089585L416.737356 362.999454c-32.946366 32.94432-51.089585 76.898391-51.089585 123.763768s18.143219 90.819448 51.087539 123.763768c25.406646 25.40767 57.58451 42.144866 93.053326 48.403406 1.76418 0.312108 3.51915 0.463558 5.249561 0.463558 14.288424 0 26.951839-10.244318 29.519314-24.802896 2.879584-16.322757-8.016581-31.889291-24.339338-34.768875-23.278169-4.106528-44.38386-15.081487-61.039191-31.736818-21.61018-21.61018-33.509185-50.489928-33.509185-81.322144s11.899004-59.711963 33.509185-81.322144l15.864316-15.864316c-0.267083 1.121544-0.478907 2.267647-0.6191 3.440355-1.955538 16.45988 9.800203 31.386848 26.260084 33.344432 25.863041 3.072989 49.213865 14.378475 67.527976 32.692586 21.608134 21.608134 33.509185 50.489928 33.509185 81.322144s-11.901051 59.71401-33.509185 81.322144L318.53987 871.368764c-21.61018 21.61018-50.489928 33.511231-81.322144 33.511231-30.832216 0-59.711963-11.901051-81.322144-33.511231-21.61018-21.61018-33.509185-50.489928-33.509185-81.322144s11.899004-59.711963 33.509185-81.322144l169.43597-169.438017c11.720949-11.718903 11.720949-30.722722 0-42.441625-11.718903-11.718903-30.722722-11.718903-42.441625 0L113.452935 666.282852c-32.946366 32.94432-51.089585 76.898391-51.089585 123.763768 0 46.865377 18.143219 90.819448 51.089585 123.763768 32.94432 32.946366 76.898391 51.091632 123.763768 51.091632s90.819448-18.145266 123.763768-51.091632l249.673409-249.671363c32.946366-32.94432 51.089585-76.898391 51.089585-123.763768-0.002047-46.865377-18.145266-90.819448-51.089585-123.763768-27.5341-27.536146-64.073294-45.240367-102.885252-49.854455-3.618411-0.428765-7.161097-0.196475-10.508331 0.601704l211.589023-211.589023c21.61018-21.61018 50.489928-33.509185 81.322144-33.509185s59.711963 11.899004 81.322144 33.509185c21.61018 21.61018 33.509185 50.489928 33.509185 81.322144s-11.899004 59.711963-33.509185 81.322144l-150.180418 150.182464c-11.720949 11.718903-11.720949 30.722722 0 42.441625 11.718903 11.718903 30.722722 11.718903 42.441625 0l150.180418-150.182464c32.946366-32.94432 51.089585-76.898391 51.089585-123.763768C965.026864 190.226482 946.882622 146.272411 913.937279 113.328092z" p-id="2612" fill="#225ed2"></path></svg>'
                 }
@@ -493,11 +496,11 @@ class Service_Pipeline_ModelView_Base():
             "message": "success",
             "templte_common_ui_config": {
             },
-            "template_group_order": ["入口", "逻辑节点", "功能节点"],
+            "template_group_order": [__(x) for x in ["入口", "逻辑节点", "功能节点"]],
             "templte_list": {
-                "入口": [
+                __("入口"): [
                     {
-                        "template_name": "kafka",
+                        "template_name": __("kafka"),
                         "template_id": 1,
                         "templte_ui_config": {
                             "shell": {
@@ -510,93 +513,83 @@ class Service_Pipeline_ModelView_Base():
                                     "range": "",
                                     "default": "predict",
                                     "placeholder": "",
-                                    "describe": "kafka topic",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("kafka topic"),
+                                    "editable": 1
                                 },
                                 "consumer_num": {
                                     "type": "str",
                                     "item_type": "str",
-                                    "label": "消费者数目",
+                                    "label": __("消费者数目"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "4",
                                     "placeholder": "",
-                                    "describe": "消费者数目",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("消费者数目"),
+                                    "editable": 1
                                 },
                                 "bootstrap_servers": {
                                     "type": "str",
                                     "item_type": "str",
-                                    "label": "地址",
+                                    "label": __("地址"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "127.0.0.1:9092",
                                     "placeholder": "",
-                                    "describe": "xx.xx.xx.xx:9092,xx.xx.xx.xx:9092",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("xx.xx.xx.xx:9092,xx.xx.xx.xx:9092"),
+                                    "editable": 1
                                 },
                                 "group": {
                                     "type": "str",
                                     "item_type": "str",
-                                    "label": "分组",
+                                    "label": __("分组"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "predict",
                                     "placeholder": "",
-                                    "describe": "消费者分组",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("消费者分组"),
+                                    "editable": 1
                                 }
                             }
                         },
                         "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
-                        "label": "kafka",
-                        "describe": "消费kafka数据",
+                        "label": __("kafka"),
+                        "describe": __("消费kafka数据"),
                         "help_url": "",
                         "pass_through": {
                             # 无论什么内容  通过task的字段透传回来
                         }
                     }
                 ],
-                "逻辑节点": [
+                __("逻辑节点"): [
                     {
-                        "template_name": "switch",
+                        "template_name": __("switch"),
                         "template_id": 2,
                         "templte_ui_config": {
                             "shell": {
                                 "case": {
                                     "type": "text",
                                     "item_type": "str",
-                                    "label": "表达式",
+                                    "label": __("表达式"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "int(input['node2'])<3:node4,node5:'3'\ndefault:node6:'0'",
                                     "placeholder": "",
-                                    "describe": "条件:下游节点:输出     其中input为节点输入",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("条件:下游节点:输出     其中input为节点输入"),
+                                    "editable": 1
                                 }
                             }
                         },
                         "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
-                        "label": "switch-case逻辑节点",
-                        "describe": "控制数据的流量",
+                        "label": __("switch-case逻辑节点"),
+                        "describe": __("控制数据的流量"),
                         "help_url": "",
                         "pass_through": {
                             # 无论什么内容  通过task的字段透传回来
@@ -604,120 +597,108 @@ class Service_Pipeline_ModelView_Base():
 
                     },
                 ],
-                "功能节点": [
+                __("功能节点"): [
                     {
-                        "template_name": "http",
+                        "template_name": __("http"),
                         "template_id": 3,
                         "templte_ui_config": {
                             "shell": {
                                 "method": {
                                     "type": "choice",
                                     "item_type": "str",
-                                    "label": "请求方式",
+                                    "label": __("请求方式"),
                                     "require": 1,
                                     "choice": ["GET", "POST"],
                                     "range": "",
                                     "default": "POST",
                                     "placeholder": "",
-                                    "describe": "请求方式",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("请求方式"),
+                                    "editable": 1
                                 },
                                 "url": {
                                     "type": "str",
                                     "item_type": "str",
-                                    "label": "请求地址",
+                                    "label": __("请求地址"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "http://127.0.0.1:8080/api",
                                     "placeholder": "",
-                                    "describe": "请求地址",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("请求地址"),
+                                    "editable": 1
                                 },
                                 "header": {
                                     "type": "text",
                                     "item_type": "str",
-                                    "label": "请求头",
+                                    "label": __("请求头"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "{}",
                                     "placeholder": "",
-                                    "describe": "请求头",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("请求头"),
+                                    "editable": 1
                                 },
                                 "timeout": {
                                     "type": "int",
                                     "item_type": "str",
-                                    "label": "请求超时",
+                                    "label": __("请求超时"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "300",
                                     "placeholder": "",
-                                    "describe": "请求超时",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("请求超时"),
+                                    "editable": 1
                                 },
                                 "date": {
                                     "type": "text",
                                     "item_type": "str",
-                                    "label": "请求内容",
+                                    "label": __("请求内容"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "{}",
                                     "placeholder": "",
-                                    "describe": "请求内容",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("请求内容"),
+                                    "editable": 1
                                 }
                             }
                         },
                         "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
-                        "label": "http请求",
-                        "describe": "http请求",
+                        "label": __("http请求"),
+                        "describe": __("http请求"),
                         "help_url": "",
                         "pass_through": {
                             # 无论什么内容  通过task的字段透传回来
                         }
                     },
                     {
-                        "template_name": "自定义方法",
+                        "template_name": __("自定义方法"),
                         "template_id": 4,
                         "templte_ui_config": {
                             "shell": {
                                 "sdk_path": {
                                     "type": "str",
                                     "item_type": "str",
-                                    "label": "函数文件地址",
+                                    "label": __("函数文件地址"),
                                     "require": 1,
                                     "choice": [],
                                     "range": "",
                                     "default": "",
                                     "placeholder": "",
-                                    "describe": "函数文件地址，文件名和python类型要相同",
-                                    "editable": 1,
-                                    "condition": "",
-                                    "sub_args": {}
+                                    "describe": __("函数文件地址，文件名和python类型要相同"),
+                                    "editable": 1
                                 },
                             }
                         },
                         "username": g.user.username,
                         "changed_on": datetime.datetime.now(),
                         "created_on": datetime.datetime.now(),
-                        "label": "http请求",
-                        "describe": "http请求",
+                        "label": __("http请求"),
+                        "describe": __("http请求"),
                         "help_url": "",
                         "pass_through": {
                             # 无论什么内容  通过task的字段透传回来
@@ -741,7 +722,7 @@ class Service_Pipeline_ModelView_Base():
         return jsonify(all_template)
 
 
-class Service_Pipeline_ModelView(Service_Pipeline_ModelView_Base, MyappModelView, DeleteMixin):
+class Service_Pipeline_ModelView(Service_Pipeline_ModelView_Base, MyappModelView):
     datamodel = SQLAInterface(Service_Pipeline)
     # base_order = ("changed_on", "desc")
     # order_columns = ['changed_on']

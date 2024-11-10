@@ -17,10 +17,9 @@ ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
 
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-    echo "alias la='ls -A'" >> /root/.bashrc && \
-    echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+    echo "alias la='ls -A'" >> ~/.bashrc && \
+    echo "alias vi='vim'" >> ~/.bashrc
 
 # 安装python
 RUN add-apt-repository ppa:deadsnakes/ppa && apt install -y --force-yes --no-install-recommends apt install python2.7 python3.6 python3-pip libsasl2-dev libpq-dev \
@@ -30,10 +29,6 @@ RUN add-apt-repository ppa:deadsnakes/ppa && apt install -y --force-yes --no-ins
 
 RUN mkdir -p /usr/local/services/ && mkdir -p /data/L5Backup/ && chmod -R 777 /data/L5Backup/
 WORKDIR /usr/local/services/
-RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/l5_protocol_32os-1.0.tar.gz && tar -zxvf l5_protocol_32os-1.0.tar.gz && rm l5_protocol_32os-1.0.tar.gz
-#RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/dns_l5_agent-1.0.tar.gz && tar -zxvf dns_l5_agent-1.0.tar.gz && rm dns_l5_agent-1.0.tar.gz
-RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/tdwdfs_client-1.0.tar.gz && tar -zxvf tdwdfs_client-1.0.tar.gz && rm tdwdfs_client-1.0.tar.gz
-#RUN wget https://docker-76009.sz.gfp.tencent-cloud.com/tlinux/dc_agent-1.0.tar.gz && tar -zxvf dc_agent-1.0.tar.gz && rm dc_agent-1.0.tar.gz
 
 WORKDIR /
 

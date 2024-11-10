@@ -1,0 +1,34 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "hdfsreader",
+                    "parameter": {
+                        "path": "/user/hive/warehouse/test/*",
+                        "defaultFS": "hdfs://hadoop-hadoop-hdfs-nn.default:9000",
+                        "column": ["*"],
+                        "fileType": "TEXT",
+                        "encoding": "UTF-8",
+                        "fieldDelimiter": ","
+                    }
+                },
+               "writer": {
+                    "name": "streamwriter",
+                    "parameter": {
+                        "print": true
+                    }
+                }
+            }
+        ]
+    }
+}

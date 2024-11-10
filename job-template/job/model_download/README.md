@@ -1,5 +1,5 @@
 # model_download 模板
-镜像：ccr.ccs.tencentyun.com/cube-studio/model_download:20221001
+镜像：ccr.ccs.tencentyun.com/cube-studio/model_download:20240501
 启动参数：
 ```bash
 {

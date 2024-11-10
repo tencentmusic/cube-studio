@@ -165,11 +165,11 @@ class K8s():
 
                 username = ''
                 if pod.metadata.labels:
-                    username = pod.metadata.labels.get('run-rtx', '')
+                    username = pod.metadata.labels.get('run-username', '')
                     if not username:
                         username = pod.metadata.labels.get('user', '')
                     if not username:
-                        username = pod.metadata.labels.get('rtx-user', '')
+                        username = pod.metadata.labels.get('username', '')
 
                 temp = {
                     'name': metadata.name,
@@ -1895,11 +1895,11 @@ class K8s():
             name = pod.metadata.name
             user = ''
             if pod.metadata.labels:
-                user = pod.metadata.labels.get('run-rtx', '')
+                user = pod.metadata.labels.get('run-username', '')
                 if not user:
                     user = pod.metadata.labels.get('user', '')
                 if not user:
-                    user = pod.metadata.labels.get('rtx-user', '')
+                    user = pod.metadata.labels.get('username', '')
 
             containers = pod.spec.containers
 

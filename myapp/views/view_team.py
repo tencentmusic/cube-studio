@@ -27,8 +27,9 @@ from .baseApi import (
     MyappModelRestApi
 )
 import json
-from flask_appbuilder import CompactCRUDMixin
 from myapp.utils.py.py_k8s import K8s
+from flask_appbuilder import CompactCRUDMixin, expose
+
 # # 获取某类project分组
 # class Project_users_Filter(MyappFilter):
 #     # @pysnooper.snoop()
@@ -90,14 +91,26 @@ class Project_User_ModelView_Base():
     edit_form_extra_fields = add_form_extra_fields
 
     def pre_add_req(self,req_json,*args,**kwargs):
-        user_roles = [role.name.lower() for role in list(get_user_roles())]
-        if "admin" in user_roles:
+
+        if g.user and g.user.is_admin():
             return req_json
-        creators = db.session().query(Project_User).filter_by(project_id=req_json.get('project')).all()
+        creators = db.session().query(Project_User).filter_by(project_id=req_json.get('project')).filter_by(role='creator').all()
         creators = [creator.user.username for creator in creators]
 
         if g.user.username not in creators:
             raise MyappException('just creator can add/edit user')
+
+    # 校验是否有权限需改组内用户
+    def check_edit_permission(self,item):
+        if g.user.is_admin():
+            return True
+        creators = db.session().query(Project_User).filter_by(project_id=item.project_id).filter_by(role='creator').all()
+        creators = [creator.user.username for creator in creators]
+        if g.user.username in creators:
+            return True
+        return False
+
+    check_delete_permission=check_edit_permission
 
     pre_update_req=pre_add_req
 
@@ -163,6 +176,7 @@ class Project_ModelView_Base():
     }
 
     add_columns = ['name', 'describe', 'expand'] # 'cluster','volume_mount','service_external_ip',
+    search_columns=["name"]
     edit_columns = add_columns
     project_type = 'org'
 
@@ -212,12 +226,6 @@ class Project_ModelView_Base():
         if item.expand:
             core.validate_json(item.expand)
             item.expand = json.dumps(json.loads(item.expand), indent=4, ensure_ascii=False)
-        user_roles = [role.name.lower() for role in list(get_user_roles())]
-        if "admin" in user_roles:
-            return
-        if not g.user.username in item.get_creators():
-            raise MyappException('just creator can add/edit')
-
 
     # before update, check permission
     def pre_update_web(self, item):
@@ -227,15 +235,12 @@ class Project_ModelView_Base():
         if not g.user.is_admin() and g.user.username not in item.get_creators():
             return False
         return True
-    check_delete_permission = check_edit_permission
 
-    # add project user
-    def post_add(self, item):
-        if not item.type:
-            item.type = self.project_type
-        creator = Project_User(role='creator', user=g.user, project=item)
-        db.session.add(creator)
-        db.session.commit()
+    def check_delete_permission(self,item):
+        if not g.user.is_admin():
+            return False
+        return True
+
 
     # @pysnooper.snoop()
     def post_list(self, items):
@@ -335,6 +340,13 @@ class Project_ModelView_org_Api(Project_ModelView_Base, MyappModelRestApi):
         )
         self.add_form_extra_fields = self.edit_form_extra_fields
 
+    # add project user
+    def post_add(self, item):
+        if not item.type:
+            item.type = self.project_type
+        creator = Project_User(role='creator', user=g.user, project=item)
+        db.session.add(creator)
+        db.session.commit()
 
 
 appbuilder.add_api(Project_ModelView_org_Api)

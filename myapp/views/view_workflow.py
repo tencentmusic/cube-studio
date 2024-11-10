@@ -141,14 +141,12 @@ class Crd_ModelView_Base():
         crd = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
         self.base_muldelete([crd])
         flash(__('清理完成'), 'success')
-        self.update_redirect()
-        return redirect(self.get_redirect())
+        return redirect(request.referrer)
 
     @action("stop_all", "停止", "停止所有选中的workflow?", "fa-trash", single=False)
     def stop_all(self, items):
         self.base_muldelete(items)
-        self.update_redirect()
-        return redirect(self.get_redirect())
+        return redirect(request.referrer)
 
     # @event_logger.log_this
     # @expose("/list/")
@@ -235,8 +233,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         self.delete_more(workflow)
 
         flash(__('清理完成'), 'success')
-        url = conf.get('MODEL_URLS', {}).get('workflow', '')
-        return redirect(url)
+        return redirect(request.referrer)
 
     label_title = _('运行实例')
     datamodel = SQLAInterface(Workflow)
@@ -975,7 +972,8 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
             }
         )
 
-class Workflow_ModelView(Workflow_ModelView_Base, MyappModelView, DeleteMixin):
+
+class Workflow_ModelView(Workflow_ModelView_Base, MyappModelView):
     datamodel = SQLAInterface(Workflow)
 
 

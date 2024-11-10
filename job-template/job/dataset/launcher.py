@@ -82,6 +82,21 @@ def download(name,version,partition,save_dir,**kwargs):
 
     exit(1)
 
+from subprocess import Popen, PIPE, STDOUT
+
+def exe_command(command):
+    """
+    执行 shell 命令并实时打印输出
+    :param command: shell 命令
+    :return: process, exitcode
+    """
+    print(command)
+    process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
+    with process.stdout:
+        for line in iter(process.stdout.readline, b''):
+            print(line.decode().strip(),flush=True)
+    exitcode = process.wait()
+    return exitcode
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("download dataset launcher")
@@ -100,7 +115,10 @@ if __name__ == "__main__":
     if args.src_type=='cube-studio':
         download(**args.__dict__)
     elif args.src_type=='huggingface':
-        pass
+        command = f'huggingface-cli download --repo-type dataset --resume-download {args.name} --revision {args.version} --local-dir {args.save_dir} --local-dir-use-symlinks False'
+        exitcode = exe_command(command)
+        exit(exitcode)
+
     elif args.src_type=='modelscope':
-        pass
+            pass
 

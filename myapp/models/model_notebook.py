@@ -60,7 +60,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if self.ide_type=='theia':
             url = "/notebook/"+self.namespace + "/" + self.name+"/" + "#"+self.mount
         else:
-            if root:
+            if root.lstrip('/'):
                 url = '/notebook/jupyter/%s/lab/tree/%s' % (self.name,root.lstrip('/'))
             else:
                 url = "/notebook/"+self.namespace + "/" + self.name+"/lab?#"+self.mount

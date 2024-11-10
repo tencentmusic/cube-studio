@@ -1,0 +1,46 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel": 1
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "READERreader",
+                    "parameter": {
+                        "username": "USERNAME",
+                        "password": "PASSWORD",
+                        "column": COLUMNS,
+                        "connection": [
+                            {
+                                "table": [
+                                    "TABLE"
+                                ],
+                                "jdbcUrl": [
+     "jdbc:READER://HOST/DATABASE"
+                                ]
+                            }
+                        ]
+                    }
+                },
+               "writer": {
+                    "name": "txtfilewriter",
+                    "parameter": {
+                        "path": "OUTDIR",
+                        "fileName": "OUTNAME",
+                        "writeMode": "truncate",
+                        "fileFormat":"csv",
+                        "header": COLUMNS,
+                        "dateFormat": "yyyy-MM-dd"
+                    }
+                }
+            }
+        ]
+    }
+}

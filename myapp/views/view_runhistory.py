@@ -5,6 +5,7 @@ from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 import pysnooper
 import urllib.parse
 from flask import request
+from flask_appbuilder.actions import action
 from myapp.models.model_job import RunHistory, Pipeline
 import calendar
 from myapp import app, appbuilder, db
@@ -67,8 +68,11 @@ class RunHistory_ModelView_Base():
     }
     edit_form_extra_fields = add_form_extra_fields
 
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
+    def muldelete(self, items):
+        return self._muldelete(items)
 
-class RunHistory_ModelView(RunHistory_ModelView_Base, MyappModelView, DeleteMixin):
+class RunHistory_ModelView(RunHistory_ModelView_Base, MyappModelView):
     datamodel = SQLAInterface(RunHistory)
 
 

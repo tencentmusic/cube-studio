@@ -33,7 +33,7 @@ def replace_git(dir_path):
         file_path = os.path.join(dir_path,file_name)
         if os.path.isfile(file_path) and '.json' in file_name:
             content = open(file_path).read()
-            content = content.replace('https://github.com/tencentmusic/cube-studio/tree/master',conf.get('GIT_URL',''))
+            content = content.replace('https://github.com/data-infra/cube-studio/tree/main',conf.get('GIT_URL','').strip('/'))
             file = open(file_path,mode='w')
             file.write(content)
             file.close()
@@ -140,7 +140,7 @@ def init():
                 images.changed_by_fk = 1
                 images.project_id = project.id
                 images.repository_id = repository_id
-                images.gitpath = gitpath
+                images.gitpath = gitpath.replace("https://github.com/data-infra/cube-studio/tree/main/".strip('/'),conf.get('GIT_URL','').strip('/'))
                 db.session.add(images)
                 db.session.commit()
                 print('add images %s' % image_name)
@@ -212,7 +212,7 @@ def init():
             try:
                 repository = Repository()
                 repository.name = 'hubsecret'
-                repository.server='ccr.ccs.tencentyun.com/xx/'
+                repository.server=conf.get('REPOSITORY_ORG','ccr.ccs.tencentyun.com/cube-studio/')
                 repository.user = 'yourname'
                 repository.password = 'yourpassword'
                 repository.hubsecret = 'hubsecret'
@@ -554,7 +554,7 @@ def init():
     # @pysnooper.snoop()
     def create_service(project_name, service_name, service_describe, image_name, command, env, resource_memory='2G',
                        resource_cpu='2', resource_gpu='0', ports='80', volume_mount='kubeflow-user-workspace(pvc):/mnt',
-                       expand={}):
+                       expand={},host=''):
         service = db.session.query(Service).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
@@ -573,6 +573,7 @@ def init():
                 service.env = '\n'.join([x.strip() for x in env.split('\n') if x.split()])
                 service.ports = ports
                 service.volume_mount = volume_mount
+                service.host = host
                 service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
                 db.session.add(service)
                 db.session.commit()
@@ -631,6 +632,8 @@ def init():
                 service.volume_mount = volume_mount
                 service.metrics = metrics
                 service.health = health
+                if "help_url" in expand:
+                    expand["help_url"]=expand["help_url"].replace("https://github.com/data-infra/cube-studio/tree/main".strip('/'),conf.get('GIT_URL','').strip('/'))
                 service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
 
                 from myapp.views.view_inferenceserving import InferenceService_ModelView_base
@@ -682,7 +685,7 @@ def init():
                         aihub = db.session.query(Aihub).filter_by(uuid=uuid).first()
                         if not aihub:
                             aihub = Aihub()
-                        aihub.doc = data.get('doc', '')
+                        aihub.doc = data.get('doc', '').replace("https://github.com/data-infra/cube-studio/tree/main",conf.get('GIT_URL','').strip('/'))
                         aihub.name = name
                         aihub.label = label
                         aihub.describe = describe

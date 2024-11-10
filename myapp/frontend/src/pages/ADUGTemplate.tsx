@@ -1105,22 +1105,24 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                 {
                                     permissions.includes('can_add') ? <Button className="mr16" type="primary" onClick={() => setVisableAdd(true)}>{t('添加')}{labelTitle}<PlusOutlined /></Button> : null
                                 }
-                                <div>
-                                    <Dropdown overlay={<Menu>
-                                        {
-                                            multipleAction.map((action, index) => {
-                                                return <Menu.Item key={`table_muliple_${index}`}>
-                                                    <span className="link" onClick={() => handleMultiRecord(action)}>
-                                                        {`${t('批量')} ${action.text}`}
-                                                    </span>
-                                                </Menu.Item>
-                                            })
-                                        }
+                                {
+                                    multipleAction && multipleAction.length ? <div>
+                                        <Dropdown overlay={<Menu>
+                                            {
+                                                multipleAction.map((action, index) => {
+                                                    return <Menu.Item key={`table_muliple_${index}`}>
+                                                        <span className="link" onClick={() => handleMultiRecord(action)}>
+                                                            {`${t('批量')} ${action.text}`}
+                                                        </span>
+                                                    </Menu.Item>
+                                                })
+                                            }
 
-                                    </Menu>}>
-                                        <Button>{t('批量操作')} <DownOutlined /></Button>
-                                    </Dropdown>
-                                </div>
+                                        </Menu>}>
+                                            <Button>{t('批量操作')} <DownOutlined /></Button>
+                                        </Dropdown>
+                                    </div> : null
+                                }
                                 {
                                     isImportData ? <div className="d-f ml16">
                                         <Tooltip color="#fff" title={<span className="tips-content-b"><div>{t('注意：csv逗号分隔')}，</div><div>{t('第一行为列的英文名')}</div> <div className="link" onClick={() => {

@@ -94,6 +94,17 @@ class Service_ModelView_base():
 
     edit_form_extra_fields = copy.deepcopy(add_form_extra_fields)
 
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        if g.user and g.user.is_admin():
+            return True
+        if g.user and g.user.username and hasattr(item, 'created_by'):
+            if g.user.username == item.created_by.username:
+                return True
+        # flash('just creator can edit/delete ', 'warning')
+        return False
+
+    check_delete_permission = check_edit_permission
 
     def set_column(self, service=None):
         host_field = StringField(_('域名'), default=Service.host.default.arg,description= _('访问域名，') + self.host_rule, widget=BS3TextFieldWidget())
@@ -190,16 +201,18 @@ class Service_ModelView_base():
             selector=labels
         )
         # 如果域名配置的gateway，就用这个
-        host = service.name + "." + service.project.cluster.get('SERVICE_DOMAIN', conf.get('SERVICE_DOMAIN', ''))
+        real_host = service.name + "." + service.project.cluster.get('SERVICE_DOMAIN', conf.get('SERVICE_DOMAIN', ''))
         if service.host:
             host = service.host.replace('http://', '').replace('https://', '').strip()
             if "/" in host:
                 host = host[:host.index("/")]
             if ":" in host:
                 host = host[:host.index(":")]
+            if host:
+                real_host=host
         k8s_client.create_istio_ingress(namespace=namespace,
                                         name=service.name,
-                                        host=host,
+                                        host=real_host,
                                         ports=service.ports.split(',')
                                         )
 
@@ -251,7 +264,7 @@ class Service_ModelView_base():
         return redirect(conf.get("MODEL_URLS", {}).get("service", '/'))
 
 
-class Service_ModelView(Service_ModelView_base, MyappModelView, DeleteMixin):
+class Service_ModelView(Service_ModelView_base, MyappModelView):
     datamodel = SQLAInterface(Service)
 
 

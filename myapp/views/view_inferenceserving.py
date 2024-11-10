@@ -319,7 +319,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
     model_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path']
     service_columns = ['resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa',
                        'priority', 'canary', 'shadow', 'host', 'volume_mount', 'sidecar']
-    admin_columns = ['inference_config', 'working_dir', 'command', 'env', 'ports', 'metrics', 'health', 'expand']
+    admin_columns = ['inference_config', 'working_dir', 'command', 'env', 'ports', 'metrics', 'health']
 
     add_fieldsets = [
         (
@@ -340,6 +340,17 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
     edit_columns = add_columns
 
     edit_fieldsets = add_fieldsets
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        if g.user and g.user.is_admin():
+            return True
+        if g.user and g.user.username and hasattr(item, 'created_by'):
+            if g.user.username == item.created_by.username:
+                return True
+        # flash('just creator can edit/delete ', 'warning')
+        return False
+
+    check_delete_permission = check_edit_permission
 
     def pre_add_web(self):
         self.default_filter = {
@@ -559,7 +570,8 @@ output %s
                 else:
                     tar_command = 'cp -rf %s /models/' % (model_path)
             if not item.id or not item.command:
-                item.command=download_command+'cp /config/* /models/ && '+tar_command+' && torchserve --start --model-store /models --models %s=%s.mar --foreground --ts-config=/config/config.properties'%(item.model_name,item.model_name)
+
+                item.command=download_command+'cp /config/* /models/ && '+tar_command+' && torchserve --start --model-store /models --models %s=%s --foreground --ts-config=/config/config.properties'%(item.model_name,model_file)
 
             expand['config.properties'] = expand['config.properties'] if expand.get('config.properties','') else self.torch_config()
             expand['log4j2.xml'] = expand['log4j2.xml'] if expand.get('log4j2.xml','') else self.torch_log()
@@ -825,6 +837,14 @@ output %s
     # @pysnooper.snoop()
     def deploy(self, service_id, env='prod'):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
+        if service.model_status!='offline' and service.model_status!=env:
+            if env=='prod' and service.model_status=='online':
+                pass
+            else:
+                flash(f'检测到推理服务状态{service.model_status}，请先清理再部署',category='warning')
+                return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice','/frontend/service/inferenceservice/inferenceservice_manager'))
+
+
         namespace = conf.get('SERVICE_NAMESPACE', 'service')
         name = service.name
         command = service.command
@@ -873,7 +893,7 @@ output %s
         pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area', 'guangzhou')
         pod_env += "\nRESOURCE_CPU=" + service.resource_cpu
         pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
-        pod_env += "\nRESOURCE_GPU=" + str(int(gpu_num))
+        pod_env += "\nRESOURCE_GPU=" + (str(gpu_num) if ',' not in str(gpu_num) else str(gpu_num).split(',')[1])
         pod_env += "\nMODEL_PATH=" + service.model_path
         pod_env = pod_env.strip(',')
 
@@ -1075,8 +1095,12 @@ output %s
 
         if env == 'prod':
             hpas = re.split(',|;', service.hpa)
-            regex = re.compile(r"\(.*\)")
-            if float(regex.sub('', service.resource_gpu)) < 1:
+            gpu_num, gpu_type, resource_name = core.get_gpu(service.resource_gpu)
+            # 虚拟化gpu占用，不进行弹性伸缩设置
+            if (type(gpu_num)==str and ',' in gpu_num):
+                gpu_num = float(gpu_num.split(',')[1])
+
+            if 0<float(gpu_num)<1:
                 for hpa in copy.deepcopy(hpas):
                     if 'gpu' in hpa:
                         hpas.remove(hpa)

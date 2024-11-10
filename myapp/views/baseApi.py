@@ -422,7 +422,7 @@ class MyappModelRestApi(ModelRestApi):
             for col in self.datamodel.obj.label_columns:
                 all_label_columns[col] = self.datamodel.obj.label_columns[col]
         # print(all_label_columns)
-        new_label_columns = self.list_columns+self.show_columns+self.edit_columns+self.add_columns
+        new_label_columns = self.list_columns+self.show_columns+self.edit_columns+self.add_columns+self.search_columns
         new_label_columns = list(set(new_label_columns))
         for col in new_label_columns:
             self.label_columns[col] = all_label_columns.get(col,col)
@@ -613,11 +613,9 @@ class MyappModelRestApi(ModelRestApi):
         }
 
     def merge_base_permissions(self, response, **kwargs):
-        response[API_PERMISSIONS_RIS_KEY] = [
-            permission
-            for permission in self.base_permissions
-            # if self.appbuilder.sm.has_access(permission, self.class_permission_name)
-        ]
+        response[API_PERMISSIONS_RIS_KEY] = [permission for permission in self.base_permissions]
+        # if self.appbuilder.sm.has_access(permission, self.class_permission_name)
+
 
     # @pysnooper.snoop()
     def merge_user_permissions(self, response, **kwargs):
@@ -858,11 +856,7 @@ class MyappModelRestApi(ModelRestApi):
     def merge_order_columns(self, response, **kwargs):
         _pruned_select_cols = kwargs.get(API_SELECT_COLUMNS_RIS_KEY, [])
         if _pruned_select_cols:
-            response[API_ORDER_COLUMNS_RES_KEY] = [
-                order_col
-                for order_col in self.order_columns
-                if order_col in _pruned_select_cols
-            ]
+            response[API_ORDER_COLUMNS_RES_KEY] = [order_col for order_col in self.order_columns if order_col in _pruned_select_cols]
         else:
             response[API_ORDER_COLUMNS_RES_KEY] = self.order_columns
 
@@ -1338,7 +1332,6 @@ class MyappModelRestApi(ModelRestApi):
             # 将扩展字段先合并在一起
             if self.expand_columns:
                 json_data = self.to_expand(json_data)
-
             data = self._merge_update_item(item, json_data)
             data = {key: data[key] for key in data if key in self.edit_columns}
             item = self.edit_model_schema.load(data, instance=item)   # 执行到这一句就会在数据库中更新了，后面的只是做修改
@@ -1677,21 +1670,25 @@ class MyappModelRestApi(ModelRestApi):
     #     item = self.datamodel.get(pk, self._base_filters)
     #     return response
 
-    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
+    # @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
     # @pysnooper.snoop(watch_explode=('items'))
-    def muldelete(self, items):
+    def _muldelete(self, items):
         if not items:
             abort(404)
         success = []
         fail = []
         for item in items:
             try:
-                self.pre_delete(item)
-                db.session.delete(item)
-                success.append(item.to_json())
+                if g.user and g.user.username and hasattr(item, 'created_by'):
+                    if g.user.username == item.created_by.username:   # 只有自己的可以删除
+                        self.pre_delete(item)
+                        db.session.delete(item)
+                        success.append(item.to_json())
+                        continue
             except Exception as e:
                 flash(str(e), "danger")
-                fail.append(item.to_json())
+
+            fail.append(item.to_json())
         db.session.commit()
         return json.dumps(
             {
@@ -1825,7 +1822,7 @@ class MyappModelRestApi(ModelRestApi):
                 column_field_kwargs = new_columns[col_name].kwargs
                 ret[col_name] = column_field_kwargs.get('label',col_name)
 
-        new_label_columns = self.list_columns+self.show_columns+self.edit_columns+self.add_columns
+        new_label_columns = self.list_columns+self.show_columns+self.edit_columns+self.add_columns+self.search_columns
         for col in list(set(new_label_columns)):
             ret[col] = self.label_columns.get(col,col)
 

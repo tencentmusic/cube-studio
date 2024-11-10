@@ -17,10 +17,9 @@ RUN apt install -y python3-dev gcc automake autoconf libtool make ffmpeg build-e
 RUN pip install pysnooper cython
 
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-    echo "alias la='ls -A'" >> /root/.bashrc && \
-    echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+    echo "alias la='ls -A'" >> ~/.bashrc && \
+    echo "alias vi='vim'" >> ~/.bashrc
 
 WORKDIR /app
 RUN pip3 install kubernetes==21.7.0 pysnooper psutil

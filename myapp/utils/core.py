@@ -1536,6 +1536,9 @@ def check_resource_gpu(resource_gpu, src_resource_gpu=None):
         return gpu_num
 
     gpu_num, gpu_type, resource_name = get_gpu(resource_gpu)
+    # 处理虚拟化占用方式，只识别比例部分
+    if type(gpu_num)==str and ',' in gpu_num:
+        gpu_num = float(gpu_num.split(',')[1])
     src_gpu_num = 0
     if src_resource_gpu:
         src_gpu_num, _, _ = get_gpu(src_resource_gpu)
@@ -1587,9 +1590,11 @@ def get_gpu(resource_gpu,resource_name=None):
     gpu_type = None
     try:
         if resource_gpu:
+            # 英文括号
             if '(' in resource_gpu:
                 gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
                 gpu_type = gpu_type[0] if gpu_type else None
+            # 中文括号
             if '（' in resource_gpu:
                 gpu_type = re.findall(r"（(.+?)）", resource_gpu)
                 gpu_type = gpu_type[0] if gpu_type else None
@@ -1605,14 +1610,22 @@ def get_gpu(resource_gpu,resource_name=None):
                 if gpu_mfrs:
                     resource_name = conf.get("GPU_RESOURCE", {}).get(gpu_mfrs, resource_name)
                 gpu_type=gpu_type.split(',')[1].strip().upper()
-
+            # 处理中文括号，和英文括号
             resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
             resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
-            gpu_num = float(resource_gpu)
+
+            # 填的是(显存,核的比例)
+            if resource_gpu and ',' in resource_gpu:
+                gpu_num = resource_gpu
+            else:
+                gpu_num = float(resource_gpu)
 
     except Exception as e:
         print(e)
     gpu_type = gpu_type.upper() if gpu_type else None
+    # 如果不是0.1等形式的虚拟化占用，那么返回整数
+    if type(gpu_num)==float and int(gpu_num)==float(gpu_num):
+        gpu_num = int(gpu_num)
     return gpu_num, gpu_type, resource_name
 
 # 按expand字段中index字段进行排序
@@ -1937,6 +1950,8 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
     }
     if '(' in req_resource['gpu']:
         req_resource['gpu'] = req_resource['gpu'][:req_resource['gpu'].index('(')]
+    if ',' in req_resource['gpu']:
+        req_resource['gpu'] = req_resource['gpu'].split(',')[1]
 
     all_resources = None
     # req_total_resource={key:float(str(req_resource[key]).replace('G',''))*replicas for key in req_resource}
@@ -2277,3 +2292,41 @@ def notebook_cascade_demo():
         },
     ]
     return options
+
+
+import hashlib
+# 计算文件的md5
+def calculate_md5(file_path):
+
+    hash_md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+# 从网络下载文件
+def download_file(url,local_dir):
+    import requests
+    def download_file(url, local_filename):
+        # 发送HTTP GET请求
+        response = requests.get(url, stream=True)
+
+        # 确保请求成功
+        if response.status_code == 200:
+            with open(local_filename, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"文件已成功下载并保存为 {local_filename}")
+            return local_filename
+        else:
+            print(f"下载失败，状态码：{response.status_code}")
+            return ''
+
+    # 示例用法
+    os.makedirs(local_dir,exist_ok=True)
+
+    local_filename = os.path.join(local_dir,url.split('/')[-1])  # 使用URL中的文件名
+
+    local_filename = download_file(url, local_filename)
+    return local_filename

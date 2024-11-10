@@ -330,7 +330,10 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
             lst = [pod for pod in lst if pod['username']==g.user.username]
 
         if order_column and lst:
-            lst = sorted(lst, key=lambda d:float(d[order_column].split('/')[0])/float(d[order_column].split('/')[1]) if '/0' not in d[order_column] else 0, reverse = False if order_direction=='asc' else True)
+            if order_column in ['cpu','memory']:
+                lst = sorted(lst, key=lambda d:float(d[order_column].split('/')[0])/float(d[order_column].split('/')[1]) if '/0' not in d[order_column] else 0, reverse = False if order_direction=='asc' else True)
+            elif order_column in ['start_time']:
+                lst = sorted(lst, key=lambda d: d[order_column],reverse=False if order_direction == 'asc' else True)
         total_count=len(lst)
         return total_count,lst
 

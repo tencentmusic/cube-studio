@@ -9,7 +9,7 @@
 2. 安装 Power Shell
 之后的脚本需要在Power Shell 中执行
 
-3. 安装python > 3.9.16
+3. 安装python = 3.9.16
 
 4. git 要配置一下不要进行换行符修改
 
@@ -46,13 +46,13 @@ mysql> flush privileges;
 
 ```
 构建基础镜像（包含基础环境）
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.09.01 -f install/docker/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.09.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.09.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2024.09.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)

@@ -143,7 +143,14 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
             describe=self.describe,
             args=self.args,
             demo=self.demo,
-            expand=self.expand
+            expand=self.expand,
+            entrypoint=self.entrypoint,
+            workdir=self.workdir,
+            hostAliases=self.hostAliases,
+            env=self.env,
+            volume_mount=self.volume_mount,
+            privileged=self.privileged,
+            accounts=self.accounts
         )
 
 
@@ -450,7 +457,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             schedule_type='once',
             cron_time=self.cron_time,
             pipeline_file='',
-            pipeline_argo_id=self.pipeline_argo_id,
+            pipeline_argo_id='',
             node_selector=self.node_selector,
             image_pull_policy=self.image_pull_policy,
             parallelism=self.parallelism,
@@ -649,7 +656,8 @@ class Crd:
             "Failed":'<svg t="1669359973288" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3503" width="20" height="20"><path d="M549.044706 512l166.189176-166.249412a26.383059 26.383059 0 0 0 0-36.98447 26.383059 26.383059 0 0 0-37.044706 0L512 475.015529l-166.249412-166.249411a26.383059 26.383059 0 0 0-36.98447 0 26.383059 26.383059 0 0 0 0 37.044706L475.015529 512l-166.249411 166.249412a26.383059 26.383059 0 0 0 0 36.98447 26.383059 26.383059 0 0 0 37.044706 0L512 548.984471l166.249412 166.249411a26.383059 26.383059 0 0 0 36.98447 0 26.383059 26.383059 0 0 0 0-37.044706L548.984471 512zM512 1024a512 512 0 1 1 0-1024 512 512 0 0 1 0 1024z" fill="#E84335" p-id="3504"></path></svg>',
             'Succeeded':'<svg t="1669360077850" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6508" width="20" height="20"><path d="M512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667s-191.018667 426.666667-426.666667 426.666667S85.333333 747.648 85.333333 512 276.352 85.333333 512 85.333333z m-74.965333 550.4L346.453333 545.152a42.666667 42.666667 0 1 0-60.330666 60.330667l120.704 120.704a42.666667 42.666667 0 0 0 60.330666 0l301.653334-301.696a42.666667 42.666667 0 1 0-60.288-60.330667l-271.530667 271.488z" fill="#4e8508" p-id="6509"></path></svg>'
         }
-        return Markup(status_icon.get(status,default)+"&nbsp;&nbsp;"+status)
+
+        return Markup(f'<div style="display: flex; align-items: center;">{status_icon.get(status,default)}&nbsp;&nbsp;{status}</div>')
 
     @property
     def spec_html(self):

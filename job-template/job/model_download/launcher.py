@@ -143,6 +143,22 @@ def download(**kwargs):
         print('未发现模型')
         exit(1)
 
+from subprocess import Popen, PIPE, STDOUT
+
+def exe_command(command):
+    """
+    执行 shell 命令并实时打印输出
+    :param command: shell 命令
+    :return: process, exitcode
+    """
+    print(command)
+    process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
+    with process.stdout:
+        for line in iter(process.stdout.readline, b''):
+            print(line.decode().strip(),flush=True)
+    exitcode = process.wait()
+    return exitcode
+
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("download model launcher")
@@ -154,8 +170,14 @@ if __name__ == "__main__":
     arg_parser.add_argument('--save_path', type=str, help="下载目录", default='')
 
     args = arg_parser.parse_args()
+    kwargs = args.__dict__
     # print("{} args: {}".format(__file__, args))
+    if kwargs['from'] == '模型管理' or 'model' in kwargs['from'] or kwargs['from']=='推理服务' or 'inference' in kwargs['from']:
+        download(**kwargs)
+    elif kwargs['from']=='huggingface':
+        command = f'huggingface-cli download --repo-type model --resume-download {kwargs["model_name"]} --revision {kwargs["model_version"]} --local-dir {kwargs["save_path"]} --local-dir-use-symlinks False'
+        exitcode = exe_command(command)
+        exit(exitcode)
 
-    download(**args.__dict__)
 
 

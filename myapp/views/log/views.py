@@ -10,7 +10,8 @@ from . import LogMixin
 class LogModelView(LogMixin, MyappModelView):
     datamodel = MyappSQLAInterface(Log)
     list_columns = ['user','method','path','duration_ms','dttm']
-
+    base_permissions = ['can_list']
+    search_columns = ["user",'method','path']
     spec_label_columns = {
         "action": _("函数"),
         "path": _("网址"),

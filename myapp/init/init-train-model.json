@@ -4,7 +4,7 @@
     "name": "mnist",
     "version": "v2022.08.01.1",
     "describe": "tf mnist 图像分类 tfserving推理",
-    "path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/tf-mnist.tar.gz",
+    "path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/tf-mnist.tar.gz",
     "framework": "tf",
     "api_type": "tfserving"
   },
@@ -13,7 +13,7 @@
     "name": "resnet50",
     "version": "v2022.08.01.2",
     "describe": "pytorch resnet50 图像分类 torch-server推理",
-    "path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/resnet50.mar",
+    "path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50.mar",
     "framework": "pytorch",
     "api_type": "torch-server"
   },
@@ -22,7 +22,7 @@
     "name": "resnet50",
     "version": "v2022.08.01.3",
     "describe": "torchscript resnet50 图像分类 triton推理",
-    "path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/resnet50-torchscript.pt",
+    "path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50-torchscript.pt",
     "framework": "pytorch",
     "api_type": "triton-server"
   },
@@ -31,7 +31,7 @@
     "name": "resnet50",
     "version": "v2022.08.01.4",
     "describe": "onnx resnet50 图像分类 triton推理",
-    "path": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/resnet50.onnx",
+    "path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50.onnx",
     "framework": "onnx",
     "api_type": "triton-server"
   }

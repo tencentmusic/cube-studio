@@ -67,8 +67,7 @@
           "--images": "ccr.ccs.tencentyun.com/cube-studio/yolov7:2024.01",
           "--working_dir": "/yolov7",
           "--command": "python server.py",
-          "--args": "",
-          "--env": "MODELPATH=/mnt/{{creator}}/coco_data_sample/yolov7_best.pt",
+          "--env": "MODELPATH=/mnt/{{creator}}/coco_data_sample/yolov7_best.pt\nYOLO_EXAMPLE=/mnt/{{creator}}/coco_data_sample/images/train2014//mnt/admin/coco_data_sample/images/train2014",
           "--ports": "8080",
           "--replicas": "1",
           "--resource_memory": "5G",
@@ -747,7 +746,7 @@
                 "args": {
                     "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
                     "workdir": "/mnt/{{creator}}/pipeline/example/yolo/",
-                    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/electric-bicycle/electric-bicycle.zip --no-check-certificate && unzip -n electric-bicycle.zip && cd electric-bicycle && sh reset.sh"
+                    "command": "rm -rf electric-bicycle.zip && wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/electric-bicycle/electric-bicycle.zip --no-check-certificate && unzip -n electric-bicycle.zip && cd electric-bicycle && sh reset.sh"
                 }
             }
         ]

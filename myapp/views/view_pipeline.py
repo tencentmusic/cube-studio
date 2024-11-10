@@ -251,6 +251,7 @@ def dag_to_pipeline(pipeline, dbsession, workflow_label=None, **kwargs):
         container_envs.append(("KFJ_TASK_PROJECT_NAME", str(pipeline.project.name)))
         container_envs.append(("GPU_RESOURCE_NAME", gpu_resource_name))
         container_envs.append(("USERNAME", pipeline.created_by.username))
+        container_envs.append(("IMAGE_PULL_POLICY", conf.get('IMAGE_PULL_POLICY','Always')))
         if hubsecret_list:
             container_envs.append(("HUBSECRET", ','.join(hubsecret_list)))
 
@@ -742,14 +743,15 @@ class Pipeline_ModelView_Base():
 
     # 检测是否具有编辑权限，只有creator和admin可以编辑
     def check_edit_permission(self, item):
-        user_roles = [role.name.lower() for role in list(get_user_roles())]
-        if "admin" in user_roles:
+        if g.user and g.user.is_admin():
             return True
         if g.user and g.user.username and hasattr(item, 'created_by'):
             if g.user.username == item.created_by.username:
                 return True
-        flash('just creator can edit/delete ', 'warning')
+        # flash('just creator can edit/delete ', 'warning')
         return False
+
+    check_delete_permission = check_edit_permission
 
     # 验证args参数,并自动排版dag_json
     # @pysnooper.snoop(watch_explode=('item'))
@@ -1274,7 +1276,7 @@ class Pipeline_ModelView_Base():
         return redirect(request.referrer)
 
 
-class Pipeline_ModelView(Pipeline_ModelView_Base, MyappModelView, DeleteMixin):
+class Pipeline_ModelView(Pipeline_ModelView_Base, MyappModelView):
     datamodel = SQLAInterface(Pipeline)
     # base_order = ("changed_on", "desc")
     # order_columns = ['changed_on']

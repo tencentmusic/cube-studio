@@ -66,8 +66,8 @@ def create_header_service(name):
             "name": name,
             "labels":{
                 "run-id":os.getenv('KFJ_RUN_ID','unknown'),
-                "run-rtx":os.getenv('KFJ_RUNNER','unknown'),
-                "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
+                "run-username":os.getenv('KFJ_RUNNER','unknown'),
+                "pipeline-username": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
             }
@@ -110,8 +110,8 @@ def create_header_deploy(name):
             "name": name,
             "labels":{
                 "run-id":os.getenv('KFJ_RUN_ID','unknown'),
-                "run-rtx":os.getenv('KFJ_RUNNER','unknown'),
-                "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
+                "run-username":os.getenv('KFJ_RUNNER','unknown'),
+                "pipeline-username": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
             }
@@ -130,7 +130,7 @@ def create_header_deploy(name):
                         "pipeline-id": KFJ_PIPELINE_ID,
                         "pipeline-name": KFJ_PIPELINE_NAME,
                         "task-name": KFJ_TASK_NAME,
-                        'rtx-user': KFJ_RUNNER,
+                        'username': KFJ_RUNNER,
                         "component": name,
                         "type": "ray",
                         "run-id": os.getenv('KFJ_RUN_ID', 'unknown'),
@@ -179,7 +179,7 @@ def create_header_deploy(name):
                         {
                             "name": "ray-head",
                             "image": KFJ_TASK_IMAGES,
-                            "imagePullPolicy": "Always",
+                            "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                             "workingDir": workingDir,
                             "command": [
                                 "/bin/bash",
@@ -237,8 +237,8 @@ def create_worker_deploy(header_name,worker_name):
             "name": worker_name,
             "labels": {
                 "run-id":os.getenv('KFJ_RUN_ID','unknown'),
-                "run-rtx":os.getenv('KFJ_RUNNER','unknown'),
-                "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
+                "run-username":os.getenv('KFJ_RUNNER','unknown'),
+                "pipeline-username": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
             }
@@ -257,7 +257,7 @@ def create_worker_deploy(header_name,worker_name):
                         "pipeline-id": KFJ_PIPELINE_ID,
                         "pipeline-name": KFJ_PIPELINE_NAME,
                         "task-name": KFJ_TASK_NAME,
-                        'rtx-user': KFJ_RUNNER,
+                        'username': KFJ_RUNNER,
                         "component": worker_name,
                         "type": "ray",
                         "run-id": os.getenv('KFJ_RUN_ID', 'unknown'),
@@ -311,7 +311,7 @@ def create_worker_deploy(header_name,worker_name):
                         {
                             "name": "ray-worker",
                             "image": KFJ_TASK_IMAGES,
-                            "imagePullPolicy": "Always",
+                            "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                             "workingDir": workingDir,
                             "command": [
                                 "/bin/bash",

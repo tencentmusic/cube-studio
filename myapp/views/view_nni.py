@@ -252,6 +252,11 @@ class NNI_ModelView_Base():
 
     # @pysnooper.snoop()
     def set_column(self, nni=None):
+        self.default_filter = {
+            "created_by": g.user.id
+        }
+
+
 
         self.edit_form_extra_fields['parameters'] = StringField(
             _('超参数'),
@@ -306,6 +311,19 @@ class NNI_ModelView_Base():
 
     pre_add_web = set_column
     pre_update_web = set_column
+
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        if g.user and g.user.is_admin():
+            return True
+        if g.user and g.user.username and hasattr(item, 'created_by'):
+            if g.user.username == item.created_by.username:
+                return True
+        # flash('just creator can edit/delete ', 'warning')
+        return False
+
+    check_delete_permission = check_edit_permission
+
 
     # 处理form请求
     def process_form(self, form, is_created):

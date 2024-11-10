@@ -178,7 +178,7 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                     "pipeline-name": KFJ_PIPELINE_NAME,
                     "task-id": KFJ_TASK_ID,
                     "task-name": KFJ_TASK_NAME,
-                    'rtx-user': KFJ_RUNNER,
+                    'username': KFJ_RUNNER,
                     "component": name,
                     "type": "pytorchjob",
                     "run-id": KFJ_RUN_ID,
@@ -232,7 +232,7 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
                     {
                         "name": "pytorch",
                         "image": image if image else KFJ_TASK_IMAGES,
-                        "imagePullPolicy": "Always",
+                        "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                         "workingDir":working_dir,
                         "env":[
                             {
@@ -269,9 +269,11 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
     }
 
 
-    if int(gpu_num):
+    if int(gpu_num)>=1:
         pod_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
         pod_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
+    elif int(gpu_num)==-1: # -1表示共享占用，使用gpu机器，但是不强制声明使用gpu，用户容器自行决定
+        pass
     else:
         # 添加禁用指令
         pod_spec['template']['spec']['containers'][0]['env'].append({
@@ -303,8 +305,8 @@ def make_pytorchjob(name,num_workers,image,working_dir,command):
             "name": name,
             "labels":{
                 "run-id":KFJ_RUN_ID,
-                "run-rtx":KFJ_RUNNER,
-                "pipeline-rtx": KFJ_CREATOR,
+                "run-username":KFJ_RUNNER,
+                "pipeline-username": KFJ_CREATOR,
                 "pipeline-id": KFJ_PIPELINE_ID,
                 "pipeline-name": KFJ_PIPELINE_NAME,
                 "task-id": KFJ_TASK_ID,

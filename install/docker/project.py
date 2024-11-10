@@ -96,9 +96,9 @@ class MyCustomRemoteUserView(AuthRemoteUserView):
 
     @expose('/login/')
     def _login(self):
-        if 'rtx' in request.args:
-            if request.args.get('rtx'):
-                username = request.args.get('rtx')
+        if 'username' in request.args:
+            if request.args.get('username'):
+                username = request.args.get('username')
                 user = self.appbuilder.sm.find_user(username)
                 if user:
                     login_user(user, remember=True)
@@ -153,9 +153,9 @@ class Myauthdbview(AuthDBView):
         request_data = request.args.to_dict()
         comed_url = request_data.get('login_url', '')
 
-        if 'rtx' in request_data:
-            if request_data.get('rtx'):
-                username = request_data.get('rtx')
+        if 'username' in request_data:
+            if request_data.get('username'):
+                username = request_data.get('username')
                 user = self.appbuilder.sm.find_user(username)
                 if user:
                     login_user(user, remember=True)
@@ -182,9 +182,12 @@ class Myauthdbview(AuthDBView):
             user = self.appbuilder.sm.find_user(username=username)
             if user is None:
                 user = self.appbuilder.sm.find_user(email=username)
-            if user is None or (not user.is_active):
+            if user is None:
                 logging.info(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
                 user = None
+            elif not user.is_active:
+                flash('发现用户%s已存在，但未激活，请联系管理员激活' % form.username.data, "warning")
+                return redirect(self.appbuilder.get_url_for_login)
             elif check_password_hash(user.password, password):
                 self.appbuilder.sm.update_user_auth_stat(user, True)
             elif user.password == password:

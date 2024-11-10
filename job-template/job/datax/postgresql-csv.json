@@ -12,10 +12,10 @@
         "content": [
             {
                 "reader": {
-                    "name": "mysqlreader",
+                    "name": "postgresqlreader",
                     "parameter": {
-                        "username": "root",
-                        "password": "admin",
+                        "username": "postgres",
+                        "password": "postgres",
                         "column": [
                             "age",
                             "duration",
@@ -35,7 +35,7 @@
                                     "train"
                                 ],
                                 "jdbcUrl": [
-     "jdbc:mysql://mysql-service.infra:3306/example"
+     "jdbc:postgresql://postgresql.kubeflow:5432/example"
                                 ]
                             }
                         ]
@@ -45,7 +45,7 @@
                     "name": "txtfilewriter",
                     "parameter": {
                         "path": "/mnt/admin/pipeline/example/ml/",
-                        "fileName": "data-test.csv",
+                        "fileName": "data-pg.csv",
                         "writeMode": "truncate",
                         "fileFormat":"csv",
                         "header": [

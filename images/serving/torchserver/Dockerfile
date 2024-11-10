@@ -2,6 +2,8 @@
 ARG FROM_IMAGES
 FROM $FROM_IMAGES
 
+ENV TZ Asia/Shanghai
+
 USER root
 WORKDIR /root
 
@@ -18,13 +20,12 @@ ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
 
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-    echo "alias la='ls -A'" >> /root/.bashrc && \
-    echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+    echo "alias la='ls -A'" >> ~/.bashrc && \
+    echo "alias vi='vim'" >> ~/.bashrc
+
 # 安装python基础包
 RUN pip install pysnooper
 
 ENV TEMP=/root
-ENV TZ=Asia/Shanghai
 

@@ -192,7 +192,7 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
                     "pipeline-name": KFJ_PIPELINE_NAME,
                     "task-id": KFJ_TASK_ID,
                     "task-name": KFJ_TASK_NAME,
-                    'rtx-user': KFJ_RUNNER,
+                    'username': KFJ_RUNNER,
                     "component": name,
                     "type": "volcanojob",
                     "run-id": KFJ_RUN_ID,
@@ -244,7 +244,7 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
                     {
                         "name": "volcanojob",
                         "image": image if image else KFJ_TASK_IMAGES,
-                        "imagePullPolicy": "Always",
+                        "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                         "workingDir":working_dir,
                         "env":[
 
@@ -319,8 +319,8 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
             "name": name,
             "labels":{
                 "run-id":KFJ_RUN_ID,
-                "run-rtx":KFJ_RUNNER,
-                "pipeline-rtx": KFJ_CREATOR,
+                "run-username":KFJ_RUNNER,
+                "pipeline-username": KFJ_CREATOR,
                 "pipeline-id": KFJ_PIPELINE_ID,
                 "pipeline-name": KFJ_PIPELINE_NAME,
                 "task-id": KFJ_TASK_ID,
@@ -415,8 +415,8 @@ def create_rabbitmq(name,create=True):
                 "labels": {
                     "app": name,
                     "run-id": KFJ_RUN_ID,
-                    "run-rtx": KFJ_RUNNER,
-                    "pipeline-rtx": KFJ_CREATOR,
+                    "run-username": KFJ_RUNNER,
+                    "pipeline-username": KFJ_CREATOR,
                     "pipeline-id": KFJ_PIPELINE_ID,
                     "pipeline-name": KFJ_PIPELINE_NAME,
                     "task-id": KFJ_TASK_ID,
