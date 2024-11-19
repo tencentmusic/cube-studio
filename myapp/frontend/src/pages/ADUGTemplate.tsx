@@ -1010,27 +1010,72 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 destroyOnClose
                 onCancel={() => { setVisableDetail(false) }}>
                 <Spin spinning={loadingDetail}>
-                    <div className="pb32" style={{ minHeight: 300 }}>
-                        {
-                            dataDetail.map((item, index) => {
-                                return <Row className="mb16" key={`dataDetail_${index}`}>
-                                    <Col span={6}><div className="ta-r"><strong>{item.label}：</strong></div></Col>
-                                    <Col span={18}><pre style={{ whiteSpace: 'break-spaces' }} dangerouslySetInnerHTML={{
-                                        __html: (() => {
-                                            let content = item.value
-                                            if (Object.prototype.toString.call(item.value) === '[object Object]' || Object.prototype.toString.call(item.value) === '[object Array]') {
-                                                try {
-                                                    content = JSON.stringify(item.value)
-                                                } catch (error) { }
-                                            }
-                                            return content
-                                        })()
-                                    }}></pre></Col>
-                                </Row>
-                            })
-                        }
+                    <div className="pb8"
+                        style={{
+                            paddingBottom: '8px',
+                            minHeight: '400px', // 最小高度
+                            maxWidth: '80vw',  // 最大宽度
+                            margin: '0 auto',  // 水平居中
+                            overflowX: 'auto', // 横向滚动条
+                        }}
+                    >
+                    {dataDetail.map((item, index) => (
+                        <div
+                        key={`dataDetail_${index}`}
+                        style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            marginBottom: '1rem'
+                        }}
+                        >
+                        {/* Label列 */}
+                        <div
+                            style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end', // 第一列内容靠右对齐
+                            paddingRight: '1rem',
+                            minWidth:'80px'
+                            }}
+                        >
+                            <strong>{item.label}：</strong>
+                        </div>
+
+                        {/* Value列 */}
+                        <div
+                            style={{
+                            flex: '1',
+                            display: 'flex',
+                            justifyContent: 'flex-start', // 第二列内容靠左对齐
+                            }}
+                        >
+                            <pre
+                            style={{
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                overflowX: 'auto',
+                                margin: 0,
+                            }}
+                            dangerouslySetInnerHTML={{
+                                __html: (() => {
+                                let content = item.value;
+                                if (
+                                    Object.prototype.toString.call(item.value) === '[object Object]' ||
+                                    Object.prototype.toString.call(item.value) === '[object Array]'
+                                ) {
+                                    try {
+                                    content = JSON.stringify(item.value, null, 2); // 格式化输出
+                                    } catch (error) {}
+                                }
+                                return content;
+                                })(),
+                            }}
+                            ></pre>
+                        </div>
+                        </div>
+                    ))}
                     </div>
                 </Spin>
+
             </Modal>
 
             <TitleHeader title={<>
