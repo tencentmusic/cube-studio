@@ -48,7 +48,6 @@ conf = app.config
 class ETL_Task_ModelView_Base():
     label_title = _("任务")
     datamodel = SQLAInterface(ETL_Task)
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('etl_pipeline')
 
     base_permissions = ['can_list', 'can_show', 'can_delete']
     base_order = ("changed_on", "desc")
@@ -77,13 +76,6 @@ class ETL_Task_ModelView_Base():
 
     show_columns = ['template', 'name', 'describe', 'etl_task_id', 'created_by', 'changed_by', 'created_on',
                     'changed_on', 'task_args']
-
-
-class ETL_Task_ModelView(ETL_Task_ModelView_Base, MyappModelView):
-    datamodel = SQLAInterface(ETL_Task)
-
-
-appbuilder.add_view_no_menu(ETL_Task_ModelView)
 
 
 # 添加api
@@ -426,7 +418,7 @@ class ETL_Pipeline_ModelView_Base():
     @expose("/submit_etl_pipeline/<etl_pipeline_id>", methods=["GET", "POST"])
     def submit_etl_pipeline(self, etl_pipeline_id):
         print(etl_pipeline_id)
-        url = '/etl_pipeline_modelview/web/' + etl_pipeline_id
+        url = '/etl_pipeline_modelview/api/web/' + etl_pipeline_id
         try:
             pipeline = db.session.query(ETL_Pipeline).filter_by(id=etl_pipeline_id).first()
             params = importlib.import_module('myapp.views.view_etl_pipeline_' + pipeline.workflow)
@@ -533,13 +525,6 @@ class ETL_Pipeline_ModelView_Base():
             raise e
 
         return redirect(request.referrer)
-
-
-class ETL_Pipeline_ModelView(ETL_Pipeline_ModelView_Base, MyappModelView, DeleteMixin):
-    datamodel = SQLAInterface(ETL_Pipeline)
-
-
-appbuilder.add_view_no_menu(ETL_Pipeline_ModelView)
 
 
 # 添加api

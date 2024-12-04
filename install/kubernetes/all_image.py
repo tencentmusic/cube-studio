@@ -6,12 +6,12 @@ kubeflow = [
     'bitnami/redis:6.2.12',  # 缓存
     "busybox:1.36.0",
     "kubeflow/training-operator:v1-8a066f9",  # 分布式训练
-    'ccr.ccs.tencentyun.com/cube-studio/spark-operator:1.3.8-3.1.1',  # spark serverless
     'alpine:3.10',
 ]
 
 kubernetes_dashboard = [
     'kubernetesui/dashboard:v2.6.1',  # k8s dashboard
+    'ccr.ccs.tencentyun.com/cube-studio/k8s-dashboard:v2.6.1',
     'kubernetesui/metrics-scraper:v1.0.8',  # k8s dashboard 上的指标监控
 ]
 
@@ -43,9 +43,6 @@ volcano = [
     'volcanosh/vc-webhook-manager:v1.7.0'  # 拦截器
 ]
 
-nni = [
-
-]
 pipeline = [
     'minio/minio:RELEASE.2023-04-20T17-56-55Z',
     'argoproj/argoexec:v3.4.3',
@@ -72,37 +69,38 @@ cube_studio = [
     # "dpage/pgadmin4",
     # "elasticsearch:7.12.1"
     # 推理服务的镜像
-    # 'tensorflow/serving:2.14.1-gpu',
-    # 'tensorflow/serving:2.14.1',
-    # 'tensorflow/serving:2.13.1-gpu',
-    # 'tensorflow/serving:2.13.1',
-    # 'tensorflow/serving:2.12.2-gpu',
-    # 'tensorflow/serving:2.12.2',
-    # 'tensorflow/serving:2.11.1-gpu',
-    # 'tensorflow/serving:2.11.1',
-    # 'tensorflow/serving:2.10.1-gpu',
-    # 'tensorflow/serving:2.10.1',
-    # 'tensorflow/serving:2.9.3-gpu',
-    # 'tensorflow/serving:2.9.3',
-    # 'tensorflow/serving:2.8.4-gpu',
-    # 'tensorflow/serving:2.8.4',
-    # 'tensorflow/serving:2.7.4-gpu',
-    # 'tensorflow/serving:2.7.4',
-    # 'tensorflow/serving:2.6.5-gpu',
-    # 'tensorflow/serving:2.6.5',
-    # 'tensorflow/serving:2.5.4-gpu',
-    # 'tensorflow/serving:2.5.4',
-    # 'ccr.ccs.tencentyun.com/cube-studio/tritonserver:24.01-py3',
-    # 'ccr.ccs.tencentyun.com/cube-studio/tritonserver:23.12-py3',
-    # 'ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.12-py3',
+
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4',
+    'ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4',
     # 'ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3',
-    # 'ccr.ccs.tencentyun.com/cube-studio/tritonserver:20.12-py3',
-    # 'pytorch/torchserve:0.9.0-gpu',
-    # 'pytorch/torchserve:0.9.0-cpu',
-    # 'pytorch/torchserve:0.8.2-gpu',
-    # 'pytorch/torchserve:0.8.2-cpu',
-    # 'pytorch/torchserve:0.7.1-gpu',
-    # 'pytorch/torchserve:0.7.1-cpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.09-py3',
+    'ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3',
+    'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-cpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-cpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-gpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-cpu',
+    # 'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-gpu',
+    'ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-cpu'
     # 'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest',
     # 'ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda',
 ]
@@ -132,7 +130,7 @@ for file in os.listdir('../../myapp/init/'):
         if match not in example_images:
             example_images.append(match.strip())
 
-images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio + volcano + pipeline + cube_studio + nni + user_image + job_template_images + example_images
+images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio + volcano + pipeline + cube_studio + user_image + job_template_images + example_images
 images = list(set(images))
 init_images = kubeflow + kubernetes_dashboard + new_gpu + new_prometheus + istio + volcano + pipeline
 

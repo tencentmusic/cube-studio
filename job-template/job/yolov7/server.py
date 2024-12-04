@@ -37,7 +37,7 @@ device='cpu'
 # 这里是添加的gpu识别
 resource_gpu = os.getenv('RESOURCE_GPU', '')
 resource_gpu = resource_gpu.split('(')[0]
-resource_gpu = int(resource_gpu) if resource_gpu else 0
+resource_gpu = int(float(resource_gpu)) if resource_gpu else 0
 if resource_gpu:
     resource_gpu = list(range(resource_gpu))
     resource_gpu = [str(x) for x in resource_gpu]

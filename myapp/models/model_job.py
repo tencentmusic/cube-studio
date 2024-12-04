@@ -117,11 +117,6 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
     def name_title(self):
         return Markup(f'<a data-toggle="tooltip" rel="tooltip" title data-original-title="{self.describe}">{self.name}</a>')
 
-
-    @property
-    def images_url(self):
-        return Markup(f'<a target=_blank href="/images_modelview/show/{self.images.id}">{self.images.name}</a>')
-
     # import pysnooper
     # @pysnooper.snoop()
     def get_env(self,name,default=None):
@@ -277,16 +272,6 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         except Exception as e:
             print(e)
         return back_crds
-
-
-    @property
-    def run_instance(self):
-        # workflow = db.session.query(Workflow).filter_by(foreign_key= str(self.id)).filter_by(status= 'Running').filter_by(create_time > datetime.datetime.now().strftime("%Y-%m-%d")).all()
-        # workflow_num = len(workflow) if workflow else 0
-        # url = '/workflow_modelview/list/?_flt_2_name=%s'%self.name.replace("_","-")[:54]
-        url = r'/workflow_modelview/list/?_flt_2_labels="pipeline-id"%3A+"'+'%s"' % self.id
-        # print(url)
-        return Markup(f"<a href='{url}'>{self.schedule_type}</a>")  # k8s有长度限制
 
     # 这个dag可能不对，所以要根据真实task纠正一下
     def fix_dag_json(self,dbsession=db.session):
@@ -548,9 +533,6 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def job_args_demo(self):
         return Markup('<pre><code>' + self.job_template.demo + '</code></pre>')
 
-    @property
-    def job_template_url(self):
-        return Markup(f'<a target=_blank href="/job_template_modelview/show/{self.job_template.id}">{self.job_template.name}</a>')
 
 
 
@@ -831,43 +813,5 @@ class Workflow(Model,Crd,MyappModelBase):
 
     @property
     def stop(self):
-        return Markup(f'<a href="/workflow_modelview/stop/{self.id}">{__("停止")}</a>')
+        return Markup(f'<a href="/workflow_modelview/api/stop/{self.id}">{__("停止")}</a>')
 
-
-class Tfjob(Model,Crd,MyappModelBase):
-    __tablename__ = 'tfjob'
-
-    @property
-    def pipeline(self):
-        if self.labels:
-            try:
-                labels = json.loads(self.labels)
-                pipeline_id = labels.get("pipeline-id",'')
-                if pipeline_id:
-                    pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
-                    return Markup(f'<a href="/pipeline_modelview/list/?_flt_2_name={pipeline.name}">{pipeline.describe}</a>')
-            except Exception as e:
-                print(e)
-        return Markup('unknown')
-
-    @property
-    def run_instance(self):
-        if self.labels:
-            try:
-                labels = json.loads(self.labels)
-                run_id = labels.get("run-id",'')
-                if run_id:
-                    return Markup(f'<a href="/workflow_modelview/list/?_flt_2_labels={run_id}">{__("运行实例")}</a>')
-            except Exception as e:
-                print(e)
-        return Markup('unknown')
-
-
-
-class Xgbjob(Model,Crd,MyappModelBase):
-    __tablename__ = 'xgbjob'
-
-
-
-class Pytorchjob(Model,Crd,MyappModelBase):
-    __tablename__ = 'pytorchjob'

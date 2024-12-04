@@ -54,6 +54,7 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
     resource_memory = Column(String(100), default='1G',comment='申请内存')
     resource_cpu = Column(String(100), default='1',comment='申请cpu')
     resource_gpu = Column(String(100), default='0',comment='申请gpu')
+
     experiment=Column(Text,default='',comment='构建出来的实验体')  #
     alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated',comment='哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated')   #
 
@@ -64,7 +65,7 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def run(self):
-        ops_html = f'<a target=_blank href="/nni_modelview/run/{self.id}">{__("运行")}</a> | <a target=_blank href="/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("AUTOML_NAMESPACE")}/{self.name}">{__("容器")}</a>  | <a href="/nni_modelview/stop/{self.id}">{__("清理")}</a> '
+        ops_html = f'<a target=_blank href="/nni_modelview/api/run/{self.id}">{__("运行")}</a> | <a target=_blank href="/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("AUTOML_NAMESPACE")}/{self.name}">{__("容器")}</a>  | <a href="/nni_modelview/api/stop/{self.id}">{__("清理")}</a> '
         return Markup(ops_html)
 
     # @property
@@ -82,10 +83,6 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
 # '''
 
     @property
-    def name_url(self):
-        return Markup(f'<a target=_blank href="/experiments_modelview/list/?_flt_2_labels=%22{self.name}%22">{self.name}</a>')
-
-    @property
     def describe_url(self):
         return Markup(f'<a target=_blank href="/nni_modelview/api/web/{self.id}">{self.describe}</a>')
 
@@ -101,7 +98,7 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def log(self):
-        return Markup(f'<a target=_blank href="/nni_modelview/log/{self.id}">log</a>')
+        return Markup(f'<a target=_blank href="/nni_modelview/api/log/{self.id}">log</a>')
 
 
     def get_node_selector(self):

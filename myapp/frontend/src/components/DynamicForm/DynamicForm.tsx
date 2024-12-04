@@ -9,6 +9,7 @@ import 'moment/locale/zh-cn';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { useTranslation } from 'react-i18next';
 import FileUploadPlus from '../FileUploadPlus/FileUploadPlus';
+import JsonEditor from '../JsonEditor/JsonEditor';
 
 interface IProps {
     primaryKey?: string
@@ -60,7 +61,7 @@ export interface IDynamicFormConfigItem {
     data: Record<string, any>
 }
 
-export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select' | 'fileUpload' | 'cascader'
+export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select' | 'fileUpload' | 'cascader' | 'json'
 
 export function calculateId(strList: string[]): number {
     const str2Num = (str: string) => {
@@ -343,6 +344,31 @@ export default function DynamicForm(props: IProps) {
             <Input.TextArea autoSize={{ minRows: 4 }} disabled={config.disable} placeholder={config.placeHolder || `${t('请选择')}${config.label}`} />
         </Form.Item>
     }
+    const renderJsonEditor = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
+        return <Form.Item
+            key={`dynamicForm_${config.name}`}
+            label={config.label}
+            name={config.name}
+            rules={config.rules}
+            initialValue={config.defaultValue}
+            extra={<>
+                {config.data.tips ? <Tooltip
+                    className="mr8"
+                    placement="bottom"
+                    title={<span dangerouslySetInnerHTML={{ __html: config.data.tips }}></span>}
+                >
+                    <div className="cp d-il">
+                        <QuestionCircleOutlined style={{ color: '#1672fa' }} />
+                        <span className="pl4 c-theme">{t('详情')}</span>
+                    </div>
+                </Tooltip> : null}
+                {config.description ? <span dangerouslySetInnerHTML={{ __html: config.description }}></span> : null}
+            </>}
+            {...itemProps}
+        >
+            <JsonEditor readOnly={config.disable} placeholder={config.placeHolder || `${t('请选择')}${config.label}`} />
+        </Form.Item>
+    }
     const renderSelect = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
         // const rules = [
         //     { required: config.required, message: `${t('请选择')}${config.label}` },
@@ -513,6 +539,8 @@ export default function DynamicForm(props: IProps) {
                 return renderCascader(item, itemProps)
             case 'textArea':
                 return renderTextArea(item, itemProps)
+            case 'json':
+                return renderJsonEditor(item, itemProps)
             case 'select':
                 return renderSelect(item, itemProps)
             case 'datePicker':

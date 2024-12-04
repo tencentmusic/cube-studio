@@ -171,22 +171,24 @@ systemctl enable buildkit --now
 # 6. 安装 cni 网络插件
 ```bash
 # 创建目录
-sudo mkdir -p /opt/cni/bin
+mkdir -p /opt/cni/bin
 
-# 下载 CNI 插件 amd
-sudo wget https://githubfast.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
+# 下载 CNI 插件 amd，可能网络问题下载失败，记得删除旧文件，重新下载几次
+wget https://githubfast.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
+# wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/containerd/cni-plugins-linux-amd64-v1.1.1.tgz
 # 下载 CNI 插件 arm
-sudo wget https://githubfast.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-arm64-v1.1.1.tgz
+wget https://githubfast.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-arm64-v1.1.1.tgz
 
 # 解压对应版本插件到 /opt/cni/bin
 mkdir -p /opt/cni/bin
 sudo tar -C /opt/cni/bin -xzvf cni-plugins-linux-amd64-v1.1.1.tgz
 
 # 创建一个 CNI 网络配置文件，比如 /etc/cni/net.d/10-bridge.conf，内容如下：
+mkdir -p /etc/cni/net.d/
 vi /etc/cni/net.d/10-bridge.conf
 
 {
-    "cniVersion": "1.1.1",
+    "cniVersion": "1.0.0",
     "name": "bridge",
     "type": "bridge",
     "bridge": "cni0",

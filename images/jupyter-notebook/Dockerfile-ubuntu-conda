@@ -21,10 +21,9 @@ ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
 
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-	echo "alias la='ls -A'" >> /root/.bashrc && \
-	echo "alias vi='vim'" >> /root/.bashrc && \
-	/bin/bash -c "source /root/.bashrc"
+RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+	echo "alias la='ls -A'" >> ~/.bashrc && \
+	echo "alias vi='vim'" >> ~/.bashrc
 
 # 安装amd64的conda
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
@@ -55,7 +54,7 @@ RUN apt install -y openssh-server openssh-client
 
 # 安装
 RUN apt install -y -f python3-opencv ffmpeg
-COPY pip.conf /root/.pip/pip.conf
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
 RUN pip3 install celery redis pyarrow requests_toolbelt cryptography tqdm fsspec aiohttp librosa flask werkzeug requests tornado Pillow pysnooper opencv-python numpy scipy matplotlib scikit-image ipython pyyaml visualdl filelock && rm -rf ~/.cache
 
 RUN pip install --upgrade pip && pip install tornado==6.2 gsutil simplejson sqlalchemy joblib scikit-learn jinja2 requests numpy pandas flask pymysql pysnooper pyyaml jupyterlab==3.4.8 voila notebook==6.4.12 && rm -rf /tmp/* /var/tmp/* /root/.cache
@@ -65,7 +64,7 @@ RUN pip3 install torch torchvision torchaudio --index-url https://download.pytor
 
 # 环境变量
 ENV NODE_HOME /usr/local
-ENV PATH $NODE_HOME/bin:$PATH
+ENV PATH $PATH:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV NODE_PATH $NODE_HOME/lib/node_modules:$PATH
 ENV SHELL /bin/bash
 
@@ -74,3 +73,5 @@ COPY examples/* /examples/
 
 # 环境初始化配置
 COPY init.sh /init.sh
+
+RUN echo "export PATH=/root/miniconda3/envs/python39/bin:/root/miniconda3/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" >> /etc/profile

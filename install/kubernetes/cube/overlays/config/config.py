@@ -617,13 +617,6 @@ CRD_INFO={
         "plural": "xgboostjobs",
         "timeout": 60*60*24*2
     },
-    "experiment":{
-        "group": "kubeflow.org",
-        "version": 'v1alpha3',  # "v1alpha3",
-        "plural": "experiments",
-        'kind':'Experiment',
-        "timeout": 60 * 60 * 24 * 2
-    },
     "pytorchjob": {
         "group": "kubeflow.org",
         "version": "v1",
@@ -694,7 +687,7 @@ GPU_NONE={
 # vgpu的类型方式
 VGPU_RESOURCE={
 }
-VGPU_DRIVE_TYPE = "vgpu"   # 第四范式解决方案
+VGPU_DRIVE_TYPE = "vgpu"
 
 
 RDMA_RESOURCE_NAME=''
@@ -815,8 +808,9 @@ ALL_LINKS=[
 ]
 
 # 推理服务的各种配置
-TFSERVING_IMAGES=['tensorflow/serving:2.14.1-gpu','tensorflow/serving:2.14.1','tensorflow/serving:2.13.1-gpu','tensorflow/serving:2.13.1','tensorflow/serving:2.12.2-gpu','tensorflow/serving:2.12.2','tensorflow/serving:2.11.1-gpu','tensorflow/serving:2.11.1','tensorflow/serving:2.10.1-gpu','tensorflow/serving:2.10.1','tensorflow/serving:2.9.3-gpu','tensorflow/serving:2.9.3','tensorflow/serving:2.8.4-gpu','tensorflow/serving:2.8.4','tensorflow/serving:2.7.4-gpu','tensorflow/serving:2.7.4','tensorflow/serving:2.6.5-gpu','tensorflow/serving:2.6.5','tensorflow/serving:2.5.4-gpu','tensorflow/serving:2.5.4']
-TORCHSERVER_IMAGES=['pytorch/torchserve:0.9.0-gpu','pytorch/torchserve:0.9.0-cpu','pytorch/torchserve:0.8.2-gpu','pytorch/torchserve:0.8.2-cpu','pytorch/torchserve:0.7.1-gpu','pytorch/torchserve:0.7.1-cpu']
+
+TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4']
+TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-cpu']
 ONNXRUNTIME_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda']
 TRITONSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tritonserver:24.01-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:23.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:20.12-py3']
 

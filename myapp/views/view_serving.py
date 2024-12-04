@@ -79,7 +79,7 @@ class Service_ModelView_base():
         "name":StringField(_('名称'), description= _('英文名(小写字母、数字、- 组成)，最长50个字符'),widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"),Length(1,54)]),
         "label":StringField(_('标签'), description= _('中文名'), widget=BS3TextFieldWidget(),validators=[DataRequired()]),
         "images": StringField(_('镜像'), description= _('镜像全称'), widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "volume_mount":StringField(_('挂载'),description= _('外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人username子目录'),widget=BS3TextFieldWidget(),default=''),
+        "volume_mount":StringField(_('挂载'),description= _('外部挂载，格式:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),widget=BS3TextFieldWidget(),default=''),
         "working_dir": StringField(_('工作目录'),description= _('工作目录，容器启动的初始所在目录，不填默认使用Dockerfile内定义的工作目录'),widget=BS3TextFieldWidget()),
         "command":StringField(_('启动命令'), description= _('启动命令，支持多行命令'),widget=MyBS3TextAreaFieldWidget(rows=3)),
         "node_selector":StringField(_('机器选择'), description= _('运行当前服务所在的机器'),widget=BS3TextFieldWidget(),default='cpu=true,serving=true'),
@@ -133,6 +133,7 @@ class Service_ModelView_base():
         if self.src_item_json.get('name', '') != item.name:
             self.delete_old_service(self.src_item_json.get('name', ''), item.project.cluster)
             flash(__('检测到修改名称，旧服务已清理完成'), category='warning')
+        self.pre_add(item)
 
     def pre_delete(self, item):
         self.delete_old_service(item.name, item.project.cluster)
@@ -263,12 +264,6 @@ class Service_ModelView_base():
         flash(__('服务部署完成'), category='success')
         return redirect(conf.get("MODEL_URLS", {}).get("service", '/'))
 
-
-class Service_ModelView(Service_ModelView_base, MyappModelView):
-    datamodel = SQLAInterface(Service)
-
-
-appbuilder.add_view_no_menu(Service_ModelView)
 
 
 class Service_ModelView_Api(Service_ModelView_base, MyappModelRestApi):

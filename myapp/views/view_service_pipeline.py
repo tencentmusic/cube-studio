@@ -63,7 +63,6 @@ class Service_Pipeline_Filter(MyappFilter):
 class Service_Pipeline_ModelView_Base():
     label_title = _('任务流')
     datamodel = SQLAInterface(Service_Pipeline)
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('service_pipeline', '')
 
     base_permissions = ['can_show', 'can_edit', 'can_list', 'can_delete', 'can_add']
     base_order = ("changed_on", "desc")
@@ -369,7 +368,7 @@ class Service_Pipeline_ModelView_Base():
             if root_node['template-group'] == 'endpoint' and root_node['template'] == 'gateway':
                 self.build_http(service_pipeline)
 
-        return redirect("/service_pipeline_modelview/web/log/%s" % service_pipeline_id)
+        return redirect("/service_pipeline_modelview/api/web/log/%s" % service_pipeline_id)
         # return redirect(run_url)
 
     # # @event_logger.log_this
@@ -402,7 +401,7 @@ class Service_Pipeline_ModelView_Base():
             return redirect(url)
         else:
             flash('no running instance', 'warning')
-            return redirect('/service_pipeline_modelview/web/%s' % service_pipeline.id)
+            return redirect('/service_pipeline_modelview/api/web/%s' % service_pipeline.id)
 
     # # @event_logger.log_this
     @expose("/web/pod/<service_pipeline_id>", methods=["GET"])
@@ -430,7 +429,7 @@ class Service_Pipeline_ModelView_Base():
         k8s_client.delete_deployment(namespace=namespace, name=service_pipeline.name)
 
         flash(__('服务清理完成'), category='success')
-        return redirect('/service_pipeline_modelview/list/')
+        return redirect('/service_pipeline_modelview/api/')
 
     @expose("/config/<service_pipeline_id>", methods=("GET", 'POST'))
     def pipeline_config(self, service_pipeline_id):
@@ -720,15 +719,6 @@ class Service_Pipeline_ModelView_Base():
                 index += 1
 
         return jsonify(all_template)
-
-
-class Service_Pipeline_ModelView(Service_Pipeline_ModelView_Base, MyappModelView):
-    datamodel = SQLAInterface(Service_Pipeline)
-    # base_order = ("changed_on", "desc")
-    # order_columns = ['changed_on']
-
-
-appbuilder.add_view_no_menu(Service_Pipeline_ModelView)
 
 
 # 添加api

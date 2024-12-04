@@ -65,7 +65,6 @@ class NNI_ModelView_Base():
     datamodel = SQLAInterface(NNI)
     conv = GeneralModelConverter(datamodel)
     label_title = _('nni超参搜索')
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('nni', '')
 
     base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('id', 'desc')
@@ -262,7 +261,7 @@ class NNI_ModelView_Base():
             _('超参数'),
             default=self.datamodel.obj.parameters.default.arg,
             description=(__("搜索参数，注意：所有整型、浮点型都写成字符串型,示例：") + '\n' + "<pre><code>%s</code></pre>" % core.nni_parameters_demo().replace('\n', '<br>')),
-            widget=MyBS3TextAreaFieldWidget(rows=10),
+            widget=MyBS3TextAreaFieldWidget(rows=10,is_json=True),
             validators=[DataRequired()]
         )
 
@@ -719,18 +718,6 @@ trainingService:
 
         return redirect(request.referrer)
 
-
-class NNI_ModelView(NNI_ModelView_Base, MyappModelView):
-    datamodel = SQLAInterface(NNI)
-    conv = GeneralModelConverter(datamodel)
-
-
-# 添加视图和菜单
-# appbuilder.add_view(NNI_ModelView,"nni超参搜索",icon = 'fa-shopping-basket',category = '超参搜索',category_icon = 'fa-share-alt')
-appbuilder.add_view_no_menu(NNI_ModelView)
-
-
-# appbuilder.add_view_no_menu(NNI_ModelView)
 
 # 添加api
 class NNI_ModelView_Api(NNI_ModelView_Base, MyappModelRestApi):

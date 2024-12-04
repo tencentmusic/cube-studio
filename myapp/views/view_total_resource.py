@@ -114,7 +114,10 @@ def node_traffic():
             node_dashboard_url = "//"+ cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/node/%s?namespace=default' % nodes[ip]['name']
             org = nodes[ip]['labels'].get('org', 'unknown')
             enable_train = nodes[ip]['labels'].get('train', 'true')
-            ip_html = '<a target="_blank" href="%s">%s</a>' % (node_dashboard_url, ip if nodes[ip]['status']=='Ready' else f'<del>{ip}</del>')
+            if g.user.is_admin():
+                ip_html = '<a target="_blank" href="%s">%s</a>' % (node_dashboard_url, ip if nodes[ip]['status']=='Ready' else f'<del>{ip}</del>')
+            else:
+                ip_html = ip if nodes[ip]['status']=='Ready' else f'<del>{ip}</del>'
 
             share = nodes[ip]['labels'].get('share', 'true')
             clolr = "#FFFFFF" if share == 'true' else '#F0F0F0'

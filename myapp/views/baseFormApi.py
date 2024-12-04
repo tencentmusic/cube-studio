@@ -8,7 +8,6 @@ from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from flask.globals import session
 from flask_appbuilder.const import (
-
     API_PAGE_INDEX_RIS_KEY,
     API_PAGE_SIZE_RIS_KEY
 )

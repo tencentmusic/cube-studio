@@ -131,7 +131,7 @@ class Crd_ModelView_Base():
 
 
                 except Exception as e:
-                    flash(str(e), "danger")
+                    flash(str(e), "error")
 
     def pre_delete(self, item):
         self.base_muldelete([item])
@@ -145,22 +145,13 @@ class Crd_ModelView_Base():
 
     @action("stop_all", "停止", "停止所有选中的workflow?", "fa-trash", single=False)
     def stop_all(self, items):
+        items = [item for item in items if item.username==g.user.username or g.user.is_admin()]
         self.base_muldelete(items)
         return redirect(request.referrer)
 
-    # @event_logger.log_this
-    # @expose("/list/")
-    # @has_access
-    # def list(self):
-    #     self.base_list()
-    #     widgets = self._list()
-    #     res = self.render_template(
-    #         self.list_template, title=self.list_title, widgets=widgets
-    #     )
-    #     return res
-
     @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
     def muldelete(self, items):
+        items = [item for item in items if item.username == g.user.username or g.user.is_admin()]
         self.base_muldelete(items)
         for item in items:
             db.session.delete(item)
@@ -230,9 +221,11 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
     @expose("/stop/<crd_id>")
     def stop(self, crd_id):
         workflow = db.session.query(self.datamodel.obj).filter_by(id=crd_id).first()
-        self.delete_more(workflow)
-
-        flash(__('清理完成'), 'success')
+        if workflow.username==g.user.username or g.user.is_admin():
+            self.delete_more(workflow)
+            flash(__('清理完成'), 'success')
+        else:
+            flash(__('no permission'), 'warning')
         return redirect(request.referrer)
 
     label_title = _('运行实例')
@@ -971,13 +964,6 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                 "result": layout_config
             }
         )
-
-
-class Workflow_ModelView(Workflow_ModelView_Base, MyappModelView):
-    datamodel = SQLAInterface(Workflow)
-
-
-appbuilder.add_view_no_menu(Workflow_ModelView)
 
 
 # 添加api

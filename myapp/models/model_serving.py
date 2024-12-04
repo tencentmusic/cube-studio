@@ -22,7 +22,6 @@ conf = app.config
 class service_common():
     @property
     def monitoring_url(self):
-        # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
         url="//"+self.project.cluster.get('HOST',request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
         return Markup(f'<a href="{url}">{__("监控")}</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
@@ -70,14 +69,14 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
             print(e)
 
         if help_url:
-            return Markup(f'<a href="/service_modelview/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/clear/{self.id}">{__("清理")}</a>')
+            return Markup(f'<a href="/service_modelview/api/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
         else:
-            return Markup(f'<a href="/service_modelview/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/clear/{self.id}">{__("清理")}</a>')
+            return Markup(f'<a href="/service_modelview/api/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
 
 
     @property
     def clear(self):
-        return Markup(f'<a href="/service_modelview/clear/{self.id}">{__("清理")}</a>')
+        return Markup(f'<a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
 
 
     @property
@@ -114,8 +113,29 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
             if '|' in SERVICE_EXTERNAL_IP:
                 SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
 
-            host = SERVICE_EXTERNAL_IP + ":" + str(port)
-            return Markup(f'<a target=_blank href="//{host}">{host}</a>')
+            # 处理业务自己配置的host的特殊配置
+            if self.host:
+                # 地址中可以配置比一些变量，或者环境变量
+                host = self.host.replace("{{creator}}",self.created_by.username)
+                if self.env:
+                    for e in self.env.split("\n"):
+                        if '=' in e:
+                            host = host.replace('{{'+e.split("=")[0]+'}}',e.split("=")[1])
+
+                from myapp.utils.core import split_url
+                host_temp, port_temp, path_temp = split_url(host)
+
+                if port_temp and port_temp in self.ports:
+                    # 查看是第几个端口
+                    if self.ports.find(port_temp) > self.ports.find(','):
+                        port = port + 1
+
+                host = SERVICE_EXTERNAL_IP + ":" + str(port)
+                url = host + path_temp
+            else:
+                host = SERVICE_EXTERNAL_IP + ":" + str(port)
+                url = host
+            return Markup(f'<a target=_blank href="//{url}">{host}</a>')
         else:
             return "未开通"
 
@@ -124,10 +144,10 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
         # 泛域名先统一http
         url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
         if self.host:
-            if 'http://' in self.host or 'https://' in self.host:
-                url = self.host
-            else:
-                url = "http://"+self.host
+            from myapp.utils.core import split_url
+            host_temp, port_temp, path_temp = split_url(self.host)
+            if host_temp:
+                url = "http://"+host_temp
 
         return Markup(f'<a target=_blank href="{url}">{url}</a>')
 
@@ -212,11 +232,11 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         # if self.created_by.username==g.user.username or g.user.is_admin():
         if self.created_by.id == g.user.id or self.project.user_role(g.user.id)=='creator':
             dom = f'''
-                    <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">{__("调试")}</a> | 
-                    <a href="/inferenceservice_modelview/deploy/test/{self.id}">{__("部署测试")}</a> | 
-                    <a href="/inferenceservice_modelview/deploy/prod/{self.id}">{__("部署生产")}</a> |
+                    <a target=_blank href="/inferenceservice_modelview/api/deploy/debug/{self.id}">{__("调试")}</a> | 
+                    <a href="/inferenceservice_modelview/api/deploy/test/{self.id}">{__("部署测试")}</a> | 
+                    <a href="/inferenceservice_modelview/api/deploy/prod/{self.id}">{__("部署生产")}</a> |
                     <a target=_blank href="{monitoring_url}">{__("监控")}</a> |
-                    <a href="/inferenceservice_modelview/clear/{self.id}">{__("清理")}</a>
+                    <a href="/inferenceservice_modelview/api/clear/{self.id}">{__("清理")}</a>
                     '''
         else:
             dom = f''' {__("调试")} | {__("部署测试")} | {__("部署生产")}</a> | <a target=_blank href="{monitoring_url}">{__("监控")}</a> | {__("清理")} '''
@@ -229,19 +249,19 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def debug(self):
-        return Markup(f'<a target=_blank href="/inferenceservice_modelview/debug/{self.id}">{__("调试")}</a>')
+        return Markup(f'<a target=_blank href="/inferenceservice_modelview/api/debug/{self.id}">{__("调试")}</a>')
 
     @property
     def test_deploy(self):
-        return Markup(f'<a href="/inferenceservice_modelview/deploy/test/{self.id}">{__("部署测试")}</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/api/deploy/test/{self.id}">{__("部署测试")}</a>')
 
     @property
     def deploy(self):
-        return Markup(f'<a href="/inferenceservice_modelview/deploy/prod/{self.id}">{__("部署生产")}</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/api/deploy/prod/{self.id}">{__("部署生产")}</a>')
 
     @property
     def clear(self):
-        return Markup(f'<a href="/inferenceservice_modelview/clear/{self.id}">{__("清理")}</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/api/clear/{self.id}">{__("清理")}</a>')
 
     @property
     def ip(self):

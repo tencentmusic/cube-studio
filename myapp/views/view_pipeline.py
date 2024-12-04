@@ -565,7 +565,6 @@ def run_pipeline(pipeline, workflow_json):
 class Pipeline_ModelView_Base():
     label_title = _('任务流')
     datamodel = SQLAInterface(Pipeline)
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('pipeline', '')
 
     base_permissions = ['can_show', 'can_edit', 'can_list', 'can_delete', 'can_add']
     base_order = ("changed_on", "desc")

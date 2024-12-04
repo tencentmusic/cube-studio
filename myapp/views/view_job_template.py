@@ -58,7 +58,6 @@ class Job_Tempalte_Filter(MyappFilter):
 class Job_Template_ModelView_Base():
     datamodel = SQLAInterface(Job_Template)
     label_title = _('任务模板')
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('job_template', '')
 
     list_columns = ['project', 'name_title', 'version', 'creator', 'modified']
     spec_label_columns = {
@@ -70,8 +69,6 @@ class Job_Template_ModelView_Base():
         "version": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 200},
     }
-    show_columns = ['project', 'name', 'version', 'describe', 'images_url', 'workdir', 'entrypoint', 'args_html',
-                    'demo_html', 'env', 'hostAliases', 'privileged', 'expand_html']
     add_columns = ['project', 'images', 'name', 'version', 'describe', 'workdir', 'entrypoint', 'volume_mount',
                    'job_args_definition', 'args', 'env', 'hostAliases', 'privileged', 'accounts', 'demo', 'expand']
     edit_columns = add_columns
@@ -162,7 +159,7 @@ class Job_Template_ModelView_Base():
             _('扩展'),
             default=json.dumps({"index": 0, "help_url": conf.get('DOCUMENTATION_URL')}, ensure_ascii=False, indent=4),
             description= _('json格式的扩展字段，支持<br> "index":"$模板展示顺序号"，<br>"help_url":"$帮助文档地址"，<br>"HostNetwork":true 启动主机端口监听'),
-            widget=MyBS3TextAreaFieldWidget(rows=3),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            widget=MyBS3TextAreaFieldWidget(rows=3,is_json=True),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         )
     }
     edit_form_extra_fields = add_form_extra_fields
@@ -181,7 +178,7 @@ class Job_Template_ModelView_Base():
                 }
             }, indent=4, ensure_ascii=False),
             description= _('json格式，此类task使用时需要填写的参数'),
-            widget=MyBS3TextAreaFieldWidget(rows=10,tips=Markup('<pre><code>' + core.job_template_args_definition() + "</code></pre>")),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            widget=MyBS3TextAreaFieldWidget(rows=10,tips=Markup('<pre><code>' + core.job_template_args_definition() + "</code></pre>"),is_json=True),  # 传给widget函数的是外层的field对象，以及widget函数的参数
             validators=[DataRequired()]
         )
 

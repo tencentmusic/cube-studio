@@ -25,7 +25,7 @@ rm -rf /etc/docker/ && mkdir -p /etc/docker/
 (
 cat << EOF
 {
-	  "registry-mirrors": ["https://hub.uuuadc.top", "https://docker.anyhub.us.kg", "https://dockerhub.jobcher.com", "https://dockerhub.icu", "https://docker.ckyl.me", "https://docker.awsl9527.cn"],
+    "registry-mirrors": ["https://docker.1panel.live", "https://hub.rat.dev/", "https://docker.chenby.cn", "https://docker.m.daocloud.io"],
     "insecure-registries":["docker.oa.com:8080"],
     "default-runtime": "nvidia",
     "data-root": "/data/docker",

@@ -2,6 +2,7 @@
 ```bash
 github地址
 wget https://githubfast.com/goharbor/harbor/releases/download/v2.11.1/harbor-offline-installer-v2.11.1.tgz
+#wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/harbor-offline-installer-v2.11.1.tgz
 解压
 tar xf harbor-offline-installer-v2.11.1.tgz -C /usr/local/
 cd /usr/local/harbor
@@ -27,8 +28,9 @@ http:
   #  certificate: /your/certificate/path
   # private_key: /your/private/key/path
 data_volume: /data  #这个路径是宿主机的路径，根据实际情况修改成空间大的地方
+# external_url: http://xx.xx.xx.xx:88   # 如果有公网地址，这里填写
 ```
-默认密码 Harbor12345
+admin默认密码 Harbor12345
 
 # 执行安装程序，只安装harbor
 
@@ -38,6 +40,8 @@ data_volume: /data  #这个路径是宿主机的路径，根据实际情况修�
 
 ```bash
 cd /usr/local/harbor
+# 每次修改了配置文件都要删除之前的配置，重新安装
+rm -rf ./common/config
 ./install.sh
 ```
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 bash init_node.sh
-mkdir -p ~/.kube /etc/kubernetes/ && rm -rf ~/.kube/config /etc/kubernetes/admin.conf && cp config ~/.kube/config && cp ~/.kube/config /etc/kubernetes/admin.conf
+mkdir -p ~/.kube && rm -rf ~/.kube/config && cp config ~/.kube/config
 mkdir -p kubeconfig && echo "" > kubeconfig/dev-kubeconfig
 
 ARCH=$(uname -m)
@@ -101,12 +101,12 @@ kubectl apply -f volcano/volcano-development.yaml
 kubectl wait crd/jobs.batch.volcano.sh --for condition=established --timeout=60s
 
 # 部署istio
+kubectl delete -f istio/install-1.15.0.yaml
 kubectl apply -f istio/install-crd.yaml
 kubectl wait crd/envoyfilters.networking.istio.io --for condition=established --timeout=60s
 # 在k8s 1.21-部署
 #kubectl apply -f istio/install.yaml
 # 在k8s 1.21+部署
-kubectl delete -f istio/install-1.15.0.yaml
 kubectl apply -f istio/install-1.15.0.yaml
 
 kubectl wait crd/virtualservices.networking.istio.io --for condition=established --timeout=60s

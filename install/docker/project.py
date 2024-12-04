@@ -162,7 +162,7 @@ class Myauthdbview(AuthDBView):
                     if comed_url:
                         return redirect(comed_url)
                     return redirect(self.appbuilder.get_url_for_index)
-
+        # 如果已经登录了，那么直接进去首页
         if g.user is not None and g.user.is_authenticated:
             return redirect(self.appbuilder.get_url_for_index)
 
@@ -179,17 +179,21 @@ class Myauthdbview(AuthDBView):
             password = form.password.data
             print("The message was: ", password)
 
+            # 根据用户名登录
             user = self.appbuilder.sm.find_user(username=username)
             if user is None:
+                # 根据用户邮箱登录
                 user = self.appbuilder.sm.find_user(email=username)
             if user is None:
                 logging.info(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
-                user = None
+            # 用户未激活报错
             elif not user.is_active:
                 flash('发现用户%s已存在，但未激活，请联系管理员激活' % form.username.data, "warning")
                 return redirect(self.appbuilder.get_url_for_login)
+            # 校验是否和加密密码对应
             elif check_password_hash(user.password, password):
                 self.appbuilder.sm.update_user_auth_stat(user, True)
+            # 校验是否和明文密码对应
             elif user.password == password:
                 self.appbuilder.sm.update_user_auth_stat(user, True)
             else:
@@ -198,10 +202,12 @@ class Myauthdbview(AuthDBView):
                 user = None
 
             if not user:
-                user = self.appbuilder.sm.find_user(form.username.data)
+                import re
+                # 查看用户不存在还是密码不对
+                user = self.appbuilder.sm.find_user(username)
                 if user:
                     # 有用户，但是密码不对
-                    flash('发现用户%s已存在，但输入密码不对' % form.username.data, "warning")
+                    flash('发现用户%s已存在，但输入密码不对' % username, "warning")
 
                     return redirect(self.appbuilder.get_url_for_login)
                 else:
@@ -209,14 +215,28 @@ class Myauthdbview(AuthDBView):
                     # flash('未发现%s用户，联系管理员创建' % form.username.data, "warning")
                     # return redirect(self.appbuilder.get_url_for_login)
                     # 没有用户的时候自动注册用户
-                    user = self.appbuilder.sm.auth_user_remote_org_user(username=form.username.data, org_name='',password=form.password.data)
-                    flash('发现用户%s不存在，已自动注册' % form.username.data, "warning")
+                    user = self.appbuilder.sm.auth_user_remote_org_user(username=username, org_name='', password=password)   # hashed_password=password可以密文存储
+                    flash('发现用户%s不存在，已自动注册' % username, "warning")
+
+
             login_user(user, remember=True)
             # 添加到public项目组
             from myapp.security import MyUserRemoteUserModelView_Base
             user_view = MyUserRemoteUserModelView_Base()
             user_view.post_add(user)
+
+            # 拷贝示例数据
+            import shutil
+
+            user_workspace = f'/data/k8s/kubeflow/pipeline/workspace/{username}'
+            os.makedirs(user_workspace,exist_ok=True)
+            if not os.path.exists(os.path.join(user_workspace,'pipeline')):
+                os.makedirs(os.path.join(user_workspace,'pipeline'),exist_ok=True)
+                shutil.copytree(f'myapp/example/pipeline',f'/data/k8s/kubeflow/pipeline/workspace/{username}/pipeline/example')
+
             return redirect(comed_url if comed_url else self.appbuilder.get_url_for_index)
+
+
         return self.render_template(
             self.login_template, title=self.title, form=form, appbuilder=self.appbuilder
         )
@@ -228,4 +248,6 @@ class Myauthdbview(AuthDBView):
         g.user = None
         logout_user()
         return redirect(login_url)
+
+
 

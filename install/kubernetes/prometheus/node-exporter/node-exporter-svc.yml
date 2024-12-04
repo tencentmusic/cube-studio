@@ -11,6 +11,6 @@ spec:
   - name: https
     port: 9100
     targetPort: https
-    nodePort: 31010
+#    nodePort: 31010
   selector:
     app: node-exporter

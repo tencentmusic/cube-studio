@@ -33,7 +33,7 @@ def download_file(url,des_dir=None,local_path=None):
                 f.write(chunk)
         r.close()
 
-# @pysnooper.snoop()
+@pysnooper.snoop()
 def download(name,version,partition,save_dir,**kwargs):
     # print(kwargs)
     headers = {
@@ -78,6 +78,19 @@ def download(name,version,partition,save_dir,**kwargs):
         pool.map(partial(download_file, des_dir=save_dir), donwload_urls)  # 当前worker，只处理分配给当前worker的任务
         pool.close()
         pool.join()
+
+        # 对目录下的压缩文件进行解压
+        files = os.listdir(save_dir)
+        for file in files:
+            try:
+                if '.zip' in file:
+                    exe_command(f'cd {save_dir} && unzip {file}')
+                elif '.tar.gz' in file:
+                    exe_command(f'cd {save_dir} && tar -zxvf {file}')
+                elif '.gz' in file:
+                    exe_command(f'cd {save_dir} && gzip -d {file}')
+            except Exception as e:
+                print(e)
         exit(0)
 
     exit(1)
@@ -112,7 +125,7 @@ if __name__ == "__main__":
         if args.partition:
             args.save_dir=f'/mnt/{KFJ_CREATOR}/dataset/{args.name}/{args.version}/{args.partition}'
     # print("{} args: {}".format(__file__, args))
-    if args.src_type=='cube-studio':
+    if args.src_type=='cube-studio' or args.src_type=='当前平台':
         download(**args.__dict__)
     elif args.src_type=='huggingface':
         command = f'huggingface-cli download --repo-type dataset --resume-download {args.name} --revision {args.version} --local-dir {args.save_dir} --local-dir-use-symlinks False'

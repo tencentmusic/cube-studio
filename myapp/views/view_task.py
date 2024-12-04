@@ -42,11 +42,9 @@ conf = app.config
 class Task_ModelView_Base():
     label_title = _('任务')
     datamodel = SQLAInterface(Task)
-    check_redirect_list_url = '/pipeline_modelview/edit/'
     help_url = conf.get('HELP_URL', {}).get(datamodel.obj.__tablename__, '') if datamodel else ''
     list_columns = ['name', 'label', 'pipeline', 'job_template', 'volume_mount', 'resource_memory', 'resource_cpu',
-                    'resource_gpu','resource_rdma', 'timeout', 'retry', 'created_on', 'changed_on', 'monitoring', 'expand']
-    # list_columns = ['name','label','job_template_url','volume_mount','debug','run','clear','log']
+                    'resource_gpu', 'resource_rdma', 'timeout', 'retry', 'created_on', 'changed_on', 'monitoring', 'expand']
     cols_width = {
         "name": {"type": "ellip2", "width": 250},
         "label": {"type": "ellip2", "width": 200},
@@ -68,7 +66,7 @@ class Task_ModelView_Base():
         "expand": {"type": "ellip2", "width": 300},
     }
     show_columns = ['name', 'label', 'pipeline', 'job_template', 'volume_mount', 'command', 'overwrite_entrypoint',
-                    'working_dir', 'args_html', 'resource_memory', 'resource_cpu', 'resource_gpu','resource_rdma', 'timeout', 'retry',
+                    'working_dir', 'args_html', 'resource_memory', 'resource_cpu', 'resource_gpu', 'resource_rdma', 'timeout', 'retry',
                     'skip', 'created_by', 'changed_by', 'created_on', 'changed_on', 'monitoring_html']
     add_columns = ['job_template', 'name', 'label', 'pipeline', 'volume_mount', 'command', 'working_dir', 'skip']
     edit_columns = ['name', 'label', 'volume_mount', 'command', 'working_dir', 'skip']
@@ -110,7 +108,7 @@ class Task_ModelView_Base():
         ),
         "volume_mount": StringField(
             label= _('挂载'),
-            description= _('外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人username子目录'),
+            description= _('外部挂载，格式:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),
             widget=BS3TextFieldWidget(),
             default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
         ),
@@ -406,45 +404,9 @@ class Task_ModelView_Base():
 
     # 因为删除就找不到pipeline了
     def pre_delete(self, item):
-        self.check_redirect_list_url = '/pipeline_modelview/edit/' + str(item.pipeline.id)
         self.pipeline = item.pipeline
         # 删除task启动的所有实例
         self.delete_task_run(item)
-
-    widget_config = {
-        "int": MyBS3TextFieldWidget,
-        "float": MyBS3TextFieldWidget,
-        "bool": None,
-        "str": MyBS3TextFieldWidget,
-        "text": MyBS3TextAreaFieldWidget,
-        "json": MyBS3TextAreaFieldWidget,
-        "date": DatePickerWidget,
-        "datetime": DateTimePickerWidget,
-        "password": BS3PasswordFieldWidget,
-        "enum": Select2Widget,
-        "multiple": Select2ManyWidget,
-        "file": None,
-        "dict": None,
-        "list": None
-    }
-
-    field_config = {
-        "int": IntegerField,
-        "float": FloatField,
-        "bool": BooleanField,
-        "str": StringField,
-        "text": StringField,
-        "json": MyJSONField,  # MyJSONField   如果使用文本字段，传到后端的是又编过一次码的字符串
-        "date": DateField,
-        "datetime": DateTimeField,
-        "password": StringField,
-        "enum": SelectField,
-        "multiple": SelectMultipleField,
-        "file": FileField,
-        "dict": None,
-        "list": MyLineSeparatedListField
-    }
-
 
     def run_pod(self, task, k8s_client, run_id, namespace, pod_name, image, working_dir, command, args):
 
@@ -583,7 +545,6 @@ class Task_ModelView_Base():
                 flash(message, 'warning')
                 return self.response(400, **{"status": 1, "result": {}, "message": message})
 
-                # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG', ''))
@@ -669,7 +630,6 @@ class Task_ModelView_Base():
         if try_num == 0:
             flash(message, 'warning')
             return self.response(400, **{"status": 1, "result": {}, "message": message})
-            # return redirect('/pipeline_modelview/web/%s'%str(task.pipeline.id))
 
         return redirect("/k8s/web/debug/%s/%s/%s/%s" % (task.pipeline.project.cluster['NAME'], namespace, pod_name, pod_name))
 
@@ -719,7 +679,6 @@ class Task_ModelView_Base():
                     message = __("超时，请稍后重试")
                     flash(message, category='warning')
                     return self.response(400, **{"status": 1, "result": {}, "message": message})
-                    # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
         # 没有历史或者没有运行态，直接创建
         if not pod:
@@ -794,7 +753,6 @@ class Task_ModelView_Base():
             message = __('启动时间过长，一分钟后重试')
             flash(message, 'warning')
             return self.response(400, **{"status": 1, "result": {}, "message": message})
-            # return redirect('/pipeline_modelview/web/%s' % str(task.pipeline.id))
 
         return redirect("/k8s/web/log/%s/%s/%s" % (task.pipeline.project.cluster['NAME'], namespace, pod_name))
 
@@ -859,13 +817,6 @@ class Task_ModelView_Base():
         flash(__("未检测到当前task正在运行的容器"), category='success')
         return redirect('/pipeline_modelview/api/web/%s' % str(task.pipeline.id))
 
-#
-# class Task_ModelView(Task_ModelView_Base, CompactCRUDMixin, MyappModelView):
-#     datamodel = SQLAInterface(Task)
-#
-#
-# appbuilder.add_view_no_menu(Task_ModelView)
-
 class Task_ModelView(Task_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Task)
     route_base = '/task_modelview'
@@ -876,7 +827,6 @@ appbuilder.add_api(Task_ModelView)
 class Task_ModelView_Api(Task_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Task)
     route_base = '/task_modelview/api'
-    # list_columns = ['name','label','job_template_url','volume_mount','debug']
     list_columns = ['name', 'label', 'pipeline', 'job_template', 'volume_mount', 'node_selector', 'command',
                     'overwrite_entrypoint', 'working_dir', 'args', 'resource_memory', 'resource_cpu', 'resource_gpu', 'resource_rdma',
                     'timeout', 'retry', 'created_by', 'changed_by', 'created_on', 'changed_on', 'monitoring', 'expand']

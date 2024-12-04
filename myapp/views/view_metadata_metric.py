@@ -212,12 +212,12 @@ class Metadata_metric_ModelView_base():
             abort(404)
         for item in items:
             try:
-                if item.created_by.username == g.user.username:
+                if g.user.is_admin() or item.created_by.username == g.user.username:
                     self.pre_delete(item)
                     self.datamodel.delete(item, raise_exception=True)
                     self.post_delete(item)
             except Exception as e:
-                flash(str(e), "danger")
+                flash(str(e), "error")
 
 
 class Metadata_metric_ModelView_Api(Metadata_metric_ModelView_base, MyappModelRestApi):

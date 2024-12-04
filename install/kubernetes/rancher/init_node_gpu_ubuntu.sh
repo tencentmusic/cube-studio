@@ -14,7 +14,7 @@ sudo apt-get install -y nvidia-docker2
 (
 cat << EOF
 {
-    "registry-mirrors": ["https://hub.uuuadc.top", "https://docker.anyhub.us.kg", "https://dockerhub.jobcher.com", "https://dockerhub.icu", "https://docker.ckyl.me", "https://docker.awsl9527.cn"],
+    "registry-mirrors": ["https://docker.1panel.live", "https://hub.rat.dev/", "https://docker.chenby.cn", "https://docker.m.daocloud.io"],
     "default-runtime": "nvidia",
     "data-root": "/data/docker",
     "runtimes": {

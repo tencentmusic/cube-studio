@@ -28,7 +28,7 @@ rm -rf /etc/apt/sources.list.d/docker.list
 
 ### 国内使用阿里源
 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -
-sudo add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+sudo add-apt-repository  -y "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
 
 ### 安装docker
 sudo apt-get update

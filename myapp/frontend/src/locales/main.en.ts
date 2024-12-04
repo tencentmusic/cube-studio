@@ -214,7 +214,8 @@ const translation = {
   "智能推荐下游节点":"Intelligent recommendation of downstream nodes",
   "请先选择推荐节点":"Please select the recommended node first.",
   "导出数据": "Export data",
-  "备份":"backup"
+  "备份":"backup",
+  "json格式错误":"Invalid JSON format. Please correct it."
 }
 
 export default translation

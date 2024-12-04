@@ -28,6 +28,16 @@ data:
             }
         }
 
+        # 静态资源
+        location /static/appbuilder/ {
+            root   /data/web;
+            index  index.html index.htm;
+            try_files $uri $uri/ /frontend/index.html;
+            if ($request_filename ~* .*\.html$) {
+              add_header Cache-Control "no-cache, no-store";
+            }
+        }
+
         location / {
             # 线上生产使用
             proxy_pass http://kubeflow-dashboard.infra/;

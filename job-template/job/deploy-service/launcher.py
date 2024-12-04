@@ -115,7 +115,7 @@ def deploy(**kwargs):
         if new_service:
             time.sleep(5)  # 等待数据刷入数据库
             print(new_service)
-            url = host + "/inferenceservice_modelview/deploy/prod/%s"%new_service['id']
+            url = host + "/inferenceservice_modelview/api/deploy/prod/%s"%new_service['id']
             res = requests.get(url,headers=headers, allow_redirects=False)
             if res.status_code==302 or res.status_code==200:
                 print('部署成功')

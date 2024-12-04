@@ -83,7 +83,7 @@ def has_access(f):
                     self.__class__.__name__
                 )
             )
-            flash(as_unicode(FLAMSG_ERR_SEC_ACCESS_DENIED), "danger")
+            flash(as_unicode(FLAMSG_ERR_SEC_ACCESS_DENIED), "error")
         return redirect(
             url_for(
                 self.appbuilder.sm.auth_view.__class__.__name__ + ".login",
@@ -518,7 +518,7 @@ class MyappModelView(ModelView):
                     form.populate_obj(item)
                     self.pre_add(item)
                 except Exception as e:
-                    flash(str(e), "danger")
+                    flash(str(e), "error")
                 else:
                     print(item.to_json())
                     if self.datamodel.add(item):
@@ -595,7 +595,7 @@ class MyappModelView(ModelView):
                     form.populate_obj(item)
                     self.pre_update(item)
                 except Exception as e:
-                    flash(str(e), "danger")
+                    flash(str(e), "error")
                 else:
                     if self.datamodel.edit(item):
                         self.post_update(item)
@@ -665,7 +665,6 @@ class MyappModelView(ModelView):
             flash(str(e), 'warning')
             self.update_redirect()
             return redirect(self.get_redirect())
-            # return redirect(self.check_redirect_list_url)
 
         widgets = self._edit(pk)
 
@@ -833,7 +832,7 @@ class DeleteMixin(object):
         try:
             self.pre_delete(item)
         except Exception as e:
-            flash(str(e), "danger")
+            flash(str(e), "error")
         else:
             view_menu = security_manager.find_view_menu(item.get_perm())
             pvs = (
@@ -873,7 +872,7 @@ class DeleteMixin(object):
             try:
                 self.pre_delete(item)
             except Exception as e:
-                flash(str(e), "danger")
+                flash(str(e), "error")
             else:
                 self._delete(item.id)
         self.update_redirect()

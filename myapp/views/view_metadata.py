@@ -230,7 +230,7 @@ class Metadata_table_ModelView_base():
                 if g.user.is_admin() or (item.owner and g.user.username in item.owner):
                     self.datamodel.delete(item, raise_exception=True)
             except Exception as e:
-                flash(str(e), "danger")
+                flash(str(e), "error")
 
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_add(self, item):

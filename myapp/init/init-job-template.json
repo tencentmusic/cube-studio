@@ -648,7 +648,7 @@
   },
   "dataset": {
     "project_name": "数据导入导出",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/dataset:20230501",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/dataset:20240501",
     "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dataset",
     "image_describe": "数据集导入",
     "job_template_name": "dataset",
@@ -731,7 +731,7 @@
   },
   "model-download": {
     "project_name": "数据导入导出",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/model_download:20221001",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/model_download:20240501",
     "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_download",
     "image_describe": "模型导入",
     "job_template_name": "model-download",
@@ -739,7 +739,7 @@
     "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
-    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com\nexport HF_HUB_ENABLE_HF_TRANSFER=1",
+    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com\nHF_HUB_ENABLE_HF_TRANSFER=1",
     "job_template_expand": {
       "index": 4,
       "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_download"

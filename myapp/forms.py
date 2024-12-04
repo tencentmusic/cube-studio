@@ -76,11 +76,12 @@ from wtforms import widgets
 
 
 class MyBS3TextAreaFieldWidget(widgets.TextArea):
-    def __init__(self, rows=3, readonly=0, expand_filed=None, tips=None):  # 扩展成list类型字段
+    def __init__(self, rows=3, readonly=0, expand_filed=None, tips=None, is_json=False):  # 扩展成list类型字段
         self.rows = rows
         self.readonly = readonly
         self.expand_filed = expand_filed
         self.tips = tips
+        self.is_json=is_json
         return super(MyBS3TextAreaFieldWidget, self).__init__()
 
     def __call__(self, field, **kwargs):

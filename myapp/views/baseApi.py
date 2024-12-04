@@ -598,7 +598,9 @@ class MyappModelRestApi(ModelRestApi):
                 # 处理时间类型
                 if hasattr(column_field_kwargs['widget'], 'is_date_range') and column_field_kwargs['widget'].is_date_range:
                     col_info['ui-type'] = 'rangePicker'
-
+                # 处理json类型
+                if hasattr(column_field_kwargs['widget'], 'is_json') and column_field_kwargs['widget'].is_json:
+                    col_info['ui-type'] = 'json'
             col_info = self.make_ui_info(col_info)
             ret.append(col_info)
         return ret
@@ -680,7 +682,7 @@ class MyappModelRestApi(ModelRestApi):
         for column in edit_columns:
             if column.get('retry_info', False):
                 column['disable'] = True
-        edit_columns = self.merge_expand_field_info(edit_columns)
+        edit_columns = self.merge_expand_field_info(edit_columns)   # 扩展字段的信息展开成独立字段
         response[API_EDIT_COLUMNS_RES_KEY] = edit_columns
 
     # @pysnooper.snoop(watch_explode=('edit_columns'))
@@ -1272,6 +1274,11 @@ class MyappModelRestApi(ModelRestApi):
                 json_data = self.to_expand(json_data)
 
             json_data = {key: json_data[key] for key in json_data if key in self.add_columns}
+            # 对于RelatedListt参数做处理，因为传递过来的是逗号分隔的id
+            for col in self.add_columns:
+                field = self.add_model_schema.fields[col]
+                if isinstance(field, RelatedList) and field.name in json_data:
+                    json_data[field.name] = [{"id": int(id)} for id in json_data[field.name].split(',')]
             item = self.add_model_schema.load(json_data)
             # item = self.add_model_schema.load(data)
         except Exception as err:
@@ -1324,6 +1331,11 @@ class MyappModelRestApi(ModelRestApi):
                 if type(json_data[key]) == str:
                     json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入
 
+            # 对于RelatedListt参数做处理，因为传递过来的是逗号分隔的id
+            for col in self.edit_columns:
+                field = self.edit_model_schema.fields[col]
+                if isinstance(field, RelatedList) and field.name in json_data:
+                    json_data[field.name] = [{"id": int(id)} for id in json_data[field.name].split(',')]
             if self.pre_update_req:
                 new_json_data = self.pre_update_req(req_json=json_data, src_item = item)
                 if new_json_data:
@@ -1679,14 +1691,20 @@ class MyappModelRestApi(ModelRestApi):
         fail = []
         for item in items:
             try:
-                if g.user and g.user.username and hasattr(item, 'created_by'):
+                if g.user and g.user.is_admin():  # 管理员可以删除全部
+                    self.pre_delete(item)
+                    db.session.delete(item)
+                    success.append(item.to_json())
+                    continue
+                elif g.user and g.user.username and hasattr(item, 'created_by'):
                     if g.user.username == item.created_by.username:   # 只有自己的可以删除
                         self.pre_delete(item)
                         db.session.delete(item)
                         success.append(item.to_json())
                         continue
+
             except Exception as e:
-                flash(str(e), "danger")
+                flash(str(e), "error")
 
             fail.append(item.to_json())
         db.session.commit()
@@ -1773,6 +1791,8 @@ class MyappModelRestApi(ModelRestApi):
             )
         return order_column, order_direction
 
+    # 注意字符串类型的输入参数，需要把输入内容转为字符串
+    # @pysnooper.snoop()
     def _handle_filters_args(self, rison_args):
         self._filters.clear_filters()
         self._filters.rest_add_filters(rison_args.get(API_FILTERS_RIS_KEY, []))
@@ -1828,6 +1848,7 @@ class MyappModelRestApi(ModelRestApi):
 
         return ret
 
+
     def make_ui_info(self, ret_src):
         ret = copy.deepcopy(ret_src)
         # 可序列化处理
@@ -1865,7 +1886,7 @@ class MyappModelRestApi(ModelRestApi):
 
         # 统一规范前端type和选择时value
         # 选择器
-        if ret.get('type', '') in ['QuerySelect', 'Select', 'Related', 'MySelectMultiple', 'SelectMultiple', 'Enum']:
+        if ret.get('type', '') in ['QuerySelect', 'Select', 'Related', 'RelatedList', 'MySelectMultiple', 'SelectMultiple', 'Enum']:
             choices = ret.get('choices', [])
             values = ret.get('values', [])
             if choices:
@@ -1885,15 +1906,22 @@ class MyappModelRestApi(ModelRestApi):
 
             ret['values'] = values
             if not ret.get('ui-type', ''):
-                ret['ui-type'] = 'select2' if 'SelectMultiple' in ret['type'] else 'select'
+                if ret['type'] in ['MySelectMultiple', 'RelatedList', 'SelectMultiple']:
+                    ret['ui-type'] = 'select2'   # 逗号分隔的多选内容
+                else:
+                    ret['ui-type'] = 'select'
 
         # 字符串
-        if ret.get('ui-type', '') not in ['list', 'datePicker']:  # list,datePicker 类型，保持原样
+        if ret.get('ui-type', '') not in ['list', 'datePicker','json']:  # list,datePicker,json 类型，保持原样
             if ret.get('type', '') in ['String', ]:
                 if ret.get('widget', 'BS3Text') == 'BS3Text':
                     ret['ui-type'] = 'input'
                 else:
                     ret['ui-type'] = 'textArea'
+
+        # # json类型
+        # if ret.get('ui-type', '')=='json':
+        #     ret['type']='json'
 
         # 长文本输入
         if 'text' in ret.get('type', '').lower():
@@ -1956,9 +1984,20 @@ class MyappModelRestApi(ModelRestApi):
             # 处理时间类型
             if hasattr(column_field_kwargs['widget'], 'is_date') and column_field_kwargs['widget'].is_date:
                 ret['ui-type'] = 'datePicker'
+
             # 处理时间类型
             if hasattr(column_field_kwargs['widget'], 'is_date_range') and column_field_kwargs['widget'].is_date_range:
                 ret['ui-type'] = 'rangePicker'
+
+            # 处理json类型
+            if hasattr(column_field_kwargs['widget'], 'is_json') and column_field_kwargs['widget'].is_json:
+                ret['ui-type'] = 'json'
+
+            # 处理行数
+            if hasattr(column_field_kwargs['widget'], 'rows') and column_field_kwargs['widget'].rows:
+                if 'style' not in ret:
+                    ret['style']={}
+                ret['style']['rows']=column_field_kwargs['widget'].rows
 
             # 处理扩展字段，一个字段存储一个list的值
             if hasattr(column_field_kwargs['widget'], 'expand_filed') and column_field_kwargs['widget'].expand_filed:
@@ -2077,6 +2116,7 @@ class MyappModelRestApi(ModelRestApi):
                 ret['validators'] = [validators.DataRequired()]
 
         # print(ret)
+        # 获取前端ui显示的dom类型
         ret = self.make_ui_info(ret)
 
         return ret

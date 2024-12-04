@@ -936,7 +936,20 @@ export default function TaskListManager(props?: IAppMenuItem) {
                         return { ...pre, [next.key]: value }
                     }
                     if ((updateColumnsMap[next.key] || {})['ui-type'] === 'select2') {
-                        return { ...pre, [next.key]: (next.value || '').split(',') }
+                        let processedValue;
+                        if(Array.isArray(next.value)){
+                            processedValue = next.value.map((item: any) => {
+                                    if (typeof item === 'object' && item !== null && 'id' in item) {
+                                        return item.id;
+                                    } else {
+                                        return item;
+                                    }
+                                }
+                            )
+                        } else {
+                            processedValue = (next.value || '').split(',');
+                          }
+                        return { ...pre, [next.key]: processedValue }
                     }
 
                     if ((updateColumnsMap[next.key] || {})['ui-type'] === 'datePicker') {
@@ -1010,25 +1023,68 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 destroyOnClose
                 onCancel={() => { setVisableDetail(false) }}>
                 <Spin spinning={loadingDetail}>
-                    <div className="pb32" style={{ minHeight: 300 }}>
-                        {
-                            dataDetail.map((item, index) => {
-                                return <Row className="mb16" key={`dataDetail_${index}`}>
-                                    <Col span={6}><div className="ta-r"><strong>{item.label}：</strong></div></Col>
-                                    <Col span={18}><pre style={{ whiteSpace: 'break-spaces' }} dangerouslySetInnerHTML={{
-                                        __html: (() => {
-                                            let content = item.value
-                                            if (Object.prototype.toString.call(item.value) === '[object Object]' || Object.prototype.toString.call(item.value) === '[object Array]') {
-                                                try {
-                                                    content = JSON.stringify(item.value)
-                                                } catch (error) { }
-                                            }
-                                            return content
-                                        })()
-                                    }}></pre></Col>
-                                </Row>
-                            })
-                        }
+                    <div className="pb8"
+                        style={{
+                            paddingBottom: '8px',
+                            minHeight: '400px',
+                            maxWidth: '70vw',
+                            margin: '0 auto',
+                            overflowX: 'auto',
+                        }}
+                    >
+                    {dataDetail.map((item, index) => (
+                        <div
+                        key={`dataDetail_${index}`}
+                        style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            marginBottom: '1rem'
+                        }}
+                        >
+                        {/* Label列 */}
+                        <div
+                            style={{
+                            display: 'flex',
+                            justifyContent: 'right',
+                            width:'130px'
+                            }}
+                        >
+                            <strong>{item.label}：</strong>
+                        </div>
+
+                        {/* Value列 */}
+                        <div
+                            style={{
+                            flex: '1',
+                            display: 'flex',
+                            justifyContent: 'flex-start',
+                            }}
+                        >
+                            <pre
+                            style={{
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                overflowX: 'auto',
+                                margin: 0,
+                            }}
+                            dangerouslySetInnerHTML={{
+                                __html: (() => {
+                                let content = item.value;
+                                if (
+                                    Object.prototype.toString.call(item.value) === '[object Object]' ||
+                                    Object.prototype.toString.call(item.value) === '[object Array]'
+                                ) {
+                                    try {
+                                    content = JSON.stringify(item.value, null, 2); // 格式化输出
+                                    } catch (error) {}
+                                }
+                                return content;
+                                })(),
+                            }}
+                            ></pre>
+                        </div>
+                        </div>
+                    ))}
                     </div>
                 </Spin>
             </Modal>

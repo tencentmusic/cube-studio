@@ -72,12 +72,6 @@ class RunHistory_ModelView_Base():
     def muldelete(self, items):
         return self._muldelete(items)
 
-class RunHistory_ModelView(RunHistory_ModelView_Base, MyappModelView):
-    datamodel = SQLAInterface(RunHistory)
-
-
-appbuilder.add_view_no_menu(RunHistory_ModelView)
-
 
 # 添加api
 class RunHistory_ModelView_Api(RunHistory_ModelView_Base, MyappModelRestApi):

@@ -223,32 +223,6 @@ aihub接口类型
         # "echart":open('myapp/utils/echart/radar.json').read()
     }
 
-    expand_columns1 = {
-        "knowledge": {
-            'volume_mount': StringField(
-                label= _('挂载'),
-                default='kubeflow-user-workspace(pvc):/mnt/',
-                description= _('构建镜像时添加的挂载'),
-                widget=BS3TextFieldWidget(),
-                validators=[]
-            ),
-            'resource_memory': StringField(
-                label= _('内存'),
-                default='8G',
-                description= _('限制的内存大小'),
-                widget=BS3TextFieldWidget(),
-                validators=[]
-            ),
-            'resource_cpu': StringField(
-                label= _('cpu'),
-                default='4',
-                description= _('限制的cpu大小'),
-                widget=BS3TextFieldWidget(),
-                validators=[]
-            )
-        }
-    }
-
     add_fieldsets = [
         (
             _('基础配置'),

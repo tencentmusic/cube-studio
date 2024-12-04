@@ -43,8 +43,7 @@ class Docker_Filter(MyappFilter):
 
 class Docker_ModelView_Base():
     datamodel = SQLAInterface(Docker)
-    label_title = 'docker'
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('docker')
+    label_title = '容器'
 
     crd_name = 'docker'
 
@@ -336,7 +335,7 @@ class Docker_ModelView_Base():
             labels={"app": "docker", "user": g.user.username, "pod-type": "docker"},
             annotations={'project': docker.project.name},
             args=None,
-            volume_mount='/var/run/docker.sock(hostpath):/var/run/docker.sock' if 'docker' in cli else '/etc/containerd/(hostpath):/etc/containerd/,/run/containerd/containerd.sock(hostpath):/run/containerd/containerd.sock',
+            volume_mount=conf.get('DOCKER_SOCKET','/var/run/docker.sock(hostpath):/var/run/docker.sock') if 'docker' in cli else conf.get('CONTAINERD_SOCKET','/etc/containerd/(hostpath):/etc/containerd/,/run/containerd/containerd.sock(hostpath):/run/containerd/containerd.sock'),
             working_dir='/mnt/%s' % docker.created_by.username,
             node_selector=None,
             resource_memory='0~10G',
@@ -363,6 +362,10 @@ class Docker_ModelView_Base():
 
         return redirect("/k8s/web/log/%s/%s/%s" % (docker.project.cluster.get('NAME', ''), namespace, pod_name))
 
+
+    @expose('/entry/docker', methods=['GET', 'DELETE'])
+    def entry_docker(self):
+        return redirect('/frontend/dev/images/docker?isVisableAdd=true')
 
 # 添加api
 class Docker_ModelView_Api(Docker_ModelView_Base, MyappModelRestApi):

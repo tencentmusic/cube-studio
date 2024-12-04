@@ -4,7 +4,7 @@ import copy
 import logging
 import random
 import traceback
-
+from sqlalchemy import or_,and_
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import pysnooper
@@ -17,7 +17,7 @@ import time
 import datetime
 from myapp.utils.py.py_k8s import K8s
 from myapp.utils.celery import session_scope
-from myapp.project import push_message,push_admin
+from myapp.project import push_message, push_admin
 from myapp.tasks.celery_app import celery_app
 # Myapp framework imports
 from myapp import app
@@ -25,9 +25,6 @@ from myapp.models.model_job import (
     Pipeline,
     RunHistory,
     Workflow,
-    Tfjob,
-    Pytorchjob,
-    Xgbjob,
     Task
 )
 from myapp.models.model_notebook import Notebook
@@ -41,9 +38,7 @@ class Pusherror(Exception):
 conf = app.config
 
 model_map = {
-    "tfjobs": Tfjob,
     "workflows": Workflow,
-    "pytorchjobs": Pytorchjob
 }
 
 # @pysnooper.snoop()
@@ -1219,6 +1214,10 @@ def adjust_service_resource(task):
         except Exception as e:
             logging.error(e)
             logging.error('Traceback: %s', traceback.format_exc())
+
+
+
+
 
 def cp_cubestudio():
     # 复制cube-studio代码

@@ -62,7 +62,6 @@ class InferenceService_Filter(MyappFilter):
 
 class InferenceService_ModelView_base():
     datamodel = SQLAInterface(InferenceService)
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('inferenceservice', '')
 
     # add_columns = ['service_type','project','name', 'label','images','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host','hpa','metrics','health']
     add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path',
@@ -114,7 +113,7 @@ class InferenceService_ModelView_base():
     INFERNENCE_IMAGES = list(conf.get('INFERNENCE_IMAGES', {}).values())
     for item in INFERNENCE_IMAGES:
         images += item
-    service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（企业版）','llm-server（企业版）',]
+    service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（todo）','llm-server（todo）',]
     spec_label_columns = {
         "inference_host_url": _("域名:需要泛域名支持，测试(test.xx)/调试(debug.xx)"),
     }
@@ -146,7 +145,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
                                     validators=[DataRequired()]),
         "host": StringField(_('域名'), default=InferenceService.host.default.arg,description= _('访问域名，')+host_rule,widget=BS3TextFieldWidget()),
         "transformer":StringField(_('前后置处理'), default=InferenceService.transformer.default.arg,description= _('前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架'),widget=BS3TextFieldWidget()),
-        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，<span style="color:red;">虚拟化占用和共享模式占用仅企业版支持</span>'),
+        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
                                                         widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
@@ -893,7 +892,7 @@ output %s
         pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area', 'guangzhou')
         pod_env += "\nRESOURCE_CPU=" + service.resource_cpu
         pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
-        pod_env += "\nRESOURCE_GPU=" + (str(gpu_num) if ',' not in str(gpu_num) else str(gpu_num).split(',')[1])
+        pod_env += "\nRESOURCE_GPU=" + str(int(gpu_num))
         pod_env += "\nMODEL_PATH=" + service.model_path
         pod_env = pod_env.strip(',')
 
@@ -1095,12 +1094,8 @@ output %s
 
         if env == 'prod':
             hpas = re.split(',|;', service.hpa)
-            gpu_num, gpu_type, resource_name = core.get_gpu(service.resource_gpu)
-            # 虚拟化gpu占用，不进行弹性伸缩设置
-            if (type(gpu_num)==str and ',' in gpu_num):
-                gpu_num = float(gpu_num.split(',')[1])
-
-            if 0<float(gpu_num)<1:
+            regex = re.compile(r"\(.*\)")
+            if float(regex.sub('', service.resource_gpu)) < 1:
                 for hpa in copy.deepcopy(hpas):
                     if 'gpu' in hpa:
                         hpas.remove(hpa)
@@ -1360,13 +1355,6 @@ output %s
         # 顶层只保留最新的数据
         res['data'] = [all_data[id] for id in all_data if id in all_last_data_id]
         return res
-
-class InferenceService_ModelView(InferenceService_ModelView_base, MyappModelView):
-    datamodel = SQLAInterface(InferenceService)
-
-
-appbuilder.add_view_no_menu(InferenceService_ModelView)
-
 
 # 添加api
 class InferenceService_ModelView_Api(InferenceService_ModelView_base, MyappModelRestApi):

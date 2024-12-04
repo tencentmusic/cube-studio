@@ -885,7 +885,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         db.session.delete(item)
                         success.append(item.to_json())
                     except Exception as e:
-                        flash(str(e), "danger")
+                        flash(str(e), "error")
                         fail.append(item.to_json())
                 db.session.commit()
                 return json.dumps(
@@ -915,7 +915,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         result_data = self.add_model_schema.dump(new_item.data, many=False).data
                         success.append(item.to_json())
                     except Exception as e:
-                        flash(str(e), "danger")
+                        flash(str(e), "error")
                         fail.append(item.to_json())
                 db.session.commit()
                 return json.dumps(

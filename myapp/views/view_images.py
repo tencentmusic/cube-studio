@@ -32,7 +32,6 @@ class Repository_ModelView_Base():
     datamodel = SQLAInterface(Repository)
 
     label_title = _('仓库')
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('repository', '')
     base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('id', 'desc')
     # base_filters = [["id", Creator_Filter, lambda: []]]
@@ -140,16 +139,13 @@ class Repository_ModelView_Api(Repository_ModelView_Base, MyappModelRestApi):
 
     route_base = '/repository_modelview/api'
 
-
 appbuilder.add_api(Repository_ModelView_Api)
-
 
 
 
 class Images_ModelView_Base():
     label_title = _('镜像')
     datamodel = SQLAInterface(Images)
-    check_redirect_list_url = conf.get('MODEL_URLS', {}).get('images', '')
 
     list_columns = ['project','images_url', 'creator', 'modified']
     cols_width = {
