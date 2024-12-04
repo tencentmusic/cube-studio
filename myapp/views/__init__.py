@@ -22,8 +22,8 @@ from . import view_train_model
 from . import view_serving
 from . import view_inferenceserving
 # from . import view_service_pipeline
-from .log import views
-from .log import api as log_api
+from . import view_log
+from . import view_user_role
 
 from . import view_sqllab
 from . import view_aihub

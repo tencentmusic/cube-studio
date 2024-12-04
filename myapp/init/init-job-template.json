@@ -530,7 +530,7 @@
   "datax-import": {
     "project_name": "数据导入导出",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/datax:20240501",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/master/job-template/job/datax",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/datax",
     "image_describe": "datax mysql postgresql 数据导入",
     "job_template_name": "datax-import",
     "job_template_describe": "datax mysql postgresql 数据导入",
@@ -2503,7 +2503,7 @@
   "yolov8": {
     "project_name": "机器视觉",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/yolov8:2024.07",
-    "gitpath": "https://github.com/data-infra/cube-studio-enterprise/tree/master/job-template/job/yolov8",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/yolov8",
     "image_describe": "yolo目标识别",
     "job_template_name": "yolov8",
     "job_template_describe": "yolo目标识别",
@@ -2515,7 +2515,7 @@
     "job_template_expand": {
       "index": 4,
       "rec_job_template": "自定义镜像",
-      "help_url": "https://github.com/data-infra/cube-studio-enterprise/tree/master/job-template/job/yolov8"
+      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/yolov8"
     },
     "job_template_args": {
       "训练参数": {
@@ -2764,7 +2764,7 @@
   "nlp-clean-data": {
     "project_name": "文本处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/nlp-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-clean-data",
     "job_template_describe": "异常数据清洗(todo)",
@@ -2783,7 +2783,7 @@
   "nlp-filter-data": {
     "project_name": "文本处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/nlp-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-filter-data",
     "job_template_describe": "过滤异常文档(todo)",
@@ -2802,7 +2802,7 @@
   "nlp-replace-private-data": {
     "project_name": "文本处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/nlp-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-replace-private-data",
     "job_template_describe": "去除隐私信息(todo)",
@@ -2821,7 +2821,7 @@
   "vision-image-blur": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-blur",
     "job_template_describe": "图片去噪声(todo)",
@@ -2840,7 +2840,7 @@
   "vision-image-resize": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-resize",
     "job_template_describe": "图片缩放(todo)",
@@ -2859,7 +2859,7 @@
   "vision-image-normalize": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-normalize",
     "job_template_describe": "图片标准化(todo)",
@@ -2878,7 +2878,7 @@
   "vision-image-cropping": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-cropping",
     "job_template_describe": "图片裁剪(todo)",
@@ -2897,7 +2897,7 @@
   "vision-image-equalize": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-equalize",
     "job_template_describe": "图片均衡化，增强对比度(todo)",
@@ -2916,7 +2916,7 @@
   "vision-image-cvtcolor": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-cvtcolor",
     "job_template_describe": "图片的空间转换(todo)",
@@ -2935,7 +2935,7 @@
   "vision-image-augmentation": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/vision-process",
+    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-augmentation",
     "job_template_describe": "图片变换，图像增强(todo)",
