@@ -56,6 +56,7 @@ services:
       - ../../myapp/static/appbuilder/frontend:/data/web/frontend
       - ../../myapp/:/home/myapp/myapp/
       - ../../aihub/:/cube-studio/aihub/
+      - ../../job-template/:/cube-studio/job-template/
       - ./file:/data/k8s/kubeflow
       - ./entrypoint.sh:/entrypoint.sh
       - ./config.py:/home/myapp/myapp/config.py
@@ -104,5 +105,21 @@ services:
 #      - ./config.py:/home/myapp/myapp/config.py
 #      - ./kubeconfig:/home/myapp/kubeconfig
 
-
+#  watch:
+#    image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2024.11.01
+#    restart: unless-stopped
+#    # 默认的prefork池针对长时间的任务支持不是很好，如果任务运行时间有数分钟/小时，建议启用 Celery 的 -Ofair 命令参数
+#    command: ["supervisord", "-c", "/home/myapp/myapp/tools/supervisord.conf"]
+#    environment:
+#      REDIS_HOST: 'redis'
+#      REDIS_PORT: '6379'
+#      REDIS_PASSWORD: admin
+#      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
+#      ENVIRONMENT: DEV
+#    volumes:
+#      - ../../myapp/:/home/myapp/myapp/
+#      - ./file:/data/k8s/kubeflow
+#      - ./entrypoint.sh:/entrypoint.sh
+#      - ./config.py:/home/myapp/myapp/config.py
+#      - ./kubeconfig:/home/myapp/kubeconfig
 
