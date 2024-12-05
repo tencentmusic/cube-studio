@@ -57,3 +57,4 @@ sasl==0.3.1                 # sqllab对接hive
 cryptography==43.0.0        # 加解密
 jwcrypto==1.5.6             # 推理服务支持启动认证jwt
 openai==1.34.0              # openai接口协议
+ldap3==2.9.1                # ldap单点登录

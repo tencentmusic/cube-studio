@@ -8,7 +8,7 @@
 
 ### 1.2 通过Dockerfile构建镜像
 ```bash
-docker build -t  $hubhost/notebook:jupyter-ubuntu-machinelearning -f Dockerfile .
+docker build --network=host -t  $hubhost/notebook:jupyter-ubuntu-machinelearning -f Dockerfile .
 docker push $hubhost/notebook:jupyter-ubuntu-machinelearning
 ```
 

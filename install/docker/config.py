@@ -791,7 +791,7 @@ HOSTALIASES='''
 127.0.0.1 localhost
 '''
 # 默认服务代理的ip
-SERVICE_EXTERNAL_IP=[]
+SERVICE_EXTERNAL_IP=[]    # ['内网ip']或者['内网ip|公网ip']
 
 # 链接菜单
 ALL_LINKS=[

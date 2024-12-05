@@ -243,7 +243,7 @@ class Task_ModelView_Base():
                     src_attr = arg[5:].split('.')  # 多级子属性
                     sub_src_attr = json.loads(item.args)
                     for sub_key in src_attr:
-                        sub_src_attr = sub_src_attr[sub_key] if sub_key in sub_src_attr else ''
+                        sub_src_attr = sub_src_attr[sub_key].strip(' ') if sub_key in sub_src_attr else ''
                     args_json_column[arg] = sub_src_attr
                 elif task_attr_value == None and action == 'add':  # 必须不是None
                     args_json_column[arg] = ''

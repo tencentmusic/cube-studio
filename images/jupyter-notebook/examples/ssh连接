@@ -1,11 +1,12 @@
 # 将此文件内容追加到~/.ssh/config   ssh root登录密码 cube-studio
+# ssh-copy-id -p PORT root@HOST  本地设置免密登录
 
 Host cube-studio
   HostName localhost
   Port localport
   User root
-  IdentityFile ~/.ssh/id_rsa
   ServerAliveInterval 10
   ControlMaster auto
-  ControlPath ~/.ssh/master-%r@%h:%p
+  ForwardX11 yes
+  ForwardX11Trusted yes
   ForwardAgent yes

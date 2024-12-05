@@ -44,10 +44,6 @@ RUN pip install --upgrade setuptools pip && \
     pip install --ignore-installed -r /requirements.txt && \
     rm -rf /root/.cache/pip
 
-## 修正部分包版本
-# RUN pip install Flask-Babel==4.0.0
-#RUN pip install cryptography==3.4.8
-
 WORKDIR /home/myapp
 
 USER root
