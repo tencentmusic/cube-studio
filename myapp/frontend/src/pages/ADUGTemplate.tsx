@@ -6,7 +6,7 @@ import TableBox from '../components/TableBox/TableBox';
 import moment from "moment";
 import { InfoCircleOutlined, CopyOutlined, DownOutlined, ExclamationCircleOutlined, ExportOutlined, PlusOutlined, QuestionCircleOutlined, RollbackOutlined, UploadOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getParam, getTableScroll } from '../util';
+import {getParam, getTableScroll, isDomString, isJsonString} from '../util';
 import ModalForm from '../components/ModalForm/ModalForm';
 import cookies from 'js-cookie';
 import { IADUGTemplateActionItem, IAppMenuItem } from '../api/interface/kubeflowInterface';
@@ -17,6 +17,7 @@ import DynamicForm, { calculateId, IDynamicFormConfigItem, IDynamicFormGroupConf
 import ChartOptionTempalte from './ChartOptionTempalte';
 import { useTranslation } from 'react-i18next';
 import './ADUGTemplate.less';
+import TabsModal from '../components/TabsModal/TabsModal';
 
 interface fatchDataParams {
     pageConf: TablePaginationConfig
@@ -41,6 +42,8 @@ export default function TaskListManager(props?: IAppMenuItem) {
     const [visableAdd, setVisableAdd] = useState((getParam('isVisableAdd') === 'true') || false)
     const [loadingUpdate, setLoadingUpdate] = useState(false)
     const [visableUpdate, setVisableUpdate] = useState(false)
+    const [visibleTabsModal, setVisibleTabsModal] = useState(false)
+    const [enhancedDetailsUrl, setEnhancedDetailsUrl] = useState('')
     const [loadingDetail, setLoadingDetail] = useState(false)
     const [visableDetail, setVisableDetail] = useState(false)
     const [selectedRowKeys, setSelectedRowKeys] = useState<ReactText[]>([])
@@ -261,6 +264,28 @@ export default function TaskListManager(props?: IAppMenuItem) {
                         if (text === undefined || text === '') {
                             return '-'
                         }
+                        if (isDomString(text)){
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = text;
+                            const topElement = tempDiv.firstElementChild;
+                            const typeValue = topElement?.getAttribute('type');
+                            const addedValue = topElement?.getAttribute('addedValue');
+
+                            console.log('type:', typeValue);
+                            console.log('addedValue:', addedValue);
+                            if (typeValue && addedValue){
+                                if (typeValue === 'tips'){
+                                    return <Tooltip title={<span className="tips-content" dangerouslySetInnerHTML={{ __html: addedValue}}></span>} placement="topLeft">
+                                      <div className={cols_width[column].type || 'ellip2'} dangerouslySetInnerHTML={{ __html: text }}>
+                                       </div>
+                                    </Tooltip>
+                                }
+                                if (typeValue === 'enhancedDetails'){
+                                    return <div onClick={()=>{setVisibleTabsModal(true);setEnhancedDetailsUrl(addedValue)}} dangerouslySetInnerHTML={{ __html: text }}></div>
+                                }
+                            }
+                        }
+
                         if (cols_width[column] && cols_width[column].type?.indexOf('ellip') !== -1) {
                             return <Tooltip title={<span className="tips-content" dangerouslySetInnerHTML={{ __html: text }}></span>} placement="topLeft">
                                 <div className={cols_width[column].type} dangerouslySetInnerHTML={{ __html: text }}>
@@ -384,8 +409,17 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                         permissions.includes('can_edit') ? <Menu.Item><div className="link" onClick={() => {
                                             setVisableUpdate(true)
                                             getADUGTemplateApiInfo(route_base, record[primary_key]).then(res => {
-                                                const { edit_columns, label_columns, description_columns } = res.data
+                                                const { edit_columns, label_columns, description_columns,edit_fieldsets } = res.data
                                                 const formConfigUpdate: IDynamicFormConfigItem[] = createDyFormConfig(edit_columns, label_columns, description_columns)
+                                                const updateColumnsMap = edit_columns.reduce((pre: any, next: any) => ({ ...pre, [next.name]: next }), {})
+                                                edit_columns.forEach((item) => {
+                                                    if (item['ui-type'] === 'list') {
+                                                        item.info.forEach((itemInfo: any) => {
+                                                            updateColumnsMap[itemInfo.name] = itemInfo
+                                                        })
+                                                    }
+                                                })
+                                                setUpdateColumnsMap(updateColumnsMap)
                                                 const formGroupConfigUpdate: IDynamicFormGroupConfigItem[] = edit_fieldsets.map(group => {
                                                     const currentData = group.fields.map(field => updateColumnsMap[field]).filter(item => !!item)
                                                     return {
@@ -458,7 +492,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                     {
                                         !!singleAction.length && singleAction.map((action, index) => {
                                             return <Menu.Item key={`table_action_${index}`}><div className="link" onClick={() => {
-                                                Modal.confirm({
+                                                action.icon==='url'?
+                                                    window.open(`${route_base}action/${action.name}/${record[primary_key]}`, '_blank') :
+                                                    Modal.confirm({
                                                     title: action.confirmation,
                                                     icon: <ExclamationCircleOutlined />,
                                                     content: '',
@@ -1088,7 +1124,8 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     </div>
                 </Spin>
             </Modal>
-
+            {/* tabs详情 */}
+            <TabsModal visible={visibleTabsModal} url={enhancedDetailsUrl} onVisibilityChange={setVisibleTabsModal}/>
             <TitleHeader title={<>
                 {
                     (props?.isSubRoute) ? <Button className="mr16" onClick={() => {
@@ -1242,6 +1279,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             }}
                             scroll={{ x: tableWidth, y: scrollY }}
                         /> : <div className="bg-w p16">
+                            {/*{*/}
+                            {/*    permissions.includes('can_add') ? <Button className="mr16" type="primary" onClick={() => setVisableAdd(true)}>{t('添加')}{labelTitle}<PlusOutlined /></Button> : null*/}
+                            {/*}*/}
                             <div className="d-f fw">
                                 {
                                     dataList.map((row, rowIndex) => {

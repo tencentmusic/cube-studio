@@ -70,7 +70,6 @@ class NNI_ModelView_Base():
     base_order = ('id', 'desc')
     base_filters = [["id", NNI_Filter, lambda: []]]
     order_columns = ['id']
-    list_columns = ['project', 'describe_url', 'job_type', 'creator', 'modified', 'run', 'log']
     show_columns = ['project','created_by', 'changed_by', 'created_on', 'changed_on', 'job_type', 'name', 'namespace', 'describe',
                     'parallel_trial_count', 'max_trial_count', 'objective_type','parameters',
                     'objective_goal', 'objective_metric_name', 'objective_additional_metric_names', 'algorithm_name',
@@ -232,7 +231,7 @@ class NNI_ModelView_Base():
         default=datamodel.obj.resource_memory.default.arg,
         description= _('内存的资源使用限制(每个测试实例)，示例：1G，20G'),
         widget=BS3TextFieldWidget(),
-        validators=[DataRequired()]
+        validators=[DataRequired(), Regexp("^.*G$")]
     )
     edit_form_extra_fields['resource_cpu'] = StringField(
         _('cpu'),
@@ -446,11 +445,9 @@ class NNI_ModelView_Base():
                                   )
 
         # 创建vs
-        host = nni.project.cluster.get('HOST', request.host)
+        host = nni.project.cluster.get('HOST', request.host).split('|')[-1].strip().split(':')[0]
         if not host:
-            host = request.host
-        if ':' in host:
-            host = host[:host.rindex(':')]  # 如果捕获到端口号，要去掉
+            host = request.host.split(':')[0]
         vs_json = {
             "apiVersion": "networking.istio.io/v1alpha3",
             "kind": "VirtualService",
@@ -471,11 +468,21 @@ class NNI_ModelView_Base():
                             {
                                 "uri": {
                                     "prefix": "/nni/%s//" % nni.name
+                                },
+                                "headers": {
+                                    "cookie": {
+                                        "regex": ".*myapp_username=.*"
+                                    }
                                 }
                             },
                             {
                                 "uri": {
                                     "prefix": "/nni/%s/" % nni.name
+                                },
+                                "headers": {
+                                    "cookie": {
+                                        "regex": ".*myapp_username=.*"
+                                    }
                                 }
                             }
                         ],
@@ -520,6 +527,10 @@ class NNI_ModelView_Base():
     def stop(self, nni_id):
         nni = db.session.query(NNI).filter(NNI.id == nni_id).first()
         self.pre_delete(nni)
+        expand = json.loads(nni.expand) if nni.expand else {}
+        expand['status']='offline'
+        nni.expand = json.dumps(expand)
+        db.session.commit()
         time.sleep(2)
         flash(__('清理完成'),'success')
         return redirect(conf.get('MODEL_URLS', {}).get('nni', ''))
@@ -583,6 +594,11 @@ trainingService:
 
         self.deploy_nni_service(nni)
         namespace = conf.get('AUTOML_NAMESPACE', 'automl')
+        # 记录部署行为
+        expand = json.loads(nni.expand) if nni.expand else {}
+        expand['status']='online'
+        nni.expand = json.dumps(expand)
+        db.session.commit()
         return redirect(f'/k8s/web/search/{nni.project.cluster["NAME"]}/{namespace}/{nni.name}')
         # return redirect(conf.get('MODEL_URLS', {}).get('nni', ''))
 
@@ -621,7 +637,7 @@ trainingService:
         nni = db.session.query(NNI).filter_by(id=nni_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s = K8s(nni.project.cluster.get('KUBECONFIG', ''))
-        namespace = conf.get('AUTOML_NAMESPACE')
+        namespace = conf.get('AUTOML_NAMESPACE','automl')
         pod = k8s.get_pods(namespace=namespace, pod_name=nni.name+"-master-0")
         if pod:
             return redirect("/k8s/web/log/%s/%s/%s/nnijob" % (nni.project.cluster['NAME'], namespace, nni.name+"-master-0"))
@@ -634,7 +650,7 @@ trainingService:
         nni = db.session.query(NNI).filter_by(id=nni_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(nni.project.cluster.get('KUBECONFIG', ''))
-        namespace = conf.get('AUTOML_NAMESPACE')
+        namespace = conf.get('AUTOML_NAMESPACE','automl')
         try:
             # time.sleep(2)
             k8s_client.NetworkingV1Api.delete_namespaced_network_policy(namespace=namespace,name=nni.name)
@@ -644,7 +660,7 @@ trainingService:
         except Exception as e:
             pass
 
-        host = "//" + nni.project.cluster.get('HOST', request.host)
+        host = "//" + nni.project.cluster.get('HOST', request.host).split('|')[-1]
         return redirect(f'{host}/nni/{nni.name}/')
 
     def pre_delete(self,nni):
@@ -724,7 +740,7 @@ class NNI_ModelView_Api(NNI_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(NNI)
     conv = GeneralModelConverter(datamodel)
     route_base = '/nni_modelview/api'
-    list_columns = ['project', 'describe_url', 'creator', 'modified', 'run']
+    list_columns = ['project', 'describe_url', 'run', 'creator', 'modified', ]
     add_columns = ['project', 'name', 'describe',
                    'parallel_trial_count', 'max_trial_count', 'objective_type',
                    'objective_goal', 'objective_metric_name', 'algorithm_name',

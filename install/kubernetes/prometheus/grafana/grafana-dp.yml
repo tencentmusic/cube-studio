@@ -32,7 +32,7 @@ spec:
           value: "3000"
         - name: GF_AUTH_BASIC_ENABLED
           value: "false"
-        - name: GF_AUTH_ANONYMOUS_ENABLED
+        - name: GF_AUTH_ANONYMOUS_ENABLED        # 这里可以配置不允许匿名，避免安全审核
           value: "true"
         - name: GF_SECURITY_ADMIN_USER
           valueFrom:

@@ -4,7 +4,7 @@
 
 ### 整体架构
 
-![image](https://img-blog.csdnimg.cn/direct/e5648520aada4995858a9a7205904600.png)
+![image](https://github.com/tencentmusic/cube-studio/assets/20157705/a07b1742-3413-4957-bd15-0f2b3c30f66f)
 
 
 # 公司

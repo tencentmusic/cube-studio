@@ -141,6 +141,7 @@ vi /etc/docker/daemon.json
 {
     "registry-mirrors": ["https://docker.1panel.live", "https://hub.rat.dev/", "https://docker.chenby.cn", "https://docker.m.daocloud.io"],
     "dns": ["114.114.114.114","8.8.8.8"],
+    "max-concurrent-downloads": 5,
     "data-root": "/data/docker",
     "insecure-registries":["docker.oa.com:8080"]
 }

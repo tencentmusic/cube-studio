@@ -79,7 +79,7 @@ class Task_ModelView_Base():
     add_form_extra_fields = {
         "args": StringField(
             _('启动参数'),
-            widget=MyBS3TextAreaFieldWidget(rows=10),
+            widget=MyBS3TextAreaFieldWidget(rows=10,is_json=True),
         ),
         "pipeline": QuerySelectField(
             _('任务流'),
@@ -138,7 +138,7 @@ class Task_ModelView_Base():
             default=Task.resource_memory.default.arg,
             description= _('内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管理员'),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired()]
+            validators=[DataRequired(), Regexp("^.*G$")]
         ),
         'resource_cpu': StringField(
             label= _('cpu'),
@@ -204,6 +204,7 @@ class Task_ModelView_Base():
             raise MyappException('volume_mount is not valid, must contain : or null')
 
     # @pysnooper.snoop(watch_explode=('item'))
+    # 多级子参数的合并，目前不需要
     def merge_args(self, item, action):
 
         logging.info(item)
@@ -288,6 +289,8 @@ class Task_ModelView_Base():
 
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_add(self, item):
+
+
         parameter = json.loads(item.pipeline.parameter)
         if parameter.get("demo", 'false').lower() == 'true':
             raise MyappException(__("示例pipeline，不允许修改，请复制后编辑"))
@@ -295,6 +298,10 @@ class Task_ModelView_Base():
         if item.job_template is None:
             raise MyappException(__("Job Template 为必选"))
 
+        item.resource_memory=item.resource_memory.upper()
+        item.resource_gpu = item.resource_gpu.upper() if item.resource_gpu else '0'
+        if 'G' not in item.resource_memory and 'M' not in item.resource_memory:
+            item.resource_memory = item.resource_memory+"G"
         item.volume_mount = item.pipeline.project.volume_mount  # 默认使用项目的配置
 
         if item.job_template.volume_mount and item.job_template.volume_mount not in item.volume_mount:
@@ -326,6 +333,10 @@ class Task_ModelView_Base():
         item.name = item.name.replace('_', '-')[0:54].lower()
         if item.resource_gpu:
             item.resource_gpu = str(item.resource_gpu).upper()
+        item.resource_memory=item.resource_memory.upper()
+        item.resource_gpu = item.resource_gpu.upper() if item.resource_gpu else '0'
+        if 'G' not in item.resource_memory and 'M' not in item.resource_memory:
+            item.resource_memory = item.resource_memory+"G"
         if item.job_template is None:
             raise MyappException(__("Job Template 为必选"))
 
@@ -548,7 +559,7 @@ class Task_ModelView_Base():
 
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG', ''))
-        namespace = conf.get('PIPELINE_NAMESPACE')
+        namespace = conf.get('PIPELINE_NAMESPACE','pipeline')
         pod_name = "debug-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name.lower()[:60].strip('-')
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
@@ -656,7 +667,7 @@ class Task_ModelView_Base():
 
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG', ''))
-        namespace = conf.get('PIPELINE_NAMESPACE')
+        namespace = conf.get('PIPELINE_NAMESPACE','pipeline')
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name.lower()[:60].strip('-')
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
@@ -759,7 +770,7 @@ class Task_ModelView_Base():
     def delete_task_run(self, task):
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(task.pipeline.project.cluster.get('KUBECONFIG', ''))
-        namespace = conf.get('PIPELINE_NAMESPACE')
+        namespace = conf.get('PIPELINE_NAMESPACE','pipeline')
         # 删除运行时容器
         pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = pod_name.lower()[:60].strip('-')
@@ -806,7 +817,7 @@ class Task_ModelView_Base():
         task = db.session.query(Task).filter_by(id=task_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s = K8s(task.pipeline.project.cluster.get('KUBECONFIG', ''))
-        namespace = conf.get('PIPELINE_NAMESPACE')
+        namespace = conf.get('PIPELINE_NAMESPACE','pipeline')
         running_pod_name = "run-" + task.pipeline.name.replace('_', '-') + "-" + task.name.replace('_', '-')
         pod_name = running_pod_name.lower()[:60].strip('-')
         pod = k8s.get_pods(namespace=namespace, pod_name=pod_name)

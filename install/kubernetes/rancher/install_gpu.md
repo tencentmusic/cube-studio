@@ -27,8 +27,10 @@ reboot    才能重新安装
 # 安装新的
 
 ```bash
-安装依赖
+ubuntu安装依赖
 sudo apt-get install -y freeglut3-dev build-essential libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev
+centos安装依赖
+sudo yum install freeglut-devel gcc gcc-c++ make kernel-devel libX11-devel libXmu-devel libXi-devel mesa-libGL mesa-libGLU mesa-libGLU-devel
 
 # 或者安装520.61.05版本
 wget https://us.download.nvidia.com/tesla/520.61.05/NVIDIA-Linux-x86_64-520.61.05.run
@@ -53,7 +55,7 @@ bash ./cuda_12.4.0_550.54.14_linux.run
 
 也可以使用命令推荐安装ubuntu-drivers devices，
 ```bash
-sudo apt install -y nvidia-driver-535-server
+sudo apt install -y nvidia-driver-550-server
 重启机器
 ```
 

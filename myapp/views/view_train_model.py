@@ -86,25 +86,24 @@ class Training_Model_ModelView_Base():
     label_title = _('模型')
     base_filters = [["id", Training_Model_Filter, lambda: []]]
 
-    path_describe = _('''
-serving：自定义镜像的推理服务，模型地址随意
+    model_path_describe = '''serving：自定义镜像的推理服务，模型地址随意
 ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件
 tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/
 torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型
 onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx
 triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
-llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推理加速和openai流式接口
-'''.strip())
+vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速和openai流式接口
+'''.strip()
 
-    service_type_choices = [x.replace('_', '-') for x in ['serving','ml-server','tfserving', 'torch-server', 'onnxruntime', 'triton-server','llm-server','aihub']]
+    service_type_choices = [x.replace('_', '-') for x in ['serving','ml-server','tfserving', 'torch-server', 'onnxruntime', 'triton-server','vllm','aihub']]
 
     add_form_extra_fields = {
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description=_('模型文件的容器地址或下载地址，格式参考详情'),
+            description=_('模型文件的容器地址或下载地址，格式参考详情。'),
             validators=[DataRequired()],
-            widget=MyBS3TextFieldWidget(tips=Markup('<pre><code>' + path_describe + "</code></pre>"))
+            widget=MyBS3TextFieldWidget(tips=_(model_path_describe))
         ),
         "describe": StringField(
             _("描述"),
@@ -130,9 +129,9 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
             default='random_run_id_' + uuid.uuid4().hex[:32]
         ),
         "run_time": StringField(
-            _('运行时间'),
+            _('保存时间'),
             widget=MyBS3TextFieldWidget(),
-            description= _('pipeline 训练的 运行时间'),
+            description= _('模型的保存时间'),
             default=datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S'),
         ),
         "name": StringField(
@@ -204,7 +203,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
                 return redirect(download_url)
         flash(__('未发现模型存储地址'),'warning')
 
-        return redirect(conf.get('train_model'))
+        return redirect(conf.get('MODEL_URLS',{}).get('train_model','/frontend/'))
 
 
     @expose("/deploy/<model_id>", methods=["GET", 'POST'])

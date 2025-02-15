@@ -129,6 +129,13 @@ def monitoring(crd_k8s,name,namespace):
         pytorchjob = crd_k8s.get_one_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=namespace,name=name)
         if pytorchjob:
             print('pytorchjob status %s'%pytorchjob['status'], flush=True)
+            status = pytorchjob.get('status','').lower()
+            if status!='running':
+                # 如果不是running 就打印下详情，好知道为啥不行
+                events = crd_k8s.get_job_event(namespace=KFJ_NAMESPACE,job_name=name)
+                if events:
+                    print(events[-1].get("message",''))
+                pass
         else:
             print('pytorchjob not exist', flush=True)
 

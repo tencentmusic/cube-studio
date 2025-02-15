@@ -295,7 +295,7 @@ aihub接口类型
                 "stream": "true"
             },indent=4,ensure_ascii=False),
             description= _('接口配置，每种接口类型配置参数不同'),
-            widget=MyBS3TextAreaFieldWidget(rows=5, tips=Markup('<pre><code>' + service_config + "</code></pre>")),
+            widget=MyBS3TextAreaFieldWidget(rows=5, is_json=True, tips=Markup('<pre><code>' + service_config + "</code></pre>")),
             validators=[DataRequired()]
         ),
         "knowledge": StringField(
@@ -305,7 +305,7 @@ aihub接口类型
                 "file": [__("文件地址")]
             },indent=4,ensure_ascii=False),
             description= _('先验知识配置。如果先验字符串少于1800个字符，可以直接填写字符串，否则需要使用json配置'),
-            widget=MyBS3TextAreaFieldWidget(rows=5, tips=Markup('<pre><code>' + knowledge_config + "</code></pre>")),
+            widget=MyBS3TextAreaFieldWidget(rows=5, is_json=True, tips=Markup('<pre><code>' + knowledge_config + "</code></pre>")),
             validators=[]
         ),
         "prompt":StringField(
@@ -328,7 +328,7 @@ aihub接口类型
                 "index":int(time.time())
             },indent=4,ensure_ascii=False),
             description= _('配置扩展参数，"index":控制显示顺序,"isPublic":控制是否为公共应用'),
-            widget=MyBS3TextAreaFieldWidget(),
+            widget=MyBS3TextAreaFieldWidget(is_json=True),
             validators=[]
         ),
     }
@@ -679,20 +679,20 @@ AI:
         try:
             text = emoji.demojize(search_text)
             search_text = re.sub(':\S+?:', ' ', text)  # 去除表情
-            chatlog = ChatLog(
-                username=str(username),
-                chat_id=chat.id,
-                query=search_text,
-                answer="",
-                manual_feedback="",
-                answer_status="created",
-                answer_cost='0',
-                err_msg="",
-                created_on=str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())),
-                changed_on=str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-            )
-            db.session.add(chatlog)
-            db.session.commit()
+            # chatlog = ChatLog(
+            #     username=str(username),
+            #     chat_id=chat.id,
+            #     query=search_text,
+            #     answer="",
+            #     manual_feedback="",
+            #     answer_status="created",
+            #     answer_cost='0',
+            #     err_msg="",
+            #     created_on=str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())),
+            #     changed_on=str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+            # )
+            # db.session.add(chatlog)
+            # db.session.commit()
         except Exception as e:
             db.session.rollback()
             print(e)
@@ -732,7 +732,7 @@ AI:
                         search_text=search_text,
                         enable_history=enable_history,
                         history=history,
-                        chatlog_id=chatlog.id,
+                        chatlog_id=chatlog.id if chatlog else None,
                         stream=True
                     )
                     if chatlog:
@@ -751,7 +751,7 @@ AI:
                         search_text=search_text,
                         enable_history=enable_history,
                         history=history,
-                        chatlog_id=chatlog.id,
+                        chatlog_id=chatlog.id if chatlog else None,
                         stream=False
                     )
                     return_message = __('失败') if return_status else __("成功")
@@ -1133,7 +1133,8 @@ AI:
                 else:
                     llm_url = llm_url
                 url=llm_url
-        url = url.strip('/')+"/chat/completions"
+        if '/chat/completions' not in url:
+            url = url.strip('/')+"/chat/completions"
         llm_tokens = json.loads(chat.service_config).get("llm_tokens", [])
         llm_token = ''
         if llm_tokens:
@@ -1339,10 +1340,10 @@ AI:
                             finish = True
                             back_message = back_message+g.after_message
                             if chatlog_id:
-                                chatlog = db.session.query(ChatLog).filter_by(id=int(chatlog_id)).first()
-                                chatlog.answer_status = '成功'
-                                # chatlog.answer = back_message  # 内容太多了
-                                db.session.commit()
+                                # chatlog = db.session.query(ChatLog).filter_by(id=int(chatlog_id)).first()
+                                # chatlog.answer_status = '成功'
+                                # # chatlog.answer = back_message  # 内容太多了
+                                # db.session.commit()
                                 if history != None:
                                     history.append((search_text, back_message))
                                     history = history[0 - int(chat.session_num):]
@@ -1454,7 +1455,7 @@ class Chat_View(Chat_View_Base, MyappModelRestApi):
 class Chat_View_Api(Chat_View_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Chat)
     route_base = '/aitalk_modelview/api'
-    list_columns = ['id','name', 'icon', 'label', 'chat_type', 'service_type', 'owner', 'session_num', 'hello', 'tips','knowledge','service_config','expand']
+    list_columns = ['id','name', 'icon', 'label', 'chat_type', 'service_type', 'owner', 'session_num', 'hello', 'tips','knowledge','service_config','expand','prompt']
 
     # info接口响应修正
     # @pysnooper.snoop()

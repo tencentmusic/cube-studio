@@ -271,7 +271,7 @@ class K8s_View(BaseMyappView):
             status = run_shell(command)
             return jsonify({
                 "status": 0,
-                "message": __("删除完成。查看被删除pod是否完成。")+f"{cluster.get('HOST', request.host)}"+conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/')+f"#/search?namespace={namespace}&q={pod_name}",
+                "message": __("删除完成。查看被删除pod是否完成。")+f"{cluster.get('HOST', request.host).split('|')[-1]}"+conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/')+f"#/search?namespace={namespace}&q={pod_name}",
                 "result": {}
             })
 
@@ -286,8 +286,8 @@ class K8s_View(BaseMyappView):
     def web_log(self, cluster_name, namespace, pod_name,container_name=None):
         from myapp.utils.py.py_k8s import K8s
         all_clusters = conf.get('CLUSTERS', {})
-        host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host)
-        pod_url = host_url + conf.get('K8S_DASHBOARD_CLUSTER') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, container_name if container_name else pod_name)
+        host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
+        pod_url = host_url + conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, container_name if container_name else pod_name)
         print(pod_url)
         kubeconfig = all_clusters[cluster_name].get('KUBECONFIG', '')
 
@@ -325,8 +325,8 @@ class K8s_View(BaseMyappView):
     # @pysnooper.snoop()
     def web_debug(self, cluster_name, namespace, pod_name, container_name):
 
-        host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host)
-        pod_url = host_url + conf.get('K8S_DASHBOARD_CLUSTER') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, container_name, namespace)
+        host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
+        pod_url = host_url + conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, container_name, namespace)
         print(pod_url)
         data = {
             "url": pod_url,
@@ -343,9 +343,9 @@ class K8s_View(BaseMyappView):
 
     @expose("/web/search/<cluster_name>/<namespace>/<search>", methods=["GET", ])
     def web_search(self, cluster_name, namespace, search):
-        host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host)
+        host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
         search = search[:50]
-        pod_url = host_url+conf.get('K8S_DASHBOARD_CLUSTER') + "#/search?namespace=%s&q=%s" % (namespace, search)
+        pod_url = host_url+conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + "#/search?namespace=%s&q=%s" % (namespace, search)
         data = {
             "url": pod_url,
             "target": 'div.kd-scroll-container',  # kd-logs-container  :nth-of-type(0)

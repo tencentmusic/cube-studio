@@ -62,18 +62,18 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def service_pipeline_url(self):
-        service_pipeline_url="/service_pipeline_modelview/web/" +str(self.id)
+        service_pipeline_url="/service_pipeline_modelview/api/web/" +str(self.id)
         return Markup(f'<a href="{service_pipeline_url}">{self.describe}</a>')
 
     @property
     def run(self):
-        service_pipeline_run_url = "/service_pipeline_modelview/run_service_pipeline/" +str(self.id)
+        service_pipeline_run_url = "/service_pipeline_modelview/api/run_service_pipeline/" +str(self.id)
         return Markup(f'<a target=_blank href="{service_pipeline_run_url}">{__("运行")}</a>')
 
     @property
     def log(self):
         if self.run_id:
-            service_pipeline_url = "/service_pipeline_modelview/web/log/%s"%self.id
+            service_pipeline_url = "/service_pipeline_modelview/api/web/log/%s"%self.id
             return Markup(f'<a target=_blank href="{service_pipeline_url}">{__("日志")}</a>')
         else:
             return Markup(__('日志'))
@@ -81,18 +81,18 @@ class Service_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
 
     @property
     def pod(self):
-        url = "/service_pipeline_modelview/web/pod/%s" % self.id
+        url = "/service_pipeline_modelview/api/web/pod/%s" % self.id
         return Markup(f'<a target=_blank href="{url}">pod</a>')
 
 
     @property
     def operate_html(self):
         dom=f'''
-        <a target=_blank href="/service_pipeline_modelview/run_service_pipeline/{self.id}">{__("部署")}</a> | 
-        <a target=_blank href="/service_pipeline_modelview/web/pod/{self.id}">pod</a> | 
-        <a target=_blank href="/service_pipeline_modelview/web/log/{self.id}">{__("日志")}</a> |
-        <a target=_blank href="/service_pipeline_modelview/web/monitoring/{self.id}">{__("监控")}</a> |
-        <a href="/service_pipeline_modelview/clear/{self.id}">{__("清理")}</a>
+        <a target=_blank href="/service_pipeline_modelview/api/run_service_pipeline/{self.id}">{__("部署")}</a> | 
+        <a target=_blank href="/service_pipeline_modelview/api/web/pod/{self.id}">pod</a> | 
+        <a target=_blank href="/service_pipeline_modelview/api/web/log/{self.id}">{__("日志")}</a> |
+        <a target=_blank href="/service_pipeline_modelview/api/web/monitoring/{self.id}">{__("监控")}</a> |
+        <a href="/service_pipeline_modelview/api/clear/{self.id}">{__("清理")}</a>
         '''
         return Markup(dom)
 

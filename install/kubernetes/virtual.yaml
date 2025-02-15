@@ -8,7 +8,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"   # 配置自己管理的域名kubeflow.local.com
+  - "*"      # 使用域名访问，这里要配置成自己的域名，不然notebook会自动使用域名代理，优先级比此处大
   http:
   - match:
     - uri:
@@ -34,7 +34,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"   # 配置自己管理的域名kubeflow.local.com
+  - "*"   # 使用域名访问，这里要配置成自己的域名
   http:
   - match:
     - uri:
@@ -59,7 +59,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"  # 配置自己管理的域名 kubeflow.local.com
+  - "*"   # 使用域名访问，这里要配置成自己的域名
   http:
   - match:
     - uri:
@@ -84,7 +84,7 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"  # 配置自己管理的域名 kubeflow.local.com
+  - "*"   # 使用域名访问，这里要配置成自己的域名
   http:
   - match:
     - uri:

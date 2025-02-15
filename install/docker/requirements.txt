@@ -58,3 +58,4 @@ cryptography==43.0.0        # 加解密
 jwcrypto==1.5.6             # 推理服务支持启动认证jwt
 openai==1.34.0              # openai接口协议
 ldap3==2.9.1                # ldap单点登录
+gmssl==3.2.2                # sm4加解密，单点登录

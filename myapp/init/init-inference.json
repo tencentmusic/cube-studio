@@ -18,7 +18,6 @@
     "resource_memory": "2G",
     "resource_cpu": "2",
     "expand": {
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/tfserving/example"
     }
   },
   "pytorch-resnet50": {
@@ -41,7 +40,6 @@
     "resource_memory": "5G",
     "resource_cpu": "5",
     "expand": {
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/torchserver/example"
     }
   },
   "torchscript-resnet50": {
@@ -65,7 +63,6 @@
     "resource_cpu": "5",
     "inference_config": "\n---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"pytorch_libtorch\"\nmax_batch_size: 0\ninput \n[\n    {\n        name: \"INPUT__0\"\n        data_type: TYPE_FP32\n        format: FORMAT_NCHW\n        dims: [ 3, 224, 224 ]\n        reshape: {\n            shape: [ 1, 3, 224, 224 ]\n        }\n    }\n]\n    \noutput \n[\n    {\n        name: \"OUTPUT__0\"\n        data_type: TYPE_FP32\n        dims: [ 1000 ]\n        reshape: {\n            shape: [ 1, 1000 ]\n        }\n    }\n]\n    \n\nparameters: { key: \"DISABLE_OPTIMIZED_EXECUTION\" value: { string_value:\"true\" } }\nparameters: { key: \"INFERENCE_MODE\" value: { string_value: \"false\" } }\n",
     "expand": {
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/triton-server/example"
     }
   },
   "onnx-resnet50": {

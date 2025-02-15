@@ -151,7 +151,7 @@ class Notebook_ModelView_Base():
             default=Notebook.resource_memory.default.arg,
             description= _('内存的资源使用限制，示例：1G，20G'),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired()]
+            validators=[DataRequired(), Regexp("^.*G$")]
         )
         self.add_form_extra_fields['resource_cpu'] = StringField(
             _('cpu'),
@@ -181,9 +181,10 @@ class Notebook_ModelView_Base():
             "created_by": g.user.id
         }
 
-    # @pysnooper.snoop()
+
     def pre_add(self, item):
         item.name = item.name.replace("_", "-")[0:54].lower()
+        item.resource_gpu = item.resource_gpu.upper() if item.resource_gpu else '0'
 
         # 不需要用户自己填写node selector
         # if core.get_gpu(item.resource_gpu)[0]:
@@ -257,27 +258,6 @@ class Notebook_ModelView_Base():
         flash(__('注意：个人重要文件本地git保存，notebook会定时清理，如要运行长期任务请在pipeline中创建任务流进行。<br>个人持久化目录在/mnt/')+g.user.username,category='info')
         return items
 
-    # @event_logger.log_this
-    # @expose("/add", methods=["GET", "POST"])
-    # @has_access
-    # def add(self):
-    #     self.set_column()
-    #     self.add_form = self.conv.create_form(
-    #             self.label_columns,
-    #             self.add_columns,
-    #             self.description_columns,
-    #             self.validators_columns,
-    #             self.add_form_extra_fields,
-    #             self.add_form_query_rel_fields,
-    #         )
-    #     widget = self._add()
-    #     if not widget:
-    #         return redirect('/notebook_modelview/list/') # self.post_add_redirect()
-    #     else:
-    #         return self.render_template(
-    #             self.add_template, title=self.add_title, widgets=widget
-    #         )
-
     pre_update_web = set_column
     pre_add_web = set_column
 
@@ -306,15 +286,20 @@ class Notebook_ModelView_Base():
                 SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[0].strip()
                 SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
 
+        # 使用集群的ip
+        if not SERVICE_EXTERNAL_IP:
+            ip = notebook.project.cluster.get('HOST','').split('|')[0].strip().split(':')[0]
+            if ip:
+                SERVICE_EXTERNAL_IP=[ip]
+
         # 使用全局ip
         if not SERVICE_EXTERNAL_IP:
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
 
         # 使用当前
         if not SERVICE_EXTERNAL_IP:
-            if core.checkip(request.host):
-                ip = request.host
-                ip = ip[:ip.index(':')] if ":" in ip else ip
+            if core.checkip(request.host.split(':')[0]):
+                ip = request.host.split(':')[0]
                 SERVICE_EXTERNAL_IP = [ip]
 
         port = 3000
@@ -399,8 +384,8 @@ class Notebook_ModelView_Base():
             image=notebook.images,
             hostAliases=conf.get('HOSTALIASES', ''),
             env=env,
-            privileged=None,
-            accounts=conf.get('JUPYTER_ACCOUNTS'),
+            privileged=None,   # 这里设置privileged 才能看到所有的gpu卡，小心权限太高
+            accounts=conf.get('JUPYTER_ACCOUNTS',''),
             username=notebook.created_by.username
         )
         k8s_client.create_service(
@@ -423,12 +408,10 @@ class Notebook_ModelView_Base():
             host = SERVICE_EXTERNAL_IP[0]
         # 再使用项目配置
         if not host:
-            host = notebook.project.cluster.get('HOST', request.host)
+            host = notebook.project.cluster.get('HOST', request.host).split('|')[0].strip().split(':')[0]
         # 最后使用当前域名
         if not host:
-            host = request.host
-        if ':' in host:
-            host = host[:host.rindex(':')]  # 如果捕获到端口号，要去掉
+            host = request.host.split(':')[0]
         crd_json = {
             "apiVersion": "networking.istio.io/v1alpha3",
             "kind": "VirtualService",
@@ -449,6 +432,11 @@ class Notebook_ModelView_Base():
                             {
                                 "uri": {
                                     "prefix": "/notebook/%s/%s/" % (namespace, notebook.name)
+                                },
+                                "headers": {
+                                    "cookie":{
+                                        "regex": ".*myapp_username=.*"
+                                    }
                                 }
                             }
                         ],

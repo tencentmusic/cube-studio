@@ -69,7 +69,7 @@ Metadata_column_fields = {
         description='',
         widget=Select2Widget(),
         default='text',
-        choices=[['int', 'int'], ['text', 'text'], ['date', 'date'], ['double', 'double'], ['enum', 'enum']],
+        choices=[['int', 'int'], ['text', 'text'], ['date', 'date'], ['double', 'double'], ['enum', 'enum'], ['json', 'json']],
         validators=[DataRequired()]
     ),
     "unique": BooleanField(
@@ -107,7 +107,7 @@ def ddl_hive_external_table(table_id):
             return
         cols = json.loads(item.columns)
         # 创建hive外表
-        hive_type_map = {'INT': 'BIGINT', 'TEXT': 'STRING','STRING': 'STRING','DATE': 'STRING', 'DOUBLE': 'DOUBLE','ENUM':'STRING'}
+        hive_type_map = {'INT': 'BIGINT', 'TEXT': 'STRING','STRING': 'STRING','DATE': 'STRING', 'DOUBLE': 'DOUBLE','ENUM':'STRING','JSON': "STRING"}
         cols_lst = []
         for col_name in cols:
             if col_name in ['id', ]:
@@ -164,11 +164,11 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
     base_order = ('id', 'desc')
     list_columns = ['table_html', 'label', 'owner', 'describe', 'operate_html']
     cols_width = {
-        "table_html": {"type": "ellip2", "width": 300},
-        "label": {"type": "ellip2", "width": 300},
+        "table_html": {"type": "ellip2", "width": 200},
+        "label": {"type": "ellip2", "width": 200},
         "owner": {"type": "ellip2", "width": 300},
-        "describe": {"type": "ellip2", "width": 300},
-        "operate_html": {"type": "ellip2", "width": 400}
+        "describe": {"type": "ellip2", "width": 200},
+        "operate_html": {"type": "ellip2", "width": 300}
     }
     spec_label_columns = {
         "sqllchemy_uri": _("链接串地址")
@@ -597,6 +597,11 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         "type": "ellip2",
                         "width": max(200,len(columns[column_name].get("label",''))*20)
                     }
+                if column_type == 'json':
+                    cols_width[column_type] = {
+                        "type": "ellip2",
+                        "width": max(200,len(columns[column_name].get("label",''))*20)
+                    }
 
                 column_sql_type = BigInteger if column_type == 'int' else String  # 因为实际使用的时候，会在数据库中存储浮点数据，通用性也更强
 
@@ -609,6 +614,14 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         description='',  # columns[column_name]['describe'],
                         widget=BS3TextFieldWidget(),
                         validators=[Regexp("^[0-9]{4,4}-[0-9]{2,4}-[0-9]{2,2}$")] + val
+                    )
+                elif column_type == 'json':
+                    add_form_extra_fields[column_name] = StringField(
+                        _(column_name),
+                        default='{}',
+                        description='',
+                        widget=MyBS3TextAreaFieldWidget(is_json=True),
+                        validators=val
                     )
                 elif column_type == 'enum':
                     column_sql_type = String
@@ -644,7 +657,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                 show_columns.append(column_name)
                 if not int(columns[column_name].get('primary_key', False)):
                     list_columns.append(column_name)
-                if column_type == 'string' or column_type == 'text' or column_type == 'int' or column_type == 'enum':
+                if column_type == 'string' or column_type == 'text' or column_type == 'int' or column_type == 'enum' or column_type == 'json':
                     if not int(columns[column_name].get('primary_key', False)):
                         search_columns.append(column_name)
                 # if column_type == 'int':
@@ -936,6 +949,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     search_columns=search_columns,
                     order_columns=order_columns,
                     add_columns=add_columns,
+                    edit_columns=add_columns,
                     list_columns=list_columns,
                     label_title=dim.label,
                     base_permissions=['can_list', 'can_add', 'can_delete', 'can_edit', 'can_show'],

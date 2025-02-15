@@ -267,7 +267,7 @@ def push_task_time(workflow, dbsession):
                 # 有单任务运行时长超过4个小时才通知
                 if max_task_run_time > 4:
                     logging.info(message)
-                    push_message(conf.get('ADMIN_USER').split(','), message, link)
+                    push_message(conf.get('ADMIN_USER','admin').split(','), message, link)
 
                 alert_user = pipeline.alert_user.split(',') if pipeline.alert_user else []
                 alert_user = [user.strip() for user in alert_user if user.strip()]
@@ -397,7 +397,7 @@ def deal_event(event, workflow_info, namespace):
                         deliver_message(workflow, dbsession)
                     except Exception as e1:
                         logging.error('push fail:'+str(e1))
-                        push_message(conf.get('ADMIN_USER').split(','), 'push fail' + str(e1))
+                        push_message(conf.get('ADMIN_USER','admin').split(','), 'push fail' + str(e1))
                 save_history(workflow, dbsession)
                 save_monitoring(workflow, dbsession)
 
@@ -408,7 +408,7 @@ def deal_event(event, workflow_info, namespace):
 # @pysnooper.snoop()
 def listen_workflow():
     workflow_info = conf.get('CRD_INFO')['workflow']
-    namespace = conf.get('PIPELINE_NAMESPACE')  # 不仅这一个命名空间
+    namespace = conf.get('PIPELINE_NAMESPACE','pipeline')  # 不仅这一个命名空间
     w = watch.Watch()
     while (True):
         try:

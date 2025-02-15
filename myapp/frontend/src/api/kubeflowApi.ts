@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import axios, { AxiosResFormat } from '.'
 import { IADUGTemplateInfo, IAppHeaderItem, IAppMenuItem, ICustomDialog } from './interface/kubeflowInterface'
+import { ITabsModalData } from './interface/tabsModalInterface'
 
 export const getAppMenu = (): Promise<AxiosResponse<IAppMenuItem[]>> => {
     return axios.get('/myapp/menu')
@@ -89,4 +90,12 @@ export const actionADUGTemplateFavorite = (url?: string, params?: {}): AxiosResF
 
 export const actionADUGTemplateCancelFavorite = (url?: string, params?: {}): AxiosResFormat<any> => {
     return axios.delete(url || '', { params })
+}
+
+export const actionTabsModalInfo = (url: string): AxiosResFormat<ITabsModalData> => {
+    return axios.get(url)
+}
+
+export const actionTabsModal = (method: 'get'|'post'|'delete',url?: string, params?: {}): Promise<any> => {
+    return axios[method](url || '', { params })
 }

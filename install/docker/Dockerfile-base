@@ -1,5 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9-amd64-20231001 -f install/docker/Dockerfile-base .
-
+# docker buildx build --platform linux/amd64,linux/arm64 -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9-20250101 -f install/docker/Dockerfile-base . --push
 FROM ubuntu:22.04
 
 ENV TZ=Asia/Shanghai
@@ -7,10 +6,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG PYTHON_VERSION=python3.9
 
 # 取值 amd64、arm64、arm/v6、arm/v7、ppc64le、s390x。
-ARG TARGETARCH=amd64
+# ARG TARGETARCH=amd64
 # 替换源
-COPY install/docker/sources.list.${TARGETARCH} /etc/apt/sources.list
-COPY install/docker/pip.conf /root/.pip/pip.conf
+# COPY install/docker/sources.list.${TARGETARCH} /etc/apt/sources.list
+# COPY install/docker/pip.conf /root/.pip/pip.conf
 RUN apt-get clean all && apt-get update -y
 
 # 安装运维工具

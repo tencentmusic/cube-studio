@@ -8637,6 +8637,7 @@ data:
           initContainers:
             - name: grpc-bootstrap-init
               image: busybox:1.36.0
+              imagePullPolicy: IfNotPresent
               volumeMounts:
                 - mountPath: /var/lib/grpc/data/
                   name: grpc-io-proxyless-bootstrap

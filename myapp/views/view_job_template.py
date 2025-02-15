@@ -157,7 +157,7 @@ class Job_Template_ModelView_Base():
         ),
         "expand": StringField(
             _('扩展'),
-            default=json.dumps({"index": 0, "help_url": conf.get('DOCUMENTATION_URL')}, ensure_ascii=False, indent=4),
+            default=json.dumps({"index": 0, "help_url": conf.get('DOCUMENTATION_URL','')}, ensure_ascii=False, indent=4),
             description= _('json格式的扩展字段，支持<br> "index":"$模板展示顺序号"，<br>"help_url":"$帮助文档地址"，<br>"HostNetwork":true 启动主机端口监听'),
             widget=MyBS3TextAreaFieldWidget(rows=3,is_json=True),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         )
@@ -305,6 +305,14 @@ class Job_Template_ModelView_Base():
         except Exception as e:
             raise e
         return redirect(request.referrer)
+
+
+    # 配置只有管理员可以添加和删除
+    def add_more_info(self,response, **kwargs):
+        if g.user.is_admin():
+            response['permissions']=['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
+        else:
+            response['permissions'] = ['can_list', 'can_show']
 
 # 添加api
 class Job_Template_ModelView_Api(Job_Template_ModelView_Base, MyappModelRestApi):

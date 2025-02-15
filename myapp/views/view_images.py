@@ -37,10 +37,11 @@ class Repository_ModelView_Base():
     # base_filters = [["id", Creator_Filter, lambda: []]]
     order_columns = ['id']
     search_columns = ['name', 'server', 'hubsecret', 'user']
-    list_columns = ['name', 'server', 'hubsecret', 'creator', 'modified']
+    list_columns = ['name', 'server', 'hubsecret_url', 'creator', 'modified']
     cols_width = {
-        "name": {"type": "ellip2", "width": 250},
-        "hubsecret": {"type": "ellip2", "width": 250},
+        "name": {"type": "ellip2", "width": 150},
+        "hubsecret": {"type": "ellip2", "width": 350},
+        "hubsecret_url": {"type": "ellip2", "width": 150},
     }
     show_exclude_columns = ['password']
     add_columns = ['name', 'server', 'user', 'password', 'hubsecret']
@@ -50,14 +51,16 @@ class Repository_ModelView_Base():
         "server": _('仓库'),
         "user": _("用户名"),
         "hubsecret": 'k8s hubsecret',
+        "hubsecret_url": 'k8s hubsecret'
     }
 
     add_form_extra_fields = {
         "server": SelectField(
             _('服务地址'),
             widget=MySelect2Widget(can_input=True),
-            default='harbor.oa.com/xx/',
-            choices=[['harbor.oa.com/xx/','harbor.oa.com/xx/'],['ccr.ccs.tencentyun.com/xx/','ccr.ccs.tencentyun.com/xx/'],['registry.docker-cn.com','registry.docker-cn.com']],
+            default='harbor.oa.com/cube-studio/',
+            choices=[['harbor.oa.com/cube-studio/','harbor.oa.com/cube-studio/'],['ccr.ccs.tencentyun.com/cube-studio/','ccr.ccs.tencentyun.com/cube-studio/'],['registry.docker-cn.com','registry.docker-cn.com']],
+            # description= _("镜像仓库地址")
             description= _("镜像仓库地址，示例：")+conf.get('REPOSITORY_ORG','')
         ),
         "user": StringField(
@@ -111,7 +114,7 @@ class Repository_ModelView_Base():
         for kubeconfig in all_kubeconfig:
             try:
                 k8s = K8s(kubeconfig)
-                namespaces = conf.get('HUBSECRET_NAMESPACE')
+                namespaces = conf.get('HUBSECRET_NAMESPACE',[])
                 for namespace in namespaces:
                     try:
                         server = repo.server[:repo.server.index('/')] if '/' in repo.server else repo.server

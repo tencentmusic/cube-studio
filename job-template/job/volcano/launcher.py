@@ -76,6 +76,7 @@ def default_job_name():
     name = "volcanojob-" + KFJ_PIPELINE_NAME.replace('_','-')+"-"+uuid.uuid4().hex[:4]
     return name[0:54]
 
+vsjob_name = default_job_name()
 
 import subprocess
 # @pysnooper.snoop()
@@ -105,7 +106,6 @@ def run_shell(shell):
 
 
 
-
 # 监控指定名称的volcanojob
 def monitoring(crd_k8s,name,namespace):
     time.sleep(10)
@@ -125,9 +125,15 @@ def monitoring(crd_k8s,name,namespace):
     check_time = datetime.datetime.now()
     while(True):
         volcanojob = crd_k8s.get_one_crd(group=crd_info['group'],version=crd_info['version'],plural=crd_info['plural'],namespace=namespace,name=name)
-        status = volcanojob['status'].lower()
         if volcanojob:
             print('volcanojob status %s'%volcanojob['status'], flush=True)
+            status = volcanojob.get('status','').lower()
+            if status!='running':
+                # 如果不是running 就打印下详情，好知道为啥不行
+                events = crd_k8s.get_job_event(namespace=KFJ_NAMESPACE,job_name=name)
+                if events:
+                    print(events[-1].get("message",''))
+                pass
         else:
             print('volcanojob not exist', flush=True)
 
@@ -354,6 +360,6 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     print("{} args: {}".format(__file__, args))
 
-    launch_volcanojob(name=default_job_name(),num_workers=args.num_worker,image=args.image,working_dir=args.working_dir,worker_command=args.command)
+    launch_volcanojob(name=vsjob_name,num_workers=args.num_worker,image=args.image,working_dir=args.working_dir,worker_command=args.command)
 
 

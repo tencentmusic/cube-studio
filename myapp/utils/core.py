@@ -649,7 +649,7 @@ def validate_task_args(task_args, job_args):  # 两个都是字典
     # @pysnooper.snoop()
     def to_value(value, value_type):
         if value_type == 'str' or value_type == 'text':
-            return str(value)
+            return str(value).strip(' ')  # 把用户容易填错的多个空格去掉
         if value_type == 'int':
             return int(value)
         if value_type == 'float':
@@ -1626,6 +1626,8 @@ def get_gpu(resource_gpu,resource_name=None):
     # 如果不是0.1等形式的虚拟化占用，那么返回整数
     if type(gpu_num)==float and int(gpu_num)==float(gpu_num):
         gpu_num = int(gpu_num)
+
+    # gpu_num 可以是小数，可以是整数，也可以是1G,0.1这种写了显存的字符串结构
     return gpu_num, gpu_type, resource_name
 
 # 按expand字段中index字段进行排序

@@ -29,6 +29,8 @@ from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
 
+example = os.getenv('YOLO_EXAMPLE','')  # 获取推理结果的保存地址
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.getenv('MODELPATH','/yolov7/weights/yolov7.pt')
 device='cpu'
@@ -132,6 +134,7 @@ def inference(source):
 
 label = 'cube-studio开源平台yolov7目标识别推理服务'
 describe = 'cube studio开源云原生一站式机器学习/深度学习AI平台，支持sso登录，多租户/多项目组，数据资产对接，notebook在线开发，拖拉拽任务流pipeline编排，多机多卡分布式算法训练，超参搜索，推理服务VGPU，多集群调度，边缘计算，serverless，标注平台，自动化标注，数据集管理，大模型一键微调，llmops，私有知识库，AI应用商店，支持模型一键开发/推理/微调，私有化部署，支持国产cpu/gpu/npu芯片，支持RDMA，支持pytorch/tf/mxnet/deepspeed/paddle/colossalai/horovod/spark/ray/volcano分布式'
+
 gradio_examples=[
     "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/media-download/train2014/COCO_train2014_000000000597.jpg",
     "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/media-download/train2014/COCO_train2014_000000000797.jpg",
@@ -139,7 +142,8 @@ gradio_examples=[
     "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/media-download/train2014/COCO_train2014_000000001397.jpg",
     "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/media-download/train2014/COCO_train2014_000000001497.jpg",
     "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/media-download/train2014/COCO_train2014_000000001697.jpg"
-]
+] if not example else example.split(',')
+
 with gr.Blocks(title=label,theme=gr.themes.Default(text_size='lg')) as demo:
 
     with gr.Row():

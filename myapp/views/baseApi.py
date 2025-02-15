@@ -253,6 +253,7 @@ class MyappModelRestApi(ModelRestApi):
     check_edit_permission = None
     check_delete_permission = None
     datamodel = None
+    list_show_columns=[]   # 在list查询的时候，从数据库获取的数据字段列，list_columns是显示的字段列
 
     def pre_show(self, item):
         pass
@@ -565,6 +566,7 @@ class MyappModelRestApi(ModelRestApi):
                 except Exception as e:
                     print(e)
 
+
     # 根据columnsfields 转化为 info的json信息
     # @pysnooper.snoop()
     def columnsfield2info(self, columnsfields):
@@ -682,8 +684,20 @@ class MyappModelRestApi(ModelRestApi):
         for column in edit_columns:
             if column.get('retry_info', False):
                 column['disable'] = True
+
         edit_columns = self.merge_expand_field_info(edit_columns)   # 扩展字段的信息展开成独立字段
         response[API_EDIT_COLUMNS_RES_KEY] = edit_columns
+        # 提供字段变换内容
+        if self.set_columns_related and 'data' in response:
+            try:
+                response_edit_columns = {}
+                for column in response[API_EDIT_COLUMNS_RES_KEY]:
+                    response_edit_columns[column['name']] = column
+                self.set_columns_related(response['data'], response_edit_columns)
+                response[API_EDIT_COLUMNS_RES_KEY] = list(response_edit_columns.values())
+            except Exception as e:
+                print(e)
+
 
     # @pysnooper.snoop(watch_explode=('edit_columns'))
     def merge_add_fieldsets_info(self, response, **kwargs):
@@ -996,6 +1010,12 @@ class MyappModelRestApi(ModelRestApi):
             item = self.datamodel.get(id)
             if item and self.pre_update_web:
                 try:
+                    data = self.show_model_schema.dump(item, many=False)
+                    _response['data']=data
+                except Exception as e:
+                    print(e)
+
+                try:
                     self.pre_update_web(item)
                 except Exception as e:
                     print(e)
@@ -1119,7 +1139,7 @@ class MyappModelRestApi(ModelRestApi):
             _args = self.pre_list_req(req_json=_args)
 
         # handle select columns
-        select_cols = _args.get(API_SELECT_COLUMNS_RIS_KEY, [])
+        select_cols = _args.get(API_SELECT_COLUMNS_RIS_KEY, self.list_select_columns)
         _pruned_select_cols = [col for col in select_cols if col in list(set(self.list_columns + self.show_columns))]
         self.set_response_key_mappings(
             _response,
@@ -1252,6 +1272,21 @@ class MyappModelRestApi(ModelRestApi):
             json_data[column_name]=json.dumps(expand_value,indent=4,ensure_ascii=False)
         return json_data
 
+
+    def fix_xss(self,input):
+        return input
+        if '<svg' in input:
+            return input
+        # 去除用户添加的html dom
+        import bleach
+        # 允许的 HTML 标签和属性
+        allowed_tags = ['svg']  # 注意  会把启动命令的&&也转义了
+        allowed_attributes = {}
+
+        # 使用 bleach.clean 函数来清理输入
+        cleaned_input = bleach.clean(input, tags=allowed_tags, attributes=allowed_attributes).replace('&amp;', '&')
+        return cleaned_input
+
         # @expose("/add", methods=["POST"])
     # def add(self):
     @expose("/", methods=["POST"])
@@ -1265,6 +1300,9 @@ class MyappModelRestApi(ModelRestApi):
             for key in json_data:
                 if type(json_data[key]) == str:
                     json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入
+
+                    json_data[key] = self.fix_xss(json_data[key])
+
             if self.pre_add_req:
                 json_data_temp = self.pre_add_req(req_json=json_data)
                 if json_data_temp:
@@ -1330,6 +1368,7 @@ class MyappModelRestApi(ModelRestApi):
             for key in json_data:
                 if type(json_data[key]) == str:
                     json_data[key] = json_data[key].strip(" ")  # 所有输入去除首尾空格，避免误输入
+                    json_data[key] = self.fix_xss(json_data[key])
 
             # 对于RelatedListt参数做处理，因为传递过来的是逗号分隔的id
             for col in self.edit_columns:
@@ -1425,6 +1464,8 @@ class MyappModelRestApi(ModelRestApi):
         action = self.actions.get(name)
         try:
             res = action.func(self.datamodel.get(pk))
+            if isinstance(res,Response) and action.icon=='url':
+                return res
             back = {
                 "status": 0,
                 "result": {},
@@ -1453,6 +1494,8 @@ class MyappModelRestApi(ModelRestApi):
         ]
         try:
             back = action.func(items)
+            if isinstance(back, Response) and action.icon=='url':
+                return back
             message = back if type(back) == str else 'success'
             back = {
                 "status": 0,
@@ -1516,6 +1559,14 @@ class MyappModelRestApi(ModelRestApi):
     @expose("/upload/", methods=["POST"])
     def upload(self):
         csv_file = request.files.get('csv_file')  # FileStorage
+        if '.csv' not in csv_file and '.json' not in csv_file:
+            back = {
+                "status": 1,
+                "message": '不支持的格式文件',
+                "result": {}
+            }
+            return self.response(200, **back)
+
         # 文件保存至指定路径
         i_path = csv_file.filename
         if os.path.exists(i_path):
@@ -1548,7 +1599,7 @@ class MyappModelRestApi(ModelRestApi):
                 continue
 
             # 全是空值的去掉
-            ll = [l.strip() for l in line if l.strip()]
+            ll = [self.fix_xss(l.strip()) for l in line if l.strip()]
             if not ll:
                 continue
 
@@ -1568,6 +1619,7 @@ class MyappModelRestApi(ModelRestApi):
                 print(e)
                 result.append(str(e))
 
+        csv_file.remove(i_path)
         flash('success %s rows，fail %s rows' % (len([x for x in result if x == 'success']), len([x for x in result if x == 'fail'])),'warning')
         back = {
             "status": 0,

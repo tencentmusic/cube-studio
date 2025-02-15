@@ -21,6 +21,6 @@ chmod -R 777 /data/k8s/monitoring/grafana/ /data/k8s/monitoring/prometheus/ /dat
 # 关闭swap分区
 swapoff -a
 # 拉取镜像
-sh pull_image_kubeflow.sh
+sh pull_images.sh
 
 

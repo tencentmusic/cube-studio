@@ -385,11 +385,11 @@ const AppWrapper = (props: IProps) => {
             <Dropdown overlay={<Menu>
               <Menu.Item onClick={() => {
                 navigate('/user')
-              }}>用户中心</Menu.Item>
+              }}>{t("用户中心")}</Menu.Item>
               <Menu.Item onClick={() => {
                 Cookies.remove('myapp_username');
                 handleTips.userlogout()
-              }}>退出登录</Menu.Item>
+              }}>{t("退出登录")}</Menu.Item>
             </Menu>
             }>
               <img className="mr8 cp" style={{ borderRadius: 200, height: 32 }} src={imgUrlProtraits} onError={() => {

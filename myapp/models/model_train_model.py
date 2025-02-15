@@ -36,6 +36,7 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
     metrics = Column(Text,default='{}',comment='指标')
     md5 = Column(String(200),default='',comment='md5值')
     api_type = Column(String(100),comment='api类型')
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
 
     def __repr__(self):
         return self.name

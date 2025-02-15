@@ -23,6 +23,8 @@ import { updateTaskList, updateTaskId, selectTaskId } from '@src/models/task';
 import style from './style';
 import { Switch, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { marked } from 'marked'
+import './editorbody.less';
 
 interface ModelProps {
   model: any;
@@ -243,7 +245,9 @@ const Model: React.FC<ModelProps> = props => {
             }}
           />
           <div className={style.splitLine}></div>
-          <TextField label={t('模板描述')} value={jobTemplate?.describe || ''} disabled readOnly />
+          <Tooltip title={jobTemplate?.describe || ''} className="mr8" placement="bottom">
+            <span><TextField label={t('模板描述')} value={jobTemplate?.describe || ''} disabled readOnly style={{ pointerEvents: 'none' }} /></span>
+          </Tooltip>
           <div className={style.splitLine}></div>
           <TextField
             label={t('名称')}
@@ -334,6 +338,15 @@ const Model: React.FC<ModelProps> = props => {
 
             const mapCurrent = Object.keys(current).map(key => {
               const args = current[key];
+              const tip = marked(args.tip||'',{async: false})
+              const tip_tooltip = (
+                <Tooltip overlayClassName={style.tipStyle}
+                         // placement="bottom"
+                         title={<span className="cube-tip" dangerouslySetInnerHTML={{__html: tip}}></span>}>
+                  <span style={{fontWeight: 'bold', color: '#0078d4', marginLeft: '10px'}}>{t('详情')}</span>
+                </Tooltip>
+              )
+
               const { choice } = args;
               type Option = {
                 key: string;
@@ -354,6 +367,7 @@ const Model: React.FC<ModelProps> = props => {
 
               if(args.type==='float'){
                 const range = typeof args.range === 'string' ? args.range.split(',') : args.range;
+
                 return (<React.Fragment key={key}>
                   {
                     <>
@@ -372,13 +386,7 @@ const Model: React.FC<ModelProps> = props => {
                       />
                       <div className={style.argsDescription}>
                         <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
-                        {args.tip ? <Tooltip
-                            className="mr8"
-                            placement="bottom"
-                            title={<span dangerouslySetInnerHTML={{ __html: args.tip }}></span>}
-                        >
-                            <span style={{ fontWeight: 'bold', color: '#0078d4', marginLeft:'10px' }}>{t('详情')}</span>
-                        </Tooltip> : null}
+                        {args.tip ? tip_tooltip : null}
                       </div>
                     </>
                   }
@@ -422,13 +430,7 @@ const Model: React.FC<ModelProps> = props => {
                         />
                         <div className={style.argsDescription}>
                           <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
-                          {args.tip ? <Tooltip
-                          className="mr8"
-                          placement="bottom"
-                          title={<span dangerouslySetInnerHTML={{ __html: args.tip }}></span>}
-                          >
-                              <span style={{ fontWeight: 'bold', color: '#0078d4', marginLeft:'10px'}}>{t('详情')}</span>
-                          </Tooltip> : null}
+                          {args.tip ? tip_tooltip : null}
                         </div>
 
                     </div>
@@ -454,13 +456,7 @@ const Model: React.FC<ModelProps> = props => {
                       />
                       <div className={style.argsDescription}>
                         <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
-                        {args.tip ? <Tooltip
-                            className="mr8"
-                            placement="bottom"
-                            title={<span dangerouslySetInnerHTML={{ __html: args.tip }}></span>}
-                        >
-                            <span style={{ fontWeight: 'bold', color: '#0078d4', marginLeft:'10px' }}>{t('详情')}</span>
-                        </Tooltip> : null}
+                        {args.tip ? tip_tooltip : null}
                       </div>
                     </>
                   }
@@ -500,13 +496,7 @@ const Model: React.FC<ModelProps> = props => {
                       />
                       <div className={style.argsDescription}>
                         <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
-                        {args.tip ? <Tooltip
-                            className="mr8"
-                            placement="bottom"
-                            title={<span dangerouslySetInnerHTML={{ __html: args.tip }}></span>}
-                        >
-                            <span style={{ fontWeight: 'bold', color: '#0078d4', marginLeft:'10px' }}>{t('详情')}</span>
-                        </Tooltip> : null}
+                        {args.tip ? tip_tooltip : null}
                       </div>
                     </>
                   }
@@ -530,13 +520,7 @@ const Model: React.FC<ModelProps> = props => {
                       />
                       <div className={style.argsDescription}>
                         <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
-                        {args.tip ? <Tooltip
-                            className="mr8"
-                            placement="bottom"
-                            title={<span dangerouslySetInnerHTML={{ __html: args.tip }}></span>}
-                        >
-                            <span style={{ fontWeight: 'bold', color: '#0078d4', marginLeft:'10px' }}>{t('详情')}</span>
-                        </Tooltip> : null}
+                        {args.tip ? tip_tooltip : null}
                       </div>
                     </>
                   ) : (
@@ -581,13 +565,7 @@ const Model: React.FC<ModelProps> = props => {
                           return (
                             <div className={style.argsDescription}>
                               <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
-                              {args.tip ? <Tooltip
-                                className="mr8"
-                                placement="bottom"
-                                title={<span dangerouslySetInnerHTML={{ __html: args.tip }}></span>}
-                            >
-                                <span style={{ fontWeight: 'bold', color: '#0078d4', marginLeft:'10px' }}>{t('详情')}</span>
-                            </Tooltip> : null}
+                              {args.tip ? tip_tooltip : null}
                             </div>
                           );
                         }}

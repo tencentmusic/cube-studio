@@ -289,6 +289,8 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         layout_config['progress'] = status_more.get('progress', '0/0')
         layout_config["start_time"] = k8s_client.to_local_time(status_more.get('startedAt',''))
         layout_config['finish_time'] = k8s_client.to_local_time(status_more.get('finishedAt',''))
+        if layout_config['finish_time'] and layout_config['finish_time']<layout_config["start_time"]:
+            layout_config['finish_time'],layout_config['start_time'] = layout_config['start_time'],layout_config['finish_time']
 
         layout_config['crd_json'] = {
             "apiVersion": "argoproj.io/v1alpha1",
@@ -500,6 +502,8 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
                             "resource_gpu": resource_gpu,
                             "children": []
                         }
+                        if ui_node['finish_time'] and ui_node['finish_time']<ui_node['start_time']:
+                            ui_node['finish_time'],ui_node['start_time']=ui_node['start_time'],ui_node['finish_time']
                         if node_name == child and not self.node_detail_config:
                             self.node_detail_config = ui_node
 
@@ -533,7 +537,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
 
     # @pysnooper.snoop(watch_explode=())
     def get_minio_content(self, key, decompress=True, download=False):
-        if request.host=='127.0.0.1':
+        if '127.0.0.1' in request.host:
             return
         content = ''
         from minio import Minio
@@ -671,7 +675,7 @@ class Workflow_ModelView_Base(Crd_ModelView_Base):
         except Exception as e:
             print(e)
 
-        host_url = "http://" + conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host)
+        host_url = "http://" + conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
 
         online_pod_log_url = "/k8s/web/log/%s/%s/%s/main" % (cluster_name, namespace, pod_name)
         offline_pod_log_url = f'/workflow_modelview/api/web/log/{cluster_name}/{namespace}/{workflow_name}/{pod_name}/main.log'

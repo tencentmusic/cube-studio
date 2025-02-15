@@ -78,7 +78,7 @@
                 "torch-server",
                 "onnxruntime",
                 "triton-server",
-                "llm-server"
+                "vllm"
             ],
             "range": "",
             "default": "service",

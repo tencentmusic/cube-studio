@@ -56,6 +56,7 @@ spec:
           requests:
             cpu: 10m
             memory: 20Mi
+      # 这里hostNetwork，才能拿到主机ip，不然监控的就是容器本身
       hostNetwork: true
       hostPID: true
       securityContext:

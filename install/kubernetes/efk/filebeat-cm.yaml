@@ -71,7 +71,7 @@ data:
           - equals:
               kubernetes.namespace: "jupyter"
           - equals:
-              kubernetes.namespace: "katib"
+              kubernetes.namespace: "automl"
           - equals:
               kubernetes.namespace: "harbor"
 

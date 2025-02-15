@@ -7,7 +7,8 @@
     "job_template_name": "自定义镜像",
     "job_template_describe": "使用用户自定义镜像作为运行镜像",
     "job_template_expand": {
-      "index": 1
+      "index": 1,
+      "rec_job_template": "自定义镜像"
     },
     "job_template_args": {
       "任务": {
@@ -21,7 +22,7 @@
           "range": "",
           "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
           "placeholder": "",
-          "describe": "要调试的镜像，<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像参考<a>",
+          "describe": "要调试的镜像，<a target='_blank' href='https://github.com/data-infra/cube-studio/tree/main/images'>基础镜像参考<a>",
           "editable": 1
         },
         "workdir": {
@@ -47,7 +48,7 @@
           "range": "",
           "default": "echo 'test'",
           "placeholder": "",
-          "describe": "启动命令",
+          "describe": "启动命令。对于镜像中不包含的环境，可以在启动脚本中现场安装",
           "editable": 1
         }
       }
@@ -61,7 +62,8 @@
     "job_template_name": "logical",
     "job_template_describe": "任务流量的逻辑节点(todo)",
     "job_template_expand": {
-      "index": 2
+      "index": 2,
+      "rec_job_template": "自定义镜像"
     },
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=1\nTASK_RESOURCE_MEMORY=1G\nTASK_RESOURCE_GPU=0",
     "job_template_args": {}
@@ -74,14 +76,15 @@
     "job_template_name": "python",
     "job_template_describe": "python代码执行(todo)",
     "job_template_expand": {
-      "index": 3
+      "index": 3,
+      "rec_job_template": "自定义镜像"
     },
     "job_template_args": {}
   },
   "drop-duplicates": {
     "project_name": "特征处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/data-process:20230501",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "去除重复样本",
     "job_template_name": "drop-duplicates",
     "job_template_describe": "去除重复样本(todo)",
@@ -91,7 +94,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
@@ -99,7 +103,7 @@
   "drop-missing": {
     "project_name": "特征处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/data-process:20230501",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "删除缺失率过高的值",
     "job_template_name": "drop-missing",
     "job_template_describe": "删除缺失率过高的值(todo)",
@@ -109,15 +113,16 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
   },
   "drop-stablize": {
     "project_name": "特征处理",
-    "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/data-process:20230501",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "去除值过于单一的变量",
     "job_template_name": "drop-stablize",
     "job_template_describe": "去除值过于单一的变量(todo)",
@@ -127,7 +132,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
@@ -135,7 +141,7 @@
   "fill-missing": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "填充缺失值",
     "job_template_name": "fill-missing",
     "job_template_describe": "填充缺失值(todo)",
@@ -145,7 +151,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 4,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
@@ -153,7 +160,7 @@
   "one-hot": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "枚举类one hot展开",
     "job_template_name": "one-hot",
     "job_template_version": "Alpha",
@@ -164,7 +171,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
@@ -172,7 +180,7 @@
   "calculate-metric": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "获取变量的统计量",
     "job_template_name": "calculate-metric",
     "job_template_describe": "获取变量的统计量(todo)",
@@ -182,7 +190,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
@@ -190,7 +199,7 @@
   "outlier-detection": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "异常值检测",
     "job_template_name": "outlier-detection",
     "job_template_describe": "异常值检测(todo)",
@@ -200,7 +209,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
@@ -208,7 +218,7 @@
   "pca": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process",
+    "gitpath": "/job-template/job/data-process",
     "image_describe": "pca降维",
     "job_template_name": "pca",
     "job_template_describe": "pca降维(todo)",
@@ -219,7 +229,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 14,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/data-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/data-process"
     },
     "job_template_args": {
     }
@@ -227,7 +238,7 @@
   "calculate-correlation": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process",
+    "gitpath": "/job-template/job/feature-process",
     "image_describe": "计算列的相关性计算",
     "job_template_name": "calculate-correlation",
     "job_template_describe": "特征向量间的相关性计算(todo)",
@@ -237,7 +248,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 6,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process"
     },
     "job_template_args": {
     }
@@ -245,7 +257,7 @@
   "feature-combine": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-combine",
+    "gitpath": "/job-template/job/feature-combine",
     "image_describe": "特征组合",
     "job_template_name": "feature-combine",
     "job_template_describe": "特征组合，用于衍生特征(todo)",
@@ -255,7 +267,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-combine"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-combine"
     },
     "job_template_args": {
     }
@@ -263,7 +276,7 @@
   "feature-importance": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-importance",
+    "gitpath": "/job-template/job/feature-importance",
     "image_describe": "特征重要性",
     "job_template_name": "feature-importance",
     "job_template_describe": "特征重要性，通过随机森林、逻辑回归、xgboost等模型计算特征重要性，可计算特征的iv值、互信息值、方差等(todo)",
@@ -273,7 +286,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 6,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-importance"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-importance"
     },
     "job_template_args": {
     }
@@ -281,7 +295,7 @@
   "hadamard-multiply": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hadamard-multiply",
+    "gitpath": "/job-template/job/hadamard-multiply",
     "image_describe": "hadamard乘积",
     "job_template_name": "hadamard-multiply",
     "job_template_describe": "hadamard乘积(todo)",
@@ -291,7 +305,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hadamard-multiply"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/hadamard-multiply"
     },
     "job_template_args": {
     }
@@ -299,17 +314,18 @@
   "union-join-data": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/union-join-data",
+    "gitpath": "/job-template/job/union-join-data",
     "image_describe": "数据合并",
     "job_template_name": "union-join-data",
     "job_template_describe": "数据合并，包含union、join操作(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/union-join-data"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/union-join-data"
     },
     "job_template_args": {
     }
@@ -317,17 +333,18 @@
   "run-sql": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "run-sql",
     "job_template_describe": "执行sql(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -335,17 +352,18 @@
   "sort": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "sort",
     "job_template_describe": "排序(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -353,17 +371,18 @@
   "index-process": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "index-process",
     "job_template_describe": "索引处理，包含增加索引、索引转列、列索引重命名(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -371,17 +390,18 @@
   "objective-process": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "objective-process",
     "job_template_describe": "非数值型变量处理，包括hash、根据统计量转换、one-hot(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -389,17 +409,18 @@
   "data-tranform": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "data-tranform",
     "job_template_describe": "数据变换，包括boxcox转换、二值化、数据类型转换、dct变换、根据函数转换、ma移动平均、多项式展开(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -407,17 +428,18 @@
   "data-split": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "data-split",
     "job_template_describe": "数据拆分，包括列内拆分、列间拆分、行间拆分、svd奇异值分解(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 7,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -425,17 +447,18 @@
   "dimension-reduction": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "dimension-reduction",
     "job_template_describe": "降维，包括pca降维和卡方降维(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 6,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -443,17 +466,18 @@
   "sample": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "sample",
     "job_template_describe": "采样，包括随机采样、分层采样、过采样、欠采样(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 8,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -461,17 +485,18 @@
   "standardize-normalize": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "standardize-normalize",
     "job_template_describe": "标准化、正则化、归一化，有最大绝对值归一化、最大最小归一化、z_score标准化(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -479,17 +504,18 @@
   "discretization": {
     "project_name": "特征处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all",
+    "gitpath": "/job-template/job/feature-process-all",
     "image_describe": "特征处理相关函数",
     "job_template_name": "discretization",
     "job_template_describe": "数据离散化，等宽、等频、聚类离散化(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/feature-process-all"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/feature-process-all"
     },
     "job_template_args": {
     }
@@ -497,7 +523,7 @@
   "datax": {
     "project_name": "数据导入导出",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/datax:20240501",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/datax",
+    "gitpath": "/job-template/job/datax",
     "image_describe": "datax异构数据源同步",
     "job_template_name": "datax",
     "job_template_describe": "datax异构数据源同步",
@@ -507,21 +533,22 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/datax"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/datax"
     },
     "job_template_args": {
       "数据导入": {
         "-f": {
           "type": "str",
           "item_type": "str",
-          "label": "job.json文件地址，<a target='_blank' href='https://github.com/alibaba/DataX'>书写格式参考</a>",
+          "label": "job.json文件地址，<a target='_blank' href='https://github.com/alibaba/DataX?tab=readme-ov-file#support-data-channels'>书写格式参考</a>",
           "require": 1,
           "choice": [
           ],
           "range": "",
           "default": "/mnt/{{creator}}/pipeline/example/ml/mysql-csv.json",
           "placeholder": "",
-          "describe": "job.json文件地址，<a target='_blank' href='https://github.com/alibaba/DataX'>书写格式参考</a>",
+          "describe": "job.json文件地址，<a target='_blank' href='https://github.com/alibaba/DataX?tab=readme-ov-file#support-data-channels'>书写格式参考</a>",
           "editable": 1
         }
       }
@@ -530,7 +557,7 @@
   "datax-import": {
     "project_name": "数据导入导出",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/datax:20240501",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/datax",
+    "gitpath": "/job-template/job/datax",
     "image_describe": "datax mysql postgresql 数据导入",
     "job_template_name": "datax-import",
     "job_template_describe": "datax mysql postgresql 数据导入",
@@ -539,7 +566,9 @@
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 1
+      "index": 1,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/datax"
     },
     "job_template_args": {
       "数据导入": {
@@ -638,7 +667,7 @@
           "require": 1,
           "choice": [],
           "range": "",
-          "default": "/mnt/admin/pipeline/example/ml/data-test.csv",
+          "default": "/mnt/{{creator}}/pipeline/example/ml/data-test.csv",
           "placeholder": "",
           "describe": "csv存储目的地",
           "editable": 1
@@ -649,7 +678,7 @@
   "dataset": {
     "project_name": "数据导入导出",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/dataset:20240501",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dataset",
+    "gitpath": "/job-template/job/dataset",
     "image_describe": "数据集导入",
     "job_template_name": "dataset",
     "job_template_describe": "数据集导入",
@@ -659,7 +688,8 @@
     "job_template_env": "HF_ENDPOINT=https://hf-mirror.com\nHF_HUB_ENABLE_HF_TRANSFER=1",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/dataset"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/dataset"
     },
     "job_template_args": {
       "数据集导入": {
@@ -675,7 +705,7 @@
           "range": "",
           "default": "当前平台",
           "placeholder": "",
-          "describe": "数据集的来源",
+          "describe": "数据集的来源，“当前平台”为本平台“数据集”模块",
           "editable": 1
         },
         "--name": {
@@ -685,7 +715,7 @@
           "require": 1,
           "choice": [],
           "range": "",
-          "default": "MNIST",
+          "default": "mnist",
           "placeholder": "",
           "describe": "数据集的名称",
           "editable": 1
@@ -697,7 +727,7 @@
           "require": 1,
           "choice": [],
           "range": "",
-          "default": "latest",
+          "default": "1998",
           "placeholder": "",
           "describe": "数据集的版本",
           "editable": 1
@@ -732,7 +762,7 @@
   "model-download": {
     "project_name": "数据导入导出",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/model_download:20240501",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_download",
+    "gitpath": "/job-template/job/model_download",
     "image_describe": "模型导入",
     "job_template_name": "model-download",
     "job_template_describe": "模型导入",
@@ -741,8 +771,9 @@
     "job_template_account": "",
     "job_template_env": "HF_ENDPOINT=https://hf-mirror.com\nHF_HUB_ENABLE_HF_TRANSFER=1",
     "job_template_expand": {
-      "index": 4,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_download"
+      "index": 5,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/model_download"
     },
     "job_template_args": {
       "模型导入": {
@@ -811,19 +842,19 @@
           "range": "",
           "default": "online",
           "placeholder": "",
-          "describe": "模型状态，模型来自推理服务时有效",
+          "describe": "来源模型的状态，模型来自推理服务时有效",
           "editable": 1
         },
         "--save_path": {
           "type": "str",
           "item_type": "str",
-          "label": "下载目的目录",
+          "label": "下载保存目录",
           "require": 1,
           "choice": [],
           "range": "",
           "default": "/mnt/{{creator}}/pipeline/example/model/",
           "placeholder": "",
-          "describe": "下载目的目录",
+          "describe": "下载保存目录",
           "editable": 1
         }
       }
@@ -832,18 +863,20 @@
   "hadoop": {
     "project_name": "数据处理工具",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hadoop",
+    "gitpath": "/job-template/job/hadoop",
     "image_describe": "hadoop大数据组件客户端",
     "job_template_name": "hadoop",
     "job_template_describe": "hadoop大数据组件，hdfs,hbase,sqoop,spark(todo)",
-    "job_template_command": "",
+    "job_template_command": "bash start.sh",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_expand": {
       "index": 0,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hadoop"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/hadoop",
+      "HostNetwork": true
     },
-    "job_template_env": "",
+    "job_template_env": "FS_DEFAULTFS=hdfs://xx.xx.xx:9000\nYARN_RESOURCEMANAGER_ADDRESS=xx.xx.xx.xx:8032\nHIVE_METASTORE_URIS=thrift://xx.xx.xx.xx:9083",
     "job_template_args": {
       "hadoop任务": {
         "--command": {
@@ -853,9 +886,9 @@
           "require": 1,
           "choice": [],
           "range": "",
-          "default": "hadoop fs -get hdfs://host:port/user/hadoop/file localfile",
+          "default": "hdfs dfs -ls /",
           "placeholder": "",
-          "describe": "执行命令",
+          "describe": "执行命令。注意：由于大数据组件版本可能存在不一致的情况，这里可能需要基于原始模板构建跟内部大数据系统版本一致的hadoop模板",
           "editable": 1
         }
       }
@@ -863,8 +896,8 @@
   },
   "volcanojob": {
     "project_name": "数据处理工具",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/volcano:20230601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/volcano",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/volcano:20250101",
+    "gitpath": "/job-template/job/volcano",
     "image_describe": "有序分布式任务",
     "job_template_name": "volcanojob",
     "job_template_describe": "有序分布式任务",
@@ -873,7 +906,8 @@
     "job_template_account": "kubeflow-pipeline",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/volcano"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/volcano"
     },
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_args": {
@@ -888,7 +922,7 @@
           "range": "",
           "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
           "placeholder": "",
-          "describe": "worker镜像，直接运行你代码的环境镜像<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+          "describe": "worker镜像，直接运行你代码的环境镜像。<a target='_blank' href='https://github.com/data-infra/cube-studio/tree/main/images'>基础镜像</a>",
           "editable": 1
         },
         "--working_dir": {
@@ -914,7 +948,7 @@
           "range": "",
           "default": "python demo.py",
           "placeholder": "",
-          "describe": "启动命令",
+          "describe": "启动命令。对于镜像中不包含的环境，可以在启动脚本中现场安装",
           "editable": 1
         },
         "--num_worker": {
@@ -936,7 +970,7 @@
   "ray": {
     "project_name": "数据处理工具",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/ray:gpu-20240101",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/ray",
     "image_describe": "ray分布式任务",
     "job_template_name": "ray",
     "job_template_describe": "python多机分布式任务",
@@ -945,7 +979,8 @@
     "job_template_account": "kubeflow-pipeline",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/ray"
     },
     "job_template_args": {
       "分布式任务": {
@@ -1015,7 +1050,7 @@
   "ray-sklearn": {
     "project_name": "机器学习框架",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/ray-sklearn:20240101",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray_sklearn",
+    "gitpath": "/job-template/job/ray_sklearn",
     "image_describe": "sklearn基于ray的分布式",
     "job_template_name": "ray-sklearn",
     "job_template_describe": "sklearn基于ray的分布式",
@@ -1025,7 +1060,8 @@
     "job_template_env": "NO_RESOURCE_CHECK=true",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ray_sklearn"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/ray_sklearn"
     },
     "job_template_args": {
       "训练": {
@@ -1107,7 +1143,9 @@
           "placeholder": "",
           "describe": "sklearn 模型参数，json格式，默认为空",
           "editable": 1
-        },
+        }
+      },
+      "模型": {
         "--model_file_path": {
           "type": "str",
           "item_type": "str",
@@ -1183,17 +1221,18 @@
   "adaboost": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/adaboost",
+    "gitpath": "/job-template/job/adaboost",
     "image_describe": "adaboost算法",
     "job_template_name": "adaboost",
     "job_template_describe": "adaboost算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/adaboost"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/adaboost"
     },
     "job_template_args": {
     }
@@ -1201,17 +1240,18 @@
   "xgb": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/xgb",
+    "gitpath": "/job-template/job/xgb",
     "image_describe": "xgb算法单机",
     "job_template_name": "xgb",
     "job_template_describe": "xgb算法单机(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/xgb"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/xgb"
     },
     "job_template_args": {
     }
@@ -1219,17 +1259,18 @@
   "bayesian": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/bayesian",
+    "gitpath": "/job-template/job/bayesian",
     "image_describe": "bayesian算法",
     "job_template_name": "bayesian",
     "job_template_describe": "bayesian算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/bayesian"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/bayesian"
     },
     "job_template_args": {
     }
@@ -1237,17 +1278,18 @@
   "decision-tree": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/decision-tree",
+    "gitpath": "/job-template/job/decision-tree",
     "image_describe": "decision-tree算法",
     "job_template_name": "decision-tree",
     "job_template_describe": "decision-tree算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/decision-tree"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/decision-tree"
     },
     "job_template_args": {
     }
@@ -1255,17 +1297,18 @@
   "gbdt": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/gbdt",
+    "gitpath": "/job-template/job/gbdt",
     "image_describe": "gbdt算法",
     "job_template_name": "gbdt",
     "job_template_describe": "gbdt算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/gbdt"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/gbdt"
     },
     "job_template_args": {
     }
@@ -1273,17 +1316,18 @@
   "hyperparam-search-ray": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hyperparameter-search-ray",
+    "gitpath": "/job-template/job/hyperparameter-search-ray",
     "image_describe": "超参搜索算法",
     "job_template_name": "hyperparam-search",
     "job_template_describe": "超参搜索算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hyperparameter-search-ray"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/hyperparameter-search-ray"
     },
     "job_template_args": {
     }
@@ -1291,17 +1335,19 @@
   "hyperparam-search-nni": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hyperparameter-search-nni",
+    "gitpath": "/job-template/job/hyperparameter-search-nni",
     "image_describe": "nni超参搜索算法",
     "job_template_name": "hyperparam-search-nni",
     "job_template_describe": "超参搜索算法(todo)",
-    "job_template_command": "",
+    "job_template_workdir": "/app",
+    "job_template_command": "python launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/hyperparameter-search-nni",
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/hyperparameter-search-nni",
       "HostNetwork": true
     },
     "job_template_args": {
@@ -1310,17 +1356,18 @@
   "kmean": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/kmean",
+    "gitpath": "/job-template/job/kmean",
     "image_describe": "kmean算法",
     "job_template_name": "kmean",
     "job_template_describe": "kmean算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/kmean"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/kmean"
     },
     "job_template_args": {
     }
@@ -1328,17 +1375,18 @@
   "knn": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/knn",
+    "gitpath": "/job-template/job/knn",
     "image_describe": "knn算法",
     "job_template_name": "knn",
     "job_template_describe": "knn算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/knn"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/knn"
     },
     "job_template_args": {
     }
@@ -1346,17 +1394,18 @@
   "lightgbm": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lightgbm",
+    "gitpath": "/job-template/job/lightgbm",
     "image_describe": "lightgbm算法",
     "job_template_name": "lightgbm",
     "job_template_describe": "lightgbm算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lightgbm"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/lightgbm"
     },
     "job_template_args": {
     }
@@ -1364,17 +1413,18 @@
   "lr": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lr",
+    "gitpath": "/job-template/job/lr",
     "image_describe": "lr算法",
     "job_template_name": "lr",
     "job_template_describe": "lr算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/lr"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/lr"
     },
     "job_template_args": {
     }
@@ -1382,17 +1432,18 @@
   "random-forest": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/random-forest",
+    "gitpath": "/job-template/job/random-forest",
     "image_describe": "random-forest算法",
     "job_template_name": "random-forest",
     "job_template_describe": "random-forest算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/random-forest"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/random-forest"
     },
     "job_template_args": {
     }
@@ -1400,17 +1451,18 @@
   "random-forest-regression": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/rf-regression",
+    "gitpath": "/job-template/job/rf-regression",
     "image_describe": "random-forest-regression算法",
     "job_template_name": "random-forest-regression",
     "job_template_describe": "random-forest-regression算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/rf-regression"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/rf-regression"
     },
     "job_template_args": {
     }
@@ -1418,17 +1470,18 @@
   "arima": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/arima",
+    "gitpath": "/job-template/job/arima",
     "image_describe": "arima 时间序列算法",
     "job_template_name": "arima",
     "job_template_describe": "arima时间序列算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/arima"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/arima"
     },
     "job_template_args": {
     }
@@ -1436,17 +1489,18 @@
   "ar": {
     "project_name": "机器学习算法",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ar",
+    "gitpath": "/job-template/job/ar",
     "image_describe": "ar 时间序列算法",
     "job_template_name": "ar",
     "job_template_describe": "ar 时间序列算法(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/ar"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/ar"
     },
     "job_template_args": {
     }
@@ -1454,7 +1508,7 @@
   "tfjob": {
     "project_name": "深度学习",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/tf:20230801",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf",
+    "gitpath": "/job-template/job/tf",
     "image_describe": "tf 分布式训练",
     "job_template_name": "tfjob",
     "job_template_describe": "tf 分布式训练",
@@ -1464,7 +1518,8 @@
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/tf"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/tf"
     },
     "job_template_args": {
       "分布式训练": {
@@ -1477,7 +1532,7 @@
           "range": "",
           "default": "kubeflow/tf-mnist-with-summaries:latest",
           "placeholder": "",
-          "describe": "worker镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+          "describe": "worker镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/data-infra/cube-studio/tree/main/images'>基础镜像</a>",
           "editable": 1
         },
         "--working_dir": {
@@ -1501,7 +1556,7 @@
           "range": "",
           "default": "python /var/tf_mnist/mnist_with_summaries.py",
           "placeholder": "启动命令，例如 python3 xxx.py",
-          "describe": "启动命令，例如 python3 xxx.py",
+          "describe": "启动命令，例如 python3 xxx.py。对于镜像中不包含的环境，可以在启动后脚本内自行现场安装",
           "editable": 1
         },
         "--num_worker": {
@@ -1522,7 +1577,7 @@
   "pytorchjob": {
     "project_name": "深度学习",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/pytorch:20230801",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/pytorch",
+    "gitpath": "/job-template/job/pytorch",
     "image_describe": "pytorch分布式训练",
     "job_template_name": "pytorchjob",
     "job_template_describe": "pytorch 分布式训练",
@@ -1532,7 +1587,8 @@
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/pytorch"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/pytorch"
     },
     "job_template_args": {
       "分布式训练": {
@@ -1546,7 +1602,7 @@
           "range": "",
           "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
           "placeholder": "",
-          "describe": "worker镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+          "describe": "worker镜像，直接运行你代码的环境镜像 <a target='_blank' href='https://github.com/data-infra/cube-studio/tree/main/images'>基础镜像</a>",
           "editable": 1
         },
         "--working_dir": {
@@ -1572,7 +1628,7 @@
           "range": "",
           "default": "bash start.sh",
           "placeholder": "启动命令，例如 python3 xxx.py",
-          "describe": "启动命令，例如 python3 xxx.py",
+          "describe": "启动命令，例如 python3 xxx.py。对于镜像中不包含的环境，可以在启动后脚本内自行现场安装",
           "editable": 1
         },
         "--num_worker": {
@@ -1594,17 +1650,18 @@
   "paddlejob": {
     "project_name": "深度学习",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/paddle",
+    "gitpath": "/job-template/job/paddle",
     "image_describe": "paddle分布式训练",
     "job_template_name": "paddlejob",
     "job_template_describe": "paddle 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_expand": {
       "index": 4,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/paddle"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/paddle"
     },
     "job_template_args": {
     }
@@ -1612,17 +1669,17 @@
   "mindspore": {
     "project_name": "深度学习",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mindspore",
+    "gitpath": "/job-template/job/mindspore",
     "image_describe": "mindspore 分布式训练",
     "job_template_name": "mindspore",
     "job_template_describe": "mindspore 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_expand": {
       "index": 5,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mindspore"
+      "help_url": "/job-template/job/mindspore"
     },
     "job_template_args": {
     }
@@ -1630,17 +1687,18 @@
   "mxnet": {
     "project_name": "深度学习",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mxnet",
+    "gitpath": "/job-template/job/mxnet",
     "image_describe": "mxnet分布式训练",
     "job_template_name": "mxnet",
     "job_template_describe": "mxnet 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_expand": {
-      "index": 6,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mxnet"
+      "index": 7,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/mxnet"
     },
     "job_template_args": {
     }
@@ -1648,17 +1706,18 @@
   "horovod": {
     "project_name": "分布式加速",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/horovod",
+    "gitpath": "/job-template/job/horovod",
     "image_describe": "horovod 分布式训练",
     "job_template_name": "horovod",
     "job_template_describe": "horovod 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/horovod"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/horovod"
     },
     "job_template_args": {
     }
@@ -1666,17 +1725,18 @@
   "megatron": {
     "project_name": "分布式加速",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/megatron",
+    "gitpath": "/job-template/job/megatron",
     "image_describe": "megatron 分布式训练",
     "job_template_name": "megatron",
     "job_template_describe": "megatron 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/megatron"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/megatron"
     },
     "job_template_args": {
     }
@@ -1684,17 +1744,18 @@
   "deepspeed": {
     "project_name": "分布式加速",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deepspeed",
+    "gitpath": "/job-template/job/deepspeed",
     "image_describe": "deepspeed 分布式训练",
     "job_template_name": "deepspeed",
     "job_template_describe": "deepspeed 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=2\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deepspeed"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/deepspeed"
     },
     "job_template_args": {
     }
@@ -1702,17 +1763,18 @@
   "colossalai": {
     "project_name": "分布式加速",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/colossalai",
+    "gitpath": "/job-template/job/colossalai",
     "image_describe": "colossalai 分布式训练",
     "job_template_name": "colossalai",
     "job_template_describe": "colossalai 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/colossalai"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/colossalai"
     },
     "job_template_args": {
     }
@@ -1720,17 +1782,18 @@
   "mpi": {
     "project_name": "分布式加速",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mpi",
+    "gitpath": "/job-template/job/mpi",
     "image_describe": "mpi 分布式训练",
     "job_template_name": "mpi",
     "job_template_describe": "mpi 分布式训练(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "kubeflow-pipeline",
     "job_template_env": "",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/mpi"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/mpi"
     },
     "job_template_args": {
     }
@@ -1738,17 +1801,18 @@
   "model-evaluation": {
     "project_name": "模型处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_evaluation",
+    "gitpath": "/job-template/job/model_evaluation",
     "image_describe": "模型评估",
     "job_template_name": "model-evaluation",
     "job_template_describe": "模型评估(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_evaluation"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/model_evaluation"
     },
     "job_template_args": {
     }
@@ -1756,17 +1820,18 @@
   "model-convert": {
     "project_name": "模型处理",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_convert",
+    "gitpath": "/job-template/job/model_convert",
     "image_describe": "模型转换",
     "job_template_name": "model-convert",
     "job_template_describe": "模型转换(todo)",
-    "job_template_command": "",
+    "job_template_command": "python3 transformer2onnx.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_convert"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/model_convert"
     },
     "job_template_args": {
     }
@@ -1774,7 +1839,7 @@
   "model-register": {
     "project_name": "模型服务化",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/model_register:20230501",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_register",
+    "gitpath": "/job-template/job/model_register",
     "image_describe": "注册模型",
     "job_template_name": "model-register",
     "job_template_describe": "注册模型",
@@ -1784,7 +1849,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_register"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/model_register"
     },
     "job_template_args": {
       "模型注册": {
@@ -1831,7 +1897,7 @@
           "require": 1,
           "choice": [],
           "range": "",
-          "default": "https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/inference/tf-mnist.tar.gz",
+          "default": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/tf-mnist.tar.gz",
           "placeholder": "",
           "describe": "模型地址",
           "editable": 1
@@ -1892,7 +1958,7 @@
             "torch-server",
             "onnxruntime",
             "triton-server",
-            "llm-server",
+            "vllm",
             "aihub"
           ],
           "range": "",
@@ -1907,7 +1973,7 @@
   "model-offline-predict": {
     "project_name": "模型服务化",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/offline-predict:20230801",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_offline_predict",
+    "gitpath": "/job-template/job/model_offline_predict",
     "image_describe": "分布式离线推理",
     "job_template_name": "model-offline-predict",
     "job_template_describe": "分布式离线推理",
@@ -1917,7 +1983,8 @@
     "job_template_env": "NO_RESOURCE_CHECK=true\nTASK_RESOURCE_CPU=4\nTASK_RESOURCE_MEMORY=4G\nTASK_RESOURCE_GPU=0",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/model_offline_predict"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/model_offline_predict"
     },
     "job_template_args": {
       "模型离线推理": {
@@ -1929,9 +1996,9 @@
           "choice": [
           ],
           "range": "",
-          "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
+          "default": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9-dev",
           "placeholder": "",
-          "describe": "worker镜像，直接运行你代码的环境镜像<a target='_blank' href='https://github.com/tencentmusic/cube-studio/tree/master/images'>基础镜像</a>",
+          "describe": "worker镜像，直接运行你代码的环境镜像<a target='_blank' href='https://github.com/data-infra/cube-studio/tree/main/images'>基础镜像</a>",
           "editable": 1
         },
         "--working_dir": {
@@ -1979,17 +2046,18 @@
   "deploy-service": {
     "project_name": "模型服务化",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/deploy-service:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deploy-service",
+    "gitpath": "/job-template/job/deploy-service",
     "image_describe": "模型部署推理服务",
     "job_template_name": "deploy-service",
     "job_template_describe": "模型部署推理服务",
     "job_template_command": "python3 launcher.py",
     "job_template_volume": "",
-    "job_template_account": "kubeflow-pipeline",
+    "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/deploy-service"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/deploy-service"
     },
     "job_template_args": {
       "模型信息": {
@@ -2067,7 +2135,7 @@
             "torch-server",
             "onnxruntime",
             "triton-server",
-            "llm-server"
+            "vllm"
           ],
           "range": "",
           "default": "service",
@@ -2249,7 +2317,7 @@
   "media-download": {
     "project_name": "多媒体类模板",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio",
+    "gitpath": "/job-template/job/video-audio",
     "image_describe": "分布式媒体文件处理",
     "job_template_name": "media-download",
     "job_template_describe": "分布式下载媒体文件",
@@ -2258,7 +2326,8 @@
     "job_template_account": "kubeflow-pipeline",
     "job_template_expand": {
       "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/video-audio"
     },
     "job_template_args": {
       "模型下载": {
@@ -2292,14 +2361,14 @@
         "--input_file": {
           "type": "str",
           "item_type": "str",
-          "label": "下载信息文件地址",
+          "label": "配置文件地址",
           "require": 1,
           "choice": [
           ],
           "range": "",
           "default": "/mnt/{{creator}}/pipeline/example/media/video_url.txt",
           "placeholder": "",
-          "describe": "下载信息文件地址<br>url类型，每行格式：$url $local_path",
+          "describe": "配置文件地址<br>url类型，每行格式：$url $local_path",
           "editable": 1
         }
       }
@@ -2308,7 +2377,7 @@
   "video-img": {
     "project_name": "多媒体类模板",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio",
+    "gitpath": "/job-template/job/video-audio",
     "image_describe": "分布式媒体文件处理",
     "job_template_name": "video-img",
     "job_template_describe": "视频提取图片(分布式版)",
@@ -2317,7 +2386,8 @@
     "job_template_account": "kubeflow-pipeline",
     "job_template_expand": {
       "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/video-audio"
     },
     "job_template_args": {
       "视频抽帧": {
@@ -2353,7 +2423,7 @@
   "video-audio": {
     "project_name": "多媒体类模板",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/video-audio:20210601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio",
+    "gitpath": "/job-template/job/video-audio",
     "image_describe": "分布式媒体文件处理",
     "job_template_name": "video-audio",
     "job_template_describe": "视频提取音频(分布式版)",
@@ -2362,7 +2432,8 @@
     "job_template_account": "kubeflow-pipeline",
     "job_template_expand": {
       "index": 3,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/video-audio"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/video-audio"
     },
     "job_template_args": {
       "提取音频": {
@@ -2398,7 +2469,7 @@
   "yolov7": {
     "project_name": "机器视觉",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/yolov7:2024.01",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/yolov7",
+    "gitpath": "/job-template/job/yolov7",
     "image_describe": "yolo目标识别",
     "job_template_name": "yolov7",
     "job_template_describe": "yolo目标识别",
@@ -2409,7 +2480,8 @@
     "job_template_env": "",
     "job_template_expand": {
       "index": 4,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/yolov7"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/yolov7"
     },
     "job_template_args": {
       "训练参数": {
@@ -2502,8 +2574,8 @@
   },
   "yolov8": {
     "project_name": "机器视觉",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/yolov8:2024.07",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/yolov8",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/yolov8:2024.10",
+    "gitpath": "/job-template/job/yolov8",
     "image_describe": "yolo目标识别",
     "job_template_name": "yolov8",
     "job_template_describe": "yolo目标识别",
@@ -2515,7 +2587,7 @@
     "job_template_expand": {
       "index": 4,
       "rec_job_template": "自定义镜像",
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/yolov8"
+      "help_url": "/job-template/job/yolov8"
     },
     "job_template_args": {
       "训练参数": {
@@ -2606,81 +2678,44 @@
       }
     }
   },
-  "chatglm2": {
-    "project_name": "大模型",
-    "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm2",
-    "image_describe": "chatglm2",
-    "job_template_name": "chatglm2",
-    "job_template_describe": "chatglm2 lora微调(todo)",
-    "job_template_version": "Release",
-    "job_template_workdir": "/root/chatglm",
-    "job_template_command": "deepspeed --master_port 520 train.py --mode glm2 --train_type lora --gradient_checkpointing",
-    "job_template_volume": "",
-    "job_template_account": "",
-    "job_template_env": "",
-    "job_template_expand": {
-      "index": 1,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm2"
-    },
-    "job_template_args": {
-    }
-  },
-  "chatglm3": {
-    "project_name": "大模型",
-    "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm3",
-    "image_describe": "chatglm3",
-    "job_template_name": "chatglm3",
-    "job_template_describe": "chatglm3 lora微调(todo)",
-    "job_template_version": "Release",
-    "job_template_workdir": "/root/chatglm",
-    "job_template_command": "deepspeed --master_port 520 train.py --mode glm2 --train_type lora --gradient_checkpointing",
-    "job_template_volume": "",
-    "job_template_account": "",
-    "job_template_env": "",
-    "job_template_expand": {
-      "index": 2,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm3"
-    },
-    "job_template_args": {
-    }
-  },
   "chatglm4": {
     "project_name": "大模型",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/chatglm4",
+    "gitpath": "/job-template/job/llama_factory",
     "image_describe": "chatglm4",
     "job_template_name": "chatglm4",
     "job_template_describe": "chatglm4 lora微调(todo)",
     "job_template_version": "Release",
-    "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_workdir": "/root/llama_factory",
+    "job_template_command": "python start.py",
     "job_template_volume": "",
     "job_template_account": "",
-    "job_template_env": "",
+    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com",
     "job_template_expand": {
-      "index": 3
+      "index": 3,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/llama_factory"
     },
     "job_template_args": {
     }
   },
-  "llama2": {
+  "deepseek": {
     "project_name": "大模型",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/llama2",
-    "image_describe": "llama2",
-    "job_template_name": "llama2",
-    "job_template_describe": "llama2 lora微调(todo)",
+    "gitpath": "/job-template/job/llama_factory",
+    "image_describe": "deepseek",
+    "job_template_name": "deepseek",
+    "job_template_describe": "deepseek 微调(todo)",
     "job_template_version": "Release",
-    "job_template_workdir": "/root/Llama2-Chinese/train/sft",
-    "job_template_command": "deepspeed finetune_clm_lora.py --do_train --do_eval --use_fast_tokenizer false --evaluation_strategy  steps --logging_strategy steps --save_strategy steps --disable_tqdm false --ddp_find_unused_parameters false --report_to tensorboard --overwrite_output_dir --ignore_data_skip true --fp16  --gradient_checkpointing  --fp16_full_eval --ddp_timeout 18000000 ",
+    "job_template_workdir": "/root/llama_factory",
+    "job_template_command": "python start.py",
     "job_template_volume": "",
     "job_template_account": "",
-    "job_template_env": "",
+    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com",
     "job_template_expand": {
       "index": 4,
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/llama2"
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/llama_factory"
     },
     "job_template_args": {
     }
@@ -2688,7 +2723,7 @@
   "llama3": {
     "project_name": "大模型",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/llama3",
+    "gitpath": "https://github.com/data-infra/cube-studio/tree/main/job-template/job/llama3",
     "image_describe": "llama3",
     "job_template_name": "llama3",
     "job_template_describe": "llama3 lora微调(todo)",
@@ -2707,18 +2742,20 @@
   "baichuan2": {
     "project_name": "大模型",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/baichuan2",
+    "gitpath": "/job-template/job/baichuan2",
     "image_describe": "baichuan2",
     "job_template_name": "baichuan2",
     "job_template_describe": "baichuan2 微调(todo)",
     "job_template_version": "Release",
-    "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_workdir": "/root/baichuan2/fine-tune/",
+    "job_template_command": "deepspeed --hostfile='' fine-tune.py --report_to 'none'  --save_strategy epoch --lr_scheduler_type constant ",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 6
+      "index": 5,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/baichuan2"
     },
     "job_template_args": {
     }
@@ -2726,18 +2763,20 @@
   "qwen2": {
     "project_name": "大模型",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/llama-factory:20240410",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/qwen2",
+    "gitpath": "/job-template/job/llama_factory",
     "image_describe": "qwen2",
     "job_template_name": "qwen2",
     "job_template_describe": "qwen2 lora微调(todo)",
     "job_template_version": "Release",
-    "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_workdir": "/root/llama_factory",
+    "job_template_command": "python start.py",
     "job_template_volume": "",
     "job_template_account": "",
-    "job_template_env": "",
+    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com",
     "job_template_expand": {
-      "index": 7
+      "index": 6,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/llama_factory"
     },
     "job_template_args": {
     }
@@ -2745,18 +2784,20 @@
   "llama-factory": {
     "project_name": "大模型",
     "image_name": "python:3.9",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/llama_factory",
+    "gitpath": "/job-template/job/llama_factory",
     "image_describe": "llama-factory",
     "job_template_name": "llama-factory",
     "job_template_describe": "llama-factory 100+llm大模型微调(todo)",
     "job_template_version": "Release",
-    "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_workdir": "/root/llama_factory",
+    "job_template_command": "python start.py",
     "job_template_volume": "",
     "job_template_account": "",
-    "job_template_env": "",
+    "job_template_env": "HF_ENDPOINT=https://hf-mirror.com",
     "job_template_expand": {
-      "index": 8
+      "index": 7,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/llama_factory"
     },
     "job_template_args": {
     }
@@ -2764,18 +2805,20 @@
   "nlp-clean-data": {
     "project_name": "文本处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/nlp-process",
+    "gitpath": "/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-clean-data",
     "job_template_describe": "异常数据清洗(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python clean-data.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 1
+      "index": 1,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/nlp-process"
     },
     "job_template_args": {
     }
@@ -2783,18 +2826,20 @@
   "nlp-filter-data": {
     "project_name": "文本处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/nlp-process",
+    "gitpath": "/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-filter-data",
     "job_template_describe": "过滤异常文档(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python filter-data.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 2
+      "index": 2,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/nlp-process"
     },
     "job_template_args": {
     }
@@ -2802,18 +2847,20 @@
   "nlp-replace-private-data": {
     "project_name": "文本处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/nlp-process",
+    "gitpath": "/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-replace-private-data",
     "job_template_describe": "去除隐私信息(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python replace-data.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 3
+      "index": 3,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/nlp-process"
     },
     "job_template_args": {
     }
@@ -2821,18 +2868,20 @@
   "vision-image-blur": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
+    "gitpath": "/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-blur",
     "job_template_describe": "图片去噪声(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py --deal_type blur",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 1
+      "index": 1,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/vision-process"
     },
     "job_template_args": {
     }
@@ -2840,18 +2889,20 @@
   "vision-image-resize": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
+    "gitpath": "/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-resize",
     "job_template_describe": "图片缩放(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py --deal_type resize",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 2
+      "index": 2,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/vision-process"
     },
     "job_template_args": {
     }
@@ -2859,18 +2910,20 @@
   "vision-image-normalize": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
+    "gitpath": "/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-normalize",
     "job_template_describe": "图片标准化(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py --deal_type normalize",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 3
+      "index": 3,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/vision-process"
     },
     "job_template_args": {
     }
@@ -2878,18 +2931,20 @@
   "vision-image-cropping": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
+    "gitpath": "/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-cropping",
     "job_template_describe": "图片裁剪(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py --deal_type cropping",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 4
+      "index": 4,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/vision-process"
     },
     "job_template_args": {
     }
@@ -2897,18 +2952,20 @@
   "vision-image-equalize": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
+    "gitpath": "/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-equalize",
     "job_template_describe": "图片均衡化，增强对比度(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py --deal_type equalize",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 5
+      "index": 5,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/vision-process"
     },
     "job_template_args": {
     }
@@ -2916,18 +2973,20 @@
   "vision-image-cvtcolor": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
+    "gitpath": "/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-cvtcolor",
     "job_template_describe": "图片的空间转换(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py --deal_type cvtcolor",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 6
+      "index": 6,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/vision-process"
     },
     "job_template_args": {
     }
@@ -2935,18 +2994,20 @@
   "vision-image-augmentation": {
     "project_name": "图像处理",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/vision-process:20240601",
-    "gitpath": "https://github.com/tencentmusic/cube-studio/tree/master/job-template/job/vision-process",
+    "gitpath": "/job-template/job/vision-process",
     "image_describe": "视觉算法类的数据处理",
     "job_template_name": "vision-image-augmentation",
     "job_template_describe": "图片变换，图像增强(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "",
+    "job_template_command": "python launcher.py --deal_type augmentation",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
-      "index": 7
+      "index": 7,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/vision-process"
     },
     "job_template_args": {
     }

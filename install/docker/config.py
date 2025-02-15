@@ -89,13 +89,13 @@ AUTH_TYPE = AUTH_DB
 # Uncomment to setup Full admin role name
 # AUTH_ROLE_ADMIN = 'Admin'
 
-# Uncomment to setup Public role name, no authentication needed
+# 游客(非注册用户)的默认角色，目前没用
 # AUTH_ROLE_PUBLIC = 'Public'
 
 # 是否允许用户注册
 AUTH_USER_REGISTRATION = False
 
-# 用户的默认角色
+# 注册用户的默认角色
 AUTH_USER_REGISTRATION_ROLE = "Gamma"
 
 # RECAPTCHA_PUBLIC_KEY = 'GOOGLE PUBLIC KEY FOR RECAPTCHA'
@@ -306,10 +306,8 @@ PIPELINE_TASK_CRON_RESOLUTION = 10
 #         "link": "/frontend/ai_hub/model_market/model_visual"
 #     }
 # ]
-# User credentials to use for generating reports
-# This user should have permissions to browse all the dashboards and
-# slices.
-# TODO: In the future, login as the owner of the item to generate reports
+
+
 EMAIL_REPORTS_USER = "admin"
 EMAIL_REPORTS_SUBJECT_PREFIX = "[Report] "
 
@@ -694,6 +692,7 @@ RDMA_RESOURCE_NAME=''
 
 DEFAULT_POD_RESOURCES={}
 
+ENABEL_ALERT_HOMEPAGE=True  # 报警消息是否在首页显示
 # 各类model list界面的帮助文档
 HELP_URL={}
 
@@ -722,8 +721,12 @@ SERVICE_PIPELINE_ZIPKIN='http://xx.xx.xx.xx:9401'
 SERVICE_PIPELINE_JAEGER='tracing.service'
 # 拉取私有仓库镜像默认携带的k8s hubsecret名称
 HUBSECRET = ['hubsecret']
-# 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
+
+# 私有仓库的组织名，如果完全内网环境，修改为自己的内网
 REPOSITORY_ORG='ccr.ccs.tencentyun.com/cube-studio/'
+# 私有仓库的组织名，用户在线构建的镜像自动推送这个组织下面
+PUSH_REPOSITORY_ORG='ccr.ccs.tencentyun.com/cube-studio/'
+
 # 用户常用默认镜像
 USER_IMAGE = 'ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9'
 # notebook每个pod使用的用户账号
@@ -808,49 +811,20 @@ ALL_LINKS=[
 ]
 
 # 推理服务的各种配置
-
-TFSERVING_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4']
-TORCHSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-cpu']
-ONNXRUNTIME_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda']
-TRITONSERVER_IMAGES=['ccr.ccs.tencentyun.com/cube-studio/tritonserver:24.01-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:23.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:20.12-py3']
-
 INFERNENCE_IMAGES={
-    "tfserving":TFSERVING_IMAGES,
-    'torch-server':TORCHSERVER_IMAGES,
-    'onnxruntime':ONNXRUNTIME_IMAGES,
-    'triton-server':TRITONSERVER_IMAGES
-}
-
-INFERNENCE_COMMAND={
-    "tfserving":"/usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
-    "torch-server":"torchserve --start --model-store /models/$model_name/ --models $model_name=$model_name.mar --foreground --log-config /config/log4j2.xml",
-    "onnxruntime":"onnxruntime_server --model_path /models/",
-    "triton-server":'tritonserver --model-repository=/models/ --strict-model-config=true --log-verbose=1'
-}
-INFERNENCE_ENV={
-    "tfserving":['TF_CPP_VMODULE=http_server=1','TZ=Asia/Shanghai'],
-}
-INFERNENCE_PORTS={
-    "tfserving":'8501',
-    "torch-server":"8080,8081",
-    "onnxruntime":"8001",
-    "triton-server":"8000,8002"
-}
-INFERNENCE_METRICS={
-    "tfserving":'8501:/metrics',
-    "torch-server":"8082:/metrics",
-    "triton-server":"8002:/metrics"
-}
-INFERNENCE_HEALTH={
-    "tfserving":'8501:/v1/models/$model_name/versions/$model_version/metadata',
-    "torch-server":"8080:/ping",
-    "triton-server":"8000:/v2/health/ready"
+    "tfserving":['ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.14.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.13.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.12.2','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.11.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.10.1','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.9.3','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.8.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.7.4','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.6.5','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4-gpu','ccr.ccs.tencentyun.com/cube-studio/tfserving:2.5.4'],
+    'torch-server':['ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.9.0-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.8.2-cpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-gpu','ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-cpu'],
+    'onnxruntime':['ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest','ccr.ccs.tencentyun.com/cube-studio/onnxruntime:latest-cuda'],
+    'triton-server':['ccr.ccs.tencentyun.com/cube-studio/tritonserver:24.01-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:23.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:21.12-py3','ccr.ccs.tencentyun.com/cube-studio/tritonserver:20.12-py3']
 }
 
 CONTAINER_CLI='docker'   # 或者 docker nerdctl
 
 DOCKER_IMAGES='docker:23.0.4'
 NERDCTL_IMAGES='ccr.ccs.tencentyun.com/cube-studio/nerdctl:1.7.2'
+DOCKER_SOCKET = '/var/run/docker.sock(hostpath):/var/run/docker.sock'
+CONTAINERD_SOCKET = '/etc/containerd/(hostpath):/etc/containerd/,/run/containerd/containerd.sock(hostpath):/run/containerd/containerd.sock'
+# CONTAINERD_SOCKET = '/var/lib/rancher/rke2/agent/etc/containerd/(hostpath):/etc/containerd/,/run/k3s/containerd/containerd.sock(hostpath):/run/containerd/containerd.sock'
 
 WAIT_POD_IMAGES='ccr.ccs.tencentyun.com/cube-studio/wait-pod:v1'
 # notebook，pipeline镜像拉取策略

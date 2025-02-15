@@ -578,6 +578,10 @@ class Pipeline_ModelView_Base():
         "pipeline_url": {"type": "ellip2", "width": 400},
         "modified": {"type": "ellip2", "width": 150}
     }
+    spec_label_columns={
+        "parameter":_("后端扩展"),
+        "expand":_("前端扩展")
+    }
     add_columns = ['project', 'name', 'describe']
     edit_columns = ['project', 'name', 'describe', 'schedule_type', 'cron_time', 'depends_on_past', 'max_active_runs',
                     'expired_limit', 'parallelism', 'global_env', 'alert_status', 'alert_user', 'parameter',
@@ -615,7 +619,8 @@ class Pipeline_ModelView_Base():
         "dag_json": StringField(
             _('上下游关系'),
             default='{}',
-            widget=MyBS3TextAreaFieldWidget(rows=10),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            description=_("任务的上下游关系，目前不需要手动修改"),
+            widget=MyBS3TextAreaFieldWidget(rows=10,is_json=True),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         ),
         "namespace": StringField(
             _('命名空间'),
@@ -692,6 +697,18 @@ class Pipeline_ModelView_Base():
             label= _('报警用户'),
             widget=BS3TextFieldWidget(),
             description= _("选择通知用户，每个用户使用逗号分隔")
+        ),
+        "parameter": StringField(
+            _('后端扩展'),
+            default='{}',
+            description=_('后端扩展参数，用于配置是否为demo或固化任务流'),
+            widget=MyBS3TextAreaFieldWidget(rows=10, is_json=True),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+        ),
+        "expand": StringField(
+            _('前端扩展'),
+            default='{}',
+            description=_('前端扩展参数，前端用于记录任务流节点位置和连线关系'),
+            widget=MyBS3TextAreaFieldWidget(rows=10, is_json=True),  # 传给widget函数的是外层的field对象，以及widget函数的参数
         )
 
     }
@@ -845,7 +862,7 @@ class Pipeline_ModelView_Base():
             item.global_env = '\n'.join(pipeline_global_env)
 
         item.name = item.name.replace('_', '-')[0:54].lower().strip('-')
-        item.namespace = json.loads(item.project.expand).get('PIPELINE_NAMESPACE', conf.get('PIPELINE_NAMESPACE'))
+        item.namespace = json.loads(item.project.expand).get('PIPELINE_NAMESPACE', conf.get('PIPELINE_NAMESPACE','pipeline'))
         # item.alert_status = ','.join(item.alert_status)
         self.pipeline_args_check(item)
         item.create_datetime = datetime.datetime.now()
@@ -887,7 +904,7 @@ class Pipeline_ModelView_Base():
 
 
         item.name = item.name.replace('_', '-')[0:54].lower()
-        item.namespace = json.loads(item.project.expand).get('PIPELINE_NAMESPACE', conf.get('PIPELINE_NAMESPACE'))
+        item.namespace = json.loads(item.project.expand).get('PIPELINE_NAMESPACE', conf.get('PIPELINE_NAMESPACE','pipeline'))
         # item.alert_status = ','.join(item.alert_status)
         self.merge_upstream(item)
         self.pipeline_args_check(item)
@@ -933,21 +950,27 @@ class Pipeline_ModelView_Base():
         pipeline.expand = ""
         pipeline.dag_json = "{}"
         db.session.commit()
+        try:
+            # 删除所有相关的运行中workflow
+            back_crds = pipeline.get_workflow()
+            self.delete_bind_crd(back_crds)
+        except Exception as e:
+            print(e)
 
-        # 删除所有相关的运行中workflow
-        back_crds = pipeline.get_workflow()
-        self.delete_bind_crd(back_crds)
         # 删除所有的任务
-        tasks = pipeline.get_tasks()
-        # 删除task启动的所有实例
-        for task in tasks:
-            self.delete_task_run(task)
+        try:
+            tasks = pipeline.get_tasks()
+            # 删除task启动的所有实例
+            for task in tasks:
+                self.delete_task_run(task)
+        except Exception as e:
+            print(e)
 
-        for task in tasks:
-            db.session.delete(task)
 
         # 删除所有的workflow
         # 只是删除了数据库记录，但是实例并没有删除，会重新监听更新的。
+        db.session.query(Task).filter_by(pipeline_id=pipeline.id).delete(synchronize_session=False)
+        db.session.commit()
         db.session.query(Workflow).filter_by(foreign_key=str(pipeline.id)).delete(synchronize_session=False)
         db.session.commit()
         db.session.query(Workflow).filter(Workflow.labels.contains(f'"pipeline-id": "{str(pipeline.id)}"')).delete(synchronize_session=False)
@@ -1164,7 +1187,7 @@ class Pipeline_ModelView_Base():
     def web_monitoring(self, pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=int(pipeline_id)).first()
 
-        url = "http://"+pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
+        url = "http://"+pipeline.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_TASK_PATH')+ pipeline.name
         return redirect(url)
         # else:
         #     flash('no running instance', 'warning')
@@ -1174,7 +1197,7 @@ class Pipeline_ModelView_Base():
     @expose("/web/pod/<pipeline_id>", methods=["GET"])
     def web_pod(self, pipeline_id):
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
-        return redirect(f'/k8s/web/search/{pipeline.project.cluster["NAME"]}/{conf.get("PIPELINE_NAMESPACE")}/{pipeline.name.replace("_", "-").lower()}')
+        return redirect(f'/k8s/web/search/{pipeline.project.cluster["NAME"]}/{conf.get("PIPELINE_NAMESPACE","pipeline")}/{pipeline.name.replace("_", "-").lower()}')
 
         # data = {
         #     "url": "//" + pipeline.project.cluster.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/search?namespace=%s&q=%s' % (conf.get('PIPELINE_NAMESPACE'), pipeline.name.replace('_', '-').lower()),
@@ -1281,7 +1304,9 @@ class Pipeline_ModelView(Pipeline_ModelView_Base, MyappModelView):
     # order_columns = ['changed_on']
 
 
-appbuilder.add_view_no_menu(Pipeline_ModelView)
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
+    def muldelete(self, items):
+        return self._muldelete(items)
 
 
 # 添加api
@@ -1309,3 +1334,11 @@ class Pipeline_ModelView_Api(Pipeline_ModelView_Base, MyappModelRestApi):
 
 
 appbuilder.add_api(Pipeline_ModelView_Api)
+
+class Pipeline_ModelView_Home_Api(Pipeline_ModelView_Api):
+    datamodel = SQLAInterface(Pipeline)
+    route_base = '/pipeline_modelview/home/api'
+    list_columns = ['id', 'project', 'pipeline_url', 'creator', 'modified', 'changed_on', 'describe']
+
+
+appbuilder.add_api(Pipeline_ModelView_Home_Api)

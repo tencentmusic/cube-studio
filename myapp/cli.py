@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import re
 import shutil
 from datetime import datetime
 from flask_babel import gettext as __
@@ -26,17 +27,13 @@ def create_app(script_info=None):
 def make_shell_context():
     return dict(app=app, db=db)
 
-# @pysnooper.snoop()
-def replace_git(dir_path):
-    files = os.listdir(dir_path)
-    for file_name in files:
-        file_path = os.path.join(dir_path,file_name)
-        if os.path.isfile(file_path) and '.json' in file_name:
-            content = open(file_path).read()
-            content = content.replace('https://github.com/data-infra/cube-studio/tree/main',conf.get('GIT_URL','').strip('/'))
-            file = open(file_path,mode='w')
-            file.write(content)
-            file.close()
+
+
+def replace_git(content):
+    content = json.dumps(content)
+    content = content.replace('https://github.com/tencentmusic/cube-studio/tree/master', conf.get('GIT_URL', '').strip('/'))
+    content = content.replace('ccr.ccs.tencentyun.com/cube-studio', conf.get('REPOSITORY_ORG', '').strip('/'))
+    return json.loads(content)
 
 
 
@@ -52,7 +49,6 @@ def init():
         print(e)
 
     init_dir='myapp/init' if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh' else "myapp/init-en"
-    replace_git(init_dir)
     # 初始化创建项目组
     try:
 
@@ -140,7 +136,7 @@ def init():
                 images.changed_by_fk = 1
                 images.project_id = project.id
                 images.repository_id = repository_id
-                images.gitpath = gitpath.replace("https://github.com/data-infra/cube-studio/tree/main/".strip('/'),conf.get('GIT_URL','').strip('/'))
+                images.gitpath = gitpath if bool(re.match(r'^http', gitpath)) else (conf.get('GIT_URL', '').strip('/') + gitpath),
                 db.session.add(images)
                 db.session.commit()
                 print('add images %s' % image_name)
@@ -168,12 +164,16 @@ def init():
                     job_template.volume_mount = job_template_volume
                     job_template.accounts = job_template_account
                     job_template_expand['source'] = "github"
+                    if 'help_url' in job_template_expand:
+                        job_template_expand['help_url']=job_template_expand['help_url'] if re.match(r'^http',job_template_expand['help_url']) else (conf.get('GIT_URL', '').strip('/') + job_template_expand['help_url'])
                     job_template.expand = json.dumps(job_template_expand, indent=4, ensure_ascii=False) if job_template_expand else '{}'
                     job_template.created_by_fk = 1
                     job_template.changed_by_fk = 1
                     job_template.project_id = project.id
                     job_template.images_id = images.id
                     job_template.env = job_template_env
+                    # if 'tip' in job_template_args:
+                    #     job_template_args['tip']=job_template_args['tip'].replace('\n','<br>')
                     job_template.args = json.dumps(job_template_args, indent=4, ensure_ascii=False) if job_template_args else '{}'
                     db.session.add(job_template)
                     db.session.commit()
@@ -225,11 +225,11 @@ def init():
                 print(e)
                 db.session.rollback()
 
-
         print('begin init job_templates')
         init_file = os.path.join(init_dir,'init-job-template.json')
         if os.path.exists(init_file):
             job_templates = json.load(open(init_file, mode='r'))
+            job_templates = replace_git(job_templates)
             for job_template_name in job_templates:
                 try:
                     job_template = job_templates[job_template_name]
@@ -396,6 +396,7 @@ def init():
         init_file = os.path.join(init_dir,'init-pipeline.json')
         if os.path.exists(init_file):
             pipelines = json.load(open(init_file, mode='r'))
+            pipelines = replace_git(pipelines)
             for pipeline_name in pipelines:
                 try:
                     pipeline = pipelines[pipeline_name]['pipeline']
@@ -407,46 +408,6 @@ def init():
     except Exception as e:
         print(e)
         # traceback.print_exc()
-
-    # 从目录中添加示例 pipeline
-    try:
-        print('begin init pipeline example')
-
-        pipelines = os.listdir('myapp/example/pipeline/')
-        for pipeline_name in pipelines:
-            if os.path.isdir(os.path.join('myapp/example/pipeline/',pipeline_name)):
-                try:
-                    pipeline_path = os.path.join('myapp/example/pipeline/',pipeline_name,'pipeline.json')
-                    init_path = os.path.join('myapp/example/pipeline/', pipeline_name, 'init.py')
-                    if os.path.exists(pipeline_path):
-                        pipeline = json.load(open(pipeline_path))
-                        tasks = pipeline['tasks']
-                        pipeline = pipeline['pipeline']
-
-                        create_pipeline(pipeline=pipeline, tasks=tasks)
-
-                    # 环境要求比较复杂，可以直接在notebook里面初始化
-                    os.makedirs('/data/k8s/kubeflow/pipeline/workspace/admin/pipeline/example/',exist_ok=True)
-                    # shutil.copy2(f'myapp/example/pipeline/{pipeline_name}','/data/k8s/kubeflow/pipeline/workspace/admin/pipeline/example/')
-                    if not os.path.exists(f'/data/k8s/kubeflow/pipeline/workspace/admin/pipeline/example/{pipeline_name}'):
-                        shutil.copytree(f'myapp/example/pipeline/{pipeline_name}', f'/data/k8s/kubeflow/pipeline/workspace/admin/pipeline/example/{pipeline_name}')
-                    # if os.path.exists(init_path):
-                    #     try:
-                    #         params = importlib.import_module(f'myapp.example.pipeline.{pipeline_name}.init')
-                    #         init_func = getattr(params, 'init')
-                    #         init_func()
-                    #     except Exception as e:
-                    #         print(e)
-                    #         # traceback.print_exc()
-
-                    print('add job template using example %s' % pipeline_name)
-                except Exception as e1:
-                    print(e1)
-                # traceback.print_exc()
-    except Exception as e:
-        print(e)
-        # traceback.print_exc()
-
 
     # 添加 demo 推理 服务
     def create_dataset(**kwargs):
@@ -540,6 +501,7 @@ def init():
         init_file = os.path.join(init_dir, 'init-train-model.json')
         if os.path.exists(init_file):
             train_models = json.load(open(init_file, mode='r'))
+            train_models = replace_git(train_models)
             for train_model_name in train_models:
                 try:
                     train_model = train_models[train_model_name]
@@ -552,7 +514,7 @@ def init():
 
     # 添加demo 服务
     # @pysnooper.snoop()
-    def create_service(project_name, service_name, service_describe, image_name, command, env, resource_memory='2G',
+    def create_service(project_name, service_name, service_describe, image_name,working_dir='', command='', env='', resource_memory='2G',
                        resource_cpu='2', resource_gpu='0', ports='80', volume_mount='kubeflow-user-workspace(pvc):/mnt',
                        expand={},host=''):
         service = db.session.query(Service).filter_by(name=service_name).first()
@@ -566,6 +528,7 @@ def init():
                 service.changed_by_fk = 1
                 service.project_id = project.id
                 service.images = image_name
+                service.working_dir=working_dir
                 service.command = command
                 service.resource_memory = resource_memory
                 service.resource_cpu = resource_cpu
@@ -588,6 +551,7 @@ def init():
         init_file = os.path.join(init_dir, 'init-service.json')
         if os.path.exists(init_file):
             services = json.load(open(init_file, mode='r'))
+            services = replace_git(services)
             for service_name in services:
                 try:
                     service = services[service_name]
@@ -602,7 +566,7 @@ def init():
     # @pysnooper.snoop()
     def create_inference(project_name, service_name, service_describe, image_name, command, env, model_name, workdir='',
                          model_version='', model_path='', service_type='serving', resource_memory='2G',
-                         resource_cpu='2', resource_gpu='0', host='', ports='80',
+                         resource_cpu='2', resource_gpu='0', min_replicas=1, max_replicas=1, host='', ports='80',
                          volume_mount='kubeflow-user-workspace(pvc):/mnt', metrics='', health='', inference_config='',
                          expand={}):
         service = db.session.query(InferenceService).filter_by(name=service_name).first()
@@ -623,6 +587,8 @@ def init():
                 service.resource_memory = resource_memory
                 service.resource_cpu = resource_cpu
                 service.resource_gpu = resource_gpu
+                service.min_replicas = int(min_replicas)
+                service.max_replicas = int(max_replicas)
                 service.host = host
                 service.working_dir = workdir
                 service.command = command
@@ -633,7 +599,8 @@ def init():
                 service.metrics = metrics
                 service.health = health
                 if "help_url" in expand:
-                    expand["help_url"]=expand["help_url"].replace("https://github.com/data-infra/cube-studio/tree/main".strip('/'),conf.get('GIT_URL','').strip('/'))
+                    help_url = expand['help_url']
+                    expand["help_url"] = help_url if bool(re.match(r'^http', help_url)) else (conf.get('GIT_URL', '').strip('/') + help_url)
                 service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
 
                 from myapp.views.view_inferenceserving import InferenceService_ModelView_base
@@ -654,6 +621,7 @@ def init():
         init_file = os.path.join(init_dir, 'init-inference.json')
         if os.path.exists(init_file):
             inferences = json.load(open(init_file, mode='r'))
+            inferences = replace_git(inferences)
             for inference_name in inferences:
                 try:
                     inference = inferences[inference_name]
@@ -669,6 +637,7 @@ def init():
         if not os.path.exists(info_path):
             return
         aihubs = json.load(open(info_path, mode='r'))
+        aihubs = replace_git(aihubs)
 
         try:
             if len(aihubs) > 0:
@@ -685,7 +654,8 @@ def init():
                         aihub = db.session.query(Aihub).filter_by(uuid=uuid).first()
                         if not aihub:
                             aihub = Aihub()
-                        aihub.doc = data.get('doc', '').replace("https://github.com/data-infra/cube-studio/tree/main",conf.get('GIT_URL','').strip('/'))
+                        doc = data.get('doc', '')
+                        aihub.doc = doc if bool(re.match(r'^http', doc)) else (conf.get('GIT_URL', '').strip('/') + doc)
                         aihub.name = name
                         aihub.label = label
                         aihub.describe = describe
@@ -732,6 +702,7 @@ def init():
         if not os.path.exists(chat_path):
             return
         chats = json.load(open(chat_path, mode='r'))
+        chats = replace_git(chats)
 
         try:
             if len(chats) > 0:
@@ -837,6 +808,7 @@ def init():
             init_file = os.path.join(init_dir, 'init-etl-pipeline.json')
             if os.path.exists(init_file):
                 pipelines = json.load(open(init_file, mode='r'))
+                pipelines = replace_git(pipelines)
                 for pipeline in pipelines:
                     db.session.add(ETL_Pipeline(
                         project_id=1, created_by_fk=1,changed_by_fk=1,
@@ -859,6 +831,7 @@ def init():
             init_file = os.path.join(init_dir, 'init-automl.json')
             if os.path.exists(init_file):
                 nnis = json.load(open(init_file, mode='r'))
+                nnis = replace_git(nnis)
                 for nni in nnis:
                     db.session.add(NNI(
                         project_id=1, created_by_fk=1,changed_by_fk=1,
@@ -873,6 +846,7 @@ def init():
                         resource_memory=nni.get('resource_memory', '1G'),
                         resource_cpu=nni.get('resource_cpu', '1'),
                         resource_gpu=nni.get('resource_gpu', '0'),
+                        parallel_trial_type=nni.get('parallel_trial_type', 'multi-process'),
                     ))
                     db.session.commit()
                     print('添加nni 超参搜索成功')
@@ -918,17 +892,19 @@ def init():
         init_file = os.path.join(init_dir, 'init-image.json')
         if os.path.exists(init_file):
             images = json.load(open(init_file, mode='r'))
+            images = replace_git(images)
             for image in images:
                 project = db.session.query(Project).filter_by(name=image['group_name']).filter_by(type='job-template').first()
                 repository = db.session.query(Repository).filter_by(name=image['repository']).first()
                 image_model = db.session.query(Images).filter_by(name=image.get('name')).first()
                 if project and not image_model:
                     pass
+                    gitpath = image.get("gitpath",'')
                     db.session.add(Images(
                         project_id=project.id, created_by_fk=1,changed_by_fk=1,
                         name=image.get('name'),
                         describe=image.get('describe',''),
-                        gitpath=image.get('gitpath',''),
+                        gitpath = gitpath if bool(re.match(r'^http', gitpath)) else (conf.get('GIT_URL', '').strip('/') + gitpath),
                         repository_id=repository.id if repository else 1,
                         dockerfile = image.get('dockerfile','')
                     ))

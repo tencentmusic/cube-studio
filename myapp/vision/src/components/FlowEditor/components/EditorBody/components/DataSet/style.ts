@@ -98,6 +98,10 @@ const nodeContentWrapper = mergeStyles({
 const nodeTips = mergeStyles({
   color: 'rgb(177, 177, 183)',
   paddingLeft: 8,
+  maxWidth: '250px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 export default {

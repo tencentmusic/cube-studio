@@ -40,7 +40,7 @@ const pipeline_modelview_list = (): Promise<any> => {
 };
 
 const pipeline_modelview_all = (filters: string): Promise<any> => {
-  return ajax.get(`/pipeline_modelview/api/?form_data=${filters}`);
+  return ajax.get(`/pipeline_modelview/home/api/?form_data=${filters}`);
 };
 
 // 获取流水线信息

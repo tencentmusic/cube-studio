@@ -109,9 +109,9 @@ def node_traffic():
                 nodes.update(stored_nodes[org][device])
 
         cluster_config = conf.get('CLUSTERS', {}).get(cluster_name, {})
-        grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_CLUSTER_PATH')
+        grafana_url = "//" + cluster_config.get('HOST', request.host).split('|')[-1] + conf.get('GRAFANA_CLUSTER_PATH')
         for ip in nodes:
-            node_dashboard_url = "//"+ cluster_config.get('HOST', request.host) + conf.get('K8S_DASHBOARD_CLUSTER') + '#/node/%s?namespace=default' % nodes[ip]['name']
+            node_dashboard_url = "//"+ cluster_config.get('HOST', request.host).split('|')[-1] + conf.get('K8S_DASHBOARD_CLUSTER') + '#/node/%s?namespace=default' % nodes[ip]['name']
             org = nodes[ip]['labels'].get('org', 'unknown')
             enable_train = nodes[ip]['labels'].get('train', 'true')
             if g.user.is_admin():
@@ -250,8 +250,8 @@ def pod_resource():
                 for pod_name in all_tasks_json[cluster_name][namespace][org]:
                     pod = all_tasks_json[cluster_name][namespace][org][pod_name]
                     dashboard_url = f'/k8s/web/search/{cluster_name}/{namespace}/{pod_name}'
-                    task_grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_TASK_PATH')
-                    node_grafana_url = "//" + cluster_config.get('HOST', request.host) + conf.get('GRAFANA_NODE_PATH')
+                    task_grafana_url = "//" + cluster_config.get('HOST', request.host).split('|')[-1] + conf.get('GRAFANA_TASK_PATH')
+                    node_grafana_url = "//" + cluster_config.get('HOST', request.host).split('|')[-1] + conf.get('GRAFANA_NODE_PATH')
                     pod_resource={
                         "cluster":cluster_name,
                         'project':pod['annotations'].get('project','unknown'),
@@ -455,6 +455,15 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                         k8s_client.delete_service(namespace=namespace, name=service_name)
                         k8s_client.delete_service(namespace=namespace, name=service_external_name)
                         k8s_client.delete_istio_ingress(namespace=namespace, name=service_name)
+                        k8s_client.delete_crd(group='batch.volcano.sh', version='v1alpha1', plural='jobs', namespace=namespace, name=service_name + "-vc")
+                        # 把推理服务的状态改为offline
+                    pod_type = pod['label'].get("pod-type",'')
+                    if pod_type=='inference':
+                        from myapp.models.model_serving import InferenceService
+                        inference = db.session.query(InferenceService).filter_by(name=service_name).first()
+                        if inference:
+                            inference.model_status='offline'
+                            db.session.commit()
                 # 如果是aihub命名空间，需要删除 deployemnt和service和虚拟服务
                 if namespace == 'aihub':
                     service_name = pod['label'].get("app", '')
@@ -472,6 +481,9 @@ class Total_Resource_ModelView_Api(MyappFormRestApi):
                 # 如果是pipeline命名空间，按照run-id进行删除，这里先只删除pod，也会造成任务停止
                 if namespace == 'pipeline':
                     k8s_client.delete_pods(namespace=namespace, pod_name=pod_name)
+                    run_id = pod['label'].get("run-id", '')
+                    if run_id:
+                        k8s_client.delete_workflow(all_crd_info=conf.get("CRD_INFO", {}),namespace='pipeline',run_id=run_id)
 
                 if namespace == 'automl':
                     vcjob_name = pod['label'].get("app", '')

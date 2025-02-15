@@ -1,4 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base -f Dockerfile-cpu-base .
+# docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base -f Dockerfile-cpu-base .
 
 FROM ccr.ccs.tencentyun.com/cube-studio/theia-python:latest
 
@@ -8,8 +8,7 @@ RUN apt update && apt install -y --force-yes --no-install-recommends vim apt-tra
 
 RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
     echo "alias la='ls -A'" >> ~/.bashrc && \
-    echo "alias vi='vim'" >> ~/.bashrc && \
-    /bin/bash -c "source ~/.bashrc"
+    echo "alias vi='vim'" >> ~/.bashrc
 
 RUN apt install -y libsasl2-dev libpq-dev && rm -f /usr/bin/python && rm -f /usr/local/bin/pip && rm -f /usr/bin/pip && ln -s /usr/local/bin/python3 /usr/bin/python && ln -s /usr/bin/pip3 /usr/bin/pip
 

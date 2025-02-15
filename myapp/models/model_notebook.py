@@ -52,7 +52,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     def name_url(self):
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
 
-        host = "//" + self.project.cluster.get('HOST', request.host)
+        host = "//" + self.project.cluster.get('HOST', request.host).split('|')[-1]
 
         expand = json.loads(self.expand) if self.expand else {}
         root = expand.get('root','')
@@ -116,7 +116,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     def status(self):
         try:
             k8s_client = py_k8s.K8s(self.cluster.get('KUBECONFIG',''))
-            namespace = conf.get('NOTEBOOK_NAMESPACE')
+            namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
             if pods and len(pods)>0:
                 status = pods[0]['status']

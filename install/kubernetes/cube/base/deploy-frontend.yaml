@@ -20,6 +20,7 @@ data:
 
         # 静态资源
         location /frontend/ {
+            autoindex off; # 禁止目录遍历
             root   /data/web;
             index  index.html index.htm;
             try_files $uri $uri/ /frontend/index.html;
@@ -30,6 +31,7 @@ data:
 
         # 静态资源
         location /static/appbuilder/ {
+            autoindex off; # 禁止目录遍历
             root   /data/web;
             index  index.html index.htm;
             try_files $uri $uri/ /frontend/index.html;
@@ -39,6 +41,7 @@ data:
         }
 
         location / {
+            autoindex off; # 禁止目录遍历
             # 线上生产使用
             proxy_pass http://kubeflow-dashboard.infra/;
 

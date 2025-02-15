@@ -50,6 +50,9 @@ pipeline = [
     'argoproj/argocli:v3.4.3'
 ]
 cube_studio = [
+    # 前后端
+    'ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.01.01',
+    'ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.01.01',
     # notebook基础镜像
     'ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base',
     'ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base',
@@ -62,7 +65,7 @@ cube_studio = [
     # 超参搜索的镜像
     'ccr.ccs.tencentyun.com/cube-studio/nni:20240501',
     # 内部服务镜像
-    "ccr.ccs.tencentyun.com/cube-studio/phpmyadmin",
+    "phpmyadmin:5.2.1",
     # "ccr.ccs.tencentyun.com/cube-studio/patrikx3:latest",
     # "mongo-express:0.54.0",
     # "ccr.ccs.tencentyun.com/cube-studio/neo4j:4.4",

@@ -240,6 +240,14 @@ class Project_ModelView_Base():
     def post_list(self, items):
         return core.sort_expand_index(items)
 
+
+    # 配置只有管理员可以添加和删除
+    def add_more_info(self,response, **kwargs):
+        if g.user.is_admin():
+            response['permissions']=['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
+        else:
+            response['permissions'] = ['can_list', 'can_show']
+
 class Project_ModelView_job_template_Api(Project_ModelView_Base, MyappModelRestApi):
     route_base = '/project_modelview/job_template/api'
     datamodel = SQLAInterface(Project)
@@ -262,6 +270,11 @@ class Project_ModelView_job_template_Api(Project_ModelView_Base, MyappModelRestA
         )
     }
     add_form_extra_fields = edit_form_extra_fields
+
+    def post_add(self, item):
+        if not item.type:
+            item.type = self.project_type
+        db.session.commit()
 
 
 appbuilder.add_api(Project_ModelView_job_template_Api)
@@ -361,6 +374,10 @@ class Project_ModelView_train_model_Api(Project_ModelView_Base, MyappModelRestAp
         )
     }
     add_form_extra_fields = edit_form_extra_fields
+    def post_add(self, item):
+        if not item.type:
+            item.type = self.project_type
+        db.session.commit()
 
 
 appbuilder.add_api(Project_ModelView_train_model_Api)

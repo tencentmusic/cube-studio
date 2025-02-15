@@ -26,7 +26,7 @@ class Dimension_table(Model,ImportMixin,MyappModelBase):
     owner = Column(String(2000), nullable=True,default='',comment='责任人')
     columns=Column(Text, nullable=True,default='{}',comment='列信息')
     status = Column(Integer, default=1,comment='状态')
-
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
 
     @property
     def table_html(self):

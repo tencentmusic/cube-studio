@@ -21,7 +21,7 @@ from myapp.models.model_team import Project
 import pysnooper
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from flask_appbuilder.models.decorators import renders
-from flask import Markup,request
+from flask import Markup,request,g
 from myapp.models.base import MyappModelBase
 import datetime
 metadata = Model.metadata
@@ -37,6 +37,14 @@ class Repository(Model,AuditMixinNullable,MyappModelBase):
     user = Column(String(100), nullable=False,comment='账户')
     password = Column(String(100), nullable=False,comment='密码')
     hubsecret = Column(String(100),comment='k8s secret名')
+
+    @property
+    def hubsecret_url(self):
+        if g.user.is_admin():
+            url = conf.get('K8S_DASHBOARD_CLUSTER', '') + f'#/secret/pipeline/{self.hubsecret}?namespace=pipeline'
+            return Markup(f'<a target=_blank href="{url}">{self.hubsecret}</a>')
+        else:
+            return self.hubsecret
 
     def __repr__(self):
         return self.name
@@ -174,12 +182,13 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     alert_status = Column(String(100), default='Pending,Running,Succeeded,Failed,Terminated',comment=' 哪些状态会报警Pending,Running,Succeeded,Failed,Unknown,Waiting,Terminated')   #
     alert_user = Column(String(300), default='',comment='报警接收人')
 
-    expand = Column(Text(65536),default='[]',comment='扩展参数')
+    expand = Column(Text(65536),default='[]',comment='前端保留参数，用于记录编排样式')
     depends_on_past = Column(Boolean, default=False,comment='是否依赖过往实例')
     max_active_runs = Column(Integer, nullable=False,default=3,comment='最大同时运行的pipeline实例')   #
     expired_limit = Column(Integer, nullable=False, default=0,comment='过期保留个数，此数值有效时，会优先使用，覆盖max_active_runs的功能')  #
-    parameter = Column(Text(65536), default='{}',comment='前端保留参数，用于记录编排样式')
+    parameter = Column(Text(65536), default='{}',comment='后端扩展参数')
 
+    priority = Column(String(100), default='high', comment='优先级')  # giving priority to meeting high-priority resource needs
 
     def __repr__(self):
         return self.name
@@ -524,7 +533,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def monitoring_html(self):
         try:
             monitoring = json.loads(self.monitoring)
-            monitoring['link']="http://"+self.pipeline.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
+            monitoring['link']="http://"+self.pipeline.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
         except Exception:
             return Markup('<pre><code> nothing </code></pre>')

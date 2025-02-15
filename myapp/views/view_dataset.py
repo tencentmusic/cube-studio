@@ -87,7 +87,7 @@ class Dataset_ModelView_base():
     }
 
     edit_columns = add_columns
-    list_columns = ['icon_html', 'name', 'version', 'label_html', 'describe','owner', 'ops_html', 'path_html', 'download_url_html']
+    list_columns = ['icon_html', 'name', 'version', 'label_html', 'describe','owner', 'path_html', 'download_url_html']
 
     cols_width = {
         "name": {"type": "ellip1", "width": 150},
@@ -245,7 +245,7 @@ class Dataset_ModelView_base():
         ),
         "url": StringField(
             label= _('相关网址'),
-            description='关于数据集介绍或者手动下载的网址，每行一个网址',
+            description=_('关于数据集介绍或者手动下载的网址，每行一个网址'),
             widget=MyBS3TextAreaFieldWidget(rows=3),
             default=''
         ),

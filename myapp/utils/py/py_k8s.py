@@ -210,7 +210,19 @@ class K8s():
             event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
             if not event['time']:
                 event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
+        events = sorted(events,key=lambda x:x.get('time',''))
         return events
+
+
+    # @pysnooper.snoop()
+    def get_job_event(self, namespace, job_name):
+        events = [item.to_dict() for item in self.v1.list_namespaced_event(namespace, field_selector=f'involvedObject.name={job_name}').items]
+        for event in events:
+            event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
+            if not event['time']:
+                event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
+        return events
+
 
     # 获取 指定服务，指定命名空间的下面的endpoint
     def get_pod_humanized(self, namespace, pod_name):

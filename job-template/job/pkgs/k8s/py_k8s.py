@@ -15,19 +15,20 @@ import threading
 import logging
 
 class K8s():
-
+    # @pysnooper.snoop()
     def __init__(self, file_path=None):  # kubeconfig
-        config.load_incluster_config()
+        if file_path and os.path.exists(file_path) and ''.join(open(file_path).readlines()).strip():
+            config.kube_config.load_kube_config(config_file=file_path)
+        else:
+            config.load_incluster_config()
         self.v1 = client.CoreV1Api()
-        self.v1beta1 = client.ExtensionsV1beta1Api()
         self.AppsV1Api = client.AppsV1Api()
         self.NetworkingV1Api = client.NetworkingV1Api()
         self.CustomObjectsApi = client.CustomObjectsApi()
         self.v1.api_client.configuration.verify_ssl = False  # 只能设置 /usr/local/lib/python3.9/dist-packages/kubernetes/client/configuration.py:   self.verify_ssl= True ---> False
+
         self.gpu_resource={
-            "gpu":"nvidia.com/gpu",
-            "npu":"huawei.com/ascend-310",
-            "dcu":"dcu.com/gpu"
+            "gpu":"nvidia.com/gpu"
         }
         self.vgpu_resource = {
             "mgpu":"tencent.com/vcuda-core",
@@ -35,16 +36,20 @@ class K8s():
         }
         self.vgpu_drive_type = 'TENCENT'
 
+    # @pysnooper.snoop()
+    def get_gpu(self,resource_gpu, resource_name=None):
 
-    def get_gpu(self,resource_gpu):
         gpu_num = 0
-        resource_name = os.getenv('GPU_RESOURCE_NAME', '')
+        if not resource_name:
+            resource_name = os.getenv('GPU_RESOURCE_NAME','nvidia.com/gpu')
         gpu_type = None
         try:
             if resource_gpu:
+                # 英文括号
                 if '(' in resource_gpu:
                     gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
                     gpu_type = gpu_type[0] if gpu_type else None
+                # 中文括号
                 if '（' in resource_gpu:
                     gpu_type = re.findall(r"（(.+?)）", resource_gpu)
                     gpu_type = gpu_type[0] if gpu_type else None
@@ -60,14 +65,24 @@ class K8s():
                     if gpu_mfrs:
                         resource_name = self.gpu_resource.get(gpu_mfrs, resource_name)
                     gpu_type = gpu_type.split(',')[1].strip().upper()
-
+                # 处理中文括号，和英文括号
                 resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
                 resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
-                gpu_num = float(resource_gpu)
+
+                # 填的是(显存,核的比例)
+                if resource_gpu and ',' in resource_gpu:
+                    gpu_num = resource_gpu
+                else:
+                    gpu_num = float(resource_gpu)
 
         except Exception as e:
             print(e)
         gpu_type = gpu_type.upper() if gpu_type else None
+        # 如果不是0.1等形式的虚拟化占用，那么返回整数
+        if type(gpu_num) == float and int(gpu_num) == float(gpu_num):
+            gpu_num = int(gpu_num)
+
+        # gpu_num 可以是小数，可以是整数，也可以是1G,0.1这种写了显存的字符串结构
         return gpu_num, gpu_type, resource_name
 
     # 获取指定范围的pod
@@ -205,6 +220,17 @@ class K8s():
             if not event['time']:
                 event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
         return events
+
+
+    # @pysnooper.snoop(watch_explode=('event'))
+    def get_job_event(self, namespace, job_name):
+        events = [item.to_dict() for item in self.v1.list_namespaced_event(namespace, field_selector=f'involvedObject.name={job_name}').items]
+        for event in events:
+            event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
+            if not event['time']:
+                event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
+        return events
+
 
     # 获取 指定服务，指定命名空间的下面的endpoint
     def get_pod_humanized(self, namespace, pod_name):
@@ -1397,29 +1423,6 @@ class K8s():
         except Exception as e:
             print(e)
 
-    # 创建pod
-    # @pysnooper.snoop()
-    def create_ingress(self, namespace, name, host, username, port):
-        self.v1beta1 = client.ExtensionsV1beta1Api()
-        ingress_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username},annotations={"nginx.ingress.kubernetes.io/proxy-connect-timeout":"3000","nginx.ingress.kubernetes.io/proxy-send-timeout":"3000","nginx.ingress.kubernetes.io/proxy-read-timeout":"3000","nginx.ingress.kubernetes.io/proxy-body-size":"1G"})
-        backend = client.ExtensionsV1beta1IngressBackend(service_name=name,service_port=port)
-        path = client.ExtensionsV1beta1HTTPIngressPath(backend=backend,path='/')
-        http = client.ExtensionsV1beta1HTTPIngressRuleValue(paths=[path])
-        rule = client.ExtensionsV1beta1IngressRule(host=host, http=http)
-        ingress_spec = client.ExtensionsV1beta1IngressSpec(rules=[rule])
-        ingress = client.ExtensionsV1beta1Ingress(api_version='extensions/v1beta1', kind='Ingress', metadata=ingress_metadata, spec=ingress_spec)
-        print(ingress.to_dict())
-        try:
-            self.v1beta1.delete_namespaced_ingress(name=name, namespace=namespace)
-        except Exception as e:
-            print(e)
-
-        try:
-            ingress = self.v1beta1.create_namespaced_ingress(namespace=namespace, body=ingress)
-        except Exception as e:
-            print(e)
-
-    #
     def delete_istio_ingress(self, namespace, name):
         crd_info = {
             "group": "networking.istio.io",
@@ -2021,8 +2024,8 @@ def check_status_time(status, hour=8):
 
 
 if __name__=='__main__':
-    k8s_client = K8s(file_path='kubeconfig/dev-kubeconfig')
+    k8s_client = K8s(file_path='config')
 
-    k8s_client.get_all_node_allocated_resources()
+    k8s_client.get_job_event(namespace='pipeline',job_name='volcanojob-admin-pipeline-1733972449066-d8d1')
 
 

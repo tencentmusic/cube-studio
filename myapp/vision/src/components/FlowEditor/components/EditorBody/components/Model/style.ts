@@ -99,6 +99,12 @@ const textLabelStyle = mergeStyles({
   lineHeight: '30px',
 });
 
+const tipStyle = mergeStyles({
+  maxWidth: '500px !important',
+  maxHeight: '400px',
+  overflowY: 'auto',
+});
+
 export default {
   modelContainer,
   modelHeader,
@@ -112,4 +118,5 @@ export default {
   templateConfig,
   argsDescription,
   textLabelStyle,
+  tipStyle,
 };

@@ -299,7 +299,12 @@ class MyappModelBase():
         "user_id":_("用户id"),
         "email":_("邮箱"),
         "roles":_("角色"),
-        "roles_html": _("角色")
+        "roles_html": _("角色"),
+        "dataset": _("数据集"),
+        "pre_train_model": _("预训练模型"),
+        "source": _("来源"),
+        "hot": _("热度"),
+        "price": _("价格")
     }
 
     # print(label_columns)

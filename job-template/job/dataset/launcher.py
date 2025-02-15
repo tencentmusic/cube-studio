@@ -59,7 +59,7 @@ def download(name,version,partition,save_dir,**kwargs):
     res = requests.get(url, headers=headers)
     exist_dataset = res.json().get('result', {}).get('data', [])
     if not exist_dataset:
-        print('不存在数据集')
+        print('不存在指定数据集或指定版本')
         exit(1)
     exist_dataset = exist_dataset[0]
 

@@ -283,9 +283,11 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
     # 任何一个成功，或者失败都会结束程序
     task_spec['policies'] = [{"event": "TaskCompleted", "action": "CompleteJob"},{"event": "PodFailed", "action": "AbortJob"}]
 
-    if int(gpu_num):
+    if int(gpu_num)>=1:
         task_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
         task_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
+    elif int(gpu_num)==-1:
+        pass
     else:
         # 添加禁用指令
         task_spec['template']['spec']['containers'][0]['env'].append({
