@@ -9,7 +9,7 @@
 
 # 公司
 
-![图片 1](https://user-images.githubusercontent.com/20157705/223387901-1b922d96-0a79-4542-b53b-e70938404b2e.png)
+![图片 1](https://github.com/user-attachments/assets/83064556-d9c2-4adb-a796-018883ed427b)
 
 # 帮助文档
 
