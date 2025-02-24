@@ -24,6 +24,13 @@ spec:
                 operator: In
                 values:
                 - "true"
+      initContainers:
+        - name: modify-volume-permission
+          image: busybox:1.36.0
+          command: ["sh","-c","chown 472 /var/lib/grafana/"]
+          volumeMounts:
+            - mountPath: /var/lib/grafana
+              name: grafana-storage
       containers:
       - name: grafana
         image:  grafana/grafana:9.5.20
@@ -70,8 +77,10 @@ spec:
         - mountPath: /grafana-dashboard-definitions/0/
           name: all-grafana-dashboards
           readOnly: false
-#      securityContext:
-#        fsGroup: 472
+      securityContext:
+        fsGroup: 472
+        supplementalGroups:
+          - 0
 #        runAsNonRoot: true
 #        runAsUser: 65534
       serviceAccountName: grafana
