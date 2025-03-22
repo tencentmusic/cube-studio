@@ -203,6 +203,13 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
         pipeline_run_url = "/pipeline_modelview/api/run_pipeline/" +str(self.id)
         return Markup(f'<a target=_blank href="{pipeline_run_url}">run</a>')
 
+    @property
+    def status(self):
+        workflow_name = self.pipeline_argo_id
+        workflow = db.session.query(Workflow).filter_by(name=workflow_name).first()
+        if workflow:
+            return workflow.status
+        return 'unknown'
 
     @property
     def log(self):
@@ -247,6 +254,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     # 获取pipeline中的所有task
     def get_tasks(self,dbsession=db.session):
         return dbsession.query(Task).filter_by(pipeline_id=self.id).all()
+
 
     # @pysnooper.snoop()
     def delete_old_task(self, dbsession=db.session):
@@ -479,7 +487,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     command = Column(String(1000),default='',comment='启动命令')
     overwrite_entrypoint = Column(Boolean,default=False,comment='是否覆盖模板中的入口点')
     args = Column(Text,comment='任务启动参数')
-    volume_mount = Column(String(2000),default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',comment='挂载')   #
+    volume_mount = Column(String(2000),default='kubeflow-user-workspace(pvc):/mnt',comment='挂载')   #
     node_selector = Column(String(100),default='cpu=true,train=true',comment='机器选择器')   #
     resource_memory = Column(String(100),default='2G',comment='申请内存')
     resource_cpu = Column(String(100), default='2',comment='申请cpu')
@@ -533,7 +541,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     def monitoring_html(self):
         try:
             monitoring = json.loads(self.monitoring)
-            monitoring['link']="http://"+self.pipeline.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_TASK_PATH')+monitoring.get('pod_name','')
+            monitoring['link']="http://"+self.pipeline.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_TASK_PATH','')+monitoring.get('pod_name','')
             return Markup('<pre><code>' + json.dumps(monitoring,ensure_ascii=False,indent=4) + '</code></pre>')
         except Exception:
             return Markup('<pre><code> nothing </code></pre>')

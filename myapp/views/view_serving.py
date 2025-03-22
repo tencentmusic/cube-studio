@@ -1,5 +1,7 @@
 import copy
 
+import pysnooper
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from myapp.models.model_serving import Service
 from myapp.utils import core
@@ -164,7 +166,13 @@ class Service_ModelView_base():
         k8s_client = K8s(service.project.cluster.get('KUBECONFIG', ''))
         namespace = conf.get('SERVICE_NAMESPACE')
 
-        volume_mount = service.volume_mount
+        # 对挂载做一下渲染替换，可以替换用户名，也可以替换环境变量
+        volume_mount = service.volume_mount.replace("{{creator}}", service.created_by.username)
+        if service.env:
+            for e in service.env.split("\n"):
+                if '=' in e:
+                    volume_mount = volume_mount.replace('{{'+e.split("=")[0]+'}}',e.split("=")[1])
+
         labels = {"app": service.name, "user": service.created_by.username, "pod-type": "service"}
         env = service.env
         env += "\nRESOURCE_CPU=" + service.resource_cpu
@@ -258,8 +266,8 @@ class Service_ModelView_base():
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
             SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
-
-            meet_ports = core.get_not_black_port(30000 + 10 * service.id)
+            port_str = conf.get('SERVICE_PORT', '30000+10*ID').replace('ID', str(service.id))
+            meet_ports = core.get_not_black_port(int(eval(port_str)))
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(

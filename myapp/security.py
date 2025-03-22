@@ -1,3 +1,5 @@
+import re
+
 from flask_login import current_user
 import logging
 import jwt
@@ -172,8 +174,6 @@ class MyUserRemoteUserModelView_Base():
     add_columns = ["username",'password', "email", "roles", 'org']
     show_columns = ["username", "active",'email','org','password', "roles",'secret']
     describe_columns={
-        "org":"组织架构，自行填写",
-        "quota": '资源限额，额度填写方式 $集群名,$资源组名,$命名空间,$资源类型,$限制类型,$限制值，其中$命名空间包含all,jupyter,pipeline,service,automl,aihub,$资源类型包含cpu,memory,gpu,$限制类型包含single,concurrent,total',
         "roles": "Admin角色拥有管理员权限，Gamma为普通用户角色"
     }
     list_widget = MyappSecurityListWidget
@@ -237,7 +237,7 @@ class MyUserRemoteUserModelView_Base():
         "quota": StringField(
             _("额度限制"),
             widget=BS3TextFieldWidget(),
-            description=_('用户在该项目组中的资源额度,<br>额度填写方式 $命名空间,$资源类型,$限制类型,$限制值，<br>其中$命名空间包含all,jupyter,pipeline,service,automl,aihub,<br>$资源类型包含cpu,memory,gpu,<br>$限制类型包含single,concurrent,total，<br>多个限额配置使用分隔分隔')
+            description=_('资源限额，额度填写方式 $集群名,$资源组名,$命名空间,$资源类型,$限制类型,$限制值，<br>其中$集群名可为all,dev，<br>$资源组名可为all,public，<br>$命名空间包含all,jupyter,pipeline,service,automl,aihub，<br>$资源类型包含cpu,memory,gpu，<br>$限制类型包含single,concurrent')
         ),
     }
     edit_form_extra_fields = add_form_extra_fields

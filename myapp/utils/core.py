@@ -639,9 +639,9 @@ def validate_job_args(args):
 
     return json.dumps(job_args, indent=4, ensure_ascii=False)
 
-
+import pysnooper
 # task_args 为用户填写的参数，job_args为定义的参数标准
-# @pysnooper.snoop()
+# @pysnooper.snoop(watch_explode=('job_arg_attr'))
 def validate_task_args(task_args, job_args):  # 两个都是字典
     if not task_args:
         return {}
@@ -667,39 +667,39 @@ def validate_task_args(task_args, job_args):  # 两个都是字典
 
     # 校验 task的attr和job的attr是否符合
     # @pysnooper.snoop()
-    def check_attr(task_attr, job_attr):
-        validate_attr = task_attr
+    def check_attr(task_arg_value, job_arg_attr):
+        validate_attr = task_arg_value
 
-        if job_attr['type'] == 'str' or job_attr['type'] == 'text' or job_attr['type'] == 'int' or job_attr['type'] == 'float':
-            validate_attr = to_value(task_attr, job_attr['type'])
+        if job_arg_attr['type'] == 'str' or job_arg_attr['type'] == 'text' or job_arg_attr['type'] == 'int' or job_arg_attr['type'] == 'float':
+            validate_attr = to_value(task_arg_value, job_arg_attr['type'])
 
-        if job_attr['type'] == 'json':
-            validate_attr = to_value(task_attr, job_attr['type'])
+        if job_arg_attr['type'] == 'json':
+            validate_attr = to_value(task_arg_value, job_arg_attr['type'])
 
-        if job_attr['type'] == 'enum':
-            validate_attr = to_value(task_attr, job_attr['item_type'])
-            if validate_attr not in job_attr['choice']:
-                raise MyappException("task arg type(enum) is not in choice: %s" % job_attr['choice'])
+        if job_arg_attr['type'] == 'enum':
+            validate_attr = to_value(task_arg_value, job_arg_attr['item_type'])
+            if validate_attr not in job_arg_attr['choice']:
+                raise MyappException("task arg type(enum) is not in choice: %s" % job_arg_attr['choice'])
 
-        if job_attr['type'] == 'multiple':
-            if type(task_attr) == str:
-                validate_attr = re.split(' |,|;|\n|\t', str(task_attr))  # 分割字符串
+        if job_arg_attr['type'] == 'multiple':
+            if type(task_arg_value) == str:
+                validate_attr = re.split(' |,|;|\n|\t', str(task_arg_value))  # 分割字符串
             if type(validate_attr) == list:
                 for item in validate_attr:
-                    if item not in job_attr['choice']:
-                        raise MyappException("task arg type(enum) is not in choice: %s" % job_attr['choice'])
-        if job_attr['type'] == 'dict' and type(job_attr['sub_args']) != dict:
+                    if item not in job_arg_attr['choice']:
+                        raise MyappException("task arg type(enum) is not in choice: %s" % job_arg_attr['choice'])
+        if job_arg_attr['type'] == 'dict' and type(job_arg_attr['sub_args']) != dict:
             raise MyappException("task args type(dict) sub args must is dict")
 
         # 校验字典的子属性
-        if job_attr['type'] == 'dict':
-            for sub_attr_name in task_attr:
-                validate_attr[sub_attr_name] = check_attr(task_attr[sub_attr_name], job_attr['sub_args'][sub_attr_name])
+        if job_arg_attr['type'] == 'dict':
+            for sub_attr_name in task_arg_value:
+                validate_attr[sub_attr_name] = check_attr(task_arg_value[sub_attr_name], job_arg_attr['sub_args'][sub_attr_name])
 
         # 检验list的每个元素
-        if job_attr['type'] == 'list':
+        if job_arg_attr['type'] == 'list':
             # 使用逗号分隔的数组
-            validate_attr = task_attr.strip(',').split(',')
+            validate_attr = task_arg_value.strip(',').split(',')
             validate_attr = [x.strip() for x in validate_attr if x.strip()]
             validate_attr = ','.join(validate_attr)
 
@@ -708,15 +708,15 @@ def validate_task_args(task_args, job_args):  # 两个都是字典
     validate_args = {}
     try:
         for group in job_args:
-            for attr_name in job_args[group]:
-                job_attr = job_args[group][attr_name]
-                if attr_name in task_args:
-                    task_attr = task_args[attr_name]
-                    validate_args[attr_name] = check_attr(task_attr, job_attr)
-                elif job_args['require']:
-                    raise MyappException("task args %s must is require" % attr_name)
-                elif job_args['default']:
-                    validate_args[attr_name] = job_args['default']
+            for arg_name in job_args[group]:
+                job_arg_attr = job_args[group][arg_name]
+                if arg_name in task_args:
+                    task_arg_value = task_args[arg_name]
+                    validate_args[arg_name] = check_attr(task_arg_value, job_arg_attr)
+                elif job_arg_attr.get('require',1) and not job_arg_attr.get('default',''):
+                    raise MyappException("task args %s must is require" % arg_name)
+                elif job_arg_attr['default']:
+                    validate_args[arg_name] = job_arg_attr['default']
 
         return validate_args
 
@@ -1537,11 +1537,12 @@ def check_resource_gpu(resource_gpu, src_resource_gpu=None):
 
     gpu_num, gpu_type, resource_name = get_gpu(resource_gpu)
     # 处理虚拟化占用方式，只识别比例部分
-    if type(gpu_num)==str and ',' in gpu_num:
-        gpu_num = float(gpu_num.split(',')[1])
+    gpu_num = float(str(gpu_num).split(',')[-1])
+
     src_gpu_num = 0
     if src_resource_gpu:
         src_gpu_num, _, _ = get_gpu(src_resource_gpu)
+        src_gpu_num = float(str(src_gpu_num).split(',')[-1])
 
     if hasattr(g,'user') and not g.user.is_admin():
         resource_gpu = check_max_gpu(gpu_num, src_gpu_num)
@@ -1891,14 +1892,17 @@ def get_all_resource(cluster='all',namespace='all',exclude_pod=[]):
         for namespace in namespaces:
             pods = k8s_client.get_pods(namespace=namespace)
             for pod in pods:
-                # 集群，资源组，空间，项目组，用户，resource，值
-                user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('run-username','admin'))))
-                project = pod['annotations'].get('project', 'public')
-                all_resource.append([cluser_name,pod['node_selector'].get('org','public'),namespace,project,user,pod['name'],pod['labels'],'cpu',float(pod['cpu'])])
-                all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], 'memory',float(pod['memory'])])
-                gpu_resource = conf.get('GPU_RESOURCE', {})
-                for ai_device in gpu_resource:
-                    all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], ai_device,float(pod.get(ai_device,''))])
+                # 只计算running中的资源
+                if pod['status'].lower()=='running':
+                    # 集群，资源组，空间，项目组，用户，resource，值
+                    user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('run-username','admin'))))
+                    project = pod['annotations'].get('project', 'public')
+                    all_resource.append([cluser_name,pod['node_selector'].get('org','public'),namespace,project,user,pod['name'],pod['labels'],'cpu',float(pod['cpu'])])
+                    all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], 'memory',float(pod['memory'])])
+                    gpu_resource = conf.get('GPU_RESOURCE', {})
+                    for ai_device in gpu_resource:
+                        all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], ai_device,float(pod.get(ai_device,''))])
+
     columns = ['cluster', 'org', 'namespace', 'project', 'user', 'name','labels','resource', 'value']
     all_resource =[dict(zip(columns,resource)) for resource in all_resource]
     # print(all_resource)
@@ -1935,11 +1939,12 @@ def get_not_black_port(port):
     return meet_port
 
 # 验证用户资源额度限制
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclude_pod=[],req_resource={},replicas=1):
     # 管理员不受限制
-    if req_user.is_admin():
-        return True,''
+    # if req_user.is_admin():
+    #     return True,''
+
     # resource为{"cpu":1,"memory":1,"gpu":1}格式
     # quota 书写格式，cluster_name，org,namespace，resource，single_total,value
     # exclude_pod数组格式表示忽略的名称数组，字典格式表述忽略的pod标签，字符串表示原始的pod名
@@ -1950,15 +1955,12 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
         "memory": str(req_resource.get('memory','0')),
         "gpu": str(req_resource.get('gpu','0')),
     }
-    if '(' in req_resource['gpu']:
-        req_resource['gpu'] = req_resource['gpu'][:req_resource['gpu'].index('(')]
-    if ',' in req_resource['gpu']:
-        req_resource['gpu'] = req_resource['gpu'].split(',')[1]
+    req_resource['gpu'] = req_resource['gpu'].split('(')[0].split(',')[-1]
 
     all_resources = None
     # req_total_resource={key:float(str(req_resource[key]).replace('G',''))*replicas for key in req_resource}
-    # 验证用户username在集群cluster_name的namespace空闲下运行value大的resource(cpu,memory,gpu)资源是否允许
-    # 先来验证是否有个人用户额度限制，单集群限制，单空闲限制
+    # 验证用户username在集群cluster_name的namespace空间下运行value大的resource(cpu,memory,gpu)资源是否允许
+    # 先来验证是否有个人用户额度限制，单集群限制，单空间限制
     if req_user.quota:
         if not all_resources:
             all_resources = get_all_resource(exclude_pod=exclude_pod)
@@ -2010,7 +2012,8 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
                             message += "\nexist pod:\n" + '\n'.join([pod['labels'].get('pod-type', 'task') + ":" + pod['name'] for pod in exist_pod])
 
                             print(message)
-                            if request_resource*replicas>(limit_resource-exist_resource):
+                            # 如果用户没有申请这个资源值，也不报错，比如gpu资源超过了，但用户可能不申请gpu资源
+                            if request_resource>0 and request_resource*replicas>(limit_resource-exist_resource):
                                 return False,Markup("<br>"+message.replace('\n','<br>'))
 
             if quota['type']=='total':
@@ -2064,7 +2067,8 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
                     message +="\nexist pod:\n"+'\n'.join([pod['labels'].get('pod-type','task')+":"+pod['name'] for pod in exist_pod])
                     print(message)
                     # message += '\n<a target="_blank" href="https://www.w3schools.com">申请资源</a>'
-                    if request_resource*replicas > (limit_resource - exist_resource):
+                    # 如果用户没有申请这个资源值，也不报错，比如gpu资源超过了，但用户可能不申请gpu资源
+                    if request_resource>0 and request_resource*replicas > (limit_resource - exist_resource):
                         return False,Markup("<br>"+message.replace('\n','<br>'))
 
             if quota['type'] == 'total':
@@ -2118,7 +2122,8 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
                     message +="\nexist pod:\n"+'\n'.join([pod['labels'].get('pod-type','task')+":"+pod['name'] for pod in exist_pod])
 
                     print(message)
-                    if request_resource*replicas > (limit_resource - exist_resource):
+                    # 如果用户没有申请这个资源值，也不报错，比如gpu资源超过了，但用户可能不申请gpu资源
+                    if request_resource>0 and request_resource*replicas > (limit_resource - exist_resource):
                         return False,Markup("<br>"+message.replace('\n','<br>'))
 
             if quota['type'] == 'total':
@@ -2211,7 +2216,7 @@ def table_html(csv_path,features=None,zip_file=None):  # zip_file 用来表示�
 
         return path
 
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def audio_to_html(path):
 
         if "http://" in path or "https://" in path:
@@ -2332,3 +2337,76 @@ def download_file(url,local_dir):
 
     local_filename = download_file(url, local_filename)
     return local_filename
+
+
+# 获取任务流的固化
+def pipeline_immutable(pipeline):
+    if not pipeline:
+        return {}
+    tasks = pipeline.get_tasks()
+    tasks = pipeline.sort(tasks)
+    tasks_ids = {}
+    for task in tasks:
+        tasks_ids[str(task.id)] = task
+
+    data = {
+        "label": pipeline.describe,
+        "pipeline_id": pipeline.id,
+        "index": pipeline.id,
+        "pipeline": {
+            "describe": pipeline.describe,
+            "dag_json": json.loads(pipeline.dag_json),
+            "global_env": pipeline.global_env,
+        },
+        "task": [],
+        "args": {}
+    }
+    data['args'] = {}
+    # 按dag的顺序，为task进行排序
+    for task in tasks:
+        task_json = {
+            "job_templete": task.job_template.name,
+            "name": task.name,
+            "label": task.label,
+            "volume_mount": task.volume_mount,
+            "resource_memory": task.resource_memory,
+            "resource_cpu": task.resource_cpu,
+            "resource_gpu": task.resource_gpu,
+            "resource_rdma": task.resource_rdma,
+            "args": json.loads(task.args)
+        }
+        job_template_args = json.loads(task.job_template.args) if task.job_template.args else {}
+        task_arg = json.loads(task.args) if task.args else {}
+        new_task_arg = {}
+        if job_template_args and task_arg:
+
+            for group in job_template_args:
+                for key in job_template_args[group]:
+                    job_template_args[group][key]['task_id'] = task.id
+                    job_template_args[group][key]['task_arg'] = key
+                    job_template_args[group][key]['default'] = task_arg.get(key, job_template_args[group][key].get('default', ''))
+                    if job_template_args[group][key]['default']:
+                        job_template_args[group][key]['show'] = 1
+                    else:
+                        job_template_args[group][key]['show'] = 0
+
+                    # 去除原有分组层，本身也不能重复，统一使用任务名称为分组
+                    new_task_arg[task.name + "." + key] = job_template_args[group][key]
+
+        data['task'].append(task_json)
+        data['args'][task.label] = new_task_arg
+
+    immutable_config = json.loads(pipeline.parameter).get('immutable-config', {})
+
+    # 更新配置，用户可以自己定义分组，参数名等
+    def update_nested_dict(d, u):
+        for k, v in u.items():
+            if isinstance(v, dict) and isinstance(d.get(k), dict):
+                update_nested_dict(d[k], v)
+            else:
+                d[k] = v
+
+    update_nested_dict(data, immutable_config)
+    data['label']=immutable_config.get('label',data['label'])
+    return data
+

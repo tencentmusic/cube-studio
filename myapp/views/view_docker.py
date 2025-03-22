@@ -16,7 +16,7 @@ from flask import (
     flash,
     g,
     Markup,
-    redirect
+    redirect, render_template
 )
 from .base import (
     DeleteMixin,
@@ -25,6 +25,8 @@ from .base import (
 )
 from flask_appbuilder import expose
 import datetime, time, json
+
+from ..models.model_team import Project
 
 conf = app.config
 
@@ -167,7 +169,13 @@ class Docker_ModelView_Base():
         self.pre_add(item)
         # 如果修改了基础镜像，就把debug中的任务删除掉
         if self.src_item_json:
-            if item.base_image != self.src_item_json.get('base_image', ''):
+            # k8s集群更换了，要删除原来的
+            if str(self.src_item_json.get('project_id', '1'))!=str(item.project.id):
+                src_project = db.session.query(Project).filter_by(id=int(self.src_item_json.get('project_id', '1'))).first()
+                if src_project and src_project.cluster['NAME']!=item.project.cluster['NAME']:
+                    self.delete_pod(item.id,src_project.cluster['NAME'])
+                    flash(__('发现集群更换，已帮你删除之前启动的debug容器'), 'success')
+            elif item.base_image != self.src_item_json.get('base_image', ''):
                 self.delete_pod(item.id)
                 item.last_image = ''
                 flash(__('发现基础镜像更换，已帮你删除之前启动的debug容器'), 'success')
@@ -253,10 +261,12 @@ class Docker_ModelView_Base():
     # @event_logger.log_this
     @expose("/delete_pod/<docker_id>", methods=["GET", "POST"])
     # @pysnooper.snoop()
-    def delete_pod(self, docker_id):
+    def delete_pod(self, docker_id,cluster=None):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
-        k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG', ''))
+        if not cluster:
+            cluster = docker.project.cluster['NAME']
+        k8s_client = K8s(conf.get('CLUSTERS').get(cluster).get('KUBECONFIG', ''))
         namespace = json.loads(docker.expand).get("namespace", conf.get('NOTEBOOK_NAMESPACE','jupyter'))
         pod_name = "docker-%s-%s" % (docker.created_by.username, str(docker.id))
         k8s_client.delete_pods(namespace=namespace, pod_name=pod_name)
@@ -266,7 +276,7 @@ class Docker_ModelView_Base():
         return redirect(conf.get('MODEL_URLS', {}).get('docker', ''))
 
     def pre_delete(self,item):
-        self.delete_pod(item.id)
+        self.delete_pod(docker_id=item.id)
 
     # @event_logger.log_this
     @expose("/save/<docker_id>", methods=["GET", "POST"])

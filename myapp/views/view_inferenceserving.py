@@ -1,8 +1,9 @@
+import math
 import random
 
 import requests
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
-from flask import jsonify
+from flask import jsonify, render_template
 from jinja2 import Environment, BaseLoader, DebugUndefined
 from myapp.models.model_serving import InferenceService
 from myapp.utils import core
@@ -388,7 +389,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
 
     check_delete_permission = check_edit_permission
 
-    def pre_add_web(self):
+    def pre_add_web(self,item=None):
         self.default_filter = {
             "created_by": g.user.id
         }
@@ -896,7 +897,7 @@ output %s
         config_datas = service.inference_config.strip().split("\n---") if service.inference_config else []
         config_datas = [x.strip() for x in config_datas if x.strip()]
         volume_mount = service.volume_mount
-        print('文件个数：', len(config_datas))
+        # print('文件个数：', len(config_datas))
         config_data = {}
         for data in config_datas:
             file_name = re.sub('^-*', '', data.split('\n')[0]).strip()
@@ -904,9 +905,17 @@ output %s
             if file_name and file_content:
                 config_data[file_name] = file_content
         if config_data:
-            print('create configmap')
+            # print('create configmap')
             k8s_client.create_configmap(namespace=namespace, name=name, data=config_data, labels={'app': name})
             volume_mount += ",%s(configmap):/config/" % name
+
+        # 对挂载做一下渲染替换，可以替换用户名，也可以替换环境变量
+        volume_mount = volume_mount.replace("{{creator}}", service.created_by.username)
+        if service.env:
+            for e in service.env.split("\n"):
+                if '=' in e:
+                    volume_mount = volume_mount.replace('{{' + e.split("=")[0] + '}}', e.split("=")[1])
+
         ports = [int(port) for port in service.ports.split(',')]
         gpu_num, gpu_type, resource_name = core.get_gpu(service.resource_gpu)
 
@@ -929,7 +938,7 @@ output %s
 
         if env == 'test' or env == 'debug':
             try:
-                print('delete deployment')
+                # print('delete deployment')
                 k8s_client.delete_deployment(namespace=namespace, name=name)
                 k8s_client.delete_statefulset(namespace=namespace, name=name)
             except Exception as e:
@@ -955,7 +964,7 @@ output %s
                 # print(e)
 
             pod_ports = list(set(pod_ports))
-            print('create deployment')
+            # print('create deployment')
             # https://istio.io/latest/docs/reference/config/annotations/
             if service.sidecar and 'istio' in service.sidecar:  #  and service.service_type == 'serving'
                 labels['sidecar.istio.io/inject'] = 'true'
@@ -1000,7 +1009,7 @@ output %s
             }
         else:
             annotations = {}
-        print('deploy service')
+        # print('deploy service')
         # 端口改变才重新部署服务
         disable_load_balancer = str(json.loads(service.expand).get('disable_load_balancer','false')).lower() if service.expand else 'false'
         if disable_load_balancer=='true':
@@ -1032,7 +1041,7 @@ output %s
         if host and (env == 'debug' or env == 'test'):
             host = env + '.' + host
         try:
-            print('deploy istio ingressgateway')
+            # print('deploy istio ingressgateway')
             k8s_client.create_istio_ingress(
                 namespace=namespace,
                 name=name,
@@ -1079,10 +1088,11 @@ output %s
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
             SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
-            meet_ports = core.get_not_black_port(20000 + 10 * service.id)
+            port_str = conf.get('INFERENCE_PORT', '20000+10*ID').replace('ID', str(service.id))
+            meet_ports = core.get_not_black_port(int(eval(port_str)))
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
-            print('deploy proxy ip')
+            # print('deploy proxy ip')
             # 监控
             annotations = {
                 "service.kubernetes.io/local-svc-only-bind-node-with-pod": "true",
@@ -1113,7 +1123,8 @@ output %s
 
         if not SERVICE_EXTERNAL_IP and TKE_EXISTED_LBID:
             TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')[0]
-            meet_ports = core.get_not_black_port(20000 + 10 * self.id)
+            port_str = conf.get('INFERENCE_PORT', '20000+10*ID').replace('ID', str(service.id))
+            meet_ports = core.get_not_black_port(int(eval(port_str)))
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
@@ -1174,7 +1185,7 @@ output %s
             pods = k8s_client.get_pods(namespace=namespace, labels={"app": name})
             if pods:
                 pod = pods[0]
-                print('deploy debug success')
+                # print('deploy debug success')
                 return redirect("/k8s/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
 
         # 生产环境才有域名代理灰度的问题
@@ -1188,7 +1199,7 @@ output %s
             upgrade_service.apply_async(kwargs=kwargs)
 
         flash(__('服务部署完成，正在进行同域名服务版本切换'), category='success')
-        print('deploy prod success')
+        # print('deploy prod success')
         return redirect(conf.get('MODEL_URLS', {}).get('inferenceservice', ''))
 
     @action("copy", "复制", confirmation= '复制所选记录?', icon="fa-copy", multiple=True, single=False)
@@ -1222,7 +1233,7 @@ output %s
 
     # @pysnooper.snoop()
     def echart_option(self, filters=None):
-        print(filters)
+        # print(filters)
         global global_all_service_load
         if not global_all_service_load:
             global_all_service_load['check_time'] = None
@@ -1403,13 +1414,8 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base, MyappModel
     datamodel = SQLAInterface(InferenceService)
     route_base = '/inferenceservice_modelview/api'
 
-    # def add_more_info(self,response,**kwargs):
-    #     online_services = db.session.query(InferenceService).filter(InferenceService.model_status=='online').filter(InferenceService.resource_gpu!='0').all()
-    #     if len(online_services)>0:
-    #         response['echart']=True
-    #     else:
-    #         response['echart'] = False
-
+    # 目前 编辑时的列，是使用第一次打开时info接口拿到的edit_column而不是 点击编辑时拿到的info信息
+    # @pysnooper.snoop()
     def set_columns_related(self, exist_add_args, response_add_columns):
         exist_service_type = exist_add_args.get('service_type', '')
         service_model_path = {

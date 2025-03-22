@@ -101,7 +101,7 @@ vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速�
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description=_('模型文件的容器地址或下载地址，格式参考详情。'),
+            description=_('模型文件的容器地址或下载地址，格式参考详情。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">上传模型</a>'),
             validators=[DataRequired()],
             widget=MyBS3TextFieldWidget(tips=_(model_path_describe))
         ),
@@ -218,7 +218,7 @@ vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速�
             exist_inference.project_id = train_model.project_id
             exist_inference.project = train_model.project
             exist_inference.model_name = train_model.name
-            exist_inference.label = train_model.describe
+            exist_inference.label = train_model.describe[:100]
             exist_inference.model_version = train_model.version
             exist_inference.model_path = train_model.path
             exist_inference.service_type = train_model.api_type

@@ -5,8 +5,7 @@ from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from myapp import app, conf
 from myapp.utils.py.py_k8s import K8s, K8SStreamThread
-from flask import g, flash, request, render_template, send_from_directory, send_file, make_response, Markup, jsonify
-
+from flask import g, flash, request, render_template, send_from_directory, send_file, make_response, Markup, jsonify, redirect
 import datetime, time
 from myapp import app, appbuilder, db, event_logger
 from .base import BaseMyappView
@@ -287,6 +286,10 @@ class K8s_View(BaseMyappView):
         from myapp.utils.py.py_k8s import K8s
         all_clusters = conf.get('CLUSTERS', {})
         host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
+
+        if '127.0.0.1' in request.host or 'localhost' in request.host:
+            return redirect(host_url+f'{self.route_base}/web/log/{cluster_name}/{namespace}/{pod_name}{("/"+container_name) if container_name else ""}')
+
         pod_url = host_url + conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + "#/log/%s/%s/pod?namespace=%s&container=%s" % (namespace, pod_name, namespace, container_name if container_name else pod_name)
         print(pod_url)
         kubeconfig = all_clusters[cluster_name].get('KUBECONFIG', '')
@@ -326,6 +329,10 @@ class K8s_View(BaseMyappView):
     def web_debug(self, cluster_name, namespace, pod_name, container_name):
 
         host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
+
+        if '127.0.0.1' in request.host or 'localhost' in request.host:
+            return redirect(host_url+f'{self.route_base}/web/debug/{cluster_name}/{namespace}/{pod_name}/{container_name}')
+
         pod_url = host_url + conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + '#/shell/%s/%s/%s?namespace=%s' % (namespace, pod_name, container_name, namespace)
         print(pod_url)
         data = {
@@ -343,7 +350,10 @@ class K8s_View(BaseMyappView):
 
     @expose("/web/search/<cluster_name>/<namespace>/<search>", methods=["GET", ])
     def web_search(self, cluster_name, namespace, search):
-        host_url = "//"+ conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
+        host_url = "//" + conf.get("CLUSTERS", {}).get(cluster_name, {}).get("HOST", request.host).split('|')[-1]
+        if '127.0.0.1' in request.host or 'localhost' in request.host:
+            return redirect(host_url+f'{self.route_base}/web/search/{cluster_name}/{namespace}/{search}')
+
         search = search[:50]
         pod_url = host_url+conf.get('K8S_DASHBOARD_CLUSTER','/k8s/dashboard/cluster/') + "#/search?namespace=%s&q=%s" % (namespace, search)
         data = {

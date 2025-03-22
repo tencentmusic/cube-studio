@@ -110,7 +110,7 @@ const EditorBody: React.FC = () => {
       //     pipeline: +pipelineId,
       //     name: taskName,
       //     label: `新建 ${modelInfo.name} 任务`,
-      //     volume_mount: 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+      //     volume_mount: 'kubeflow-user-workspace(pvc):/mnt',
       //     image_pull_policy: 'Always',
       //     working_dir: '',
       //     command: '',

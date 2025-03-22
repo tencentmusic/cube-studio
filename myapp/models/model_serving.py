@@ -93,16 +93,24 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def ip(self):
         from myapp.utils import core
-        meet_ports = core.get_not_black_port(30000 + 10 * self.id)
+        port_str = conf.get('SERVICE_PORT', '30000+10*ID').replace('ID', str(self.id))
+        meet_ports = core.get_not_black_port(int(eval(port_str)))
         port = meet_ports[0]
-        # first, Use the proxy ip configured by the project group
+        # 使用项目组配置的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
+
+        # 再使用配置文件里面为该集群配置的代理ip
+        if not SERVICE_EXTERNAL_IP:
+            # second, Use the global configuration proxy ip
+            SERVICE_EXTERNAL_IP = self.project.cluster.get('HOST','')
+
+        # 使用全局配置的代理ip
         if not SERVICE_EXTERNAL_IP:
             # second, Use the global configuration proxy ip
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
             if SERVICE_EXTERNAL_IP:
                 SERVICE_EXTERNAL_IP=SERVICE_EXTERNAL_IP[0]
-
+        # 使用浏览器ip
         if not SERVICE_EXTERNAL_IP:
             ip = request.host.split(':')[0]
             if core.checkip(ip):
@@ -110,8 +118,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
-            if '|' in SERVICE_EXTERNAL_IP:
-                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip().split(':')[0].strip()
 
             # 处理业务自己配置的host的特殊配置
             if self.host:
@@ -147,22 +154,35 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     def host_url(self):
         # 泛域名先统一http
         host = self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
-        url = "http://" + host
+        # 统一域名上的端口，也就是ingressgateway的端口
+        port = ''
+        host_port = self.project.cluster.get('HOST','')
+        if not host_port and conf.get('SERVICE_EXTERNAL_IP'):
+            host_port = conf.get('SERVICE_EXTERNAL_IP')[0]
+        if not host_port:
+            host_port = request.host
+        if host_port:
+            host_port = host_port.split('|')[-1]
+        if ':' in host_port:
+            port = host_port.split(':')[-1]
+
+
         if self.host:
             from myapp.utils.core import split_url
             host_temp, port_temp, path_temp = split_url(self.host)
             if host_temp:
                 host = host_temp
-                url = "http://"+host_temp
-        if 'svc.cluster.local' in url:
-            host_port = host + ("" if ':' not in request.host else (":" + request.host.split(':')[-1]))
+
+        host_port = host + ("" if not port else (":" + port))
+        if 'svc.cluster.local' in host:
             return f'''
-<div type=tips addedValue='添加配置 "{request.host.split(':')[0]} {host}" 到hosts文件后再访问域名'>
+<div type=tips addedValue='添加配置 "{host_port.split(':')[0]} {host}" 到hosts文件后再访问域名'>
     {host_port}
 </div>
 '''
-
-        return Markup(f'<a target=_blank href="{url}">{host}</a>')
+        else:
+            url = "http://" + host_port
+            return Markup(f'<a target=_blank href="{url}">{host_port}</a>')
 
     @property
     def ready(self):
@@ -339,19 +359,27 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def ip(self):
         from myapp.utils import core
-        meet_ports = core.get_not_black_port(20000 + 10 * self.id)
+        port_str = conf.get('INFERENCE_PORT', '20000+10*ID').replace('ID', str(self.id))
+        meet_ports = core.get_not_black_port(int(eval(port_str)))
         port = meet_ports[0]
 
         TKE_EXISTED_LBID = json.loads(self.project.expand).get('TKE_EXISTED_LBID', self.project.cluster.get("TKE_EXISTED_LBID",conf.get('TKE_EXISTED_LBID','')))
 
-        # first, Use the proxy ip configured by the project group
+        # 先使用项目组里面配置的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
+
+        # 再使用配置文件里面为该集群配置的代理ip
+        if not SERVICE_EXTERNAL_IP:
+            # second, Use the global configuration proxy ip
+            SERVICE_EXTERNAL_IP = self.project.cluster.get('HOST','')
+
+        # 再使用全局代理ip
         if not SERVICE_EXTERNAL_IP:
             # second, Use the global configuration proxy ip
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', [])
             if SERVICE_EXTERNAL_IP:
                 SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
-
+        # 再使用浏览器ip
         if not SERVICE_EXTERNAL_IP:
             ip = request.host.split(':')[0]
             if core.checkip(ip):
@@ -359,8 +387,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
-            if '|' in SERVICE_EXTERNAL_IP:
-                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip().split(':')[0].strip()
 
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             url = host
@@ -404,38 +431,48 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     def inference_host_url(self):
         # 泛域名先使用http
         host = self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
-        link = host
+        port=''
+        path=''
 
-        if not self.host and self.service_type=='tfserving':
-            link=host+f"/v1/models/{self.model_name}/metadata"
-        if not self.host and self.service_type=='torch-server':
-            link=host+":8080/models"
+        # 统一域名上的端口，也就是ingressgateway的端口
+        host_port = self.project.cluster.get('HOST', '')
+        if not host_port and conf.get('SERVICE_EXTERNAL_IP'):
+            host_port = conf.get('SERVICE_EXTERNAL_IP')[0]
+        if not host_port:
+            host_port = request.host
+        if host_port:
+            host_port = host_port.split('|')[-1]
+        if ':' in host_port:
+            port = host_port.split(':')[-1]
 
         if self.host:
             from myapp.utils.core import split_url
             host_temp, port_temp, path_temp = split_url(self.host)
-
+            if path_temp:
+                path=path_temp
+            else:
+                if self.service_type=='tfserving':
+                    path = f"/v1/models/{self.model_name}/metadata"
+                if self.service_type=='torch-server':
+                    path = "/models"
+                    port = "8080"
             if host_temp:
                 host=host_temp
             if port_temp and port_temp in self.ports:
                 # 查看是第几个端口
                 if self.ports.find(port_temp) > self.ports.find(','):
-                    link = host+":8080"+path_temp
-            else:
-                if port_temp:
-                    link = host+":"+port_temp+path_temp
-                else:
-                    link = host+path_temp
+                    port = '8080'
+
+        host_port = host + ("" if not port else (":" + port))
         if 'svc.cluster.local' in host:
-            host_port = host + ("" if ':' not in request.host else (":" + request.host.split(':')[-1]))
             return f'''
-<div type=tips addedValue='添加配置 "{request.host.split(':')[0]} {host}" 到hosts文件后再访问域名'>
+<div type=tips addedValue='添加配置 "{host_port.split(':')[0]} {host}" 到hosts文件后再访问域名'>
     {host_port}
 </div>
 '''
-        hosts=f'<a target=_blank href="http://{link}">{host}</a>'
-        return Markup(hosts)
-
+        else:
+            url = "http://" + host_port+path
+            return Markup(f'<a target=_blank href="{url}">{host_port}</a>')
 
 
     def clone(self):

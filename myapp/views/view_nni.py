@@ -40,6 +40,8 @@ from .base import (
 from flask_appbuilder import expose
 import datetime, json
 
+from ..models.model_team import Project
+
 conf = app.config
 
 
@@ -663,10 +665,13 @@ trainingService:
         host = "//" + nni.project.cluster.get('HOST', request.host).split('|')[-1]
         return redirect(f'{host}/nni/{nni.name}/')
 
-    def pre_delete(self,nni):
+    # @pysnooper.snoop()
+    def pre_delete(self,nni,cluster=None):
         # 删除pod
         namespace = conf.get('AUTOML_NAMESPACE', 'automl')
-        k8s_client = K8s(nni.project.cluster.get('KUBECONFIG', ''))
+        if not cluster:
+            cluster = nni.project.cluster['NAME']
+        k8s_client = K8s(conf.get('CLUSTERS').get(cluster).get('KUBECONFIG', ''))
 
         # 删除pod
         try:
@@ -718,6 +723,16 @@ trainingService:
 
     def pre_update(self, item):
         self.pre_add(item)
+
+        # 如果修改了基础镜像，就把debug中的任务删除掉
+        if self.src_item_json:
+            # k8s集群更换了，要删除原来的
+            if str(self.src_item_json.get('project_id', '1')) != str(item.project.id):
+                src_project = db.session.query(Project).filter_by(id=int(self.src_item_json.get('project_id', '1'))).first()
+                if src_project and src_project.cluster['NAME'] != item.project.cluster['NAME']:
+                    self.pre_delete(item, src_project.cluster['NAME'])
+                    flash(__('发现集群更换，已帮你删除之前启动的超参任务'), 'success')
+
 
     @action("copy", "复制", confirmation= '复制所选记录?', icon="fa-copy",multiple=True, single=False)
     def copy(self, nnis):

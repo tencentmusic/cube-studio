@@ -106,7 +106,7 @@ def delete_old_crd(object_info):
                                 elif 'pipeline-username' in label:
                                     username = label['pipeline-username']
                                 if username:
-                                    push_message([username]+conf.get('ADMIN_USER','').split(','),__('%s %s %s %s 创建时间 %s， 已经运行时间过久，注意修正') % (username,object_info['plural'],crd_object['name'],pipeline_id,crd_object['create_time']))
+                                    push_message([username]+conf.get('ADMIN_USER','admin').split(','),__('%s %s %s %s 创建时间 %s， 已经运行时间过久，注意修正') % (username,object_info['plural'],crd_object['name'],pipeline_id,crd_object['create_time']))
                     else:
                         # 如果运行结束已经1天，就直接删除
                         if crd_object['finish_time'] and crd_object['finish_time'] < (datetime.datetime.now() - datetime.timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S'):
@@ -186,7 +186,7 @@ def delete_notebook(task):
     object_info = conf.get("CRD_INFO", {}).get('notebook', {})
     logging.info(object_info)
     timeout = int(object_info.get('timeout', 60 * 60 * 24 * 3))
-    namespace = conf.get('NOTEBOOK_NAMESPACE')
+    namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
     with session_scope(nullpool=True) as dbsession:
         # 删除vscode的pod
         try:
@@ -223,8 +223,8 @@ def delete_debug_docker(task):
     # 删除完成的任务
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
-        notebook_namespace = conf.get('NOTEBOOK_NAMESPACE')
-        pipeline_namespace = conf.get('PIPELINE_NAMESPACE')
+        notebook_namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
+        pipeline_namespace = conf.get('PIPELINE_NAMESPACE','pipeline')
         k8s_client = K8s(cluster.get('KUBECONFIG',''))
         k8s_client.delete_pods(namespace=notebook_namespace,status='Succeeded')
         pipeline_pods = k8s_client.get_pods(pipeline_namespace)
@@ -238,7 +238,7 @@ def delete_debug_docker(task):
     # 删除debug和test的服务
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
-        namespace = conf.get('SERVICE_NAMESPACE')
+        namespace = conf.get('SERVICE_NAMESPACE','service')
         k8s_client = K8s(cluster.get('KUBECONFIG',''))
         with session_scope(nullpool=True) as dbsession:
             try:
@@ -274,7 +274,7 @@ def delete_debug_docker(task):
 
     # 删除 notebook 容器
     logging.info('begin delete jupyter')
-    namespace = conf.get('NOTEBOOK_NAMESPACE')
+    namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
         k8s_client = K8s(cluster.get('KUBECONFIG',''))
@@ -298,16 +298,16 @@ def delete_debug_docker(task):
                 logging.error(e)
                 logging.error('Traceback: %s', traceback.format_exc())
 
-    push_message(conf.get('ADMIN_USER', '').split(','), 'jupter pod 清理完毕')
+    push_message(conf.get('ADMIN_USER', 'admin').split(','), 'jupter pod 清理完毕')
 
     # 删除调试镜像的pod 和commit pod
-    namespace = conf.get('NOTEBOOK_NAMESPACE')
+    namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
     for cluster_name in clusters:
         cluster = clusters[cluster_name]
         k8s_client = K8s(cluster.get('KUBECONFIG',''))
         k8s_client.delete_pods(namespace=namespace,labels={'pod-type':"docker"})
 
-    push_message(conf.get('ADMIN_USER', '').split(','), __('docker 调试构建 pod 清理完毕'))
+    push_message(conf.get('ADMIN_USER', 'admin').split(','), __('docker 调试构建 pod 清理完毕'))
 
 
 # 推送微信消息
@@ -330,7 +330,7 @@ def deliver_message(pipeline,message=''):
         message = "pipeline: %s(%s) \nnamespace: %s\ncrontab: %s\ntime: %s\nfail start run:\n%s" % (pipeline.name,pipeline.describe, pipeline.namespace,pipeline.cron_time,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),message)
 
     push_message(receivers,message)
-    # push_message(conf.get('ADMIN_USER').split(','),message)
+    # push_message(conf.get('ADMIN_USER','admin').split(','),message)
 
 
 # 获取预计发送时间。控制发送频率不要太频繁
@@ -432,13 +432,13 @@ def make_timerun_config(task):
                                     dbsession.add(schedule_history)
                                     dbsession.commit()
                                 else:
-                                    push_message(conf.get('ADMIN_USER').split(','),'pipeline %s make config fail'%pipeline.name)
+                                    push_message(conf.get('ADMIN_USER','admin').split(','),'pipeline %s make config fail'%pipeline.name)
                             if len(exist_timeruns)>1:
                                 for i in range(1,len(exist_timeruns)):
                                     exist_timerun = exist_timeruns[i]
                                     dbsession.delete(exist_timerun)
                                     dbsession.commit()
-                                push_message(conf.get('ADMIN_USER').split(','),__('发现%s 任务流在 %s 时刻存在多个定时记录') % (pipeline.name,execution_date))
+                                push_message(conf.get('ADMIN_USER','admin').split(','),__('发现%s 任务流在 %s 时刻存在多个定时记录') % (pipeline.name,execution_date))
 
 
                     # 无论产生任务怎么样，上传都是要执行的，可能会上传之前没有上传的任务
@@ -594,7 +594,7 @@ def upload_workflow(task,timerun_id,pipeline_id):
             # 如果想回填，可以把这个手动配置为comed
             if timerun.status=='created':
                 logging.info('timerun %s has upload'%timerun_id)
-                push_message(conf.get('ADMIN_USER').split(','), __('阻止重复提交 timerun %s, pipeline %s, exec time %s') % (timerun.id,pipeline.name,timerun.execution_date))
+                push_message(conf.get('ADMIN_USER','admin').split(','), __('阻止重复提交 timerun %s, pipeline %s, exec time %s') % (timerun.id,pipeline.name,timerun.execution_date))
                 return
 
             logging.info('begin upload workflow %s %s' % (pipeline.name, datetime.datetime.now()))
@@ -802,8 +802,8 @@ def check_pipeline_resource():
                         message += __('\n\n自行增加tfjob资源配置或worker数目')
                     logging.info(message)
                     if message:
-                        # push_message(conf.get('ADMIN_USER','').split(','),message)
-                        push_message(conf.get('ADMIN_USER').split(','),message)
+                        # push_message(conf.get('ADMIN_USER','admin').split(','),message)
+                        push_message(conf.get('ADMIN_USER','admin').split(','),message)
                         push_message([work['user']],message)
 
         except Exception as e:
@@ -907,7 +907,7 @@ def watch_gpu(task):
                 message+=pod['namespace']+","+pod['user']+","+pod['name']+","+str(pod['gpu'])+"\n"
             logging.info(message)
             message += __("%s集群共已使用%s张卡") % (cluster_name,int(used_gpu))
-            push_message(conf.get('ADMIN_USER','').split(','),message)
+            push_message(conf.get('ADMIN_USER','admin').split(','),message)
 
         except Exception as e1:
             logging.error(e1)
@@ -932,11 +932,11 @@ def watch_pod_utilization(task=None):
                 if pod['start_time'] > (datetime.datetime.now() - datetime.timedelta(days=2)) and pod['name'] in service_pods_metrics and pod['username']:
                     try:
                         if pod['cpu'] > 5 and service_pods_metrics[pod['name']]['cpu'] < pod['cpu'] / 5:
-                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源cpu使用率过低，最新2天最大使用率为{round(service_pods_metrics[pod["name"]]["cpu"],2)}，但申请值为{pod["cpu"]}，请及时清理或修改申请值')
+                            push_message([pod['username']] + conf.get('ADMIN_USER', 'admin').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源cpu使用率过低，最新2天最大使用率为{round(service_pods_metrics[pod["name"]]["cpu"],2)}，但申请值为{pod["cpu"]}，请及时清理或修改申请值')
 
                         # 虚拟gpu服务不考虑
                         if int(pod.get('gpu', 0)) >= 1 and service_pods_metrics[pod['name']]['gpu'] < 0.15:
-                            push_message([pod['username']] + conf.get('ADMIN_USER', '').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源gpu使用率过低，最新2天最大使用率为{round(service_pods_metrics[pod["name"]]["gpu"],2)}，但申请值为{pod["gpu"]}，请及时清理或修改申请值')
+                            push_message([pod['username']] + conf.get('ADMIN_USER', 'admin').split(','),f'集群 {cluster_name} 用户 {pod["username"]} pod {pod["name"]}资源gpu使用率过低，最新2天最大使用率为{round(service_pods_metrics[pod["name"]]["gpu"],2)}，但申请值为{pod["gpu"]}，请及时清理或修改申请值')
                             pass
                     except Exception as e:
                         logging.error(e)
@@ -994,9 +994,9 @@ def adjust_node_resource(task):
                             "cluster":cluster_name,
                             "node_selector":pod['node_selector']
                         }
-                        push_message(conf.get('ADMIN_USER','').split(','),'cluster %s, namespace %s pod %s 因资源问题 pending'%(cluster_name,namespace,pod['name']))
+                        push_message(conf.get('ADMIN_USER','admin').split(','),'cluster %s, namespace %s pod %s 因资源问题 pending'%(cluster_name,namespace,pod['name']))
                     else:
-                        push_message(conf.get('ADMIN_USER', '').split(','),'cluster %s, namespace %s pod %s 因其他问题 pending' % (cluster_name,namespace, pod['name']))
+                        push_message(conf.get('ADMIN_USER', 'admin').split(','),'cluster %s, namespace %s pod %s 因其他问题 pending' % (cluster_name,namespace, pod['name']))
 
         for ip in all_node_json:
             all_node_json[ip]['used_memory'] = int(sum(all_node_json[ip]['used_memory']))
@@ -1079,7 +1079,7 @@ def adjust_node_resource(task):
                     org_node_cpu_per = get_cpu_per_node(min_cpu_org)
                     logging.info(org_node_cpu_per)
                     adjust_node = [node[0] for node in org_node_cpu_per[:1]]  # 每次调整一台机器
-                    push_message(conf.get('ADMIN_USER').split(','), __('集群 %s 调整项目组 %s 下 cpu机器 %s 到项目组%s') % (cluster_name, min_cpu_org, ','.join(adjust_node), des_org))
+                    push_message(conf.get('ADMIN_USER','admin').split(','), __('集群 %s 调整项目组 %s 下 cpu机器 %s 到项目组%s') % (cluster_name, min_cpu_org, ','.join(adjust_node), des_org))
                     k8s_client.label_node(adjust_node, labels={"org": des_org})
                     return
 
@@ -1087,7 +1087,7 @@ def adjust_node_resource(task):
                     org_node_gpu_per = get_gpu_per_node(min_gpu_org)
                     logging.info(org_node_gpu_per)
                     adjust_node = [node[0] for node in org_node_gpu_per[:1]]  # 每次调整一台机器
-                    push_message(conf.get('ADMIN_USER').split(','), __('集群 %s 调整项目组 %s 下 gpu机器 %s 到项目组%s') % (cluster_name, min_gpu_org, ','.join(adjust_node), des_org))
+                    push_message(conf.get('ADMIN_USER','admin').split(','), __('集群 %s 调整项目组 %s 下 gpu机器 %s 到项目组%s') % (cluster_name, min_gpu_org, ','.join(adjust_node), des_org))
                     k8s_client.label_node(adjust_node, labels={"org": des_org})
                     return
 
@@ -1099,7 +1099,7 @@ def adjust_node_resource(task):
             org_node_cpu_per = get_cpu_per_node(min_cpu_org)
             logging.info(org_node_cpu_per)
             adjust_node = [node[0] for node in org_node_cpu_per[:1]]   # 每次调整一台机器
-            push_message(conf.get('ADMIN_USER').split(','), __('集群 %s 调整项目组 %s 下 cpu机器 %s 到项目组%s') % (cluster_name,min_cpu_org,','.join(adjust_node),max_cpu_org))
+            push_message(conf.get('ADMIN_USER','admin').split(','), __('集群 %s 调整项目组 %s 下 cpu机器 %s 到项目组%s') % (cluster_name,min_cpu_org,','.join(adjust_node),max_cpu_org))
             k8s_client.label_node(adjust_node,labels={"org":max_cpu_org})
             return
 
@@ -1109,7 +1109,7 @@ def adjust_node_resource(task):
             org_node_gpu_per = get_gpu_per_node(min_gpu_org)
             logging.info(org_node_gpu_per)
             adjust_node = [node[0] for node in org_node_gpu_per[:1]]  # 每次调整一台机器
-            push_message(conf.get('ADMIN_USER').split(','), __('集群 %s 调整项目组 %s 下 gpu机器 %s 到项目组%s') % (cluster_name, min_gpu_org, ','.join(adjust_node), max_gpu_org))
+            push_message(conf.get('ADMIN_USER','admin').split(','), __('集群 %s 调整项目组 %s 下 gpu机器 %s 到项目组%s') % (cluster_name, min_gpu_org, ','.join(adjust_node), max_gpu_org))
             k8s_client.label_node(adjust_node,labels={"org":max_gpu_org})
             return
 
@@ -1161,7 +1161,7 @@ def adjust_service_resource(task):
                 inferenceserving = dbsession.query(InferenceService).filter_by(name=hpa.metadata.name).filter_by(model_status='online').first()
                 if not inferenceserving:
                     message = cluster_name + __("：请删除hpa，因") + hpa.metadata.name + __('服务下线或者不存在')
-                    push_message(conf.get('ADMIN_USER').split(','), message=message)
+                    push_message(conf.get('ADMIN_USER','admin').split(','), message=message)
                     continue
                 else:
                     if inferenceserving.resource_gpu and inferenceserving.resource_gpu!='0' and inferenceserving.priority==1:
@@ -1171,7 +1171,7 @@ def adjust_service_resource(task):
                             pass
                             # 如果没有扩张，或者持续时间太久，就缩小低优先级服务
                             if not hpa.status.last_scale_time or datetime.datetime.now().timestamp() - hpa.status.last_scale_time.astimezone(datetime.timezone(datetime.timedelta(hours=8))).timestamp() > 400:
-                                push_message(conf.get('ADMIN_USER').split(','), __('寻找扩服务%s一卡') % (inferenceserving.name,))
+                                push_message(conf.get('ADMIN_USER','admin').split(','), __('寻找扩服务%s一卡') % (inferenceserving.name,))
                                 target_node_selector = get_deployment_node_selector(name=inferenceserving.name,namespace=namespace)
 
                                 # 获取同项目组，低优先级的推理
@@ -1185,7 +1185,7 @@ def adjust_service_resource(task):
                                             # 随意缩放一个pod
                                             if not target_node_selector.get('gpu-type',''):
                                                 client.AppsV1Api().patch_namespaced_deployment_scale(service.name, namespace,[{'op': 'replace', 'path': '/spec/replicas', 'value': current_replicas-1}])
-                                                push_message([service.created_by.username,inferenceserving.created_by.username]+conf.get('ADMIN_USER').split(','),'缩服务%s一卡，扩服务%s一卡'%(service.name,inferenceserving.name))
+                                                push_message([service.created_by.username,inferenceserving.created_by.username]+conf.get('ADMIN_USER','admin').split(','),'缩服务%s一卡，扩服务%s一卡'%(service.name,inferenceserving.name))
                                                 return
                                             # 缩放指定pod
                                             else:
@@ -1206,7 +1206,7 @@ def adjust_service_resource(task):
                                                         if can_scale_pods:
                                                             k8s_client.v1.delete_namespaced_pod(can_scale_pods[0]['name'], namespace,grace_period_seconds=0)
                                                             client.AppsV1Api().patch_namespaced_deployment_scale(service.name, namespace, [{'op': 'replace', 'path': '/spec/replicas','value': current_replicas - 1}])
-                                                            push_message([service.created_by.username,inferenceserving.created_by.username] + conf.get('ADMIN_USER').split(','), __('缩服务%s一卡，扩服务%s一卡') % (service.name, inferenceserving.name))
+                                                            push_message([service.created_by.username,inferenceserving.created_by.username] + conf.get('ADMIN_USER','admin').split(','), __('缩服务%s一卡，扩服务%s一卡') % (service.name, inferenceserving.name))
 
                                                             return
 
@@ -1238,7 +1238,7 @@ def check_pod_terminating(task):
     logging.info(f'============= begin run check_pod_terminating task')
     headers={
         'Content-Type': "application/json",
-        "Authorization":conf.get('ADMIN_USER').split(',')[0]
+        "Authorization":conf.get('ADMIN_USER','admin').split(',')[0]
     }
     res = requests.get('http://kubeflow-dashboard.infra/k8s/read/pod/terminating',headers=headers)
     if res.status_code==200:
@@ -1257,9 +1257,9 @@ def check_pod_terminating(task):
 
                 message = __('集群%s,%s %s kill失败， 可先选择强制删除 %s') % (cluster_name,host,pod_name,kill_pod_url)
                 username = pod['username']
-                push_message(conf.get('ADMIN_USER').split(','),message)
+                push_message(conf.get('ADMIN_USER','admin').split(','),message)
     else:
-        push_message(conf.get('ADMIN_USER').split(','), __('查询终止态pod失败'))
+        push_message(conf.get('ADMIN_USER','admin').split(','), __('查询终止态pod失败'))
 
 
 if __name__=="__main__":

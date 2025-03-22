@@ -132,16 +132,16 @@
     "project_name": "public",
     "service_name": "ollama",
     "service_describe": "ollama大模型推理",
-    "image_name": "ghcr.io/open-webui/open-webui:ollama",
+    "image_name": "ghcr.nju.edu.cn/open-webui/open-webui:ollama",
     "command": "",
     "env": "",
-    "ports": "9997",
+    "ports": "8080",
     "resource_gpu": "1",
     "resource_cpu": "20",
     "resource_memory": "20G",
     "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/{{creator}}/pipeline/example/ollama/model(hostpath):/root/.ollama",
     "expand": {
-      "help_url": "https://github.com/xorbitsai/inference"
+      "help_url": "https://github.com/ollama/ollama"
     }
   }
 }

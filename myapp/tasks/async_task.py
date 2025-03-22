@@ -30,7 +30,7 @@ def check_docker_commit(task,docker_id):  # 在页面中测试时会自定接收
         try:
             docker = dbsession.query(Docker).filter_by(id=int(docker_id)).first()
             pod_name = "docker-commit-%s-%s" % (docker.created_by.username, str(docker.id))
-            namespace = conf.get('NOTEBOOK_NAMESPACE')
+            namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
             k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
             begin_time=datetime.datetime.now()
             now_time=datetime.datetime.now()
@@ -46,7 +46,7 @@ def check_docker_commit(task,docker_id):  # 在页面中测试时会自定接收
                         break
                     # 其他异常状态直接报警
                     if commit_pod['status']!='Running':
-                        push_message(conf.get('ADMIN_USER').split(','),'commit pod %s not running'%commit_pod['name'])
+                        push_message(conf.get('ADMIN_USER','admin').split(','),'commit pod %s not running'%commit_pod['name'])
                         break
                 else:
                     break

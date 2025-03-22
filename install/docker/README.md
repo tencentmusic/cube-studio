@@ -49,16 +49,16 @@ mysql> flush privileges;
 docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.01.01 -f install/docker/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.03.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.01.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.03.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.01.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.01.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.03.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.03.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -113,7 +113,7 @@ docker-compose -f docker-compose.yml  up
 
 需要先在k8s开发集群部署一遍cube-studio，然后才能在本地连接并调度
 
-![k8s配置](https://img-blog.csdnimg.cn/direct/fa582b82e228432188d8db1b942238ce.png)
+![k8s配置](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/image/localk8s.jpg)
 
 3) 修改minio地址
 

@@ -1,3 +1,4 @@
+import math
 import random
 
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
@@ -26,7 +27,7 @@ import logging
 from flask import (
     flash,
     g,
-    redirect
+    redirect, render_template
 )
 from .base import (
     get_user_roles,
@@ -110,7 +111,7 @@ class Task_ModelView_Base():
             label= _('挂载'),
             description= _('外部挂载，格式:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),
             widget=BS3TextFieldWidget(),
-            default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives'
+            default='kubeflow-user-workspace(pvc):/mnt'
         ),
         "working_dir": StringField(
             label= _('工作目录'),
@@ -415,6 +416,9 @@ class Task_ModelView_Base():
 
     # 因为删除就找不到pipeline了
     def pre_delete(self, item):
+        parameter = json.loads(item.pipeline.parameter) if item.pipeline.parameter else {}
+        if parameter.get("demo", 'false').lower() == 'true':
+            raise MyappException(__("示例pipeline，不允许修改，请复制后编辑"))
         self.pipeline = item.pipeline
         # 删除task启动的所有实例
         self.delete_task_run(item)
@@ -608,6 +612,7 @@ class Task_ModelView_Base():
                     args=None
                 )
             except Exception as e:
+                return render_template('close.html', data=str(e).replace('<br>', '\n'))
                 return self.response(400, **{"status": 1, "result": {}, "message": str(e)})
 
         try_num = 30
@@ -750,7 +755,10 @@ class Task_ModelView_Base():
                     args=args
                 )
             except Exception as e:
-                return self.response(400, **{"status": 1, "result": {}, "message": str(e)})
+                return render_template('close.html', data=str(e).replace('<br>','\n'))
+                # return self.response(400, **{"status": 1, "result": {}, "message": str(e)})
+
+
 
         try_num = 5
         while (try_num > 0):

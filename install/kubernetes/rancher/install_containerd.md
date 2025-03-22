@@ -9,7 +9,7 @@ sudo rm -rf /var/lib/containerd /etc/containerd/
 
 ```
 
-## 1.2 安装containerd
+## 1.2 ubuntu安装containerd
 
 ```bash
 
@@ -17,12 +17,14 @@ sudo rm -rf /var/lib/containerd /etc/containerd/
 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -
 sudo add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
 
-# 安装containerd
+# 更新源
 sudo apt-get update
-sudo apt-get install -y containerd.io
 
 # 查看版本
 apt-cache madison containerd
+
+# 安装containerd
+sudo apt-get install -y containerd.io
 
 # sudo apt-get install containerd=<VERSION>
 # 例如 apt-get install containerd=1.7.20-..
@@ -126,11 +128,7 @@ wget https://githubfast.com/containerd/nerdctl/releases/download/v${version}/ner
 ```
 tar zxvf nerdctl-${version}-linux-amd64.tar.gz -C /usr/local/bin
 
-echo "alias docker='nerdctl --namespace k8s.io'"  >> /etc/profile
-echo "alias docker-compose='nerdctl compose'"  >> /etc/profile
-source  /etc/profile
-
-#配置nerdctl
+# 配置nerdctl
 mkdir -p /etc/nerdctl/
 cat > /etc/nerdctl/nerdctl.toml << 'EOF'
 namespace      = "k8s.io"
@@ -152,6 +150,8 @@ tar zxvf buildkit-${version}.linux-amd64.tar.gz -C /usr/local/
 
 vi /etc/systemd/system/buildkit.service 
 
+# 编辑内容如下
+
 [Unit]
 Description=BuildKit
 Documentation=https://github.com/moby/buildkit
@@ -162,10 +162,12 @@ ExecStart=/usr/local/bin/buildkitd --oci-worker=false --containerd-worker=true
 [Install]
 WantedBy=multi-user.target
 
+```
 
+
+```
 # 启动
 systemctl enable buildkit --now
-
 ```
 
 # 6. 安装 cni 网络插件

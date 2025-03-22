@@ -28,9 +28,6 @@ spec:
   resources:
     requests:
       storage: 500Gi
-#  selector:
-#    matchLabels:
-#      jupyter-pvname: jupyter-kubeflow-user-workspace
   storageClassName: ""
   volumeName: jupyter-kubeflow-user-workspace
 
@@ -63,8 +60,5 @@ spec:
   resources:
     requests:
       storage: 500Gi
-#  selector:
-#    matchLabels:
-#      jupyter-pvname: jupyter-kubeflow-archives
   storageClassName: ""
   volumeName: jupyter-kubeflow-archives

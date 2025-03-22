@@ -135,7 +135,7 @@ fi
 ```
 3、修改cube-studio镜像为内网镜像。
 ```bash
-vi cube/overlays/kustomization.yml
+vi install/kubernetes/cube/overlays/kustomization.yml
 修改最底部的newName和newTag
 ```
 

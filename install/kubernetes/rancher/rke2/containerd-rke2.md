@@ -17,46 +17,31 @@ nerdctl run -d --privileged --network cube-studio  --restart=unless-stopped -p 4
 
 # 部署rke2
 
-镜像仓库：registry.cn-hangzhou.aliyuncs.com 
+k8s版本: 1.25， 不要部署nginx-ingress
 
-高级选项-补充的 API server 参数： --service-node-port-range=1-65535
+镜像仓库：配置了这个，rancher的系统组件，就会走阿里云
 
+    registry.cn-hangzhou.aliyuncs.com 
 
-yaml配置，目前不使用
-```bash
+配置了这个，k8s里面拉取镜像就可以走镜像加速器
 
-registries:
-  mirrors:
-    docker.io:
-      endpoint:
-        - https://registry.cn-hangzhou.aliyuncs.com
-        
-# kubelet参数暂时不能用
-kubelet:
-  extra_args:
-    container-runtime: remote
-    container-runtime-endpoint: unix:///run/containerd/containerd.sock
-    containerd: /run/containerd/containerd.sock
-    runtime-request-timeout: 15m
+Mirror：
 
---container-runtime=remote
---container-runtime-endpoint=unix:///run/containerd/containerd.sock
---containerd=/run/containerd/containerd.sock
+    镜像仓库主机名 *    mirror地址： docker.m.daocloud.io
+    镜像仓库主机名 docker.io    mirror地址： docker.m.daocloud.io
+
+高级选项-补充的 
+
+```
+kubelet参数：（使用主机的containerd）
+container-runtime=remote
+containerd=/run/containerd/containerd.sock
+container-runtime-endpoint=unix:///run/containerd/containerd.sock
+
+API server 参数： 
+--service-node-port-range=1-65535
 
 ```
 
-# 修改rke2的containerd的配置文件
-rke2的k8s部署完成后，修改rke2的配置。
-```bash
-cp /var/lib/rancher/rke2/agent/etc/containerd/config.toml /var/lib/rancher/rke2/agent/etc/containerd/config.toml.tmpl
 
-tee -a /var/lib/rancher/rke2/agent/etc/containerd/config.toml.tmpl << 'EOF'
-[plugins."io.containerd.grpc.v1.cri".registry]
-  config_path = "/etc/containerd/certs.d"
-EOF
-
-systemctl restart rke2-server
-# 查看最新的配置是否使用 /etc/containerd/certs.d下的加速器配置了
-cat /var/lib/rancher/rke2/agent/etc/containerd/config.toml
-```
 

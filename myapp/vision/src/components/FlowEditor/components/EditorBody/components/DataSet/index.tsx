@@ -67,7 +67,7 @@ const DataSet: React.FC<NodeProps> = props => {
               pipeline: +pipelineId,
               name: taskName,
               label: `${t('新建')} ${modelInfo.name} ${t('任务')}`,
-              volume_mount: 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+              volume_mount: 'kubeflow-user-workspace(pvc):/mnt',
               image_pull_policy: 'Always',
               working_dir: '',
               command: '',

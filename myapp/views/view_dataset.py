@@ -251,7 +251,7 @@ class Dataset_ModelView_base():
         ),
         "path": StringField(
             label= _('容器内路径'),
-            description=_('本地文件通过notebook上传到平台内，处理后，压缩成单个压缩文件，每行一个压缩文件地址。'),
+            description=_('本地文件通过notebook上传到平台内，处理后，压缩成单个压缩文件，每行一个压缩文件地址。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">上传文件</a>'),
             widget=MyBS3TextAreaFieldWidget(rows=3),
             default=''
         ),

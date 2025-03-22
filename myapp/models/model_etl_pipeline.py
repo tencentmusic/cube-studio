@@ -49,6 +49,7 @@ class ETL_Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             dag_json=self.dag_json,
             config=self.config,
             expand=self.expand,
+            workflow=self.workflow
         )
 
 

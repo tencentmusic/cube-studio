@@ -7,7 +7,7 @@ import re
 import traceback
 import urllib.parse
 import os
-from flask import Markup, Response, current_app, make_response, send_file, flash, g, jsonify, request
+from flask import Markup, Response, current_app, make_response, send_file, flash, g, jsonify, request, render_template
 from inspect import isfunction
 
 from sqlalchemy import create_engine
@@ -253,7 +253,6 @@ class MyappModelRestApi(ModelRestApi):
     check_edit_permission = None
     check_delete_permission = None
     datamodel = None
-    list_show_columns=[]   # 在list查询的时候，从数据库获取的数据字段列，list_columns是显示的字段列
 
     def pre_show(self, item):
         pass
@@ -2249,3 +2248,4 @@ class MyappModelRestApi(ModelRestApi):
             if _col not in data.keys():
                 data[_col] = data_item[_col]
         return data
+

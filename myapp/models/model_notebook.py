@@ -37,7 +37,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     ide_type = Column(String(100), default='jupyter',comment='ide类型')
     working_dir = Column(String(200), default='',comment='工作目录')
     env = Column(String(400),default='',comment='环境变量') #
-    volume_mount = Column(String(2000), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',comment='挂载')  #
+    volume_mount = Column(String(2000), default='kubeflow-user-workspace(pvc):/mnt',comment='挂载')  #
     node_selector = Column(String(200), default='cpu=true,notebook=true',comment='机器选择器')  #
     image_pull_policy = Column(Enum('Always', 'IfNotPresent',name='image_pull_policy'), nullable=True, default='Always',comment='镜像拉取策略')
     resource_memory = Column(String(100), default='10G',comment='申请内存')
@@ -71,7 +71,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         if SERVICE_EXTERNAL_IP and conf.get('ENABLE_EDGE_K8S',False):
             SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip()
             from myapp.utils import core
-            meet_ports = core.get_not_black_port(10000 + 10 * self.id)
+            port_str = conf.get('NOTEBOOK_PORT', '10000+10*ID').replace('ID', str(self.id))
+            meet_ports = core.get_not_black_port(int(eval(port_str)))
             host = "//%s:%s"%(SERVICE_EXTERNAL_IP,str(meet_ports[0]))
             if self.ide_type=='theia':
                 url = "/" + "#/mnt/" + self.created_by.username
@@ -119,11 +120,28 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
             namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
             pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
             if pods and len(pods)>0:
+                message=''
                 status = pods[0]['status']
+                if status.lower()=='pending':
+                    event = k8s_client.get_pod_event(namespace=namespace, pod_name=self.name)
+                    if event:
+                        message=event[-1].get('message','')
+
+
                 if g.user.is_admin():
                     k8s_dash_url = f'/k8s/web/search/{self.cluster["NAME"]}/jupyter/{self.name}'
-                    url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
+                    if message:
+                        url = Markup(f'<a target=_blank style="color:#008000;" type=tips addedValue="{message}" href="{k8s_dash_url}">{status}</a>')
+                    else:
+                        url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
                     return url
+
+                if message:
+                    status = f'''
+<div type=tips addedValue='{message}'>
+    {status}
+</div>
+'''
                 return status
 
         except Exception as e:

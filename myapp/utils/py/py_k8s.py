@@ -32,6 +32,7 @@ class K8s():
         self.AppsV1Api = client.AppsV1Api()
         self.NetworkingV1Api = client.NetworkingV1Api()
         self.CustomObjectsApi = client.CustomObjectsApi()
+        self.rbacvi = client.RbacAuthorizationV1Api()
         self.v1.api_client.configuration.verify_ssl = False  # 只能设置 /usr/local/lib/python3.9/dist-packages/kubernetes/client/configuration.py:   self.verify_ssl= True ---> False
         self.gpu_resource=conf.get('GPU_RESOURCE',{})
         self.vgpu_resource = conf.get('VGPU_RESOURCE', {})
@@ -75,38 +76,43 @@ class K8s():
             all_pods = []
             # 如果只有命名空间
             if (namespace and not service_name and not pod_name and not labels):
-                all_pods = self.v1.list_namespaced_pod(namespace=namespace).items
+                all_pods = self.v1.list_namespaced_pod(namespace=namespace).items or []
             # 如果有命名空间和pod名，就直接查询pod
             elif (namespace and pod_name):
                 pod = self.v1.read_namespaced_pod(name=pod_name, namespace=namespace,_request_timeout=5)
-                all_pods.append(pod)
+                if pod:
+                    all_pods.append(pod)
             # 如果只有命名空间和服务名，就查服务下绑定的pod
             elif (namespace and service_name):  # 如果有命名空间和服务名
                 all_endpoints = self.v1.read_namespaced_endpoints(service_name, namespace,_request_timeout=5)  # 先查询入口点，
-                subsets = all_endpoints.subsets
-                addresses = subsets[0].addresses  # 只取第一个子网
-                for address in addresses:
-                    pod_name_temp = address.target_ref.name
-                    pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
-                    all_pods.append(pod)
-            elif (namespace and status):
-                if status.lower()=='running':
-                    all_endpoints = self.v1.list_namespaced_endpoints(namespace=namespace)  # 先查询入口点，
+                if all_endpoints:
                     subsets = all_endpoints.subsets
-                    addresses = subsets[0].addresses  # 只取第一个子网
-                    for address in addresses:
-                        pod_name_temp = address.target_ref.name
-                        pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
+                    if subsets:
+                        addresses = subsets[0].addresses  # 只取第一个子网
+                        for address in addresses:
+                            pod_name_temp = address.target_ref.name
+                            pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
+                            if pod:
+                                all_pods.append(pod)
+            elif (namespace and status):
+                # if status.lower()=='running':
+                #     all_endpoints = self.v1.list_namespaced_endpoints(namespace=namespace).items or [] # 先查询入口点，
+                #     subsets = all_endpoints.subsets
+                #     if subsets:
+                #         addresses = subsets[0].addresses  # 只取第一个子网
+                #         for address in addresses:
+                #             pod_name_temp = address.target_ref.name
+                #             pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
+                #             all_pods.append(pod)
+                # else:
+                src_pods = self.v1.list_namespaced_pod(namespace).items or []
+                for pod in src_pods:
+                    if pod.status and pod.status.phase == status:
                         all_pods.append(pod)
-                else:
-                    src_pods = self.v1.list_namespaced_pod(namespace).items
-                    for pod in src_pods:
-                        if pod.status and pod.status.phase == status:
-                            all_pods.append(pod)
 
 
             elif (namespace and labels):
-                src_pods = self.v1.list_namespaced_pod(namespace).items
+                src_pods = self.v1.list_namespaced_pod(namespace).items or []
                 for pod in src_pods:
                     pod_labels = pod.metadata.labels
                     is_des_pod = True
@@ -135,7 +141,7 @@ class K8s():
                 # gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
                 vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0'))/100 for container in containers if container.resources and container.resources.requests]
                 vgpu += [float(container.resources.requests.get('tke.cloud.tencent.com/qgpu-core', '0'))/100 for container in containers if container.resources and container.resources.requests]
-                vgpu += [float(container.resources.requests.get('nvidia.com/vgpu', '0')) / 10 for container in containers if container.resources and container.resources.requests]
+                vgpu += [float(container.resources.requests.get('nvidia.com/gpucores', '0')) / 100 for container in containers if container.resources and container.resources.requests]
 
                 # 获取gpu异构资源占用
                 ai_resource={}
@@ -156,7 +162,6 @@ class K8s():
                             node_selector[match_expression.key] = match_expression.values[0]
                         if match_expression.operator == 'Equal':
                             node_selector[match_expression.key] = match_expression.values
-
                 except Exception:
                     pass
                     # print(e)
@@ -258,7 +263,7 @@ class K8s():
     def delete_pods(self, namespace=None, service_name=None, pod_name=None, status=None, labels=None):
         if not namespace:
             return []
-        all_pods = self.get_pods(namespace=namespace, pod_name=pod_name, service_name=service_name, labels=labels)
+        all_pods = self.get_pods(namespace=namespace, pod_name=pod_name, service_name=service_name, labels=labels) or []
         if status:
             all_pods = [pod for pod in all_pods if pod['status'] == status]
         try:
@@ -276,7 +281,7 @@ class K8s():
     def get_all_node_allocated_resources(self):
         nodes_resource = {}
         try:
-            pods = self.v1.list_pod_for_all_namespaces(watch=False).items
+            pods = self.v1.list_pod_for_all_namespaces(watch=False).items or []
 
             for pod in pods:
                 if not pod.status or pod.status.phase != 'Running':
@@ -287,7 +292,8 @@ class K8s():
                 # gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
                 vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
                 vgpu += [float(container.resources.requests.get('tke.cloud.tencent.com/qgpu-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
-                vgpu += [float(container.resources.requests.get('nvidia.com/vgpu', '0')) / 10 for container in containers if container.resources and container.resources.requests]
+                # vgpu += [float(container.resources.requests.get('nvidia.com/vgpu', '0')) / 10 for container in containers if container.resources and container.resources.requests]
+                vgpu += [float(container.resources.requests.get('nvidia.com/gpucores', '0')) / 100 for container in containers if container.resources and container.resources.requests]
 
                 node_name = pod.spec.node_name
                 if node_name not in nodes_resource:
@@ -322,7 +328,7 @@ class K8s():
 
     def get_node_event(self, node_name):
         node = self.get_node(name=node_name)
-        events = [item.to_dict() for item in self.v1.list_event_for_all_namespaces().items]   # field_selector=f'source.host={node["hostip"]}'
+        events = [item.to_dict() for item in (self.v1.list_event_for_all_namespaces().items or [])]   # field_selector=f'source.host={node["hostip"]}'
         for event in events:
             event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
             if not event['time']:
@@ -338,7 +344,7 @@ class K8s():
     def get_node(self, label=None, name=None, ip=None):
         try:
             back_nodes = []
-            all_node = self.v1.list_node(label_selector=label).items
+            all_node = self.v1.list_node(label_selector=label).items or []
             # print(all_node)
             for node in all_node:
                 try:
@@ -385,7 +391,7 @@ class K8s():
     def label_node(self, ips, labels):
         try:
             all_node_ip = []
-            all_node = self.v1.list_node().items
+            all_node = self.v1.list_node().items or []
 
             for node in all_node:
                 # print(node)
@@ -491,9 +497,9 @@ class K8s():
         crd_objects=[]
         try:
             if label_selector:
-                crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,label_selector=label_selector)['items']
+                crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,label_selector=label_selector)['items'] or []
             else:
-                crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural)['items']
+                crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural)['items'] or []
         except ApiException as api_e:
             if api_e.status != 404:
                 print(api_e)
@@ -540,7 +546,7 @@ class K8s():
 
     # @pysnooper.snoop(watch_explode=())
     def get_crd_all_namespaces(self, group, version, plural, pool=False):
-        all_namespace = self.v1.list_namespace().items
+        all_namespace = self.v1.list_namespace().items or []
         all_namespace = [namespace.metadata.name for namespace in all_namespace]
         back_objects = []
         jobs = []
@@ -580,7 +586,7 @@ class K8s():
             return [name]
         elif labels:
             back_name = []
-            crds = self.get_crd(group=group, version=version, plural=plural, namespace=namespace)
+            crds = self.get_crd(group=group, version=version, plural=plural, namespace=namespace) or []
             for crd in crds:
                 if crd['labels']:
                     crd_labels = json.loads(crd['labels'])
@@ -705,7 +711,7 @@ class K8s():
 
             # 删除stss
             try:
-                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items
+                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items or []
                 if stss:
                     for sts in stss:
                         self.AppsV1Api.delete_namespaced_stateful_set(namespace=namespace, name=sts.metadata.name, grace_period_seconds=0)
@@ -718,7 +724,7 @@ class K8s():
 
             # 删除daemonsets
             try:
-                daemonsets = self.AppsV1Api.list_namespaced_daemon_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items
+                daemonsets = self.AppsV1Api.list_namespaced_daemon_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items or []
                 if daemonsets:
                     for daemonset in daemonsets:
                         self.AppsV1Api.delete_namespaced_daemon_set(namespace=namespace, name=daemonset.metadata.name, grace_period_seconds=0)
@@ -731,7 +737,7 @@ class K8s():
 
             # 删除service
             try:
-                services = self.v1.list_namespaced_service(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items
+                services = self.v1.list_namespaced_service(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items or []
                 if services:
                     for service in services:
                         self.v1.delete_namespaced_service(namespace=namespace, name=service.metadata.name, grace_period_seconds=0)
@@ -756,7 +762,7 @@ class K8s():
         if labels:
             try:
                 # 获取具有指定标签的服务
-                services = self.v1.list_namespaced_service(namespace="your-namespace", label_selector=",".join([f"{k}={v}" for k, v in labels.items()])).items
+                services = self.v1.list_namespaced_service(namespace="your-namespace", label_selector=",".join([f"{k}={v}" for k, v in labels.items()])).items or []
 
                 # 遍历每个服务
                 for service in services:
@@ -1343,7 +1349,7 @@ class K8s():
             try:
                 labels_arr = ["%s=%s" % (key, labels[key]) for key in labels]
                 labels_str = ','.join(labels_arr)
-                deploys = self.AppsV1Api.list_namespaced_deployment(namespace=namespace, label_selector=labels_str).items
+                deploys = self.AppsV1Api.list_namespaced_deployment(namespace=namespace, label_selector=labels_str).items or []
                 for deploy in deploys:
                     client.AppsV1Api().delete_namespaced_deployment(name=deploy.metadata.name, namespace=namespace, grace_period_seconds=0)
             except ApiException as api_e:
@@ -1419,7 +1425,7 @@ class K8s():
             try:
                 labels_arr = ["%s=%s" % (key, labels[key]) for key in labels]
                 labels_str = ','.join(labels_arr)
-                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector=labels_str).items
+                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector=labels_str).items or []
                 for sts in stss:
                     client.AppsV1Api().delete_namespaced_stateful_set(name=sts.metadata.name, namespace=namespace)
             except ApiException as api_e:
@@ -1811,10 +1817,10 @@ class K8s():
                         "resource": {
                             "name": "memory",
                             "targetAverageUtilization": int(mem_threshold),  # V1的书写格式
-                            # "target": {       # V2 的书写格式
-                            #     "type": "Utilization",
-                            #     "averageUtilization": int(mem_threshold)
-                            # }
+                            "target": {       # V2 的书写格式
+                                "type": "Utilization",
+                                "averageUtilization": int(mem_threshold)
+                            }
                         }
                     }
                 )
@@ -1827,10 +1833,10 @@ class K8s():
                         "resource": {
                             "name": "cpu",
                             "targetAverageUtilization": int(cpu_threshold),  # V1的书写格式
-                            # "target": {       # V2 的书写格式
-                            #     "type": "Utilization",
-                            #     "averageUtilization": int(cpu_threshold)
-                            # }
+                            "target": {       # V2 的书写格式
+                                "type": "Utilization",
+                                "averageUtilization": int(cpu_threshold)
+                            }
                         }
                     }
                 )
@@ -1901,7 +1907,7 @@ class K8s():
         back_metrics = []
         cust = client.CustomObjectsApi()
         metrics = cust.list_cluster_custom_object('metrics.k8s.io', 'v1beta1', 'nodes')  # All node metrics
-        items = metrics['items']
+        items = metrics['items'] or []
         for item in items:
             back_metrics.append({
                 "name": item['metadata']['name'],
@@ -2037,7 +2043,7 @@ class K8s():
             return name, user, gpu
 
         for namespace in namespaces:
-            pods = self.v1.list_namespaced_pod(namespace).items
+            pods = self.v1.list_namespaced_pod(namespace).items or []
             for pod in pods:
                 status = pod.status.phase
                 if status != 'Running':

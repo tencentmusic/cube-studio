@@ -8,7 +8,7 @@ import sys
 
 from dateutil import tz
 
-from flask_appbuilder.security.manager import AUTH_REMOTE_USER, AUTH_DB
+from flask_appbuilder.security.manager import AUTH_REMOTE_USER, AUTH_DB, AUTH_LDAP
 from myapp.stats_logger import DummyStatsLogger
 
 
@@ -104,7 +104,10 @@ AUTH_USER_REGISTRATION_ROLE = "Gamma"
 OAUTH_PROVIDERS=[]
 
 #LDAP认证时, ldap server
-# AUTH_LDAP_SERVER = "ldap://ldapserver.new"
+AUTH_LDAP_SERVER = "ldap://xx.xx.xx.xx"
+AUTH_LDAP_PORT = "xx"
+AUTH_LDAP_USE_TLS = False
+AUTH_LDAP_BASE_DN = 'cpcnet.local'   # 基准dn
 
 # OpenID认证的提供方
 # OPENID_PROVIDERS = [

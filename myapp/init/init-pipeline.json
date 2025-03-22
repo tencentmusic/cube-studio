@@ -33,7 +33,7 @@
         "args": {
           "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
           "workdir": "/mnt/{{creator}}/",
-          "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/coco.zip --no-check-certificate && unzip -o coco.zip && cd  coco_data_sample && bash reset_file.sh"
+          "command": "rm -rf coco.zip && wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/pipeline/coco.zip --no-check-certificate && unzip -o coco.zip && cd  coco_data_sample && bash reset_file.sh"
         }
       },
       {
@@ -67,7 +67,7 @@
           "--images": "ccr.ccs.tencentyun.com/cube-studio/yolov7:2024.01",
           "--working_dir": "/yolov7",
           "--command": "python server.py",
-          "--env": "MODELPATH=/mnt/{{creator}}/coco_data_sample/yolov7_best.pt\nYOLO_EXAMPLE=/mnt/{{creator}}/coco_data_sample/images/train2014//mnt/admin/coco_data_sample/images/train2014",
+          "--env": "MODELPATH=/mnt/{{creator}}/coco_data_sample/yolov7_best.pt\nYOLO_EXAMPLE=/mnt/{{creator}}/coco_data_sample/images/train2014/COCO_train2014_000000000597.jpg",
           "--ports": "8080",
           "--replicas": "1",
           "--resource_memory": "5G",
@@ -269,7 +269,7 @@
         "job_templete": "decision-tree",
         "name": "model-train",
         "label": "模型训练",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
@@ -290,7 +290,7 @@
         "job_templete": "decision-tree",
         "name": "model-val",
         "label": "模型评估",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
@@ -308,7 +308,7 @@
         "job_templete": "decision-tree",
         "name": "model-offline-inference",
         "label": "模型离线推理",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
@@ -326,7 +326,7 @@
         "job_templete": "datax",
         "name": "data-import",
         "label": "数据导入",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
@@ -338,7 +338,7 @@
         "job_templete": "自定义镜像",
         "name": "data-process",
         "label": "数据处理",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
@@ -352,7 +352,7 @@
         "job_templete": "model-register",
         "name": "model-register",
         "label": "模型注册",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
@@ -371,7 +371,7 @@
         "job_templete": "deploy-service",
         "name": "deploy-service",
         "label": "服务部署",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
@@ -398,32 +398,32 @@
       }
     ]
   },
-  "chatglm4": {
+  "deepseek": {
     "pipeline": {
-      "name": "chatglm4",
-      "describe": "大模型：chatglm4微调部署",
+      "name": "deepseek",
+      "describe": "大模型：deepseek微调部署",
       "project": "public",
       "parameter": {
         "demo": "true",
-        "img": "/static/assets/images/pipeline/chatglm.png"
+        "img": "/static/assets/images/pipeline/deepseek.jpg"
       },
       "dag_json": {
         "task-data-process": {},
-        "chatglm4-lora": {
+        "deepseek-lora": {
           "upstream": [
             "task-data-process"
           ]
         },
-        "deploy-chatglm4": {
+        "deploy-deepseek": {
           "upstream": [
-            "chatglm4-lora"
+            "deepseek-lora"
           ]
         }
       },
       "global_env": "",
       "expand": [
         {
-          "id": "deploy-chatglm4",
+          "id": "deploy-deepseek",
           "type": "dataSet",
           "position": {
             "x": 224,
@@ -433,8 +433,8 @@
             "info": {
               "describe": "模型部署推理服务"
             },
-            "name": "deploy-chatglm4",
-            "label": "部署chatglm4"
+            "name": "deploy-deepseek",
+            "label": "部署deepseek"
           }
         },
         {
@@ -453,7 +453,7 @@
           }
         },
         {
-          "id": "chatglm4-lora",
+          "id": "deepseek-lora",
           "type": "dataSet",
           "position": {
             "x": 224,
@@ -461,53 +461,53 @@
           },
           "data": {
             "info": {
-              "describe": "chatglm4 lora微调"
+              "describe": "deepseek lora微调"
             },
-            "name": "chatglm4-lora",
-            "label": "chatglm4 lora微调"
+            "name": "deepseek-lora",
+            "label": "deepseek lora微调"
           }
         },
         {
           "source": "task-data-process",
           "arrowHeadType": "arrow",
-          "target": "chatglm4-lora",
-          "id": "logic__edge-task-null-chatglm4-null"
+          "target": "deepseek-lora",
+          "id": "logic__edge-task-null-deepseek-null"
         },
         {
-          "source": "chatglm4-lora",
+          "source": "deepseek-lora",
           "arrowHeadType": "arrow",
-          "target": "deploy-chatglm4",
-          "id": "logic__edge-chatglm4-null-deploy-chatglm4null"
+          "target": "deploy-deepseek",
+          "id": "logic__edge-deepseek-null-deploy-deepseeknull"
         }
       ]
     },
     "tasks": [
       {
         "job_templete": "deploy-service",
-        "name": "deploy-chatglm4",
-        "label": "部署chatglm4",
-        "volume_mount": "kubeflow-archives(pvc):/archives,kubeflow-user-workspace(pvc):/mnt",
+        "name": "deploy-deepseek",
+        "label": "部署deepseek",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
         "resource_rdma": "0",
         "args": {
           "--project_name": "public",
-          "--label": "chatglm4推理部署",
-          "--model_name": "chatglm4",
-          "--model_version": "v2024.06.01.1",
-          "--model_path": "/mnt/{{creator}}/pipeline/example/chatglm/result/exported_model",
-          "--service_type": "llm-server",
-          "--images": "ccr.ccs.tencentyun.com/cube-studio/llm-server:20240601",
-          "--working_dir": "/FastChat",
-          "--command": "python -m vllm.entrypoints.openai.api_server --trust-remote-code --model $KUBEFLOW_MODEL_PATH --host 0.0.0.0 --port 8000 --dtype float16 --tensor-parallel-size $RESOURCE_GPU --served-model-name $KUBEFLOW_MODEL_NAME",
+          "--label": "deepseek推理部署",
+          "--model_name": "deepseek",
+          "--model_version": "v2025.03.01.1",
+          "--model_path": "/mnt/{{creator}}/pipeline/example/deepseek/result/exported_model",
+          "--service_type": "vllm",
+          "--images": "vllm/vllm-openai:latest",
+          "--working_dir": "",
+          "--command": "python3 -m vllm.entrypoints.openai.api_server --trust-remote-code --max-model-len 8192 --model $KUBEFLOW_MODEL_PATH --host 0.0.0.0 --port 8000 --dtype float16 --tensor-parallel-size $RESOURCE_GPU --served-model-name $KUBEFLOW_MODEL_NAME",
           "--env": "HF_ENDPOINT=https://hf-mirror.com",
           "--host": "/v1/models/",
           "--ports": "8000",
           "--replicas": "1",
           "--resource_memory": "20G",
           "--resource_cpu": "10",
-          "--resource_gpu": "2",
+          "--resource_gpu": "1",
           "--volume_mount": "kubeflow-user-workspace(pvc):/mnt",
           "--inference_config": "",
           "--metrics": "",
@@ -518,34 +518,36 @@
         "job_templete": "自定义镜像",
         "name": "task-data-process",
         "label": "数据准备",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "2G",
         "resource_cpu": "2",
         "resource_gpu": "0",
         "resource_rdma": "0",
         "args": {
           "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
-          "workdir": "/mnt/{{creator}}/pipeline/example/chatglm/",
+          "workdir": "/mnt/{{creator}}/pipeline/example/deepseek/",
           "command": "python data-process-identiy.py"
         }
       },
       {
-        "job_templete": "chatglm4",
-        "name": "chatglm4-lora",
-        "label": "chatglm4 lora微调",
-        "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+        "job_templete": "deepseek",
+        "name": "deepseek-lora",
+        "label": "deepseek lora微调",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
         "resource_memory": "40G",
         "resource_cpu": "10",
-        "resource_gpu": "2",
+        "resource_gpu": "1",
         "resource_rdma": "0",
         "args": {
-          "--model_name": "THUDM/glm-4-9b-chat",
-          "--model_path": "/mnt/{{creator}}/pipeline/example/chatglm/glm-4-9b-chat",
-          "--dataset": "/mnt/{{creator}}/pipeline/example/chatglm/identity.json",
-          "--template": "glm4",
+          "--model_name": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+          "--model_path": "/mnt/{{creator}}/pipeline/example/deepseek/DeepSeek-R1-Distill-Qwen-7B/",
+          "--dataset": {
+            "path": "/mnt/{{creator}}/pipeline/example/deepseek/identity.json"
+          },
+          "--template": "deepseek3",
           "--finetuning_type": "lora",
-          "--lora_target": "query_key_value,dense_h_to_4h,dense_4h_to_h,dense",
-          "--output_dir": "/mnt/{{creator}}/pipeline/example/chatglm/result/",
+          "--lora_target": "all",
+          "--output_dir": "/mnt/{{creator}}/pipeline/example/deepseek/result/",
           "--per_device_train_batch_size": "4",
           "--gradient_accumulation_steps": "4",
           "--lr_scheduler_type": "cosine",
@@ -738,7 +740,7 @@
                 "job_templete": "自定义镜像",
                 "name": "download-model",
                 "label": "下载校验数据和预训练模型",
-                "volume_mount": "kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives",
+                "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
                 "resource_memory": "2G",
                 "resource_cpu": "2",
                 "resource_gpu": "0",

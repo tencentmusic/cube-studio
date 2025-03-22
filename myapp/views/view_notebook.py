@@ -223,6 +223,15 @@ class Notebook_ModelView_Base():
 
         self.pre_add(item)
 
+        # 如果修改了基础镜像，就把debug中的任务删除掉
+        if self.src_item_json:
+            # k8s集群更换了，要删除原来的
+            if str(self.src_item_json.get('project_id', '1')) != str(item.project.id):
+                src_project = db.session.query(Project).filter_by(id=int(self.src_item_json.get('project_id', '1'))).first()
+                if src_project and src_project.cluster['NAME'] != item.project.cluster['NAME']:
+                    self.base_muldelete([item],src_project.cluster['NAME'])
+                    flash(__('发现集群更换，已帮你删除之前启动的notebook'), 'success')
+
     def post_add(self, item):
 
         try:
@@ -261,7 +270,253 @@ class Notebook_ModelView_Base():
     pre_update_web = set_column
     pre_add_web = set_column
 
-    # @pysnooper.snoop(watch_explode=('notebook'))
+    @expose('/entry/jupyter', methods=['GET', 'DELETE'])
+    # @pysnooper.snoop()
+    def entry_jupyter(self):
+        data=request.args
+        project_name=data.get('project_name','public')
+        name = data.get('name',g.user.username+'-pipeline').replace("_",'')[:56]
+        label = data.get('label','打开目录')
+        resource_memory = data.get('resource_memory',"10G")
+        resource_cpu = data.get('resource_cpu',"10")
+        volume_mount = data.get('volume_mount','kubeflow-user-workspace(pvc):/mnt')
+        file_path = data.get('file_path', '')   # 一定要是文件在 notebook的容器目录
+
+        def template_str(src_str):
+            from jinja2 import Environment, BaseLoader, DebugUndefined
+            rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(src_str)
+            des_str = rtemplate.render(creator=g.user.username,
+                                       datetime=datetime,
+                                       runner=g.user.username,
+                                       uuid=uuid
+                                       )
+            return des_str
+
+        file_path = template_str(file_path)
+        if f'/mnt/{g.user.username}' in file_path:
+            file_path = file_path.replace(f'/mnt/{g.user.username}','')
+
+        images = data.get('images',f'{conf.get("REPOSITORY_ORG","ccr.ccs.tencentyun.com/cube-studio/")}notebook:jupyter-ubuntu22.04')
+        project = db.session.query(Project).filter(Project.name==project_name).filter(Project.type=='org').first()
+        notebook = db.session.query(Notebook).filter(Notebook.name==name).first()
+        if not project:
+            res = make_response("项目组%s不存在"%project_name)
+            res.status_code = 405
+            return res
+
+        if project:
+            if not notebook:
+                notebook = Notebook()
+            notebook.project = project
+            notebook.project_id = project.id
+            notebook.name = name
+            notebook.describe = label
+            notebook.images = images
+            notebook.ide_type = 'jupyter'
+            notebook.working_dir = ''
+            notebook.volume_mount = volume_mount
+            notebook.resource_memory = resource_memory
+            notebook.created_by=g.user
+            notebook.changed_by=g.user
+            notebook.resource_cpu = resource_cpu
+            if file_path.strip('/'):
+                notebook.expand = json.dumps({
+                    "root":file_path
+                })
+            if not notebook.id:
+                notebook.created_on=datetime.datetime.now()
+                db.session.add(notebook)
+
+            db.session.commit()
+
+        notebook_id = notebook.id
+        k8s_client = K8s(notebook.cluster.get('KUBECONFIG', ''))
+        namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
+        crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
+
+        # 删除
+        if request.method=='DELETE':
+            try:
+                k8s_client.delete_pods(namespace=namespace,pod_name=name)
+            except Exception as e:
+                print(e)
+            try:
+                k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'], namespace=namespace, name=name)
+            except Exception as e:
+                print(e)
+
+            try:
+                k8s_client.delete_service(namespace=namespace,name=name)
+            except Exception as e:
+                print(e)
+
+            notebook.delete()
+            db.session.commit()
+            res = make_response(__("删除成功"))
+            res.status_code = 200
+            return res
+
+        notebook = db.session.query(Notebook).filter(Notebook.id==int(notebook_id)).first()
+
+        port = 3000
+        name = notebook.name
+
+        # 创建新的service
+        labels = {"app": notebook.name, 'user': notebook.created_by.username, 'pod-type': "notebook"}
+        try:
+            exist_service = k8s_client.v1.read_namespaced_service(name=name, namespace=namespace)
+        except:
+            exist_service = None
+        if not exist_service:
+            k8s_client.create_service(
+                namespace=namespace,
+                name=name,
+                username=notebook.created_by.username,
+                ports=[port, ],
+                selector=labels
+            )
+        try:
+            exist_crd = k8s_client.CustomObjectsApi.get_namespaced_custom_object(
+                group=crd_info['group'], version=crd_info['version'],
+                plural=crd_info['plural'], namespace=namespace,
+                name=name
+            )
+        except:
+            exist_crd=None
+        host = notebook.project.cluster.get('HOST', request.host).split('|')[0].strip().split(':')[0]
+
+        if not exist_crd:
+            # 创建vs
+            crd_json = {
+                "apiVersion": "networking.istio.io/v1alpha3",
+                "kind": "VirtualService",
+                "metadata": {
+                    "name": name,
+                    "namespace": namespace
+                },
+                "spec": {
+                    "gateways": [
+                        "kubeflow/kubeflow-gateway"
+                    ],
+                    "hosts": [
+                        "*" if core.checkip(host) else host
+                    ],
+                    "http": [
+                        {
+                            "match": [
+                                {
+                                    "uri": {
+                                        "prefix": "/notebook/%s/%s/" % (namespace, notebook.name)
+                                    },
+                                    "headers": {
+                                        "cookie": {
+                                            "regex": ".*myapp_username=.*"
+                                        }
+                                    }
+
+                                }
+                            ],
+                            "rewrite": {
+                                "uri": '/notebook/jupyter/%s/' % notebook.name
+                            },
+                            "route": [
+                                {
+                                    "destination": {
+                                        "host": "%s.%s.svc.cluster.local" % (notebook.name, namespace),
+                                        "port": {
+                                            "number": port
+                                        }
+                                    }
+                                }
+                            ],
+                            "timeout": "300s"
+                        }
+                    ]
+                }
+            }
+
+            # print(crd_json)
+            crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],
+                                        namespace=namespace, body=crd_json)
+
+        exist_pod = k8s_client.get_pods(pod_name=name, namespace=namespace)
+        if exist_pod:
+            exist_pod = exist_pod[0]
+            # if exist_pod['status'] != 'Running':
+            k8s_client.v1.delete_namespaced_pod(name, namespace, grace_period_seconds=0)
+            exist_pod = None
+        rewrite_url = '/notebook/jupyter/%s/' % notebook.name
+        username=g.user.username
+        if not exist_pod:
+
+            pre_command = '(nohup sh /init.sh > /notebook_init.log 2>&1 &) ; (nohup sh /mnt/%s/init.sh > /init.log 2>&1 &) ; ' % username
+            working_dir = '/mnt/%s' % username
+            command = ["sh", "-c", "%s jupyter lab --notebook-dir=%s --ip=0.0.0.0 "
+                                   "--no-browser --allow-root --port=%s "
+                                   "--NotebookApp.token='' --NotebookApp.password='' --ServerApp.disable_check_xsrf=True "
+                                   "--NotebookApp.allow_origin='*' "
+                                   "--NotebookApp.base_url=%s" % (pre_command, "/mnt/"+username, port, rewrite_url)]
+            env = {
+                "NO_AUTH": "true",
+            }
+            pod, pod_spec = k8s_client.make_pod(
+                namespace=namespace,
+                name=name,
+                labels=labels,
+                annotations = {"project":project_name},
+                command=command,
+                args=None,
+                volume_mount=notebook.volume_mount,
+                working_dir=working_dir,
+                node_selector=notebook.get_node_selector(),
+                resource_memory="0G~" + notebook.resource_memory,
+                resource_cpu="0~" + notebook.resource_cpu,
+                resource_gpu=notebook.resource_gpu,
+                image_pull_policy=conf.get('IMAGE_PULL_POLICY', 'Always'),
+                image_pull_secrets=conf.get('HUBSECRET', []),
+                image=notebook.images,
+                hostAliases=conf.get('HOSTALIASES', ''),
+                env=env,
+                privileged=None,
+                accounts=conf.get('JUPYTER_ACCOUNTS',''),
+                username=username,
+                restart_policy='Never'
+            )
+            # print(pod)
+            try:
+                pod = k8s_client.v1.create_namespaced_pod(namespace, pod)
+                time.sleep(1)
+            except Exception as e:
+                print(e)
+        # print(pod)
+
+        left_retry = 10
+        status=''
+        while(left_retry):
+            pod = k8s_client.get_pods(namespace=namespace, pod_name=name)
+            if pod:
+                pod=pod[0]
+                status=json.dumps(pod['status_more'],ensure_ascii=False,indent=4, default=str).replace('\n',"<br>")
+                if pod['status']=='Running':
+                    if file_path:
+                        if file_path.lstrip('/'):
+                            file_path=f'/notebook/jupyter/{name}/lab/tree/'+file_path.strip('/')
+                            time.sleep(2)
+                            return redirect(file_path)
+                        else:
+                            file_path = f'/notebook/jupyter/{name}/lab?#/mnt/{g.user.username}'
+                            time.sleep(2)
+                            return redirect(file_path)
+
+                    return redirect('http://%s%s'%(host,rewrite_url))
+            left_retry=left_retry-1
+            time.sleep(2)
+        res = make_response(__("notebook未就绪，刷新此页面。<br> notebook状态：<br><br>")+Markup(status))
+        res.status_code=200
+        return res
+
+
+    # @pysnooper.snoop(watch_explode=('message'))
     def reset_notebook(self, notebook):
         notebook.changed_on = datetime.datetime.now()
         db.session.commit()
@@ -308,8 +563,8 @@ class Notebook_ModelView_Base():
         workingDir = None
         volume_mount = notebook.volume_mount
         # 端口+0是jupyterlab  +1是sshd   +2 +3 是预留的用户自己启动应用占用的端口
-
-        meet_ports = core.get_not_black_port(10000 + 10 * notebook.id)
+        port_str = conf.get('NOTEBOOK_PORT','10000+10*ID').replace('ID', str(notebook.id))
+        meet_ports = core.get_not_black_port(int(eval(port_str)))
         env = {
             "NO_AUTH": "true",
             "DISPLAY": ":10.0",   # 屏幕投屏时使用
@@ -322,6 +577,7 @@ class Notebook_ModelView_Base():
         }
 
         rewrite_url = '/'
+
         pre_command = '(nohup sh /init.sh > /notebook_init.log 2>&1 &) ; (nohup sh /mnt/%s/init.sh > /init.log 2>&1 &) ; ' % notebook.created_by.username
         if notebook.ide_type == 'jupyter' or notebook.ide_type == 'bigdata' or notebook.ide_type == 'machinelearning' or notebook.ide_type == 'deeplearning':
             rewrite_url = '/notebook/jupyter/%s/' % notebook.name
@@ -460,8 +716,10 @@ class Notebook_ModelView_Base():
         }
 
         # print(crd_json)
-        crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
-
+        try:
+            crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+        except:
+            pass
         # 边缘模式时，需要根据项目组中的配置设置代理ip
 
         if SERVICE_EXTERNAL_IP and SERVICE_EXTERNAL_IP[0]!='127.0.0.1':
@@ -484,8 +742,6 @@ class Notebook_ModelView_Base():
                 external_ip=SERVICE_EXTERNAL_IP if conf.get('K8S_NETWORK_MODE','iptables')!='ipvs' else None
             )
 
-        return crd
-
     # @event_logger.log_this
     @expose('/reset/<notebook_id>', methods=['GET', 'POST'])
     def reset(self, notebook_id):
@@ -497,7 +753,8 @@ class Notebook_ModelView_Base():
         except Exception as e:
             message = __('重置失败，稍后重试。') + str(e)
             flash(message, 'warning')
-            return self.response(400, **{"message": message, "status": 1, "result": {}})
+            return redirect(conf.get('MODEL_URLS', {}).get('notebook', ''))
+            # return self.response(400, **{"message": message, "status": 1, "result": {}})
 
         return redirect(conf.get('MODEL_URLS', {}).get('notebook', ''))
 
@@ -511,19 +768,23 @@ class Notebook_ModelView_Base():
 
     # 基础批量删除
     # @pysnooper.snoop()
-    def base_muldelete(self, items):
+    def base_muldelete(self, items, cluster=None):
         if not items:
-            abort(404)
+            return
+            # abort(404)
+
         for item in items:
             try:
-                k8s_client = K8s(item.cluster.get('KUBECONFIG',''))
-                k8s_client.delete_pods(namespace=item.namespace,pod_name=item.name)
-                k8s_client.delete_service(namespace=item.namespace,name=item.name)
-                k8s_client.delete_service(namespace=item.namespace, name=(item.name + "-external").lower()[:60].strip('-'))
+                if not cluster:
+                    cluster = item.project.cluster['NAME']
+                k8s_client = K8s(conf.get('CLUSTERS').get(cluster).get('KUBECONFIG', ''))
+                namespace = item.namespace
+                k8s_client.delete_pods(namespace=namespace,pod_name=item.name)
+                k8s_client.delete_service(namespace=namespace,name=item.name)
+                k8s_client.delete_service(namespace=namespace, name=(item.name + "-external").lower()[:60].strip('-'))
                 crd_info = conf.get("CRD_INFO", {}).get('virtualservice', {})
                 if crd_info:
-                    k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'],
-                                          plural=crd_info['plural'], namespace=item.namespace, name="notebook-jupyter-%s" % item.name.replace('_', '-'))
+                    k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'], namespace=item.namespace, name="notebook-jupyter-%s" % item.name.replace('_', '-'))
 
             except Exception as e:
                 flash(str(e), "warning")

@@ -108,7 +108,7 @@ def aigc_get_pic(url, headers, data):
                 image = result[0]['image']
                 if 'http:' not in image and 'https://' not in image:
                     image = urllib.parse.urljoin(url, image)
-                    print(image)
+                    # print(image)
                 return 0, image
     else:
         return 1, f'请求{url}失败'
@@ -196,7 +196,9 @@ openai接口类型
     "llm_data": {
         "xxxxx": "xxxxxx"   # 额外添加的json参数
     },
-    "stream": "false" # 是否流式响应
+    "stream": "false", # 是否流式响应
+    "before":[["replace","substr1","substr2"],["replace","substr1","substr2"]],
+    "after":[["replace","substr1","substr2"],["replace","substr1","substr2"]]
 }
 
 aihub接口类型
@@ -284,7 +286,7 @@ aihub接口类型
             description= _('接口类型，并不一定是openai，只需要符合http请求响应格式即可'),
             widget=Select2Widget(),
             default='openai',
-            choices=[[x, x] for x in ["openai",'aihub','chatbi','autogpt',_('召回列表')]],
+            choices=[[x, x] for x in ["openai",'aihub','chatbi',_('召回列表')]],
             validators=[]
         ),
         "service_config": StringField(
@@ -712,7 +714,7 @@ AI:
         except Exception as e:
             print(e)
 
-        if chat.service_type.lower() == 'openai' or chat.service_type.lower() == 'chatgpt4' or chat.service_type.lower() == 'chatgpt3.5':
+        if chat.service_type.lower() == 'openai':
             model = json.loads(chat.service_config).get('llm_data', {}).get("model", '')
             if 'dall' in model:
                 res = self.chatgpt_dall_e(
@@ -1077,7 +1079,7 @@ AI:
                 res = requests.post(recall_url,json=data,headers=headers,timeout=5,verify=False)
                 if res.status_code==200:
                     recall_result = res.json()
-                    print('召回响应',json.dumps(recall_result,indent=4,ensure_ascii=False))
+                    # print('召回响应',json.dumps(recall_result,indent=4,ensure_ascii=False))
                     if 'result' in recall_result:
                         knowledge= recall_result['result']
                         if not score:
@@ -1185,7 +1187,7 @@ AI:
                 knowledge = [str(knowledge)]
             knowledge = [x for x in knowledge if x.strip()]
             # 拼接请求体
-            print('召回知识库', json.dumps(knowledge, indent=4, ensure_ascii=False))
+            # print('召回知识库', json.dumps(knowledge, indent=4, ensure_ascii=False))
             added_knowledge = []
             # 添加私有知识库，要满足token限制
             for item in knowledge:
@@ -1211,7 +1213,7 @@ AI:
                         break
             added_history = '\n'.join(added_history)
             messages = messages.replace('{{history}}', added_history)
-        print(messages)
+        # print(messages)
         return [{'role': 'user', 'content': messages}]
 
     # 生成openai相应格式
@@ -1290,6 +1292,8 @@ AI:
             url, headers, llm_token = self.get_llm_url_header(chat, stream)
             message = self.generate_prompt(chat=chat, search_text=search_text, enable_history=enable_history, history=history)
             service_config = json.loads(chat.service_config)
+            before = service_config.get('before',[])
+            after = service_config.get('after', [])
             data = {
                 'model': 'gpt-4-turbo-2024-04-09',
                 'messages': message,
@@ -1309,82 +1313,106 @@ AI:
             if stream:
                 # 返回流响应
                 import sseclient
+                try:
+                    res = requests.post(
+                        url,
+                        headers=headers,
+                        json=data,
+                        stream=stream,
+                        verify=False
+                    )
+                    if res.status_code != 200:
+                        if i<(max_retry-1):
+                            continue
 
-                res = requests.post(
-                    url,
-                    headers=headers,
-                    json=data,
-                    stream=stream,
-                    verify=False
-                )
-                if res.status_code != 200 and i<(max_retry-1):
-                    continue
-                client = sseclient.SSEClient(res)
+                    client = sseclient.SSEClient(res)
 
-                # @pysnooper.snoop(watch_explode='message')
-                def generate(history):
+                    # @pysnooper.snoop(watch_explode='message')
+                    def generate(history):
 
-                    back_message = ''
-                    for event in client.events():
-                        message = event.data
-                        finish = False
-                        if message != '[DONE]':
-                            choices = json.loads(event.data)['choices']
-                            if choices:
-                                message = choices[0].get('delta', {}).get('content', '')
+                        back_message = ''
+                        for event in client.events():
+                            message = event.data
+                            finish = False
+                            if message != '[DONE]':
+                                choices = json.loads(event.data)['choices']
+                                if choices:
+                                    message = choices[0].get('delta', {}).get('content', '')
+                                else:
+                                    message=''
+                                # print(message, flush=True, end='')
+                            # print(message)
+                            if message == '[DONE]':
+                                finish = True
+                                back_message = back_message+g.after_message
+                                if chatlog_id:
+                                    # chatlog = db.session.query(ChatLog).filter_by(id=int(chatlog_id)).first()
+                                    # chatlog.answer_status = '成功'
+                                    # # chatlog.answer = back_message  # 内容太多了
+                                    # db.session.commit()
+                                    if history != None:
+                                        history.append((search_text, back_message))
+                                        history = history[0 - int(chat.session_num):]
+                                        try:
+                                            cache.set('chat_' + session_id, history, timeout=300)  # 人连续对话的时间跨度
+                                        except Exception as e:
+                                            print(e)
                             else:
-                                message=''
-                            print(message, flush=True, end='')
-                        # print(message)
-                        if message == '[DONE]':
-                            finish = True
-                            back_message = back_message+g.after_message
-                            if chatlog_id:
-                                # chatlog = db.session.query(ChatLog).filter_by(id=int(chatlog_id)).first()
-                                # chatlog.answer_status = '成功'
-                                # # chatlog.answer = back_message  # 内容太多了
-                                # db.session.commit()
-                                if history != None:
-                                    history.append((search_text, back_message))
-                                    history = history[0 - int(chat.session_num):]
-                                    try:
-                                        cache.set('chat_' + session_id, history, timeout=300)  # 人连续对话的时间跨度
-                                    except Exception as e:
-                                        print(e)
-                        else:
-                            back_message = back_message + message
-                        # 随机乱码，用来避免内容中包含此内容，实现每次返回内容的分隔
-                        back = "TQJXQKT0POF6P4D:" + json.dumps(
-                            {
-                                "message": "success",
-                                "status": 0,
-                                "finish":finish,
-                                "result": [
-                                    {"text": back_message},
-                                ]
-                            }, ensure_ascii=False
-                        ) + "\n\n"
-                        yield back
+                                back_message = back_message + message
 
-                response = Response(stream_with_context(generate(history=history if enable_history else None)),mimetype='text/event-stream')
-                response.headers["Cache-Control"] = "no-cache"
-                response.headers["Connection"] = 'keep-alive'
-                response.status_code = res.status_code
-                if response.status_code ==401:
-                    service_config = json.loads(chat.service_config)
-                    # if 'miss_tokens' not in service_config:
-                    #     service_config['miss_tokens']={}
-                    # service_config['miss_tokens'][llm_token]=service_config['miss_tokens'].get(llm_token,0)+1
-                    chat.service_config = json.dumps(service_config,ensure_ascii=False,indent=4)
-                    db.session.commit()
+                            back_ops_message = back_message
+                            for ops in after:
+                                if len(ops) == 3 and ops[0] == 'replace':
+                                    back_ops_message = back_ops_message.replace(ops[1], ops[2])
 
-                return response
+                            # 随机乱码，用来避免内容中包含此内容，实现每次返回内容的分隔
+                            back = "TQJXQKT0POF6P4D:" + json.dumps(
+                                {
+                                    "message": "success",
+                                    "status": 0,
+                                    "finish":finish,
+                                    "result": [
+                                        {"text": back_ops_message},
+                                    ]
+                                }, ensure_ascii=False
+                            ) + "\n\n"
+                            yield back
+
+                    response = Response(stream_with_context(generate(history=history if enable_history else None)),mimetype='text/event-stream')
+                    response.headers["Cache-Control"] = "no-cache"
+                    response.headers["Connection"] = 'keep-alive'
+                    response.status_code = res.status_code
+                    if response.status_code ==401:
+                        service_config = json.loads(chat.service_config)
+                        # if 'miss_tokens' not in service_config:
+                        #     service_config['miss_tokens']={}
+                        # service_config['miss_tokens'][llm_token]=service_config['miss_tokens'].get(llm_token,0)+1
+                        chat.service_config = json.dumps(service_config,ensure_ascii=False,indent=4)
+                        db.session.commit()
+
+                    return response
+                except Exception as e:
+                    print(e)
+                    if max_retry-1==i:
+                        def generate():
+                            back = "TQJXQKT0POF6P4D:" + json.dumps(
+                                {
+                                    "message": "success",
+                                    "status": 0,
+                                    "finish": True,
+                                    "result": [
+                                        {"text": '模型服务接口访问失败，请先部署模型'},
+                                    ]
+                                }, ensure_ascii=False
+                            ) + "\n\n"
+                            yield back
+                        response = Response(stream_with_context(generate()),mimetype='text/event-stream')
+                        response.headers["Cache-Control"] = "no-cache"
+                        response.headers["Connection"] = 'keep-alive'
+                        return response
 
                 # 返回普通响应
             else:
-                # print(url)
-                # print(headers)
-                # print(data)
                 res = requests.post(
                     url,
                     headers=headers,
@@ -1396,7 +1424,11 @@ AI:
                 if res.status_code == 200 or res.status_code == 201:
                     # print(res.text)
                     mes = res.json()['choices'][0]['message']['content']
-                    print(mes)
+                    # print(mes)
+                    for ops in after:
+                        if len(ops)==3 and ops[0]=='replace':
+                            mes = mes.replace(ops[1],ops[2])
+
                     return 0, mes
                 else:
                     service_config = json.loads(chat.service_config)

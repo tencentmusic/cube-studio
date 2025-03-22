@@ -1,3 +1,6 @@
+import base64
+import math
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
@@ -10,7 +13,7 @@ from myapp.models.model_job import Task, Pipeline, Workflow, RunHistory
 from myapp.models.model_team import Project
 from myapp.views.view_team import Project_Join_Filter
 from flask_appbuilder.actions import action
-from flask import jsonify, Response, request
+from flask import jsonify, Response, request, render_template
 from flask_appbuilder.forms import GeneralModelConverter
 from myapp.utils import core
 from myapp import app, appbuilder, db
@@ -1128,10 +1131,14 @@ class Pipeline_ModelView_Base():
         if not pipeline.pipeline_file:
             flash("请先编排任务，并进行保存后再运行整个任务流",'warning')
             return redirect('/pipeline_modelview/api/web/%s' % pipeline.id)
+        try:
+            crd_name = run_pipeline(pipeline, json.loads(pipeline.pipeline_file))  # 会根据版本号是否为空决定是否上传
+            pipeline.pipeline_argo_id = crd_name
+            db.session.commit()  # 更新
+        except Exception as e:
+            return render_template('close.html', data=str(e).replace('<br>', '\n'))
+            return redirect('/pipeline_modelview/api/web/%s' % pipeline.id)
 
-        crd_name = run_pipeline(pipeline, json.loads(pipeline.pipeline_file))  # 会根据版本号是否为空决定是否上传
-        pipeline.pipeline_argo_id = crd_name
-        db.session.commit()  # 更新
         # back_crds = pipeline.get_workflow()
         # 添加会和watch中的重复
         # if back_crds:
@@ -1178,9 +1185,15 @@ class Pipeline_ModelView_Base():
         pipeline = db.session.query(Pipeline).filter_by(id=pipeline_id).first()
         namespace = pipeline.namespace
         workflow_name = pipeline.pipeline_argo_id
-        cluster = pipeline.project.cluster["NAME"]
-        url = f'/frontend/commonRelation?backurl=/workflow_modelview/api/web/dag/{cluster}/{namespace}/{workflow_name}'
-        return redirect(url)
+        if workflow_name:
+            cluster = pipeline.project.cluster["NAME"]
+            url = f'/frontend/commonRelation?backurl=/workflow_modelview/api/web/dag/{cluster}/{namespace}/{workflow_name}'
+            return redirect(url)
+        else:
+            url = '/frontend/showOutLink?url=%2Fstatic%2Fappbuilder%2Fvison%2Findex.html%3Fpipeline_id%3D'+str(pipeline_id)
+            return redirect(url)
+
+
 
     # # @event_logger.log_this
     @expose("/web/monitoring/<pipeline_id>", methods=["GET"])

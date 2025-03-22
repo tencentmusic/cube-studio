@@ -929,7 +929,7 @@ def init():
                 images=images[0] if images else "",
                 namespace='jupyter',
                 ide_type='jupyter',
-                volume_mount='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+                volume_mount='kubeflow-user-workspace(pvc):/mnt',
                 node_selector='cpu=true,notebook=true',
                 image_pull_policy='Always',
                 resource_cpu='10',
