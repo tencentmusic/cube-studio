@@ -26,13 +26,13 @@ spec:
                 - "true"
       containers:
       - name: grafana
-        image:  grafana/grafana:9.1.5
+        image:  grafana/grafana:9.5.20
         env:
         - name: GRAFANA_PORT
           value: "3000"
         - name: GF_AUTH_BASIC_ENABLED
           value: "false"
-        - name: GF_AUTH_ANONYMOUS_ENABLED
+        - name: GF_AUTH_ANONYMOUS_ENABLED        # 这里可以配置不允许匿名，避免安全审核
           value: "true"
         - name: GF_SECURITY_ADMIN_USER
           valueFrom:
@@ -85,8 +85,8 @@ spec:
         hostPath:
           path: /usr/share/zoneinfo/Asia/Shanghai
       - name: grafana-datasources
-        secret:
-          secretName: grafana-datasources
+        configMap:
+          name: grafana-datasources
       - configMap:
           name: grafana-dashboards
         name: grafana-dashboards

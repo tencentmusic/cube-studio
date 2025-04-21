@@ -1,34 +1,22 @@
-FROM ubuntu:18.04
+FROM python:3.9
 
-# 安装运维工具
-RUN apt-get update && apt install -y --force-yes --no-install-recommends vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl locales zip
-# 安装python
-RUN apt install -y python3.6-dev python3-pip libsasl2-dev libpq-dev \
-    && ln -s /usr/bin/python3 /usr/bin/python \
-    && ln -s /usr/bin/pip3 /usr/bin/pip
+ENV TZ Asia/Shanghai
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN wget https://github.com/stern/stern/releases/download/v1.21.0/stern_1.21.0_linux_amd64.tar.gz && tar -zxvf stern_1.21.0_linux_amd64.tar.gz && rm stern_1.21.0_linux_amd64.tar.gz && chmod +x stern &&  mv stern /usr/bin/stern
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/bin/
+ARG TARGETARCH=amd64
 
-# 安装中文
-RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
-ENV LANG zh_CN.UTF-8
-ENV LC_ALL zh_CN.UTF-8
-ENV LANGUAGE zh_CN.UTF-8
+RUN wget https://github.com/stern/stern/releases/download/v1.21.0/stern_1.21.0_linux_${TARGETARCH}.tar.gz && tar -zxvf stern_1.21.0_linux_${TARGETARCH}.tar.gz && rm stern_1.21.0_linux_${TARGETARCH}.tar.gz && chmod +x stern &&  mv stern /usr/bin/stern
 
-# 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-    echo "alias la='ls -A'" >> /root/.bashrc && \
-    echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+RUN /usr/local/bin/python -m pip install --upgrade pip
 
-
-RUN pip install kubernetes==18.20.0 pysnooper psutil
+RUN pip install kubernetes==21.7.0 pysnooper psutil requests numpy  pyinstaller argparse
 COPY job/volcano/* /app/
 COPY job/pkgs /app/job/pkgs
 WORKDIR /app
 ENV PYTHONPATH=/app:$PYTHONPATH
 
 ENTRYPOINT ["python3", "launcher.py"]
+
+
 
 

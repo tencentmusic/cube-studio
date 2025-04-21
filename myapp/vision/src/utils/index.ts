@@ -25,3 +25,15 @@ export function isJsonString(str: string): boolean {
     return false;
   }
 }
+
+export function getParam(name: string): string | undefined {
+  const reg = new RegExp(`(^|&)${name}=([^&]*)(&|$)`);
+  const location: Location = window.location;
+  const href = location.href;
+  const query = href.substr(href.lastIndexOf('?') + 1);
+  const res = query.match(reg);
+  if (res !== null) {
+    return decodeURIComponent(res[2])
+  }
+  return undefined;
+}

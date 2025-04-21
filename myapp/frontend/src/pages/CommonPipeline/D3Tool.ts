@@ -102,8 +102,11 @@ export default class D3Tool {
 			.scaleExtent([0.1, 2])
 			// .scale(2)
 			// .on("dblclick", null)
-			.on('zoom', (e) => {
-				const transform = d3.event.transform;
+			.on('zoom', (e: any) => {
+				// console.log('graphviz zoomed with event:', e);
+				// fix
+				// const transform = d3.event.transform;
+				const transform = e.transform
 				_selfThis.scaleView.attr('style', 'transition:all 0s').attr('transform', transform);
 				_selfThis.tip.hide()
 			}).on("end", () => {

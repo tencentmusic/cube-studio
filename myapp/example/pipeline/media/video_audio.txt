@@ -1,0 +1,10 @@
+/mnt/admin/pipeline/example/media/ide.mp4 /mnt/admin/pipeline/example/media/ide.mp3
+/mnt/admin/pipeline/example/media/aigc.mp4 /mnt/admin/pipeline/example/media/aigc.np3
+/mnt/admin/pipeline/example/media/pipeline.mp4 /mnt/admin/pipeline/example/media/pipeline.mp3
+/mnt/admin/pipeline/example/media/vgpu.mp4 /mnt/admin/pipeline/example/media/vgpu.mp3
+/mnt/admin/pipeline/example/media/notebook.mp4 /mnt/admin/pipeline/example/media/notebook.mp3
+/mnt/admin/pipeline/example/media/aihub.mp4 /mnt/admin/pipeline/example/media/aihub.mp3
+/mnt/admin/pipeline/example/media/大模型.mp4 /mnt/admin/pipeline/example/media/大模型.mp3
+/mnt/admin/pipeline/example/media/自动化标注.mp4 /mnt/admin/pipeline/example/media/自动化标注.mp3
+/mnt/admin/pipeline/example/media/输入输出.mp4 /mnt/admin/pipeline/example/media/输入输出.mp3
+/mnt/admin/pipeline/example/media/aihub应用开发.mp4 /mnt/admin/pipeline/example/media/aihub应用开发.mp3

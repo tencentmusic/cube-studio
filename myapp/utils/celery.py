@@ -1,5 +1,4 @@
 
-import logging
 from typing import Iterator
 
 from contextlib2 import contextmanager
@@ -7,10 +6,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import NullPool
-
+import logging
 from myapp import app, db
 
-logger = logging.getLogger(__name__)
 
 # Null pool is used for the celery workers due process forking side effects.
 @contextmanager
@@ -31,7 +29,7 @@ def session_scope(nullpool: bool) -> Iterator[Session]:
         session.commit()
     except SQLAlchemyError as ex:
         session.rollback()
-        logger.exception(ex)
+        logging.exception(ex)
         raise
     finally:
         session.close()

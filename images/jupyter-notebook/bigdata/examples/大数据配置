@@ -1,0 +1,27 @@
+大数据软件客户端在/opt/third/目录下，可自行修改目录下的配置文件
+
+hadoop配置目录 /opt/third/hadoop/etc/hadoop
+ - hdfs地址配置 /opt/third/hadoop/etc/hadoop/core-site.xml   修改 fs.defaultFS
+ - yarn地址配置 /opt/third/hadoop/etc/hadoop/yarn-site.xml   修改 yarn.resourcemanager.address
+
+测试命令：hdfs dfs -mkdir /input/
+测试命令: hdfs dfs -ls /
+
+hive配置目录 /opt/third/hive/conf/
+ - metastore地址配置 /opt/third/hive/conf/hive-site.xml      修改 hive.metastore.uris
+
+测试命令：hive -e 'show database'
+```
+创建个表
+CREATE TABLE IF NOT EXISTS test(key INT,value string) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+插入数据
+insert into test values(1,"1");
+select * from test;
+```
+
+spark配置目录 /opt/third/spark/conf/
+ - spark默认配置 /opt/third/spark/conf/spark-defaults.conf
+
+测试命令：spark-sql
+注意：python写的pyspark需要占用固定端口，每次需要先关闭之前启动的pyspark再启动新的，保证固定端口可用
+

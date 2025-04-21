@@ -1,8 +1,9 @@
+import re
+
 from flask_login import current_user
 import logging
 import jwt
 
-from flask_babel import lazy_gettext
 import pysnooper
 from flask import current_app
 from flask_appbuilder.security.sqla import models as ab_models
@@ -14,6 +15,7 @@ from flask_appbuilder.security.views import (
     RoleModelView,
     UserModelView
 )
+from werkzeug.security import generate_password_hash,check_password_hash
 from flask_appbuilder.security.sqla.models import assoc_user_role
 
 from flask_appbuilder.security.decorators import has_access
@@ -24,7 +26,10 @@ from sqlalchemy import or_
 from flask_appbuilder.security.views import expose
 
 from flask import g, flash, request
-
+from sqlalchemy import (
+    Boolean,
+    Text
+)
 from flask_appbuilder.security.sqla.models import assoc_permissionview_role
 from sqlalchemy import select
 from flask_appbuilder.const import (
@@ -35,6 +40,14 @@ from flask_appbuilder.const import (
     AUTH_REMOTE_USER,
     LOGMSG_WAR_SEC_LOGIN_FAILED
 )
+from flask_appbuilder.security.views import SimpleFormView
+from flask_appbuilder._compat import as_unicode
+from wtforms import StringField
+from wtforms.validators import DataRequired,Regexp,Length
+
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
+from flask_appbuilder.forms import DynamicForm
+
 
 
 
@@ -78,10 +91,21 @@ from flask_appbuilder.security.sqla.models import User,Role
 from sqlalchemy import Column, String
 
 
-
-class MyUser(User):
+from myapp.models.base import MyappModelBase
+class MyUser(User,MyappModelBase):
     __tablename__ = 'ab_user'
     org = Column(String(200))   # Organization
+    quota = Column(String(2000))  # 资源配额
+    active = Column(Boolean,default=True)
+    balance = Column(Text(),default="{}")  # 余额，冻结余额，余额不足是否关机，真实还是虚拟余额
+    wechat = Column(String(200))  # 微信
+    phone = Column(String(200))  # 电话号码
+    coupon = Column(Text(),default="{}")  # 优惠券：名称，使用条件，生效时间，失效时间，余额，原始面值，状态
+    voucher = Column(Text(),default="{}")  # 代金券：名称，类型，规则，最高抵扣，面额，折扣，生效时间，失效时间，状态，适用产品，适用范围
+    bill = Column(Text(),default="{}")  # 发票信息:发票抬头,发票类型,纳税人识别号,开户银行名称,基本开户账号,注册场所地址,注册固定电话,收件人姓名,手机号,地址,
+    real_name_authentication = Column(Text(),default="{}")  # 实名认证：真实姓名，身份证；企业证件类型，企业证件附件，企业名称，企业证件号码，法人/被授权人身份(法定代表人，被授予人)，身份证件附件正面，身份证件背面，姓名，证件号码，状态
+    subaccount = Column(Text(),default="{}")  # 子用户，用于表征子账户的信息：父账户，累计消息，共享主帐号余额，子账户权限
+
     def get_full_name(self):
         return self.username
 
@@ -102,93 +126,124 @@ class MyUser(User):
             # timestamp = int(func.date_format(self.changed_on))
             timestamp = int(self.changed_on.timestamp())
             payload = {
-                "iss": self.username
+                "iss": "cube-studio",
+                "sub":self.username
                 # "iat": timestamp,  # Issue period
                 # "nbf": timestamp,  # Effective Date
                 # "exp": timestamp + 60 * 60 * 24 * 30 * 12,  # Valid for 12 months
             }
 
-            global_password = 'myapp'
+            from myapp import conf
+            global_password = conf.get('JWT_PASSWORD','cube-studio')
             encoded_jwt = jwt.encode(payload, global_password, algorithm='HS256')
-            encoded_jwt = encoded_jwt.decode('utf-8')
             return encoded_jwt
         return ''
 
+    @property
+    def roles_html(self):
+        return "["+', '.join([role.name for role in self.roles]) +"]"
+
+import pysnooper
+class MyRole(Role,MyappModelBase):
+    __tablename__ = 'ab_role'
+
+    @property
+    def permissions_html(self):
+        return "["+'],\n['.join([permission.permission.name + " on "+permission.view_menu.name for permission in self.permissions]) +"]"
 
 # customize role view
 class MyRoleModelView(RoleModelView):
 
-    datamodel = SQLAInterface(Role)
+    datamodel = SQLAInterface(MyRole)
     order_columns = ["id"]
+    base_order = ('id', 'desc')
     route_base = "/roles"
     list_columns = ["name", "permissions"]
+    base_permissions = ['can_list', 'can_edit', 'can_add', 'can_show']
 
 
 class MyUserRemoteUserModelView_Base():
+    label_title = _('用户')
     datamodel = SQLAInterface(MyUser)
-    list_columns = ["username", "active", "roles", ]
-    edit_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]
-    add_columns = ["first_name", "last_name", "username",'password', "active", "email", "roles",'org' ]
-    show_columns = ["username", "active", "roles", "login_count"]
+
+    base_permissions = ['can_list', 'can_edit', 'can_add', 'can_show','can_userinfo']
+
+    list_columns = ["username", "active", "roles"]
+
+    edit_columns = ["username",'password', "active", "email", "roles", 'org']
+    add_columns = ["username",'password', "email", "roles", 'org']
+    show_columns = ["username", "active",'email','org','password', "roles",'secret']
+    describe_columns={
+        "roles": "Admin角色拥有管理员权限，Gamma为普通用户角色"
+    }
     list_widget = MyappSecurityListWidget
     label_columns = {
-        "get_full_name": lazy_gettext("Full Name"),
-        "first_name": lazy_gettext("First Name"),
-        "last_name": lazy_gettext("Last Name"),
-        "username": lazy_gettext("User Name"),
-        "password": lazy_gettext("Password"),
-        "active": lazy_gettext("Is Active?"),
-        "email": lazy_gettext("Email"),
-        "roles": lazy_gettext("Role"),
-        "last_login": lazy_gettext("Last login"),
-        "login_count": lazy_gettext("Login count"),
-        "fail_login_count": lazy_gettext("Failed login count"),
-        "created_on": lazy_gettext("Created on"),
-        "created_by": lazy_gettext("Created by"),
-        "changed_on": lazy_gettext("Changed on"),
-        "changed_by": lazy_gettext("Changed by"),
-        "secret": lazy_gettext("Authorization"),
+        "get_full_name": _("全名称"),
+        "first_name": _("姓"),
+        "last_name": _("名"),
+        "username": _("用户名"),
+        "password": _("密码"),
+        "active": _("激活"),
+        "email": _("邮箱"),
+        "roles": _("角色"),
+        "roles_html": _("角色"),
+        "last_login": _("最近一次登录"),
+        "login_count": _("登录次数"),
+        "fail_login_count": _("登录失败次数"),
+        "created_on": _("创建时间"),
+        "created_by": _("创建者"),
+        "changed_on": _("修改时间"),
+        "changed_by": _("修改者"),
+        "secret": _("秘钥"),
+        "quota": _('额度'),
+        "org": _("组织架构")
     }
+    spec_label_columns = label_columns
 
-    show_fieldsets = [
-        (
-            lazy_gettext("User info"),
-            {"fields": ["username", "active", "roles", "login_count",'secret']},
-        ),
-        (
-            lazy_gettext("Personal Info"),
-            {"fields": ["first_name", "last_name", "email",'org'], "expanded": True},
-        ),
-        (
-            lazy_gettext("Audit Info"),
-            {
-                "fields": [
-                    "last_login",
-                    "fail_login_count",
-                    "created_on",
-                    "created_by",
-                    "changed_on",
-                    "changed_by",
-                ],
-                "expanded": False,
-            },
-        ),
-    ]
-
+    order_columns=['id']
+    search_columns = ["username", 'org']
+    base_order = ('id', 'desc')
+    # 个人查看详情额展示的信息
     user_show_fieldsets = [
         (
-            lazy_gettext("User info"),
-            {"fields": ["username", "active", "roles", "login_count",'secret']},
-        ),
-        (
-            lazy_gettext("Personal Info"),
-            {"fields": ["first_name", "last_name", "email"], "expanded": True},
-        ),
+            _("用户信息"),
+            {"fields": ["username", "active", "roles", "email",'secret','org']},
+        )
     ]
+    show_fieldsets = user_show_fieldsets
 
+    add_form_extra_fields = {
+        "username" : StringField(
+            _("用户名"),
+            validators=[DataRequired(), Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$")],
+            widget=BS3TextFieldWidget(),
+            description=_("用户名只能由小写字母、数字、-组成"),
+        ),
+        "password": StringField(
+            _("密码"),
+            validators=[DataRequired()],
+            widget=BS3TextFieldWidget()
+        ),
+        "email": StringField(
+            _("邮箱"),
+            validators=[DataRequired(), Regexp(".*@.*\..*")],
+            widget=BS3TextFieldWidget()
+        ),
+        "org": StringField(
+            _("组织架构"),
+            widget=BS3TextFieldWidget(),
+            description=_("组织架构，自行填写"),
+        ),
+        "quota": StringField(
+            _("额度限制"),
+            widget=BS3TextFieldWidget(),
+            description=_('资源限额，额度填写方式 $集群名,$资源组名,$命名空间,$资源类型,$限制类型,$限制值，<br>其中$集群名可为all,dev，<br>$资源组名可为all,public，<br>$命名空间包含all,jupyter,pipeline,service,automl,aihub，<br>$资源类型包含cpu,memory,gpu，<br>$限制类型包含single,concurrent')
+        ),
+    }
+    edit_form_extra_fields = add_form_extra_fields
 
     @expose("/userinfo/")
-    @has_access
+    # @has_access
     def userinfo(self):
         item = self.datamodel.get(g.user.id, self._base_filters)
         widgets = self._get_show_widget(
@@ -207,8 +262,9 @@ class MyUserRemoteUserModelView_Base():
     def post_add(self,user):
         from myapp import security_manager,db
         gamma_role = security_manager.find_role('Gamma')
-        if gamma_role not in user.roles:
+        if gamma_role not in user.roles and not user.roles:
             user.roles.append(gamma_role)
+            user.active=True
             db.session.commit()
 
         # 添加到public项目组
@@ -225,64 +281,54 @@ class MyUserRemoteUserModelView_Base():
         except Exception:
             db.session.rollback()
 
+    def post_update(self,user):
+        # 如果修改了账户，要更改labelstudio中的账户
+        self.post_add(user)
 
+    def pre_add(self,user):
+        user.first_name = user.username
+        user.last_name = ''
+        user.active=True
+
+    def pre_update(self,user):
+        user.first_name = user.username
+        user.last_name = ''
 
 class MyUserRemoteUserModelView(MyUserRemoteUserModelView_Base,UserModelView):
     datamodel = SQLAInterface(MyUser)
-
-from flask_appbuilder.security.views import SimpleFormView
-from flask_appbuilder._compat import as_unicode
-from flask_babel import lazy_gettext
-from wtforms import StringField
-from wtforms.validators import DataRequired
-
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
-from flask_appbuilder.forms import DynamicForm
 
 
 class UserInfoEditView(SimpleFormView):
 
     class UserInfoEdit(DynamicForm):
-        first_name = StringField(
-            lazy_gettext("First Name"),
-            validators=[DataRequired()],
-            widget=BS3TextFieldWidget(),
-            description=lazy_gettext("Write the user first name or names"),
-        )
-        last_name = StringField(
-            lazy_gettext("Last Name"),
-            validators=[DataRequired()],
-            widget=BS3TextFieldWidget(),
-            description=lazy_gettext("Write the user last name"),
-        )
         username = StringField(
-            lazy_gettext("User Name"),
-            validators=[DataRequired()],
+            _("用户名"),
+            validators=[DataRequired(), Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$")],
             widget=BS3TextFieldWidget(),
-            description=lazy_gettext("Write the Username"),
+            description=_("用户名只能由小写字母、数字、-组成"),
         )
         password = StringField(
-            lazy_gettext("Password"),
+            _("密码"),
             validators=[DataRequired()],
             widget=BS3TextFieldWidget(),
-            description=lazy_gettext("Password"),
+            description=_("密码"),
         )
         email = StringField(
-            lazy_gettext("Email"),
-            validators=[DataRequired()],
+            _("邮箱"),
+            validators=[DataRequired(), Regexp(".*@.*.com")],
             widget=BS3TextFieldWidget(),
-            description=lazy_gettext("Write the Email"),
+            description=_("填写邮箱地址"),
         )
         org = StringField(
-            lazy_gettext("Org"),
+            _("组织架构"),
             widget=BS3TextFieldWidget(),
-            description=lazy_gettext("organization name"),
+            description=_("组织架构，自行填写"),
         )
 
     form = UserInfoEdit
-    form_title = lazy_gettext("Edit User Information")
+    form_title = _("编辑用户信息")
     redirect_url = "/"
-    message = lazy_gettext("User information changed")
+    message = _("用户信息修改完成")
 
     def form_get(self, form):
         item = self.appbuilder.sm.get_user_by_id(g.user.id)
@@ -299,7 +345,6 @@ class UserInfoEditView(SimpleFormView):
         form.populate_obj(item)
         self.appbuilder.sm.update_user(item)
         flash(as_unicode(self.message), "info")
-
 
 
 from myapp.project import MyCustomRemoteUserView
@@ -334,15 +379,15 @@ class MyappSecurityManager(SecurityManager):
         # 添加从header中进行认证的方式
         self.lm.header_loader(self.load_user_from_header)
 
-    # 使用header 认证，通过rtx名获取用户
+    # 使用header 认证，通过username名获取用户
     # @pysnooper.snoop()
     def load_user_from_header(self, authorization_value):
         # token=None
         # if 'token' in request.headers:
         #     token = request.headers['token']
         if authorization_value:
-            # rtx 免认证
-            if len(authorization_value) < 20:
+            # username 免认证
+            if len(authorization_value) < 40:
                 username = authorization_value
                 if username:
                     user = self.find_user(username)
@@ -350,13 +395,14 @@ class MyappSecurityManager(SecurityManager):
                     return user
             else:  # token 认证
                 encoded_jwt = authorization_value.encode('utf-8')
-                payload = jwt.decode(encoded_jwt, 'myapp', algorithms=['HS256'])
+                from myapp import conf
+                payload = jwt.decode(encoded_jwt, conf.get('JWT_PASSWORD','cube-studio'), algorithms=['HS256'])
                 # if payload['iat'] > time.time():
                 #     return
                 # elif payload['exp'] < time.time():
                 #     return
                 # else:
-                user = self.find_user(payload['iss'])
+                user = self.find_user(payload['sub'])
                 g.user = user
                 return user
 
@@ -396,8 +442,8 @@ class MyappSecurityManager(SecurityManager):
             self.auth_view = self.authdbview()
 
         elif self.auth_type == AUTH_LDAP:
-            self.user_view = self.userldapmodelview
-            self.auth_view = self.authldapview()
+            self.user_view = self.userdbmodelview
+            self.auth_view = self.authdbview()
         elif self.auth_type == AUTH_OAUTH:
             self.user_view = self.useroauthmodelview
             self.auth_view = self.authoauthview()
@@ -420,7 +466,7 @@ class MyappSecurityManager(SecurityManager):
             "List Users",
             icon="fa-user",
             href="/users/list/?_flt_2_username=",
-            label=_("List Users"),
+            label=_("用户列表"),
             category="Security",
             category_icon="fa-cogs",
             category_label=_("Security"),
@@ -430,7 +476,7 @@ class MyappSecurityManager(SecurityManager):
             "List Roles",
             icon="fa-group",
             href="/roles/list/?_flt_2_name=",
-            label=_("List Roles"),
+            label=_("角色列表"),
             category="Security",
             category_icon="fa-cogs",
         )
@@ -441,7 +487,7 @@ class MyappSecurityManager(SecurityManager):
                 self.userstatschartview,
                 "User's Statistics",
                 icon="fa-bar-chart-o",
-                label=_("User's Statistics"),
+                label=_("用户统计信息"),
                 category="Security",
             )
         if self.auth_user_registration:
@@ -449,7 +495,7 @@ class MyappSecurityManager(SecurityManager):
                 self.registerusermodelview,
                 "User's Statistics",
                 icon="fa-user-plus",
-                label=_("User Registrations"),
+                label=_("用户注册"),
                 category="Security",
             )
         self.appbuilder.menu.add_separator("Security")
@@ -457,14 +503,14 @@ class MyappSecurityManager(SecurityManager):
             self.permissionmodelview,
             "Base Permissions",
             icon="fa-lock",
-            label=_("Base Permissions"),
+            label=_("基础权限"),
             category="Security",
         )
         self.appbuilder.add_view(
             self.viewmenumodelview,
             "Views/Menus",
             icon="fa-list-alt",
-            label=_("Views/Menus"),
+            label=_("视图和菜单"),
             category="Security",
         )
         self.appbuilder.add_view(
@@ -490,14 +536,13 @@ class MyappSecurityManager(SecurityManager):
             user.email = email
             user.active = True
             user.roles+=roles   # 添加默认注册角色
-            user.password=password
-            # if hashed_password:
-            #     user.password = hashed_password
-            # else:
-            #     user.password = generate_password_hash(password)
+            if password:
+                user.password=password
+            if hashed_password:
+                user.password = generate_password_hash(hashed_password)
             self.get_session.add(user)
             self.get_session.commit()
-
+            # 在项目组中添加用户
             try:
                 from myapp.models.model_team import Project_User, Project
                 public_project = self.get_session.query(Project).filter(Project.name == "public").filter(Project.type == "org").first()
@@ -516,20 +561,17 @@ class MyappSecurityManager(SecurityManager):
             self.get_session.rollback()
             return False
 
-        # 添加public项目组
-
-
 
     # 添加注册远程用户
     # @pysnooper.snoop()
-    def auth_user_remote_org_user(self, username,org_name='',password='',email='',first_name='',last_name=''):
+    def auth_user_remote_org_user(self, username,org_name='',password='',hashed_password='',email='',first_name='',last_name=''):
         if not username:
             return None
         # 查找用户
+        from myapp import conf
         user = self.find_user(username=username)
         # 添加以组织同名的角色，同时添加上级角色
-        # 注册rtx同名角色
-        rtx_role = self.add_role(username)
+
         # 如果用户不存在就注册用户
         if user is None:
             user = self.add_org_user(
@@ -537,9 +579,10 @@ class MyappSecurityManager(SecurityManager):
                 first_name=first_name if first_name else username,
                 last_name=last_name if last_name else username,
                 password=password,
+                hashed_password=hashed_password,
                 org=org_name,               # 添加组织架构
-                email=username + "@tencent.com" if not email else email,
-                roles=[self.find_role(self.auth_user_registration_role),rtx_role] if self.find_role(self.auth_user_registration_role) else [rtx_role,]  #  org_role   添加gamma默认角色,    组织架构角色先不自动添加
+                email=username + f"@{conf.get('APP_NAME','cube-studio').replace(' ','').lower()}.com" if not email else email,
+                roles=[self.find_role(self.auth_user_registration_role)] if self.find_role(self.auth_user_registration_role) else []  #  org_role   添加gamma默认角色,    组织架构角色先不自动添加
             )
         elif not user.is_active:  # 如果用户未激活不允许接入
             print(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
@@ -553,14 +596,13 @@ class MyappSecurityManager(SecurityManager):
             gamma_role = self.find_role(self.auth_user_registration_role)
             if gamma_role and gamma_role not in user.roles:
                 user.roles.append(gamma_role)
-            if rtx_role and rtx_role not in user.roles:
-                user.roles.append(rtx_role)
+
             # 更新用户信息
             if org_name:
                 user.org = org_name    # 更新组织架构字段
-                org_role = self.add_role(org_name)
-                if org_role not in user.roles:
-                    user.roles.append(org_role)
+                # org_role = self.add_role(org_name)
+                # if org_role not in user.roles:
+                #     user.roles.append(org_role)
 
             self.update_user_auth_stat(user)
 
@@ -652,7 +694,7 @@ class MyappSecurityManager(SecurityManager):
                     .filter(self.user_model.id == g.user.id)
                     .filter(self.permission_model.name == permission_name)
             ).all()
-            return set([s.name for s in view_menu_names])
+            return list(set([s.name for s in view_menu_names]))
 
         # Properly treat anonymous user 匿名用户
         public_role = self.get_public_role()
@@ -663,8 +705,8 @@ class MyappSecurityManager(SecurityManager):
                     self.permission_model.name == permission_name
                 )
             ).all()
-            return set([s.name for s in view_menu_names])
-        return set()
+            return list(set([s.name for s in view_menu_names]))
+        return []
 
 
     # 在视图上添加权限
@@ -691,8 +733,6 @@ class MyappSecurityManager(SecurityManager):
         # Creating default roles
         self.set_role("Admin", self.is_admin_pvm)
         self.set_role("Gamma", self.is_gamma_pvm)
-        self.set_role("granter", self.is_granter_pvm)
-
 
         # commit role and view menu updates
         self.get_session.commit()
@@ -744,7 +784,6 @@ class MyappSecurityManager(SecurityManager):
             or pvm.permission.name in self.ADMIN_ONLY_PERMISSIONS
         )
 
-
     # 校验权限是否是默认所有人可接受的
     def is_accessible_to_all(self, pvm):
         return pvm.permission.name in self.ACCESSIBLE_PERMS
@@ -755,33 +794,17 @@ class MyappSecurityManager(SecurityManager):
 
     # 看一个权限是否是gamma角色该有的权限
     def is_gamma_pvm(self, pvm):
+        # return False
         return not (
             self.is_user_defined_permission(pvm)
             or self.is_admin_only(pvm)
         ) or self.is_accessible_to_all(pvm)
 
 
-    def is_granter_pvm(self, pvm):
-        return pvm.permission.name in {"can_override_role_permissions", "can_approve"}
-
-
     # 创建视图，创建权限，创建视图-权限绑定记录。
-    def set_perm(self, mapper, connection, target,permission_name):  # noqa
-        #
-        # connection is sql
-        # target is tables/db  model
-
-        if target.perm != target.get_perm():
-            link_table = target.__table__
-            connection.execute(
-                link_table.update()
-                .where(link_table.c.id == target.id)
-                .values(perm=target.get_perm())
-            )
-
-        # add to view menu if not already exists
-        permission_name = permission_name
-        view_menu_name = target.get_perm()
+    # @pysnooper.snoop()
+    def set_perm(self, view_menu_name,permission_name):
+        connection = self.get_session
         permission = self.find_permission(permission_name)
         view_menu = self.find_view_menu(view_menu_name)
         pv = None
@@ -791,12 +814,14 @@ class MyappSecurityManager(SecurityManager):
                 self.permission_model.__table__  # pylint: disable=no-member
             )
             connection.execute(permission_table.insert().values(name=permission_name))
+            connection.commit()
             permission = self.find_permission(permission_name)
 
         # 如果视图不存在就创建
         if not view_menu:
             view_menu_table = self.viewmenu_model.__table__  # pylint: disable=no-member
             connection.execute(view_menu_table.insert().values(name=view_menu_name))
+            connection.commit()
             view_menu = self.find_view_menu(view_menu_name)
 
         # 获取是否存在 视图-权限绑定  记录
@@ -817,6 +842,7 @@ class MyappSecurityManager(SecurityManager):
                     permission_id=permission.id, view_menu_id=view_menu.id
                 )
             )
+            connection.commit()
             # 重新获取权限视图绑定记录
             pv = (
                 self.get_session.query(self.permissionview_model)
@@ -826,36 +852,20 @@ class MyappSecurityManager(SecurityManager):
         return pv
 
 
-
     # 根据权限，视图，添加到相关pv-role
-    @classmethod
-    def add_pv_role(self,permission_name,view_menu_name,session):
-        permission = session.query(self.permission_model).filter_by(name=permission_name).first()
-        view_menu = session.query(self.viewmenu_model).filter_by(name=view_menu_name).first()
-        # 获取是否存在 视图-权限绑定  记录
-        if permission and view_menu:
-            pv = (
-                session.query(self.permissionview_model)
-                    .filter_by(permission=permission, view_menu=view_menu)
-                    .first()
-            )
+    # @pysnooper.snoop()
+    def add_pv_role(self,permission_name,view_menu_name,role_name):
+        pv = self.set_perm(view_menu_name=view_menu_name,permission_name=permission_name)
+        if pv:
             try:
-                # 为用户所属组织架构都添加该pv
-                if pv and g.user and g.user.org:
-                    roles = session.query(self.role_model).all()  # 获取所有角色，自动在相应角色下面添加pv
-                    if roles:
-                        for role in roles:
-                            if role.name in g.user.org:
-                                # 为pvm-role表中添加记录
-                                pv_role = session.execute(select([assoc_permissionview_role.c.id]).where(assoc_permissionview_role.c.permission_view_id==pv.id)
-                                                          .where(assoc_permissionview_role.c.role_id==role.id)
-                                                          .limit(1)
-                                                          ).fetchall()
-                                if not pv_role:
-                                    session.execute(assoc_permissionview_role.insert().values(
-                                        permission_view_id=pv.id, role_id=role.id
-                                        )
-                                    )
+                session = self.get_session
+                role = session.query(self.role_model).filter_by(name=role_name).first()
+                if role:
+                    # 为pvm-role表中添加记录
+                    pv_role = session.query(assoc_permissionview_role.c.id).filter(assoc_permissionview_role.c.permission_view_id==pv.id).filter(assoc_permissionview_role.c.role_id==role.id).first()
+                    if not pv_role:
+                        session.execute(assoc_permissionview_role.insert().values(permission_view_id=pv.id, role_id=role.id))
+                        session.commit()
             except Exception as e:
                 logging.error(e)
 
@@ -865,12 +875,21 @@ class MyappSecurityManager(SecurityManager):
     def get_join_projects_id(self,session):
         from myapp.models.model_team import Project_User
         if g.user:
-            projects_id = session.query(Project_User.project_id).filter(Project_User.user_id == User.get_user_id()).all()
-            projects_id = [project_id[0] for project_id in projects_id]
+            project_users = session.query(Project_User).filter(Project_User.user_id == User.get_user_id()).all()
+
+            projects_id = [project_user.project_id for project_user in project_users if project_user.project.type=='org']
             return projects_id
         else:
             return []
 
+    @classmethod
+    def get_join_projects(self,session):
+        from myapp.models.model_team import Project_User
+        if g.user:
+            project_users = session.query(Project_User).filter(Project_User.user_id == g.user.id).all()
+            return [project_user.project for project_user in project_users if project_user.project.type=='org']
+        else:
+            return []
 
     @classmethod
     def get_create_pipeline_ids(self,session):

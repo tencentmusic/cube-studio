@@ -1,10 +1,10 @@
 import random
 import time
+import logging
 import pandas
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
-from flask_babel import lazy_gettext
 import copy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -28,11 +28,11 @@ from flask import (
 )
 from .base import MyappFilter
 from myapp.models.model_dimension import Dimension_table
+from myapp.utils import core
 from flask_appbuilder import expose
 import pysnooper, datetime, json
 
 conf = app.config
-logging = app.logger
 
 
 class Dimension_table_Filter(MyappFilter):
@@ -51,55 +51,55 @@ class Dimension_table_Filter(MyappFilter):
 
 Metadata_column_fields = {
     "name": StringField(
-        label=_("列名"),
-        description='列名(小写字母、数字、_ 组成)，最长50个字符',
+        label= _("列名"),
+        description= _('列名(小写字母、数字、_ 组成)，最长50个字符'),
         default='',
         widget=BS3TextFieldWidget(),
         validators=[Regexp("^[a-z][a-z0-9_]*[a-z0-9]$"), Length(1, 54), DataRequired()]
     ),
     "describe": StringField(
-        label=_('列描述'),
-        description='列名描述',
+        label= _('列描述'),
+        description='',
         default='',
         widget=BS3TextFieldWidget(),
         validators=[DataRequired()]
     ),
     "column_type": SelectField(
-        label=_('字段类型'),
-        description='列类型',
+        label= _('字段类型'),
+        description='',
         widget=Select2Widget(),
         default='text',
-        choices=[['int', 'int'], ['text', 'text'], ['date', 'date'], ['double', 'double'], ['enum', 'enum']],
+        choices=[['int', 'int'], ['text', 'text'], ['date', 'date'], ['double', 'double'], ['enum', 'enum'], ['json', 'json']],
         validators=[DataRequired()]
     ),
     "unique": BooleanField(
-        label=_('是否唯一'),
-        description='是否唯一',
+        label= _('是否唯一'),
+        description='',
         default=False,
         widget=BS3TextFieldWidget(),
     ),
     "nullable": BooleanField(
-        label=_('是否可为空'),
-        description='是否可为空',
+        label= _('是否可为空'),
+        description='',
         default=True,
         widget=BS3TextFieldWidget(),
     ),
     "primary_key": BooleanField(
-        label=_('是否为主键'),
-        description='是否为主键',
+        label= _('是否为主键'),
+        description='',
         default=False,
         widget=BS3TextFieldWidget(),
     ),
     "choices": StringField(
-        label=_('可选择项'),
-        description='enum类型时，逗号分割多个可选择项，为空则为数据库记录已存在可选择项',
+        label= _('可选择项'),
+        description= _('enum类型时，逗号分割多个可选择项，为空则为数据库记录已存在可选择项'),
         default='',
         widget=BS3TextFieldWidget(),
     )
 }
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def ddl_hive_external_table(table_id):
     try:
         item = db.session.query(Dimension_table).filter_by(id=int(table_id)).first()
@@ -107,14 +107,14 @@ def ddl_hive_external_table(table_id):
             return
         cols = json.loads(item.columns)
         # 创建hive外表
-        hive_type_map = {'INT': 'BIGINT', 'TEXT': 'STRING','STRING': 'STRING','DATE': 'STRING', 'DOUBLE': 'DOUBLE','ENUM':'STRING'}
+        hive_type_map = {'INT': 'BIGINT', 'TEXT': 'STRING','STRING': 'STRING','DATE': 'STRING', 'DOUBLE': 'DOUBLE','ENUM':'STRING','JSON': "STRING"}
         cols_lst = []
         for col_name in cols:
             if col_name in ['id', ]:
                 continue
             column_type = cols[col_name].get('column_type', 'text').upper()
             if column_type not in hive_type_map:
-                raise RuntimeError("更新了不支持新字段类型")
+                raise RuntimeError(__("更新了不支持的新字段类型"))
             column_type = hive_type_map[column_type]
             col_str = col_name + ' ' + column_type
             cols_lst.append(col_str)
@@ -123,8 +123,7 @@ def ddl_hive_external_table(table_id):
         import sqlalchemy.engine.url as url
         uri = url.make_url(item.sqllchemy_uri if item.sqllchemy_uri else default_uri)
         hive_sql = ''' 
-# hive建外表
-use 你的hive数据库;
+# use your hive db;
 CREATE EXTERNAL TABLE IF NOT EXISTS {table_name}  (
 id BIGINT,
 {columns_sql}
@@ -141,9 +140,9 @@ with (ip='{ip}',port='{port}',db_name='{pg_db_name}',user_name='{user_name}',pwd
             pg_db_name=uri.database,
             pg_table_name=item.table_name
         )
-        return hive_sql
         # 执行创建数据库的sql
         logging.info(hive_sql)
+        return hive_sql
     except Exception as e:
         print(e)
         return str(e)
@@ -154,7 +153,7 @@ default_uri = 'mysql+pymysql://your_username:your_password@your_host:port/your_d
 
 class Dimension_table_ModelView_Api(MyappModelRestApi):
     datamodel = SQLAInterface(Dimension_table)
-    label_title = '维表'
+    label_title = _('维表')
     route_base = '/dimension_table_modelview/api'
     base_permissions = ['can_add', 'can_list', 'can_delete', 'can_show', 'can_edit']
     add_columns = ['sqllchemy_uri', 'app', 'table_name', 'label', 'describe', 'owner', 'columns']
@@ -165,28 +164,24 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
     base_order = ('id', 'desc')
     list_columns = ['table_html', 'label', 'owner', 'describe', 'operate_html']
     cols_width = {
-        "table_html": {"type": "ellip2", "width": 300},
-        "label": {"type": "ellip2", "width": 300},
+        "table_html": {"type": "ellip2", "width": 200},
+        "label": {"type": "ellip2", "width": 200},
         "owner": {"type": "ellip2", "width": 300},
-        "describe": {"type": "ellip2", "width": 300},
-        "operate_html": {"type": "ellip2", "width": 400}
+        "describe": {"type": "ellip2", "width": 200},
+        "operate_html": {"type": "ellip2", "width": 300}
     }
     spec_label_columns = {
-        "sqllchemy_uri": "链接串地址",
-        "owner": "负责人",
-        "columns": "列信息",
-        "table_html": "表名",
-        "table_name": "表名"
+        "sqllchemy_uri": _("链接串地址")
     }
     base_filters = [["id", Dimension_table_Filter, lambda: []]]
 
     add_fieldsets = [
         (
-            lazy_gettext('表元数据'),
+            _('表元数据'),
             {"fields": ['sqllchemy_uri', 'app', 'table_name', 'label', 'describe', 'owner'], "expanded": True},
         ),
         (
-            lazy_gettext('列信息'),
+            _('列信息'),
             {"fields": ['columns'],
              "expanded": True},
         )
@@ -195,54 +190,53 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
 
     add_form_extra_fields = {
         "sqllchemy_uri": StringField(
-            _(datamodel.obj.lab('sqllchemy_uri')),
+            _('链接串地址'),
             default="",
-            description='链接串地址： <br> 示例：mysql+pymysql://$账号:$密码@$ip:$端口/$库名?charset=utf8 <br> 示例：postgresql+psycopg2://$账号:$密码@$ip:$端口/$库名',
+            description= _('链接串地址： <br> 示例：mysql+pymysql://账号:密码@ip:端口/库名?charset=utf8 <br> 示例：postgresql+psycopg2://账号:密码@ip:端口/库名'),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), Regexp("^(mysql\+pymysql|postgresql\+psycopg2)")]
+            validators=[DataRequired(), Regexp("^(mysql\+pymysql|postgresql\+psycopg2)://.*:.*@.*:[0-9]*/[a-zA-Z_\-]*")]
         ),
         "table_name": StringField(
-            label=_(datamodel.obj.lab('table_name')),
-            description='远程数据库的表名',
+            label= _('表名'),
+            description= _('远程数据库的表名'),
             widget=BS3TextFieldWidget(),
             default='',
             validators=[DataRequired(), Regexp("^[a-z][a-z0-9_\-]*[a-z0-9]$")]
         ),
         "label": StringField(
-            label=_(datamodel.obj.lab('label')),
-            description='中文名',
+            label= _('标签'),
+            description='',
             widget=BS3TextFieldWidget(),
             default='',
             validators=[DataRequired()]
         ),
         "describe": StringField(
-            label=_(datamodel.obj.lab('describe')),
-            description='描述',
+            label= _('描述'),
+            description='',
             widget=BS3TextFieldWidget(),
             default='',
             validators=[DataRequired()]
         ),
         "app": SelectField(
-            label=_(datamodel.obj.lab('app')),
-            description='产品分类',
+            label= _('产品'),
+            description='',
             widget=MySelect2Widget(can_input=True, conten2choices=True),
             default='',
-            choices=[[x, x] for x in ['产品1', "产品2", "产品3"]],
+            choices=[[_(x), _(x)] for x in ['app1', "app2", "app3"]],
             validators=[DataRequired()]
         ),
         "columns": StringField(
-            label='字段信息',
-            description='维表字段信息，必须包含自增主键列，例如id',
+            label= _('字段信息'),
+            description= _('维表字段信息，必须包含自增主键列，例如id'),
             widget=MyBS3TextAreaFieldWidget(expand_filed=Metadata_column_fields)
         ),
         "owner": StringField(
-            label=_(datamodel.obj.lab('owner')),
+            label= _('责任人'),
             default='',
-            description='责任人,逗号分隔的多个用户',
+            description= _('责任人,逗号分隔的多个用户'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
-
     }
     edit_form_extra_fields = add_form_extra_fields
 
@@ -257,10 +251,10 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                 if cols[col_name].get('primary_key', False):
                     return
             if 'postgresql' in sqllchemy_uri:
-                cols['rowid'] = {
+                cols['id'] = {
                     "column_type": "int",
-                    "describe": "主键",
-                    "name": "rowid",
+                    "describe": __("主键"),
+                    "name": "id",
                     "nullable": False,
                     "primary_key": True,
                     "unique": True
@@ -268,23 +262,23 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
             if 'mysql' in sqllchemy_uri:
                 cols['id'] = {
                     "column_type": "int",
-                    "describe": "主键",
+                    "describe": __("主键"),
                     "name": "id",
                     "nullable": False,
                     "primary_key": True,
                     "unique": True
                 }
-            # 对于罗盘维表，不允许有自定义主键
+            # 不允许有自定义主键
             if not sqllchemy_uri or sqllchemy_uri == default_uri:
                 for col_name in cols:
-                    if cols[col_name].get("primary_key", False) and col_name != 'rowid':
+                    if cols[col_name].get("primary_key", False) and col_name != 'id':
                         cols[col_name]["primary_key"] = False
 
             item.columns = json.dumps(cols, indent=4, ensure_ascii=False)
         if not item.owner or g.user.username not in item.owner:
             item.owner = g.user.username if not item.owner else item.owner + "," + g.user.username
 
-        flash('添加或修改字段类型，需要点击"更新远程表"，以实现在远程数据库上建表', 'warning')
+        flash(__('添加或修改字段类型，需要点击"更新远程表"，以实现在远程数据库上建表'), 'warning')
 
     def pre_update(self, item):
         if not item.sqllchemy_uri:
@@ -296,6 +290,21 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         if "dimension_%s" % item.id in all_dimension:
             del all_dimension["dimension_%s" % item.id]
 
+    # 验证是否可以联通
+    def post_add(self, item):
+        # 测试连接
+        try:
+            if not core.test_database_connection(item.sqllchemy_uri):
+                flash(__('数据库连接串地址无法访问'),'error')
+                item.sqllchemy_uri=''
+                db.session.commit()
+        except Exception as e:
+            flash(__('测试数据库连通性失败，请重新配置数据库连接串'),'error')
+            item.sqllchemy_uri = ''
+            db.session.commit()
+
+    def post_update(self, item):
+        self.post_add(item)
     # 转换为前端list
     def pre_show_res(self, _response):
         data = _response['data']
@@ -308,7 +317,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         data['columns'] = columns_list
 
     # 添加或者更新前将前端columns list转化为字段存储
-    def pre_add_req(self, req_json=None):
+    def pre_add_req(self, req_json=None, *args, **kwargs):
         if req_json and 'columns' in req_json:
             columns = {}
             for col in req_json.get('columns', []):
@@ -337,7 +346,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         return Markup(ddl_sql.replace('\n', '<br>'))
 
     # @expose("/clear/<dim_id>", methods=["GET"])
-    @action("clear", __("清空"), __("Delete all Really?"), "fa-trash", single=True)
+    @action("clear", "清空", "清空选中维表的所有远程数据?", "fa-trash", single=True, multiple=False)
     def delete_all(self, items):
         if not items:
             abort(404)
@@ -352,11 +361,11 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                 dbsession.execute('TRUNCATE TABLE  %s;' % dim.table_name)
                 dbsession.commit()
                 dbsession.close()
-                flash('清空完成', 'success')
+                flash(__('清空完成'), 'success')
         except Exception as e:
-            flash('清空失败：' + str(e), 'error')
+            flash(__('清空失败：') + str(e), 'error')
 
-        url_path = conf.get('MODEL_URLS', {}).get("dimension") + '?targetId=' + dim_id
+        url_path = conf.get('MODEL_URLS', {}).get("dimension") + f'?targetId={dim_id}'
         return redirect(url_path)
 
     @expose("/create_external_table/<dim_id>", methods=["GET"])
@@ -404,7 +413,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                     if sql:
                         dbsession.execute(sql)
                         dbsession.commit()
-                    flash('创建新表成功', 'success')
+                    flash(__('创建新表成功'), 'success')
                 else:
                     exist_columns = list(company_data.head().to_dict()['column_name'].values())
                     print(exist_columns)
@@ -418,11 +427,11 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                                     print(sql)
                                     dbsession.execute(sql)
                                     dbsession.commit()
-                                    flash('增加新字段成功', 'success')
+                                    flash(__('增加新字段成功'), 'success')
                                 except Exception as e:
                                     dbsession.rollback()
                                     print(e)
-                                    flash('增加新字段失败：' + str(e), 'error')
+                                    flash(__('增加新字段失败：') + str(e), 'error')
 
                 dbsession.close()
                 # 如果远程有表，就增加字段
@@ -439,6 +448,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                 cols = json.loads(item.columns)
 
                 import sqlalchemy
+                from sqlalchemy.exc import NoSuchTableError
                 try:
                     table = sqlalchemy.Table(item.table_name, sqlalchemy.MetaData(), autoload=True, autoload_with=engine)
 
@@ -458,14 +468,14 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                                     print(sql)
                                     dbsession.execute(sql)
                                     dbsession.commit()
-                                    flash('增加新字段成功', 'success')
+                                    flash(__('增加新字段成功'), 'success')
                                 except Exception as e:
                                     dbsession.rollback()
                                     print(e)
-                                    flash('增加新字段失败：' + str(e), 'error')
+                                    flash(__('增加新字段失败：') + str(e), 'error')
 
 
-                except sqlalchemy.exc.NoSuchTableError:
+                except NoSuchTableError:
                     print('表不存在')
                     # 如果表不存在
 
@@ -489,7 +499,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
                     if sql:
                         dbsession.execute(sql)
                         dbsession.commit()
-                        flash('创建新表成功', 'success')
+                        flash(__('创建新表成功'), 'success')
 
                 dbsession.close()
                 # 如果远程有表，就增加字段
@@ -498,7 +508,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         if "dimension_%s" % dim_id in all_dimension:
             del all_dimension["dimension_%s" % dim_id]
 
-        url_path = conf.get('MODEL_URLS', {}).get("dimension") + '?targetId=' + dim_id
+        url_path = conf.get('MODEL_URLS', {}).get("dimension") + f'?targetId={dim_id}'
         return redirect(url_path)
 
     def add_more_info(self, response, **kwargs):
@@ -563,12 +573,11 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
             }
             for column_name in columns:
                 column_type = columns[column_name].get('column_type', 'string')
-                if column_type == 'int':
-                    cols_width[column_type] = {
-                        "type": "ellip1",
-                        "width": max(100,len(columns[column_name].get("label",''))*20)
-                    }
-                if column_type == 'double':
+                cols_width[column_type] = {
+                    "type": "ellip1",
+                    "width": max(100, len(columns[column_name].get("label", '')) * 20)
+                }
+                if column_type == 'int' or column_type == 'double':
                     cols_width[column_type] = {
                         "type": "ellip1",
                         "width": max(100,len(columns[column_name].get("label",''))*20)
@@ -588,6 +597,11 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         "type": "ellip2",
                         "width": max(200,len(columns[column_name].get("label",''))*20)
                     }
+                if column_type == 'json':
+                    cols_width[column_type] = {
+                        "type": "ellip2",
+                        "width": max(200,len(columns[column_name].get("label",''))*20)
+                    }
 
                 column_sql_type = BigInteger if column_type == 'int' else String  # 因为实际使用的时候，会在数据库中存储浮点数据，通用性也更强
 
@@ -600,6 +614,14 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         description='',  # columns[column_name]['describe'],
                         widget=BS3TextFieldWidget(),
                         validators=[Regexp("^[0-9]{4,4}-[0-9]{2,4}-[0-9]{2,2}$")] + val
+                    )
+                elif column_type == 'json':
+                    add_form_extra_fields[column_name] = StringField(
+                        _(column_name),
+                        default='{}',
+                        description='',
+                        widget=MyBS3TextAreaFieldWidget(is_json=True),
+                        validators=val
                     )
                 elif column_type == 'enum':
                     column_sql_type = String
@@ -635,7 +657,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                 show_columns.append(column_name)
                 if not int(columns[column_name].get('primary_key', False)):
                     list_columns.append(column_name)
-                if column_type == 'string' or column_type == 'text' or column_type == 'int' or column_type == 'enum':
+                if column_type == 'string' or column_type == 'text' or column_type == 'int' or column_type == 'enum' or column_type == 'json':
                     if not int(columns[column_name].get('primary_key', False)):
                         search_columns.append(column_name)
                 # if column_type == 'int':
@@ -652,7 +674,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
             model_class = type(
                 "Dimension_Model_%s" % dim.id, (Model, MyappModelBase),
                 dict(
-                    __tablename__=dim.table_name,
+                    __tablename__=dim.table_name,   # 这里表名是不能重复的。不然会相互影响
                     __bind_key__=bind_key if bind_key else None,
                     **column_class
                 )
@@ -666,7 +688,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
             def check_unique(self, item):
                 unique_columns = []
                 for key in self.cols:
-                    if key in ['id', 'rowid']:
+                    if key in ['id']:
                         continue
                     if self.cols[key].get('unique', False):
                         unique_columns.append(key)
@@ -703,7 +725,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
                 # 浮点转型
                 for key in self.cols:
-                    if key in ['id', 'rowid']:
+                    if key in ['id']:
                         continue
                     if self.cols[key].get('column_type', 'text') == 'int':
                         try:
@@ -717,14 +739,14 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         except Exception:
                             setattr(item, key, None)
                 if not self.check_unique(item):
-                    flash('检测到唯一性字段重复', 'warning')
-                    raise Exception('检测到唯一性字段重复')
+                    flash(__('检测到唯一性字段重复'), 'warning')
+                    raise Exception(__('检测到唯一性字段重复'))
 
             def pre_update(self, item):
 
                 # 浮点转型
                 for key in self.cols:
-                    if key in ['id', 'rowid']:
+                    if key in ['id']:
                         continue
                     if self.cols[key].get('column_type', 'text') == 'int':
                         try:
@@ -739,8 +761,8 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                             setattr(item, key, None)
                 # 修改必命中唯一性
                 # if not self.check_unique(item):
-                #     flash('检测到唯一性字段重复', 'warning')
-                #     raise Exception('检测到唯一性字段重复')
+                #     flash(__('检测到唯一性字段重复'), 'warning')
+                #     raise Exception(__('检测到唯一性字段重复'))
 
 
             def get_primary_key(cols):
@@ -782,8 +804,9 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                             return encoding
                         except UnicodeDecodeError:
                             print(f"Failed to read file with {encoding} encoding")
-                    flash('不识别的csv文件编码格式，请转为utf-8编码格式','warning')
-                    raise Exception("不识别的csv文件编码格式，请转为utf-8编码格式")
+                    message = __('不识别的csv文件编码格式，请转为utf-8编码格式')
+                    flash(message,'warning')
+                    raise Exception(message)
 
                 encodings = ['utf-8-sig', 'GBK']
                 encoding = get_csv_encoding(i_path, encodings)
@@ -800,11 +823,12 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         for col_name in header:
                             # attr = self.datamodel.obj
                             if not hasattr(self.datamodel.obj, col_name):
-                                flash('csv首行header与数据库字段不对应', 'warning')
+                                message = __('csv首行header与数据库字段不对应')
+                                flash(message, 'warning')
                                 back = {
                                     "status": 1,
                                     "result": [],
-                                    "message": "csv首行header与数据库字段不对应"
+                                    "message": message
                                 }
                                 return self.response(400, **back)
                         continue
@@ -856,12 +880,12 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                 #     "message": "result为上传成功行，共成功%s" % len([x for x in result if x == 'success'])
                 # }
                 # return self.response(200, **back)
-                message = '成功导入%s行，失败导入%s行' % (len([x for x in result if x == 'success']), len([x for x in result if x != 'success']))
+                message = 'success %s rows，fail %s rows' % (len([x for x in result if x == 'success']), len([x for x in result if x != 'success']))
                 message += ','.join(result)
                 message = Markup(message)
                 return make_response(message, 200)
 
-            @action("muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False)
+            @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
             # @pysnooper.snoop(watch_explode=('items'))
             def muldelete(self, items):
                 if not items:
@@ -874,7 +898,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         db.session.delete(item)
                         success.append(item.to_json())
                     except Exception as e:
-                        flash(str(e), "danger")
+                        flash(str(e), "error")
                         fail.append(item.to_json())
                 db.session.commit()
                 return json.dumps(
@@ -884,7 +908,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     }, indent=4, ensure_ascii=False
                 )
 
-            @action("copy_row", __("Copy"), __("复制所选记录 all Really?"), "fa-trash", single=False)
+            @action("copy_row", "复制", "复制所选记录?", "fa-trash", single=False)
             # @pysnooper.snoop(watch_explode=('items'))
             def copy_row(self, items):
                 if not items:
@@ -896,7 +920,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         req_json = item.to_json()
                         if 'id' in req_json:
                             del req_json["id"]
-                        json_data = self.pre_add_req(req_json)
+                        json_data = self.pre_add_req(req_json=req_json)
                         new_item = self.add_model_schema.load(json_data)
                         self.pre_add(new_item.data)
                         self.datamodel.add(new_item.data, raise_exception=True)
@@ -904,7 +928,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         result_data = self.add_model_schema.dump(new_item.data, many=False).data
                         success.append(item.to_json())
                     except Exception as e:
-                        flash(str(e), "danger")
+                        flash(str(e), "error")
                         fail.append(item.to_json())
                 db.session.commit()
                 return json.dumps(
@@ -925,6 +949,8 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                     search_columns=search_columns,
                     order_columns=order_columns,
                     add_columns=add_columns,
+                    edit_columns=add_columns,
+                    list_columns=list_columns,
                     label_title=dim.label,
                     base_permissions=['can_list', 'can_add', 'can_delete', 'can_edit', 'can_show'],
                     pre_add=pre_add,
@@ -959,6 +985,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
     @expose("/<dim_id>/api/", methods=["GET"])
     def dim_api_list(self, dim_id, **kwargs):
+
         view_instance = self.set_model(dim_id)
         try:
             return view_instance.api_list(**kwargs)

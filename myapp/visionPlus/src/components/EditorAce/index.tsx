@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import { selectShowEditor, updateShowEditor, selectValue, updateValue, selectType } from '@src/models/editor';
 import { isJsonString } from '@src/utils/index';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 interface IProps {
   isStrictJson?: boolean
   language?: string
@@ -19,6 +20,7 @@ const EditorAce: React.FC<IProps> = (props: IProps) => {
   const [codeWidth, setCodeWidth] = useState<string | number>('100%');
   const [dragging, setDragging] = useState(false);
   const [isError, setIsError] = useState(false);
+  const { t, i18n } = useTranslation();
 
   const handleConfirm = () => {
     if (props.isStrictJson && !isJsonString(current)) {
@@ -57,7 +59,7 @@ const EditorAce: React.FC<IProps> = (props: IProps) => {
     >
       <Stack className={style.contentStyles.container}>
         <div className={style.contentStyles.header}>
-          <span>编辑</span>
+          <span>{t('编辑')}</span>
           <IconButton iconProps={style.cancelIcon} onClick={handleCancel} />
         </div>
         <div
@@ -123,13 +125,13 @@ const EditorAce: React.FC<IProps> = (props: IProps) => {
               }}
               isMultiline={false}
             >
-              格式错误
+              {t('格式错误')}
             </MessageBar>
           ) : null}
           <PrimaryButton styles={{ root: { marginRight: 10 } }} onClick={handleConfirm}>
-            确认
+            {t('确认')}
           </PrimaryButton>
-          <DefaultButton onClick={handleCancel}>取消</DefaultButton>
+          <DefaultButton onClick={handleCancel}>{t('取消')}</DefaultButton>
         </div>
       </Stack>
     </div>

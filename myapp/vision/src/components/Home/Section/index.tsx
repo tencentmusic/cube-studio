@@ -5,6 +5,7 @@ import { updateErrMsg, selectUserName } from '@src/models/app';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
 import Player from 'xgplayer';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 
 interface ISectionProps {
   name: string;
@@ -19,6 +20,9 @@ const Section: React.FC<ISectionProps> = props => {
   const [curVideo, setCurVideo] = useState<string>('');
   const [curPlayer, setCurPlayer] = useState<Player | undefined>(undefined);
   const userName = useAppSelector(selectUserName);
+  const { t, i18n } = useTranslation();
+
+  console.log('i18n.language',i18n.language)
 
   const handleNewPipeline = () => {
     api
@@ -96,6 +100,14 @@ const Section: React.FC<ISectionProps> = props => {
           url: curVideo,
           width: 800,
           height: 500,
+          videoInit: true,
+          playbackRate: [0.5, 0.75, 1, 1.5, 2],
+          defaultPlaybackRate: 1,
+          download: true,
+          pip: true,
+          disableProgress:false,
+          allowPlayAfterEnded: true,
+          allowSeekAfterEnded: true,
         });
         setCurPlayer(player);
       }, 0);
@@ -123,7 +135,7 @@ const Section: React.FC<ISectionProps> = props => {
             setShowMore(!showMore);
           }}
         >
-          {showMore ? '折叠' : '更多'}
+          {showMore ? t('折叠') : t('更多')}
         </div>
       </Stack>
       <div className={`${style.sampleStyles} ${showMore ? '' : style.sampleHide}`}>
@@ -139,7 +151,7 @@ const Section: React.FC<ISectionProps> = props => {
               <Icon iconName="Add" className={style.addIconStyles}></Icon>
             </div>
             <div className={style.cardTitleStyles}>
-              <span>新建流水线</span>
+              <span>{t('新建流水线')}</span>
             </div>
           </div>
         ) : null}

@@ -1,0 +1,94 @@
+{
+  "tf-mnist": {
+    "project_name": "public",
+    "service_name": "mnist-202208011",
+    "model_name": "mnist",
+    "service_describe": "tf 图像分类",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/tfserving:2.3.4",
+    "model_version": "v2022.08.01.1",
+    "model_path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/tf-mnist.tar.gz",
+    "service_type": "tfserving",
+    "env": "TF_CPP_VMODULE=http_server=1\nTZ=Asia/Shanghai",
+    "host": "/v1/models/mnist/metadata",
+    "ports": "8501",
+    "metrics": "8501:/metrics",
+    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/tf-mnist.tar.gz && tar -zxvf tf-mnist.tar.gz && mkdir -p /models/mnist/202207281/ && cp -r tf-mnist/* /models/mnist/202207281/ && /usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
+    "health": "8501:/v1/models/mnist/versions/202207281/metadata",
+    "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+    "resource_memory": "2G",
+    "resource_cpu": "2",
+    "expand": {
+    }
+  },
+  "pytorch-resnet50": {
+    "project_name": "public",
+    "service_name": "resnet50-202208012",
+    "model_name": "resnet50",
+    "service_describe": "pytorch 图像分类",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/torchserve:0.7.1-cpu",
+    "model_version": "v2022.08.01.2",
+    "model_path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50.mar",
+    "service_type": "torch-server",
+    "env": "",
+    "host": ":8081/models",
+    "ports": "8080,8081",
+    "metrics": "8082:/metrics",
+    "workdir": "/models",
+    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50.mar && mkdir -p /models && cp /config/* /models/ && cp resnet50.mar /models/ && torchserve --start --model-store /models --models resnet50=resnet50.mar --foreground --ts-config=/config/config.properties",
+    "health": "8080:/ping",
+    "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+    "resource_memory": "5G",
+    "resource_cpu": "5",
+    "expand": {
+    }
+  },
+  "torchscript-resnet50": {
+    "project_name": "public",
+    "service_name": "resnet50-202208013",
+    "model_name": "resnet50",
+    "service_describe": "torchscript 图像分类",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3",
+    "model_version": "v2022.08.01.3",
+    "model_path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50-torchscript.pt",
+    "service_type": "triton-server",
+    "env": "",
+    "host": "/v2/models/resnet50",
+    "ports": "8000,8002",
+    "metrics": "",
+    "workdir": "",
+    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50-torchscript.pt && mkdir -p /models/resnet50/202208013/ && cp /config/* /models/resnet50/ && cp -r resnet50-torchscript.pt /models/resnet50/202208013/model.pt && tritonserver --model-repository=/models --strict-model-config=true  --log-verbose=1",
+    "health": "8000:/v2/health/ready",
+    "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+    "resource_memory": "5G",
+    "resource_cpu": "5",
+    "inference_config": "\n---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"pytorch_libtorch\"\nmax_batch_size: 0\ninput \n[\n    {\n        name: \"INPUT__0\"\n        data_type: TYPE_FP32\n        format: FORMAT_NCHW\n        dims: [ 3, 224, 224 ]\n        reshape: {\n            shape: [ 1, 3, 224, 224 ]\n        }\n    }\n]\n    \noutput \n[\n    {\n        name: \"OUTPUT__0\"\n        data_type: TYPE_FP32\n        dims: [ 1000 ]\n        reshape: {\n            shape: [ 1, 1000 ]\n        }\n    }\n]\n    \n\nparameters: { key: \"DISABLE_OPTIMIZED_EXECUTION\" value: { string_value:\"true\" } }\nparameters: { key: \"INFERENCE_MODE\" value: { string_value: \"false\" } }\n",
+    "expand": {
+    }
+  },
+  "onnx-resnet50": {
+    "project_name": "public",
+    "service_name": "resnet50-202208014",
+    "model_name": "resnet50",
+    "service_describe": "onnx 图像分类",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/tritonserver:22.07-py3",
+    "model_version": "v2022.08.01.4",
+    "model_path": "https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50.onnx",
+    "service_type": "triton-server",
+    "env": "",
+    "host": "/v2/models/resnet50",
+    "ports": "8000,8002",
+    "metrics": "",
+    "workdir": "",
+    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50.onnx && mkdir -p /models/resnet50/202208014/ && cp /config/* /models/resnet50/ && cp -r resnet50.onnx /models/resnet50/202208014/model.onnx && tritonserver --model-repository=/models --strict-model-config=true  --log-verbose=1",
+    "health": "8000:/v2/health/ready",
+    "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+    "resource_memory": "5G",
+    "resource_cpu": "5",
+    "inference_config": "---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"onnxruntime_onnx\"\nbackend: \"onnxruntime\"\nmax_batch_size : 0\n\ninput [\n  {\n    name: \"input_name\"\n    data_type: TYPE_FP32\n    format: FORMAT_NCHW\n    dims: [ 3, 224, 224 ]\n    reshape { shape: [ 1, 3, 224, 224 ] }\n  }\n]\noutput [\n  {\n    name: \"output_name\"\n    data_type: TYPE_FP32\n    dims: [ 1000 ]\n    reshape { shape: [ 1, 1000 ] }\n  }\n]\n\nparameters { key: \"intra_op_thread_count\" value: { string_value: \"10\" } }\nparameters { key: \"execution_mode\" value: { string_value: \"1\" } }\nparameters { key: \"inter_op_thread_count\" value: { string_value: \"10\" } }\n",
+    "expand": {
+      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/triton-server/example"
+    }
+  }
+}
+
+

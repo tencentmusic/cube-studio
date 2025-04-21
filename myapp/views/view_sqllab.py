@@ -8,6 +8,8 @@ from flask_appbuilder import CompactCRUDMixin, expose
 import pysnooper, datetime, time, json
 from myapp.utils.celery import session_scope
 import logging
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp.models.model_sqllab_query import Sqllab_Query
 
 conf = app.config
@@ -27,35 +29,34 @@ from myapp.utils.sqllab.base_impl import Base_Impl
 engine_impls = {
     'mysql': Base_Impl(),
     'presto': Base_Impl(),
-    'clikchouse': Base_Impl(),
+    'clickhouse': Base_Impl(),
     'postgres': Base_Impl(),
     "impala": Base_Impl(),
-    "oracle": Base_Impl(),
-    "mssql": Base_Impl()
+    "hive": Base_Impl()
 }
 db_uri_demo = {
-    'mysql': ['mysql+pymysql://username:password@host:port/database'],
-    'presto': ['presto://username:password@host:port/database'],
-    'clikchouse': ['clickhouse+native://username:password@host:port/database'],
-    'postgres': ['postgresql+psycopg2://username:password@host:port/database'],
+    'mysql': ['mysql+pymysql://$username:$password@$host:3306/$database'],
+    'postgres': ['postgresql+psycopg2://$username:$password@$host:5432/$database'],
+    'presto': ['presto://$username:$password@$host:8080/$catalog/$schema'],   # presto://presto-coordinator-service.default:8080/hive/default
+    'clickhouse': ['clickhouse+native://$username:$password@$host:9000/$database'],
+    # "hive":['hive://username:passwd@host:10000/default?auth=LDAP'],
+    "hive":['hive://$host:10000/default?auth=NOSASL'],
     "impala": ['impala://host:port/database'],
-    "oracle": ['oracle://username:password@host:port/database'],
-    "mssql": ['mssql+pymssql://username:password@host:port/database']
 }
 
-
+# @pysnooper.snoop()
 def add_task(req_data):
     try:
         engine_arg1 = req_data['engine_arg1']
         engine_arg2 = req_data['engine_arg2']
         qsql = req_data['sql']
     except Exception as e:
-        raise KeyError("添加任务参数缺失")
+        raise KeyError(__("添加任务参数缺失"))
 
     try:
         engine_impl = engine_impls[engine_arg1]
     except Exception as e:
-        raise KeyError("%s引擎未实现" % engine_arg1)
+        raise KeyError(engine_arg1+__("引擎未实现"))
 
     q = Sqllab_Query(
         submit_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -74,12 +75,12 @@ def check_task_engine(qid):
     with session_scope(nullpool=True) as dbsession:
         q = dbsession.query(Sqllab_Query).filter(Sqllab_Query.id == int(qid)).first()
         if not q:
-            raise RuntimeError("任务数据库记录不存在，id:" + str(qid))
+            raise RuntimeError(__("任务数据库记录不存在，id:") + str(qid))
         eng = q.engine_arg1
     try:
         engine_impl = engine_impls[eng]
     except Exception as e:
-        raise KeyError("%s引擎未实现" % eng)
+        raise KeyError(eng+__("引擎未实现"))
     return qid, engine_impl
 
 
@@ -87,7 +88,7 @@ def check_process_res(res_keys, res):
     try:
         res = {key: res[key] for key in res_keys}
     except Exception as e:
-        raise KeyError("返回值异常，检查引擎实现，需包含：" + str(res_keys))
+        raise KeyError(__("返回值异常，检查引擎实现，需包含：") + str(res_keys))
     return res
 
 
@@ -118,7 +119,7 @@ class Sqllab_Query_View(BaseMyappView):
             "result": [
                 {
                     "type": 'select',
-                    "label": '引擎',
+                    "label": __('引擎'),
                     "id": 'engine_arg1',
                     "value": [
                         {
@@ -138,12 +139,14 @@ class Sqllab_Query_View(BaseMyappView):
                 },
                 {
                     "type": 'input-select',
-                    "label": '数据库',
+                    "label": __('数据库'),
                     "id": 'engine_arg2',
                     "value": [],
                 }
             ]
         }
+        if 'SQLLAB' in conf:
+            config['result']=conf.get('SQLLAB')
         # print(config)
         return jsonify(config)
 
@@ -153,7 +156,10 @@ class Sqllab_Query_View(BaseMyappView):
         if args_in:
             req_data = args_in
         else:
-            req_data = request.json
+            req_data = request.get_json(silent=True)
+        if conf.get('SQLLAB_ARGS',{}):
+            req_data.update(conf.get('SQLLAB_ARGS',{}))
+
         qid, engine_impl = add_task(req_data)
         res = engine_impl.submit_task(qid)
         res_keys = ["err_msg", "task_id"]

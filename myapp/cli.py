@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+import re
 import shutil
 from datetime import datetime
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 import json
 from myapp import app, appbuilder, db, security_manager
 from myapp.models.model_team import Project, Project_User
@@ -25,6 +28,15 @@ def make_shell_context():
     return dict(app=app, db=db)
 
 
+
+def replace_git(content):
+    content = json.dumps(content)
+    content = content.replace('https://github.com/tencentmusic/cube-studio/tree/master', conf.get('GIT_URL', '').strip('/'))
+    content = content.replace('ccr.ccs.tencentyun.com/cube-studio', conf.get('REPOSITORY_ORG', '').strip('/'))
+    return json.loads(content)
+
+
+
 # https://dormousehole.readthedocs.io/en/latest/cli.html
 @app.cli.command('init')
 # @pysnooper.snoop()
@@ -36,10 +48,16 @@ def init():
     except Exception as e:
         print(e)
 
+    init_dir='myapp/init' if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh' else "myapp/init-en"
     # 初始化创建项目组
     try:
 
         def add_project(project_type, name, describe, expand={}):
+            if not expand:
+                expand={
+                    "org": "public"
+                }
+            print('add project',project_type,name,describe)
             project = db.session.query(Project).filter_by(name=name).filter_by(type=project_type).first()
             if project is None:
                 try:
@@ -63,35 +81,38 @@ def init():
                     db.session.rollback()
 
         # 添加一些默认的记录
-        add_project('org', 'public', '公共项目组')
-        add_project('org', '推荐中心', '推荐项目组')
-        add_project('org', '搜索中心', '搜索项目组')
-        add_project('org', '广告中心', '广告项目组')
-        add_project('org', '安全中心', '安全项目组')
-        add_project('org', '多媒体中心', '多媒体项目组')
+        add_project('org', 'public', __('公共项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('推荐中心'), __('推荐项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('搜索中心'), __('搜索项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('广告中心'), __('广告项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('安全中心'), __('安全项目组'),expand={'cluster':'dev','org':'public'})
+        add_project('org', __('多媒体中心'), __('多媒体项目组'),expand={'cluster':'dev','org':'public'})
 
-        add_project('job-template', '基础命令', 'python/bash等直接在服务器命令行中执行命令的模板', {"index": 1})
-        add_project('job-template', '数据导入导出', '集群与用户机器或其他集群之间的数据迁移', {"index": 2})
-        add_project('job-template', '数据预处理', '结构化话数据特征处理', {"index": 3})
-        add_project('job-template', '数据处理', '数据的单机或分布式处理任务,ray/spark/hadoop/volcanojob', {"index": 4})
-        add_project('job-template', '特征工程', '特征处理相关', {"index": 5})
-        add_project('job-template', '机器学习框架', '传统机器学习框架，sklearn', {"index": 6})
-        add_project('job-template', '机器学习算法', '传统机器学习，lr/决策树/gbdt/xgb/fm等', {"index": 7})
-        add_project('job-template', '深度学习', '深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等', {"index": 8})
-        add_project('job-template', '分布式加速', 'tf相关的训练，模型校验，离线预测等功能', {"index": 9})
-        add_project('job-template', 'tf分布式', 'tf相关的训练，模型校验，离线预测等功能', {"index": 10})
-        add_project('job-template', 'pytorch分布式', 'pytorch相关的训练，模型校验，离线预测等功能', {"index": 11})
-        add_project('job-template', 'xgb分布式', 'xgb相关的训练，模型校验，离线预测等功能', {"index": 12})
-        add_project('job-template', '模型处理', '模型服务化部署相关的组件模板', {"index": 13})
-        add_project('job-template', '模型服务化', '模型服务化部署相关的组件模板', {"index": 14})
-        add_project('job-template', '推荐类模板', '推荐领域常用的任务模板', {"index": 15})
-        add_project('job-template', '搜索类模板', '向量搜索常用的任务模板', {"index": 16})
-        add_project('job-template', '广告类模板', '推荐领域常用的任务模板', {"index": 17})
-        add_project('job-template', '多媒体类模板', '音视频图片文本常用的任务模板', {"index": 18})
-        add_project('job-template', '机器视觉', '视觉类相关模板', {"index": 19})
-        add_project('job-template', '听觉', '听觉类相关模板', {"index": 20})
-        add_project('job-template', '自然语言', '自然语言类相关模板', {"index": 21})
-        add_project('job-template', '大模型', '大模型相关模板', {"index": 22})
+        add_project('job-template', __('基础命令'), __('python/bash等直接在服务器命令行中执行命令的模板'), {"index": 1})
+        add_project('job-template', __('数据导入导出'), __('集群与用户机器或其他集群之间的数据迁移'), {"index": 2})
+        add_project('job-template', __('数据预处理'), __('结构化话数据特征处理'), {"index": 3})
+        add_project('job-template', __('数据处理工具'), __('数据的单机或分布式处理任务,ray/spark/hadoop/volcanojob'), {"index": 4})
+        add_project('job-template', __('特征处理'), __('特征处理相关功能'), {"index": 5})
+        add_project('job-template', __('图像处理'), __('图像处理相关功能'), {"index": 5.1})
+        add_project('job-template', __('视频处理'), __('视频处理相关功能'), {"index": 5.2})
+        add_project('job-template', __('音频处理'), __('音频处理相关功能'), {"index": 5.3})
+        add_project('job-template', __('文本处理'), __('文本处理相关功能'), {"index": 5.4})
+        add_project('job-template', __('机器学习框架'), __('传统机器学习框架，sklearn'), {"index": 6})
+        add_project('job-template', __('机器学习算法'), __('传统机器学习，lr/决策树/gbdt/xgb/fm等'), {"index": 7})
+        add_project('job-template', __('深度学习'), __('深度框架训练，tf/pytorch/mxnet/mpi/horovod/kaldi等'), {"index": 8})
+        add_project('job-template', __('分布式加速'), __('分布式训练加速框架'), {"index": 9})
+        add_project('job-template', __('tf分布式'), __('tf相关的训练，模型校验，离线预测等功能'), {"index": 10})
+        add_project('job-template', __('pytorch分布式'), __('pytorch相关的训练，模型校验，离线预测等功能'), {"index": 11})
+        add_project('job-template', __('模型处理'), __('模型压缩转换处理相关的组件模板'), {"index": 13})
+        add_project('job-template', __('模型服务化'), __('模型服务化部署相关的组件模板'), {"index": 14})
+        add_project('job-template', __('推荐类模板'), __('推荐领域常用的任务模板'), {"index": 15})
+        add_project('job-template', __('搜索类模板'), __('搜索领域常用的任务模板'), {"index": 16})
+        add_project('job-template', __('广告类模板'), __('广告领域常用的任务模板'), {"index": 17})
+        add_project('job-template', __('多媒体类模板'), __('音视频图片文本常用的任务模板'), {"index": 18})
+        add_project('job-template', __('机器视觉'), __('视觉类相关模板'), {"index": 19})
+        add_project('job-template', __('听觉'), __('听觉类相关模板'), {"index": 20})
+        add_project('job-template', __('自然语言'), __('自然语言类相关模板'), {"index": 21})
+        add_project('job-template', __('大模型'), __('大模型相关模板'), {"index": 22})
 
     except Exception as e:
         print(e)
@@ -115,7 +136,7 @@ def init():
                 images.changed_by_fk = 1
                 images.project_id = project.id
                 images.repository_id = repository_id
-                images.gitpath = gitpath
+                images.gitpath = gitpath if bool(re.match(r'^http', gitpath)) else (conf.get('GIT_URL', '').strip('/') + gitpath),
                 db.session.add(images)
                 db.session.commit()
                 print('add images %s' % image_name)
@@ -143,12 +164,16 @@ def init():
                     job_template.volume_mount = job_template_volume
                     job_template.accounts = job_template_account
                     job_template_expand['source'] = "github"
+                    if 'help_url' in job_template_expand:
+                        job_template_expand['help_url']=job_template_expand['help_url'] if re.match(r'^http',job_template_expand['help_url']) else (conf.get('GIT_URL', '').strip('/') + job_template_expand['help_url'])
                     job_template.expand = json.dumps(job_template_expand, indent=4, ensure_ascii=False) if job_template_expand else '{}'
                     job_template.created_by_fk = 1
                     job_template.changed_by_fk = 1
                     job_template.project_id = project.id
                     job_template.images_id = images.id
                     job_template.env = job_template_env
+                    # if 'tip' in job_template_args:
+                    #     job_template_args['tip']=job_template_args['tip'].replace('\n','<br>')
                     job_template.args = json.dumps(job_template_args, indent=4, ensure_ascii=False) if job_template_args else '{}'
                     db.session.add(job_template)
                     db.session.commit()
@@ -187,7 +212,7 @@ def init():
             try:
                 repository = Repository()
                 repository.name = 'hubsecret'
-                repository.server='registry.docker-cn.com'
+                repository.server=conf.get('REPOSITORY_ORG','ccr.ccs.tencentyun.com/cube-studio/')
                 repository.user = 'yourname'
                 repository.password = 'yourpassword'
                 repository.hubsecret = 'hubsecret'
@@ -201,14 +226,17 @@ def init():
                 db.session.rollback()
 
         print('begin init job_templates')
-        job_templates = json.load(open('myapp/init-job-template.json', mode='r'))
-        for job_template_name in job_templates:
-            try:
-                job_template = job_templates[job_template_name]
-                job_template['repository_id'] = repository.id
-                create_template(**job_template)
-            except Exception as e1:
-                print(e1)
+        init_file = os.path.join(init_dir,'init-job-template.json')
+        if os.path.exists(init_file):
+            job_templates = json.load(open(init_file, mode='r'))
+            job_templates = replace_git(job_templates)
+            for job_template_name in job_templates:
+                try:
+                    job_template = job_templates[job_template_name]
+                    job_template['repository_id'] = repository.id
+                    create_template(**job_template)
+                except Exception as e1:
+                    print(e1)
 
     except Exception as e:
         print(e)
@@ -273,6 +301,7 @@ def init():
                     task_model.resource_memory = task.get('resource_memory', '2G')
                     task_model.resource_cpu = task.get('resource_cpu', '2')
                     task_model.resource_gpu = task.get('resource_gpu', '0')
+                    task_model.resource_rdma = task.get('resource_rdma', '0')
                     task_model.created_by_fk = 1
                     task_model.changed_by_fk = 1
                     task_model.pipeline_id = pipeline_model.id
@@ -364,18 +393,21 @@ def init():
             pass
     try:
         print('begin init pipeline')
-        pipelines = json.load(open('myapp/init-pipeline.json', mode='r'))
-        for pipeline_name in pipelines:
-            try:
-                pipeline = pipelines[pipeline_name]['pipeline']
-                tasks = pipelines[pipeline_name]['tasks']
-                create_pipeline(pipeline=pipeline, tasks=tasks)
-                print('add pipeline %s' % pipeline_name)
-            except Exception as e1:
-                print(e1)
+        init_file = os.path.join(init_dir,'init-pipeline.json')
+        if os.path.exists(init_file):
+            pipelines = json.load(open(init_file, mode='r'))
+            pipelines = replace_git(pipelines)
+            for pipeline_name in pipelines:
+                try:
+                    pipeline = pipelines[pipeline_name]['pipeline']
+                    tasks = pipelines[pipeline_name]['tasks']
+                    create_pipeline(pipeline=pipeline, tasks=tasks)
+                    print('add pipeline %s' % pipeline_name)
+                except Exception as e1:
+                    print(e1)
     except Exception as e:
         print(e)
-
+        # traceback.print_exc()
 
     # 添加 demo 推理 服务
     def create_dataset(**kwargs):
@@ -385,7 +417,7 @@ def init():
                 dataset = Dataset()
                 dataset.name = kwargs['name']
                 dataset.field = kwargs.get('field', '')
-                dataset.version = 'latest'
+                dataset.version = kwargs.get('version', 'latest')
                 dataset.label = kwargs.get('label', '')
                 dataset.status = kwargs.get('status', '')
                 dataset.describe = kwargs.get('describe', '')
@@ -405,7 +437,8 @@ def init():
                 dataset.storage_class = kwargs.get('storage_class', '')
                 dataset.storage_size = kwargs.get('storage_size', '')
                 dataset.download_url = kwargs.get('download_url', '')
-                dataset.owner = 'admin'
+                dataset.owner = kwargs.get('owner', 'admin')
+                dataset.features = kwargs.get('features', '{}')
                 dataset.created_by_fk = 1
                 dataset.changed_by_fk = 1
                 db.session.add(dataset)
@@ -421,14 +454,16 @@ def init():
         datasets = db.session.query(Dataset).all()  # 空白数据集才初始化
         if not datasets:
             import csv
-            csv_reader = csv.reader(open('myapp/init-dataset.csv', mode='r', encoding='utf-8-sig'))
-            header = None
-            for line in csv_reader:
-                if not header:
-                    header = line
-                    continue
-                data = dict(zip(header, line))
-                create_dataset(**data)
+            init_file = os.path.join(init_dir, 'init-dataset.csv')
+            if os.path.exists(init_file):
+                csv_reader = csv.reader(open(init_file, mode='r', encoding='utf-8-sig'))
+                header = None
+                for line in csv_reader:
+                    if not header:
+                        header = line
+                        continue
+                    data = dict(zip(header, line))
+                    create_dataset(**data)
 
     except Exception as e:
         print(e)
@@ -463,22 +498,25 @@ def init():
 
     try:
         print('begin init train_models')
-        train_models = json.load(open('myapp/init-train-model.json', mode='r'))
-        for train_model_name in train_models:
-            try:
-                train_model = train_models[train_model_name]
-                create_train_model(**train_model)
-            except Exception as e1:
-                print(e1)
+        init_file = os.path.join(init_dir, 'init-train-model.json')
+        if os.path.exists(init_file):
+            train_models = json.load(open(init_file, mode='r'))
+            train_models = replace_git(train_models)
+            for train_model_name in train_models:
+                try:
+                    train_model = train_models[train_model_name]
+                    create_train_model(**train_model)
+                except Exception as e1:
+                    print(e1)
     except Exception as e:
         print(e)
         # traceback.print_exc()
 
     # 添加demo 服务
     # @pysnooper.snoop()
-    def create_service(project_name, service_name, service_describe, image_name, command, env, resource_memory='2G',
+    def create_service(project_name, service_name, service_describe, image_name,working_dir='', command='', env='', resource_memory='2G',
                        resource_cpu='2', resource_gpu='0', ports='80', volume_mount='kubeflow-user-workspace(pvc):/mnt',
-                       expand={}):
+                       expand={},host=''):
         service = db.session.query(Service).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
@@ -490,6 +528,7 @@ def init():
                 service.changed_by_fk = 1
                 service.project_id = project.id
                 service.images = image_name
+                service.working_dir=working_dir
                 service.command = command
                 service.resource_memory = resource_memory
                 service.resource_cpu = resource_cpu
@@ -497,6 +536,7 @@ def init():
                 service.env = '\n'.join([x.strip() for x in env.split('\n') if x.split()])
                 service.ports = ports
                 service.volume_mount = volume_mount
+                service.host = host
                 service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
                 db.session.add(service)
                 db.session.commit()
@@ -508,13 +548,16 @@ def init():
 
     try:
         print('begin init services')
-        services = json.load(open('myapp/init-service.json', mode='r'))
-        for service_name in services:
-            try:
-                service = services[service_name]
-                create_service(**service)
-            except Exception as e1:
-                print(e1)
+        init_file = os.path.join(init_dir, 'init-service.json')
+        if os.path.exists(init_file):
+            services = json.load(open(init_file, mode='r'))
+            services = replace_git(services)
+            for service_name in services:
+                try:
+                    service = services[service_name]
+                    create_service(**service)
+                except Exception as e1:
+                    print(e1)
     except Exception as e:
         print(e)
         # traceback.print_exc()
@@ -523,7 +566,7 @@ def init():
     # @pysnooper.snoop()
     def create_inference(project_name, service_name, service_describe, image_name, command, env, model_name, workdir='',
                          model_version='', model_path='', service_type='serving', resource_memory='2G',
-                         resource_cpu='2', resource_gpu='0', ports='80',
+                         resource_cpu='2', resource_gpu='0', min_replicas=1, max_replicas=1, host='', ports='80',
                          volume_mount='kubeflow-user-workspace(pvc):/mnt', metrics='', health='', inference_config='',
                          expand={}):
         service = db.session.query(InferenceService).filter_by(name=service_name).first()
@@ -544,6 +587,9 @@ def init():
                 service.resource_memory = resource_memory
                 service.resource_cpu = resource_cpu
                 service.resource_gpu = resource_gpu
+                service.min_replicas = int(min_replicas)
+                service.max_replicas = int(max_replicas)
+                service.host = host
                 service.working_dir = workdir
                 service.command = command
                 service.inference_config = inference_config
@@ -552,12 +598,15 @@ def init():
                 service.volume_mount = volume_mount
                 service.metrics = metrics
                 service.health = health
+                if "help_url" in expand:
+                    help_url = expand['help_url']
+                    expand["help_url"] = help_url if bool(re.match(r'^http', help_url)) else (conf.get('GIT_URL', '').strip('/') + help_url)
                 service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
 
                 from myapp.views.view_inferenceserving import InferenceService_ModelView_base
                 inference_class = InferenceService_ModelView_base()
                 inference_class.src_item_json = {}
-                inference_class.pre_add(service)
+                inference_class.use_expand(service)
 
                 db.session.add(service)
                 db.session.commit()
@@ -569,14 +618,16 @@ def init():
 
     try:
         print('begin init inferences')
-        inferences = json.load(open('myapp/init-inference.json', mode='r'))
-        for inference_name in inferences:
-            try:
-                inference = inferences[inference_name]
-                create_inference(**inference)
-                print('add inference %s' % inference_name)
-            except Exception as e1:
-                print(e1)
+        init_file = os.path.join(init_dir, 'init-inference.json')
+        if os.path.exists(init_file):
+            inferences = json.load(open(init_file, mode='r'))
+            inferences = replace_git(inferences)
+            for inference_name in inferences:
+                try:
+                    inference = inferences[inference_name]
+                    create_inference(**inference)
+                except Exception as e1:
+                    print(e1)
     except Exception as e:
         print(e)
         # traceback.print_exc()
@@ -586,6 +637,7 @@ def init():
         if not os.path.exists(info_path):
             return
         aihubs = json.load(open(info_path, mode='r'))
+        aihubs = replace_git(aihubs)
 
         try:
             if len(aihubs) > 0:
@@ -602,7 +654,8 @@ def init():
                         aihub = db.session.query(Aihub).filter_by(uuid=uuid).first()
                         if not aihub:
                             aihub = Aihub()
-                        aihub.doc = data.get('doc', '')
+                        doc = data.get('doc', '')
+                        aihub.doc = doc if bool(re.match(r'^http', doc)) else (conf.get('GIT_URL', '').strip('/') + doc)
                         aihub.name = name
                         aihub.label = label
                         aihub.describe = describe
@@ -633,8 +686,9 @@ def init():
     # 添加aihub
     try:
         print('begin add aihub')
-        info_path = 'myapp/init-aihub.json'
-        add_aihub(info_path)
+        init_file = os.path.join(init_dir, 'init-aihub.json')
+        if os.path.exists(init_file):
+            add_aihub(init_file)
     except Exception as e:
         print(e)
         # traceback.print_exc()
@@ -643,77 +697,167 @@ def init():
     from myapp.tasks.schedules import cp_cubestudio
     cp_cubestudio()
 
+    def add_chat(chat_path):
+        from myapp.models.model_chat import Chat
+        if not os.path.exists(chat_path):
+            return
+        chats = json.load(open(chat_path, mode='r'))
+        chats = replace_git(chats)
 
+        try:
+            if len(chats) > 0:
+                for data in chats:
+                    # print(data)
+                    name = data.get('name', '')
+                    label = data.get('label', '')
+                    if name and label:
+                        chat = db.session.query(Chat).filter_by(name=name).first()
+                        if not chat:
+                            knowledge = data.get('knowledge', '')
+                            if type(knowledge)==dict:
+                                knowledge = json.dumps(knowledge,indent=4,ensure_ascii=False)
+                            chat = Chat()
+                            chat.doc = data.get('doc', '')
+                            chat.name = name
+                            chat.label = label
+                            chat.icon = data.get('icon', '')
+                            chat.session_num = int(data.get('session_num', '0'))
+                            chat.chat_type = data.get('chat_type', 'text')
+                            chat.hello = data.get('hello', '这里是cube-studio开源社区，请问有什么可以帮你的么？')
+                            chat.tips = data.get('tips', '')
+                            chat.prompt = data.get('prompt', '')
+                            chat.knowledge = knowledge
+                            chat.service_type = data.get('service_type', 'chatgpt3.5')
+                            chat.service_config = json.dumps(data.get('service_config', {}), indent=4, ensure_ascii=False)
+                            chat.owner = data.get('owner', 'admin')
+                            chat.expand = json.dumps(data.get('expand', {}), indent=4,ensure_ascii=False)
 
+                            if not chat.id:
+                                db.session.add(chat)
+                            db.session.commit()
+                            print(f'add chat {name} success')
+        except Exception as e:
+            print(e)
+            # traceback.print_exc()
+
+    # 添加chat
+    # if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh':
     try:
-        SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE', '')
-        if SQLALCHEMY_DATABASE_URI:
-            import sqlalchemy.engine.url as url
-            uri = url.make_url(SQLALCHEMY_DATABASE_URI)
-            database = uri.database
-            from myapp.models.model_metadata import Metadata_table
-            tables = db.session.query(Metadata_table).all()
-            if len(tables)==0:
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='project', owner='admin',describe='项目分组，模板分组，模型分组'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='project_user', owner='admin',describe='项目组用户'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='idex_query', owner='admin',describe='sqllab的查询记录'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='metadata_table', owner='admin',describe='离线库表管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='metadata_metric', owner='admin',describe='指标管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='dimension', owner='admin',describe='维表管理'))
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='dataset',owner='admin',describe='数据集市场'))
-
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='repository', owner='admin',describe='docker仓库管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='docker', owner='admin', describe='在线docker镜像构建'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='images', owner='admin',describe='镜像管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='notebook', owner='admin', describe='notebook在线开发'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='etl_pipeline', owner='admin',describe='数据ETL的任务流管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='etl_task', owner='admin',describe='数据ETL的任务管理'))
-
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='job_template', owner='admin',describe='任务模板'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='pipeline', owner='admin',describe='ml任务流'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='task', owner='admin', describe='ml任务管理'))
-
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='run', owner='admin',describe='定时调度记录'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='workflow', owner='admin',describe='任务流实例'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='nni', owner='admin', describe='nni超参搜索'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='service', owner='admin',describe='内部服务管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='model', owner='admin', describe='模型管理'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='inferenceservice', owner='admin', describe='推理服务'))
-
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='aihub',owner='admin',describe='模型应用市场，打通自动化标注，一键开发，一键微调，一建部署'))
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='chat',owner='admin',describe='私有知识库，配置领域知识文档或qa文档，智能机器人问答'))
-                db.session.add(Metadata_table(app='cube-studio',db='kubeflow',table='chat_log',owner='admin',describe='所有的聊天日志记录'))
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='favorite', owner='admin',describe='收藏的数据记录'))
-
-                db.session.add(Metadata_table(app='cube-studio', db='kubeflow', table='logs', owner='admin',describe='用户行为记录'))
-                db.session.commit()
-                print('添加离线表成功')
-
+        print('begin add chat')
+        init_file = os.path.join(init_dir, 'init-chat.json')
+        if os.path.exists(init_file):
+            add_chat(init_file)
     except Exception as e:
         print(e)
-        # traceback.print_exc()
+            # traceback.print_exc()
+    if conf.get('BABEL_DEFAULT_LOCALE','zh')=='zh':
+        try:
+            SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE', '')
+            if SQLALCHEMY_DATABASE_URI:
+                import sqlalchemy.engine.url as url
+                uri = url.make_url(SQLALCHEMY_DATABASE_URI)
+                database = uri.database
+                from myapp.models.model_metadata import Metadata_table
+                tables = db.session.query(Metadata_table).all()
+                if len(tables)==0:
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='project', owner='admin',describe='项目分组，模板分组，模型分组'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='project_user', owner='admin',describe='项目组用户'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='idex_query', owner='admin',describe='sqllab的查询记录'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='metadata_table', owner='admin',describe='离线库表管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='metadata_metric', owner='admin',describe='指标管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='dimension', owner='admin',describe='维表管理'))
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='dataset',owner='admin',describe='数据集市场'))
+
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='repository', owner='admin',describe='docker仓库管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='docker', owner='admin', describe='在线docker镜像构建'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='images', owner='admin',describe='镜像管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='notebook', owner='admin', describe='notebook在线开发'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='etl_pipeline', owner='admin',describe='数据ETL的任务流管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='etl_task', owner='admin',describe='数据ETL的任务管理'))
+
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='job_template', owner='admin',describe='任务模板'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='pipeline', owner='admin',describe='ml任务流'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='task', owner='admin', describe='ml任务管理'))
+
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='run', owner='admin',describe='定时调度记录'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='workflow', owner='admin',describe='任务流实例'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='nni', owner='admin', describe='nni超参搜索'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='service', owner='admin',describe='内部服务管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='model', owner='admin', describe='模型管理'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='inferenceservice', owner='admin', describe='推理服务'))
+
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='aihub',owner='admin',describe='模型应用市场，打通自动化标注，一键开发，一键微调，一建部署'))
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='chat',owner='admin',describe='私有知识库，配置领域知识文档或qa文档，智能机器人问答'))
+                    db.session.add(Metadata_table(app='cube-studio',db=database,table='chat_log',owner='admin',describe='所有的聊天日志记录'))
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='favorite', owner='admin',describe='收藏的数据记录'))
+
+                    db.session.add(Metadata_table(app='cube-studio', db=database, table='logs', owner='admin',describe='用户行为记录'))
+                    db.session.commit()
+                    print('添加离线表成功')
+
+        except Exception as e:
+            print(e)
+            # traceback.print_exc()
+
     # 添加ETL pipeline
     try:
-
+        print('begin add etl pipeline')
         from myapp.models.model_etl_pipeline import ETL_Pipeline
         tables = db.session.query(ETL_Pipeline).all()
         if len(tables) == 0:
-            pipelines = json.load(open('myapp/init-etl-pipeline.json', mode='r'))
-            for pipeline in pipelines:
-                db.session.add(ETL_Pipeline(
-                    project_id=1, created_by_fk=1,changed_by_fk=1,
-                    name=pipeline.get('name',''), config=json.dumps(pipeline.get('config',{}),indent=4,ensure_ascii=False),
-                    describe=pipeline.get('describe','系统自带pipeline示例'),workflow=pipeline.get('workflow','airflow'),
-                    dag_json=json.dumps(pipeline.get('dag_json',{}),indent=4,ensure_ascii=False)))
-                db.session.commit()
-                print('添加etl pipeline成功')
+            init_file = os.path.join(init_dir, 'init-etl-pipeline.json')
+            if os.path.exists(init_file):
+                pipelines = json.load(open(init_file, mode='r'))
+                pipelines = replace_git(pipelines)
+                for pipeline in pipelines:
+                    db.session.add(ETL_Pipeline(
+                        project_id=1, created_by_fk=1,changed_by_fk=1,
+                        name=pipeline.get('name',''), config=json.dumps(pipeline.get('config',{}),indent=4,ensure_ascii=False),
+                        describe=pipeline.get('describe','pipeline example'),workflow=pipeline.get('workflow','airflow'),
+                        dag_json=json.dumps(pipeline.get('dag_json',{}),indent=4,ensure_ascii=False)))
+                    db.session.commit()
+                    print('添加etl pipeline成功')
     except Exception as e:
         print(e)
         # traceback.print_exc()
 
+
+    # 添加nni超参搜索
+    try:
+        print('begin add nni')
+        from myapp.models.model_nni import NNI
+        nni = db.session.query(NNI).all()
+        if len(nni) == 0:
+            init_file = os.path.join(init_dir, 'init-automl.json')
+            if os.path.exists(init_file):
+                nnis = json.load(open(init_file, mode='r'))
+                nnis = replace_git(nnis)
+                for nni in nnis:
+                    db.session.add(NNI(
+                        project_id=1, created_by_fk=1,changed_by_fk=1,
+                        job_type=nni.get('job_type','Job'),name=nni.get('name','test'+uuid.uuid4().hex[:4]),namespace=nni.get('namespace','automl'),
+                        describe=nni.get('describe', ''),parallel_trial_count=nni.get('parallel_trial_count', 3),max_trial_count=nni.get('max_trial_count', 12),
+                        objective_type=nni.get('objective_type', 'maximize'),objective_goal=nni.get('objective_goal', 0.99),objective_metric_name=nni.get('objective_metric_name', 'accuracy'),
+                        algorithm_name=nni.get('algorithm_name','Random'), parameters=nni.get('parameters','{}'),
+                        job_json=json.dumps(nni.get('job_json',{}),indent=4,ensure_ascii=False),
+                        job_worker_image = nni.get('job_worker_image', conf.get('NNI_IMAGES','')),
+                        working_dir=nni.get('working_dir', '/mnt/admin/nni/demo/'),
+                        job_worker_command=nni.get('job_worker_command', 'python xx.py'),
+                        resource_memory=nni.get('resource_memory', '1G'),
+                        resource_cpu=nni.get('resource_cpu', '1'),
+                        resource_gpu=nni.get('resource_gpu', '0'),
+                        parallel_trial_type=nni.get('parallel_trial_type', 'multi-process'),
+                    ))
+                    db.session.commit()
+                    print('添加nni 超参搜索成功')
+    except Exception as e:
+        print(e)
+        # traceback.print_exc()
+
+
     # 添加镜像在线构建
     try:
-
+        print('begin add docker')
         from myapp.models.model_docker import Docker
         docker = db.session.query(Docker).all()
         if len(docker) == 0:
@@ -722,9 +866,9 @@ def init():
                 project_id=1,
                 created_by_fk=1,
                 changed_by_fk=1,
-                describe='构建python基础环境',
-                base_image='ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9',
-                target_image='ccr.ccs.tencentyun.com/cube-studio/python:2023.06.19.1',
+                describe='build python environment',
+                base_image=conf.get('USER_IMAGE',''),
+                target_image=conf.get("REPOSITORY_ORG",'')+'python:2023.06.19.1',
                 need_gpu=False,
                 consecutive_build=True,
                 expand=json.dumps(
@@ -732,6 +876,7 @@ def init():
                     "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
                     "resource_memory": "8G",
                     "resource_cpu": "4",
+                    "resource_gpu": "0",
                     "namespace": "jupyter"
                 },indent=4,ensure_ascii=False)
             ))
@@ -740,3 +885,66 @@ def init():
     except Exception as e:
         print(e)
         # traceback.print_exc()
+
+    # 初始化镜像管理
+    try:
+        print('begin add images')
+        init_file = os.path.join(init_dir, 'init-image.json')
+        if os.path.exists(init_file):
+            images = json.load(open(init_file, mode='r'))
+            images = replace_git(images)
+            for image in images:
+                project = db.session.query(Project).filter_by(name=image['group_name']).filter_by(type='job-template').first()
+                repository = db.session.query(Repository).filter_by(name=image['repository']).first()
+                image_model = db.session.query(Images).filter_by(name=image.get('name')).first()
+                if project and not image_model:
+                    pass
+                    gitpath = image.get("gitpath",'')
+                    db.session.add(Images(
+                        project_id=project.id, created_by_fk=1,changed_by_fk=1,
+                        name=image.get('name'),
+                        describe=image.get('describe',''),
+                        gitpath = gitpath if bool(re.match(r'^http', gitpath)) else (conf.get('GIT_URL', '').strip('/') + gitpath),
+                        repository_id=repository.id if repository else 1,
+                        dockerfile = image.get('dockerfile','')
+                    ))
+                    db.session.commit()
+                    print('添加镜像管理成功')
+    except Exception as e:
+        print(e)
+        # traceback.print_exc()
+
+    # 初始化notebook
+    try:
+        print('begin add notebook')
+        project = db.session.query(Project).filter_by(name='public').filter_by(type='org').first()
+        notebooks = db.session.query(Notebook).all()
+        if project and not notebooks:
+            pass
+            images = [image for image in [x[0] for x in conf.get('NOTEBOOK_IMAGES',[])] if 'jupyter' in image]
+            db.session.add(Notebook(
+                project_id=project.id, created_by_fk=1,changed_by_fk=1,
+                name='admin-jupyter',
+                describe='jupyter notebook',
+                images=images[0] if images else "",
+                namespace='jupyter',
+                ide_type='jupyter',
+                volume_mount='kubeflow-user-workspace(pvc):/mnt',
+                node_selector='cpu=true,notebook=true',
+                image_pull_policy='Always',
+                resource_cpu='10',
+                resource_memory='10G',
+                resource_gpu='0'
+            ))
+            db.session.commit()
+            print('添加notebook成功')
+    except Exception as e:
+        print(e)
+        # traceback.print_exc()
+    # 初始化示例所需要的测试数据
+    try:
+        import subprocess
+        process = subprocess.Popen('python /home/myapp/myapp/example/pipeline/ml/init.py', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+    except Exception as e:
+        print(e)

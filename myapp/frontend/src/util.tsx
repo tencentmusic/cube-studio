@@ -1,6 +1,6 @@
 /**
  * 获取第一个表格的可视化高度
- * @param {number} extraHeight 额外的高度(表格底部的内容高度 Number类型,默认为74) 
+ * * @param {number} extraHeight 额外的高度(表格底部的内容高度 Number类型,默认为74)
  * @param {reactRef} ref Table所在的组件的ref
  */
 export function getTableScroll({ extraHeight, ref }: any = {}) {
@@ -253,3 +253,17 @@ export const data2Time = (value: number) => {
     }
     return Number(con.toFixed(2)) + _UNIT[index];
 };
+
+export const  isJsonString = (str:string) => {
+  try {
+    JSON.parse(str);
+    return true;  // 如果解析成功，返回 true
+  } catch (e) {
+    return false;  // 如果解析失败，返回 false
+  }
+}
+
+export const  isDomString = (str:string) => {
+    const domRegex = /<\/?[a-z][\s\S]*>/i;
+    return domRegex.test(str);
+}

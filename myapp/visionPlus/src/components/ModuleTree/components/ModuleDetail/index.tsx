@@ -3,6 +3,7 @@ import { Callout, Stack, Label, PrimaryButton } from '@fluentui/react';
 import { useAppSelector, useAppDispatch } from '@src/models/hooks';
 import { selectCallout, selectCurrent, selectInfo, updateCallout } from '@src/models/template';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 const { Item } = Stack;
 
 const ModuleDetail: React.FC = () => {
@@ -10,6 +11,7 @@ const ModuleDetail: React.FC = () => {
   const callout = useAppSelector(selectCallout);
   const current = useAppSelector(selectCurrent);
   const info = useAppSelector(selectInfo);
+  const { t, i18n } = useTranslation();
 
   // 鼠标事件
   const handleMouseEvent = (e: any) => {
@@ -36,7 +38,7 @@ const ModuleDetail: React.FC = () => {
         <Item grow={1} shrink={1} className={style.moduleDetailItemStyle}>
           <div>
             <Label title="Description" className={style.moduleDetailLabel}>
-              描述
+              {t('描述')}
             </Label>
             <div className={style.moduleDetailBody}>
               <p>{info.describe}</p>
@@ -46,7 +48,7 @@ const ModuleDetail: React.FC = () => {
         <Item grow={1} shrink={1} className={style.moduleDetailItemStyle}>
           <div>
             <Label title="Description" className={style.moduleDetailLabel}>
-              创建人
+              {t('创建人')}
             </Label>
             <div className={style.moduleDetailBody}>
               <p>{info.createdBy}</p>
@@ -66,7 +68,7 @@ const ModuleDetail: React.FC = () => {
         <Item grow={1} shrink={1} className={style.moduleDetailItemStyle}>
           <div>
             <Label title="Description" className={style.moduleDetailLabel}>
-              上次修改时间
+              {t('上次修改时间')}
             </Label>
             <div className={style.moduleDetailBody}>
               <p>{info.lastChanged}</p>
@@ -102,7 +104,7 @@ const ModuleDetail: React.FC = () => {
                   window.open(info.help_url);
                 }}
               >
-                配置文档
+                {t('配置文档')}
             </PrimaryButton>
             </Item>
           ) : null

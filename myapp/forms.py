@@ -9,46 +9,6 @@ conf = app.config
 
 from wtforms.validators import DataRequired, Length, NumberRange, Optional, Regexp, ValidationError
 
-
-# from myapp.models.base import MyappModelBase
-# model_base=MyappModelBase()
-#
-# class StringField(Field):
-#     """
-#     This field is the base for most of the more complicated fields, and
-#     represents an ``<input type="text">``.
-#     """
-#     widget = widgets.TextInput()
-#
-#
-#     def __init__(self, label=None, validators=None, filters=tuple(),
-#                  description='', id=None, default=None, widget=None,
-#                  render_kw=None, _form=None, _name=None, _prefix='',
-#                  _translations=None, _meta=None):
-#         label=_(model_base.lab('server')) if label==None  else label
-#         default='' if default==None else default
-#         widget=BS3TextFieldWidget() if widget==None else widget
-#         description=description if description else ''
-#         validators = [] if validators==None else validators
-#
-#         return super(StringField, self).__init__(label=label,default=default,widget=widget,validators=validators,description=description)
-#
-#     # @pysnooper.snoop()
-#     def process_formdata(self, valuelist):
-#         # aa = self.data
-#         if not self.data:
-#             self.data=''
-#         if valuelist:
-#             self.data = valuelist[0]
-#         elif self.data is None:
-#             self.data = ''
-#         aa = self.data
-#
-#     # @pysnooper.snoop()
-#     def _value(self):
-#         return text_type(self.data) if self.data is not None else ''
-
-
 # 处理完再校验
 class JsonValidator(object):
     def __init__(self):
@@ -91,7 +51,7 @@ def filter_not_empty_values(value):
 
 
 import pysnooper, datetime, time, json
-from wtforms.widgets.core import HTMLString, html_params
+from wtforms.widgets.core import Markup, html_params
 
 try:
     from html import escape
@@ -106,21 +66,22 @@ class MyCodeArea(object):
 
     def __call__(self, field, **kwargs):
         if self.code:
-            return HTMLString('<pre><code>%s</code></pre>' % (self.code,))
+            return Markup('<pre><code>%s</code></pre>' % (self.code,))
         else:
-            return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
-        # return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
+            return Markup('<pre><code>%s</code></pre>' % (field._value(),))
+        # return Markup('<pre><code>%s</code></pre>' % (field._value(),))
 
 
 from wtforms import widgets
 
 
 class MyBS3TextAreaFieldWidget(widgets.TextArea):
-    def __init__(self, rows=3, readonly=0, expand_filed=None, tips=None):  # 扩展成list类型字段
+    def __init__(self, rows=3, readonly=0, expand_filed=None, tips=None, is_json=False):  # 扩展成list类型字段
         self.rows = rows
         self.readonly = readonly
         self.expand_filed = expand_filed
         self.tips = tips
+        self.is_json=is_json
         return super(MyBS3TextAreaFieldWidget, self).__init__()
 
     def __call__(self, field, **kwargs):
@@ -134,11 +95,12 @@ class MyBS3TextAreaFieldWidget(widgets.TextArea):
 
 
 class MyBS3TextFieldWidget(widgets.TextInput):
-    def __init__(self, value='', readonly=0, is_date=False, is_date_range=False):
+    def __init__(self, value='', readonly=0, is_date=False, is_date_range=False,tips=None):
         self.value = value
         self.readonly = readonly
         self.is_date = is_date
         self.is_date_range = is_date_range
+        self.tips = tips
         return super(MyBS3TextFieldWidget, self).__init__()
 
     def __call__(self, field, **kwargs):
@@ -257,7 +219,7 @@ class MySelect2Widget(object):
             else:
                 html.append(self.render_option(val, label, selected))
         html.append('</select>')
-        return HTMLString(''.join(html))
+        return Markup(''.join(html))
 
     @classmethod
     def render_option(cls, value, label, selected, **kwargs):
@@ -268,14 +230,14 @@ class MySelect2Widget(object):
         options = dict(kwargs, value=value)
         if selected:
             options['selected'] = True
-        return HTMLString('<option %s>%s</option>' % (html_params(**options), escape_html(label, quote=False)))
+        return Markup('<option %s>%s</option>' % (html_params(**options), escape_html(label, quote=False)))
 
 
 # json编辑框
 class MyJsonIde(object):
     def __call__(self, field, **kwargs):
-        return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
-        # return HTMLString('<pre><code>%s</code></pre>' % (field._value(),))
+        return Markup('<pre><code>%s</code></pre>' % (field._value(),))
+        # return Markup('<pre><code>%s</code></pre>' % (field._value(),))
 
 
 class MySelect2ManyWidget(widgets.Select):

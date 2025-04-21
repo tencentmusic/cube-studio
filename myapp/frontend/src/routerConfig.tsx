@@ -149,7 +149,7 @@ export const formatRoute = (data: IAppMenuItem[]): IRouterConfigPlusItem[] => {
                 ...item,
                 breadcrumbs: currentChain.map(item => item.title)
             }
-            if (item.children) {
+            if (item.children?.length > 0) {
                 res.push({
                     ...item,
                     path: `/${currentPath.join('/')}`,
@@ -220,7 +220,7 @@ export const getDefaultOpenKeys = (data: IRouterConfigPlusItem[]) => {
         if (item?.isExpand && item.path) {
             openKeys.push(item.path)
         }
-        if (item?.children) {
+        if (item?.children && item.children[0]) {
             quene.push(...item.children)
         }
     }

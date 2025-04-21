@@ -20,8 +20,16 @@
         <value>mapreduce_shuffle</value>
     </property>
     <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>hadoop-hadoop-yarn-rm-0.hadoop-hadoop-yarn-rm.default</value>
+    </property>
+    <property>
         <name>yarn.resourcemanager.address</name>
-        <value>xxx.xxx.xxx.xxx:8032</value>
+        <value>hadoop-hadoop-yarn-rm-0.hadoop-hadoop-yarn-rm.default:8032</value>
+    </property>
+        <property>
+        <name>yarn.resourcemanager.scheduler.address</name>
+        <value>hadoop-hadoop-yarn-rm-0.hadoop-hadoop-yarn-rm.default:8030</value>
     </property>
     <property>
         <name>yarn.nodemanager.env-whitelist</name>

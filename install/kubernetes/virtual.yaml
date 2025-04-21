@@ -1,4 +1,38 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: infra-kubeflow-dashboard
+  namespace: infra
+spec:
+  gateways:
+  - kubeflow/kubeflow-gateway
+  hosts:
+  - "*"    # 管理平台的域名   kubeflow.local.com
+  http:
+  - route:
+    - destination:
+        host: kubeflow-dashboard-frontend.infra.svc.cluster.local
+        port:
+          number: 80
+---
 
+#---
+#apiVersion: networking.istio.io/v1alpha3
+#kind: VirtualService
+#metadata:
+#  name: infra-kubeflow-dashboard
+#  namespace: infra
+#spec:
+#  gateways:
+#  - kubeflow/kubeflow-gateway-8080
+#  hosts:
+#  - "*"    # 管理平台的域名   kubeflow.local.com
+#  http:
+#  - route:
+#    - destination:
+#        host: kubeflow-dashboard-frontend-1.infra.svc.cluster.local
+#        port:
+#          number: 80
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -9,11 +43,14 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"   # 配置自己管理的域名kubeflow.local.com
+  - "*"      # 使用域名访问，这里要配置成自己的域名，不然notebook会自动使用域名代理，优先级比此处大
   http:
   - match:
     - uri:
         prefix: /k8s/dashboard/cluster/
+      headers:
+        cookie:
+          regex: ".*myapp_username=.*"
     rewrite:
       uri: /
     route:
@@ -32,11 +69,14 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"   # 配置自己管理的域名kubeflow.local.com
+  - "*"   # 使用域名访问，这里要配置成自己的域名
   http:
   - match:
     - uri:
         prefix: /k8s/dashboard/user1/
+      headers:
+        cookie:
+          regex: ".*myapp_username=.*"
     rewrite:
       uri: /
     route:
@@ -54,11 +94,14 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"  # 配置自己管理的域名 kubeflow.local.com
+  - "*"   # 使用域名访问，这里要配置成自己的域名
   http:
   - match:
     - uri:
         prefix: /labelstudio/
+      headers:
+        cookie:
+          regex: ".*myapp_username=.*"
     rewrite:
       uri: /labelstudio/
     route:
@@ -76,11 +119,14 @@ spec:
   gateways:
   - kubeflow/kubeflow-gateway
   hosts:
-  - "*"  # 配置自己管理的域名 kubeflow.local.com
+  - "*"   # 使用域名访问，这里要配置成自己的域名
   http:
   - match:
     - uri:
         prefix: /grafana/
+      headers:
+        cookie:
+          regex: ".*myapp_username=.*"
     rewrite:
       uri: /
     route:
@@ -88,3 +134,57 @@ spec:
         host: grafana.monitoring.svc.cluster.local
         port:
           number: 8080
+#---
+#apiVersion: networking.istio.io/v1alpha3
+#kind: VirtualService
+#metadata:
+#  name: monitoring-prometheus
+#  namespace: monitoring
+#spec:
+#  gateways:
+#  - kubeflow/kubeflow-gateway
+#  hosts:
+#  - "*"  # 配置自己管理的域名 kubeflow.local.com
+#  http:
+#  - match:
+#    - uri:
+#        prefix: /prometheus/
+#    rewrite:
+#      uri: /prometheus/
+#    route:
+#    - destination:
+#        host: prometheus-k8s.monitoring.svc.cluster.local
+#        port:
+#          number: 9090
+---
+## 私有云环境minio存放public所有静态资源vs
+#apiVersion: networking.istio.io/v1beta1
+#kind: VirtualService
+#metadata:
+#  name: minio
+#  namespace: kubeflow
+#spec:
+#  gateways:
+#  - kubeflow/kubeflow-gateway
+#  hosts:
+#  - '*'
+#  http:
+#  - corsPolicy:
+#      allowHeaders:
+#      - '*'
+#      allowMethods:
+#      - POST
+#      - GET
+#      allowOrigin:
+#      - '*'
+#    match:
+#    - uri:
+#        prefix: /minio/
+#    rewrite:
+#      uri: /
+#    route:
+#    - destination:
+#        host: minio.kubeflow.svc.cluster.local
+#        port:
+#          number: 9000
+

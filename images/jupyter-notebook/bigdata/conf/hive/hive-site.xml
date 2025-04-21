@@ -2,7 +2,18 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
     <property>
+      <name>hive.metastore.warehouse.dir</name>
+      <value>/user/hive/warehouse</value>
+    </property>
+    <property>
         <name>hive.metastore.uris</name>
-        <value>thrift://xxx.xxx.xxx.xxx:9083</value>
+        <value>thrift://hive-service.default:9083</value>
     </property>
 </configuration>
+
+
+
+
+
+
+

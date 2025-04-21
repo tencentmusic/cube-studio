@@ -8,6 +8,7 @@ import { saveTaskList } from '@src/models/task';
 import { toggle } from '@src/models/setting';
 import api from '@src/api';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 const { Item } = Stack;
 
 const EditorHead: React.FC = () => {
@@ -16,11 +17,13 @@ const EditorHead: React.FC = () => {
   const info = useAppSelector(selectInfo);
   const userName = useAppSelector(selectUserName);
 
+  const { t, i18n } = useTranslation();
+
   // 新建流水线
   const handleNewPipeline = () => {
     api
       .pipeline_modelview_add({
-        describe: `新建流水线-${Date.now()}`,
+        describe: `${t('新建流水线')}-${Date.now()}`,
         name: `${userName}-pipeline-${Date.now()}`,
         node_selector: 'cpu=true,train=true',
         schedule_type: 'once',
@@ -45,7 +48,14 @@ const EditorHead: React.FC = () => {
     if (pipelineId) {
       await dispatch(await saveTaskList());
       dispatch(savePipeline());
-      window.open(`${window.location.origin}/pipeline_modelview/run_pipeline/${pipelineId}`);
+      window.open(`${window.location.origin}/pipeline_modelview/api/run_pipeline/${pipelineId}`);
+    }
+  };
+
+  // pipeline copy
+  const handleCopy = async () => {
+    if (pipelineId) {
+      window.open(`${window.location.origin}/pipeline_modelview/api/copy_pipeline/${pipelineId}`);
     }
   };
 
@@ -74,12 +84,12 @@ const EditorHead: React.FC = () => {
                   }}
                   onClick={handleNewPipeline}
                 >
-                  新建流水线
+                  {(t('新建流水线'))}
                 </PrimaryButton>
               )}
             </Item>
             <Item className={info.name ? '' : style.hidden}>
-              <TooltipHost content="设置">
+              <TooltipHost content={t('设置')}>
                 <IconButton
                   iconProps={{ iconName: 'Settings' }}
                   onClick={() => {
@@ -96,40 +106,12 @@ const EditorHead: React.FC = () => {
         <Item className={info.name ? '' : style.hidden}>
           <Stack horizontal>
             <Item styles={style.buttonItemStyle}>
-              <PrimaryButton onClick={handleSubmit}>运行</PrimaryButton>
+              <PrimaryButton onClick={handleSubmit}>{t('运行')}</PrimaryButton>
             </Item>
             <Item styles={style.buttonItemStyle}>
-              <DefaultButton
-                onClick={() => {
-                  api
-                    .pipeline_modelview_copy(pipelineId)
-                    .then((res: any) => {
-                      if (res?.id) {
-                        if (window.self === window.top) {
-                          window.location.search = `?pipeline_id=${res.id}`;
-                        } else {
-                          window.parent.postMessage(
-                            {
-                              type: 'copy',
-                              message: {
-                                pipelineId: res.id,
-                              },
-                            },
-                            `${window.location.origin}`,
-                          );
-                        }
-                      }
-                    })
-                    .catch(err => {
-                      if (err.response) {
-                        dispatch(updateErrMsg({ msg: err.response.data.message }));
-                      }
-                    });
-                }}
-              >
-                复制
-              </DefaultButton>
+                <PrimaryButton onClick={handleCopy}>{t('复制')}</PrimaryButton>
             </Item>
+
           </Stack>
         </Item>
       </Stack>

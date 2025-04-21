@@ -1,0 +1,4 @@
+deb https://mirrors.aliyun.com/ubuntu-ports/ xenial main restricted universe multiverse
+deb https://mirrors.aliyun.com/ubuntu-ports/ xenial-updates main restricted universe multiverse
+deb https://mirrors.aliyun.com/ubuntu-ports/ xenial-backports main restricted universe multiverse
+deb https://mirrors.aliyun.com/ubuntu-ports/ xenial-security main restricted universe multiverse

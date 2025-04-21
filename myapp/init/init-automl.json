@@ -1,0 +1,25 @@
+[
+    {
+    "job_type": "Job",
+    "project": "public",
+    "name": "test1",
+    "namespace": "automl",
+    "describe": "nni单机并行功能测试",
+    "parallel_trial_count": 3,
+    "max_trial_count": 12,
+    "objective_type": "maximize",
+    "objective_goal": 0.99,
+    "objective_metric_name": "accuracy",
+    "algorithm_name": "Random",
+    "parameters": "{\n    \"batch_size\": {\n        \"_type\": \"choice\",\n        \"_value\": [16,32,64,128]\n    },\n    \"momentum\": {\n        \"_type\": \"uniform\",\n        \"_value\": [0,1]\n    }\n}",
+    "job_json": {
+    },
+    "job_worker_image": "ccr.ccs.tencentyun.com/cube-studio/nni:20240501",
+    "working_dir": "/mnt/admin/pipeline/example/nni/",
+    "job_worker_command": "python demo.py",
+    "resource_memory": "1G",
+    "resource_cpu": "1",
+    "resource_gpu": "0"
+  }
+]
+

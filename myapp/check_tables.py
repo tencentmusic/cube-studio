@@ -25,7 +25,7 @@ def check_tables():
                            'ab_role', 'ab_user', 'ab_user_role', 'ab_view_menu', 'alembic_version', 'dimension',
                            'docker', 'images', 'inferenceservice', 'job_template', 'logs', 'metadata_metric', 'model',
                            'nni', 'notebook', 'pipeline', 'project', 'project_user', 'repository', 'run',
-                           'service', 'service_pipeline', 'task', 'metadata_table', 'workflow']:
+                           'service', 'task', 'metadata_table', 'workflow']:
             if table_name not in results:
                 print('%s db下，table %s不完整，请\n1、mysql: drop dabatase %s\n2、重启当前pod' % (uri.database,table_name,uri.database))
                 exit(1)

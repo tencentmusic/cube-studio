@@ -73,7 +73,6 @@ from myapp.models.favorite import Favorite
 
 conf = app.config
 
-log = logging.getLogger(__name__)
 API_COLUMNS_INFO_RIS_KEY = 'columns_info'
 API_ADD_FIELDSETS_RIS_KEY = 'add_fieldsets'
 API_EDIT_FIELDSETS_RIS_KEY = 'edit_fieldsets'
@@ -261,13 +260,13 @@ class MyappFormRestApi(ModelRestApi):
     def post_add(self, item):
         pass
 
-    def pre_add_req(self, req_json):
+    def pre_add_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_add_res(self, result):
         return result
 
-    def pre_update_req(self, req_json):
+    def pre_update_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_update_res(self, result):
@@ -279,7 +278,7 @@ class MyappFormRestApi(ModelRestApi):
     def post_update(self, item):
         pass
 
-    def pre_list_req(self, req_json):
+    def pre_list_req(self, req_json, *args, **kwargs):
         return req_json
 
     def pre_list_res(self, result):
@@ -311,7 +310,7 @@ class MyappFormRestApi(ModelRestApi):
     ops_link = [
         # {
         #     "text": "git",
-        #     "url": "https://github.com/tencentmusic/cube-studio"
+        #     "url": "https://github.com/data-infra/cube-studio"
         # }
     ]
 
@@ -514,8 +513,13 @@ class MyappFormRestApi(ModelRestApi):
     def merge_ops_data(self, response, **kwargs):
         response[API_IMPORT_DATA_RIS_KEY] = self.import_data
         response[API_DOWNLOAD_DATA_RIS_KEY] = self.download_data
-        response[API_OPS_BUTTON_RIS_KEY]=self.ops_link
-        response[API_ENABLE_FAVORITE_RIS_KEY]=self.enable_favorite
+        # for ops in self.ops_link:
+        #     if 'http://' not in ops['url'] and 'https://' not in ops['url']:
+        #         host = "//" + conf['HOST'] if conf['HOST'] else request.host
+        #         ops['url'] = host+ops['url']
+
+        response[API_OPS_BUTTON_RIS_KEY] = self.ops_link
+        response[API_ENABLE_FAVORITE_RIS_KEY] = self.enable_favorite
         response['page_size'] = self.page_size
 
     # 重新渲染add界面
@@ -963,7 +967,7 @@ class MyappFormRestApi(ModelRestApi):
     # @pysnooper.snoop()
     def api_show(self, pk, **kwargs):
         _response = dict()
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
@@ -984,7 +988,7 @@ class MyappFormRestApi(ModelRestApi):
     @expose("/", methods=["GET"])
     def api_list(self, **kwargs):
         _response = dict()
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
@@ -1044,9 +1048,9 @@ class MyappFormRestApi(ModelRestApi):
     # @expose("/add", methods=["POST"])
     # def add(self):
     @expose("/", methods=["POST"])
-    @pysnooper.snoop(watch_explode=('item', 'json_data'))
+    # @pysnooper.snoop(watch_explode=('item', 'json_data'))
     def api_add(self):
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
@@ -1074,7 +1078,7 @@ class MyappFormRestApi(ModelRestApi):
     @expose("/<pk>", methods=["PUT"])
     # @pysnooper.snoop(watch_explode=('item','data'))
     def api_edit(self, pk):
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
@@ -1098,9 +1102,9 @@ class MyappFormRestApi(ModelRestApi):
         raise NotImplementedError('To be implemented')
 
     @expose("/<pk>", methods=["DELETE"])
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def api_delete(self, pk):
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         _args.update(json.loads(request.args.get('form_data', "{}")))
         _args.update(request.args)
         if "form_data" in _args:
@@ -1425,8 +1429,8 @@ class MyappFormRestApi(ModelRestApi):
             ret["remember"] = True
         else:
             ret["remember"] = False
-        ret["label"] = _(self.label_columns.get(field.name, ""))
-        ret["description"] = _(self.description_columns.get(field.name, ""))
+        ret["label"] = self.label_columns.get(field.name, "")
+        ret["description"] = self.description_columns.get(field.name, "")
         if field.validate and isinstance(field.validate, list):
             ret["validators"] = [v for v in field.validate]
         elif field.validate:
@@ -1593,7 +1597,7 @@ class MyappFormRestApi(ModelRestApi):
         :param data: python data structure
         :return: python data structure
         """
-        data_item = self.edit_model_schema.dump(model_item, many=False).data
+        data_item = self.edit_model_schema.dump(model_item, many=False)
         for _col in data_item:
             if _col not in data.keys():
                 data[_col] = data_item[_col]

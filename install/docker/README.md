@@ -1,4 +1,29 @@
 
+# 本地机器环境准备
+
+## windows 系统下基础环境
+
+1. 安装docker desktop
+下载Docker Desktop Installer，安装最新版docker desktop。 windows 10 版本需要启用 Hyper-V ，安装配置流程可参考在线文档https://zhuanlan.zhihu.com/p/441965046
+
+2. 安装 Power Shell
+之后的脚本需要在Power Shell 中执行
+
+3. 安装python = 3.9.16
+
+4. git 要配置一下不要进行换行符修改
+
+`git config --global core.autocrlf false`
+
+## mac系统基础环境
+
+1. 安装docker desktop
+
+## linux系统基础环境
+
+1、安装docker/docker-compose
+
+
 # 本地调试
 
 ## deploy mysql
@@ -6,6 +31,7 @@
 ```
 docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:8.0.32
 ```
+
 进入mysql，创建kubeflow数据库
 ```
 mysql> CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
@@ -20,19 +46,19 @@ mysql> flush privileges;
 
 ```
 构建基础镜像（包含基础环境）
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.08.01 -f install/docker/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.03.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.08.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.03.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2023.08.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.08.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.03.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.03.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -40,7 +66,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:frontend-2023.
 注意：前后端代码生产环境均在容器中运行。
 
 后端开发调试：代码通过挂载，在本机ide中修改，在docker-compose中运行调试，debug模式自动热更新。
-前端调试：本机ide开发调试，最后编译为静态文件，也可以在docker中编译成静态文件，最后统一打包成docker镜像
+前端调试：大部分功能在本机ide开发调试即可，支持热更新。完整的平台前端调试需要本地ide开发完成后打包编译为静态文件，也可以在docker中编译成静态文件，在docker-compose中运行验证，不同于后端，这种docker中调试的话前端不支持热更新。
 
 #### 本地后端python代码开发
 
@@ -72,9 +98,26 @@ STAGE: 'dev'
 docker-compose -f docker-compose.yml  up
 ```
 
-部署以后，登录首页 会自动创建用户，绑定角色（Gamma和username同名角色）。
+部署以后，登录首页 会自动创建用户，绑定角色（Gamma）。
 
 可根据自己的需求为角色授权。
+
+注意：一种比较快捷的本地调试方式，是在后端的启动命令前加上sleep 1000000，然后docker-compose up -d起来以后，再`docker exec -it docker-myapp-1 bash`进入到后端命令行进行调试。
+
+首次调试需要创建数据库和初始化。执行`/entrypoint.sh`
+
+后续的调试可以直接执行`python myapp/run.py`
+
+
+2）本地连接k8s开发集群
+
+需要先在k8s开发集群部署一遍cube-studio，然后才能在本地连接并调度
+
+![k8s配置](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/image/localk8s.jpg)
+
+3) 修改minio地址
+
+将远端k8s上的kubeflow命名空间下的minio服务改为nodeport类型，然后修改install/docker/config.py中的MINIO_HOST为minio服务的ip:nodeport
 
 #### 前端页面本机开发和构建
 
@@ -98,7 +141,13 @@ yarn: npm install yarn -g
 ```
 ```sh
 # 初始化安装可能会遇到依赖包的版本选择，直接回车默认即可
-cd myapp/vision && yarn && yarn build
+如果本地环境有偏差，可以在容器内进行构建，参考entrypoint.sh中的构建命令
+# 构建前端主体
+cd /home/myapp/myapp/frontend && npm install && npm run build
+# 构建机器学习pipeline
+cd /home/myapp/myapp/vision && npm install && npm run build
+# 构建数据ETL pipeline
+cd /home/myapp/myapp/visionPlus && yarn && npm run build
 ```
 输出路径：`myapp/static/appbuilder`
 #### 纯前端开发（本地）
@@ -106,14 +155,14 @@ cd myapp/vision && yarn && yarn build
 ##### 环境准备
 
 - https://nodejs.org/en/download/ 进入nodejs官网，选择下载LTS长期支持版本
-- 然后在官网下载安装好LTS版本之后，输入`npm install -g n`安装node版本管理器（ https://www.npmjs.com/package/n ），最后输入`n 14.15.0`将node版本切换至14.x
-- https://github.com/nodejs/Release 这里可以找到14.x等往期版本
+- 然后在官网下载安装好LTS版本之后，输入`npm install -g n`安装node版本管理器（ https://www.npmjs.com/package/n ），最后输入`n 16.15.0`将node版本切换至16.x
+- https://github.com/nodejs/Release 这里可以找到16.x等往期版本
 
 
 以主要前端项目`myapp/frontend`为例，到这里前端开发环境已经准备好了
 
 1. `cd myapp/frontend` 进入目录
-2. `npm run start` 进入调试模式
+2. `npm run start` 进入调试模式。需要现在本地启动后端才行
 3. `npm run build` 打包编译静态资源
 #### 前端配置代理
 
@@ -125,6 +174,28 @@ cd myapp/vision && yarn && yarn build
 STAGE: 'build'
 docker-compose -f docker-compose.yml  up
 ```
+## 前后端镜像升级
+
+### 前端镜像升级
+
+在项目根目录下执行下面命令：其中xx.xx.xx/xx/是你的镜像仓库地址
+
+docker build --network=host -t xx.xx.xx/xx/kubeflow-dashboard-frontend:xx -f install/docker/dockerFrontend/Dockerfile .
+
+然后线上infra命令空间修改kubeflow-dashboard-frontend的deployment的镜像名换为你自己构建的
+
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/c9c8665aba0844f088416b776b10a1d4.png)
+
+
+### 后端镜像升级
+
+在项目根目录下执行下面命令：其中xx.xx.xx/xx/是你的镜像仓库地址
+
+docker build --network=host -t xx.xx.xx/xx/kubeflow-dashboard:xx -f install/docker/Dockerfile .
+
+然后线上infra命令空间修改kubeflow-dashboard的deployment的镜像名换为你自己构建的
+
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/3bbabe70cf954bb78b91331e113bf103.png)
 
 ## Q&A
 1） 如果构建镜像过程中因为网络问题失败，可以通过新增pip国内镜像地址来解决。
@@ -133,10 +204,10 @@ docker-compose -f docker-compose.yml  up
 ```
 [global]
 index-url = http://mirrors.aliyun.com/pypi/simple/
-extra-index-url = https://pypi.tuna.tsinghua.edu.cn/simple/
+extra-index-url = https://mirrors.aliyun.com/pypi/simple/
 
 [install]
-trusted-host=mirrors.aliyun.com pypi.tuna.tsinghua.edu.cn
+trusted-host=mirrors.aliyun.com
 ```
 然后在cube-studio/install/docker/Dockerfile-base中增加:
 
@@ -155,3 +226,17 @@ yarn配置镜像命令
 ```
 yarn config set registry https://registry.npmmirror.com
 ```
+
+3）windows 系统下执行pip3 install -r requirements.txt 失败
+
+Power Shell 单独安装失败的部分，但要确保安装的版本号与requirements.txt保持一致，安装成功后再重新执行pip3 install -r requirements.txt
+
+4）windows 环境，执行docker-compose报UnicodeDecodeError: 'gbk' codec问题
+编码类型问题可参考 https://cloud.tencent.com/developer/article/1530430 修改本地文件 encoding.py  大概位置为：XXX\AppData\Local\Programs\Python\Python312\Lib\site-packages\pip\_internal\utils\encoding.py
+
+5）windows 环境，执行docker-compose，报 Python——/usr/bin/env: ‘python(3)\r’: No such file or directory
+原因：在Windows系统中，文本文件的行尾通常以回车符(CR)和换行符(LF)的组合表示（称为CRLF），而在Linux和Unix系统中，行尾仅以换行符(LF)表示。当你在Windows环境下编写或编辑Shell脚本，然后尝试在Linux系统上运行时，就可能会遇到这个问题。
+解决方案： vscode 打开项目，全文搜索报错文本关键字，比如/usr/bin/env，打开对应文件，将VSCode 右下角的CRLF 切换为 LF 保存对应文件
+
+6）windows 环境，打包visionPlus 编译过程报错
+/myapp/visionPlus/.eslintrc 文件中 注释行："linebreak-style": ["error", "unix"]，取消注释行："linebreak-style": ["error", "windows"]

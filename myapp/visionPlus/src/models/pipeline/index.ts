@@ -1,14 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppThunk } from '../store';
 import { updateErrMsg } from '../app';
-import { selectElements } from '../element';
 import api from '@src/api';
 import getParamter from '@src/utils/getParamter';
-import { selectTaskList } from '../task';
-import { message } from 'antd';
 
 export interface PipelineState {
   pipelineId: number | string;
+  scenes:string;
   info: any;
   saved: boolean;
   changed: any;
@@ -20,6 +18,7 @@ export interface PipelineState {
 
 const initialState: PipelineState = {
   pipelineId: getParamter('pipeline_id', window.location.href, false)?.pipeline_id || '',
+  scenes: getParamter('scenes', window.location.href, false)?.scenes || '',
   info: {},
   saved: true,
   changed: {},
@@ -72,72 +71,24 @@ export const {
 } = pipelineSlice.actions;
 
 export const selectPipelineId = (state: RootState): PipelineState['pipelineId'] => state.pipeline.pipelineId;
+export const selectPipelineScenes = (state: RootState): PipelineState['scenes'] => state.pipeline.scenes;
 export const selectInfo = (state: RootState): PipelineState['info'] => state.pipeline.info;
 export const selectSaved = (state: RootState): PipelineState['saved'] => state.pipeline.saved;
 export const selectChanged = (state: RootState): PipelineState['changed'] => state.pipeline.changed;
 export const selectEditing = (state: RootState): PipelineState['editing'] => state.pipeline.editing;
-export const selectPipelineList = (state: RootState): PipelineState['pipelineList'] => state.pipeline.pipelineList;
 export const selectAll = (state: RootState): PipelineState['all'] => state.pipeline.all;
 export const selectIsLoadError = (state: RootState): PipelineState['isLoadError'] => state.pipeline.isLoadError;
 
-export const getPipelineList = (): AppThunk => dispatch => {
-  api.pipeline_modelview_list().then(res => {
-    if (res?.status === 0) {
-      const list: any[] = res.result.map((item: any) => {
-        return {
-          id: item.id,
-          name: item.name,
-          describe: item.describe,
-          changed_on: item.changed_on,
-          project_id: item.project_id,
-        };
-      });
-      dispatch(
-        updatePipelineList(list.sort((a, b) => new Date(b.changed_on).getTime() - new Date(a.changed_on).getTime())),
-      );
-    }
-  });
-};
-
-export const getAllList =
-  (data: unknown): AppThunk =>
-    dispatch => {
-      dispatch(updateAll(undefined));
-      api
-        .pipeline_modelview_all(JSON.stringify(data))
-        .then(res => {
-          if (res?.status === 0) {
-            const list: any[] = res.result.map((item: any) => {
-              return {
-                id: item.id,
-                name: item.name,
-                describe: item.describe,
-                changed_on: item.changed_on,
-                project_id: item.project.id,
-              };
-            });
-            dispatch(updateAll(list.sort((a, b) => new Date(b.changed_on).getTime() - new Date(a.changed_on).getTime())));
-          }
-        })
-        .catch(err => {
-          if (err.response) {
-            dispatch(
-              updateErrMsg({
-                msg: err?.response?.data?.message || '获取列表失败',
-              }),
-            );
-          }
-        });
-    };
 
 // 获取当前流水线信息
 export const getPipeline = (): AppThunk => (dispatch, getState) => {
   const state = getState();
   const pipelineId = selectPipelineId(state);
+  const pipelineScenes = selectPipelineScenes(state);
 
-  if (pipelineId) {
+  if (pipelineId && pipelineScenes) {
     api
-      .pipeline_modelview_detail(pipelineId)
+      .pipeline_modelview_detail(pipelineId,pipelineScenes)
       .then((res: any) => {
         if (res?.status === 0) {
           dispatch(updateInfo(res));
@@ -228,6 +179,7 @@ export const savePipeline = (): AppThunk => (dispatch, getState) => {
   }
 
   const pipelineId = selectPipelineId(state);
+  const pipelineScenes = selectPipelineScenes(state);
 
   if (!selectSaved(state) || !pipelineId) return;
   dispatch(updateSaved(false));
@@ -240,7 +192,7 @@ export const savePipeline = (): AppThunk => (dispatch, getState) => {
 
   console.log('tarRes', tarRes, tarParam)
   api
-    .pipeline_modelview_save(pipelineId, tarParam)
+    .pipeline_modelview_save(pipelineId,pipelineScenes, tarParam)
     .then((res: any) => {
       dispatch(updateEditing(false));
 

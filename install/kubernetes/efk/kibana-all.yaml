@@ -62,15 +62,6 @@ spec:
       labels:
         k8s-app: kibana-logging
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: beta.kubernetes.io/arch
-                operator: In
-                values:
-                - "amd64"
       containers:
       - env:
         - name: ELASTICSEARCH_HOSTS

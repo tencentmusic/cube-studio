@@ -1,8 +1,8 @@
-FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base
+FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04
 
 RUN apt-get update && apt install -y lsof
 
-RUN mkdir -p /examples/ && git clone https://github.com/tencentmusic/cube-studio.git && cp -r cube-studio/aihub/machine-learning/* /examples/ && rm -rf cube-studio
+RUN mkdir -p /examples/ && git clone https://github.com/data-infra/cube-studio.git && cp -r cube-studio/aihub/machine-learning/* /examples/ && rm -rf cube-studio
 
 # 爬虫包
 RUN pip install pyquery requests lxml beautifulsoup4 \

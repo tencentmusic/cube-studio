@@ -8637,6 +8637,7 @@ data:
           initContainers:
             - name: grpc-bootstrap-init
               image: busybox:1.36.0
+              imagePullPolicy: IfNotPresent
               volumeMounts:
                 - mountPath: /var/lib/grpc/data/
                   name: grpc-io-proxyless-bootstrap
@@ -9503,7 +9504,7 @@ spec:
           secretName: istio-kubeconfig
           optional: true
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: istio-ingressgateway
@@ -9522,7 +9523,7 @@ spec:
       app: istio-ingressgateway
       istio: ingressgateway
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: istiod
@@ -9644,7 +9645,7 @@ subjects:
     name: istiod-service-account
     namespace: istio-system
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: istio-ingressgateway
@@ -9671,7 +9672,7 @@ spec:
         type: Utilization
         averageUtilization: 80
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: istiod
@@ -9702,7 +9703,6 @@ kind: Service
 metadata:
   name: istio-ingressgateway
   namespace: istio-system
-  annotations:
   labels:
     app: istio-ingressgateway
     istio: ingressgateway
@@ -9712,6 +9712,7 @@ metadata:
     operator.istio.io/component: "IngressGateways"
 spec:
   # type: LoadBalancer
+#  type: NodePort
   selector:
     app: istio-ingressgateway
     istio: ingressgateway
@@ -9724,10 +9725,12 @@ spec:
       port: 80
       protocol: TCP
       targetPort: 8888
+#      nodePort: 80
     - name: http3
       port: 8080
       protocol: TCP
       targetPort: 8889
+#      nodePort: 8080
 #    - name: https
 #      port: 443
 #      protocol: TCP

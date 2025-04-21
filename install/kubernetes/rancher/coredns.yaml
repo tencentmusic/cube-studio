@@ -13,9 +13,18 @@ data:
         }
         # 自定义host
         hosts {
-          1.1.1.1    example1.local.com
-          2.2.2.2    example2.local.com
-          172.16.247.0 pypi.tuna.tsinghua.edu.cn
+          192.168.3.100    mirrors.aliyun.com
+          192.168.3.100    ccr.ccs.tencentyun.com
+          192.168.3.100    registry-1.docker.io
+          192.168.3.100    auth.docker.io
+          192.168.3.10     hub.docker.com
+          192.168.3.100    www.modelscope.cn
+          192.168.3.100    modelscope.oss-cn-beijing.aliyuncs.com
+          192.168.3.100    archive.ubuntu.com
+          192.168.3.100    security.ubuntu.com
+          192.168.3.100    cloud.r-project.org
+          192.168.3.100    deb.nodesource.com
+          192.168.3.100    docker-76009.sz.gfp.tencent-cloud.com
           fallthrough
         }
         prometheus :9153

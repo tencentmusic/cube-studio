@@ -5,13 +5,13 @@ git clone https://github.com/microsoft/onnxruntime.git
 cd onnxruntime/dockerfiles
 git submodule update --init
 
-docker build -t $hubhost/onnxruntime:cpu -f Dockerfile.source ..
+docker build --network=host -t $hubhost/onnxruntime:cpu -f Dockerfile.source ..
 docker push $hubhost/onnxruntime:cpu
 
-docker build -t $hubhost/onnxruntime:cuda -f Dockerfile.cuda ..
+docker build --network=host -t $hubhost/onnxruntime:cuda -f Dockerfile.cuda ..
 docker push $hubhost/onnxruntime:cuda
 
-docker build -t $hubhost/onnxruntime:tensorrt -f Dockerfile.tensorrt ..
+docker build --network=host -t $hubhost/onnxruntime:tensorrt -f Dockerfile.tensorrt ..
 docker push $hubhost/onnxruntime:tensorrt
 
 # 地址：https://github.com/microsoft/onnxruntime/tree/master/dockerfiles

@@ -5,7 +5,7 @@ metadata:
   name: kubeflow-clusterrole
 rules:
 - apiGroups: ["*"]
-  resources: ["pods","pods/exec","pods/log","services","endpoints","events","configmaps","nodes","deployments","mpijobs","tfjobs","pytorchjobs","frameworks","jobs","sparkapplications","mxjobs","paddlejobs","xgboostjobs"]
+  resources: ["pods","pods/exec","pods/log","services","endpoints","events","configmaps","nodes","deployments","mpijobs","tfjobs","pytorchjobs","jobs","sparkapplications","mxjobs","paddlejobs","xgboostjobs"]
   verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
 ---
 apiVersion: v1
@@ -37,19 +37,30 @@ metadata:
   name: nni
   namespace: automl
 ---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nni
+  namespace: automl
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get"]
+---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: automl-nni-clusterrolebinding
+  name: nni
   namespace: automl
 subjects:
 - kind: ServiceAccount
   name: nni
   namespace: automl
 roleRef:
-  kind: ClusterRole
-  name: kubeflow-clusterrole
+  kind: Role
+  name: nni
   apiGroup: rbac.authorization.k8s.io
+
 
 
 

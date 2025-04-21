@@ -2,8 +2,8 @@
 
 set -ex
 
-docker build -t ccr.ccs.tencentyun.com/cube-studio/model_download:20221001 -f job/model_download/Dockerfile .
-docker push ccr.ccs.tencentyun.com/cube-studio/model_download:20221001
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/model_download:20240501 -f job/model_download/Dockerfile .
+docker push ccr.ccs.tencentyun.com/cube-studio/model_download:20240501
 
 
 

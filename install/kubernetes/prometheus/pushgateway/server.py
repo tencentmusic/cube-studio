@@ -40,8 +40,8 @@ Sender_type = os.getenv('Sender_type', 'wechat')
 def push_message(sender_type,**args):
     if sender_type=='wechat':
         push_wechat(args['message'],args['sender'],args['receiver'])
-    if sender_type=='rtx_group':
-        push_rtx_group(args['message'],args['sender'])
+    if sender_type=='username_group':
+        push_username_group(args['message'],args['sender'])
 
 
 # 微信公共号告警，指向个人推送
@@ -67,7 +67,7 @@ def push_wechat(message,sender,receiver):
     logging.info('reveive resp from wechat: %s'% resp.read().decode("unicode_escape"))
 
 # 企业微信群推送，sender为企业微信群的的key,message为字典数据
-def push_rtx_group(message,sender):
+def push_username_group(message,sender):
     data = {
         "msgtype": "text",
         "text": {
@@ -75,9 +75,9 @@ def push_rtx_group(message,sender):
         }
     }
     url = 'http://in.qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s'%sender
-    logging.info('begin to send rtx group %s'%url)
+    logging.info('begin to send username group %s'%url)
     resp = requests.post(url,timeout=10,json=data)
-    logging.info('reveive resp from rtx: %s'%resp.content)
+    logging.info('reveive resp from username: %s'%resp.content)
 
 
 # 推送数据

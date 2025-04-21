@@ -13,13 +13,13 @@ import pysnooper
 import traceback
 import threading
 import logging
-
+from myapp import conf
+from myapp.utils import core
 
 class K8s():
 
     def __init__(self, file_path=None):  # kubeconfig
         if not file_path:
-            from myapp import conf
             file_path = conf.get('CLUSTERS',{}).get(conf.get('ENVIRONMENT'),{}).get('KUBECONFIG','')
         kubeconfig = os.getenv('KUBECONFIG', '')
         if file_path and os.path.exists(file_path) and ''.join(open(file_path).readlines()).strip():
@@ -29,11 +29,16 @@ class K8s():
         else:
             config.load_incluster_config()
         self.v1 = client.CoreV1Api()
-        self.v1beta1 = client.ExtensionsV1beta1Api()
         self.AppsV1Api = client.AppsV1Api()
         self.NetworkingV1Api = client.NetworkingV1Api()
         self.CustomObjectsApi = client.CustomObjectsApi()
+        self.rbacvi = client.RbacAuthorizationV1Api()
         self.v1.api_client.configuration.verify_ssl = False  # 只能设置 /usr/local/lib/python3.9/dist-packages/kubernetes/client/configuration.py:   self.verify_ssl= True ---> False
+        self.gpu_resource=conf.get('GPU_RESOURCE',{})
+        self.vgpu_resource = conf.get('VGPU_RESOURCE', {})
+        self.vgpu_drive_type = conf.get("VGPU_DRIVE_TYPE", "vgpu")
+
+        self.get_gpu = core.get_gpu
 
     # 获取指定范围的pod
     # @pysnooper.snoop()
@@ -44,10 +49,26 @@ class K8s():
         addresses = subsets[0].addresses  # 只取第一个子网
         for address in addresses:
             pod_name_temp = address.target_ref.name
-            pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
+            pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace,_request_timeout=5)
             all_pods.append(pod)
 
+    def exist_hold_resource(self,pod):
+        try:
+            exist_hold_resource=False
+            if pod['status'] == 'Running' or pod['status_more'].get('phase', '') == 'Running':
+                exist_hold_resource = True
+            if pod['status'] == 'Pending':
+                for condition in pod['status_more']['conditions']:
+                    if condition['type'] == 'PodScheduled' and str(condition['status']).lower() == 'true':
+                        exist_hold_resource = True
+                        break
+        except Exception as e:
+            print(e)
+            exist_hold_resource=True
 
+        return exist_hold_resource
+
+    # @pysnooper.snoop()
     def get_pods(self, namespace=None, service_name=None, pod_name=None, labels={},status=None):
         # print(namespace)
         back_pods = []
@@ -55,31 +76,43 @@ class K8s():
             all_pods = []
             # 如果只有命名空间
             if (namespace and not service_name and not pod_name and not labels):
-                all_pods = self.v1.list_namespaced_pod(namespace).items
+                all_pods = self.v1.list_namespaced_pod(namespace=namespace).items or []
             # 如果有命名空间和pod名，就直接查询pod
             elif (namespace and pod_name):
-                pod = self.v1.read_namespaced_pod(name=pod_name, namespace=namespace)
-                all_pods.append(pod)
+                pod = self.v1.read_namespaced_pod(name=pod_name, namespace=namespace,_request_timeout=5)
+                if pod:
+                    all_pods.append(pod)
             # 如果只有命名空间和服务名，就查服务下绑定的pod
             elif (namespace and service_name):  # 如果有命名空间和服务名
-                all_endpoints = self.v1.read_namespaced_endpoints(service_name, namespace)  # 先查询入口点，
-                subsets = all_endpoints.subsets
-                addresses = subsets[0].addresses  # 只取第一个子网
-                for address in addresses:
-                    pod_name_temp = address.target_ref.name
-                    pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
-                    all_pods.append(pod)
-            elif (namespace and status and status.lower()=='running'):
-                all_endpoints = self.v1.list_namespaced_endpoints(namespace=namespace)  # 先查询入口点，
-                subsets = all_endpoints.subsets
-                addresses = subsets[0].addresses  # 只取第一个子网
-                for address in addresses:
-                    pod_name_temp = address.target_ref.name
-                    pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace)
-                    all_pods.append(pod)
+                all_endpoints = self.v1.read_namespaced_endpoints(service_name, namespace,_request_timeout=5)  # 先查询入口点，
+                if all_endpoints:
+                    subsets = all_endpoints.subsets
+                    if subsets:
+                        addresses = subsets[0].addresses  # 只取第一个子网
+                        for address in addresses:
+                            pod_name_temp = address.target_ref.name
+                            pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
+                            if pod:
+                                all_pods.append(pod)
+            elif (namespace and status):
+                # if status.lower()=='running':
+                #     all_endpoints = self.v1.list_namespaced_endpoints(namespace=namespace).items or [] # 先查询入口点，
+                #     subsets = all_endpoints.subsets
+                #     if subsets:
+                #         addresses = subsets[0].addresses  # 只取第一个子网
+                #         for address in addresses:
+                #             pod_name_temp = address.target_ref.name
+                #             pod = self.v1.read_namespaced_pod(name=pod_name_temp, namespace=namespace, _request_timeout=5)
+                #             all_pods.append(pod)
+                # else:
+                src_pods = self.v1.list_namespaced_pod(namespace).items or []
+                for pod in src_pods:
+                    if pod.status and pod.status.phase == status:
+                        all_pods.append(pod)
+
 
             elif (namespace and labels):
-                src_pods = self.v1.list_namespaced_pod(namespace).items
+                src_pods = self.v1.list_namespaced_pod(namespace).items or []
                 for pod in src_pods:
                     pod_labels = pod.metadata.labels
                     is_des_pod = True
@@ -94,12 +127,29 @@ class K8s():
                 # print(pod)
                 metadata = pod.metadata
                 status = pod.status.phase if pod and hasattr(pod, 'status') and hasattr(pod.status, 'phase') else ''
+                # Pending Running Succeeded Failed Unknown
+                # 辅助状态 ContainerCreating CrashLoopBackOff ImagePullBackOff ErrImagePull  Terminating
+                # 如果是running 也分为重启运行中
+                if status.lower()=='running':
+                    status = 'Running' if [x.status for x in pod.status.conditions if x.type == 'Ready' and x.status == 'True'] else 'CrashLoopBackOff'
+
                 containers = pod.spec.containers
                 # mem = [container.resources.requests for container in containers]
                 memory = [self.to_memory_GB(container.resources.requests.get('memory','0G')) for container in containers if container.resources and container.resources.requests]
                 cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources  and container.resources.requests]
-                gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
+
+                # gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
                 vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0'))/100 for container in containers if container.resources and container.resources.requests]
+                vgpu += [float(container.resources.requests.get('tke.cloud.tencent.com/qgpu-core', '0'))/100 for container in containers if container.resources and container.resources.requests]
+                vgpu += [float(container.resources.requests.get('nvidia.com/gpucores', '0')) / 100 for container in containers if container.resources and container.resources.requests]
+
+                # 获取gpu异构资源占用
+                ai_resource={}
+                for name in self.gpu_resource:
+                    resource = self.gpu_resource[name]
+                    gpu = [int(container.resources.requests.get(resource, '0')) for container in containers if container.resources and container.resources.requests]
+                    ai_resource[name]=sum(gpu)
+                ai_resource['gpu']=ai_resource.get('gpu',0)+sum(vgpu)
 
                 node_selector = {}
                 try:
@@ -112,7 +162,6 @@ class K8s():
                             node_selector[match_expression.key] = match_expression.values[0]
                         if match_expression.operator == 'Equal':
                             node_selector[match_expression.key] = match_expression.values
-
                 except Exception:
                     pass
                     # print(e)
@@ -126,26 +175,36 @@ class K8s():
                         username = pod.metadata.labels.get('user', '')
                     if not username:
                         username = pod.metadata.labels.get('rtx-user', '')
+                    if not username:
+                        username = pod.metadata.labels.get('run-username', '')
+                    if not username:
+                        username = pod.metadata.labels.get('username', '')
 
                 temp = {
                     'name': metadata.name,
                     "username": username,
-                    'host_ip': pod.status.host_ip,
+                    'host_ip': pod.status.host_ip if pod.status.host_ip else '',
                     'pod_ip': pod.status.pod_ip,
                     'status': status,  # 每个容器都正常才算正常
                     'status_more': pod.status.to_dict(),  # 无法json序列化
                     'node_name': pod.spec.node_name,
-                    "labels": metadata.labels,
+                    "labels": metadata.labels if metadata.labels else {},
+                    "annotations": metadata.annotations if metadata.annotations else {},
                     "memory": sum(memory),
                     "cpu": sum(cpu),
-                    "gpu": sum(gpu) + sum(vgpu),
+                    # "gpu": sum(gpu) + sum(vgpu),
                     "start_time": (metadata.creation_timestamp + datetime.timedelta(hours=8)).replace(tzinfo=None),   # 时间格式
                     "node_selector": node_selector
                 }
+                temp.update(ai_resource)
+
                 back_pods.append(temp)
             # print(back_pods)
             return back_pods
 
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
             return back_pods
@@ -156,12 +215,24 @@ class K8s():
             event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
             if not event['time']:
                 event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
+        events = sorted(events,key=lambda x:x.get('time',''))
         return events
+
+
+    # @pysnooper.snoop()
+    def get_job_event(self, namespace, job_name):
+        events = [item.to_dict() for item in self.v1.list_namespaced_event(namespace, field_selector=f'involvedObject.name={job_name}').items]
+        for event in events:
+            event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
+            if not event['time']:
+                event['time'] = (event['event_time'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('event_time', None) else None
+        return events
+
 
     # 获取 指定服务，指定命名空间的下面的endpoint
     def get_pod_humanized(self, namespace, pod_name):
         try:
-            pod = self.v1.read_namespaced_pod(namespace=namespace, name=pod_name)
+            pod = self.v1.read_namespaced_pod(namespace=namespace, name=pod_name,_request_timeout=5)
             if pod:
                 from kubernetes.client import ApiClient
                 pod = ApiClient().sanitize_for_serialization(pod)
@@ -179,7 +250,7 @@ class K8s():
         try:
             all_pods = self.get_pods(namespace=namespace, service_name=service_name)
             all_pod_ip = []
-            if (all_pods):
+            if all_pods:
                 for pod in all_pods:
                     all_pod_ip.append(pod['pod_ip'])
                 # print(all_pod_ip)
@@ -192,48 +263,25 @@ class K8s():
     def delete_pods(self, namespace=None, service_name=None, pod_name=None, status=None, labels=None):
         if not namespace:
             return []
-        all_pods = self.get_pods(namespace=namespace, pod_name=pod_name, service_name=service_name, labels=labels)
+        all_pods = self.get_pods(namespace=namespace, pod_name=pod_name, service_name=service_name, labels=labels) or []
         if status:
             all_pods = [pod for pod in all_pods if pod['status'] == status]
         try:
             for pod in all_pods:
                 self.v1.delete_namespaced_pod(pod['name'], namespace, grace_period_seconds=0)
                 print('delete pod %s' % pod['name'])
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
         return all_pods
 
-    def get_node_allocated_resources(self, node_name):
-        field_selector = 'spec.nodeName=' + node_name
-        pods = self.v1.list_pod_for_all_namespaces(watch=False, field_selector=field_selector).items
-        node = self.get_node(name=node_name)[0]
-        node_resource = {
-            "used_memory": 0,
-            "used_cpu": 0,
-            "used_gpu": 0
-        }
-        for pod in pods:
-            if not pod.status or pod.status.phase != 'Running':
-                continue
-            containers = pod.spec.containers
-            memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
-            cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
-            gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
-            vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
-            node_resource['used_memory'] += sum(memory)
-            node_resource['used_cpu'] += sum(cpu)
-            node_resource['used_gpu'] += sum(gpu) + sum(vgpu)
-
-        node_resource['used_memory'] = int(node_resource['used_memory'])
-        node_resource['used_cpu'] = int(node_resource['used_cpu'])
-        node_resource['used_gpu'] = round(node_resource['used_gpu'], 1)
-        node.update(node_resource)
-        return node
-
+    # @pysnooper.snoop()
     def get_all_node_allocated_resources(self):
         nodes_resource = {}
         try:
-            pods = self.v1.list_pod_for_all_namespaces(watch=False).items
+            pods = self.v1.list_pod_for_all_namespaces(watch=False).items or []
 
             for pod in pods:
                 if not pod.status or pod.status.phase != 'Running':
@@ -241,8 +289,12 @@ class K8s():
                 containers = pod.spec.containers
                 memory = [self.to_memory_GB(container.resources.requests.get('memory', '0G')) for container in containers if container.resources and container.resources.requests]
                 cpu = [self.to_cpu(container.resources.requests.get('cpu', '0')) for container in containers if container.resources and container.resources.requests]
-                gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
+                # gpu = [int(container.resources.requests.get('nvidia.com/gpu', '0')) for container in containers if container.resources and container.resources.requests]
                 vgpu = [float(container.resources.requests.get('tencent.com/vcuda-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
+                vgpu += [float(container.resources.requests.get('tke.cloud.tencent.com/qgpu-core', '0')) / 100 for container in containers if container.resources and container.resources.requests]
+                # vgpu += [float(container.resources.requests.get('nvidia.com/vgpu', '0')) / 10 for container in containers if container.resources and container.resources.requests]
+                vgpu += [float(container.resources.requests.get('nvidia.com/gpucores', '0')) / 100 for container in containers if container.resources and container.resources.requests]
+
                 node_name = pod.spec.node_name
                 if node_name not in nodes_resource:
                     nodes_resource[node_name] = {
@@ -252,21 +304,31 @@ class K8s():
                     }
                 nodes_resource[node_name]['used_memory'] += sum(memory)
                 nodes_resource[node_name]['used_cpu'] += sum(cpu)
-                nodes_resource[node_name]['used_gpu'] += sum(gpu) + sum(vgpu)
+
+                # 获取gpu异构资源占用
+                for name in self.gpu_resource:
+                    resource = self.gpu_resource[name]
+                    gpu = [int(container.resources.requests.get(resource, '0')) for container in containers if container.resources and container.resources.requests]
+                    nodes_resource[node_name]["used_"+name] = nodes_resource[node_name].get("used_"+name,0)+sum(gpu)
+                    # print(pod.metadata.name,"used_"+name,sum(gpu))
+                nodes_resource[node_name]['used_gpu'] = nodes_resource[node_name].get('used_gpu', 0) + sum(vgpu)
+
             for node_name in nodes_resource:
                 node_resource = nodes_resource[node_name]
+                # print(node_resource)
                 node_resource['used_memory'] = int(node_resource['used_memory'])
                 node_resource['used_cpu'] = int(node_resource['used_cpu'])
                 node_resource['used_gpu'] = round(node_resource['used_gpu'], 1)
 
         except Exception as e:
+            logging.error('Traceback: %s', traceback.format_exc())
             print(e)
 
         return nodes_resource
 
     def get_node_event(self, node_name):
         node = self.get_node(name=node_name)
-        events = [item.to_dict() for item in self.v1.list_event_for_all_namespaces().items]   # field_selector=f'source.host={node["hostip"]}'
+        events = [item.to_dict() for item in (self.v1.list_event_for_all_namespaces().items or [])]   # field_selector=f'source.host={node["hostip"]}'
         for event in events:
             event['time'] = (event['first_timestamp'] + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if event.get('first_timestamp', None) else None
             if not event['time']:
@@ -282,23 +344,35 @@ class K8s():
     def get_node(self, label=None, name=None, ip=None):
         try:
             back_nodes = []
-            all_node = self.v1.list_node(label_selector=label).items
+            all_node = self.v1.list_node(label_selector=label).items or []
             # print(all_node)
             for node in all_node:
                 try:
                     back_node = {}
-                    # print(node)
+                    # 获取gpu异构资源占用
+                    ai_resource = {}
+                    for gpu_mfrs in self.gpu_resource:
+                        resource = self.gpu_resource[gpu_mfrs]
+                        ai_resource[gpu_mfrs] = int(node.status.allocatable.get(resource, '0'))
+
+                    # print(node.status.conditions)
                     adresses = node.status.addresses
                     back_node['cpu'] = int(self.to_cpu(node.status.allocatable.get('cpu', '0')))
                     back_node['memory'] = int(self.to_memory_GB(node.status.allocatable.get('memory', '0')))
-                    back_node['gpu'] = int(node.status.allocatable.get('nvidia.com/gpu', '0'))
+                    # back_node['gpu'] = int(node.status.allocatable.get('nvidia.com/gpu', '0'))
                     back_node['labels'] = node.metadata.labels
                     back_node['name'] = node.metadata.name
                     back_node['create_time'] = node.metadata.creation_timestamp
                     back_node['node_info'] = node.status.node_info.to_dict()
+                    back_node['status'] = 'Ready' if [x.status for x in node.status.conditions if x.type=='Ready' and x.status=='True'] else 'Unknown'
+                    # print(back_node['status'])
+                    back_node.update(ai_resource)
+
                     for address in adresses:
                         if address.type == 'InternalIP':
                             back_node['hostip'] = address.address
+                            break
+
                     if name and back_node['name'] == name:
                         back_nodes.append(back_node)
                     elif ip and back_node['hostip'] == ip:
@@ -317,26 +391,26 @@ class K8s():
     def label_node(self, ips, labels):
         try:
             all_node_ip = []
-            all_node = self.v1.list_node().items
+            all_node = self.v1.list_node().items or []
 
             for node in all_node:
                 # print(node)
                 adresses = node.status.addresses
-                Hostname = ''
-                InternalIP = ''
+                hostname = ''
+                internalIP = ''
                 for address in adresses:
                     if address.type == 'Hostname':
-                        Hostname = address.address
+                        hostname = address.address
                     if address.type == 'InternalIP':
-                        InternalIP = address.address
+                        internalIP = address.address
 
-                if InternalIP in ips:
+                if internalIP in ips:
                     body = {
                         "metadata": {
                             "labels": labels
                         }
                     }
-                    self.v1.patch_node(Hostname, body)
+                    self.v1.patch_node(hostname, body)
 
             return all_node_ip
         except Exception as e:
@@ -420,10 +494,17 @@ class K8s():
 
     # @pysnooper.snoop(watch_explode=())
     def get_crd(self, group, version, plural, namespace, label_selector=None, return_dict=None):
-        if label_selector:
-            crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,label_selector=label_selector)['items']
-        else:
-            crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural)['items']
+        crd_objects=[]
+        try:
+            if label_selector:
+                crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group,version=version,namespace=namespace,plural=plural,label_selector=label_selector)['items'] or []
+            else:
+                crd_objects = self.CustomObjectsApi.list_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural)['items'] or []
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
+        except Exception as e:
+            print(e)
         back_objects=[]
         for crd_object in crd_objects:
             # print(crd_object['status']['conditions'][-1]['type'])
@@ -465,7 +546,7 @@ class K8s():
 
     # @pysnooper.snoop(watch_explode=())
     def get_crd_all_namespaces(self, group, version, plural, pool=False):
-        all_namespace = self.v1.list_namespace().items
+        all_namespace = self.v1.list_namespace().items or []
         all_namespace = [namespace.metadata.name for namespace in all_namespace]
         back_objects = []
         jobs = []
@@ -496,12 +577,16 @@ class K8s():
             try:
                 delete_body = client.V1DeleteOptions(grace_period_seconds=0)
                 self.CustomObjectsApi.delete_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural, name=name, body=delete_body)
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
             except Exception as e:
+                logging.error('Traceback: %s', traceback.format_exc())
                 print(e)
             return [name]
         elif labels:
             back_name = []
-            crds = self.get_crd(group=group, version=version, plural=plural, namespace=namespace)
+            crds = self.get_crd(group=group, version=version, plural=plural, namespace=namespace) or []
             for crd in crds:
                 if crd['labels']:
                     crd_labels = json.loads(crd['labels'])
@@ -513,8 +598,12 @@ class K8s():
                                                                                       namespace=namespace,
                                                                                       plural=plural, name=crd['name'],
                                                                                       body=delete_body)
+                            except ApiException as api_e:
+                                if api_e.status != 404:
+                                    print(api_e)
                             except Exception as e:
                                 print(e)
+                                logging.error('Traceback: %s', traceback.format_exc())
                             back_name.append(crd['name'])
             return back_name
 
@@ -532,9 +621,9 @@ class K8s():
                     group=crd_info['group'], version=crd_info['version'],
                     plural=crd_info['plural'], namespace=namespace, labels={'run-id': run_id}
                 )
-
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除tfjob
             try:
@@ -545,15 +634,7 @@ class K8s():
                 )
             except Exception as e:
                 print(e)
-
-            # 删除framework
-            try:
-                crd_info = all_crd_info['framework']
-                self.delete_crd(group=crd_info['group'], version=crd_info['version'],
-                                plural=crd_info['plural'], namespace=namespace,
-                                labels={"run-id": str(run_id)})
-            except Exception as e:
-                print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除pytorchjob
             try:
@@ -564,6 +645,7 @@ class K8s():
                 )
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除mpijob
             try:
@@ -574,6 +656,7 @@ class K8s():
                 )
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除vcjob
             try:
@@ -584,6 +667,7 @@ class K8s():
                 )
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除sparkjob
             try:
@@ -594,6 +678,7 @@ class K8s():
                 )
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除paddlejob
             try:
@@ -604,6 +689,7 @@ class K8s():
                 )
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除mxjob
             try:
@@ -614,51 +700,81 @@ class K8s():
                 )
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除deployment
             try:
                 self.delete_deployment(namespace=namespace, labels={'run-id': run_id})
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除stss
             try:
-                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items
+                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items or []
                 if stss:
                     for sts in stss:
                         self.AppsV1Api.delete_namespaced_stateful_set(namespace=namespace, name=sts.metadata.name, grace_period_seconds=0)
-
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除daemonsets
             try:
-                daemonsets = self.AppsV1Api.list_namespaced_daemon_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items
+                daemonsets = self.AppsV1Api.list_namespaced_daemon_set(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items or []
                 if daemonsets:
                     for daemonset in daemonsets:
                         self.AppsV1Api.delete_namespaced_daemon_set(namespace=namespace, name=daemonset.metadata.name, grace_period_seconds=0)
-
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 删除service
             try:
-                services = self.v1.list_namespaced_service(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items
+                services = self.v1.list_namespaced_service(namespace=namespace, label_selector="run-id=%s" % str(run_id)).items or []
                 if services:
                     for service in services:
                         self.v1.delete_namespaced_service(namespace=namespace, name=service.metadata.name, grace_period_seconds=0)
-
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
             except Exception as e:
                 print(e)
+                logging.error('Traceback: %s', traceback.format_exc())
 
             # 不能删除pod，因为task的模板也是有这个run-id的，所以不能删除
 
-    def delete_service(self, namespace, name):
-        try:
-            self.v1.delete_namespaced_service(name=name, namespace=namespace, grace_period_seconds=0)
-        except Exception as e:
-            print(e)
+    def delete_service(self, namespace, name=None, labels=None):
+        if name:
+            try:
+                self.v1.delete_namespaced_service(name=name, namespace=namespace, grace_period_seconds=0)
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
+            except Exception as e:
+                print(e)
+        if labels:
+            try:
+                # 获取具有指定标签的服务
+                services = self.v1.list_namespaced_service(namespace="your-namespace", label_selector=",".join([f"{k}={v}" for k, v in labels.items()])).items or []
 
+                # 遍历每个服务
+                for service in services:
+                    # 删除服务
+                    self.v1.delete_namespaced_service(name=service.metadata.name, namespace=service.metadata.namespace)
+                    print(f"Deleted service: {service.metadata.name} in namespace: {service.metadata.namespace}")
+
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
+            except Exception as e:
+                print(e)
     #
     # @pysnooper.snoop()
     # def get_volume_mounts(self,volume_mount,username):
@@ -726,6 +842,38 @@ class K8s():
                                 "name": volumn_name,
                                 "mountPath": os.path.join(mount, username),
                                 "subPath": username
+                            }
+                        )
+                    if "(pvc-share)" in volume:
+                        pvc_name = volume.replace('(pvc-share)', '').replace(' ', '')
+                        volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
+                        k8s_volumes.append({
+                            "name": volumn_name,
+                            "persistentVolumeClaim": {
+                                "claimName": pvc_name
+                            }
+                        })
+                        k8s_volume_mounts.append(
+                            {
+                                "name": volumn_name,
+                                "mountPath": mount
+                            }
+                        )
+
+                    # 外部挂载盘不挂载子目录
+                    if "(storage)" in volume:
+                        pvc_name = volume.replace('(storage)', '').replace(' ', '')
+                        volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
+                        k8s_volumes.append({
+                            "name": volumn_name,
+                            "persistentVolumeClaim": {
+                                "claimName": pvc_name
+                            }
+                        })
+                        k8s_volume_mounts.append(
+                            {
+                                "name": volumn_name,
+                                "mountPath": mount,
                             }
                         )
 
@@ -824,40 +972,11 @@ class K8s():
                 )
         return k8s_volumes, k8s_volume_mounts
 
-    # @pysnooper.snoop()
-    def get_gpu(self, resource_gpu):
-        gpu_num = 0
-        gpu_type = ''
-        try:
-            if resource_gpu:
-                if '(' in resource_gpu:
-                    gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
-                    gpu_type = gpu_type[0] if gpu_type else None
-                if '（' in resource_gpu:
-                    gpu_type = re.findall(r"（(.+?)）", resource_gpu)
-                    gpu_type = gpu_type[0] if gpu_type else None
-
-                resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
-                resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
-                gpu_num = float(resource_gpu)
-
-        except Exception as e:
-            print(e)
-        gpu_type = gpu_type.upper() if gpu_type else None
-        return gpu_num, gpu_type
 
     # @pysnooper.snoop(watch_explode=())
     def make_container(self, name, command, args, volume_mount, working_dir, resource_memory, resource_cpu,
                        resource_gpu, image_pull_policy, image, env, privileged=False, username='', ports=None,
-                       health=None,hostPort=[]):
-
-        if not '~' in resource_memory:
-            resource_memory = resource_memory.strip() + "~" + resource_memory.strip()
-        if not '~' in resource_cpu:
-            resource_cpu = resource_cpu.strip() + "~" + resource_cpu.strip()
-
-        requests_memory, limits_memory = resource_memory.strip().split('~')
-        requests_cpu, limits_cpu = resource_cpu.strip().split('~')
+                       health=None,hostPort=[],resource_rdma=0):
 
         k8s_volumes, k8s_volume_mounts = self.get_volume_mounts(volume_mount, username)
 
@@ -879,36 +998,41 @@ class K8s():
         env_list.append(client.V1EnvVar(name='K8S_POD_NAME', value_from=client.V1EnvVarSource(field_ref=client.V1ObjectFieldSelector(field_path='metadata.name'))))
 
         security_context = client.V1SecurityContext(privileged=privileged) if privileged else None
+        resources_requests = {}
+        resources_limits = {}
+        if resource_memory and not '~' in resource_memory:
+            resource_memory = resource_memory.strip() + "~" + resource_memory.strip()
+        if resource_cpu and not '~' in resource_cpu:
+            resource_cpu = resource_cpu.strip() + "~" + resource_cpu.strip()
 
-        resources_requests = {
-            "cpu": requests_cpu,
-            "memory": requests_memory
-        }
-        resources_limits = {
-            "cpu": limits_cpu,
-            "memory": limits_memory
-        }
+        if resource_memory:
+            requests_memory, limits_memory = resource_memory.strip().split('~')
+            resources_requests['memory'] = requests_memory.strip()
+            resources_limits['memory'] = limits_memory.strip()
 
-        gpu_num, gpu_type = self.get_gpu(resource_gpu)
+        if resource_cpu:
+            requests_cpu, limits_cpu = resource_cpu.strip().split('~')
+            resources_requests['cpu'] = requests_cpu.strip()
+            resources_limits['cpu'] = limits_cpu.strip()
+
+        gpu_num, gpu_type, resource_name = self.get_gpu(resource_gpu)
 
         # 整卡占用
         if gpu_num >= 1:
-            from myapp import conf
-            gpu_drive_type = conf.get("GPU_DRIVE_TYPE", "NVIDIA")
-            if gpu_drive_type == 'NVIDIA':
-                resources_requests['nvidia.com/gpu'] = str(int(gpu_num))
-                resources_limits['nvidia.com/gpu'] = str(int(gpu_num))
+            gpu_num = int(gpu_num)
+            if resource_name:
+                resources_requests[resource_name] = str(int(gpu_num))
+                resources_limits[resource_name] = str(int(gpu_num))
 
-        if 0 < gpu_num < 1:
-            # 虚拟gpu
-            from myapp import conf
-            vgpu_drive_type = conf.get("VGPU_DRIVE_TYPE", "TENCENT")
-            if vgpu_drive_type == 'TENCENT':
-                gpu_memory = int(gpu_num*64) if gpu_type=='T4' else int(gpu_num*128) if gpu_type=='V100' else int(gpu_num*160) if gpu_type=='A100' else int(gpu_num*64)
-                resources_requests['tencent.com/vcuda-core'] = str(int(gpu_num*100))
-                resources_requests['tencent.com/vcuda-memory'] = str(gpu_memory)
-                resources_limits['tencent.com/vcuda-core'] = str(int(gpu_num * 100))
-                resources_limits['tencent.com/vcuda-memory'] = str(gpu_memory)
+        if 0==gpu_num:
+            # 没要gpu的容器，就要加上可视gpu为空，不然gpu镜像能看到和使用所有gpu
+            for gpu_alias in conf.get('GPU_NONE',{}):
+                env_list.append(client.V1EnvVar(name=conf.get('GPU_NONE',{})[gpu_alias][0], value=conf.get('GPU_NONE',{})[gpu_alias][1]))
+        DEFAULT_POD_RESOURCES = conf.get('DEFAULT_POD_RESOURCES',{})
+        for resource_name in DEFAULT_POD_RESOURCES:
+            if resource_name not in resources_limits:
+                resources_requests[resource_name] = DEFAULT_POD_RESOURCES[resource_name]
+                resources_limits[resource_name] = DEFAULT_POD_RESOURCES[resource_name]
 
         resources_obj = client.V1ResourceRequirements(requests=resources_requests, limits=resources_limits)
 
@@ -949,6 +1073,7 @@ class K8s():
                 readiness_probe = client.V1Probe(http_get=client.V1HTTPGetAction(path=path,port=port_name),failure_threshold=1,period_seconds=60,timeout_seconds=30,initial_delay_seconds=60)
 
             # print(readiness_probe)
+
         container = client.V1Container(
             name=name,
             command=command,
@@ -964,19 +1089,24 @@ class K8s():
             readiness_probe=readiness_probe if health else None
         )
 
+
+
         return container
 
     # @pysnooper.snoop()
     def make_pod(self, namespace, name, labels, command, args, volume_mount, working_dir, node_selector,
                  resource_memory, resource_cpu, resource_gpu, image_pull_policy, image_pull_secrets, image, hostAliases,
                  env, privileged, accounts, username, ports=None, restart_policy='OnFailure',
-                 scheduler_name='default-scheduler', node_name='', health=None, annotations={}, hostPort=[]):
-
+                 scheduler_name='default-scheduler', node_name='', health=None, annotations={}, hostPort=[],resource_rdma=0):
+        if not labels:
+            labels={}
         if scheduler_name == 'kube-batch':
             annotations['scheduling.k8s.io/group-name'] = name
-        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)
+
+
         image_pull_secrets = [client.V1LocalObjectReference(image_pull_secret) for image_pull_secret in image_pull_secrets]
-        nodeSelector = None
+        affinity = None
+        nodeSelector = {}
         if node_selector and '=' in node_selector:
             nodeSelector = {}
             for selector in re.split(',|;|\n|\t', node_selector):
@@ -984,15 +1114,31 @@ class K8s():
                 if selector:
                     nodeSelector[selector.strip().split('=')[0].strip()] = selector.strip().split('=')[1].strip()
 
-        gpu_num, gpu_type = self.get_gpu(resource_gpu)
+        gpu_num, gpu_type, resource_name = self.get_gpu(resource_gpu)
         # 设置卡型
         if gpu_type and gpu_type.strip():
             nodeSelector['gpu-type'] = gpu_type
+        # 独占模式，尽量聚集在一个，避免卡零碎
         if gpu_num >= 1:
             nodeSelector['gpu'] = 'true'
-        if 1 > gpu_num > 0:
-            nodeSelector['vgpu'] = 'true'
-
+            labels['gpu']='true'
+            # 优先选择gpu卡占用的地方，这样不容易造成卡的零碎化占用
+            affinity = client.V1Affinity(
+                node_affinity=None,
+                pod_anti_affinity=None,
+                pod_affinity=client.V1PodAffinity(
+                preferred_during_scheduling_ignored_during_execution=[
+                    client.V1WeightedPodAffinityTerm(
+                        pod_affinity_term=client.V1PodAffinityTerm(
+                            topology_key="kubernetes.io/hostname",
+                            label_selector = client.V1LabelSelector(
+                                match_labels={
+                                    "gpu": 'true'
+                                }
+                            )
+                        ),
+                        weight=10)])
+                )
         k8s_volumes, k8s_volume_mounts = self.get_volume_mounts(volume_mount, username)
 
         containers = [self.make_container(name=name,
@@ -1010,7 +1156,8 @@ class K8s():
                                           username=username,
                                           ports=ports,
                                           health=health,
-                                          hostPort=hostPort
+                                          hostPort=hostPort,
+                                          resource_rdma=resource_rdma
                                           )]
 
         # 添加host
@@ -1025,9 +1172,10 @@ class K8s():
                     host_aliases.append(host_aliase)
 
         service_account = accounts if accounts else None
-        spec = v1_pod_spec.V1PodSpec(image_pull_secrets=image_pull_secrets, node_selector=nodeSelector,node_name=node_name if node_name else None,
+        spec = v1_pod_spec.V1PodSpec(affinity=affinity,image_pull_secrets=image_pull_secrets, node_selector=nodeSelector,node_name=node_name if node_name else None,
                                      volumes=k8s_volumes, containers=containers, restart_policy=restart_policy,
                                      host_aliases=host_aliases, service_account=service_account,scheduler_name=scheduler_name)
+        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)
         pod = v1_pod.V1Pod(api_version='v1', kind='Pod', metadata=metadata, spec=spec)
         return pod, spec
 
@@ -1035,10 +1183,13 @@ class K8s():
     def create_debug_pod(self, namespace, name, labels, command, args, volume_mount, working_dir, node_selector,
                          resource_memory, resource_cpu, resource_gpu, image_pull_policy, image_pull_secrets, image,
                          hostAliases, env, privileged, accounts, username, scheduler_name='default-scheduler',
-                         node_name='',annotations={},hostPort=[]):
+                         node_name='',annotations={},hostPort=[],resource_rdma=0):
         try:
             self.v1.delete_namespaced_pod(name=name, namespace=namespace, grace_period_seconds=0)
             # time.sleep(1)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
             pass
@@ -1067,7 +1218,8 @@ class K8s():
             restart_policy='Never',
             scheduler_name=scheduler_name,
             node_name=node_name,
-            hostPort=hostPort
+            hostPort=hostPort,
+            resource_rdma=resource_rdma
         )
         # print(pod)
         pod = self.v1.create_namespaced_pod(namespace, pod)
@@ -1077,9 +1229,12 @@ class K8s():
     # @pysnooper.snoop()
     def apply_hubsecret(self, namespace, name, user, password, server):
         try:
-            hubsecrest = self.v1.read_namespaced_secret(name=name, namespace=namespace)
+            hubsecrest = self.v1.read_namespaced_secret(name=name, namespace=namespace,_request_timeout=5)
             if hubsecrest:
                 self.v1.delete_namespaced_secret(name, namespace=namespace)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
 
@@ -1124,28 +1279,12 @@ class K8s():
     #     client.AppsV1Api().  (name, namespace)
     #     return []
 
-    # 删除deployment
-    def delete_deployment(self, namespace, name=None, labels=None):
-        if name:
-            try:
-                client.AppsV1Api().delete_namespaced_deployment(name=name, namespace=namespace, grace_period_seconds=0)
-            except Exception as e:
-                print(e)
-        elif labels:
-            try:
-                labels_arr = ["%s=%s" % (key, labels[key]) for key in labels]
-                labels_str = ','.join(labels_arr)
-                deploys = self.AppsV1Api.list_namespaced_deployment(namespace=namespace, label_selector=labels_str).items
-                for deploy in deploys:
-                    client.AppsV1Api().delete_namespaced_deployment(name=deploy.metadata.name, namespace=namespace, grace_period_seconds=0)
-            except Exception as e:
-                print(e)
 
     # @pysnooper.snoop(watch_explode=())
-    def create_deployment(self, namespace, name, replicas, labels, command, args, volume_mount, working_dir,
+    def create_ReplicationController(self, namespace, name, replicas, labels, command, args, volume_mount, working_dir,
                           node_selector, resource_memory, resource_cpu, resource_gpu, image_pull_policy,
                           image_pull_secrets, image, hostAliases, env, privileged, accounts, username, ports,
-                          scheduler_name='default-scheduler', health=None, annotations={}):
+                          scheduler_name='default-scheduler', health=None, annotations={},**kwargs):
 
         pod, pod_spec = self.make_pod(
             namespace=namespace,
@@ -1174,31 +1313,79 @@ class K8s():
         )
 
         pod_spec.restart_policy = 'Always'  # dp里面必须是Always
+        # cpu任务， # 控制pod尽量分散到不同的机器上
+        if not resource_gpu or resource_gpu=='0':
+            pod_spec.affinity = client.V1Affinity(
+                pod_anti_affinity=client.V1PodAntiAffinity(
+                    preferred_during_scheduling_ignored_during_execution=[client.V1WeightedPodAffinityTerm(
+                        weight=10,
+                        pod_affinity_term=client.V1PodAffinityTerm(
+                            label_selector=client.V1LabelSelector(
+                                match_expressions=[client.V1LabelSelectorRequirement(
+                                    key=label[0],
+                                    operator='In',
+                                    values=[label[1]]
+                                )]
+                            ),
+                            topology_key="kubernetes.io/hostname"
+                        )
 
-        pod_spec.affinity = client.V1Affinity(
-            pod_anti_affinity=client.V1PodAntiAffinity(
-                preferred_during_scheduling_ignored_during_execution=[client.V1WeightedPodAffinityTerm(
-                    weight=10,
-                    pod_affinity_term=client.V1PodAffinityTerm(
-                        label_selector=client.V1LabelSelector(
-                            match_expressions=[client.V1LabelSelectorRequirement(
-                                key=label[0],
-                                operator='In',
-                                values=[label[1]]
-                            )]
-                        ),
-                        topology_key="kubernetes.io/hostname"
-                    )
+                    ) for label in labels.items()]
+                ))
 
-                ) for label in labels.items()]
-            ))
+        return pod,pod_spec
 
-        dp_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
+    # 删除deployment
+    def delete_deployment(self, namespace, name=None, labels=None):
+        if name:
+            try:
+                client.AppsV1Api().delete_namespaced_deployment(name=name, namespace=namespace, grace_period_seconds=0)
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
+            except Exception as e:
+                print(e)
+        elif labels:
+            try:
+                labels_arr = ["%s=%s" % (key, labels[key]) for key in labels]
+                labels_str = ','.join(labels_arr)
+                deploys = self.AppsV1Api.list_namespaced_deployment(namespace=namespace, label_selector=labels_str).items or []
+                for deploy in deploys:
+                    client.AppsV1Api().delete_namespaced_deployment(name=deploy.metadata.name, namespace=namespace, grace_period_seconds=0)
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
+            except Exception as e:
+                print(e)
+
+    # deploymnet伸缩容
+    def scale_deployment(self,namespace, name, replicas):
+        try:
+            deployment = self.AppsV1Api.read_namespaced_deployment(name=name, namespace=namespace)
+            deployment.spec.replicas = int(replicas)
+            self.AppsV1Api.replace_namespaced_deployment(name=name, namespace=namespace, body=deployment)
+        except Exception as e:
+            print(e)
+
+    # @pysnooper.snoop()
+    def create_deployment(self, namespace, name, replicas, labels, command, args, volume_mount,working_dir,
+                                     node_selector, resource_memory, resource_cpu, resource_gpu, image_pull_policy,
+                                     image_pull_secrets, image, hostAliases, env, privileged, accounts, username,
+                                     ports,
+                                     scheduler_name='default-scheduler', health=None, annotations={}):
+        pod,pod_spec = self.create_ReplicationController(
+            namespace=namespace,name=name,replicas=replicas,labels=labels,command=command,args=args,volume_mount=volume_mount,
+            working_dir=working_dir,node_selector=node_selector,resource_memory=resource_memory,resource_cpu=resource_cpu,
+            resource_gpu=resource_gpu,image_pull_policy=image_pull_policy,image_pull_secrets=image_pull_secrets,image=image,
+            hostAliases=hostAliases,env=env,privileged=privileged,accounts=accounts,username=username,ports=ports,scheduler_name=scheduler_name,
+            health=health,annotations=annotations
+        )
+        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels, annotations=annotations)
         selector = client.models.V1LabelSelector(match_labels=labels)
-        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels)
+        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels,annotations=annotations)
         template = client.models.V1PodTemplateSpec(metadata=template_metadata, spec=pod_spec)
         dp_spec = v1_deployment_spec.V1DeploymentSpec(replicas=int(replicas), selector=selector, template=template)
-        dp = v1_deployment.V1Deployment(api_version='apps/v1', kind='Deployment', metadata=dp_metadata, spec=dp_spec)
+        dp = v1_deployment.V1Deployment(api_version='apps/v1', kind='Deployment', metadata=metadata, spec=dp_spec)
         # print(dp.to_str())
         # try:
         #     client.AppsV1Api().delete_namespaced_deployment(name, namespace)
@@ -1229,68 +1416,57 @@ class K8s():
         if name:
             try:
                 client.AppsV1Api().delete_namespaced_stateful_set(name=name, namespace=namespace)
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
             except Exception as e:
                 print(e)
         elif labels:
             try:
                 labels_arr = ["%s=%s" % (key, labels[key]) for key in labels]
                 labels_str = ','.join(labels_arr)
-                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector=labels_str).items
+                stss = self.AppsV1Api.list_namespaced_stateful_set(namespace=namespace, label_selector=labels_str).items or []
                 for sts in stss:
                     client.AppsV1Api().delete_namespaced_stateful_set(name=sts.metadata.name, namespace=namespace)
+            except ApiException as api_e:
+                if api_e.status != 404:
+                    print(api_e)
             except Exception as e:
                 print(e)
 
     # @pysnooper.snoop(watch_explode=())
     def create_statefulset(self, namespace, name, replicas, labels, command, args, volume_mount, working_dir,
-                           node_selector, resource_memory, resource_cpu, resource_gpu, image_pull_policy,
-                           image_pull_secrets, image, hostAliases, env, privileged, accounts, username, ports,
-                           restart_policy='Always', scheduler_name='default-scheduler', annotations={}):
+                          node_selector, resource_memory, resource_cpu, resource_gpu, image_pull_policy,
+                          image_pull_secrets, image, hostAliases, env, privileged, accounts, username, ports,
+                          scheduler_name='default-scheduler', health=None, annotations={}):
 
-        pod, pod_spec = self.make_pod(
-            namespace=namespace,
-            name=name,
-            labels=labels,
-            command=command,
-            args=args,
+        pod,pod_spec = self.create_ReplicationController(
+            namespace=namespace, name=name, replicas=replicas, labels=labels, command=command, args=args,
             volume_mount=volume_mount,
-            working_dir=working_dir,
-            node_selector=node_selector,
-            resource_memory=resource_memory,
+            working_dir=working_dir, node_selector=node_selector, resource_memory=resource_memory,
             resource_cpu=resource_cpu,
-            resource_gpu=resource_gpu,
-            image_pull_policy=image_pull_policy,
-            image_pull_secrets=image_pull_secrets,
+            resource_gpu=resource_gpu, image_pull_policy=image_pull_policy, image_pull_secrets=image_pull_secrets,
             image=image,
-            hostAliases=hostAliases,
-            env=env,
-            privileged=privileged,
-            accounts=accounts,
-            username=username,
-            ports=ports,
-            restart_policy=restart_policy,
-            scheduler_name=scheduler_name
+            hostAliases=hostAliases, env=env, privileged=privileged, accounts=accounts, username=username, ports=ports,
+            scheduler_name=scheduler_name,
+            health=health, annotations=annotations
         )
-
-        if scheduler_name == 'kube-batch':
-            annotations['scheduling.k8s.io/group-name'] = name
-        sts_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
+        metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels=labels)
         selector = client.models.V1LabelSelector(match_labels=labels)
-        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels,annotations=annotations)
-        template = client.models.V1PodTemplateSpec(metadata=template_metadata,spec=pod_spec)
-        sts_spec = client.models.V1StatefulSetSpec(pod_management_policy='Parallel',replicas=int(replicas), selector=selector,template=template,service_name=name)
-        sts = client.models.V1StatefulSet(api_version='apps/v1', kind='StatefulSet', metadata=sts_metadata, spec=sts_spec)
+        template_metadata = v1_object_meta.V1ObjectMeta(labels=labels)
+        template = client.models.V1PodTemplateSpec(metadata=template_metadata, spec=pod_spec)
+        sts_spec = client.models.V1StatefulSetSpec(pod_management_policy='OrderedReady',replicas=int(replicas), selector=selector,template=template,service_name=name)
+        sts = client.models.V1StatefulSet(api_version='apps/v1', kind='StatefulSet', metadata=metadata, spec=sts_spec)
         # print(dp.to_str())
-        try:
-            client.AppsV1Api().delete_namespaced_stateful_set(name, namespace)
-        except Exception as e:
-            pass
-            print(e)
 
         try:
-            sts = client.AppsV1Api().create_namespaced_stateful_set(namespace, sts)
-        except Exception as e:
-            print(e)
+            self.AppsV1Api.read_namespaced_stateful_set(name=name, namespace=namespace)
+            # self.AppsV1Api.patch_namespaced_deployment(name=name, namespace=namespace, body=dp)
+            self.AppsV1Api.replace_namespaced_stateful_set(name=name, namespace=namespace, body=sts)
+        except ApiException as e:
+            if e.status == 404:
+                dp = self.AppsV1Api.create_namespaced_stateful_set(namespace, sts)
+
 
     # 创建pod
     # @pysnooper.snoop()
@@ -1299,11 +1475,14 @@ class K8s():
         service_ports=[]
         for index,port in enumerate(ports):
             if type(port)==list and len(port)>1:
-                service_ports.append(client.V1ServicePort(name='http%s'%index, port=int(port[0]), protocol='TCP', target_port=int(port[1])))
+                service_ports.append(client.V1ServicePort(name='http%s'%index, node_port=int(port[0]) if service_type=='NodePort' else None, port=int(port[0]), protocol='TCP', target_port=int(port[1])))
             else:
-                service_ports.append(client.V1ServicePort(name='http%s' % index, port=int(port), protocol='TCP', target_port=int(port)))
+                service_ports.append(client.V1ServicePort(name='http%s' % index, node_port=int(port) if service_type=='NodePort' else None, port=int(port), protocol='TCP', target_port=int(port)))
 
-        svc_spec = client.V1ServiceSpec(cluster_ip='None' if disable_load_balancer else None,ports=service_ports, selector=selector, type=service_type,external_i_ps=external_ip,load_balancer_ip=load_balancer_ip,external_traffic_policy=external_traffic_policy)
+        svc_spec = client.V1ServiceSpec(cluster_ip='None' if disable_load_balancer else None, ports=service_ports,
+                                        selector=selector, type=service_type, external_i_ps=external_ip,
+                                        load_balancer_ip=load_balancer_ip,
+                                        external_traffic_policy=external_traffic_policy)
 
         service = client.V1Service(api_version='v1', kind='Service', metadata=svc_metadata, spec=svc_spec)
         # print(service.to_dict())
@@ -1317,11 +1496,12 @@ class K8s():
         #     print(e)
 
         try:
-            self.v1.read_namespaced_service(name=name, namespace=namespace)
+            self.v1.read_namespaced_service(name=name, namespace=namespace,_request_timeout=5)
             self.v1.replace_namespaced_service(name=name, namespace=namespace, body=service)
         except ApiException as e:
             if e.status == 404:
-                print(service)
+                pass
+                # print(service)
                 service = self.v1.create_namespaced_service(namespace, body=service)
 
     # @pysnooper.snoop()
@@ -1329,9 +1509,12 @@ class K8s():
         svc_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username,"run-id":run_id})
         svc_spec = client.V1ServiceSpec(cluster_ip='None', selector={"app":name,'user':username},type='ClusterIP')
         service = client.V1Service(api_version='v1', kind='Service', metadata=svc_metadata, spec=svc_spec)
-        print(service.to_dict())
+        # print(service.to_dict())
         try:
             self.v1.delete_namespaced_service(name, namespace)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             pass
             print(e)
@@ -1339,29 +1522,6 @@ class K8s():
             service = self.v1.create_namespaced_service(namespace, service)
         except Exception as e:
             print(e)
-
-    # 创建pod
-    # @pysnooper.snoop()
-    def create_ingress(self, namespace, name, host, username, port):
-        self.v1beta1 = client.ExtensionsV1beta1Api()
-        ingress_metadata = v1_object_meta.V1ObjectMeta(name=name, namespace=namespace, labels={"app":name,'user':username},annotations={"nginx.ingress.kubernetes.io/proxy-connect-timeout":"3000","nginx.ingress.kubernetes.io/proxy-send-timeout":"3000","nginx.ingress.kubernetes.io/proxy-read-timeout":"3000","nginx.ingress.kubernetes.io/proxy-body-size":"1G"})
-        backend = client.ExtensionsV1beta1IngressBackend(service_name=name,service_port=port)
-        path = client.ExtensionsV1beta1HTTPIngressPath(backend=backend,path='/')
-        http = client.ExtensionsV1beta1HTTPIngressRuleValue(paths=[path])
-        rule = client.ExtensionsV1beta1IngressRule(host=host, http=http)
-        ingress_spec = client.ExtensionsV1beta1IngressSpec(rules=[rule])
-        ingress = client.ExtensionsV1beta1Ingress(api_version='extensions/v1beta1', kind='Ingress', metadata=ingress_metadata, spec=ingress_spec)
-        print(ingress.to_dict())
-        try:
-            self.v1beta1.delete_namespaced_ingress(name=name, namespace=namespace)
-        except Exception as e:
-            print(e)
-
-        try:
-            ingress = self.v1beta1.create_namespaced_ingress(namespace=namespace, body=ingress)
-        except Exception as e:
-            print(e)
-
     #
     def delete_istio_ingress(self, namespace, name):
         crd_info = {
@@ -1575,12 +1735,18 @@ class K8s():
         }
         try:
             self.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=name)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
 
     def delete_configmap(self, namespace, name):
         try:
             self.v1.delete_namespaced_config_map(name=name, namespace=namespace, grace_period_seconds=0)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
 
@@ -1588,6 +1754,9 @@ class K8s():
     def create_configmap(self, namespace, name, data, labels):
         try:
             self.v1.delete_namespaced_config_map(name=name, namespace=namespace)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
         try:
@@ -1599,11 +1768,17 @@ class K8s():
 
     def delete_hpa(self, namespace, name):
         try:
-            client.AutoscalingV2beta1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
+            client.AutoscalingV2beta2Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
         try:
             client.AutoscalingV1Api().delete_namespaced_horizontal_pod_autoscaler(name=name,namespace=namespace,grace_period_seconds=0)
+        except ApiException as api_e:
+            if api_e.status != 404:
+                print(api_e)
         except Exception as e:
             print(e)
 
@@ -1613,7 +1788,7 @@ class K8s():
         hpa = re.split(',|;', hpa)
 
         hpa_json = {
-            "apiVersion": "autoscaling/v2beta1",
+            "apiVersion": "autoscaling/v2beta2",  # 需要所使用的k8s集群启动了这个版本的hpa，可以通过 kubectl api-resources  查看使用的版本
             "kind": "HorizontalPodAutoscaler",
             "metadata": {
                 "name": name,
@@ -1642,10 +1817,10 @@ class K8s():
                         "resource": {
                             "name": "memory",
                             "targetAverageUtilization": int(mem_threshold),  # V1的书写格式
-                            # "target": {       # V2 的书写格式
-                            #     "type": "Utilization",
-                            #     "averageUtilization": int(mem_threshold)
-                            # }
+                            "target": {       # V2 的书写格式
+                                "type": "Utilization",
+                                "averageUtilization": int(mem_threshold)
+                            }
                         }
                     }
                 )
@@ -1658,10 +1833,10 @@ class K8s():
                         "resource": {
                             "name": "cpu",
                             "targetAverageUtilization": int(cpu_threshold),  # V1的书写格式
-                            # "target": {       # V2 的书写格式
-                            #     "type": "Utilization",
-                            #     "averageUtilization": int(cpu_threshold)
-                            # }
+                            "target": {       # V2 的书写格式
+                                "type": "Utilization",
+                                "averageUtilization": int(cpu_threshold)
+                            }
                         }
                     }
                 )
@@ -1696,9 +1871,9 @@ class K8s():
         #     ),
         #     status=status
         # )
-        print(json.dumps(hpa_json, indent=4, ensure_ascii=4))
+        print(json.dumps(hpa_json, indent=4, ensure_ascii=False))
         try:
-            client.AutoscalingV2beta1Api().create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=hpa_json, pretty=True)
+            client.AutoscalingV2beta2Api().create_namespaced_horizontal_pod_autoscaler(namespace=namespace, body=hpa_json, pretty=True)
         except ValueError as e:
             if str(e) == 'Invalid value for `conditions`, must not be `None`':
                 print(e)
@@ -1709,28 +1884,30 @@ class K8s():
     # @pysnooper.snoop()
     def to_memory_GB(self, memory):
         if 'K' in memory:
-            return float(memory.replace('Ki', '').replace('K', '')) / 1024 / 1024
+            return round(float(memory.replace('Ki', '').replace('K', '')) / 1024 / 1024,2)
         if 'M' in memory:
-            return float(memory.replace('Mi', '').replace('M', '')) / 1024
+            return round(float(memory.replace('Mi', '').replace('M', '')) / 1024,2)
         if 'G' in memory:
-            return float(memory.replace('Gi', '').replace('G', ''))
-        return 0
+            return round(float(memory.replace('Gi', '').replace('G', '')),2)
+        if 'T' in memory:
+            return round(float(memory.replace('Ti', '').replace('T', ''))*1024,2)
+        return round(float(memory)/1024/1024/1024,2)
 
     def to_cpu(self, cpu):
         if 'm' in cpu:
-            return float(cpu.replace('m', '')) / 1000
+            return round(float(cpu.replace('m', '')) / 1000,2)
         if 'n' in cpu:
-            return float(cpu.replace('n', '')) / 1000 / 1000
+            return round(float(cpu.replace('n', '')) / 1000 / 1000,2)
         if 'u' in cpu:
-            return float(cpu.replace('u', '')) / 1000 / 1000 / 1000
-        return float(cpu)
+            return round(float(cpu.replace('u', '')) / 1000 / 1000 / 1000,2)
+        return round(float(cpu),2)
 
     # @pysnooper.snoop(watch_explode=('item'))
     def get_node_metrics(self):
         back_metrics = []
         cust = client.CustomObjectsApi()
         metrics = cust.list_cluster_custom_object('metrics.k8s.io', 'v1beta1', 'nodes')  # All node metrics
-        items = metrics['items']
+        items = metrics['items'] or []
         for item in items:
             back_metrics.append({
                 "name": item['metadata']['name'],
@@ -1771,7 +1948,7 @@ class K8s():
     # @pysnooper.snoop()
     def exec_command(self, name, namespace, command):
         try:
-            self.v1.read_namespaced_pod(name=name, namespace=namespace)
+            self.v1.read_namespaced_pod(name=name, namespace=namespace,_request_timeout=5)
         except ApiException as e:
             if e.status != 404:
                 print("Unknown error: %s" % e)
@@ -1843,27 +2020,30 @@ class K8s():
                     user = pod.metadata.labels.get('user', '')
                 if not user:
                     user = pod.metadata.labels.get('rtx-user', '')
+                if not user:
+                    user = pod.metadata.labels.get('run-username', '')
+                if not user:
+                    user = pod.metadata.labels.get('username', '')
 
             containers = pod.spec.containers
 
             gpu = 0
             for container in containers:
-                limits = container.resources.limits
-                request = container.resources.requests
-                container_gpu = 0
-                if limits:
-                    container_gpu = int(limits.get('nvidia.com/gpu', 0))
-                elif request:
-                    # container_gpu = int(request.get('tencent.com/vcuda-core', 0)) / 100
-                    # if not container_gpu:
-                    container_gpu = int(request.get('nvidia.com/gpu', 0))
-                if container_gpu < 0.01:
+                for gpu_resource_name in list(self.gpu_resource.values()):
+                    limits = container.resources.limits
+                    request = container.resources.requests
                     container_gpu = 0
-                gpu += container_gpu
+                    if limits:
+                        container_gpu = int(limits.get(gpu_resource_name, 0))
+                    elif request:
+                        container_gpu = int(request.get(gpu_resource_name, 0))
+                    if container_gpu < 0.01:
+                        container_gpu = 0
+                    gpu += container_gpu
             return name, user, gpu
 
         for namespace in namespaces:
-            pods = self.v1.list_namespaced_pod(namespace).items
+            pods = self.v1.list_namespaced_pod(namespace).items or []
             for pod in pods:
                 status = pod.status.phase
                 if status != 'Running':
@@ -1913,8 +2093,23 @@ class K8s():
         )
         container_stream.write_channel(4, json.dumps({"Height": int(rows), "Width": int(cols)}))
         return container_stream
+    # 读取pvc
+    def get_pvc(self,name,namespace):
+        try:
+            pvc = self.v1.read_namespaced_persistent_volume_claim(name=name,namespace=namespace,_request_timeout=5)
+            pvc = {
+                "status":pvc.status.phase if pvc.status and pvc.status.phase else 'unknown'
+            }
+            return pvc
+        except ApiException as e1:
+            if e1.status == 404:
+                pass
 
+        except Exception  as e:
+            pass
+        return {}
 
+        pass
 class K8SStreamThread(threading.Thread):
 
     def __init__(self, ws, container_stream):
@@ -1963,20 +2158,10 @@ def check_status_time(status, hour=8):
 
     return status
 
-#
-# if __name__=='__main__':
-#     k8s_client = K8s(file_path='/home/myapp/kubeconfig/dev-kubeconfig')
-#
-#     try:
-#         deployments = k8s_client.AppsV1Api.list_deployment_for_all_namespaces().items
-#         for deploy in deployments:
-#             # print(deploy)
-#             namespace = deploy.metadata.namespace
-#             name = deploy.metadata.name
-#             run_id = deploy.metadata.labels.get('run-id', '').strip() if deploy.metadata.labels else ''
-#             print(namespace,name,run_id)
-#     except Exception as e2:
-#         print(e2)
 
-# pod = k8s_client.get_pod_humanized(namespace='infra',pod_name="kubeflow-dashboard-5fb75694c9-856ck")
-# print(pod)
+if __name__=='__main__':
+    k8s_client = K8s(file_path='kubeconfig/dev-kubeconfig')
+
+    print(k8s_client.get_node())
+
+

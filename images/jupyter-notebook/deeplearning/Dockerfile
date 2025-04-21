@@ -1,10 +1,10 @@
-FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu-cpu-base
+FROM ccr.ccs.tencentyun.com/cube-studio/notebook:jupyter-ubuntu22.04
 
 RUN apt-get update && apt install -y lsof
 ENV TZ Asia/Shanghai
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN mkdir -p /examples/ && git clone https://github.com/tencentmusic/cube-studio.git && cp -r cube-studio/aihub/deep-learning/* /examples/ && rm -rf cube-studio
+RUN mkdir -p /examples/ && git clone https://github.com/data-infra/cube-studio.git && cp -r cube-studio/aihub/deep-learning/* /examples/ && rm -rf cube-studio
 
 # 基础工具
 RUN apt install -y -f python3-opencv ffmpeg gcc automake autoconf libtool make ffmpeg build-essential

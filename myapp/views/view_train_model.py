@@ -1,19 +1,28 @@
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from myapp.models.model_train_model import Training_Model
 from myapp.models.model_serving import InferenceService
+from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from myapp import app, appbuilder, db
 import uuid
 from myapp.views.view_team import Project_Join_Filter
-
+from myapp.utils import core
 from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import SelectField, StringField
 from flask_appbuilder.fieldwidgets import Select2Widget
-from myapp.forms import MyBS3TextFieldWidget
+from flask_appbuilder.actions import action
+from myapp.forms import MyBS3TextFieldWidget, MyBS3TextAreaFieldWidget
+from myapp import security_manager
 from flask import (
     flash,
     g,
-    redirect
+    redirect, request,
+    flash,
+    g,
+    Markup,
+    make_response,
+    redirect,
+    request
 )
 from .base import (
     DeleteMixin,
@@ -36,7 +45,9 @@ class Training_Model_Filter(MyappFilter):
         user_roles = [role.name.lower() for role in list(self.get_user_roles())]
         if "admin" in user_roles:
             return query
-        return query.filter(self.model.created_by_fk == g.user.id)
+        join_projects_id = security_manager.get_join_projects_id(db.session)
+        return query.filter(self.model.project_id.in_(join_projects_id))
+        # return query.filter(self.model.created_by_fk == g.user.id)
 
 
 class Training_Model_ModelView_Base():
@@ -66,78 +77,79 @@ class Training_Model_ModelView_Base():
         "model_metric": {"type": "ellip2", "width": 300},
     }
     spec_label_columns = {
-        "path": "模型文件",
-        "framework": "算法框架",
-        "api_type": "推理框架",
-        "pipeline_id": "任务流id",
-        "deploy": "发布",
-        "model_metric": "指标"
+        "path": _("模型文件"),
+        "framework": _("训练框架"),
+        "api_type": _("推理框架"),
+        "deploy": _("发布")
     }
 
-    label_title = '模型'
+    label_title = _('模型')
     base_filters = [["id", Training_Model_Filter, lambda: []]]
 
-    path_describe = r'''
-            tfserving：仅支持tf save_model方式的模型目录, /mnt/xx/../saved_model/<br>
-            torch-server：torch-model-archiver编译后的mar模型文件地址, /mnt/xx/../xx.mar或torch script保存的模型<br>
-            onnxruntime：onnx模型文件的地址, /mnt/xx/../xx.onnx<br>
-            tensorrt:模型文件地址, /mnt/xx/../xx.plan<br>
-            '''
+    model_path_describe = '''serving：自定义镜像的推理服务，模型地址随意
+ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件
+tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/
+torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型
+onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx
+triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
+vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速和openai流式接口
+'''.strip()
 
-    service_type_choices = [x.replace('_', '-') for x in ['sklearn','xgb','tfserving', 'torch-server', 'onnxruntime', 'triton-server','aihub']]
+    service_type_choices = [x.replace('_', '-') for x in ['serving','ml-server','tfserving', 'torch-server', 'onnxruntime', 'triton-server','vllm','aihub']]
 
     add_form_extra_fields = {
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description=_(path_describe),
-            validators=[DataRequired()]
+            description=_('模型文件的容器地址或下载地址，格式参考详情。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">上传模型</a>'),
+            validators=[DataRequired()],
+            widget=MyBS3TextFieldWidget(tips=_(model_path_describe))
         ),
         "describe": StringField(
-            _(datamodel.obj.lab('describe')),
-            description=_('模型描述'),
+            _("描述"),
+            description= _('模型描述'),
             validators=[DataRequired()]
         ),
         "pipeline_id": StringField(
-            _(datamodel.obj.lab('pipeline_id')),
-            description=_('任务流的id，0表示非任务流产生模型'),
+            _('任务流id'),
+            description= _('任务流的id，0表示非任务流产生模型'),
             default='0'
         ),
         "version": StringField(
             _('版本'),
             widget=MyBS3TextFieldWidget(),
-            description='模型版本',
+            description= _('模型版本'),
             default=datetime.datetime.now().strftime('v%Y.%m.%d.1'),
             validators=[DataRequired()]
         ),
         "run_id": StringField(
-            _(datamodel.obj.lab('run_id')),
+            _('run id'),
             widget=MyBS3TextFieldWidget(),
-            description='pipeline 训练的run id',
+            description= _('pipeline 训练的run id'),
             default='random_run_id_' + uuid.uuid4().hex[:32]
         ),
         "run_time": StringField(
-            _(datamodel.obj.lab('run_time')),
+            _('保存时间'),
             widget=MyBS3TextFieldWidget(),
-            description='pipeline 训练的 运行时间',
+            description= _('模型的保存时间'),
             default=datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S'),
         ),
         "name": StringField(
             _("模型名"),
             widget=MyBS3TextFieldWidget(),
-            description='模型名(a-z0-9-字符组成，最长54个字符)',
+            description= _('模型名(a-z0-9-字符组成，最长54个字符)'),
             validators=[DataRequired(), Regexp("^[a-z0-9\-]*$"), Length(1, 54)]
         ),
         "framework": SelectField(
             _('算法框架'),
-            description="选项xgb、tf、pytorch、onnx、tensorrt等",
+            description= _("选项xgb、tf、pytorch、onnx、tensorrt等"),
             widget=Select2Widget(),
-            choices=[['lr','lr'],['xgb', 'xgb'], ['tf', 'tf'], ['pytorch', 'pytorch'], ['onnx', 'onnx'], ['tensorrt', 'tensorrt'],['aihub', 'aihub']],
+            choices=[['sklearn','sklearn'],['xgb', 'xgb'], ['tf', 'tf'], ['pytorch', 'pytorch'], ['onnx', 'onnx'], ['tensorrt', 'tensorrt'],['aihub', 'aihub']],
             validators=[DataRequired()]
         ),
         'api_type': SelectField(
             _("部署类型"),
-            description="推理框架类型",
+            description= _("推理框架类型"),
             choices=[[x, x] for x in service_type_choices],
             validators=[DataRequired()]
         )
@@ -145,7 +157,7 @@ class Training_Model_ModelView_Base():
     edit_form_extra_fields = add_form_extra_fields
 
     # edit_form_extra_fields['path']=FileField(
-    #         _('模型压缩文件'),
+    #         __('模型压缩文件'),
     #         description=_(path_describe),
     #         validators=[
     #             FileAllowed(["zip",'tar.gz'],_("zip/tar.gz Files Only!")),
@@ -156,11 +168,43 @@ class Training_Model_ModelView_Base():
     def pre_add(self, item):
         if not item.run_id:
             item.run_id = 'random_run_id_' + uuid.uuid4().hex[:32]
+        if not item.pipeline_id:
+            item.pipeline_id = 0
 
     def pre_update(self, item):
         if not item.path:
             item.path = self.src_item_json['path']
         self.pre_add(item)
+
+    # 检测是否具有编辑权限，只有creator和admin可以编辑
+    def check_edit_permission(self, item):
+        if g.user and g.user.is_admin():
+            return True
+        if g.user and g.user.username and hasattr(item, 'created_by'):
+            if g.user.username == item.created_by.username:
+                return True
+        # flash('just creator can edit/delete ', 'warning')
+        return False
+
+    check_delete_permission = check_edit_permission
+
+    import pysnooper
+    @expose("/download/<model_id>", methods=["GET", 'POST'])
+    # @pysnooper.snoop()
+    def download_model(self, model_id):
+        train_model = db.session.query(Training_Model).filter_by(id=model_id).first()
+        if train_model.download_url:
+            return redirect(train_model.download_url)
+        if train_model.path:
+            if 'http://' in train_model.path or 'https://' in train_model.path:
+                return redirect(train_model.path)
+            if '/mnt' in train_model.path:
+                download_url = request.host_url + 'static/' + train_model.path.strip('/')
+                return redirect(download_url)
+        flash(__('未发现模型存储地址'),'warning')
+
+        return redirect(conf.get('MODEL_URLS',{}).get('train_model','/frontend/'))
+
 
     @expose("/deploy/<model_id>", methods=["GET", 'POST'])
     def deploy(self, model_id):
@@ -174,7 +218,7 @@ class Training_Model_ModelView_Base():
             exist_inference.project_id = train_model.project_id
             exist_inference.project = train_model.project
             exist_inference.model_name = train_model.name
-            exist_inference.label = train_model.describe
+            exist_inference.label = train_model.describe[:100]
             exist_inference.model_version = train_model.version
             exist_inference.model_path = train_model.path
             exist_inference.service_type = train_model.api_type
@@ -184,9 +228,9 @@ class Training_Model_ModelView_Base():
 
             db.session.add(exist_inference)
             db.session.commit()
-            flash('新服务版本创建完成', 'success')
+            flash(__('新服务版本创建完成'), 'success')
         else:
-            flash('服务版本已存在', 'success')
+            flash(__('服务版本已存在'), 'success')
         import urllib.parse
 
         url = conf.get('MODEL_URLS', {}).get('inferenceservice', '') + '?filter=' + urllib.parse.quote(json.dumps([{"key": "model_name", "value": exist_inference.model_name}], ensure_ascii=False))
@@ -194,11 +238,39 @@ class Training_Model_ModelView_Base():
         return redirect(url)
 
 
-class Training_Model_ModelView(Training_Model_ModelView_Base, MyappModelView, DeleteMixin):
+    # 划分数据历史版本
+    def pre_list_res(self,res):
+        data=res['data']
+        import itertools
+        all_data={item['id']:item for item in data}
+        all_last_data_id=[]
+        # 按name分组，最新数据下包含其他更老的数据作为历史集合
+        data = sorted(data, key=lambda x: x['name'])
+        for name, group in itertools.groupby(data, key=lambda x: x['name']):
+            group=list(group)
+            max_id = max([x['id'] for x in group])
+            all_last_data_id.append(max_id)
+            for item in group:
+                if item['id']!=max_id:
+                    if 'children' not in all_data[max_id]:
+                        all_data[max_id]['children']=[all_data[item['id']]]
+                    else:
+                        all_data[max_id]['children'].append(all_data[item['id']])
+        # 顶层只保留最新的数据
+        res['data'] = [all_data[id] for id in all_data if id in all_last_data_id]
+        return res
+
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
+    def muldelete(self, items):
+        return self._muldelete(items)
+
+class Training_Model_ModelView(Training_Model_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Training_Model)
+    route_base = '/training_model_modelview/web/api'
+    add_columns = ['project', 'name', 'version', 'describe', 'path', 'framework', 'metrics','api_type']
 
 
-appbuilder.add_view_no_menu(Training_Model_ModelView)
+appbuilder.add_api(Training_Model_ModelView)
 
 
 class Training_Model_ModelView_Api(Training_Model_ModelView_Base, MyappModelRestApi):  # noqa

@@ -1,0 +1,66 @@
+{
+    type: 'treemap',
+    width: '30%',
+    height: '90%',
+    left: '3%',
+    top: '10%',
+    sort: 'asc',
+    label: {
+        show: true,
+        formatter: '{node|{b}}',
+        rich: {
+            node: {
+                fontSize: 20,
+                lineHeight: 25,
+                padding: [0, 7],
+            }
+        }
+    },
+    levels: [{
+        itemStyle: {
+            borderWidth: 1,
+            gapWidth: 5
+        }
+    },
+    {
+        itemStyle: {
+            gapWidth: 1
+        }
+    },
+    {
+        colorSaturation: [0.35, 0.5],
+        itemStyle: {
+            gapWidth: 1,
+            borderColorSaturation: 0.6
+        }
+    }],
+    data: [{
+        name: 'CLUSTER_NUM\n集群数目',
+        value: 1,
+    },
+    {
+        name: 'NODE_NUM\n机器数目',
+        value: 1
+    },
+    {
+        value: 3,
+        children: [
+        {
+            name: '计算任务',
+            children: [{
+                name: 'PIPELINE_NUM\npipeline数目',
+                value: 1
+            },
+            {
+                name: 'SERVICE_NUM\n服务数目',
+                value: 1
+            },
+            {
+                name: 'NOTEBOOK_NUM\nnotebook数目',
+                value: 1
+            }]
+        },
+
+        ]
+    }]
+}

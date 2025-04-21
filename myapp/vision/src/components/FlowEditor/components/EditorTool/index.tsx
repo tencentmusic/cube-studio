@@ -15,6 +15,7 @@ import { saveTaskList, selectTaskList } from '@src/models/task';
 import { toggle } from '@src/models/template';
 import React, { useEffect } from 'react';
 import { isNode, removeElements } from 'react-flow-renderer';
+import { useTranslation } from 'react-i18next';
 import style from './style';
 
 const { Item } = Stack;
@@ -28,6 +29,8 @@ const EditorTool: React.FC = () => {
   const taskList = useAppSelector(selectTaskList);
   const isEditing = useAppSelector(selectEditing);
   const selectedElements = useAppSelector(selectSelected);
+  const { t, i18n } = useTranslation();
+
   const commandItem: ICommandBarItemProps[] = [
     {
       // buttonStyles: style.commonButton,
@@ -37,7 +40,7 @@ const EditorTool: React.FC = () => {
         iconName: 'Library',
         styles: style.commonIcon,
       },
-      text: '展开/关闭菜单',
+      text: t('展开/关闭菜单'),
       onClick: e => {
         e?.preventDefault();
         dispatch(toggle());
@@ -51,7 +54,7 @@ const EditorTool: React.FC = () => {
         iconName: 'save',
         styles: style.commonIcon,
       },
-      text: '保存',
+      text: t('保存'),
       onClick: async e => {
         e?.preventDefault();
         dispatch(await saveTaskList());
@@ -66,11 +69,11 @@ const EditorTool: React.FC = () => {
         iconName: 'FastForward',
         styles: style.commonIcon,
       },
-      text: '调度实例',
+      text: t('调度实例'),
       onClick: () => {
         if (pipelineId) {
           window.open(
-            `${window.location.origin}/pipeline_modelview/web/workflow/${pipelineId}`,
+            `${window.location.origin}/pipeline_modelview/api/web/workflow/${pipelineId}`,
           );
         }
       },
@@ -83,10 +86,10 @@ const EditorTool: React.FC = () => {
         iconName: 'ComplianceAudit',
         styles: style.commonIcon,
       },
-      text: '日志',
+      text: t('日志'),
       onClick: () => {
         if (pipeline?.id) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/log/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/log/${pipelineId}`);
         }
       },
     },
@@ -98,10 +101,10 @@ const EditorTool: React.FC = () => {
         iconName: 'WebAppBuilderFragment',
         styles: style.commonIcon,
       },
-      text: '容器',
+      text: t('容器'),
       onClick: () => {
         if (pipeline?.name) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/pod/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/pod/${pipelineId}`);
         }
       },
     },
@@ -113,10 +116,10 @@ const EditorTool: React.FC = () => {
         iconName: 'TimeEntry',
         styles: style.commonIcon,
       },
-      text: '定时记录',
+      text: t('定时记录'),
       onClick: () => {
         if (pipeline?.name) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/runhistory/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/runhistory/${pipelineId}`);
         }
       },
     },
@@ -128,7 +131,7 @@ const EditorTool: React.FC = () => {
         iconName: 'Delete',
         styles: style.commonIcon,
       },
-      text: '删除节点',
+      text: t('删除节点'),
       onClick: () => {
         if (isNode(selectedElements[0])) {
           const taskId = +selectedElements[0]?.id;
@@ -157,10 +160,10 @@ const EditorTool: React.FC = () => {
         iconName: 'NetworkTower',
         styles: style.commonIcon,
       },
-      text: '监控',
+      text: t('监控'),
       onClick: () => {
         if (pipeline?.id) {
-          window.open(`${window.location.origin}/pipeline_modelview/web/monitoring/${pipelineId}`);
+          window.open(`${window.location.origin}/pipeline_modelview/api/web/monitoring/${pipelineId}`);
         }
       },
     },
@@ -193,7 +196,7 @@ const EditorTool: React.FC = () => {
               iconName={isEditing ? 'AlertSolid' : 'SkypeCircleCheck'}
               styles={{ root: { color: isEditing ? '#e95f39' : '#8cb93c', marginRight: 5 } }}
             />
-            {isEditing ? '未保存' : '已保存'}
+            {isEditing ? t('未保存') : t('已保存')}
           </>
         ) : (
             <>
@@ -205,7 +208,7 @@ const EditorTool: React.FC = () => {
                 }}
                 size={SpinnerSize.small}
               ></Spinner>
-            保存中
+            {t('保存中')}
           </>
           )}
       </Stack>

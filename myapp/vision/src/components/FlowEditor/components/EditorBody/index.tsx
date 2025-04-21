@@ -24,6 +24,7 @@ import { updateLoading, selectLoading } from '@src/models/task';
 import Setting from './components/Setting';
 import NodeType from './components/NodeType';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 
 const { Item } = Stack;
 
@@ -36,6 +37,7 @@ const EditorBody: React.FC = () => {
   const taskLoading = useAppSelector(selectLoading);
   const reactFlowWrapper = useRef<any>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+  const { t, i18n } = useTranslation();
 
   // 加载
   const onLoad = (_reactFlowInstance: OnLoadParams) => {
@@ -83,8 +85,8 @@ const EditorBody: React.FC = () => {
           job_template: modelInfo.id,
           pipeline: +pipelineId,
           name: taskName,
-          label: `新建 ${modelInfo.name} 任务`,
-          volume_mount: 'kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives',
+          label: `${t('新建')} ${modelInfo.name} ${t('任务')}`,
+          volume_mount: 'kubeflow-user-workspace(pvc):/mnt',
           image_pull_policy: 'Always',
           working_dir: '',
           command: '',
@@ -93,6 +95,7 @@ const EditorBody: React.FC = () => {
           resource_memory: '2G',
           resource_cpu: '2',
           resource_gpu: '0',
+          resource_rdma: '0',
           timeout: 0,
           retry: 0,
           args: JSON.stringify(defaultArgs),
@@ -106,7 +109,7 @@ const EditorBody: React.FC = () => {
               data: {
                 info: modelInfo,
                 name: taskName,
-                label: `新建 ${modelInfo.name} 任务`,
+                label: `${t('新建')} ${modelInfo.name} ${t('任务')}`,
               },
             };
             dispatch(updateEditing(true));

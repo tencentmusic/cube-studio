@@ -3,7 +3,8 @@ from sqlalchemy.orm import relationship
 import json
 from sqlalchemy import Text
 from myapp.utils import core
-
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from myapp.models.helpers import AuditMixinNullable
 from flask import request,g
 from .model_team import Project
@@ -16,14 +17,13 @@ from flask import Markup
 import datetime
 metadata = Model.metadata
 conf = app.config
-
+import pysnooper
 
 class service_common():
     @property
     def monitoring_url(self):
-        # return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
-        url="//"+self.project.cluster.get('HOST',request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
-        return Markup(f'<a href="{url}">监控</a>')
+        url="//"+self.project.cluster.get('HOST',request.host).split('|')[-1]+conf.get('GRAFANA_SERVICE_PATH','')+self.name
+        return Markup(f'<a href="{url}">{__("监控")}</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
 
 
@@ -35,33 +35,33 @@ class service_common():
 
 class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     __tablename__ = 'service'
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    project_id = Column(Integer, ForeignKey('project.id'),comment='项目组id')
     project = relationship(
         Project, foreign_keys=[project_id]
     )
 
-    name = Column(String(100), nullable=False,unique=True)   # Used to generate pod service and vs
-    label = Column(String(100), nullable=False)
-    images = Column(String(200), nullable=False)
-    working_dir = Column(String(100),default='')
-    command = Column(String(1000),default='')
-    args = Column(Text,default='')
-    env = Column(Text,default='')
-    volume_mount = Column(String(2000),default='')
-    node_selector = Column(String(100),default='cpu=true,serving=true')
-    replicas = Column(Integer,default=1)
-    ports = Column(String(100),default='80')
-    resource_memory = Column(String(100),default='2G')
-    resource_cpu = Column(String(100), default='2')
-    resource_gpu= Column(String(100), default='0')
-    deploy_time = Column(String(100), nullable=False,default=datetime.datetime.now)
-    host = Column(String(200), default='')
-    expand = Column(Text(65536), default='{}')
+    name = Column(String(100), nullable=False,unique=True,comment='英文名')   # Used to generate pod service and vs
+    label = Column(String(100), nullable=False,comment='中文名')
+    images = Column(String(200), nullable=False,comment='镜像')
+    working_dir = Column(String(100),default='',comment='启动目录')
+    command = Column(String(1000),default='',comment='启动命令')
+    args = Column(Text,default='',comment='启动参数')
+    env = Column(Text,default='',comment='环境变量')
+    volume_mount = Column(String(2000),default='',comment='挂载')
+    node_selector = Column(String(100),default='cpu=true,serving=true',comment='机器选择器')
+    replicas = Column(Integer,default=1,comment='副本')
+    ports = Column(String(100),default='80',comment='端口')
+    resource_memory = Column(String(100),default='2G',comment='申请内存')
+    resource_cpu = Column(String(100), default='2',comment='申请cpu')
+    resource_gpu= Column(String(100), default='0',comment='申请gpu')
+    deploy_time = Column(String(100), nullable=False,default=datetime.datetime.now,comment='部署时间')
+    host = Column(String(200), default='',comment='域名')
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
 
     @property
     def deploy(self):
-        monitoring_url = "//"+self.project.cluster.get('HOST', request.host) + conf.get('GRAFANA_SERVICE_PATH') + self.name
+        monitoring_url = "//"+self.project.cluster.get('HOST', request.host).split('|')[-1] + conf.get('GRAFANA_SERVICE_PATH','') + self.name
         help_url=''
         try:
             help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
@@ -69,21 +69,21 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
             print(e)
 
         if help_url:
-            return Markup(f'<a target=_blank href="{help_url}">帮助</a> | <a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{monitoring_url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
+            return Markup(f'<a href="/service_modelview/api/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
         else:
-            return Markup(f'帮助 | <a href="/service_modelview/deploy/{self.id}">部署</a> | <a href="{monitoring_url}">监控</a> | <a href="/service_modelview/clear/{self.id}">清理</a>')
+            return Markup(f'<a href="/service_modelview/api/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
 
 
     @property
     def clear(self):
-        return Markup(f'<a href="/service_modelview/clear/{self.id}">清理</a>')
+        return Markup(f'<a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
 
 
     @property
     def name_url(self):
         # user_roles = [role.name.lower() for role in list(g.user.roles)]
         # if "admin" in user_roles:
-        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE")}/{self.name.replace("_", "-")}'
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
 
         return Markup(f'<a target=_blank href="{url}">{self.label}</a>')
 
@@ -92,98 +92,174 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def ip(self):
-        port = 30000+10*self.id
-        # first, Use the proxy ip configured by the project group
+        from myapp.utils import core
+        port_str = conf.get('SERVICE_PORT', '30000+10*ID').replace('ID', str(self.id))
+        meet_ports = core.get_not_black_port(int(eval(port_str)))
+        port = meet_ports[0]
+        # 使用项目组配置的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
+
+        # 再使用配置文件里面为该集群配置的代理ip
+        if not SERVICE_EXTERNAL_IP:
+            # second, Use the global configuration proxy ip
+            SERVICE_EXTERNAL_IP = self.project.cluster.get('HOST','')
+
+        # 使用全局配置的代理ip
         if not SERVICE_EXTERNAL_IP:
             # second, Use the global configuration proxy ip
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP',[])
             if SERVICE_EXTERNAL_IP:
                 SERVICE_EXTERNAL_IP=SERVICE_EXTERNAL_IP[0]
-
+        # 使用浏览器ip
         if not SERVICE_EXTERNAL_IP:
-            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host # remove port in host
+            ip = request.host.split(':')[0]
             if core.checkip(ip):
                 SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
-            if '|' in SERVICE_EXTERNAL_IP:
-                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip().split(':')[0].strip()
 
-            host = SERVICE_EXTERNAL_IP + ":" + str(port)
-            return Markup(f'<a target=_blank href="//{host}">{host}</a>')
+            # 处理业务自己配置的host的特殊配置
+            if self.host:
+                # 地址中可以配置比一些变量，或者环境变量
+                host = self.host.replace("{{creator}}",self.created_by.username)
+                if self.env:
+                    for e in self.env.split("\n"):
+                        if '=' in e:
+                            host = host.replace('{{'+e.split("=")[0]+'}}',e.split("=")[1])
+
+                from myapp.utils.core import split_url
+                host_temp, port_temp, path_temp = split_url(host)
+
+                if port_temp and port_temp in self.ports:
+                    # 查看是第几个端口
+                    if self.ports.find(port_temp) > self.ports.find(','):
+                        port = port + 1
+
+                host = SERVICE_EXTERNAL_IP + ":" + str(port)
+                url = host + path_temp
+            else:
+                host = SERVICE_EXTERNAL_IP + ":" + str(port)
+                url = host
+
+            if self.ready:
+                return Markup(f'<a target=_blank href="//{url}">{host}</a>')
+            else:
+                return host
         else:
             return "未开通"
 
     @property
     def host_url(self):
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
-        if self.host:
-            if 'http://' in self.host or 'https://' in self.host:
-                url = self.host
-            else:
-                url = "http://"+self.host
+        # 泛域名先统一http
+        host = self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
+        # 统一域名上的端口，也就是ingressgateway的端口
+        port = ''
+        host_port = self.project.cluster.get('HOST','')
+        if not host_port and conf.get('SERVICE_EXTERNAL_IP'):
+            host_port = conf.get('SERVICE_EXTERNAL_IP')[0]
+        if not host_port:
+            host_port = request.host
+        if host_port:
+            host_port = host_port.split('|')[-1]
+        if ':' in host_port:
+            port = host_port.split(':')[-1]
 
-        return Markup(f'<a target=_blank href="{url}">{url}</a>')
+
+        if self.host:
+            from myapp.utils.core import split_url
+            host_temp, port_temp, path_temp = split_url(self.host)
+            if host_temp:
+                host = host_temp
+
+        host_port = host + ("" if not port else (":" + port))
+        if 'svc.cluster.local' in host:
+            return f'''
+<div type=tips addedValue='添加配置 "{host_port.split(':')[0]} {host}" 到hosts文件后再访问域名'>
+    {host_port}
+</div>
+'''
+        else:
+            url = "http://" + host_port
+            return Markup(f'<a target=_blank href="{url}">{host_port}</a>')
+
+    @property
+    def ready(self):
+        expand = json.loads(self.expand) if self.expand else {}
+        if expand.get("status", '') == 'online':
+            from myapp.utils.py.py_k8s import K8s
+            try:
+                # 查看k8s的pod是否read了
+                k8s_client = K8s(self.project.cluster.get('KUBECONFIG', ''))
+                read_pod = k8s_client.get_pod_ip(namespace=conf.get('SERVICE_NAMESPACE','service'),service_name=self.name)
+                if read_pod:
+                    return True
+            except Exception as e:
+                print(e)
+
+        return False
+
+
 
 
 class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     __tablename__ = 'inferenceservice'
-    id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'))
+    id = Column(Integer, primary_key=True,comment='id主键')
+    project_id = Column(Integer, ForeignKey('project.id'),comment='项目组id')
     project = relationship(
         Project, foreign_keys=[project_id]
     )
 
-    name = Column(String(100), nullable=True,unique=True)
-    label = Column(String(100), nullable=False)
+    name = Column(String(100), nullable=True,unique=True,comment='英文名')
+    label = Column(String(100), nullable=False,comment='中文名')
 
-    service_type= Column(String(100),nullable=True,default='serving')
-    model_name = Column(String(200),default='')
-    model_version = Column(String(200),default='')
-    model_path = Column(String(200),default='')
-    model_type = Column(String(200),default='')
-    model_input = Column(Text(65536), default='')
-    model_output = Column(Text(65536), default='')
-    inference_config = Column(Text(65536), default='')   # make configmap
-    model_status = Column(String(200),default='offline')
+    service_type= Column(String(100),nullable=True,default='serving',comment='服务类型')
+    model_name = Column(String(200),default='',comment='模型名')
+    model_version = Column(String(200),default='',comment='模型版本')
+    model_path = Column(String(200),default='',comment='模型地址')
+    model_type = Column(String(200),default='',comment='模型类型')
+    model_input = Column(Text(65536), default='',comment='模型输入')
+    model_output = Column(Text(65536), default='',comment='模型输出')
+    inference_config = Column(Text(65536), default='',comment='配置文件')   # make configmap
+    model_status = Column(String(200),default='offline',comment='服务状态')
     # model_status = Column(Enum('offline','test','online','delete',name='model_status'),nullable=True,default='offline')
 
-    transformer=Column(String(200),default='')  # pre process and post process
+    transformer=Column(String(200),default='',comment='预处理')  # pre process and post process
 
-    images = Column(String(200), nullable=False)
-    working_dir = Column(String(100),default='')
-    command = Column(String(1000),default='')
-    args = Column(Text,default='')
-    env = Column(Text,default='')
-    volume_mount = Column(String(2000),default='')
-    node_selector = Column(String(100),default='cpu=true,serving=true')
-    min_replicas = Column(Integer,default=1)
-    max_replicas = Column(Integer, default=1)
-    hpa = Column(String(400), default='')
-    metrics = Column(Text(65536), default='')
-    health = Column(String(400), default='')
-    sidecar = Column(String(400), default='')
-    ports = Column(String(100),default='80')
-    resource_memory = Column(String(100),default='2G')
-    resource_cpu = Column(String(100), default='2')
-    resource_gpu= Column(String(100), default='0')
-    deploy_time = Column(String(100), nullable=True,default=datetime.datetime.now)
-    host = Column(String(200), default='')
-    expand = Column(Text(65536), default='{}')
-    canary = Column(String(400), default='')
-    shadow = Column(String(400), default='')
+    images = Column(String(200), nullable=False,comment='镜像')
+    working_dir = Column(String(100),default='',comment='启动目录')
+    command = Column(String(1000),default='',comment='启动命令')
+    args = Column(Text,default='',comment='启动参数')
+    env = Column(Text,default='',comment='环境变量')
+    volume_mount = Column(String(2000),default='',comment='挂载')
+    node_selector = Column(String(100),default='cpu=true,serving=true',comment='机器选择器')
+    min_replicas = Column(Integer,default=1,comment='最小副本数')
+    max_replicas = Column(Integer, default=1,comment='最大副本数')
+    hpa = Column(String(400), default='',comment='弹性伸缩')
+    cronhpa = Column(String(400), default='', comment='定时伸缩')
+    metrics = Column(Text(65536), default='',comment='监控接口')
+    health = Column(String(400), default='',comment='健康检查')
+    sidecar = Column(String(400), default='',comment='伴随容器')
+    ports = Column(String(100),default='80',comment='端口')
+    resource_memory = Column(String(100),default='2G',comment='申请内存')
+    resource_cpu = Column(String(100), default='2',comment='申请cpu')
+    resource_gpu= Column(String(100), default='0',comment='申请gpu')
+    deploy_time = Column(String(100), nullable=True,default=datetime.datetime.now,comment='部署时间')
+    host = Column(String(200), default='',comment='域名')
+    expand = Column(Text(65536), default='{}',comment='扩展参数')
+    canary = Column(String(400), default='',comment='灰度发布')
+    shadow = Column(String(400), default='',comment='灰度发布')
 
-    run_id = Column(String(100),nullable=True)
-    run_time = Column(String(100))
-    deploy_history = Column(Text(65536), default='')
+    run_id = Column(String(100),nullable=True,comment='run id')
+    run_time = Column(String(100),comment='运行时间')
+    deploy_history = Column(Text(65536), default='',comment='部署历史')
 
-    priority = Column(Integer,default=1)   # giving priority to meeting high-priority resource needs
+    priority = Column(Integer,default=1,comment='优先级')   # giving priority to meeting high-priority resource needs
 
     @property
     def model_name_url(self):
-        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE")}/{self.name.replace("_", "-")}'
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
 
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
@@ -204,60 +280,114 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         except Exception as e:
             print(e)
 
-        monitoring_url="//"+self.project.cluster.get('HOST', request.host)+conf.get('GRAFANA_SERVICE_PATH')+self.name
+        monitoring_url="//"+self.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_SERVICE_PATH','')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
-        dom = f'''
-                <a target=_blank href="/inferenceservice_modelview/deploy/debug/{self.id}">调试</a> | 
-                <a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a> | 
-                <a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a> |
-                <a target=_blank href="{monitoring_url}">监控</a> |
-                <a href="/inferenceservice_modelview/clear/{self.id}">清理</a>
-                '''
-        if help_url:
-            dom=f'<a target=_blank href="{help_url}">帮助</a> | '+dom
+        if self.created_by.id == g.user.id or self.project.user_role(g.user.id)=='creator':
+            dom = f'''
+                    <a target=_blank href="/inferenceservice_modelview/api/deploy/debug/{self.id}">{__("调试")}</a> | 
+                    <a href="/inferenceservice_modelview/api/deploy/test/{self.id}">{__("部署测试")}</a> | 
+                    <a href="/inferenceservice_modelview/api/deploy/prod/{self.id}">{__("部署生产")}</a> |
+                    <a target=_blank href="{monitoring_url}">{__("监控")}</a> |
+                    <a href="/inferenceservice_modelview/api/clear/{self.id}">{__("清理")}</a>
+                    '''
         else:
-            dom = '帮助 | ' + dom
+            dom = f''' {__("调试")} | {__("部署测试")} | {__("部署生产")}</a> | <a target=_blank href="{monitoring_url}">{__("监控")}</a> | {__("清理")} '''
+
+        # if help_url:
+        #     dom=f'<a target=_blank href="{help_url}">{__("帮助")}</a> | '+dom
+        # else:
+        #     dom = f'{__("帮助")} | ' + dom
         return Markup(dom)
 
     @property
     def debug(self):
-        return Markup(f'<a target=_blank href="/inferenceservice_modelview/debug/{self.id}">调试</a>')
+        return Markup(f'<a target=_blank href="/inferenceservice_modelview/api/debug/{self.id}">{__("调试")}</a>')
 
     @property
     def test_deploy(self):
-        return Markup(f'<a href="/inferenceservice_modelview/deploy/test/{self.id}">部署测试</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/api/deploy/test/{self.id}">{__("部署测试")}</a>')
 
     @property
     def deploy(self):
-        return Markup(f'<a href="/inferenceservice_modelview/deploy/prod/{self.id}">部署生产</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/api/deploy/prod/{self.id}">{__("部署生产")}</a>')
 
     @property
     def clear(self):
-        return Markup(f'<a href="/inferenceservice_modelview/clear/{self.id}">清理</a>')
+        return Markup(f'<a href="/inferenceservice_modelview/api/clear/{self.id}">{__("清理")}</a>')
+
+    @property
+    def status_url(self):
+        from myapp.utils.py.py_k8s import K8s
+        if self.model_status=='online':
+            try:
+                # 查看k8s的pod是否read了
+                k8s_client = K8s(self.project.cluster.get('KUBECONFIG', ''))
+                read_pod = k8s_client.get_pod_ip(namespace=conf.get('SERVICE_NAMESPACE','service'),service_name=self.name)
+                if read_pod:
+                    pass
+                    # return self.model_status+"(ready)"
+                else:
+                    url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
+                    return Markup(f'<a target=_blank href="{url}">deploying</a>')
+                    # return "deploying"
+                    # return self.model_status + "(not ready)"
+            except Exception as e:
+                print(e)
+
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
+        return Markup(f'<a target=_blank href="{url}">{self.model_status}</a>')
+
+        # return self.model_status
+
+    @property
+    def ready(self):
+        from myapp.utils.py.py_k8s import K8s
+        if self.model_status=='online':
+            try:
+                # 查看k8s的pod是否read了
+                k8s_client = K8s(self.project.cluster.get('KUBECONFIG', ''))
+                read_pod = k8s_client.get_pod_ip(namespace=conf.get('SERVICE_NAMESPACE','service'),service_name=self.name)
+                if read_pod:
+                    return True
+                else:
+                    return False
+            except Exception as e:
+                print(e)
+
+        return False
 
     @property
     def ip(self):
-        port = 20000+10*self.id
+        from myapp.utils import core
+        port_str = conf.get('INFERENCE_PORT', '20000+10*ID').replace('ID', str(self.id))
+        meet_ports = core.get_not_black_port(int(eval(port_str)))
+        port = meet_ports[0]
 
         TKE_EXISTED_LBID = json.loads(self.project.expand).get('TKE_EXISTED_LBID', self.project.cluster.get("TKE_EXISTED_LBID",conf.get('TKE_EXISTED_LBID','')))
 
-        # first, Use the proxy ip configured by the project group
+        # 先使用项目组里面配置的代理ip
         SERVICE_EXTERNAL_IP = json.loads(self.project.expand).get('SERVICE_EXTERNAL_IP',None) if self.project.expand else None
+
+        # 再使用配置文件里面为该集群配置的代理ip
+        if not SERVICE_EXTERNAL_IP:
+            # second, Use the global configuration proxy ip
+            SERVICE_EXTERNAL_IP = self.project.cluster.get('HOST','')
+
+        # 再使用全局代理ip
         if not SERVICE_EXTERNAL_IP:
             # second, Use the global configuration proxy ip
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', [])
             if SERVICE_EXTERNAL_IP:
                 SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP[0]
-
+        # 再使用浏览器ip
         if not SERVICE_EXTERNAL_IP:
-            ip = request.host[:request.host.rindex(':')] if ':' in request.host else request.host  #  remove port in host
+            ip = request.host.split(':')[0]
             if core.checkip(ip):
                 SERVICE_EXTERNAL_IP = ip
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡或者单域名模式，这里需要使用公网ip或者域名打开
-            if '|' in SERVICE_EXTERNAL_IP:
-                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[1].strip()
+            SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip().split(':')[0].strip()
 
             host = SERVICE_EXTERNAL_IP + ":" + str(port)
             url = host
@@ -271,54 +401,78 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
             # 处理业务自己配置的host的特殊配置
             if self.host:
-                url = self.host
-                # 如果只配置了路径，则用前面的域名+配置的路径
-                if self.host[0] == '/':
-                    # 只配置了路径的话，就用原来的host
-                    url = host + self.host
+                from myapp.utils.core import split_url
+                host_temp, port_temp, path_temp = split_url(self.host)
 
-            return Markup(f'<a target=_blank href="//{url}">{host}</a>')
+                if port_temp and port_temp in self.ports:
+                    # 查看是第几个端口
+                    if self.ports.find(port_temp) > self.ports.find(','):
+                        port = port + 1
+                url = SERVICE_EXTERNAL_IP+":"+str(port)+path_temp
+            if self.ready:
+                return Markup(f'<a target=_blank href="http://{url}">{host}</a>')
+            else:
+                return host
 
         elif TKE_EXISTED_LBID:
             TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')
             if len(TKE_EXISTED_LBID)>1:
                 host = TKE_EXISTED_LBID[1] + ":" + str(port)
-                return Markup(f'<a target=_blank href="//{host}">{host}</a>')
+                return Markup(f'<a target=_blank href="http://{host}">{host}</a>')
 
-        return "未开通"
+        return __("未开通")
 
 
     def __repr__(self):
         return self.name
 
+
     @property
     def inference_host_url(self):
-        url = "http://" + self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
-        link = url
+        # 泛域名先使用http
+        host = self.name + "." + self.project.cluster.get('SERVICE_DOMAIN',conf.get('SERVICE_DOMAIN',''))
+        port=''
+        path=''
+
+        # 统一域名上的端口，也就是ingressgateway的端口
+        host_port = self.project.cluster.get('HOST', '')
+        if not host_port and conf.get('SERVICE_EXTERNAL_IP'):
+            host_port = conf.get('SERVICE_EXTERNAL_IP')[0]
+        if not host_port:
+            host_port = request.host
+        if host_port:
+            host_port = host_port.split('|')[-1]
+        if ':' in host_port:
+            port = host_port.split(':')[-1]
+
         if self.host:
-            if 'http://' in self.host or 'https://' in self.host:
-                link = url = self.host
-            elif self.host[0]=='/':
-                # 只配置了路径的话，就用原来的host
-                link = url + self.host
+            from myapp.utils.core import split_url
+            host_temp, port_temp, path_temp = split_url(self.host)
+            if path_temp:
+                path=path_temp
             else:
-                link = "http://"+self.host
+                if self.service_type=='tfserving':
+                    path = f"/v1/models/{self.model_name}/metadata"
+                if self.service_type=='torch-server':
+                    path = "/models"
+                    port = "8080"
+            if host_temp:
+                host=host_temp
+            if port_temp and port_temp in self.ports:
+                # 查看是第几个端口
+                if self.ports.find(port_temp) > self.ports.find(','):
+                    port = '8080'
 
-
-        if not self.host and self.service_type=='tfserving':
-            link+=f"/v1/models/{self.model_name}/metadata"
-        if not self.host and self.service_type=='torch-server':
-            link+=":8080/models"
-
-        hosts=f'''
-        <a target=_blank href="{link}">{url}</a>
-        <br><a target=_blank href="{link.replace('http://','http://debug.').replace('https://','https://debug.')}">{url.replace('http://','http://debug.').replace('https://','https://debug.')}</a>
-        <br><a target=_blank href="{link.replace('http://','http://test.').replace('https://','https://test.')}">{url.replace('http://','http://test.').replace('https://','https://test.')}</a>
-        '''
-
-        hosts=f'<a target=_blank href="{link}">{url}</a>'
-        return Markup(hosts)
-
+        host_port = host + ("" if not port else (":" + port))
+        if 'svc.cluster.local' in host:
+            return f'''
+<div type=tips addedValue='添加配置 "{host_port.split(':')[0]} {host}" 到hosts文件后再访问域名'>
+    {host_port}
+</div>
+'''
+        else:
+            url = "http://" + host_port+path
+            return Markup(f'<a target=_blank href="{url}">{host_port}</a>')
 
 
     def clone(self):
@@ -356,6 +510,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
             resource_gpu = self.resource_gpu,
             deploy_time = '',
             host = self.host,
+            inference_config=self.inference_config,
             expand = '{}',
             canary = '',
             shadow = '',

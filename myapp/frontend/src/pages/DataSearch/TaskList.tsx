@@ -5,7 +5,8 @@ import TableBox from '../../components/TableBox/TableBox';
 import { TTaskStep, IEditorTaskItem, TTaskStatus } from './interface'
 import './DataSearch.less';
 import { getIdexTaskDownloadUrl, getIdexTaskResult, stopIndxTask } from '../../api/dataSearchApi';
-import Spreadsheet from '../../components/Spreadsheet/Spreadsheet';
+import { useTranslation } from 'react-i18next';
+// import Spreadsheet from '../../components/Spreadsheet/Spreadsheet';
 
 export interface ITaskListItem { }
 
@@ -36,29 +37,27 @@ const statusIconMap = (status: TTaskStatus) => {
     }
 }
 
-const handleResultData = (result: (string | number)[][]) => {
-    const header = result[0] || []
-    const data = result.slice(1)
-    const targetData = data.map((row) => {
-        const rowItem = row.reduce((pre, next, index) => ({ ...pre, [header[index]]: next }), {})
-        return rowItem
-    })
-    // const headerConfig = header.map(item => ({
-    //     title: item,
-    //     dataIndex: item,
-    //     key: item,
-    //     width: 100,
-    // }))
-    targetData.unshift(header)
-
-    return targetData
-}
-
 export default function TaskList(props: IProps) {
+    const { t, i18n } = useTranslation();
     const [visibleDownload, setVisibleDownload] = useState(false)
     const [visibleResult, setVisibleResult] = useState(false)
-    const [dataResult, setDataResult] = useState<Record<string, any>[]>([])
+    // const [dataConfig, setDataConfig] = useState<any>([])
+    // const [dataResult, setDataResult] = useState<Record<string, any>[]>([])
     const [loadingResult, setLoadingResult] = useState(true)
+
+    // const [dataConfig, _setDataConfig] = useState<any>([])
+    // const dataConfigRef = useRef(dataConfig);
+    // const setDataConfig = (data: any): void => {
+    //     dataConfigRef.current = data;
+    //     _setDataConfig(data);
+    // };
+
+    // const [dataResult, _setDataResult] = useState<any>([])
+    // const dataResultRef = useRef(dataResult);
+    // const setDataResult = (data: any): void => {
+    //     dataResultRef.current = data;
+    //     _setDataResult(data);
+    // };
 
     const [separator, _setSeparator] = useState<string>('|')
     const separatorRef = useRef(separator);
@@ -77,6 +76,29 @@ export default function TaskList(props: IProps) {
     const onChange = (key: string | string[]) => {
         console.log(key);
     };
+
+    const handleResultData = (result: (string | number)[][]) => {
+        const header = result[0] || []
+        const data = result.slice(1)
+        const targetData = data.map((row) => {
+            const rowItem = row.reduce((pre, next, index) => ({ ...pre, [header[index]]: next }), {})
+            return rowItem
+        })
+        const headerConfig = header.map(item => ({
+            title: item,
+            dataIndex: item,
+            key: item,
+            width: 120,
+        }))
+        // targetData.unshift(header)
+        // setDataConfig(headerConfig)
+        // setDataResult(targetData)
+
+        return {
+            config: headerConfig,
+            data: targetData
+        }
+    }
 
     // const handleClickDownload = (id: any) => {
     //     Modal.confirm({
@@ -128,7 +150,7 @@ export default function TaskList(props: IProps) {
 
     return (
         <div>
-            <Modal
+            {/* <Modal
                 title={`下载结果`}
                 visible={visibleResult}
                 footer={null}
@@ -140,10 +162,10 @@ export default function TaskList(props: IProps) {
                 <Spin spinning={loadingResult}>
                     <Spreadsheet height={700} width={1200} dataSource={dataResult} />
                 </Spin>
-            </Modal>
+            </Modal> */}
 
             <Modal
-                title={`结果`}
+                title={t('结果')}
                 visible={visibleDownload}
                 footer={null}
                 destroyOnClose
@@ -153,7 +175,7 @@ export default function TaskList(props: IProps) {
                 }}>
                 <div>
                     <div className="d-f ac pt8">
-                        <div className="w96">选择分隔符：</div>
+                        <div className="w96">{t('选择分隔符')}：</div>
                         <Select style={{ width: 256 }} value={separatorRef.current} options={[{
                             label: '|',
                             value: '|'
@@ -174,7 +196,7 @@ export default function TaskList(props: IProps) {
                             }).catch(err => {
                                 console.log(err)
                             })
-                        }}>下载</Button>
+                        }}>{t('下载')}</Button>
                     </div>
                 </div>
             </Modal>
@@ -182,24 +204,24 @@ export default function TaskList(props: IProps) {
                 {
                     (Object.entries(props.option).reduce((pre: IEditorTaskItem[], [key, value]) => ([...pre, value]), []) || []).reverse().filter(item => !!item.reqId).map((item, index) => {
                         return (
-                            <Collapse.Panel className={['site-collapse-custom-panel', `status-${item.status}`].join(' ')} header={`子任务${item.reqId}`} key={`task_${index}`} extra={
+                            <Collapse.Panel className={['site-collapse-custom-panel', `status-${item.status}`].join(' ')} header={`${t('子任务')}${item.reqId}`} key={`task_${index}`} extra={
                                 <>
                                     <Button className="mr16" type="default" size='small' onClick={(e) => {
                                         e.stopPropagation();
                                         props.onDelete(item.reqId)
-                                    }}>删除<DeleteOutlined /></Button>
+                                    }}>{t('删除')}<DeleteOutlined /></Button>
                                     <Button type="primary" size='small' onClick={(e) => {
                                         e.stopPropagation();
                                         props.onRetry(item.reqId)
                                     }}
-                                    >重试<RedoOutlined /></Button>
+                                    >{t('重试')}<RedoOutlined /></Button>
                                 </>
                             }>
                                 <Steps size="small" current={stepMap[item.step]}>
-                                    <Steps.Step title="准备开始" icon={stepMap[item.step] === 0 ? statusIconMap(item.status) : null} />
-                                    <Steps.Step title="解析" icon={stepMap[item.step] === 1 ? statusIconMap(item.status) : null} />
-                                    <Steps.Step title="执行" icon={stepMap[item.step] === 2 ? statusIconMap(item.status) : null} />
-                                    <Steps.Step title="输出结果" icon={stepMap[item.step] === 3 ? statusIconMap(item.status) : null} />
+                                    <Steps.Step title={t('准备开始')} icon={stepMap[item.step] === 0 ? statusIconMap(item.status) : null} />
+                                    <Steps.Step title={t('解析')} icon={stepMap[item.step] === 1 ? statusIconMap(item.status) : null} />
+                                    <Steps.Step title={t('执行')} icon={stepMap[item.step] === 2 ? statusIconMap(item.status) : null} />
+                                    <Steps.Step title={t('输出结果')} icon={stepMap[item.step] === 3 ? statusIconMap(item.status) : null} />
                                 </Steps>
                                 <TableBox
                                     size={"small"}
@@ -209,7 +231,7 @@ export default function TaskList(props: IProps) {
                                         return JSON.stringify(record)
                                     }}
                                     columns={[{
-                                        title: '子任务',
+                                        title: t('子任务'),
                                         dataIndex: 'content',
                                         key: 'content',
                                         render: (text: any) => {
@@ -231,22 +253,22 @@ export default function TaskList(props: IProps) {
                                     //     key: 'table',
                                     // },
                                     {
-                                        title: '开始时间',
+                                        title: t('开始时间'),
                                         dataIndex: 'startime',
                                         key: 'startime',
                                     }, {
-                                        title: '运行时长',
+                                        title: t('运行时长'),
                                         dataIndex: 'duration',
                                         key: 'duration',
                                     }, {
-                                        title: '状态',
+                                        title: t('状态'),
                                         dataIndex: 'status',
                                         key: 'status',
                                         render: (text: any) => {
                                             return <span className={[`c-${item.status}`].join(' ')}>{text}</span>
                                         }
                                     }, {
-                                        title: '操作',
+                                        title: t('操作'),
                                         dataIndex: 'action',
                                         key: 'action',
                                         render: () => {
@@ -254,44 +276,44 @@ export default function TaskList(props: IProps) {
                                                 <span className="link mr16" onClick={() => {
                                                     // setVisibleDetail(true)
                                                     Modal.info({
-                                                        title: '任务详情',
+                                                        title: t('任务详情'),
                                                         width: 600,
-                                                        okText: '关闭',
+                                                        okText: t('关闭'),
                                                         content: (
                                                             <div>
                                                                 <Row className="mb16">
-                                                                    <Col span={6}><div className="ta-r"><strong>开始时间：</strong></div></Col>
+                                                                    <Col span={6}><div className="ta-r"><strong>{t('开始时间')}：</strong></div></Col>
                                                                     <Col span={18}>{item.startTime}</Col>
                                                                 </Row>
                                                                 <Row className="mb16">
-                                                                    <Col span={6}><div className="ta-r"><strong>运行时长：</strong></div></Col>
+                                                                    <Col span={6}><div className="ta-r"><strong>{t('运行时长')}：</strong></div></Col>
                                                                     <Col span={18}>{item.duration}</Col>
                                                                 </Row>
                                                                 <Row className="mb16">
-                                                                    <Col span={6}><div className="ta-r"><strong>状态：</strong></div></Col>
+                                                                    <Col span={6}><div className="ta-r"><strong>{t('状态')}：</strong></div></Col>
                                                                     <Col span={18}>{item.status}</Col>
                                                                 </Row>
                                                                 <Row className="mb16">
-                                                                    <Col span={6}><div className="ta-r"><strong>子任务内容：</strong></div></Col>
+                                                                    <Col span={6}><div className="ta-r"><strong>{t('子任务内容')}：</strong></div></Col>
                                                                     <Col span={18}>{item.content}</Col>
                                                                 </Row>
                                                                 <Row className="mb16">
-                                                                    <Col span={6}><div className="ta-r"><strong>任务信息：</strong></div></Col>
+                                                                    <Col span={6}><div className="ta-r"><strong>{t('任务信息')}：</strong></div></Col>
                                                                     <Col span={18}>{item.message}</Col>
                                                                 </Row>
                                                             </div>
                                                         ),
                                                         onOk() { },
                                                     });
-                                                }}>详情</span>
+                                                }}>{t('详情')}</span>
                                                 {
                                                     !(item.step === 'end' && item.status === 'success') ? <span className="link mr16" onClick={() => {
                                                         Modal.confirm({
-                                                            title: '终止任务',
+                                                            title: t('终止任务'),
                                                             icon: <StopOutlined />,
                                                             content: '',
-                                                            okText: `确认`,
-                                                            cancelText: '取消',
+                                                            okText: t('确认'),
+                                                            cancelText: t('取消'),
                                                             onOk() {
                                                                 return new Promise((resolve, reject) => {
                                                                     stopIndxTask(item.reqId).then(res => {
@@ -301,51 +323,65 @@ export default function TaskList(props: IProps) {
                                                                     })
                                                                 })
                                                                     .then((res) => {
-                                                                        message.success('终止成功');
+                                                                        message.success(t('终止成功'));
                                                                     })
                                                                     .catch(() => {
-                                                                        message.error('终止失败');
+                                                                        message.error(t('终止失败'));
                                                                     });
                                                             },
                                                             onCancel() { },
                                                         });
-                                                    }}>终止</span> : null
+                                                    }}>{t('终止')}</span> : null
                                                 }
                                                 {
                                                     !!item.log ? <span className="link mr16" onClick={() => {
                                                         window.open(item.log, 'bank')
-                                                    }}>日志</span> : null
+                                                    }}>{t('日志')}</span> : null
                                                 }
                                                 {
                                                     item.step === 'end' && item.status === 'success' ? <span className="link mr16" onClick={() => {
-                                                        // Modal.info({
-                                                        //     title: '结果查看',
-                                                        //     content: (
-                                                        //         <div>
-                                                        //             {item.result?.map(item => {
-                                                        //                 return <div>{item}</div>
-                                                        //             })}
-                                                        //         </div>
-                                                        //     ),
-                                                        //     onOk() { },
-                                                        // });
                                                         setLoadingResult(true)
                                                         getIdexTaskResult(item.reqId).then(res => {
                                                             setVisibleResult(true)
                                                             const result = res.data.result
+                                                            handleResultData(result)
                                                             const handleData = handleResultData(result)
-                                                            setDataResult(handleData)
+                                                            // setDataResult(handleData)
+                                                            Modal.info({
+                                                                title: t('结果查看'),
+                                                                content: (
+                                                                    <div>
+                                                                        {/* {(result || [])?.map(item => {
+                                                                            return <div>{item}</div>
+                                                                        })} */}
+                                                                        <TableBox
+
+                                                                            size={"small"}
+                                                                            loading={false}
+                                                                            cancelExportData={true}
+                                                                            rowKey={(record: any) => {
+                                                                                return JSON.stringify(record)
+                                                                            }}
+                                                                            columns={handleData.config}
+                                                                            pagination={false}
+                                                                            dataSource={handleData.data}
+                                                                            scroll={{ x: 'auto' }}
+                                                                        />
+                                                                    </div>
+                                                                ),
+                                                                onOk() { },
+                                                            });
                                                         }).catch(err => { }).finally(() => {
                                                             setLoadingResult(false)
                                                         })
-                                                    }}>结果</span> : null
+                                                    }}>{t('结果')}</span> : null
                                                 }
                                                 {
                                                     item.step === 'end' && item.status === 'success' ? <span className="link" onClick={() => {
                                                         // handleClickDownload(item.reqId)
                                                         setCurrentReqId(item.reqId)
                                                         setVisibleDownload(true)
-                                                    }}>下载</span> : null
+                                                    }}>{t('下载')}</span> : null
                                                 }
                                             </>
                                         }

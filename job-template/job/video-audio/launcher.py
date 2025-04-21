@@ -3,7 +3,7 @@ import ray
 import re
 
 import os
-import sys
+import sys, json
 import time
 from kubernetes import client, config, watch
 
@@ -23,6 +23,7 @@ for task_node_selector in task_node_selectors:
     KFJ_TASK_NODE_SELECTOR[task_node_selector.split('=')[0]] = task_node_selector.split('=')[1]
 
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '')
+KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME', 'public')
 KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', '')
 KFJ_RUNNER = os.getenv('KFJ_RUNNER')
@@ -35,6 +36,13 @@ NUM_WORKER = 3
 HEADER_NAME = os.getenv('RAY_HOST', '')
 WORKER_NAME = HEADER_NAME.replace('header', 'worker')
 INIT_FILE=''
+
+HUBSECRET = os.getenv('HUBSECRET','hubsecret')
+HUBSECRET=[{"name":hubsecret} for hubsecret in HUBSECRET.split(',')]
+
+DEFAULT_POD_RESOURCES = os.getenv('DEFAULT_POD_RESOURCES','')
+DEFAULT_POD_RESOURCES = json.loads(DEFAULT_POD_RESOURCES) if DEFAULT_POD_RESOURCES else {}
+
 
 def get_volume_mounts(volume_mount,username):
     k8s_volumes = []
@@ -120,10 +128,6 @@ k8s_volumes, k8s_volume_mounts = get_volume_mounts(KFJ_TASK_VOLUME_MOUNT,KFJ_CRE
 print(k8s_volumes)
 print(k8s_volume_mounts)
 
-GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
-GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
-print(GPU_TYPE,GPU_RESOURCE)
-
 
 def create_header_service(name):
     service_json = {
@@ -134,10 +138,13 @@ def create_header_service(name):
             "name": name,
             "labels":{
                 "run-id":os.getenv('KFJ_RUN_ID','unknown'),
-                "run-rtx":os.getenv('KFJ_RUNNER','unknown'),
-                "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
+                "run-username":os.getenv('KFJ_RUNNER','unknown'),
+                "pipeline-username": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -178,10 +185,13 @@ def create_header_deploy(name):
             "name": name,
             "labels":{
                 "run-id":os.getenv('KFJ_RUN_ID','unknown'),
-                "run-rtx":os.getenv('KFJ_RUNNER','unknown'),
-                "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
+                "run-username":os.getenv('KFJ_RUNNER','unknown'),
+                "pipeline-username": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -198,19 +208,18 @@ def create_header_deploy(name):
                         "pipeline-id": KFJ_PIPELINE_ID,
                         "pipeline-name": KFJ_PIPELINE_NAME,
                         "task-name": KFJ_TASK_NAME,
-                        'rtx-user': KFJ_RUNNER,
+                        'username': KFJ_RUNNER,
                         "component": name,
                         "type": "ray"
+                    },
+                    "annotations": {
+                        "project": KFJ_TASK_PROJECT_NAME
                     }
                 },
                 "spec": {
                     "restartPolicy": "Always",
                     "volumes": k8s_volumes,
-                    "imagePullSecrets": [
-                        {
-                            "name": "hubsecret"
-                        }
-                    ],
+                    "imagePullSecrets": HUBSECRET,
                     "affinity": {
                         "nodeAffinity": {
                             "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -249,11 +258,11 @@ def create_header_deploy(name):
                         {
                             "name": "ray-head",
                             "image": KFJ_TASK_IMAGES,
-                            "imagePullPolicy": "Always",
+                            "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                             "command": [
                                 "/bin/bash",
                                 "-c",
-                                "%s ray start --head --port=6379 --redis-shard-ports=6380,6381 --num-cpus=$MY_CPU_REQUEST --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
+                                "%s ray start --head --port=6379 --num-cpus=$MY_CPU_REQUEST --block"%INIT_FILE
                             ],
                             "ports": [
                                 {
@@ -294,10 +303,6 @@ def create_header_deploy(name):
         }
     }
 
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        header_deploy['spec']['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        header_deploy['spec']['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-
     return header_deploy
 
 
@@ -310,10 +315,13 @@ def create_worker_deploy(header_name,worker_name):
             "name": worker_name,
             "labels": {
                 "run-id":os.getenv('KFJ_RUN_ID','unknown'),
-                "run-rtx":os.getenv('KFJ_RUNNER','unknown'),
-                "pipeline-rtx": os.getenv('KFJ_CREATOR', 'unknown'),
+                "run-username":os.getenv('KFJ_RUNNER','unknown'),
+                "pipeline-username": os.getenv('KFJ_CREATOR', 'unknown'),
                 "task-id":os.getenv('KFJ_TASK_ID','unknown'),
                 "pipeline-id": os.getenv('KFJ_PIPELINE_ID', 'unknown')
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
@@ -330,10 +338,12 @@ def create_worker_deploy(header_name,worker_name):
                         "pipeline-id": KFJ_PIPELINE_ID,
                         "pipeline-name": KFJ_PIPELINE_NAME,
                         "task-name": KFJ_TASK_NAME,
-                        'rtx-user': KFJ_RUNNER,
+                        'username': KFJ_RUNNER,
                         "component": worker_name,
                         "type": "ray"
-
+                    },
+                    "annotations": {
+                        "project": KFJ_TASK_PROJECT_NAME
                     }
                 },
 
@@ -383,11 +393,11 @@ def create_worker_deploy(header_name,worker_name):
                         {
                             "name": "ray-worker",
                             "image": KFJ_TASK_IMAGES,
-                            "imagePullPolicy": "Always",
+                            "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                             "command": [
                                 "/bin/bash",
                                 "-c",
-                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:$RAY_HEAD_SERVICE_PORT_REDIS --object-manager-port=12345 --node-manager-port=12346 --block"%INIT_FILE
+                                "%s ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_SERVICE_HOST:6379 --block"%INIT_FILE
                             ],
                             "volumeMounts": k8s_volume_mounts,
                             "env": [
@@ -402,20 +412,22 @@ def create_worker_deploy(header_name,worker_name):
                                 {
                                     "name": "RAY_HEAD_SERVICE_HOST",
                                     "value": header_name
-                                },
-                                {
-                                    "name": "RAY_HEAD_SERVICE_PORT_REDIS",
-                                    "value": "6379"
                                 }
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 },
                                 "limits": {
-                                    "cpu": KFJ_TASK_RESOURCE_CPU,
-                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    **{
+                                        "cpu": KFJ_TASK_RESOURCE_CPU,
+                                        "memory": KFJ_TASK_RESOURCE_MEMORY
+                                    },
+                                    **DEFAULT_POD_RESOURCES
                                 }
                             }
                         }
@@ -424,11 +436,6 @@ def create_worker_deploy(header_name,worker_name):
             }
         }
     }
-
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        worker_deploy['spec']['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-
 
     return worker_deploy
 

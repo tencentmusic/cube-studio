@@ -102,8 +102,8 @@ export const getAllList =
             return {
               id: item.id,
               name: item.pipeline_url,
-              describe: item.project.describe,
-              changed_on: item.project.changed_on,
+              describe: item.describe,
+              changed_on: item.changed_on,
               project_id: item.project.id,
             };
           });

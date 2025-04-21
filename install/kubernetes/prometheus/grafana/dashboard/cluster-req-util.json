@@ -1328,7 +1328,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "集群资源申请率",
+  "title": "Cluster Resource Request Rate",
   "uid": "cluster-req-util",
   "version": 1
 }

@@ -1,15 +1,16 @@
+import datetime
 import re
 import shutil
-
+import zipfile, pandas
 from flask_appbuilder import action
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from wtforms.validators import DataRequired, Regexp
 from myapp import app, appbuilder
 from wtforms import StringField, SelectField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget, Select2ManyWidget
 from myapp.forms import MyBS3TextAreaFieldWidget, MySelect2Widget, MyCommaSeparatedListField, MySelect2ManyWidget, \
     MySelectMultipleField
-from flask import jsonify, Markup, make_response
+from flask import jsonify, Markup, make_response, flash
 from .baseApi import MyappModelRestApi
 from flask import g, request, redirect
 import json, os, sys
@@ -28,9 +29,8 @@ from myapp import app, appbuilder, db
 from flask_appbuilder import expose
 from myapp.views.view_team import Project_Join_Filter, filter_join_org_project
 from myapp.models.model_dataset import Dataset
-
+from myapp.utils import core
 conf = app.config
-logging = app.logger
 
 
 class Dataset_Filter(MyappFilter):
@@ -49,7 +49,7 @@ class Dataset_Filter(MyappFilter):
 
 
 class Dataset_ModelView_base():
-    label_title = '数据集'
+    label_title = _('数据集')
     datamodel = SQLAInterface(Dataset)
     base_permissions = ['can_add', 'can_show', 'can_edit', 'can_list', 'can_delete']
 
@@ -57,46 +57,42 @@ class Dataset_ModelView_base():
     order_columns = ['id']
     base_filters = [["id", Dataset_Filter, lambda: []]]  # 设置权限过滤器
 
-    add_columns = ['name', 'version', 'label', 'describe', 'subdataset', 'source_type', 'source', 'field',
-                   'usage', 'storage_class', 'file_type', 'url', 'download_url', 'path',
-                   'storage_size', 'entries_num', 'duration', 'price', 'status', 'icon', 'owner', 'features']
-    show_columns = ['id', 'name', 'version', 'label', 'describe', 'subdataset', 'segment', 'source_type', 'source',
+    add_columns = ['name', 'version', 'label', 'describe', 'url', 'download_url', 'path', 'icon', 'owner', 'features']
+    show_columns = ['id', 'name', 'version', 'label', 'describe', 'segment', 'source_type', 'source',
                     'industry', 'field', 'usage', 'storage_class', 'file_type', 'status', 'url',
                     'path', 'download_url', 'storage_size', 'entries_num', 'duration', 'price', 'status', 'icon',
                     'owner', 'features']
     search_columns = ['name', 'version', 'label', 'describe', 'source_type', 'source', 'field', 'usage','storage_class', 'file_type', 'status', 'url', 'path', 'download_url']
     spec_label_columns = {
-        "subdataset": "子数据集名称",
-        "source_type": "来源类型",
-        "source": "数据来源",
-        "usage": "数据用途",
-        "research": "研究方向",
-        "storage_class": "存储类型",
-        "file_type": "文件类型",
-        "years": "数据年份",
-        "url": "相关网址",
-        "url_html": "相关网址",
-        "download_url": "下载地址",
-        "download_url_html": "下载地址",
-        "path": "本地路径",
-        "path_html": "本地路径",
-        "entries_num": "条目数量",
-        "duration": "文件时长",
-        "price": "价格",
-        "icon": "示例图",
-        "icon_html": "示例图",
-        "ops_html": "操作",
-        "features": "特征列",
-        "segment": "分区"
+        "subdataset": _("子数据集名称"),
+        "source_type": _("来源类型"),
+        "source": _("数据来源"),
+        "usage": _("数据用途"),
+        "research": _("研究方向"),
+        "storage_class": _("存储类型"),
+        "years": _("数据年份"),
+        "url": _("相关网址"),
+        "url_html": _("相关网址"),
+        "label_html": _("中文名"),
+        "path": _("容器内路径"),
+        "path_html": _("容器内路径"),
+        "entries_num": _("条目数量"),
+        "duration": _("文件时长"),
+        "price": _("价格"),
+        "icon": _("预览图"),
+        "icon_html": _("预览图"),
+        "ops_html": _("操作"),
+        "features": _("特征列"),
+        "segment": _("分区")
     }
 
     edit_columns = add_columns
-    list_columns = ['icon_html', 'name', 'version', 'label', 'describe','owner', 'source_type', 'source', 'status',
-                    'field', 'url_html', 'download_url_html', 'usage', 'storage_class', 'file_type', 'path_html', 'storage_size', 'entries_num', 'price']
+    list_columns = ['icon_html', 'name', 'version', 'label_html', 'describe','owner', 'path_html', 'download_url_html']
 
     cols_width = {
-        "name": {"type": "ellip1", "width": 200},
+        "name": {"type": "ellip1", "width": 150},
         "label": {"type": "ellip2", "width": 200},
+        "label_html": {"type": "ellip2", "width": 200},
         "version": {"type": "ellip2", "width": 100},
         "describe": {"type": "ellip2", "width": 300},
         "field": {"type": "ellip1", "width": 100},
@@ -118,158 +114,163 @@ class Dataset_ModelView_base():
         "usage": {"type": "ellip1", "width": 200},
         "research": {"type": "ellip2", "width": 100},
         "icon_html": {"type": "ellip1", "width": 100},
-        "ops_html": {"type": "ellip1", "width": 200},
+        "ops_html": {"type": "ellip1", "width": 100},
     }
     features_demo = '''
+填写规则：
 {
   "column1": {
-    # 列的类型
-    "type": "dict,list,tuple,Value,Sequence,Array2D,Array3D,Array4D,Array5D,Translation,TranslationVariableLanguages,Audio,Image,Video,ClassLabel",
+    # feature type
+    "_type": "dict,list,tuple,Value,Sequence,Array2D,Array3D,Array4D,Array5D,Translation,TranslationVariableLanguages,Audio,Image,Video",
 
-    # dict,list,tuple,Value,Sequence,Array2D,Array3D,Array4D,Array5D类型中的数据类型
+    # data type in dict,list,tuple,Value,Sequence,Array2D,Array3D,Array4D,Array5D
     "dtype": "null,bool,int8,int16,int32,int64,uint8,uint16,uint32,uint64,float16,float32,float64,time32[(s|ms)],time64[(us|ns)],timestamp[(s|ms|us|ns)],timestamp[(s|ms|us|ns),tz=(tzstring)],date32,date64,duration[(s|ms|us|ns)],decimal128(precision,scale),decimal256(precision,scale),binary,large_binary,string,large_string"
 
-    # Sequence 类型中的长度
-    "length": 10
-
-    # Array2D,Array3D,Array4D,Array5D 类型中的维度
-    "shape": (1, 2, 3, 4, 5),
-
-    # Audio 类型中的采样率，是否单声道，是否解码
-    "sampling_rate":16000,
-    "mono": true,
-    "decode": true
-
-    # Image 类型中的是否编码
-    "decode": true
-
-    # ClassLabel 类型中的分类
-    "num_classes":3,
-    "names":['class1','class2','class3'] 
-
-  },
+  }
+}
+示例：
+{
+    "id": {
+        "_type": "Value",
+        "dtype": "string"
+    },
+    "image": {
+        "_type": "Image"
+    },
+    "box": {
+        "_type": "Value",
+        "dtype": "string"
+    }
 }
     '''
     add_form_extra_fields = {
         "name": StringField(
-            label=_(datamodel.obj.lab('name')),
-            description='数据集英文名，小写',
+            label= _('名称'),
+            description= _('数据集英文名，小写'),
             default='',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(), Regexp("^[a-z][a-z0-9_]*[a-z0-9]$"), ]
         ),
         "version": StringField(
-            label=_(datamodel.obj.lab('version')),
-            description='数据集版本',
+            label= _('版本'),
+            description= _('数据集版本'),
             default='latest',
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), Regexp("^[a-z][a-z0-9_\-]*[a-z0-9]$"), ]
+            validators=[DataRequired(), Regexp("[a-z0-9_\-]*"), ]
         ),
         "subdataset": StringField(
-            label=_(datamodel.obj.lab('subdataset')),
-            description='子数据集名称，不存在子数据集，与name同值',
+            label= _('子数据集'),
+            description= _('子数据集名称，不存在子数据集，与name同值'),
             default='',
             widget=BS3TextFieldWidget(),
             validators=[]
         ),
         "label": StringField(
-            label=_(datamodel.obj.lab('label')),
+            label= _('标签'),
             default='',
-            description='数据集中文名',
+            description='',
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         ),
         "describe": StringField(
-            label=_(datamodel.obj.lab('describe')),
+            label= _('描述'),
             default='',
-            description='数据集描述',
+            description= _('数据集描述'),
             widget=MyBS3TextAreaFieldWidget(),
             validators=[DataRequired()]
         ),
         "industry": SelectField(
-            label=_(datamodel.obj.lab('industry')),
-            description='行业分类',
+            label= _('行业'),
+            description= _('行业分类'),
             widget=MySelect2Widget(can_input=True),
             default='',
-            choices=[[x, x] for x in
+            choices=[[_(x), _(x)] for x in
                      ['农业', '生物学', '气候+天气', '复杂网络', '计算机网络', '网络安全', '数据挑战', '地球科学', '经济学', '教育', '能源', '娱乐', '金融',
                       'GIS', '政府', '医疗', '图像处理', '机器学习', '博物馆', '自然语言', '神经科学', '物理', '前列腺癌', '心理学+认知', '公共领域', '搜索引擎',
                       '社交网络', '社会科学', '软件', '运动', '时间序列', '交通', '电子竞技']],
             validators=[]
         ),
         "field": SelectField(
-            label=_(datamodel.obj.lab('field')),
-            description='领域',
+            label= _('领域'),
+            description='',
             widget=MySelect2Widget(can_input=True),
-            choices=[[x, x] for x in ['视觉', "音频", "自然语言",'多模态', "风控", "搜索", '推荐','广告']],
+            choices=[[_(x), _(x)] for x in ['视觉', "语音", "自然语言",'多模态', "风控", "搜索", '推荐','广告']],
             validators=[]
         ),
         "source_type": SelectField(
-            label=_(datamodel.obj.lab('source_type')),
-            description='来源分类',
+            label= _('数据源类型'),
+            description='',
             widget=Select2Widget(),
-            default='开源',
-            choices=[[x, x] for x in ["开源", "自产", "购买"]],
+            default= _('开源'),
+            choices=[[_(x), _(x)] for x in ["开源", "自产", "购买"]],
             validators=[]
         ),
         "source": SelectField(
-            label=_(datamodel.obj.lab('source')),
-            description='数据来源，可自己填写',
+            label= _('数据来源'),
+            description= _('数据来源，可自己填写'),
             widget=MySelect2Widget(can_input=True),
-            choices=[[x, x] for x in
-                     ['github', "kaggle", "天池", 'UCI', 'AWS 公开数据集', 'Google 公开数据集', "采购公司1", "标注团队1", "政府网站1"]],
+            choices=[[_(x), _(x)] for x in
+                     ['github', "kaggle", "ali", 'uci', 'aws', 'google', "company1", "label-team1", "web1"]],
             validators=[]
         ),
         "file_type": MySelectMultipleField(
-            label=_(datamodel.obj.lab('file_type')),
-            description='文件类型',
+            label= _('文件类型'),
+            description='',
             widget=Select2ManyWidget(),
             choices=[[x, x] for x in ["png", "jpg", 'txt', 'csv', 'wav', 'mp3', 'mp4', 'nv4', 'zip', 'gz']],
         ),
         "storage_class": SelectField(
-            label=_(datamodel.obj.lab('storage_class')),
-            description='存储类型',
+            label= _('存储类型'),
+            description='',
             widget=MySelect2Widget(can_input=True),
-            choices=[[x, x] for x in ["压缩", "未压缩"]],
+            choices=[[_(x), _(x)] for x in ["压缩", "未压缩"]],
         ),
         "storage_size": StringField(
-            label=_(datamodel.obj.lab('storage_size')),
-            description='存储大小',
+            label= _('存储大小'),
+            description='',
             widget=BS3TextFieldWidget(),
         ),
         "owner": StringField(
-            label=_(datamodel.obj.lab('owner')),
+            label= _('责任人'),
             default='*',
-            description='责任人,逗号分隔的多个用户,*表示公开',
+            description= _('责任人,逗号分隔的多个用户,*表示公开'),
             widget=BS3TextFieldWidget(),
+            validators=[DataRequired()]
         ),
         "status": SelectField(
-            label=_(datamodel.obj.lab('status')),
-            description='数据集状态',
+            label= _('状态'),
+            description= _('数据集状态'),
             widget=MySelect2Widget(can_input=True),
-            choices=[[x, x] for x in ["损坏", "正常", '未购买', '已购买', '未标注', '已标注', '未校验', '已校验']],
+            choices=[[_(x), _(x)] for x in ["损坏", "正常", '未购买', '已购买', '未标注', '已标注', '未校验', '已校验']],
         ),
         "url": StringField(
-            label=_(datamodel.obj.lab('url')),
-            description='相关网址',
+            label= _('相关网址'),
+            description=_('关于数据集介绍或者手动下载的网址，每行一个网址'),
             widget=MyBS3TextAreaFieldWidget(rows=3),
             default=''
         ),
         "path": StringField(
-            label=_(datamodel.obj.lab('path')),
-            description='本地路径',
+            label= _('容器内路径'),
+            description=_('本地文件通过notebook上传到平台内，处理后，压缩成单个压缩文件，每行一个压缩文件地址。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">上传文件</a>'),
             widget=MyBS3TextAreaFieldWidget(rows=3),
             default=''
         ),
         "download_url": StringField(
-            label=_(datamodel.obj.lab('download_url')),
-            description='下载地址',
+            label= _('下载地址'),
+            description=_('如何数据集存储在外部，此处提供可以直接下载的链接地址，每行一个url'),
             widget=MyBS3TextAreaFieldWidget(rows=3),
             default=''
         ),
+        "icon": StringField(
+            label=_('预览图'),
+            default='',
+            description=_('可以为图片地址，svg源码，或者帮助文档链接'),
+            widget=BS3TextFieldWidget(),
+            validators=[]
+        ),
         "features": StringField(
-            label=_(datamodel.obj.lab('features')),
-            description=Markup('数据集中的列信息'),
+            label= _('特征列'),
+            description= _('数据集中的列信息，要求数据集中要有data.csv文件用于表示数据集中的全部数据'),
             widget=MyBS3TextAreaFieldWidget(rows=3, tips=Markup('<pre><code>' + features_demo + "</code></pre>")),
             default=''
         )
@@ -279,23 +280,48 @@ class Dataset_ModelView_base():
     import_data = True
     download_data = True
 
+    # @pysnooper.snoop()
     def pre_add(self, item):
         if not item.owner:
             item.owner = g.user.username + ",*"
-        if not item.icon:
-            item.icon = '/static/assets/images/dataset.png'
+        if item.icon and '</svg>' in item.icon:
+            item.icon = re.sub(r'width="\d+(\.\d+)?(px)?"', f'width="50px"', item.icon)
+            item.icon = re.sub(r'height="\d+(\.\d+)?(px)?"', f'height="50px"', item.icon)
         if not item.version:
             item.version = 'latest'
         if not item.subdataset:
             item.subdataset = item.name
+        item.features = json.dumps(json.loads(item.features),indent=4,ensure_ascii=False) if item.features else "{}"
+        # 判断文件是否存在
+        if item.path:
+            new_paths = []
+            paths = item.path.split("\n")
+            for path in paths:
+                local_path = os.path.join('/home/myapp/myapp/static/', path.lstrip('/'))
+                if os.path.exists(local_path):
+                    new_paths.append(path)
+                else:
+                    flash(path+"，文件不存在，保存时以去除", "error")
+            item.path = '\n'.join(new_paths)
+
 
     def pre_update(self, item):
         self.pre_add(item)
 
+
+    def check_edit_permission(self, item):
+        if not g.user.is_admin() and g.user.username != item.created_by.username and g.user.username not in item.owner:
+            return False
+        return True
+    check_delete_permission = check_edit_permission
+
     # 将外部存储保存到本地存储中心
-    @action("save_store", __("备份到存储中心"), __("备份到存储中心"), "fa-trash", single=True)
-    def save_store(self, dataset_id):
-        dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
+    @action("save_store", "备份", "备份数据到当前集群?", "fa-trash", single=True, multiple=False)
+    # @pysnooper.snoop()
+    def save_store(self, dataset):
+        if not self.check_edit_permission(dataset):
+            flash('no permission','warning')
+            return
         from myapp.tasks.async_task import update_dataset
         kwargs = {
             "dataset_id": dataset.id,
@@ -386,7 +412,6 @@ class Dataset_ModelView_base():
     # 将外部存储保存到本地存储中心
     @expose("/download/<dataset_id>", methods=["GET", "POST"])
     @expose("/download/<dataset_id>/<partition>", methods=["GET", "POST"])
-    # @pysnooper.snoop()
     def download_dataset(self, dataset_id, partition=''):
 
         # 生成下载链接
@@ -401,16 +426,16 @@ class Dataset_ModelView_base():
         dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
         try:
             download_url = []
-            if dataset.path:
+            if dataset.path and dataset.path.strip():
                 # 如果存储在集群数据集中心
                 # 如果存储在个人目录
-                paths = dataset.path.split('/n')
+                paths = dataset.path.split('\n')
                 for path in paths:
                     download_url.append(path2url(path))
 
             # 如果存储在外部链接
-            elif dataset.download_url:
-                download_url = dataset.download_url.split('/n')
+            elif dataset.download_url and dataset.download_url.strip():
+                download_url = dataset.download_url.split('\n')
             else:
                 # 如果存储在对象存储中
                 store_type = conf.get('STORE_TYPE', 'minio')
@@ -445,7 +470,7 @@ class Dataset_ModelView_base():
     @expose("/preview/<dataset_name>/<dataset_version>", methods=["GET", 'POST'])
     @expose("/preview/<dataset_name>/<dataset_version>/<dataset_segment>", methods=["GET", 'POST'])
     def preview(self):
-        _args = request.json or {}
+        _args = request.get_json(silent=True) or {}
         _args.update(request.args)
         _args.update(json.loads(request.args.get('form_data', {})))
         info = {}
@@ -467,6 +492,38 @@ class Dataset_ModelView_base():
             }
         )
         return jsonify(info)
+
+
+
+    # 划分数据历史版本
+    def pre_list_res(self,res):
+        data=res['data']
+        import itertools
+        all_data={item['id']:item for item in data}
+        all_last_data_id=[]
+        # 按name分组，最新数据下包含其他更老的数据作为历史集合
+        data = sorted(data, key=lambda x: x['name'])
+        for name, group in itertools.groupby(data, key=lambda x: x['name']):
+            group=list(group)
+            max_id = max([x['id'] for x in group])
+            all_last_data_id.append(max_id)
+            for item in group:
+                if item['id']!=max_id:
+                    if 'children' not in all_data[max_id]:
+                        all_data[max_id]['children']=[all_data[item['id']]]
+                    else:
+                        all_data[max_id]['children'].append(all_data[item['id']])
+        # 顶层只保留最新的数据
+        res['data'] = [all_data[id] for id in all_data if id in all_last_data_id]
+        return res
+
+    # 删除，把备份的数据也删除了
+    def post_delete(self,dataset):
+        remote_dir = f'dataset/{dataset.name}/{dataset.version if dataset.version else "latest"}/'
+        remote_dir = os.path.join('/data/k8s/kubeflow/global/', remote_dir)
+        if os.path.exists(remote_dir):
+            # 先清理干净，因为有可能存在旧的不对的数据
+            shutil.rmtree(remote_dir, ignore_errors=True)
 
 
 class Dataset_ModelView_Api(Dataset_ModelView_base, MyappModelRestApi):

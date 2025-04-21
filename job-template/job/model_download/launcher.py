@@ -24,7 +24,7 @@ def download(**kwargs):
     model_path=""
     exist_model = {}
     # 从注册的模型中下载模型
-    if kwargs['from']=='模型管理':
+    if kwargs['from']=='模型管理' or 'model' in kwargs['from']:
         url = host + "/training_model_modelview/api/?form_data=" + json.dumps({
             "filters": [
                 {
@@ -56,7 +56,7 @@ def download(**kwargs):
             print(res.content)
             exit(1)
 
-    elif kwargs['from']=='推理服务':
+    elif kwargs['from']=='推理服务' or 'inference' in kwargs['from']:
         filters = [
             {
                 "col": "model_name",
@@ -103,10 +103,24 @@ def download(**kwargs):
         model_path = model_path[kwargs['sub_model_name']]
     except Exception as e:
         pass
-    if model_path and os.path.exists(model_path):
+    if model_path:
         save_path = kwargs['save_path']
-        os.makedirs(save_path,exist_ok=True)
-        if os.path.isdir(model_path):
+        os.makedirs(save_path, exist_ok=True)
+        # 如果是在线地址，这下载
+        if 'https://' in model_path or 'http://' in model_path:
+            file_name = model_path.split("/")[-1]
+
+            # 下载文件并保存到本地目录
+            response = requests.get(model_path)
+            with open(os.path.join(save_path, file_name), "wb") as file:
+                file.write(response.content)
+                file.close()
+
+        elif not os.path.exists(model_path):
+            print(f'{model_path}下不存在模型')
+            exit(1)
+
+        elif os.path.isdir(model_path):
             g = os.walk(model_path)
             for path, dir_list, file_list in g:
                 for file_name in file_list:
@@ -120,13 +134,30 @@ def download(**kwargs):
                         print(e)
         else:
             shutil.copy2(model_path,save_path)
+
         # 同时将模型信息写入到存储中,比如计算指标
         if kwargs['from']=='模型管理':
             if exist_model:
-                json.dump(exist_model,open(os.path.join(kwargs['save_path'],f'{exist_model["name"]}.{exist_model["version"]}.json')))
+                json.dump(exist_model,open(os.path.join(save_path,f'{exist_model["name"]}.{exist_model["version"]}.json'),mode='w'))
     else:
         print('未发现模型')
         exit(1)
+
+from subprocess import Popen, PIPE, STDOUT
+
+def exe_command(command):
+    """
+    执行 shell 命令并实时打印输出
+    :param command: shell 命令
+    :return: process, exitcode
+    """
+    print(command)
+    process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
+    with process.stdout:
+        for line in iter(process.stdout.readline, b''):
+            print(line.decode().strip(),flush=True)
+    exitcode = process.wait()
+    return exitcode
 
 
 if __name__ == "__main__":
@@ -139,8 +170,14 @@ if __name__ == "__main__":
     arg_parser.add_argument('--save_path', type=str, help="下载目录", default='')
 
     args = arg_parser.parse_args()
+    kwargs = args.__dict__
     # print("{} args: {}".format(__file__, args))
+    if kwargs['from'] == '模型管理' or 'model' in kwargs['from'] or kwargs['from']=='推理服务' or 'inference' in kwargs['from']:
+        download(**kwargs)
+    elif kwargs['from']=='huggingface':
+        command = f'huggingface-cli download --repo-type model --resume-download {kwargs["model_name"]} --revision {kwargs["model_version"]} --local-dir {kwargs["save_path"]} --local-dir-use-symlinks False'
+        exitcode = exe_command(command)
+        exit(exitcode)
 
-    download(**args.__dict__)
 
 

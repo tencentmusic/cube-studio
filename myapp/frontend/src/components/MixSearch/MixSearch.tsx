@@ -3,6 +3,7 @@ import { Form, Row, Col, Input, Select, Button } from 'antd';
 import { DeleteOutlined, PlusOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import './MixSearch.less';
 import { LabeledValue } from 'antd/lib/select';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 export interface IMixSearchParamItem {
@@ -37,6 +38,8 @@ const MixSearch = (props: IProps) => {
 	const [paramsData, setParamsData] = useState<IMixSearchParamItem[]>(formatParamsData(props.params))
 	const [currentParamsData, setCurrentParamsData] = useState<IMixSearchParamItem[]>(formatParamsData(props.params))
 	const [paramsDataMap, setParamsDataMap] = useState<Map<string, IMixSearchParamItem>>(new Map())
+
+	const { t, i18n } = useTranslation();
 
 	useEffect(() => {
 		if (props.values) {
@@ -173,12 +176,12 @@ const MixSearch = (props: IProps) => {
 														<Form.Item
 															noStyle
 															name={[field.name, 'key']}
-															rules={[{ required: false, message: '请选择key' }]}
+															rules={[{ required: false, message: t('请选择key') }]}
 														// initialValue={'testParams'}
 														>
 															<Select
 																style={{ width: '35%' }}
-																placeholder="请选择"
+																placeholder={t('请选择')}
 																onChange={(value: string) => {
 																	// handleSelectType(value, index)
 																	const selectActionRemove = (value: string) => {
@@ -210,7 +213,7 @@ const MixSearch = (props: IProps) => {
 															noStyle
 															shouldUpdate
 															name={[field.name, 'value']}
-															rules={[{ required: false, message: '请填写value' }]}
+															rules={[{ required: false, message: t('请填写value') }]}
 														>
 															{handleRenderValueEl(index)}
 														</Form.Item>
@@ -260,7 +263,7 @@ const MixSearch = (props: IProps) => {
 				<Col flex={1}>
 					<Row justify="end">
 						<Button type="primary" htmlType="submit">
-							查询
+							{t('查询')}
 						</Button>
 					</Row>
 				</Col>
@@ -269,14 +272,14 @@ const MixSearch = (props: IProps) => {
 				<Row onClick={() => handleCollapsed()} justify="center" align="middle">
 					{collapsed ? (
 						<>
-							<Col>展开</Col>
+							<Col>{t('展开')}</Col>
 							<Col>
 								<DownOutlined />
 							</Col>
 						</>
 					) : (
 							<>
-								<Col>收起</Col>
+								<Col>{t('收起')}</Col>
 								<Col>
 									<UpOutlined />
 								</Col>

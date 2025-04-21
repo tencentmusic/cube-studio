@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/frontend/distChat/sw.js', { scope: '/frontend/distChat/' })})}

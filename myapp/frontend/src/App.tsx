@@ -14,9 +14,13 @@ import SubMenu from 'antd/lib/menu/SubMenu';
 import { clearWaterNow, drawWater, drawWaterNow, getParam, obj2UrlParam, parseParam2Obj } from './util'
 import { getAppHeaderConfig, getAppMenu, getCustomDialog, userLogout } from './api/kubeflowApi';
 import { IAppHeaderItem, IAppMenuItem, ICustomDialog } from './api/interface/kubeflowInterface';
-import { AppstoreOutlined, DownOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, DownOutlined, LeftOutlined, RightOutlined, TranslationOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie'
 import { handleTips } from './api';
+import globalConfig from './global.config'
+import i18nEn from './images/i18nEn.svg';
+
+import { useTranslation, Trans, } from 'react-i18next';
 const userName = Cookies.get('myapp_username')
 
 const RouterConfig = (config: RouteObject[]) => {
@@ -61,9 +65,12 @@ const AppWrapper = (props: IProps) => {
   const navigate = useNavigate();
   const location = useLocation()
 
+  const { t, i18n } = useTranslation();
+
   useEffect(() => {
     getAppMenu().then(res => {
       const remoteRoute = res.data
+
       const dynamicRoute = formatRoute([...remoteRoute])
       const tarRoute = [...dynamicRoute, ...routerConfigPlus]
       const tarRouteMap = getRouterMap(tarRoute)
@@ -105,7 +112,7 @@ const AppWrapper = (props: IProps) => {
       console.log(err);
     })
     return () => {
-        controller.abort()
+      controller.abort()
     }
   }, [location])
 
@@ -131,6 +138,7 @@ const AppWrapper = (props: IProps) => {
   }
 
   const handleClickNav = (app: IRouterConfigPlusItem, subPath?: string) => {
+
     if (app.path === '/') {
       navigate(app.path || '/')
     } else if (app.menu_type === 'iframe' && app.path) {
@@ -140,10 +148,12 @@ const AppWrapper = (props: IProps) => {
     } else if (app.menu_type === 'in_link' && app.path) {
       window.open(app.url, 'blank')
     } else {
+
       const currentApp = sourceAppMap[subPath || '']
+
       let currentItem = subPath ? currentApp : app
 
-      while (currentItem && currentItem.children) {
+      while (currentItem && currentItem.children?.length) {
         currentItem = currentItem.children[0]
       }
 
@@ -327,7 +337,6 @@ const AppWrapper = (props: IProps) => {
 
   return (
     <div className="content-container fade-in">
-
       {/* Header */}
       {
         isShowNav === 'false' ? null : <div className="navbar">
@@ -336,7 +345,7 @@ const AppWrapper = (props: IProps) => {
               <div className="cp pr16" style={{ width: 'auto' }} onClick={() => {
                 navigate('/', { replace: true })
               }}>
-                <img style={{ height: 42 }} src={require("./images/logoCB.svg").default} alt="img" />
+                <img style={{ height: 42 }} src={globalConfig.appLogo.default} alt="img" />
               </div>
 
               {
@@ -376,11 +385,11 @@ const AppWrapper = (props: IProps) => {
             <Dropdown overlay={<Menu>
               <Menu.Item onClick={() => {
                 navigate('/user')
-              }}>用户中心</Menu.Item>
+              }}>{t("用户中心")}</Menu.Item>
               <Menu.Item onClick={() => {
                 Cookies.remove('myapp_username');
                 handleTips.userlogout()
-              }}>退出登录</Menu.Item>
+              }}>{t("退出登录")}</Menu.Item>
             </Menu>
             }>
               <img className="mr8 cp" style={{ borderRadius: 200, height: 32 }} src={imgUrlProtraits} onError={() => {

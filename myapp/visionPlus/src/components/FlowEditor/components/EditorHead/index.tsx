@@ -8,6 +8,7 @@ import { saveTaskList } from '@src/models/task';
 import { toggle } from '@src/models/setting';
 import api from '@src/api';
 import style from './style';
+import { useTranslation } from 'react-i18next';
 const { Item } = Stack;
 
 const EditorHead: React.FC = () => {
@@ -15,43 +16,11 @@ const EditorHead: React.FC = () => {
   const pipelineId = useAppSelector(selectPipelineId);
   const info = useAppSelector(selectInfo);
   const userName = useAppSelector(selectUserName);
+  const { t, i18n } = useTranslation();
 
   // useEffect(() => {
   //   console.log('info', info);
   // }, [info])
-
-  // 新建流水线
-  const handleNewPipeline = () => {
-    api
-      .pipeline_modelview_add({
-        describe: `新建项目-${Date.now()}`,
-        name: `${userName}-pipeline-${Date.now()}`,
-        node_selector: 'cpu=true,train=true',
-        schedule_type: 'once',
-        image_pull_policy: 'Always',
-        parallelism: 1,
-        project: 7,
-      })
-      .then((res: any) => {
-        if (res?.status === 0 && res?.message === 'success') {
-          window.location.search = `?pipeline_id=${res?.result?.id}`;
-        }
-      })
-      .catch(err => {
-        if (err.response) {
-          dispatch(updateErrMsg({ msg: err.response.data.message }));
-        }
-      });
-  };
-
-  // pipeline run
-  const handleSubmit = async () => {
-    if (pipelineId) {
-      await dispatch(await saveTaskList());
-      dispatch(savePipeline());
-      window.open(`${window.location.origin}/pipeline_modelview/run_pipeline/${pipelineId}`);
-    }
-  };
 
   return (
     <Item className="editor-head">
@@ -76,14 +45,13 @@ const EditorHead: React.FC = () => {
                         },
                       },
                     }}
-                    onClick={handleNewPipeline}
                   >
-                    新建项目
+                    {t('新建项目')}
                   </PrimaryButton>
                 )}
             </Item>
             <Item className={info.name ? '' : style.hidden}>
-              <TooltipHost content="设置">
+              <TooltipHost content={t('设置')}>
                 <IconButton
                   iconProps={{ iconName: 'Settings' }}
                   onClick={() => {

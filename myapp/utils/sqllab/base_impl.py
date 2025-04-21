@@ -2,6 +2,9 @@ import os, sys
 import logging
 import pandas as pd
 from io import StringIO
+from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
+
 import pysnooper, datetime, time, json
 from myapp.utils.celery import session_scope
 from myapp.tasks.celery_app import celery_app
@@ -37,17 +40,18 @@ def convert_to_str(res_text):
 
 @celery_app.task(name="task.idex.handle_base_task", bind=False)
 def handle_task(qid, username=""):
-    logging.info("sqllab_base_task start, id:" + str(qid))
+    logging.info("============= begin run sqllab_base_task start, id:" + str(qid))
     with session_scope(nullpool=True) as dbsession:
-        # 获取数据库记录
-        q = dbsession.query(Sqllab_Query).filter(Sqllab_Query.id == int(qid)).first()
-        if not q:
-            raise RuntimeError("任务异常，数据库记录不存在")
         try:
+            # 获取数据库记录
+            q = dbsession.query(Sqllab_Query).filter(Sqllab_Query.id == int(qid)).first()
+            if not q:
+                raise RuntimeError(__("任务异常，数据库记录不存在"))
+
             if not username:
-                raise RuntimeError("无法识别账号")
+                raise RuntimeError(__("无法识别账号"))
             if not 'limit' in q.qsql:
-                raise RuntimeError("查询sql必须包含limit")
+                raise RuntimeError(__("查询sql必须包含limit"))
 
             q.start_time = str(datetime.datetime.now())
 
@@ -60,29 +64,30 @@ def handle_task(qid, username=""):
             # 发起远程sql查询
             from sqlalchemy import create_engine
             import pandas as pd
-
-            engine = create_engine(q.engine_arg2)
-            df = pd.read_sql_query(q.qsql, engine)
-            save_path = f"/data/k8s/kubeflow/pipeline/workspace/admin/sqllab/result/{qid}.csv"
-            print(save_path)
+            save_path = f"/data/k8s/kubeflow/global/sqllab/result/{qid}.csv"
+            logging.info(save_path)
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            df.to_csv(save_path, encoding='utf-8-sig', index=None, header=True)
-            print(df)
+
+            if q.engine_arg1 in ['mysql','postgres']:
+                engine = create_engine(q.engine_arg2)
+                result = pd.read_sql_query(q.qsql, engine)
+                result.to_csv(save_path, encoding='utf-8-sig', index=None, header=True)
+                logging.info(result)
 
             q.stage = 'end'
             q.status = 'success'
-            db.session.commit()
+            dbsession.commit()
 
         except Exception as e:
-            print(e)
+            logging.error(e)
             # 记录异常信息
             err_msg = traceback.format_exc()
             q.err_msg = err_msg
             q.status = 'failure'
-            db.session.commit()
+            dbsession.commit()
         finally:
             q.end_time = str(datetime.datetime.now())
-            db.session.commit()
+            dbsession.commit()
 
         return q.stage, q.status, q.err_msg
 
@@ -98,7 +103,7 @@ class Base_Impl():
                 async_task = handle_task.delay(qid, username=g.user.username)
             else:
                 stage, status, _err_msg = handle_task(qid, username=g.user.username)
-                if _err_msg != "":
+                if _err_msg:
                     raise RuntimeError(_err_msg)
 
                 res = self.get_result(qid)
@@ -125,7 +130,7 @@ class Base_Impl():
                 # 获取数据库记录
                 q = dbsession.query(Sqllab_Query).filter(Sqllab_Query.id == int(qid)).first()
                 if not q:
-                    raise RuntimeError("任务异常，数据库记录不存在")
+                    raise RuntimeError(__("任务异常，数据库记录不存在"))
                 status = q.status
                 stage = q.stage
                 err_msg = q.err_msg
@@ -144,14 +149,14 @@ class Base_Impl():
         err_msg = ""
         qid = task_id
         try:
-            csv_path = f"/data/k8s/kubeflow/pipeline/workspace/admin/sqllab/result/{qid}.csv"
+            csv_path = f"/data/k8s/kubeflow/global/sqllab/result/{qid}.csv"
             df = pd.read_csv(csv_path, encoding='utf-8-sig', header=0)
             df = df.fillna('')
 
             res = [df.columns.values.tolist()] + df.values.tolist()
         except:
             err_msg = traceback.format_exc()
-            raise RuntimeError("下载失败，desc: " + err_msg)
+            raise RuntimeError(__("下载失败，desc: ") + err_msg)
         return {"err_msg": err_msg, "result": res}
 
     # 根据分隔符生成下载文件地址
@@ -160,7 +165,7 @@ class Base_Impl():
         qid = task_id
         deli = '<@>'
         separator = request.args.get('separator')
-        result_route = '/data/k8s/kubeflow/pipeline/workspace/admin/sqllab/result/'
+        result_route = '/data/k8s/kubeflow/global/sqllab/result/'
         result_line_num = 0
         name_map = {
             ",": "comma",
@@ -179,17 +184,17 @@ class Base_Impl():
                 f.write(data.replace(deli, separator))
                 f.close()
 
-        url = f'{request.host_url.rstrip("/")}/static/mnt/admin/sqllab/result/{qid}.{name_map[separator]}.csv'
+        url = f'{request.host_url.rstrip("/")}/static/global/sqllab/result/{qid}.{name_map[separator]}.csv'
 
         # 获取数据库记录
         q = db.session.query(Sqllab_Query).filter(Sqllab_Query.id == int(qid)).first()
         if not q:
-            raise RuntimeError("任务异常，数据库记录不存在")
+            raise RuntimeError(__("任务异常，数据库记录不存在"))
         q.result_line_num = str(result_line_num)
         db.session.commit()
 
         return {"err_msg": "", "download_url": url}
 
     def stop(self, task_id):
-        err_msg = "暂未实现远程数据库kill操作"
+        err_msg = __("暂未实现远程数据库kill操作")
         return {"err_msg": err_msg}

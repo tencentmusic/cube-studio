@@ -15,6 +15,17 @@
 <div id="_di-loading_" class="di-loading e-ani"></div>
 {% endif %}
 <script type="text/javascript">
+    window.onload = function() {
+        refresh = Number('{{ data.refresh }}') || 0;
+        if (refresh)
+        {
+            // 设置刷新间隔为 5 秒（5000 毫秒）
+            setInterval(function () {
+                var iframe = document.getElementById('_appFrame_');
+                iframe.src = '{{ data.url }}';
+            }, refresh);
+        }
+    };
     // 全屏化服务
     $(function($) {
         const loading = Boolean('{{ data.loading }}' === 'True');

@@ -1,6 +1,0 @@
-[submodule "serving"]
-	path = serving
-	url = https://github.com/tensorflow/serving.git
-[submodule "recommenders-addons"]
-	path = recommenders-addons
-	url = https://github.com/tensorflow/recommenders-addons.git

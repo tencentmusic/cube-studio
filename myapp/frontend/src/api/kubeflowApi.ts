@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import axios, { AxiosResFormat } from '.'
 import { IADUGTemplateInfo, IAppHeaderItem, IAppMenuItem, ICustomDialog } from './interface/kubeflowInterface'
+import { ITabsModalData } from './interface/tabsModalInterface'
 
 export const getAppMenu = (): Promise<AxiosResponse<IAppMenuItem[]>> => {
     return axios.get('/myapp/menu')
@@ -30,12 +31,23 @@ export const getADUGTemplateList = (url?: string, params?: any): AxiosResFormat<
     return axios.get(url || '', { params })
 }
 
-export const getADUGTemplateDetail = (url: string): AxiosResFormat<any> => {
+export const getData = (url?: string, params?: any): AxiosResFormat<any> => {
+    return axios.get(url || '', { params })
+}
+
+export const postData = (url?: string, params?: any): AxiosResFormat<any> => {
+    return axios.post(url || '', params)
+}
+
+export const putData = (url?: string, params?: {}): AxiosResFormat<any> => {
+    return axios.put(url || '', params)
+}
+
+export const getADUGTemplateDetail = (url: string, form_data?: any): AxiosResFormat<any> => {
+    const formData = form_data || { str_related: 1 };
     return axios.get(`${url}`, {
         params: {
-            form_data: JSON.stringify({
-                str_related: 1
-            })
+            form_data: JSON.stringify(formData)
         }
     })
 }
@@ -78,4 +90,12 @@ export const actionADUGTemplateFavorite = (url?: string, params?: {}): AxiosResF
 
 export const actionADUGTemplateCancelFavorite = (url?: string, params?: {}): AxiosResFormat<any> => {
     return axios.delete(url || '', { params })
+}
+
+export const actionTabsModalInfo = (url: string): AxiosResFormat<ITabsModalData> => {
+    return axios.get(url)
+}
+
+export const actionTabsModal = (method: 'get'|'post'|'delete',url?: string, params?: {}): Promise<any> => {
+    return axios[method](url || '', { params })
 }

@@ -1,6 +1,7 @@
 import Axios, { AxiosResponse } from 'axios';
 import { notification } from 'antd';
 import cookies from 'js-cookie';
+import { getI18n } from 'react-i18next';
 const baseApi = process.env.REACT_APP_BASE_URL || 'http://localhost/'
 
 export type AxiosResFormat<T> = Promise<AxiosResponse<ResponseFormat<T>>>;
@@ -10,6 +11,8 @@ export interface ResponseFormat<T = any> {
     data: T;
     status: number
 }
+
+console.log(getI18n())
 
 const axios = Axios.create({
     timeout: 600000,
@@ -46,7 +49,7 @@ class HandleTips {
     gotoLogin() {
         if (this.lock) {
             this.lock = false;
-            const authUrl = `http://${window.location.host}/login/?login_url=${window.location.href}`
+            const authUrl = `//${window.location.host}/login/?login_url=${window.location.href}`
             setTimeout(() => {
                 window.location.href = authUrl;
             }, 800);
@@ -54,7 +57,7 @@ class HandleTips {
     }
 
     userlogout() {
-        const logoutUrl = `http://${window.location.host}/logout`
+        const logoutUrl = `//${window.location.host}/logout`
         setTimeout(() => {
             window.location.href = logoutUrl;
         }, 800);
@@ -67,6 +70,7 @@ export const handleTips = new HandleTips();
 // 请求拦截器
 axios.interceptors.request.use(
     (config) => {
+        config.headers.set('language', getI18n().language)
         if (!!cookies.get('myapp_username')) {
             let logConfig = config
             return logConfig;
@@ -132,7 +136,7 @@ axios.interceptors.response.use(
             const { data } = error.response;
 
             let errMsg = data
-            errMsg = `${data ? data.msg || data.message : error.response.status}`;
+            errMsg = `${data ? data.msg || data.message || data.error : error.response.status}`;
 
             if (data && Object.prototype.toString.call(data.msg || data.message) === '[object Object]') {
                 errMsg = JSON.stringify(data.msg || data.message)

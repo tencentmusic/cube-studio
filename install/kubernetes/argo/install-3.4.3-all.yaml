@@ -1206,7 +1206,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
       nodeSelector:
-        kubernetes.io/os: linux
+        kubeflow: 'true'
       priorityClassName: workflow-controller
       securityContext:
         runAsNonRoot: true
@@ -1248,6 +1248,8 @@ spec:
       labels:
         app: minio
     spec:
+      nodeSelector:
+        kubeflow: 'true'
       containers:
       - args:
         - server

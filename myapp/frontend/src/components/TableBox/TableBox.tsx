@@ -4,8 +4,9 @@ import './TableBox.less';
 import { TablePaginationConfig } from 'antd/lib/table/Table';
 import emptyImg from '../../images/emptyBg.png';
 import { GetRowKey, SorterResult, TableRowSelection } from 'antd/lib/table/interface';
-import ExportJsonExcel from 'js-export-excel';
+// import ExportJsonExcel from 'js-export-excel';
 import { Resizable } from 'react-resizable';
+import { useTranslation } from 'react-i18next';
 
 const CopyToClipboard = require('react-copy-to-clipboard');
 
@@ -35,13 +36,6 @@ interface IProps {
 		sorter: SorterResult<any> | SorterResult<any>[],
 	) => void;
 }
-
-const customizeRenderEmpty = () => (
-	<Row justify="center" align="middle" style={{ height: 360, flexDirection: 'column' }}>
-		<img src={emptyImg} style={{ width: 266 }} alt="" />
-		<div>暂无数据</div>
-	</Row>
-);
 
 const ResizableTitle = ({ onResize, width, ...restProps }: any) => {
 	if (!width) {
@@ -103,6 +97,7 @@ const TableBox = (props: IProps) => {
 		};
 	});
 	const [currentTableScroll, setCurrentTableScroll] = useState(props.scroll)
+	const { t, i18n } = useTranslation();
 
 	useEffect(() => {
 		setCols(props.columns);
@@ -119,9 +114,16 @@ const TableBox = (props: IProps) => {
 		}
 	}, [props.dataSource, props.columns]);
 
+	const customizeRenderEmpty = () => (
+		<Row justify="center" align="middle" style={{ height: 360, flexDirection: 'column' }}>
+			<img src={emptyImg} style={{ width: 266 }} alt="" />
+			<div>{t('暂无数据')}</div>
+		</Row>
+	);
+
 	const handdleFilterHeader = (dataColumns = [], data: any[]) => {
 		const columns = dataColumns.map((item: any) => item.dataIndex).filter((item: string) => item !== 'handle');
-		const sheetHeader = dataColumns.map((item: any) => item.title).filter((item: string) => item !== '操作');
+		const sheetHeader = dataColumns.map((item: any) => item.title).filter((item: string) => item !== t('操作'));
 		const tarData: any = [];
 
 		data.forEach((dataRow: any) => {
@@ -139,19 +141,19 @@ const TableBox = (props: IProps) => {
 		});
 	};
 
-	const handleClickOutputExcel = () => {
-		const option: any = {};
-		option.fileName = 'result';
-		option.datas = [
-			{
-				sheetData: dataFormat.data,
-				sheetName: 'sheet',
-				sheetHeader: dataFormat.header,
-			},
-		];
-		const toExcel = new ExportJsonExcel(option);
-		toExcel.saveExcel();
-	};
+	// const handleClickOutputExcel = () => {
+	// 	const option: any = {};
+	// 	option.fileName = 'result';
+	// 	option.datas = [
+	// 		{
+	// 			sheetData: dataFormat.data,
+	// 			sheetName: 'sheet',
+	// 			sheetHeader: dataFormat.header,
+	// 		},
+	// 	];
+	// 	const toExcel = new ExportJsonExcel(option);
+	// 	toExcel.saveExcel();
+	// };
 
 	const handleExportJira = () => {
 		const header = dataFormat.header;
@@ -222,14 +224,14 @@ const TableBox = (props: IProps) => {
 				centered={true}
 				bodyStyle={{ maxHeight: 500, overflow: 'auto' }}
 				visible={exportDataVisible}
-				title={'导出数据'}
+				title={t('导出数据')}
 				onCancel={() => {
 					setExportDataVisible(false);
 				}}
 				footer={null}
 			>
 				<div style={{ position: 'relative' }}>
-					<div className="mb16"><span className="pr8">选择需要导出的列：</span><Checkbox.Group
+					<div className="mb16"><span className="pr8">{t('选择需要导出的列')}：</span><Checkbox.Group
 						options={props.columns
 							.map((item: any) => ({ label: item.title, value: item.dataIndex }))
 							.filter((item: any) => item.value !== 'handle')}
@@ -254,7 +256,7 @@ const TableBox = (props: IProps) => {
 								handdleFilterHeader(props.columns, props.dataSource);
 							}}
 						>
-							全选
+							{t('全选')}
 						</Button>
 						<Button
 							size="small"
@@ -264,27 +266,27 @@ const TableBox = (props: IProps) => {
 								handdleFilterHeader([], props.dataSource);
 							}}
 						>
-							反选
+							{t('反选')}
 						</Button>
 					</div>
 				</div>
 
 				<Tabs>
 					<Tabs.TabPane tab="Wiki格式" key="jira">
-						<CopyToClipboard text={handleExportJira()} onCopy={() => message.success('已复制到粘贴板')}>
+						<CopyToClipboard text={handleExportJira()} onCopy={() => message.success(t('已复制到粘贴板'))}>
 							<pre style={{ cursor: 'pointer', minHeight: 100 }}>
 								<code>{handleExportJira()}</code>
 							</pre>
 						</CopyToClipboard>
 					</Tabs.TabPane>
 					<Tabs.TabPane tab="Text格式" key="test">
-						<CopyToClipboard text={handleExportText()} onCopy={() => message.success('已复制到粘贴板')}>
+						<CopyToClipboard text={handleExportText()} onCopy={() => message.success(t('已复制到粘贴板'))}>
 							<pre style={{ cursor: 'pointer', minHeight: 100 }}>
 								<code>{handleExportText()}</code>
 							</pre>
 						</CopyToClipboard>
 					</Tabs.TabPane>
-					<Tabs.TabPane tab="Excel格式" key="excel">
+					{/* <Tabs.TabPane tab="Excel格式" key="excel">
 						<Row justify="center" align="middle" style={{ minHeight: 100 }}>
 							<Col>
 								<Button type="primary" onClick={handleClickOutputExcel}>
@@ -292,7 +294,7 @@ const TableBox = (props: IProps) => {
 								</Button>
 							</Col>
 						</Row>
-					</Tabs.TabPane>
+					</Tabs.TabPane> */}
 				</Tabs>
 			</Modal>
 			{
@@ -305,7 +307,7 @@ const TableBox = (props: IProps) => {
 							{props.buttonNode}
 							{props.cancelExportData ? null : (
 								<Button style={{ marginLeft: 6 }} onClick={() => setExportDataVisible(true)}>
-									导出数据
+									{t('导出数据')}
 								</Button>
 							)}
 						</Space>

@@ -3,7 +3,7 @@ FROM $FROM_IMAGES
 
 ENV TZ=Asia/Shanghai
 ENV DEBIAN_FRONTEND=noninteractive
-
+COPY cuda/sources.list-ubuntu20.04.amd64 /etc/apt/sources.list
 # 安装运维工具
 RUN apt update; apt install -y --force-yes --no-install-recommends software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip
 
@@ -15,9 +15,8 @@ ENV LANGUAGE zh_CN.UTF-8
 
 
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /root/.bashrc && \
-    echo "alias la='ls -A'" >> /root/.bashrc && \
-    echo "alias vi='vim'" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+    echo "alias la='ls -A'" >> ~/.bashrc && \
+    echo "alias vi='vim'" >> ~/.bashrc
 
 

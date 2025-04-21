@@ -27,7 +27,7 @@ dpkg -i nfs-kernel-server
 ### centos使用rpm包方式安装(所有节点)
 
 ```shell
-wget https://docker-76009.sz.gfp.tencent-cloud.com/github/cube-studio/deploy/nfs/nfsrpm.tar.gz
+wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/nfsrpm.tar.gz
 tar -zxvf nfsrpm.tar.gz
 cd nfs
 rpm -ivh *.rpm --force --nodeps
@@ -37,7 +37,7 @@ rpm -ivh *.rpm --force --nodeps
 
 ```shell
 
-# 修改配置文件，增加下面这一行数据，指定的ip地址为客户端的地址
+# 修改配置文件，增加下面这一行数据
 # /data/nfs/ 代表nfs server本地存储目录
 mkdir -p /data/nfs
 echo "/data/nfs/ *(rw,no_root_squash,async)" >> /etc/exports
@@ -61,10 +61,14 @@ mkdir -p /data/nfs/k8s
 ln -s /data/nfs/k8s /data/
 ```
 
+如果只是单机部署nfs，那么到这里就部署结束了，如果是多机部署，则还需要部署客户端，就在客户端机器上接着往下部署。
+
 ### nfs client配置
 
+客户端的配置依据以下的步骤，需要注意的是客户端和服务端的挂载不能在同一台机器上，否则挂载会出现问题。
+
 ```shell
-export server=10.101.135.101
+export server=192.168.3.100
 
 #查看nfs server 信息
 
@@ -74,7 +78,7 @@ showmount -e $server
 Export list for xx.xx.xx.xx:
 /data/nfs      *
  
-# 系统层面添加挂载添加一行，重启自动添加
+# 系统层面添加挂载添加一行，重启自动添加，将服务端上的/data/nfs挂载到客户端上的/data/nfs
 mkdir -p /data/nfs
 echo "${server}:/data/nfs  /data/nfs   nfs   defaults  0  0" >> /etc/fstab
 
@@ -97,3 +101,10 @@ Filesystem                Size  Used Avail Use% Mounted on
 
 ```
 
+# 性能压测
+
+```bash
+time dd if=/dev/zero of=/data/nfs/test bs=2M count=1000
+time dd if=/data/nfs/test of=/dev/null bs=2M
+
+```

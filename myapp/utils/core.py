@@ -1,6 +1,7 @@
 """Utility functions used across Myapp"""
 from datetime import date, datetime, time, timedelta
 import decimal
+import pandas, io
 from email.mime.application import MIMEApplication
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -31,7 +32,6 @@ from flask_babel import lazy_gettext as _
 from flask_caching import Cache
 import markdown as md
 import numpy
-import pandas as pd
 import parsedatetime
 from jinja2 import Environment, BaseLoader, DebugUndefined
 
@@ -44,12 +44,10 @@ from sqlalchemy import event, exc, select, Text
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.sql.type_api import Variant
 from sqlalchemy.types import TEXT, TypeDecorator
-
+import math
 from myapp.exceptions import MyappException, MyappTimeoutException
 from myapp.utils.dates import datetime_to_epoch, EPOCH
 import re
-
-logging.getLogger("MARKDOWN").setLevel(logging.INFO)
 
 PY3K = sys.version_info >= (3, 0)
 DTTM_ALIAS = "__timestamp"
@@ -333,7 +331,7 @@ def json_iso_dttm_ser(obj, pessimistic: Optional[bool] = False):
     val = base_json_conv(obj)
     if val is not None:
         return val
-    if isinstance(obj, (datetime, date, time, pd.Timestamp)):
+    if isinstance(obj, (datetime, date, time, pandas.Timestamp)):
         obj = obj.isoformat()
     else:
         if pessimistic:
@@ -357,7 +355,7 @@ def json_int_dttm_ser(obj):
     val = base_json_conv(obj)
     if val is not None:
         return val
-    if isinstance(obj, (datetime, pd.Timestamp)):
+    if isinstance(obj, (datetime, pandas.Timestamp)):
         obj = datetime_to_epoch(obj)
     elif isinstance(obj, date):
         obj = (obj - EPOCH.date()).total_seconds() * 1000
@@ -498,33 +496,30 @@ def dag_json_demo():
 
 # job模板参数的定义
 def job_template_args_definition():
-    demo = '''
-{
-    "group1":{               # 参数分组，仅做web显示使用
-       "--attr1":{           # 参数名
-        "type":"str",        # int,str,text,bool,enum,float,multiple,date,datetime,file,dict,list,json
-        "item_type": "",     # 在type为enum,multiple,list时每个子参数的类型
-        "label":"参数1",      # 中文名
-        "require":1,         # 是否必须
-        "choice":[],         # type为enum/multiple时，可选值
-        "range":"$min,$max", # 最小最大取值，在int,float时使用，包含$min，但是不包含$max
-        "default":"",        # 默认值
-        "placeholder":"",    # 输入提示内容
-        "describe":"这里是这个参数的描述和备注",
-        "editable":1,        # 是否可修改
-        "condition":"",      # 显示的条件
-        "sub_args": {        # 如果type是dict或者list对应下面的参数
-        }
-      },
-      "attr2":{
+    demo = f'''
+{{
+    "group1":{{               # {_('参数分组，仅做web显示使用')}
+       "--attr1":{{           # {_('参数名')}
+        "type":"str",         # str,text,json,int,float,bool,list
+        "item_type": "str",   # {_('在type为text，item_type可为python，java，json，sql')}
+        "label":"{_('参数1')}",      # {_('中文名')}
+        "require":1,         # {_('是否必须')}
+        "choice":[],         # {_('设定输入的可选值，可选值')}
+        "range":"",          # {_('int和float型时设置最小最大值,"min,max"')}
+        "default":"",        # {_('默认值')}
+        "placeholder":"",    # {_('输入提示内容')}
+        "describe":"{_('这里是这个参数的描述和备注')}",
+        "editable":1        # {_('是否可修改')}
+      }},
+      "--attr2":{{
        ...
-      }
-    },
-    "group2":{
-    }
-}
-    '''
-    return demo.strip()
+      }}
+    }},
+    "group2":{{
+    }}
+}}
+'''.strip()
+    return _(demo)
 
 
 # 超参搜索的定义demo
@@ -551,8 +546,9 @@ def hp_parameters_demo():
         ]
     }
 }
-'''
-    return demo.strip()
+'''.strip()
+
+    return _(demo)
 
 
 # 超参搜索的定义demo
@@ -587,24 +583,12 @@ default_args = {
     "default": "",  # 默认值
     "placeholder": "",  # 输入提示内容
     "describe": "",
-    "editable": 1,  # 是否可修改
-    # "show": 1,  # 是否展示给用户填写
-    "condition": "",  # 显示的条件
-    "sub_args": {  # 如果type是dict或者list对应下面的参数
-    }
+    "editable": 1  # 是否可修改
 }
 
-
-# 渲染字符串模板变量
-def template_command(command):
-    rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(command)
-    des_str = rtemplate.render(rtx=g.user.username)
-    return des_str
-
-
 # @pysnooper.snoop()
-def validate_job_args(job_template):
-    validate_json(job_template.args)
+def validate_job_args(args):
+    validate_json(args)
     validate_job_args_type = ['int', 'bool', 'str', 'text', 'enum', 'float', 'multiple', 'dict', 'list', 'file', 'json']
 
     # 校验x修复参数
@@ -622,7 +606,7 @@ def validate_job_args(job_template):
         attr['placeholder'] = str(attr['placeholder'])
         attr['describe'] = str(attr['describe']) if attr['describe'] else str(attr['label'])
         attr['editable'] = int(attr['editable'])
-        attr['condition'] = str(attr['condition'])
+
 
         if attr['type'] not in validate_job_args_type:
             raise MyappException("job template args type must in %s " % str(validate_job_args_type))
@@ -646,7 +630,7 @@ def validate_job_args(job_template):
 
         return attr
 
-    args = json.dumps(json.loads(job_template.args), indent=4, ensure_ascii=False)
+    args = json.dumps(json.loads(args), indent=4, ensure_ascii=False)
     job_args = json.loads(args)
 
     for group in job_args:
@@ -655,9 +639,9 @@ def validate_job_args(job_template):
 
     return json.dumps(job_args, indent=4, ensure_ascii=False)
 
-
+import pysnooper
 # task_args 为用户填写的参数，job_args为定义的参数标准
-# @pysnooper.snoop()
+# @pysnooper.snoop(watch_explode=('job_arg_attr'))
 def validate_task_args(task_args, job_args):  # 两个都是字典
     if not task_args:
         return {}
@@ -665,7 +649,7 @@ def validate_task_args(task_args, job_args):  # 两个都是字典
     # @pysnooper.snoop()
     def to_value(value, value_type):
         if value_type == 'str' or value_type == 'text':
-            return str(value)
+            return str(value).strip(' ')  # 把用户容易填错的多个空格去掉
         if value_type == 'int':
             return int(value)
         if value_type == 'float':
@@ -683,61 +667,56 @@ def validate_task_args(task_args, job_args):  # 两个都是字典
 
     # 校验 task的attr和job的attr是否符合
     # @pysnooper.snoop()
-    def check_attr(task_attr, job_attr):
-        validate_attr = task_attr
+    def check_attr(task_arg_value, job_arg_attr):
+        validate_attr = task_arg_value
 
-        if job_attr['type'] == 'str' or job_attr['type'] == 'text' or job_attr['type'] == 'int' or job_attr['type'] == 'float':
-            validate_attr = to_value(task_attr, job_attr['type'])
+        if job_arg_attr['type'] == 'str' or job_arg_attr['type'] == 'text' or job_arg_attr['type'] == 'int' or job_arg_attr['type'] == 'float':
+            validate_attr = to_value(task_arg_value, job_arg_attr['type'])
 
-        if job_attr['type'] == 'json':
-            validate_attr = to_value(task_attr, job_attr['type'])
+        if job_arg_attr['type'] == 'json':
+            validate_attr = to_value(task_arg_value, job_arg_attr['type'])
 
-        if job_attr['type'] == 'enum':
-            validate_attr = to_value(task_attr, job_attr['item_type'])
-            if validate_attr not in job_attr['choice']:
-                raise MyappException("task arg type(enum) is not in choice: %s" % job_attr['choice'])
+        if job_arg_attr['type'] == 'enum':
+            validate_attr = to_value(task_arg_value, job_arg_attr['item_type'])
+            if validate_attr not in job_arg_attr['choice']:
+                raise MyappException("task arg type(enum) is not in choice: %s" % job_arg_attr['choice'])
 
-        if job_attr['type'] == 'multiple':
-            if type(task_attr) == str:
-                validate_attr = re.split(' |,|;|\n|\t', str(task_attr))  # 分割字符串
+        if job_arg_attr['type'] == 'multiple':
+            if type(task_arg_value) == str:
+                validate_attr = re.split(' |,|;|\n|\t', str(task_arg_value))  # 分割字符串
             if type(validate_attr) == list:
                 for item in validate_attr:
-                    if item not in job_attr['choice']:
-                        raise MyappException("task arg type(enum) is not in choice: %s" % job_attr['choice'])
-        if job_attr['type'] == 'dict' and type(job_attr['sub_args']) != dict:
+                    if item not in job_arg_attr['choice']:
+                        raise MyappException("task arg type(enum) is not in choice: %s" % job_arg_attr['choice'])
+        if job_arg_attr['type'] == 'dict' and type(job_arg_attr['sub_args']) != dict:
             raise MyappException("task args type(dict) sub args must is dict")
 
         # 校验字典的子属性
-        if job_attr['type'] == 'dict':
-            for sub_attr_name in task_attr:
-                validate_attr[sub_attr_name] = check_attr(task_attr[sub_attr_name], job_attr['sub_args'][sub_attr_name])
+        if job_arg_attr['type'] == 'dict':
+            for sub_attr_name in task_arg_value:
+                validate_attr[sub_attr_name] = check_attr(task_arg_value[sub_attr_name], job_arg_attr['sub_args'][sub_attr_name])
 
         # 检验list的每个元素
-        if job_attr['type'] == 'list':
-            if job_attr['item_type'] == 'dict':
-                validate_attr = []
-                for sub_task_attr in task_attr:
-                    validate_sub_attr = {}
-                    for sub_attr_name in sub_task_attr:
-                        validate_sub_attr[sub_attr_name] = check_attr(sub_task_attr[sub_attr_name],job_attr['sub_args'][sub_attr_name])
-                    validate_attr.append(validate_sub_attr)
-            else:
-                validate_attr = [to_value(sub_task_attr, job_attr['item_type']) for sub_task_attr in task_attr]
+        if job_arg_attr['type'] == 'list':
+            # 使用逗号分隔的数组
+            validate_attr = task_arg_value.strip(',').split(',')
+            validate_attr = [x.strip() for x in validate_attr if x.strip()]
+            validate_attr = ','.join(validate_attr)
 
         return validate_attr
 
     validate_args = {}
     try:
         for group in job_args:
-            for attr_name in job_args[group]:
-                job_attr = job_args[group][attr_name]
-                if attr_name in task_args:
-                    task_attr = task_args[attr_name]
-                    validate_args[attr_name] = check_attr(task_attr, job_attr)
-                elif job_args['require']:
-                    raise MyappException("task args %s must is require" % attr_name)
-                elif job_args['default']:
-                    validate_args[attr_name] = job_args['default']
+            for arg_name in job_args[group]:
+                job_arg_attr = job_args[group][arg_name]
+                if arg_name in task_args:
+                    task_arg_value = task_args[arg_name]
+                    validate_args[arg_name] = check_attr(task_arg_value, job_arg_attr)
+                elif job_arg_attr.get('require',1) and not job_arg_attr.get('default',''):
+                    raise MyappException("task args %s must is require" % arg_name)
+                elif job_arg_attr['default']:
+                    validate_args[arg_name] = job_arg_attr['default']
 
         return validate_args
 
@@ -1352,8 +1331,9 @@ def get_stacktrace():
     if current_app.config.get("SHOW_STACKTRACE"):
         return traceback.format_exc()
 
-
-def pic2html(image_arr,max_num=4):
+import pysnooper
+# @pysnooper.snoop()
+def pic2html(output_arr,max_num=4,output_type="image"):
     # 要定格写，不然markdown不识别
     html = '''
 <table> 
@@ -1362,59 +1342,64 @@ def pic2html(image_arr,max_num=4):
 </tbody>
 </table>
     '''
-    if len(image_arr)==1:
-        one_img_html = f'''
+    if output_type == "audio":
+        audio_html = ''
+        for i in range(len(output_arr)):
+            one_audio_html = f'''
 <tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>'%(image_arr[0],image_arr[0])}
+ {'<td> <audio controls><source src="%s" type="audio/mpeg"></audio> </td>' % (output_arr[i],)}
 </tr> 
-        '''
-        html = html%one_img_html
-    if len(image_arr)==2:
-        one_img_html = f'''
-<tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
-</tr> 
-        '''
-        html = html % one_img_html
-    if len(image_arr)==3 and max_num<5:
-        one_img_html = f'''
-<tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
-</tr> 
-<tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[2], image_arr[2])}
-</tr> 
-        '''
-        html = html % one_img_html
-    if len(image_arr)==4 and max_num<5:
-        one_img_html = f'''
-<tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[0], image_arr[0])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[1], image_arr[1])}
-</tr> 
-<tr> 
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[2], image_arr[2])}
- {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (image_arr[3], image_arr[3])}
-</tr> 
-        '''
-        html = html % one_img_html
-    return html
+            '''
+            audio_html+=one_audio_html
+        html = html % audio_html
+        return html
 
+    if output_type=="image":
+        if len(output_arr)==1:
+            one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>'%(output_arr[0],output_arr[0])}
+</tr> 
+        '''
+            html = html%one_img_html
+        if len(output_arr)==2:
+            one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[0], output_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[1], output_arr[1])}
+</tr> 
+        '''
+            html = html % one_img_html
+        if len(output_arr)==3 and max_num<5:
+            one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[0], output_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[1], output_arr[1])}
+</tr> 
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[2], output_arr[2])}
+</tr> 
+        '''
+            html = html % one_img_html
+        if len(output_arr)==4 and max_num<5:
+            one_img_html = f'''
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[0], output_arr[0])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[1], output_arr[1])}
+</tr> 
+<tr> 
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[2], output_arr[2])}
+ {'<td> <a href="%s"><img width="300px" src="%s" /></a> </td>' % (output_arr[3], output_arr[3])}
+</tr> 
+        '''
+            html = html % one_img_html
+        return html
+
+import pysnooper
 
 # @pysnooper.snoop()
 def check_resource_memory(resource_memory, src_resource_memory=None):
-    def set_host_max(resource):
-        return resource
-        # resource_int =0
-        # if resource and 'G' in resource:
-        #     resource_int = int(float(resource.replace('G',''))*1000)
-        # if resource and 'M' in resource:
-        #     resource_int = int(resource.replace('M', ''))
-        # if resource_int>160*1000:
-        #     resource = '160G'
-        # return resource
+    from myapp import conf
 
     # @pysnooper.snoop()
     def check_max_memory(resource, src_resource=None):
@@ -1423,22 +1408,35 @@ def check_resource_memory(resource_memory, src_resource_memory=None):
         src_resource_int = 0
         if src_resource and 'G' in src_resource:
             src_resource_int = int(float(src_resource.replace('G', '')) * 1000)
-        if src_resource and 'M' in src_resource:
+        elif src_resource and 'M' in src_resource:
             src_resource_int = int(src_resource.replace('M', ''))
+        elif src_resource:
+            src_resource_int = float(src_resource)
+
+        src_resource_int = math.ceil(src_resource_int/1000)
 
         resource_int = 0
         if resource and 'G' in resource:
             resource_int = int(float(resource.replace('G', '')) * 1000)
         if resource and 'M' in resource:
             resource_int = int(resource.replace('M', ''))
+
+        resource_int = math.ceil(resource_int/1000)
+
+        MAX_TASK_MEM = conf.get('MAX_TASK_MEM', 100)
         #  如果是变小了，可以直接使用，这是因为最大值可能是admin设置的。普通用户只能调小
         if resource_int <= src_resource_int:
             return resource
 
-        if resource_int > 100000:
-            return '100G'
-        else:
-            return resource
+        if resource_int >= MAX_TASK_MEM >= src_resource_int:
+            # flash(_('占用memory算力超过管理员设定的最大值，系统已自动配置memory为最大值') + str(MAX_TASK_MEM), category='warning')
+            return f"{MAX_TASK_MEM}G"
+
+        if resource_int >=src_resource_int >=MAX_TASK_MEM:
+            # flash(_('占用memory算力超过管理员设定的最大值，系统已自动配置memory为原有值') + str(math.ceil(src_resource_int))+"G",category='warning')
+            return f"{math.ceil(src_resource_int)}G"
+
+        return resource
 
     resource = resource_memory.upper().replace('-', '~').replace('_', '~').strip()
     if not "~" in resource:
@@ -1446,46 +1444,46 @@ def check_resource_memory(resource_memory, src_resource_memory=None):
         match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource memory input not valid')
-        if not g.user.is_admin():
-            resource = set_host_max(check_max_memory(resource, src_resource_memory))
+        if hasattr(g,'user') and not g.user.is_admin():
+            resource = check_max_memory(resource, src_resource_memory)
         else:
-            resource = set_host_max(resource)
+            resource = resource
         return resource
     else:
         pattern = '^[0-9]+[GM]~[0-9]+[GM]$'  # 匹配字符串
         match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource memory input not valid')
-        if not g.user.is_admin():
-            min = set_host_max(check_max_memory(resource.split('~')[0]))
-            max = set_host_max(check_max_memory(resource.split('~')[1]))
+        if hasattr(g,'user') and not g.user.is_admin():
+            min = check_max_memory(resource.split('~')[0])
+            max = check_max_memory(resource.split('~')[1])
             resource = str(min) + "~" + str(max)
         else:
-            min = set_host_max(resource.split('~')[0])
-            max = set_host_max(resource.split('~')[1])
+            min = resource.split('~')[0]
+            max = resource.split('~')[1]
             resource = str(min) + "~" + str(max)
         return resource
 
 
 def check_resource_cpu(resource_cpu, src_resource_cpu=None):
-    def set_host_max(resource):
-        return resource
-        # resource_int =0
-        # resource_int = float(resource) if resource else 0
-        # if resource_int>80:
-        #     resource = 80
-        # return resource
+    from myapp import conf
 
     def check_max_cpu(resource, src_resource=None):
         resource_int = float(resource) if resource else 0
         src_resource_int = float(src_resource) if src_resource else 0
+        MAX_TASK_CPU = float(conf.get('MAX_TASK_CPU',50))
 
         if resource_int <= src_resource_int:
             return resource
 
-        if resource_int > 50:
-            return '50'
-            # raise MyappException('resource cpu max 50')
+        if resource_int >= src_resource_int >= MAX_TASK_CPU:
+            # flash(_('占用cpu算力超过管理员设定的最大值，系统已自动配置cpu为原有值') + str(src_resource), category='warning')
+            return src_resource
+
+        if resource_int >=MAX_TASK_CPU >=src_resource_int:
+            # flash(_('占用cpu算力超过管理员设定的最大值，系统已自动配置cpu为最大值') + str(MAX_TASK_CPU),category='warning')
+            return str(MAX_TASK_CPU)
+
         return resource
 
     resource = resource_cpu.upper().replace('-', '~').replace('_', '~').strip()
@@ -1494,10 +1492,10 @@ def check_resource_cpu(resource_cpu, src_resource_cpu=None):
         match_obj = re.match(pattern=pattern, string=resource)
         if not match_obj:
             raise MyappException('resource cpu input not valid')
-        if not g.user.is_admin():
-            resource = set_host_max(check_max_cpu(resource, src_resource_cpu))
+        if hasattr(g,'user') and not g.user.is_admin():
+            resource = check_max_cpu(resource, src_resource_cpu)
         else:
-            resource = set_host_max(resource)
+            resource = resource
         return resource
     else:
         pattern = '^[0-9\\.]+~[0-9\\.]+$'  # 匹配字符串
@@ -1508,50 +1506,130 @@ def check_resource_cpu(resource_cpu, src_resource_cpu=None):
             resource = "%.1f~%.1f" % (float(resource.split("~")[0]), float(resource.split("~")[1]))
         except Exception:
             raise MyappException('resource cpu input not valid')
-        if not g.user.is_admin():
-            min = set_host_max(check_max_cpu(resource.split('~')[0]))
-            max = set_host_max(check_max_cpu(resource.split('~')[1]))
+        if hasattr(g,'user') and not g.user.is_admin():
+            min = check_max_cpu(resource.split('~')[0])
+            max = check_max_cpu(resource.split('~')[1])
             resource = str(min) + "~" + str(max)
         else:
-            min = set_host_max(resource.split('~')[0])
-            max = set_host_max(resource.split('~')[1])
+            min = resource.split('~')[0]
+            max = resource.split('~')[1]
             resource = str(min) + "~" + str(max)
         return resource
 
 
+def check_resource_gpu(resource_gpu, src_resource_gpu=None):
+    from myapp import conf
+
+    def check_max_gpu(gpu_num, src_gpu_num=0):
+
+        MAX_TASK_GPU = int(conf.get('MAX_TASK_GPU',8))
+
+        if gpu_num <= src_gpu_num:
+            return gpu_num
+
+        if gpu_num >= src_gpu_num >= MAX_TASK_GPU:
+            return src_gpu_num
+
+        if gpu_num >=MAX_TASK_GPU >=src_gpu_num:
+            return str(MAX_TASK_GPU)
+
+        return gpu_num
+
+    gpu_num, gpu_type, resource_name = get_gpu(resource_gpu)
+    # 处理虚拟化占用方式，只识别比例部分
+    gpu_num = float(str(gpu_num).split(',')[-1])
+
+    src_gpu_num = 0
+    if src_resource_gpu:
+        src_gpu_num, _, _ = get_gpu(src_resource_gpu)
+        src_gpu_num = float(str(src_gpu_num).split(',')[-1])
+
+    if hasattr(g,'user') and not g.user.is_admin():
+        resource_gpu = check_max_gpu(gpu_num, src_gpu_num)
+        if math.ceil(float(resource_gpu))==resource_gpu:
+            resource_gpu = math.ceil(float(resource_gpu))
+        if gpu_type:
+            resource_gpu = str(resource_gpu)+f'({gpu_type})'
+    else:
+        resource_gpu = resource_gpu
+
+    return str(resource_gpu)
+
+
+def check_resource(resource_memory,resource_cpu,resource_gpu,src_resource_memory=None,src_resource_cpu=None,src_resource_gpu=None):
+    new_resource_memory = check_resource_memory(resource_memory,src_resource_memory)
+    new_resource_memory = str(math.ceil(float(str(new_resource_memory).replace('G',''))))+"G"
+    new_resource_cpu = str(math.ceil(float(check_resource_cpu(resource_cpu,src_resource_cpu))))
+    new_resource_gpu = str(check_resource_gpu(resource_gpu, src_resource_gpu))
+
+    if str(new_resource_memory).replace('G', '') != str(resource_memory).replace('G', '') or str(new_resource_cpu) != str(resource_cpu) or str(new_resource_gpu) != str(resource_gpu):
+        message = _('占用算力超过管理员设定的最大值，系统已自动调整算力为:') + f"cpu({new_resource_cpu}),memory({new_resource_memory}),gpu({new_resource_gpu})"
+        flash(message=message,category='warning')
+
+    return new_resource_memory,new_resource_cpu,new_resource_gpu
 
 def checkip(ip):
     import re
     if ":" in ip:
         ip = ip[:ip.index(':')]
+    if '|' in ip:
+        ip = ip.split('|')[0]   # 内网ip|公网域名
     p = re.compile('^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$')
     if p.match(ip):
         return True
     else:
         return False
 
+import pysnooper
 
 # @pysnooper.snoop()
-def get_gpu(resource_gpu):
+def get_gpu(resource_gpu,resource_name=None):
+    from myapp import conf
     gpu_num = 0
+    if not resource_name:
+        resource_name=conf.get('DEFAULT_GPU_RESOURCE_NAME','')
     gpu_type = None
     try:
         if resource_gpu:
+            # 英文括号
             if '(' in resource_gpu:
                 gpu_type = re.findall(r"\((.+?)\)", resource_gpu)
                 gpu_type = gpu_type[0] if gpu_type else None
+            # 中文括号
             if '（' in resource_gpu:
                 gpu_type = re.findall(r"（(.+?)）", resource_gpu)
                 gpu_type = gpu_type[0] if gpu_type else None
 
+            # 括号里面填的可能是npu，这种词汇，不属于卡的型号，而是卡的类型
+            if gpu_type and gpu_type.lower() in list(conf.get('GPU_RESOURCE',{}).keys()):
+                gpu_mfrs=gpu_type.lower()
+                gpu_type=None
+                resource_name = conf.get("GPU_RESOURCE", {}).get(gpu_mfrs, resource_name)
+            # 填的是(卡的类型,卡的型号)
+            if gpu_type and ',' in gpu_type:
+                gpu_mfrs=gpu_type.split(',')[0].strip().lower()
+                if gpu_mfrs:
+                    resource_name = conf.get("GPU_RESOURCE", {}).get(gpu_mfrs, resource_name)
+                gpu_type=gpu_type.split(',')[1].strip().upper()
+            # 处理中文括号，和英文括号
             resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
             resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu
-            gpu_num = float(resource_gpu)
+
+            # 填的是(显存,核的比例)
+            if resource_gpu and ',' in resource_gpu:
+                gpu_num = resource_gpu
+            else:
+                gpu_num = float(resource_gpu)
 
     except Exception as e:
         print(e)
     gpu_type = gpu_type.upper() if gpu_type else None
-    return gpu_num, gpu_type
+    # 如果不是0.1等形式的虚拟化占用，那么返回整数
+    if type(gpu_num)==float and int(gpu_num)==float(gpu_num):
+        gpu_num = int(gpu_num)
+
+    # gpu_num 可以是小数，可以是整数，也可以是1G,0.1这种写了显存的字符串结构
+    return gpu_num, gpu_type, resource_name
 
 # 按expand字段中index字段进行排序
 def sort_expand_index(items):
@@ -1644,7 +1722,7 @@ def fix_task_position(pipeline, tasks, expand_tasks):
             dag_json[task_name]['total_down_num'] = get_down_node_num(task_name)
 
     root_nodes = sorted(root_nodes, key=lambda task_name: dag_json[task_name]['total_down_num'], reverse=True)  # 按子孙数量排序
-    print(root_nodes)
+    # print(root_nodes)
     for i in range(len(root_nodes)):
         dag_json[root_nodes[i]]['index'] = i
 
@@ -1729,6 +1807,7 @@ def fix_task_position(pipeline, tasks, expand_tasks):
     return expand_tasks
 
 
+
 def hive_create_sql_demo():
     sql = '''create table if not exists test_table(
     ftime int comment '分区时间',
@@ -1752,3 +1831,582 @@ def run_shell(shell):
 
     cmd.communicate()
     return cmd.returncode
+
+# 将json的文本中的全部unicode_escape编码的文本转换回中文
+def decode_unicode_escape(data):
+    if isinstance(data, str):
+        return data.encode('utf-8').decode('unicode_escape')
+    elif isinstance(data, dict):
+        return {decode_unicode_escape(key): decode_unicode_escape(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [decode_unicode_escape(item) for item in data]
+    else:
+        return data
+
+# 获取一个host 配置中的url信息
+def split_url(url):
+    if not url:
+        return '','',''
+    if url[0]=='/':
+        return '','',url
+    if url[0]==':':
+        url=url[1:]
+        port = url.split("/")[0]
+        return '',port,url[len(port):]
+    url=url.replace('http://','').replace('https://','')
+    if '/' in url:
+        host_port = url[:url.index('/')]
+        path = url.replace(host_port,'')
+        if ':' in host_port:
+            host,port = host_port.split(":")[0],host_port.split(":")[1]
+        else:
+            host, port = host_port,''
+        return host,port,path
+    else:
+        if ':' in url:
+            host,port = url.split(":")[0],url.split(":")[1]
+        else:
+            host, port = url,''
+        return host,port,''
+
+
+# @pysnooper.snoop()
+def get_all_resource(cluster='all',namespace='all',exclude_pod=[]):
+    from myapp.utils.py.py_k8s import K8s
+    from myapp import conf
+    if cluster=='all':
+        clusters=conf.get('CLUSTERS')
+    else:
+        clusters={
+            cluster:conf.get('CLUSTERS').get(cluster,{})
+        }
+    if namespace=='all':
+        namespaces=conf.get('HUBSECRET_NAMESPACE',[])
+    else:
+        namespaces=[namespace]
+
+    all_resource = []
+    for cluser_name in clusters:
+        cluster = clusters[cluser_name]
+        k8s_client = K8s(cluster.get('KUBECONFIG', ''))
+        for namespace in namespaces:
+            pods = k8s_client.get_pods(namespace=namespace)
+            for pod in pods:
+                # 只计算running中的资源
+                if pod['status'].lower()=='running':
+                    # 集群，资源组，空间，项目组，用户，resource，值
+                    user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('run-username','admin'))))
+                    project = pod['annotations'].get('project', 'public')
+                    all_resource.append([cluser_name,pod['node_selector'].get('org','public'),namespace,project,user,pod['name'],pod['labels'],'cpu',float(pod['cpu'])])
+                    all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], 'memory',float(pod['memory'])])
+                    gpu_resource = conf.get('GPU_RESOURCE', {})
+                    for ai_device in gpu_resource:
+                        all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], ai_device,float(pod.get(ai_device,''))])
+
+    columns = ['cluster', 'org', 'namespace', 'project', 'user', 'name','labels','resource', 'value']
+    all_resource =[dict(zip(columns,resource)) for resource in all_resource]
+    # print(all_resource)
+    if type(exclude_pod) == str:
+        exclude_pod = [exclude_pod]
+    # 直接指定排除的pod名称
+    if type(exclude_pod)==list:
+        all_resource = [pod for pod in all_resource if pod['name'] not in exclude_pod]
+    # 通过字典过滤排除pod
+    elif type(exclude_pod)==dict:
+        all_resource = [pod for pod in all_resource if not all(item in pod['labels'].items() for item in exclude_pod.items())]
+        # all_resource_temp = []
+        # for pod in all_resource:
+        #     can_add=False
+        #     for key in exclude_pod:
+        #         # 写的简洁些
+        #         if key not in pod['labels'] or pod['labels'][key]!=exclude_pod[key]:
+        #             can_add = True
+        #             break
+        #     if can_add:
+        #         all_resource_temp.append(pod)
+        # all_resource = all_resource_temp
+    return all_resource
+
+# 获取指定端口以后的5个非黑名单端口
+def get_not_black_port(port):
+    from myapp import conf
+    black_port = conf.get('BLACK_PORT',[10250])
+    meet_port = []
+    while len(meet_port)<5:
+        if port not in black_port:
+            meet_port.append(port)
+        port+=1
+    return meet_port
+
+# 验证用户资源额度限制
+# @pysnooper.snoop()
+def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclude_pod=[],req_resource={},replicas=1):
+    # 管理员不受限制
+    # if req_user.is_admin():
+    #     return True,''
+
+    # resource为{"cpu":1,"memory":1,"gpu":1}格式
+    # quota 书写格式，cluster_name，org,namespace，resource，single_total,value
+    # exclude_pod数组格式表示忽略的名称数组，字典格式表述忽略的pod标签，字符串表示原始的pod名
+
+    # 添加对gpu型号的处理
+    req_resource={
+        "cpu": str(req_resource.get('cpu','0')),
+        "memory": str(req_resource.get('memory','0')),
+        "gpu": str(req_resource.get('gpu','0')),
+    }
+    req_resource['gpu'] = req_resource['gpu'].split('(')[0].split(',')[-1]
+
+    all_resources = None
+    # req_total_resource={key:float(str(req_resource[key]).replace('G',''))*replicas for key in req_resource}
+    # 验证用户username在集群cluster_name的namespace空间下运行value大的resource(cpu,memory,gpu)资源是否允许
+    # 先来验证是否有个人用户额度限制，单集群限制，单空间限制
+    if req_user.quota:
+        if not all_resources:
+            all_resources = get_all_resource(exclude_pod=exclude_pod)
+
+        quota_confg = req_user.quota
+        quotas_array = re.split(';|\n',quota_confg.strip())
+        quotas=[]
+        for quota in quotas_array:
+            quota = quota.replace(' ','').strip()
+            if len(quota.split(','))==6:
+                quotas.append(dict(zip(['cluser','org','namespace','resource','type','value'],quota.split(','))))
+
+        for quota in quotas:
+            if quota['namespace']=='notebook':
+                quota['namespace']='jupyter'
+
+            # 查看单个任务是否满足资源限制
+            if quota['type']=='single':
+                if req_cluster_name == quota['cluser'] or quota['cluser'] == 'all':
+                    if req_org == quota['org'] or quota['org'] == 'all':
+                        if req_namespace==quota['namespace'] or quota['namespace']=='all':
+                            limit_resource = float(quota['value'])
+                            request_resource = float(str(req_resource.get(quota['resource'],'0')).replace('G',''))
+                            message = f'user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource}, user limit {limit_resource}'
+                            print(message)
+                            if request_resource>limit_resource:
+                                return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            # 查看正在运行的整体资源是否满足资源限制
+            if quota['type']=='concurrent':
+                if req_cluster_name == quota['cluser'] or quota['cluser'] == 'all':
+                    if req_org == quota['org'] or quota['org'] == 'all':
+                        if req_namespace==quota['namespace'] or quota['namespace']=='all':
+                            exist_pod = all_resources
+                            # 过滤个人名下的pod
+                            exist_pod = [pod for pod in exist_pod if pod['user'] == req_user.username]
+
+                            if quota['cluser']!='all':
+                                exist_pod = [pod for pod in exist_pod if pod['cluster']==quota['cluser']]
+                            if quota['namespace']!='all':
+                                exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
+                            if quota['org']!='all':
+                                exist_pod = [pod for pod in exist_pod if pod['org'] == quota['org']]
+
+                            exist_resource = sum([float(str(pod.get('value','0')).replace('G','')) for pod in exist_pod])
+                            limit_resource = float(quota['value'])
+                            request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                            message = f'user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource} * {replicas}, user limit {limit_resource}, exist {exist_resource}'
+                            message += "\nexist pod:\n" + '\n'.join([pod['labels'].get('pod-type', 'task') + ":" + pod['name'] for pod in exist_pod])
+
+                            print(message)
+                            # 如果用户没有申请这个资源值，也不报错，比如gpu资源超过了，但用户可能不申请gpu资源
+                            if request_resource>0 and request_resource*replicas>(limit_resource-exist_resource):
+                                return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            if quota['type']=='total':
+                pass
+
+    # 或者这个项目下的限制，比如对每个人的限制和对项目组的总和设置，已经确保了申请项目组，与额度配置项目组相同
+    if req_project.quota():
+        if not all_resources:
+            all_resources = get_all_resource(exclude_pod=exclude_pod)
+
+        quota_confg = req_project.quota()
+        quotas_array = re.split(';|\n', quota_confg.strip())
+        quotas = []
+        for quota in quotas_array:
+            if len(quota.split(',')) == 4:
+                quota = quota.replace(' ', '').strip()
+                quotas.append(dict(zip(['namespace', 'resource', 'type', 'value'], quota.split(','))))
+
+        for quota in quotas:
+            if quota['namespace']=='notebook':
+                quota['namespace']='jupyter'
+
+            # 查看单个任务是否满足资源限制
+            if quota['type'] == 'single':
+                if req_namespace==quota['namespace'] or quota['namespace']=='all':
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource}, project limit {limit_resource}'
+                    print(message)
+                    if request_resource > limit_resource:
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            # 查看正在运行的整体资源是否满足资源限制
+            if quota['type'] == 'concurrent':
+                if req_namespace == quota['namespace'] or quota['namespace'] == 'all':
+                    exist_pod = all_resources
+                    # 过滤该项目组下的pod
+                    exist_pod = [pod for pod in exist_pod if pod['project'] == req_project.name]
+
+                    # print(exist_pod)
+                    if quota['namespace'] != 'all':
+                        exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
+
+                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
+                    # print(exist_pod)
+                    # print(quota['resource'])
+                    exist_resource = sum([float(str(pod.get('value', '0')).replace('G', '')) for pod in exist_pod])
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource} * {replicas}, project limit {limit_resource}, exist {exist_resource}'
+                    message +="\nexist pod:\n"+'\n'.join([pod['labels'].get('pod-type','task')+":"+pod['name'] for pod in exist_pod])
+                    print(message)
+                    # message += '\n<a target="_blank" href="https://www.w3schools.com">申请资源</a>'
+                    # 如果用户没有申请这个资源值，也不报错，比如gpu资源超过了，但用户可能不申请gpu资源
+                    if request_resource>0 and request_resource*replicas > (limit_resource - exist_resource):
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            if quota['type'] == 'total':
+                pass
+
+    # 获取项目组下对个人的额度限制，已经确保了申请项目组，与额度配置项目组相同
+    if req_project.quota(userid=req_user.id):
+
+        if not all_resources:
+            all_resources = get_all_resource(exclude_pod=exclude_pod)
+
+        quota_confg = req_project.quota(userid=req_user.id)
+        quotas_array = re.split(';|\n', quota_confg.strip())
+        quotas = []
+        for quota in quotas_array:
+            quota = quota.replace(' ', '').strip()
+            if len(quota.split(',')) == 4:
+                quotas.append(dict(zip(['namespace', 'resource', 'type', 'value'], quota.split(','))))
+
+        for quota in quotas:
+            if quota['namespace']=='notebook':
+                quota['namespace']='jupyter'
+
+            # 查看单个任务是否满足资源限制
+            if quota['type'] == 'single':
+                if req_namespace == quota['namespace'] or quota['namespace'] == 'all':
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource}, project limit {limit_resource}'
+                    print(message)
+                    if request_resource > limit_resource:
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            # 查看正在运行的整体资源是否满足资源限制，
+            if quota['type'] == 'concurrent':
+                if req_namespace == quota['namespace'] or quota['namespace'] == 'all':
+                    exist_pod = all_resources
+                    # 过滤该项目组下的pod
+                    exist_pod = [pod for pod in exist_pod if pod['project'] == req_project.name and pod['user']==req_user.username]
+                    if quota['namespace'] != 'all':
+                        exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
+
+                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
+
+                    # print(exist_pod)
+                    # print(quota['resource'])
+                    exist_resource = sum([float(str(pod.get('value', '0')).replace('G', '')) for pod in exist_pod])
+                    limit_resource = float(quota['value'])
+                    request_resource = float(str(req_resource.get(quota['resource'], '0')).replace('G', ''))
+                    message = f'project user {quota["type"]} quota: \nrequest {quota["resource"]} {request_resource} * {replicas}, project limit {limit_resource}, exist {exist_resource}'
+                    message +="\nexist pod:\n"+'\n'.join([pod['labels'].get('pod-type','task')+":"+pod['name'] for pod in exist_pod])
+
+                    print(message)
+                    # 如果用户没有申请这个资源值，也不报错，比如gpu资源超过了，但用户可能不申请gpu资源
+                    if request_resource>0 and request_resource*replicas > (limit_resource - exist_resource):
+                        return False,Markup("<br>"+message.replace('\n','<br>'))
+
+            if quota['type'] == 'total':
+                pass
+
+    return True,''
+
+
+def test_database_connection(url):
+    from sqlalchemy import create_engine
+    from sqlalchemy.exc import OperationalError
+    try:
+        engine = create_engine(url)
+        conn = engine.connect()
+        conn.close()
+        return True
+    except OperationalError:
+        return False
+
+import zipfile
+def read_zip_csv(zip_path,csv_path):
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            # 读取ZIP文件中的csv文件
+            with zip_ref.open(csv_path) as csv_file:
+                string_data = io.StringIO(csv_file.read().decode('utf-8'))
+                df = pandas.read_csv(string_data).head(10)
+                return df
+    except Exception as e:
+        print(e)
+    return None
+
+# @pysnooper.snoop()
+def table_html(csv_path,features=None,zip_file=None):  # zip_file 用来表示文件是不是相对于某个压缩文件来说的
+
+    # 使用Styler进行样式定制
+    style =  [
+        {'selector': 'thead th', 'props': [('background-color', '#4CAF50'), ('color', 'white')]},
+        {'selector': 'tbody tr:nth-child(even)', 'props': [('background-color', '#f2f2f2')]},
+        {'selector': 'tbody tr:hover', 'props': [('background-color', '#ddd')]}
+    ]
+    properties = {
+        'border': '1px solid black',
+        'padding': '10px',
+        'text-align': 'left'
+    }
+
+
+    if zip_file and os.path.exists(zip_file):
+        # 打开ZIP文件
+        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            # 读取ZIP文件中的csv文件
+            with zip_ref.open(csv_path) as csv_file:
+                string_data = io.StringIO(csv_file.read().decode('utf-8'))
+                df = pandas.read_csv(string_data).head(10)
+
+    else:
+        df = pandas.read_csv(csv_path).head(10)
+
+    if not features:
+        return df.style.set_table_styles(style).set_properties(**properties).to_html(bold_headers=True)
+        # return df.to_html()
+    import base64
+
+    def image_to_html(path):
+
+        if "http://" in path or "https://" in path:
+            img_tag = f'<img src="{path}" width="100"/>'
+            return img_tag
+
+        if not zip_file:
+            real_path = os.path.join(os.path.dirname(csv_path),path)
+            if os.path.exists(real_path):
+                name, extension = os.path.splitext(real_path)
+                extension=extension.strip('.')
+                with open(real_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+                img_tag = f'<img src="data:image/{extension};base64,{encoded_string}" width="100"/>'
+                return img_tag
+        else:
+            # 打开ZIP文件
+            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                real_path = os.path.join(os.path.dirname(csv_path),path)
+                with zip_ref.open(name=real_path,mode='r') as image_file:
+                    name, extension = os.path.splitext(real_path)
+                    extension = extension.strip('.')
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+                    img_tag = f'<img src="data:image/{extension};base64,{encoded_string}" width="100"/>'
+                    return img_tag
+
+        return path
+
+    # @pysnooper.snoop()
+    def audio_to_html(path):
+
+        if "http://" in path or "https://" in path:
+            img_tag = f'<audio controls><source src="{path}" type="audio/mpeg"></audio>'
+            return img_tag
+
+        if not zip_file:
+            real_path = os.path.join(os.path.dirname(csv_path), path)
+            if os.path.exists(real_path):
+                name, extension = os.path.splitext(real_path)
+                extension = extension.strip('.')
+                with open(real_path, "rb") as audio_file:
+                    encoded_string = base64.b64encode(audio_file.read()).decode()
+                audio_tag = f'<audio controls><source src="data:audio/{extension};base64,{encoded_string}" type="audio/mpeg"></audio>'
+                return audio_tag
+        else:
+            # 打开ZIP文件
+            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                real_path = os.path.join(os.path.dirname(csv_path), path)
+                with zip_ref.open(name=real_path,mode='r') as image_file:
+                    name, extension = os.path.splitext(real_path)
+                    extension = extension.strip('.')
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+                    audio_tag = f'<audio controls><source src="data:audio/{extension};base64,{encoded_string}" type="audio/mpeg"></audio>'
+                    return audio_tag
+        return path
+
+    def video_to_html(url):
+        return f'<video src="{url}" width="320" height="240" controls>video</video>'
+
+    columns = df.columns
+    for col in columns:
+        _type = features.get(col,{}).get('_type','Value')
+        if _type.lower()=='image':
+            df[col] = df[col].apply(image_to_html)
+        if _type.lower()=='audio':
+            df[col] = df[col].apply(audio_to_html)
+        if _type.lower()=='video':
+            df[col] = df[col].apply(video_to_html)
+
+    if style:
+        return df.style.set_table_styles(style).set_properties(**properties).to_html(bold_headers=True)
+    else:
+        return df.to_html(escape=False,bold_rows=False,border=1)
+
+
+def notebook_cascade_demo():
+    options = [
+        {
+            "id": "zhejiang",
+            "value": "Zhejiang",
+            "children": [
+                {
+                    "value": "hangzhou",
+                    "label": "Hangzhou",
+                    "children": [
+                        {
+                            "value": "xihu",
+                            "label": "West Lake",
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            "id": "jiangsu",
+            "value": "Jiangsu",
+            "children": [
+                {
+                    "value": "nanjing",
+                    "label": "Nanjing",
+                    "children": [
+                        {
+                            "value": "zhonghuamen",
+                            "label": "Zhong Hua Men",
+                        },
+                    ],
+                },
+            ],
+        },
+    ]
+    return options
+
+
+import hashlib
+# 计算文件的md5
+def calculate_md5(file_path):
+
+    hash_md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+# 从网络下载文件
+def download_file(url,local_dir):
+    import requests
+    def download_file(url, local_filename):
+        # 发送HTTP GET请求
+        response = requests.get(url, stream=True)
+
+        # 确保请求成功
+        if response.status_code == 200:
+            with open(local_filename, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"文件已成功下载并保存为 {local_filename}")
+            return local_filename
+        else:
+            print(f"下载失败，状态码：{response.status_code}")
+            return ''
+
+    # 示例用法
+    os.makedirs(local_dir,exist_ok=True)
+
+    local_filename = os.path.join(local_dir,url.split('/')[-1])  # 使用URL中的文件名
+
+    local_filename = download_file(url, local_filename)
+    return local_filename
+
+
+# 获取任务流的固化
+def pipeline_immutable(pipeline):
+    if not pipeline:
+        return {}
+    tasks = pipeline.get_tasks()
+    tasks = pipeline.sort(tasks)
+    tasks_ids = {}
+    for task in tasks:
+        tasks_ids[str(task.id)] = task
+
+    data = {
+        "label": pipeline.describe,
+        "pipeline_id": pipeline.id,
+        "index": pipeline.id,
+        "pipeline": {
+            "describe": pipeline.describe,
+            "dag_json": json.loads(pipeline.dag_json),
+            "global_env": pipeline.global_env,
+        },
+        "task": [],
+        "args": {}
+    }
+    data['args'] = {}
+    # 按dag的顺序，为task进行排序
+    for task in tasks:
+        task_json = {
+            "job_templete": task.job_template.name,
+            "name": task.name,
+            "label": task.label,
+            "volume_mount": task.volume_mount,
+            "resource_memory": task.resource_memory,
+            "resource_cpu": task.resource_cpu,
+            "resource_gpu": task.resource_gpu,
+            "resource_rdma": task.resource_rdma,
+            "args": json.loads(task.args)
+        }
+        job_template_args = json.loads(task.job_template.args) if task.job_template.args else {}
+        task_arg = json.loads(task.args) if task.args else {}
+        new_task_arg = {}
+        if job_template_args and task_arg:
+
+            for group in job_template_args:
+                for key in job_template_args[group]:
+                    job_template_args[group][key]['task_id'] = task.id
+                    job_template_args[group][key]['task_arg'] = key
+                    job_template_args[group][key]['default'] = task_arg.get(key, job_template_args[group][key].get('default', ''))
+                    if job_template_args[group][key]['default']:
+                        job_template_args[group][key]['show'] = 1
+                    else:
+                        job_template_args[group][key]['show'] = 0
+
+                    # 去除原有分组层，本身也不能重复，统一使用任务名称为分组
+                    new_task_arg[task.name + "." + key] = job_template_args[group][key]
+
+        data['task'].append(task_json)
+        data['args'][task.label] = new_task_arg
+
+    immutable_config = json.loads(pipeline.parameter).get('immutable-config', {})
+
+    # 更新配置，用户可以自己定义分组，参数名等
+    def update_nested_dict(d, u):
+        for k, v in u.items():
+            if isinstance(v, dict) and isinstance(d.get(k), dict):
+                update_nested_dict(d[k], v)
+            else:
+                d[k] = v
+
+    update_nested_dict(data, immutable_config)
+    data['label']=immutable_config.get('label',data['label'])
+    return data
+

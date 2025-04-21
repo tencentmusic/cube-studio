@@ -7,7 +7,7 @@ configMapGenerator:
   files:
   - config/config.py
   - config/entrypoint.sh
-
+  - config/project.py
 # kubectl delete configmap kubeflow-dashboard-config -n infra
 # kubectl create configmap kubeflow-dashboard-config --from-file=config -n infra
 
@@ -19,7 +19,6 @@ configMapGenerator:
   - REDIS_PASSWORD=admin
   - MYSQL_SERVICE=mysql+pymysql://root:admin@mysql-service.infra:3306/kubeflow?charset=utf8
   - ENVIRONMENT=DEV
-  - GPU_TYPE=NVIDIA
 
 
 vars:
@@ -31,16 +30,16 @@ vars:
   fieldref:
     fieldpath: data.STAGE
 
-bases:
+resources:
   - ../base
 
 images:
 - name: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
   newName: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard
-  newTag: 2023.08.01
+  newTag: 2025.03.01
 - name: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend
   newName: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend
-  newTag: 2023.08.01
+  newTag: 2025.03.01
 
 
 # kustomize build . | kubectl apply -f -

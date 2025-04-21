@@ -1,6 +1,6 @@
 
 
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/istio:proxyv2-1.14.1 .
+# docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/istio:proxyv2-1.14.1 .
 FROM docker.io/istio/proxyv2:1.14.1
 USER root
 RUN apt update -y

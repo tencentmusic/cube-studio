@@ -12,6 +12,7 @@ from flask_appbuilder.widgets import ListWidget
 from myapp.forms import MySearchWidget
 from flask_babel import get_locale
 from flask_babel import gettext as __
+from flask_babel import lazy_gettext as _
 from flask_wtf.form import FlaskForm
 import simplejson as json
 from werkzeug.exceptions import HTTPException
@@ -32,7 +33,7 @@ from flask import (
     g,
     Response,
 )
-from flask_babel import lazy_gettext as _
+
 
 import yaml
 
@@ -48,8 +49,6 @@ from flask_appbuilder.const import (
     PERMISSION_PREFIX
 )
 from flask_appbuilder._compat import as_unicode
-
-log = logging.getLogger(__name__)
 
 
 def has_access(f):
@@ -78,13 +77,13 @@ def has_access(f):
                 )):
             return f(self, *args, **kwargs)
         else:
-            log.warning(
+            logging.warning(
                 LOGMSG_ERR_SEC_ACCESS_DENIED.format(
                     permission_str,
                     self.__class__.__name__
                 )
             )
-            flash(as_unicode(FLAMSG_ERR_SEC_ACCESS_DENIED), "danger")
+            flash(as_unicode(FLAMSG_ERR_SEC_ACCESS_DENIED), "error")
         return redirect(
             url_for(
                 self.appbuilder.sm.auth_view.__class__.__name__ + ".login",
@@ -123,7 +122,7 @@ def has_access_api(f):
                 )):
             return f(self, *args, **kwargs)
         else:
-            log.warning(
+            logging.warning(
                 LOGMSG_ERR_SEC_ACCESS_DENIED.format(
                     permission_str,
                     self.__class__.__name__
@@ -295,7 +294,6 @@ class BaseMyappView(BaseView):
         conf['alert_config'].update(self.alert_config)
 
 
-# 自定义list页面
 class MyappListWidget(ListWidget):
     template = "myapp/fab_overrides/list.html"
 
@@ -311,7 +309,10 @@ class MyappModelView(ModelView):
     check_redirect_list_url = None
     search_widget = MySearchWidget
     help_url = ''
-
+    list_title =''
+    add_title = ''
+    edit_title = ''
+    show_title = ''
     pre_add_web = None
     pre_update_web = None
     post_list = None
@@ -364,28 +365,16 @@ class MyappModelView(ModelView):
             Init Titles if not defined
         """
         class_name = self.datamodel.model_name
-        if not self.list_title:
-            if not self.label_title:
-                self.list_title = "List " + self._prettify_name(class_name)
-            else:
-                self.list_title = self.label_title + " 列表"
-        if not self.add_title:
-            if not self.label_title:
-                self.add_title = "Add " + self._prettify_name(class_name)
-            else:
-                self.add_title = '添加 ' + self.label_title
-        if not self.edit_title:
-            if not self.label_title:
-                self.edit_title = "Edit " + self._prettify_name(class_name)
-            else:
-                self.edit_title = '修改 ' + self.label_title
-        if not self.show_title:
-            if not self.label_title:
-                self.show_title = "Show " + self._prettify_name(class_name)
-            else:
-                self.show_title = self.label_title + " 详情"
+        if self.label_title:
+            if not self.list_title:
+                self.list_title = __("遍历 ") + self.label_title
+            if not self.add_title:
+                self.add_title = __("添加 ") + self.label_title
+            if not self.edit_title:
+                self.edit_title = __("编辑 ") + self.label_title
+            if not self.show_title:
+                self.show_title = __("查看 ") + self.label_title
         self.title = self.list_title
-
     # 每个用户对当前记录的权限，base_permissions 是对所有记录的权限
     def check_item_permissions(self, item):
         self.user_permissions = {
@@ -480,7 +469,6 @@ class MyappModelView(ModelView):
         )
         return widgets
 
-    @event_logger.log_this
     @expose("/list/")
     @has_access
     def list(self):
@@ -492,7 +480,6 @@ class MyappModelView(ModelView):
         )
         return res
 
-    @event_logger.log_this
     @expose("/show/<pk>", methods=["GET"])
     @has_access
     def show(self, pk):
@@ -531,7 +518,7 @@ class MyappModelView(ModelView):
                     form.populate_obj(item)
                     self.pre_add(item)
                 except Exception as e:
-                    flash(str(e), "danger")
+                    flash(str(e), "error")
                 else:
                     print(item.to_json())
                     if self.datamodel.add(item):
@@ -545,7 +532,6 @@ class MyappModelView(ModelView):
             self.update_redirect()
         return self._get_add_widget(form=form, exclude_cols=exclude_cols)
 
-    @event_logger.log_this
     @expose("/add", methods=["GET", "POST"])
     @has_access
     def add(self):
@@ -609,7 +595,7 @@ class MyappModelView(ModelView):
                     form.populate_obj(item)
                     self.pre_update(item)
                 except Exception as e:
-                    flash(str(e), "danger")
+                    flash(str(e), "error")
                 else:
                     if self.datamodel.edit(item):
                         self.post_update(item)
@@ -679,7 +665,6 @@ class MyappModelView(ModelView):
             flash(str(e), 'warning')
             self.update_redirect()
             return redirect(self.get_redirect())
-            # return redirect(self.check_redirect_list_url)
 
         widgets = self._edit(pk)
 
@@ -814,11 +799,11 @@ def validate_json(form, field):  # noqa
         json.loads(field.data)
     except Exception as e:
         logging.exception(e)
-        raise Exception(_("json isn't valid"))
+        raise Exception(__("json isn't valid"))
 
 
 class YamlExportMixin(object):
-    @action("yaml_export", __("Export to YAML"), __("Export to YAML?"), "fa-download")
+    @action("yaml_export", "Export to YAML", "Export to YAML?", "fa-download")
     def yaml_export(self, items):
         if not isinstance(items, list):
             items = [items]
@@ -847,7 +832,7 @@ class DeleteMixin(object):
         try:
             self.pre_delete(item)
         except Exception as e:
-            flash(str(e), "danger")
+            flash(str(e), "error")
         else:
             view_menu = security_manager.find_view_menu(item.get_perm())
             pvs = (
@@ -879,9 +864,7 @@ class DeleteMixin(object):
             flash(*self.datamodel.message)
             self.update_redirect()
 
-    @action(
-        "muldelete", __("Delete"), __("Delete all Really?"), "fa-trash", single=False
-    )
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
     def muldelete(self, items):
         if not items:
             abort(404)
@@ -889,7 +872,7 @@ class DeleteMixin(object):
             try:
                 self.pre_delete(item)
             except Exception as e:
-                flash(str(e), "danger")
+                flash(str(e), "error")
             else:
                 self._delete(item.id)
         self.update_redirect()

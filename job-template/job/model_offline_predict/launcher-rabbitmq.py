@@ -31,6 +31,7 @@ for task_node_selector in task_node_selectors:
     KFJ_TASK_NODE_SELECTOR[task_node_selector.split('=')[0]] = task_node_selector.split('=')[1]
 
 KFJ_PIPELINE_ID = os.getenv('KFJ_PIPELINE_ID', '')
+KFJ_TASK_PROJECT_NAME = os.getenv('KFJ_TASK_PROJECT_NAME', 'public')
 KFJ_RUN_ID = os.getenv('KFJ_RUN_ID', '')
 KFJ_CREATOR = os.getenv('KFJ_CREATOR', '')
 KFJ_RUNNER = os.getenv('KFJ_RUNNER','')
@@ -56,11 +57,21 @@ k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(KFJ_TASK_VOLUME_MO
 print(k8s_volumes)
 print(k8s_volume_mounts)
 rabbitmq_name=("rabbitmq-" + KFJ_PIPELINE_NAME.replace('_','-'))[0:54].strip('-')
-GPU_TYPE= os.getenv('KFJ_GPU_TYPE', 'NVIDIA')
-GPU_RESOURCE= os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
-print(GPU_TYPE,GPU_RESOURCE)
+GPU_RESOURCE_NAME= os.getenv('GPU_RESOURCE_NAME', '')
+GPU_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_GPU', '0')
+gpu_num,gpu_type,_ = k8s_client.get_gpu(GPU_RESOURCE)
+if gpu_type:
+    KFJ_TASK_NODE_SELECTOR['gpu-type']=gpu_type
 
 
+RDMA_RESOURCE_NAME= os.getenv('RDMA_RESOURCE_NAME', '')
+RDMA_RESOURCE = os.getenv('KFJ_TASK_RESOURCE_RDMA', '0')
+
+HUBSECRET = os.getenv('HUBSECRET','hubsecret')
+HUBSECRET=[{"name":hubsecret} for hubsecret in HUBSECRET.split(',')]
+
+DEFAULT_POD_RESOURCES = os.getenv('DEFAULT_POD_RESOURCES','')
+DEFAULT_POD_RESOURCES = json.loads(DEFAULT_POD_RESOURCES) if DEFAULT_POD_RESOURCES else {}
 
 def check_rabbit_finish():
     try:
@@ -166,7 +177,7 @@ def monitoring(crd_k8s,name,namespace):
 
 
 
-# @pysnooper.snoop()
+@pysnooper.snoop()
 def make_volcanojob(name,num_workers,image,working_dir,command,env):
     # if type(command)==str:
     #     command=command.split(" ")
@@ -181,20 +192,19 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
                     "pipeline-name": KFJ_PIPELINE_NAME,
                     "task-id": KFJ_TASK_ID,
                     "task-name": KFJ_TASK_NAME,
-                    'rtx-user': KFJ_RUNNER,
+                    'username': KFJ_RUNNER,
                     "component": name,
                     "type": "volcanojob",
                     "run-id": KFJ_RUN_ID,
+                },
+                "annotations": {
+                    "project": KFJ_TASK_PROJECT_NAME
                 }
             },
             "spec": {
                 "restartPolicy": "Never",
                 "volumes": k8s_volumes,
-                "imagePullSecrets": [
-                    {
-                        "name": "hubsecret"
-                    }
-                ],
+                "imagePullSecrets": HUBSECRET,
                 "affinity": {
                     "nodeAffinity": {
                         "requiredDuringSchedulingIgnoredDuringExecution": {
@@ -234,36 +244,27 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
                     {
                         "name": "volcanojob",
                         "image": image if image else KFJ_TASK_IMAGES,
-                        "imagePullPolicy": "Always",
+                        "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                         "workingDir":working_dir,
                         "env":[
-                            {
-                                "name": "NCCL_DEBUG",
-                                "value":"INFO"
-                            },
-                            {
-                                "name": "NCCL_IB_DISABLE",
-                                "value": "1"
-                            },
-                            # {
-                            #     "name": "NCCL_DEBUG_SUBSYS",
-                            #     "value": "ALL"
-                            # },
-                            {
-                                "name": "NCCL_SOCKET_IFNAME",
-                                "value": "eth0"
-                            }
+
                         ],
                         "command": ['bash','-c',command],
                         "volumeMounts": k8s_volume_mounts,
                         "resources": {
                             "requests": {
-                                "cpu": KFJ_TASK_RESOURCE_CPU,
-                                "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                **{
+                                    "cpu": KFJ_TASK_RESOURCE_CPU,
+                                    "memory": KFJ_TASK_RESOURCE_MEMORY,
+                                },
+                                **DEFAULT_POD_RESOURCES
                             },
                             "limits": {
-                                "cpu": KFJ_TASK_RESOURCE_CPU,
-                                "memory": KFJ_TASK_RESOURCE_MEMORY
+                                **{
+                                    "cpu": KFJ_TASK_RESOURCE_CPU,
+                                    "memory": KFJ_TASK_RESOURCE_MEMORY
+                                },
+                                **DEFAULT_POD_RESOURCES
                             }
                         }
                     }
@@ -282,19 +283,32 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
     # 任何一个成功，或者失败都会结束程序
     task_spec['policies'] = [{"event": "TaskCompleted", "action": "CompleteJob"},{"event": "PodFailed", "action": "AbortJob"}]
 
-    if GPU_TYPE=='NVIDIA' and GPU_RESOURCE:
-        task_spec['template']['spec']['containers'][0]['resources']['requests']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
-        task_spec['template']['spec']['containers'][0]['resources']['limits']['nvidia.com/gpu'] = GPU_RESOURCE.split(',')[0]
+    if int(gpu_num)>=1:
+        task_spec['template']['spec']['containers'][0]['resources']['requests'][GPU_RESOURCE_NAME] = int(gpu_num)
+        task_spec['template']['spec']['containers'][0]['resources']['limits'][GPU_RESOURCE_NAME] = int(gpu_num)
+    elif int(gpu_num)==-1:
+        pass
+    else:
+        # 添加禁用指令
+        task_spec['template']['spec']['containers'][0]['env'].append({
+            "name": "NVIDIA_VISIBLE_DEVICES",
+            "value": "none"
+        })
 
-    if GPU_TYPE=='TENCENT' and GPU_RESOURCE:
-        if len(GPU_RESOURCE.split(','))==2:
-            gpu_core,gpu_mem = GPU_RESOURCE.split(',')[0],str(4*int(GPU_RESOURCE.split(',')[1]))
-            if gpu_core and gpu_mem:
-                task_spec['template']['spec']['containers'][0]['resources']['requests']['tencent.com/vcuda-core'] = gpu_core
-                task_spec['template']['spec']['containers'][0]['resources']['requests']['tencent.com/vcuda-memory'] = gpu_mem
-                task_spec['template']['spec']['containers'][0]['resources']['limits']['tencent.com/vcuda-core'] = gpu_core
-                task_spec['template']['spec']['containers'][0]['resources']['limits']['tencent.com/vcuda-memory'] = gpu_mem
+    # 添加rdma
+    if RDMA_RESOURCE_NAME and RDMA_RESOURCE and int(RDMA_RESOURCE):
+        task_spec['template']['spec']['containers'][0]['resources']['requests'][RDMA_RESOURCE_NAME] = int(
+            RDMA_RESOURCE)
+        task_spec['template']['spec']['containers'][0]['resources']['limits'][RDMA_RESOURCE_NAME] = int(
+            RDMA_RESOURCE)
 
+        task_spec['template']['spec']['containers'][0]['securityContext'] = {
+            "capabilities": {
+                "add": [
+                    "IPC_LOCK"
+                ]
+            }
+        }
 
     worker_pod_spec = copy.deepcopy(task_spec)
     worker_pod_spec['replicas']=int(num_workers)-1   # 因为master是其中一个worker
@@ -307,21 +321,31 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
             "name": name,
             "labels":{
                 "run-id":KFJ_RUN_ID,
-                "run-rtx":KFJ_RUNNER,
-                "pipeline-rtx": KFJ_CREATOR,
+                "run-username":KFJ_RUNNER,
+                "pipeline-username": KFJ_CREATOR,
                 "pipeline-id": KFJ_PIPELINE_ID,
                 "pipeline-name": KFJ_PIPELINE_NAME,
                 "task-id": KFJ_TASK_ID,
                 "task-name": KFJ_TASK_NAME,
+            },
+            "annotations": {
+                "project": KFJ_TASK_PROJECT_NAME
             }
         },
         "spec": {
             "minAvailable":num_workers,
+            "policies": [
+                 {
+                     "event":"PodFailed",
+                     "action": "AbortJob"
+                 }
+             ],
             "schedulerName":"volcano",
             "cleanPodPolicy": "None",
             "plugins":{
                 "env":[],
-                "svc":[]
+                "svc":[],
+                "ssh":[]
             },
             "queue":"default",
             "tasks": [
@@ -333,7 +357,7 @@ def make_volcanojob(name,num_workers,image,working_dir,command,env):
     return volcano_deploy
 
 
-# @pysnooper.snoop()
+@pysnooper.snoop()
 def launch_volcanojob(name, num_workers, image,working_dir, worker_command,env):
     if KFJ_RUN_ID:
         print('delete old volcanojob, run-id %s'%KFJ_RUN_ID, flush=True)
@@ -382,6 +406,7 @@ def launch_volcanojob(name, num_workers, image,working_dir, worker_command,env):
 
 
 # 创建单机版本rabbitmq
+@pysnooper.snoop()
 def create_rabbitmq(name,create=True):
     try:
         pod_str={
@@ -390,14 +415,21 @@ def create_rabbitmq(name,create=True):
             "metadata": {
                 "name": name,
                 "labels": {
-                    "app": name
+                    "app": name,
+                    "run-id": KFJ_RUN_ID,
+                    "run-username": KFJ_RUNNER,
+                    "pipeline-username": KFJ_CREATOR,
+                    "pipeline-id": KFJ_PIPELINE_ID,
+                    "pipeline-name": KFJ_PIPELINE_NAME,
+                    "task-id": KFJ_TASK_ID,
+                    "task-name": KFJ_TASK_NAME,
                 }
             },
             "spec": {
                 "containers": [
                     {
                         "name": "rabbitmq",
-                        "image": "rabbitmq:3.9.12-management",
+                        "image": os.getenv('RABBITMQ_IMAGE',"rabbitmq:3.9.12-management"),
                         "imagePullPolicy": "IfNotPresent",
                         "env":[
                             {
@@ -463,7 +495,6 @@ if __name__ == "__main__":
     print("{} args: {}".format(__file__, args))
 
     # 清理启动rabbitmq
-
     create_rabbitmq(name=rabbitmq_name,create=False)
     time.sleep(10)
     create_rabbitmq(name=rabbitmq_name,create=True)
@@ -475,6 +506,12 @@ if __name__ == "__main__":
     launch_volcanojob(name=volcanojob_name,num_workers=args.num_worker,image=args.image,working_dir=args.working_dir,worker_command=args.command,env=env)
     # 清理rabbitmq
     create_rabbitmq(name=rabbitmq_name,create=False)
+    # 删除volcanojob
+    try:
+        k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'], namespace=KFJ_NAMESPACE, labels={"run-id": KFJ_RUN_ID})
+    except Exception as e:
+        print(e)
+
 
 
 

@@ -68,17 +68,46 @@ metadata:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-settings
   namespace: kube-system
+#
+#---
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: ClusterRole
+#metadata:
+#  name: kubernetes-dashboard-user1
+#rules:
+#- apiGroups:
+#  - ""
+#  resources:
+#  - pods/exec
+#  verbs:
+#  - get
+#  - list
+#  - watch
+#  - create
+#  - delete
+#- apiGroups:
+#  - ""
+#  resources:
+#  - pods
+#  - events
+#  - pods/log
+#  - services
+#  - nodes
+#  verbs:
+#  - get
+#  - list
+#  - watch
+#---
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: kubernetes-dashboard-user1
+  name: kubernetes-dashboard-pipeline
 rules:
 - apiGroups:
   - ""
   resources:
-  - pods
   - pods/exec
   verbs:
   - get
@@ -89,10 +118,9 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - pods
   - events
   - pods/log
-  - services
-  - nodes
   verbs:
   - get
   - list
@@ -101,41 +129,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cube-studio-jupyter
+  name: kubernetes-dashboard-jupyter
 rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - pods/exec
-  - pods/log
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-- apiGroups:
-  - ""
-  resources:     # 只需要能搜索到就行
-  - deployments
-  - services
-  - events
-  verbs:
-  - list
-  - delete
-  - watch
----
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: cube-studio-service
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - pods
   - pods/exec
   verbs:
   - get
@@ -146,21 +144,61 @@ rules:
 - apiGroups:
   - ""
   resources:     # 只需要能搜索到就行
-  - pods
-  - deployments
   - services
   - events
+  - pods
   - pods/log
   verbs:
   - get
   - list
-  - delete
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cube-studio-aihub
+  name: kubernetes-dashboard-automl
+rules:
+- apiGroups:
+  - ""
+  resources:     # 只需要能搜索到就行
+  - services
+  - events
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubernetes-dashboard-service
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - events
+  - pods/log
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubernetes-dashboard-aihub
 rules:
 - apiGroups:
   - ""
@@ -169,14 +207,6 @@ rules:
   - deployments
   - services
   - events
-  verbs:
-  - list
-  - delete
-  - watch
-- apiGroups:
-  - ""
-  resources:     # 只需要能搜索到就行
-  - pods/log
   verbs:
   - list
   - get
@@ -191,7 +221,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kubernetes-dashboard-user1   # 仅pipeline空间可以有权限
+  name: kubernetes-dashboard-pipeline   # 仅pipeline空间可以有权限
 subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard-user1
@@ -201,11 +231,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: kubernetes-dashboard-automl
-  namespace: automl      # 生效空间
+  namespace: automl        # 生效空间
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kubernetes-dashboard-user1
+  name: kubernetes-dashboard-automl
 subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard-user1
@@ -219,7 +249,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cube-studio-jupyter
+  name: kubernetes-dashboard-service
 subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard-user1
@@ -233,7 +263,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cube-studio-jupyter
+  name: kubernetes-dashboard-jupyter
 subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard-user1
@@ -247,11 +277,27 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cube-studio-aihub
+  name: kubernetes-dashboard-aihub
 subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard-user1
   namespace: kube-system
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard-minimal
+  name: kubernetes-dashboard-minimal
+rules:
+  # Allow Metrics Scraper to get metrics from the Metrics server
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes","namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["nodes","namespaces"]
+    verbs: ["get", "list", "watch"]   
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -299,23 +345,6 @@ rules:
   verbs: ["get"]
 
 ---
-
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  labels:
-    k8s-app: kubernetes-dashboard-minimal
-  name: kubernetes-dashboard-minimal
-rules:
-  # Allow Metrics Scraper to get metrics from the Metrics server
-  - apiGroups: ["metrics.k8s.io"]
-    resources: ["pods", "nodes","namespaces"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["*"]
-    resources: ["nodes","namespaces"]
-    verbs: ["get", "list", "watch"]   
-
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -329,7 +358,6 @@ subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard-user1
   namespace: kube-system
-
 
 ---
 
@@ -367,7 +395,7 @@ spec:
     spec:
       containers:
         - name: kubernetes-dashboard-user1
-          image: kubernetesui/dashboard:v2.6.1
+          image: ccr.ccs.tencentyun.com/cube-studio/k8s-dashboard:v2.6.1   # ccr.ccs.tencentyun.com/cube-studio/k8s-dashboard:v2.6.1-arm64   kubernetesui/dashboard:v2.6.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9090

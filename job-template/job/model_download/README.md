@@ -1,5 +1,5 @@
 # model_download 模板
-镜像：ccr.ccs.tencentyun.com/cube-studio/model_download:20221001
+镜像：ccr.ccs.tencentyun.com/cube-studio/model_download:20240501
 启动参数：
 ```bash
 {
@@ -14,9 +14,7 @@
             "default": "模型管理",
             "placeholder": "",
             "describe": "模型来源地",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_name": {
             "type": "str",
@@ -28,9 +26,7 @@
             "default": "",
             "placeholder": "",
             "describe": "模型名",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--sub_model_name": {
             "type": "str",
@@ -42,9 +38,7 @@
             "default": "",
             "placeholder": "",
             "describe": "子模型名，对于包含多个子模型的用户填写",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_version": {
             "type": "str",
@@ -56,9 +50,7 @@
             "default": "v2022.10.01.1",
             "placeholder": "",
             "describe": "模型版本号",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--model_status": {
             "type": "str",
@@ -70,9 +62,7 @@
             "default": "online",
             "placeholder": "",
             "describe": "模型状态，模型来自推理服务时有效",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         },
         "--save_path": {
             "type": "str",
@@ -84,9 +74,7 @@
             "default": "/mnt/xx/download/model/",
             "placeholder": "",
             "describe": "下载目的目录",
-            "editable": 1,
-            "condition": "",
-            "sub_args": {}
+            "editable": 1
         }
     }
 }

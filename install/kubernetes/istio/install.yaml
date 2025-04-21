@@ -2143,6 +2143,7 @@ data:
           initContainers:
             - name: grpc-bootstrap-init
               image: busybox:1.36.0
+              imagePullPolicy: IfNotPresent
               volumeMounts:
                 - mountPath: /var/lib/grpc/data/
                   name: grpc-io-proxyless-bootstrap
@@ -2949,7 +2950,7 @@ spec:
           secretName: istio-kubeconfig
           optional: true
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: istio-ingressgateway
@@ -2968,7 +2969,7 @@ spec:
       app: istio-ingressgateway
       istio: ingressgateway
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: istiod
@@ -3090,7 +3091,7 @@ subjects:
     name: istiod-service-account
     namespace: istio-system
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: istio-ingressgateway
@@ -3117,7 +3118,7 @@ spec:
         type: Utilization
         averageUtilization: 80
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: istiod

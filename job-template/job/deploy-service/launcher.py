@@ -78,9 +78,12 @@ def deploy(**kwargs):
             'max_replicas': kwargs['replicas'],
             'ports': kwargs['ports'],
             'volume_mount': kwargs['volume_mount'],
+            'inference_config': kwargs['inference_config'],
             'host': kwargs['host'],
             'hpa': kwargs['hpa'],
-            'service_type':kwargs['service_type']
+            'service_type':kwargs['service_type'],
+            'metrics': kwargs['metrics'],
+            'health': kwargs['health']
         }
 
         exist_services = res.json().get('result',{}).get('data',[])
@@ -91,6 +94,10 @@ def deploy(**kwargs):
             res = requests.post(url, headers=headers,json=payload, allow_redirects=False)
             if res.status_code==200:
                 new_service = res.json().get('result', {})
+            else:
+                print(res.content)
+                print('部署失败')
+                exit(1)
             # print(res)
 
         else:
@@ -100,12 +107,15 @@ def deploy(**kwargs):
             res = requests.put(url, headers=headers, json=payload, allow_redirects=False)
             if res.status_code==200:
                 new_service = res.json().get('result',{})
-            # print(res)
+            else:
+                print(res.content)
+                print('部署失败')
+                exit(1)
 
         if new_service:
             time.sleep(5)  # 等待数据刷入数据库
             print(new_service)
-            url = host + "/inferenceservice_modelview/deploy/prod/%s"%new_service['id']
+            url = host + "/inferenceservice_modelview/api/deploy/prod/%s"%new_service['id']
             res = requests.get(url,headers=headers, allow_redirects=False)
             if res.status_code==302 or res.status_code==200:
                 print('部署成功')
@@ -142,7 +152,9 @@ if __name__ == "__main__":
     arg_parser.add_argument('--hpa', type=str, help="弹性伸缩", default='')
     arg_parser.add_argument('--ports', type=str, help="端口号", default='80')
     arg_parser.add_argument('--volume_mount', type=str, help="挂载", default='')
-
+    arg_parser.add_argument('--inference_config', type=str, help="配置文件", default='')
+    arg_parser.add_argument('--metrics', type=str, help="指标", default='')
+    arg_parser.add_argument('--health', type=str, help="健康检查", default='')
 
     args = arg_parser.parse_args()
     # print("{} args: {}".format(__file__, args))

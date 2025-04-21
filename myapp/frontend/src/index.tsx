@@ -4,18 +4,24 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './index.less';
 import zhCN from 'antd/lib/locale/zh_CN';
+import en from 'antd/lib/locale/en_US';
 import { ConfigProvider, Spin } from 'antd';
+import { getI18n } from 'react-i18next';
 import './store/index'
-import cookies from 'js-cookie';
+import './locales/i18n'
 
 import {
   BrowserRouter, HashRouter
 } from "react-router-dom";
+import cookies from 'js-cookie';
 import { handleTips } from './api';
-import { changeTheme } from './theme';
+import { setTheme } from './theme';
 import LoadingStar from './components/LoadingStar/LoadingStar';
+import globalConfig from './global.config';
 
 Spin.setDefaultIndicator(<LoadingStar />)
+
+setTheme(globalConfig.theme)
 
 let isLogin = false
 const userName = cookies.get('myapp_username')
@@ -26,20 +32,12 @@ if (!!userName) {
   handleTips.gotoLogin()
 }
 
-changeTheme('star')
-
 ReactDOM.render(
   isLogin ?
-    <ConfigProvider locale={zhCN}>
-      {
-        process.env.REACT_APP_ROUTER_TYPE === 'browser' ?
-          <BrowserRouter basename={process.env.REACT_APP_BASE_ROUTER || '/'}>
-            <App />
-          </BrowserRouter> :
-          <HashRouter basename={process.env.REACT_APP_BASE_ROUTER || '/'}>
-            <App />
-          </HashRouter>
-      }
+    <ConfigProvider locale={getI18n().language === 'zh-CN' ? zhCN : en}>
+      <BrowserRouter basename={process.env.REACT_APP_BASE_ROUTER || '/'}>
+        <App />
+      </BrowserRouter>
     </ConfigProvider> : <></>,
   document.getElementById('root')
 );

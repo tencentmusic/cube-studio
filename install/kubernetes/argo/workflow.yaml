@@ -1016,10 +1016,10 @@ data:
   links: |
     - name: Workflow Link
       scope: workflow
-      url: /pipeline_modelview/web/${workflow.metadata.labels.pipeline-id}
+      url: /pipeline_modelview/api/web/${workflow.metadata.labels.pipeline-id}
     - name: Pod Link
       scope: pod
-      url: /pipeline_modelview/web/pod/${workflow.metadata.labels.pipeline-id}
+      url: /pipeline_modelview/api/web/pod/${workflow.metadata.labels.pipeline-id}
     - name: Pod Logs Link
       scope: pod-logs
       url: http://logging-facility?namespace=${metadata.namespace}&podName=${metadata.name}&startedAt=${status.startedAt}&finishedAt=${status.finishedAt}
@@ -1209,7 +1209,7 @@ spec:
         - mountPath: /tmp
           name: tmp
       nodeSelector:
-        kubernetes.io/os: linux
+        kubeflow: 'true'
       securityContext:
         runAsNonRoot: true
       serviceAccountName: argo-server
@@ -1233,6 +1233,8 @@ spec:
       labels:
         app: minio
     spec:
+      nodeSelector:
+        kubeflow: 'true'
       containers:
       - command:
         - minio
@@ -1325,7 +1327,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
       nodeSelector:
-        kubernetes.io/os: linux
+        kubeflow: 'true'
       securityContext:
         runAsNonRoot: true
       serviceAccountName: argo

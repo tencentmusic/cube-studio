@@ -12,9 +12,9 @@
 
 ## 方法1：Dockerfile构建
 
-jupyter镜像的构建在：https://github.com/tencentmusic/cube-studio/tree/master/images/jupyter-notebook
+jupyter镜像的构建在：https://github.com/data-infra/cube-studio/tree/main/images/jupyter-notebook
 
-vscode镜像的构建在：https://github.com/tencentmusic/cube-studio/tree/master/images/theia
+vscode镜像的构建在：https://github.com/data-infra/cube-studio/tree/main/images/theia
 
 现在默认使用的镜像为
 ```

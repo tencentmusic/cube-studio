@@ -25,7 +25,6 @@
 | kube-system    | nvidia-device-plugin-daemonset    | k8s中使用机器gpu驱动和设备的插件               |
 | kube-system    | metrics-server                    | 集群资源使用情况的指标采集，用来在hpa时使用           |
 | kube-system    | kubeflow-prometheus-adapter       | 用来将prometheus采集的指标转化为可以用来控制hpa的指标 |
-| kubeflow       | frameworkcontroller               | nni超参搜索需要的分布式组件                   |
 | kubeflow       | minio                             | 对象存储                              |
 | kubeflow       | train-operator                    | 分布式训练                             |
 | kubeflow       | workflow-controller               | argo 云原生调度                        |
@@ -46,8 +45,8 @@
 
 基础环境依赖
  - docker >= 19.03  
- - kubernetes = 1.18  
- - kubectl >=1.18  
+ - kubernetes = 1.21 ~ 1.28  
+ - kubectl ==1.24
  - cfs/ceph  挂载到每台机器的 /data/k8s/  
  - 单机 磁盘>=200G   单机磁盘容量要求不大，仅做镜像容器的存储  
  - 控制端机器 cpu>=16 mem>=32G 

@@ -1,5 +1,4 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
-
+# docker buildx build --platform linux/amd64,linux/arm64 -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9-20250101 -f install/docker/Dockerfile-base . --push
 FROM ubuntu:22.04
 
 ENV TZ=Asia/Shanghai
@@ -7,14 +6,16 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG PYTHON_VERSION=python3.9
 
 # 取值 amd64、arm64、arm/v6、arm/v7、ppc64le、s390x。
-ARG TARGETARCH=amd64
+# ARG TARGETARCH=amd64
 # 替换源
-COPY install/docker/sources.list.${TARGETARCH} /etc/apt/sources.list
-COPY install/docker/pip.conf /root/.pip/pip.conf
+# COPY install/docker/sources.list.${TARGETARCH} /etc/apt/sources.list
+# COPY install/docker/pip.conf /root/.pip/pip.conf
 RUN apt-get clean all && apt-get update -y
 
 # 安装运维工具
 RUN apt install -y --force-yes --fix-missing --no-install-recommends apt-utils ca-certificates software-properties-common vim apt-transport-https gnupg2 ca-certificates-java rsync jq  wget git dnsutils iputils-ping net-tools curl mysql-client locales zip unzip
+
+RUN mkdir -p /var/log/supervisor && apt install -y supervisor
 
 # 安装python
 RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update && apt install -y  libsasl2-dev libpq-dev python3-pip python3.9-distutils
@@ -32,18 +33,15 @@ ENV LC_ALL zh_CN.UTF-8
 ENV LANGUAGE zh_CN.UTF-8
 
 # 便捷操作
-RUN echo "alias ll='ls -alF'" >> /etc/profile && \
-	echo "alias la='ls -A'" >> /etc/profile && \
-	echo "alias vi='vim'" >> /etc/profile
+RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
+	echo "alias la='ls -A'" >> ~/.bashrc && \
+	echo "alias vi='vim'" >> ~/.bashrc
 
 COPY install/docker/requirements.txt /requirements.txt
 
 RUN pip install --upgrade setuptools pip && \
-    pip install -r /requirements.txt && \
+    pip install --ignore-installed -r /requirements.txt && \
     rm -rf /root/.cache/pip
-# 修正部分包版本
-RUN pip install celery==5.2.2
-RUN pip install click==7.1.2
 
 WORKDIR /home/myapp
 

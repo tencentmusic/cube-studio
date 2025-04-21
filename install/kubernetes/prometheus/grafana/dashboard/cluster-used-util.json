@@ -918,7 +918,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "集群资源使用率",
+  "title": "Cluster Resource Utilization",
   "uid": "cluster-used-util",
   "version": 1
 }
