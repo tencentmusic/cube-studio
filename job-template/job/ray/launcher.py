@@ -353,6 +353,10 @@ def create_worker_deploy(header_name,worker_name):
                                 {
                                     "name": "RAY_HEAD_SERVICE_HOST",
                                     "value": header_name
+                                },
+                                {
+                                    "name": "GPU_NUM",
+                                    "value": str(int(gpu_num))
                                 }
                             ],
                             "resources": {

@@ -1,7 +1,7 @@
 {
-  "yolov7": {
+  "yolov8": {
     "pipeline": {
-      "name": "imageai",
+      "name": "yolov8",
       "describe": "深度学习：目标识别训练部署",
       "project": "public",
       "parameter": {
@@ -12,14 +12,14 @@
         "download-data": {
           "upstream": []
         },
-        "yolov7-object-recognition": {
+        "yolov8-object-recognition": {
           "upstream": [
             "download-data"
           ]
         },
-        "deploy-yolov7-web-service": {
+        "deploy-yolov8-web-service": {
           "upstream": [
-            "yolov7-object-recognition"
+            "yolov8-object-recognition"
           ]
         }
       }
@@ -37,41 +37,43 @@
         }
       },
       {
-        "job_templete": "yolov7",
-        "name": "yolov7-object-recognition",
+        "job_templete": "yolov8",
+        "name": "yolov8-object-recognition",
         "label": "目标识别训练",
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
         "resource_memory": "5G",
         "resource_cpu": "5",
         "args": {
-            "--train": "/mnt/{{creator}}/coco_data_sample/train.txt",
-            "--val": "/mnt/{{creator}}/coco_data_sample/valid.txt",
-            "--classes": "person,bicycle,car,motorcycle,airplane,bus,train,truck,boat,trafficlight,firehydrant,stopsign,parkingmeter,bench,bird,cat,dog,horse,sheep,cow,elephant,bear,zebra,giraffe,backpack,umbrella,handbag,tie,suitcase,frisbee,skis,snowboard,sportsball,kite,baseballbat,baseballglove,skateboard,surfboard,tennisracket,bottle,wineglass,cup,fork,knife,spoon,bowl,banana,apple,sandwich,orange,broccoli,carrot,hotdog,pizza,donut,cake,chair,couch,pottedplant,bed,diningtable,toilet,tv,laptop,mouse,remote,keyboard,cellphone,microwave,oven,toaster,sink,refrigerator,book,clock,vase,scissors,teddybear,hairdrier,toothbrush",
-            "--batch_size": "1",
-            "--epoch": "1",
-            "--weights": "/yolov7/weights/yolov7_training.pt",
-            "--save_model_path": "/mnt/{{creator}}/coco_data_sample/yolov7_best.pt"
+          "--train": "/mnt/{{creator}}/coco_data_sample/train.txt",
+          "--val": "/mnt/{{creator}}/coco_data_sample/valid.txt",
+          "--classes": "person,bicycle,car,motorcycle,airplane,bus,train,truck,boat,trafficlight,firehydrant,stopsign,parkingmeter,bench,bird,cat,dog,horse,sheep,cow,elephant,bear,zebra,giraffe,backpack,umbrella,handbag,tie,suitcase,frisbee,skis,snowboard,sportsball,kite,baseballbat,baseballglove,skateboard,surfboard,tennisracket,bottle,wineglass,cup,fork,knife,spoon,bowl,banana,apple,sandwich,orange,broccoli,carrot,hotdog,pizza,donut,cake,chair,couch,pottedplant,bed,diningtable,toilet,tv,laptop,mouse,remote,keyboard,cellphone,microwave,oven,toaster,sink,refrigerator,book,clock,vase,scissors,teddybear,hairdrier,toothbrush",
+          "--batch_size": "1",
+          "--epoch": "1",
+          "--weights": "/yolov8/yolov8n.pt",
+          "--save_model_path": "/mnt/{{creator}}/coco_data_sample/yolov8_best.pt"
         }
       },
       {
         "job_templete": "deploy-service",
-        "name": "deploy-yolov7-web-service",
+        "name": "deploy-yolov8-web-service",
         "volume_mount": "kubeflow-user-workspace(pvc):/mnt/",
         "label": "部署模型web服务",
         "args": {
+          "--project_name": "public",
           "--label": "目标识别推理服务",
-          "--model_name": "yolov7",
-          "--model_version": "v2024.01.01.1",
-          "--model_path": "/mnt/{{creator}}/coco_data_sample/yolov7_best.pt",
+          "--model_name": "yolov8",
+          "--model_version": "v2024.07.01.1",
+          "--model_path": "/mnt/{{creator}}/coco_data_sample/yolov8_best.pt",
           "--service_type": "serving",
-          "--images": "ccr.ccs.tencentyun.com/cube-studio/yolov7:2024.01",
-          "--working_dir": "/yolov7",
+          "--images": "ccr.ccs.tencentyun.com/cube-studio/yolov8:2025.03",
+          "--volume_mount": "kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/labelstudio(hostpath):/labelstudio/",
+          "--working_dir": "/yolov8",
           "--command": "python server.py",
-          "--env": "MODELPATH=/mnt/{{creator}}/coco_data_sample/yolov7_best.pt\nYOLO_EXAMPLE=/mnt/{{creator}}/coco_data_sample/images/train2014/COCO_train2014_000000000597.jpg",
+          "--env": "MODELPATH=/mnt/{{creator}}/coco_data_sample/yolov8_best.pt\nYOLO_EXAMPLE=/mnt/{{creator}}/coco_data_sample/images/train2014/COCO_train2014_000000000597.jpg",
           "--ports": "8080",
           "--replicas": "1",
-          "--resource_memory": "5G",
-          "--resource_cpu": "5",
+          "--resource_memory": "2G",
+          "--resource_cpu": "1",
           "--resource_gpu": "0"
         }
       }

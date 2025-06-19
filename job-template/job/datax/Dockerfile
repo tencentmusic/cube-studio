@@ -1,12 +1,12 @@
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ARG TARGETARCH=amd64
 ARG PYTHON_VERSION=python3.9
 ENV TZ=Asia/Shanghai
 ENV DEBIAN_FRONTEND=noninteractive
 
-# COPY job/pkgs/sources.list.${TARGETARCH} /etc/apt/sources.list
-COPY job/pkgs/pip.conf /root/.pip/pip.conf
+COPY job/pkgs/ubuntu22.04.sources.list.${TARGETARCH} /etc/apt/sources.list
+
 # 安装运维工具
 RUN apt-get clean all && apt-get update -y
 # 安装运维工具
@@ -23,15 +23,17 @@ RUN bash -c "wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py --ig
 
 RUN rm -rf /usr/bin/python;  ln -s /usr/bin/python3 /usr/bin/python
 
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
+
 # 安装中文
 RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
-ENV LANG zh_CN.UTF-8
-ENV LC_ALL zh_CN.UTF-8
-ENV LANGUAGE zh_CN.UTF-8
+ENV LANG=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN.UTF-8
 
 ### 安装java
 RUN apt install -y openjdk-8-jdk maven
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-${TARGETARCH}
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${TARGETARCH}
 
 # 安装datax
 RUN wget https://datax-opensource.oss-cn-hangzhou.aliyuncs.com/202308/datax.tar.gz && tar -zxvf datax.tar.gz -C /usr/local/ && rm -rf datax.tar.gz
@@ -41,7 +43,7 @@ RUN wget https://datax-opensource.oss-cn-hangzhou.aliyuncs.com/202308/datax.tar.
 
 WORKDIR /usr/local/datax/bin
 
-COPY job/datax/* /usr/local/datax/bin/
+COPY job/datax/ /usr/local/datax/bin/
 
 #ENTRYPOINT ["bash","start.sh"]
 ENTRYPOINT ["python","start.py"]

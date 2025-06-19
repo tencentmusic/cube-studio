@@ -18,5 +18,6 @@ nerdctl pull registry.cn-hangzhou.aliyuncs.com/rancher/rancher-agent:v2.8.5 &
 nerdctl pull registry.cn-hangzhou.aliyuncs.com/rancher/rancher-webhook:v0.4.7 &
 nerdctl pull registry.cn-hangzhou.aliyuncs.com/rancher/rke2-cloud-provider:v1.26.3-build20230406 &
 nerdctl pull registry.cn-hangzhou.aliyuncs.com/rancher/shell:v0.1.24 &
+nerdctl pull registry.cn-hangzhou.aliyuncs.com/rancher/system-agent-installer-rke2:v1.25.16-rke2r1 &
 
 wait

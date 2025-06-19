@@ -48,7 +48,7 @@ spec:
         - name: redis
           securityContext:
             {}
-          image: "bitnami/redis:6.2.12"
+          image: "bitnami/redis:7.4"     # 6.2.12
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 6379

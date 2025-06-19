@@ -17,7 +17,7 @@ import requests
 from project import push_admin
 
 
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def check_push():
     try:
         redis_host = os.getenv('REDIS_HOST', 'redis-master.infra')

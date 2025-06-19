@@ -1284,7 +1284,7 @@ AI:
 
 
     # 调用chatgpt接口
-    # @pysnooper.snoop()
+    # @pysnooper.snoop(watch_explode=('data',))
     def chatgpt(self, chat, session_id, search_text, enable_history,history=[], chatlog_id=None, stream=True):
         max_retry=3
         for i in range(0,max_retry):
@@ -1295,16 +1295,16 @@ AI:
             before = service_config.get('before',[])
             after = service_config.get('after', [])
             data = {
-                'model': 'gpt-4-turbo-2024-04-09',
+                'model': service_config.get('model',conf.get('CHATGPT_ARGS',{}).get('model','gpt-4-turbo-2024-04-09')),
                 'messages': message,
                 'temperature': service_config.get("temperature",1),  # 问答发散度 0-2 越高越发散 较高的值（如0.8）将使输出更随机，较低的值（如0.2）将使其更集中和确定性
                 'top_p': service_config.get("top_p",0.5),  # 同temperature，如果设置 0.1 意味着只考虑构成前 10% 概率质量的 tokens
                 'n': 1,  # top n可选值
                 'stream': stream,
-                'stop': 'elit proident sint',  #
+                'stop': service_config.get('stop','elit proident sint'),  #
                 'max_tokens': service_config.get("max_tokens",2500),  # 最大返回数
                 'presence_penalty': service_config.get("presence_penalty",1),  # [控制主题的重复度]，-2.0（抓住一个主题使劲谈论） ~ 2.0（最大程度避免谈论重复的主题） 之间的数字，正值会根据到目前为止是否出现在文本中来惩罚新 tokens，从而增加模型谈论新主题的可能性
-                'frequency_penalty': 0, # [重复度惩罚因子], -2.0(可以尽情出现相同的词汇) ~ 2.0 (尽量不要出现相同的词汇)
+                'frequency_penalty': service_config.get('frequency_penalty',0), # [重复度惩罚因子], -2.0(可以尽情出现相同的词汇) ~ 2.0 (尽量不要出现相同的词汇)
                 'user': 'user',
             }
             data.update(json.loads(chat.service_config).get("llm_data", {}))
@@ -1327,7 +1327,7 @@ AI:
 
                     client = sseclient.SSEClient(res)
 
-                    # @pysnooper.snoop(watch_explode='message')
+                    # @pysnooper.snoop(watch_explode='back_ops_message')
                     def generate(history):
 
                         back_message = ''
@@ -1363,7 +1363,8 @@ AI:
                             back_ops_message = back_message
                             for ops in after:
                                 if len(ops) == 3 and ops[0] == 'replace':
-                                    back_ops_message = back_ops_message.replace(ops[1], ops[2])
+                                    back_ops_message = re.sub(ops[1],ops[2],back_ops_message,flags=re.DOTALL)
+                                    # back_ops_message = back_ops_message.replace(ops[1], ops[2])
 
                             # 随机乱码，用来避免内容中包含此内容，实现每次返回内容的分隔
                             back = "TQJXQKT0POF6P4D:" + json.dumps(

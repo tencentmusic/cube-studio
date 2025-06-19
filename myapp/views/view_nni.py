@@ -1,3 +1,6 @@
+import math
+import re
+
 from kubernetes.client import ApiException
 
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
@@ -25,7 +28,7 @@ from flask import (
     g,
     Markup,
     redirect,
-    request
+    request, render_template
 )
 from .baseApi import (
     MyappModelRestApi
@@ -245,7 +248,7 @@ class NNI_ModelView_Base():
     edit_form_extra_fields['resource_gpu'] = StringField(
         _('gpu'),
         default='0',
-        description=_('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。-1为共享占用方式，申请具体的卡型号，可以类似 1(V100)'),
+        description=_('申请的gpu卡数目，示例:2。训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
         widget=BS3TextFieldWidget(),
         validators=[DataRequired()]
     )
@@ -342,7 +345,7 @@ class NNI_ModelView_Base():
         nodeSelector = nodeSelector.split(',')
         nodeSelector = dict([x.strip().split('=') for x in nodeSelector])
 
-        volume_mount = nni.volume_mount.rstrip(',')+f",{conf.get('WORKSPACE_HOST_PATH', '')}/{nni.created_by.username}/nni/{nni.name}/log/(hostpath):/tmp/nni-experiments/"
+        volume_mount = nni.volume_mount.rstrip(',')+f",{conf.get('WORKSPACE_HOST_PATH', '/data/k8s/kubeflow/pipeline/workspace')}/{nni.created_by.username}/nni/{nni.name}/log/(hostpath):/tmp/nni-experiments/"
         k8s_volumes, k8s_volume_mounts = k8s_client.get_volume_mounts(volume_mount, nni.created_by.username)
 
         task_master_spec = {
@@ -406,7 +409,8 @@ class NNI_ModelView_Base():
         }
 
         gpu_num,gpu_type,resource_name = core.get_gpu(nni.resource_gpu)
-        if gpu_num:
+        gpu_num = math.ceil(float(str(gpu_num).split(',')[-1]))
+        if gpu_num>0:
             resources['requests'][resource_name] = gpu_num
             resources['limits'][resource_name] = gpu_num
         task_master_spec['spec']['containers'][0]['resources']=resources

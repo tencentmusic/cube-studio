@@ -1,0 +1,44 @@
+apiVersion: kubekey.kubesphere.io/v1alpha2
+kind: Cluster
+metadata:
+  name: dev
+spec:
+  hosts:
+  - {name: 172.24.92.61, address: 172.24.92.61, internalAddress: 172.24.92.61, port: 22, user: root, password: "1qaz2wsx#EDC"}
+  - {name: 172.24.92.62, address: 172.24.92.62, internalAddress: 172.24.92.62, port: 22, user: root, password: "1qaz2wsx#EDC"}
+# arm  - {name: 172.24.92.62, address: 172.24.92.62, internalAddress: 172.24.92.62, port: 22, user: root, password: "1qaz2wsx#EDC",arch: arm64}
+  roleGroups:
+    etcd:
+    - 172.24.92.61
+    control-plane:
+    - 172.24.92.61
+    worker:
+    - 172.24.92.61
+    - 172.24.92.62
+  controlPlaneEndpoint:
+    ## Internal loadbalancer for apiservers
+    # internalLoadbalancer: haproxy
+
+    domain: lb.kubesphere.local
+    address: ""
+    port: 6443
+  kubernetes:
+    version: v1.25.16
+    proxyMode: iptables
+    clusterName: cluster.local
+    autoRenewCerts: true
+    containerManager: containerd
+    apiserverArgs:
+      - service-node-port-range=1-65535
+    kubelet:
+      serializeImagePulls: false   # 设置为false允许并行拉取镜像
+  etcd:
+    type: kubekey
+  network:
+    plugin: calico
+    kubePodsCIDR: 10.233.0.0/16
+    kubeServiceCIDR: 10.234.0.0/16
+    ## multus support. https://github.com/k8snetworkplumbingwg/multus-cni
+    multusCNI:
+      enabled: false
+  addons: []

@@ -88,7 +88,7 @@ class Training_Model(Model,AuditMixinNullable,MyappModelBase):
                 metric_str=metric_str.strip(',')+'\n'
             return metric_str.strip()
         except Exception as e:
-            print(e)
+            # print(e)
             return self.metrics
 
 

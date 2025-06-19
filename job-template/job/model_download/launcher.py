@@ -115,6 +115,7 @@ def download(**kwargs):
             with open(os.path.join(save_path, file_name), "wb") as file:
                 file.write(response.content)
                 file.close()
+                print('模型保存至',save_path)
 
         elif not os.path.exists(model_path):
             print(f'{model_path}下不存在模型')
@@ -130,10 +131,12 @@ def download(**kwargs):
                         if os.path.exists(des_path):
                             os.remove(des_path)
                         shutil.copy2(one_file_path,des_path)
+                        print('模型保存至',des_path)
                     except Exception as e:
                         print(e)
         else:
             shutil.copy2(model_path,save_path)
+            print('模型保存至',save_path)
 
         # 同时将模型信息写入到存储中,比如计算指标
         if kwargs['from']=='模型管理':
@@ -165,7 +168,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('--from', type=str, help="模型来源地", default='train_model')
     arg_parser.add_argument('--model_name', type=str, help="模型名", default='demo')
     arg_parser.add_argument('--sub_model_name', type=str, help="子模型名", default='')
-    arg_parser.add_argument('--model_version', type=str, help="模型版本号",default=datetime.datetime.now().strftime('v%Y.%m.%d.1'))
+    arg_parser.add_argument('--model_version', type=str, help="模型版本号",default='')
     arg_parser.add_argument('--model_status', type=str, help="模型状态", default='')
     arg_parser.add_argument('--save_path', type=str, help="下载目录", default='')
 
@@ -179,5 +182,9 @@ if __name__ == "__main__":
         exitcode = exe_command(command)
         exit(exitcode)
 
+    elif kwargs['from'] == 'modelscope' or kwargs['from'] == '魔塔':
+        command = f'modelscope download --model {kwargs["model_name"]} --local_dir {kwargs["save_path"]}'
+        exitcode = exe_command(command)
+        exit(exitcode)
 
 

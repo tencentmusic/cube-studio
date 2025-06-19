@@ -51,10 +51,11 @@ class AbstractEventLogger(ABC):
 # @pysnooper.snoop(depth=2)
 class DBEventLogger(AbstractEventLogger):
 
-    def log(self, user_id, action, duration_ms, *args, **kwargs):
+    def log(self, user_id=None, action=None, duration_ms=10, *args, **kwargs):
         from myapp.models.log import Log
         referrer = request.referrer[:1000] if request.referrer else None
-
+        if not user_id and g.user:
+            user_id = g.user.get_id()
         log = Log(
             action=action,
             json=json.dumps(kwargs, indent=4, ensure_ascii=False),

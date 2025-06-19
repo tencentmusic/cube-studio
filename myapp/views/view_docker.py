@@ -1,3 +1,5 @@
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
@@ -7,9 +9,9 @@ from myapp.models.model_job import Repository
 from myapp import app, appbuilder, db
 from myapp.models.model_job import Repository
 from wtforms import StringField
-from myapp.views.view_team import Project_Join_Filter
+from myapp.views.view_team import Project_Join_Filter, filter_join_org_project
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
-from myapp.forms import MyBS3TextAreaFieldWidget
+from myapp.forms import MyBS3TextAreaFieldWidget, MySelect2Widget
 import pysnooper
 from .baseApi import MyappModelRestApi
 from flask import (
@@ -62,7 +64,7 @@ class Docker_ModelView_Base():
         "project": {"type": "ellip2", "width": 150},
         "describe": {"type": "ellip2", "width": 200},
         "image_history": {"type": "ellip3", "width": 600},
-        "debug": {"type": "ellip2", "width": 150}
+        "debug": {"type": "ellip2", "width": 120}
     }
 
     add_form_query_rel_fields = {
@@ -76,13 +78,13 @@ class Docker_ModelView_Base():
     }
     expand_columns={
         "expand":{
-            'volume_mount': StringField(
-                label= _('挂载'),
-                default='kubeflow-user-workspace(pvc):/mnt/',
-                description= _('构建镜像时添加的挂载'),
-                widget=BS3TextFieldWidget(),
-                validators=[]
-            ),
+            # 'volume_mount': StringField(
+            #     label= _('挂载'),
+            #     default='kubeflow-user-workspace(pvc):/mnt/',
+            #     description= _('构建镜像时添加的挂载'),
+            #     widget=BS3TextFieldWidget(),
+            #     validators=[]
+            # ),
             'resource_memory': StringField(
                 label= _('内存'),
                 default='8G',
@@ -100,7 +102,7 @@ class Docker_ModelView_Base():
             'resource_gpu': StringField(
                 label= _('gpu'),
                 default='0',
-                description= _('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。-1为共享占用方式，小数(0.1)为vgpu方式，申请具体的卡型号，可以类似 1(V100)'),
+                description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。-1为共享占用方式，小数(0.1)为vgpu方式，申请具体的卡型号，可以类似 1(V100)'),
                 widget=BS3TextFieldWidget(),
                 validators=[DataRequired()]
             )
@@ -127,6 +129,13 @@ class Docker_ModelView_Base():
 
     # @pysnooper.snoop()
     def pre_add_web(self, docker=None):
+        # self.add_form_extra_fields['project'] = QuerySelectField(
+        #     _('项目组'),
+        #     default='',
+        #     description=_('部署项目组，在切换项目组前注意先停止当前容器'),
+        #     query_factory=filter_join_org_project,
+        #     widget=MySelect2Widget(extra_classes="readonly" if docker else None, new_web=False),
+        # )
         self.add_form_extra_fields['target_image'] = StringField(
             _('目标镜像'),
             default=conf.get('PUSH_REPOSITORY_ORG','ccr.ccs.tencentyun.com/cube-studio/')+g.user.username+":"+datetime.datetime.now().strftime('%Y.%m.%d'+".1"),
@@ -144,6 +153,10 @@ class Docker_ModelView_Base():
         # # if g.user.is_admin():
         # self.edit_columns=['describe','base_image','target_image','need_gpu','consecutive_build']
         self.edit_form_extra_fields = self.add_form_extra_fields
+
+        self.default_filter = {
+            "created_by": g.user.id
+        }
 
     pre_update_web = pre_add_web
 

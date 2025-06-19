@@ -120,7 +120,7 @@ axios.interceptors.response.use(
         // Any status codes that falls outside the range of 2xx cause this function to trigger
         if (error.response) {
             const tipMessage = JSON.parse(error.response.headers['api_flashes'] || '[]')
-            console.log('tipMessage', tipMessage)
+            // console.log('tipMessage', tipMessage)
             if (tipMessage && Array.isArray(tipMessage) && tipMessage.length) {
                 tipMessage.forEach((tip: any) => {
                     if (Array.isArray(tip)) {

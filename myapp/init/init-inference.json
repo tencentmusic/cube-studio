@@ -12,7 +12,7 @@
     "host": "/v1/models/mnist/metadata",
     "ports": "8501",
     "metrics": "8501:/metrics",
-    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/tf-mnist.tar.gz && tar -zxvf tf-mnist.tar.gz && mkdir -p /models/mnist/202207281/ && cp -r tf-mnist/* /models/mnist/202207281/ && /usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
+    "command": "wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/tf-mnist.tar.gz && tar -zxvf tf-mnist.tar.gz && mkdir -p /models/mnist/202207281/ && cp -r tf-mnist/* /models/mnist/202207281/ && /usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config --rest_api_num_threads=300 --enable_batching=true",
     "health": "8501:/v1/models/mnist/versions/202207281/metadata",
     "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
     "resource_memory": "2G",

@@ -246,6 +246,7 @@ class MyappFormRestApi(BaseView):
             "columns_info": {},
             "description_columns": {},
             "edit_columns": [],
+            "fixed_columns": [],
             "edit_fieldsets": [],
             "edit_title": self.edit_title,
             "related": {},

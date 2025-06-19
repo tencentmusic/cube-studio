@@ -213,8 +213,8 @@ def init():
                 repository = Repository()
                 repository.name = 'hubsecret'
                 repository.server=conf.get('REPOSITORY_ORG','ccr.ccs.tencentyun.com/cube-studio/')
-                repository.user = 'yourname'
-                repository.password = 'yourpassword'
+                repository.user = ''
+                repository.password = ''
                 repository.hubsecret = 'hubsecret'
                 repository.created_by_fk = 1
                 repository.changed_by_fk = 1
@@ -569,12 +569,15 @@ def init():
                          resource_cpu='2', resource_gpu='0', min_replicas=1, max_replicas=1, host='', ports='80',
                          volume_mount='kubeflow-user-workspace(pvc):/mnt', metrics='', health='', inference_config='',
                          expand={}):
+        model_version = model_version if model_version else datetime.now().strftime('v%Y.%m.%d.1')
+        model_version = model_version.replace('v', '').replace('.', '').replace(':', '')
+        service_name = model_name + "-" + model_version
         service = db.session.query(InferenceService).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
             try:
                 service = InferenceService()
-                service.name = service_name.replace('_', '-')
+                service.name = service_name
                 service.label = service_describe
                 service.service_type = service_type
                 service.model_name = model_name
@@ -727,7 +730,7 @@ def init():
                             chat.tips = data.get('tips', '')
                             chat.prompt = data.get('prompt', '')
                             chat.knowledge = knowledge
-                            chat.service_type = data.get('service_type', 'chatgpt3.5')
+                            chat.service_type = data.get('service_type', 'openai')
                             chat.service_config = json.dumps(data.get('service_config', {}), indent=4, ensure_ascii=False)
                             chat.owner = data.get('owner', 'admin')
                             chat.expand = json.dumps(data.get('expand', {}), indent=4,ensure_ascii=False)

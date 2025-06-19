@@ -7,8 +7,8 @@ ARG CONDAENV
 ARG CUDAVERSION=cu118
 ARG TARGETARCH=amd64
 
-ENV TZ Asia/Shanghai
-ENV DEBIAN_FRONTEND noninteractive
+ENV TZ=Asia/Shanghai
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y
 # 安装运维工具
@@ -16,9 +16,9 @@ RUN apt install -y -f --no-install-recommends vim apt-transport-https gnupg2 ca-
 
 # 安装中文
 RUN apt install -y -f --no-install-recommends fontconfig locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
-ENV LANG zh_CN.UTF-8
-ENV LC_ALL zh_CN.UTF-8
-ENV LANGUAGE zh_CN.UTF-8
+ENV LANG=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN.UTF-8
 
 # 便捷操作
 RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
@@ -34,15 +34,15 @@ fi
 # 安装arm64的conda
 RUN if [ "$TARGETARCH" = "arm64" ]; then \
      wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-aarch64.sh ; \
-    mkdir /root/.conda && bash Miniconda3-latest-Linux-aarch64.sh -b ; \
+    mkdir /root/.conda && bash Miniconda3-latest-Linux-aarch64.sh -b -u; \
     rm -f Miniconda3-latest-Linux-aarch64.sh ; \
 fi
 
 # 激活python3
-ENV PATH "/root/miniconda3/bin":$PATH
+ENV PATH=/root/miniconda3/bin:${PATH:-}
 RUN conda create -y -n ${CONDAENV} python=${PYTHONVERSION}
-ENV PATH /root/miniconda3/envs/${CONDAENV}/bin:$PATH
-ENV CONDA_DEFAULT_ENV ${CONDAENV}
+ENV PATH=/root/miniconda3/envs/${CONDAENV}/bin:${PATH:-}
+ENV CONDA_DEFAULT_ENV=${CONDAENV}
 
 
 # 安装最新版的nodejs
@@ -63,10 +63,10 @@ RUN pip3 install torch torchvision torchaudio --index-url https://download.pytor
 #RUN pip install --upgrade jupyterlab-git jupyterlab_tensorboard_pro && jupyter lab build && jupyter labextension install jupyterlab_tensorboard_pro && jupyter serverextension enable jupyterlab_tensorboard_pro --sys-prefix
 
 # 环境变量
-ENV NODE_HOME /usr/local
-ENV PATH $PATH:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV NODE_PATH $NODE_HOME/lib/node_modules:$PATH
-ENV SHELL /bin/bash
+ENV NODE_HOME=/usr/local
+ENV PATH=${PATH:-}:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV NODE_PATH=$NODE_HOME/lib/node_modules:${PATH:-}
+ENV SHELL=/bin/bash
 
 # 拷贝examples
 COPY examples/* /examples/

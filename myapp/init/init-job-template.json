@@ -1836,6 +1836,63 @@
     "job_template_args": {
     }
   },
+  "opencompass": {
+    "project_name": "模型处理",
+    "image_name": "python:3.9",
+    "gitpath": "/job-template/job/opencompass",
+    "image_describe": "大模型评测",
+    "job_template_name": "opencompass",
+    "job_template_describe": "大模型评测(todo)",
+    "job_template_command": "python3 launcher.py",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 3,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/opencompass"
+    },
+    "job_template_args": {
+    }
+  },
+  "model-quantization": {
+    "project_name": "模型处理",
+    "image_name": "python:3.9",
+    "gitpath": "/job-template/job/model-quantization",
+    "image_describe": "大模型量化",
+    "job_template_name": "model-quantization",
+    "job_template_describe": "大模型量化(todo)",
+    "job_template_command": "python3 launcher.py",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 4,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/model-quantization"
+    },
+    "job_template_args": {
+    }
+  },
+  "model-distillation": {
+    "project_name": "模型处理",
+    "image_name": "python:3.9",
+    "gitpath": "/job-template/job/model-distillation",
+    "image_describe": "大模型蒸馏",
+    "job_template_name": "model-distillation",
+    "job_template_describe": "大模型蒸馏(todo)",
+    "job_template_command": "python3 launcher.py",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 5,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/model-distillation"
+    },
+    "job_template_args": {
+    }
+  },
   "model-register": {
     "project_name": "模型服务化",
     "image_name": "ccr.ccs.tencentyun.com/cube-studio/model_register:20230501",
@@ -2574,7 +2631,7 @@
   },
   "yolov8": {
     "project_name": "机器视觉",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/yolov8:2024.10",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/yolov8:2025.03",
     "gitpath": "/job-template/job/yolov8",
     "image_describe": "yolo目标识别",
     "job_template_name": "yolov8",
@@ -2804,7 +2861,7 @@
   },
   "nlp-clean-data": {
     "project_name": "文本处理",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
+    "image_name": "python:3.9",
     "gitpath": "/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-clean-data",
@@ -2825,14 +2882,14 @@
   },
   "nlp-filter-data": {
     "project_name": "文本处理",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
+    "image_name": "python:3.9",
     "gitpath": "/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-filter-data",
     "job_template_describe": "过滤异常文档(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "python filter-data.py",
+    "job_template_command": "python launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
@@ -2846,19 +2903,82 @@
   },
   "nlp-replace-private-data": {
     "project_name": "文本处理",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/nlp-process:20240601",
+    "image_name": "python:3.9",
     "gitpath": "/job-template/job/nlp-process",
     "image_describe": "文本算法类的数据处理",
     "job_template_name": "nlp-replace-private-data",
     "job_template_describe": "去除隐私信息(todo)",
     "job_template_version": "Release",
     "job_template_workdir": "",
-    "job_template_command": "python replace-data.py",
+    "job_template_command": "python launcher.py",
     "job_template_volume": "",
     "job_template_account": "",
     "job_template_env": "",
     "job_template_expand": {
       "index": 3,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/nlp-process"
+    },
+    "job_template_args": {
+    }
+  },
+  "question-generation": {
+    "project_name": "文本处理",
+    "image_name": "python:3.9",
+    "gitpath": "/job-template/job/nlp-process",
+    "image_describe": "文本算法类的数据处理",
+    "job_template_name": "question-generation",
+    "job_template_describe": "问题生成(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "python launcher.py",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 4,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/nlp-process"
+    },
+    "job_template_args": {
+    }
+  },
+  "question-answer-generation": {
+    "project_name": "文本处理",
+    "image_name": "python:3.9",
+    "gitpath": "/job-template/job/nlp-process",
+    "image_describe": "文本算法类的数据处理",
+    "job_template_name": "question-answer-generation",
+    "job_template_describe": "问答对生成(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "python launcher.py",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 5,
+      "rec_job_template": "自定义镜像",
+      "help_url": "/job-template/job/nlp-process"
+    },
+    "job_template_args": {
+    }
+  },
+  "question-answer-extension": {
+    "project_name": "文本处理",
+    "image_name": "python:3.9",
+    "gitpath": "/job-template/job/nlp-process",
+    "image_describe": "文本算法类的数据处理",
+    "job_template_name": "question-answer-extension",
+    "job_template_describe": "问答对扩充(todo)",
+    "job_template_version": "Release",
+    "job_template_workdir": "",
+    "job_template_command": "python launcher.py",
+    "job_template_volume": "",
+    "job_template_account": "",
+    "job_template_env": "",
+    "job_template_expand": {
+      "index": 6,
       "rec_job_template": "自定义镜像",
       "help_url": "/job-template/job/nlp-process"
     },

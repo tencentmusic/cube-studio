@@ -212,7 +212,12 @@ def make_tfjob(name,num_workers,image,working_dir,command):
                         "image": image if image else KFJ_TASK_IMAGES,
                         "imagePullPolicy": os.getenv('IMAGE_PULL_POLICY','IfNotPresent'),
                         "workingDir":working_dir,
-                        "env":[],
+                        "env":[
+                            {
+                                "name": "GPU_NUM",
+                                "value": str(int(gpu_num))
+                            }
+                        ],
                         "command": ['bash','-c',command],
                         "volumeMounts": k8s_volume_mounts,
                         "resources": {

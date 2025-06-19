@@ -223,6 +223,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 edit_fieldsets,
                 help_url,
                 order_columns,
+                fixed_columns,
                 action,
                 route_base,
                 column_related,
@@ -251,7 +252,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                     effectOption: value.related.reduce((ePre: any, eNext) => ({ ...ePre, [calculateId(eNext.src_value)]: eNext.des_value.map(item => ({ label: item, value: item })) }), {})
                 }]), [])
 
-            const listColumns = list_columns.map(column => {
+            const listColumns = list_columns.filter((column: any) => !fixed_columns.includes(column)).map(column => {
                 const columnTitle = label_columns[column] || column;
                 const [before, after] = columnTitle.split(":");
 
@@ -308,6 +309,67 @@ export default function TaskListManager(props?: IAppMenuItem) {
                         return <div style={{ overflow: 'auto', maxHeight: 100 }} dangerouslySetInnerHTML={{ __html: text }}></div>
                     },
                     width: cacheColumnsWidthMap[column] || (cols_width[column] && cols_width[column].width) || 100
+                }
+            })
+
+            const fixedColumns: any = list_columns.filter((column: any) => fixed_columns.includes(column)).map(column => {
+                const columnTitle = label_columns[column] || column;
+                const [before, after] = columnTitle.split(":");
+
+                return {
+                    title: after?<Tooltip placement="top" title={after}>{before}<InfoCircleOutlined /></Tooltip>:before,
+                    dataIndex: column,
+                    key: column,
+                    align: 'left',
+                    fixed: 'right',
+                    render: (text: any, record: any) => {
+                        if (text === undefined || text === '') {
+                            return '-'
+                        }
+                        if (isDomString(text)){
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = text;
+                            const topElement = tempDiv.firstElementChild;
+                            const typeValue = topElement?.getAttribute('type');
+                            const addedValue = topElement?.getAttribute('addedValue');
+
+                            console.log('type:', typeValue);
+                            console.log('addedValue:', addedValue);
+                            if (typeValue && addedValue){
+                                if (typeValue === 'tips'){
+                                    return <Tooltip title={<span className="tips-content" dangerouslySetInnerHTML={{ __html: addedValue}}></span>} placement="topLeft">
+                                      <div className={cols_width[column].type || 'ellip2'} dangerouslySetInnerHTML={{ __html: text }}>
+                                       </div>
+                                    </Tooltip>
+                                }
+                                if (typeValue === 'enhancedDetails'){
+                                    return <div onClick={()=>{setVisibleTabsModal(true);setEnhancedDetailsUrl(addedValue)}} dangerouslySetInnerHTML={{ __html: text }}></div>
+                                }
+                            }
+                        }
+
+                        if (cols_width[column] && cols_width[column].type?.indexOf('ellip') !== -1) {
+                            return <Tooltip title={<span className="tips-content" dangerouslySetInnerHTML={{ __html: text }}></span>} placement="topLeft">
+                                <div className={cols_width[column].type} dangerouslySetInnerHTML={{ __html: text }}>
+                                </div>
+                            </Tooltip>
+                        }
+                        if (Object.prototype.toString.call(text) === '[object Object]') {
+                            const tarRes = Object.entries(text).reduce((pre: any, [label, value]) => [...pre, { label, value }], [])
+                            if (!tarRes.length) {
+                                return '-'
+                            }
+                            return <div style={{ overflow: 'auto', maxHeight: 100 }}>
+                                {
+                                    tarRes.map((item: any, index: number) => {
+                                        return <div key={`table_itemvalue_${index}`}>{label_columns[item.label] || item.label}:{item.value}</div>
+                                    })
+                                }
+                            </div>
+                        }
+                        return <div style={{ overflow: 'auto', maxHeight: 100 }} dangerouslySetInnerHTML={{ __html: text }}></div>
+                    },
+                    width: (cols_width[column] && cols_width[column].width) || 100
                 }
             })
 
@@ -543,6 +605,9 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 },
             }
             const tarColumns: React.SetStateAction<ColumnsType<any>> = [...listColumns]
+            if (fixedColumns){
+                tarColumns.push(...fixedColumns);
+            }
             if (hasAction) {
                 tarColumns.push(tableAction)
             }

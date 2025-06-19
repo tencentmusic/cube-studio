@@ -41,6 +41,7 @@ export interface IADUGTemplateInfo {
     list_columns: string[]
     list_title: string
     order_columns: string[]
+    fixed_columns: string[]
     permissions: string[]
     show_columns: string[]
     show_title: string

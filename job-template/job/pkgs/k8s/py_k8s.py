@@ -31,8 +31,7 @@ class K8s():
             "gpu":"nvidia.com/gpu"
         }
         self.vgpu_resource = {
-            "mgpu":"tencent.com/vcuda-core",
-            "qgpu":"tke.cloud.tencent.com/qgpu-core",
+            "vgpu": "nvidia.com/vgpu",  # 第四范式解决方案虚拟化方法，cuda层拦截
         }
         self.vgpu_drive_type = 'TENCENT'
 

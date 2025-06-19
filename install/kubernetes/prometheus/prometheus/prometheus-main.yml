@@ -24,6 +24,7 @@ spec:
   storage:
     volumeClaimTemplate:
       spec:
+        storageClassName: ""
         accessModes:
         - ReadWriteMany
         resources:

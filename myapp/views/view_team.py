@@ -11,7 +11,7 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget, BS3TextFieldWidget
 from myapp.exceptions import MyappException
 from myapp import db, security_manager
-from myapp.forms import MyBS3TextFieldWidget, MyBS3TextAreaFieldWidget
+from myapp.forms import MyBS3TextFieldWidget, MyBS3TextAreaFieldWidget, MySelect2Widget
 from wtforms.validators import DataRequired, Regexp, Length
 from flask import (
     flash,

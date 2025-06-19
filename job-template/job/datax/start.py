@@ -60,13 +60,13 @@ if __name__ == "__main__":
     files = os.listdir(outdir)
     for file in files:
         if outname in file:
-            file_stat = os.stat(os.path.join(outdir,file))
-            creation_time = file_stat.st_ctime
-            dt_object = datetime.datetime.fromtimestamp(creation_time)
-            if (datetime.datetime.now()-dt_object).total_seconds()<10:
-                if os.path.exists(args.save_path):
-                    os.remove(args.save_path)
-                shutil.move(os.path.join(outdir,file),args.save_path)
+            # file_stat = os.stat(os.path.join(outdir,file))
+            # creation_time = file_stat.st_mtime
+            # dt_object = datetime.datetime.fromtimestamp(creation_time)
+            # if (datetime.datetime.now()-dt_object).total_seconds()<60:
+            if os.path.exists(args.save_path):
+                os.remove(args.save_path)
+            shutil.move(os.path.join(outdir,file),args.save_path)
 
 
 

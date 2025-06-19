@@ -230,6 +230,10 @@ def make_volcanojob(name,num_workers,image,working_dir,command):
                             {
                                 "name": "NCCL_DEBUG",
                                 "value":"INFO"
+                            },
+                            {
+                                "name": "GPU_NUM",
+                                "value": str(int(gpu_num))
                             }
                         ],
                         "command": ['bash','-c',command],

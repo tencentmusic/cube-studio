@@ -71,12 +71,13 @@ class Notebook_ModelView_Base():
     cols_width = {
         "project": {"type": "ellip2", "width": 150},
         "ide_type_html": {"type": "ellip2", "width": 200},
-        "name_url": {"type": "ellip2", "width": 250},
-        "describe": {"type": "ellip2", "width": 300},
+        "name_url": {"type": "ellip2", "width": 200},
+        "describe": {"type": "ellip2", "width": 250},
         "resource": {"type": "ellip2", "width": 300},
         "status": {"type": "ellip2", "width": 100},
         "renew": {"type": "ellip2", "width": 200},
-        "save": {"type": "ellip2", "width": 100}
+        "save": {"type": "ellip2", "width": 200},
+        "ops_html": {"type": "ellip2", "width": 130}
     }
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -111,7 +112,7 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['project'] = QuerySelectField(
             _('项目组'),
             default='',
-            description= _('部署项目组'),
+            description= _('部署项目组，在切换项目组前注意先停止当前notebook'),
             query_factory=filter_join_org_project,
             widget=MySelect2Widget(extra_classes="readonly" if notebook else None, new_web=False),
         )
@@ -163,7 +164,7 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['resource_gpu'] = StringField(
             _('gpu'),
             default='0',
-            description= _('gpu的资源使用限gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
+            description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired()]
         )
@@ -442,9 +443,10 @@ class Notebook_ModelView_Base():
         exist_pod = k8s_client.get_pods(pod_name=name, namespace=namespace)
         if exist_pod:
             exist_pod = exist_pod[0]
-            # if exist_pod['status'] != 'Running':
-            k8s_client.v1.delete_namespaced_pod(name, namespace, grace_period_seconds=0)
-            exist_pod = None
+            if exist_pod['status'].lower() != 'running':
+                k8s_client.v1.delete_namespaced_pod(name, namespace, grace_period_seconds=0)
+                exist_pod = None
+
         rewrite_url = '/notebook/jupyter/%s/' % notebook.name
         username=g.user.username
         if not exist_pod:
@@ -537,25 +539,21 @@ class Notebook_ModelView_Base():
         # 先使用项目组的
         if notebook.project.expand:
             SERVICE_EXTERNAL_IP = json.loads(notebook.project.expand).get('SERVICE_EXTERNAL_IP', '')
-            if SERVICE_EXTERNAL_IP and type(SERVICE_EXTERNAL_IP) == str:
-                SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[0].strip()
-                SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
-
         # 使用集群的ip
         if not SERVICE_EXTERNAL_IP:
-            ip = notebook.project.cluster.get('HOST','').split('|')[0].strip().split(':')[0]
-            if ip:
-                SERVICE_EXTERNAL_IP=[ip]
-
+            SERVICE_EXTERNAL_IP = notebook.project.cluster.get('HOST','').split('|')[0].strip().split(':')[0]
         # 使用全局ip
         if not SERVICE_EXTERNAL_IP:
             SERVICE_EXTERNAL_IP = conf.get('SERVICE_EXTERNAL_IP', None)
-
-        # 使用当前
+        # 使用当前url的
         if not SERVICE_EXTERNAL_IP:
             if core.checkip(request.host.split(':')[0]):
-                ip = request.host.split(':')[0]
-                SERVICE_EXTERNAL_IP = [ip]
+                SERVICE_EXTERNAL_IP = request.host.split(':')[0]
+
+        if SERVICE_EXTERNAL_IP and type(SERVICE_EXTERNAL_IP) == str:
+            SERVICE_EXTERNAL_IP = [SERVICE_EXTERNAL_IP]
+        if SERVICE_EXTERNAL_IP:
+            SERVICE_EXTERNAL_IP = [x.split('|')[0].strip().split(':')[0] for x in SERVICE_EXTERNAL_IP]
 
         port = 3000
 
@@ -599,8 +597,7 @@ class Notebook_ModelView_Base():
             command = ["bash",'-c','%s node /home/theia/src-gen/backend/main.js /home/project --hostname=0.0.0.0 --port=%s'%(pre_command,port)]
             workingDir = '/home/theia'
 
-        print(command)
-        print(workingDir)
+
 
         image_pull_secrets = conf.get('HUBSECRET', [])
         user_repositorys = db.session.query(Repository).filter(Repository.created_by_fk == g.user.id).all()
@@ -616,7 +613,7 @@ class Notebook_ModelView_Base():
         if notebook_env:
             env.update(notebook_env)
         if SERVICE_EXTERNAL_IP:
-            env["SERVICE_EXTERNAL_IP"] = SERVICE_EXTERNAL_IP[0].split('|')[-1]
+            env["SERVICE_EXTERNAL_IP"] = SERVICE_EXTERNAL_IP[0].split('|')[-1].split(':')[0]
 
 
         annotations={
@@ -723,7 +720,7 @@ class Notebook_ModelView_Base():
         # 边缘模式时，需要根据项目组中的配置设置代理ip
 
         if SERVICE_EXTERNAL_IP and SERVICE_EXTERNAL_IP[0]!='127.0.0.1':
-            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip().split(':')[0] for ip in SERVICE_EXTERNAL_IP]
             ports = [port]
             # if notebook.ide_type=='bigdata':
             for index in range(1, 4):

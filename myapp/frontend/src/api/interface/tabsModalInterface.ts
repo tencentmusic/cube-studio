@@ -20,7 +20,7 @@ export interface IGroupContentItem {
     type: TGroupContentType
 }
 
-export type TGroupContentType = 'map' | 'iframe' | 'echart' | 'text' | 'html'| 'markdown'
+export type TGroupContentType = 'map' | 'iframe' | 'echart' | 'text' | 'html'| 'markdown' | 'image'
 
 export interface IActionButton {
     text: string,

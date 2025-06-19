@@ -96,6 +96,7 @@ reboot
 # 清理历史部署痕迹
 cd cube-studio/install/kubernetes/rancher/
 sh reset_docker.sh
+进程关闭会有时延。
 执行后
 docker ps -a   查看是否还有剩余没清理干净的，如果有，重启机器，重新 sh reset_docker.sh
 
@@ -349,8 +350,10 @@ kubectl delete node node12
 首先，先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl，这里的.tar.gz的文件名称以实际为准
 
 ```bash
+export RANCHER_CONTAINER_TAG=v2.8.5
 docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:$rancher_version
 docker run --volumes-from rancher-data-new  -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-20210101.tar.gz /var/lib/rancher
+
 ```
 
 之后把tar.gz 文件复制到新的rancher server机器上,这里的.tar.gz的文件名称以实际为准

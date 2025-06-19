@@ -190,6 +190,7 @@ rules:
   - pods
   - events
   - pods/log
+  - services
   verbs:
   - get
   - list
@@ -207,6 +208,7 @@ rules:
   - deployments
   - services
   - events
+  - pods/log
   verbs:
   - list
   - get

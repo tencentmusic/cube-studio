@@ -93,6 +93,7 @@ def inference(load_model_path,save_model_dir, inference_dataset, feature_columns
             result.columns = columns
 
         result.to_csv(os.path.join(save_model_dir,'inference_result.csv'), index=False, header=True)
+        print('推理结果保存至', os.path.join(save_model_dir,'inference_result.csv'))
 
 
 @pysnooper.snoop()
@@ -148,6 +149,7 @@ def val(load_model_path,save_model_dir, val_dataset, label_columns, feature_colu
             print(train_test)
             train_test.update({"val_acc":accuracy,"val_auc":auc})
             json.dump(train_test,open(save_val_path, "w"))
+            print('评估结果保存至', save_val_path)
         else:
             y_pred = model.predict(X_val)
 
@@ -157,6 +159,7 @@ def val(load_model_path,save_model_dir, val_dataset, label_columns, feature_colu
             val_f1 = f1_score(y_val, y_pred, average='weighted')  # 使用'macro'平均计算每个类别的F1分数            
             train_test.update({"multi_class_val_acc":val_accuracy,"multi_class_val_prec":val_precision,"multi_class_val_recall":val_recall,"multi_class_val_f1":val_f1})
             json.dump(train_test,open(save_val_path, "w"))
+            print('评估结果保存至', save_val_path)
 
         metrics = [
             {
@@ -247,6 +250,7 @@ def train(save_model_dir, train_dataset, label_columns, feature_columns, model_p
 
     with open(save_model_path, 'wb') as file:
         pickle.dump(model, file)
+        print('训练模型导出至',save_model_path)
         
 # 原生的xgb的代码，原生xgb需要通过"multi:softprob"和"multi:softmax"来输出概率和分类
 #     dtrain = xgb.DMatrix(X_train, y_train)
@@ -325,12 +329,12 @@ def train(save_model_dir, train_dataset, label_columns, feature_columns, model_p
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("train xgb launcher")
-    arg_parser.add_argument('--train_dataset', type=str, help="训练数据集来源", default='')
-    arg_parser.add_argument('--val_dataset', type=str, help="评估数据集名称", default='')
+    arg_parser.add_argument('--train_dataset', type=str, help="训练数据集地址", default='')
+    arg_parser.add_argument('--val_dataset', type=str, help="评估数据集地址", default='')
     arg_parser.add_argument('--feature_columns', type=str, help="特征列", default='')
     arg_parser.add_argument('--label_columns', type=str, help="标签列", default='')
     arg_parser.add_argument('--save_model_dir', type=str, help="模型地址", default='')
-    arg_parser.add_argument('--inference_dataset', type=str, help="推理数据集名称", default='')
+    arg_parser.add_argument('--inference_dataset', type=str, help="推理数据集地址", default='')
     arg_parser.add_argument('--model_params', type=str, help="模型的输入参数", default='{}')
     arg_parser.add_argument('--load_model_path', type=str, help="加载模型地址", default='')
 

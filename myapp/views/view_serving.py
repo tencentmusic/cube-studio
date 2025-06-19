@@ -54,14 +54,18 @@ class Service_ModelView_base():
 
     show_columns = ['project', 'name', 'label', 'images', 'volume_mount', 'working_dir', 'command', 'env',
                     'resource_memory', 'resource_cpu', 'resource_gpu', 'replicas', 'ports', 'host']
-    add_columns = ['project', 'name', 'label', 'images', 'working_dir', 'command', 'env', 'resource_memory',
-                   'resource_cpu', 'resource_gpu', 'replicas', 'ports']
+
+    columns = ['project', 'name', 'label', 'images', 'working_dir', 'command', 'env', 'resource_memory', 'resource_cpu',
+               'resource_gpu', 'replicas', 'ports']
+    add_columns = columns + ['volume_mount']
+    edit_columns = add_columns
+
     list_columns = ['project', 'name_url', 'host_url', 'ip', 'deploy', 'creator', 'modified']
     cols_width = {
         "name_url": {"type": "ellip2", "width": 200},
         "host_url": {"type": "ellip2", "width": 400},
         "ip": {"type": "ellip2", "width": 250},
-        "deploy": {"type": "ellip2", "width": 230},
+        "deploy": {"type": "ellip2", "width": 130},
         "modified": {"type": "ellip2", "width": 150}
     }
     search_columns = ['created_by', 'project', 'name', 'label', 'images', 'resource_memory', 'resource_cpu', 'resource_gpu', 'volume_mount', 'host']
@@ -112,6 +116,15 @@ class Service_ModelView_base():
         host_field = StringField(_('域名'), default=Service.host.default.arg,description= _('访问域名，') + self.host_rule, widget=BS3TextFieldWidget())
         self.edit_form_extra_fields['host'] = host_field
         self.add_form_extra_fields['host'] = host_field
+
+        # 修改的时候管理员可以在上面添加一些特殊的挂载配置，适应一些特殊情况
+        if g.user.is_admin():
+            self.edit_columns = self.columns+['volume_mount']
+            self.add_columns = self.columns+['volume_mount']  # 添加的时候没有挂载配置，使用项目中的挂载配置
+        else:
+            self.edit_columns = self.columns
+            self.add_columns = self.columns
+
 
     pre_update_web = set_column
     pre_add_web = set_column
@@ -225,11 +238,12 @@ class Service_ModelView_base():
                 host = host[:host.index(":")]
             if host:
                 real_host=host
-        k8s_client.create_istio_ingress(namespace=namespace,
-                                        name=service.name,
-                                        host=real_host,
-                                        ports=service.ports.split(',')
-                                        )
+        if not core.checkip(real_host):
+            k8s_client.create_istio_ingress(namespace=namespace,
+                                            name=service.name,
+                                            host=real_host,
+                                            ports=service.ports.split(',')
+                                            )
 
         # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
         # 创建EXTERNAL_IP的服务
@@ -265,7 +279,7 @@ class Service_ModelView_base():
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
-            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip().split(':')[0] for ip in SERVICE_EXTERNAL_IP]
             port_str = conf.get('SERVICE_PORT', '30000+10*ID').replace('ID', str(service.id))
             meet_ports = core.get_not_black_port(int(eval(port_str)))
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]

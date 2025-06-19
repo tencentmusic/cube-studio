@@ -30,7 +30,7 @@ from datetime import datetime, timezone, timedelta
 
 # @pysnooper.snoop()
 def listen_service():
-    namespace = conf.get('SERVICE_NAMESPACE')
+    namespace = conf.get('SERVICE_NAMESPACE','service')
     w = watch.Watch()
     while (True):
         try:

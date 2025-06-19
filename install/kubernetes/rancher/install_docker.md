@@ -42,6 +42,9 @@ apt-cache madison docker-ce
 # 安装最新版docker，但不建议直接使用新版本
 # sudo apt install -y docker-ce
 
+# 可以提前软连 docker 根目录 
+# ln -s /data/docker /var/lib/
+
 # 建议不要像上面一样直接安装最新版，而是安装指定版本，使用安装指定版本示例如下
 apt install -y docker-ce=5:27.0.3-1~ubuntu.20.04~focal      # ubuntu 2020
 apt install -y docker-ce=5:27.0.3-1~ubuntu.22.04~jammy      # ubuntu 2022

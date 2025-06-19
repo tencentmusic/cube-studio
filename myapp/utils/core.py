@@ -1608,9 +1608,10 @@ def get_gpu(resource_gpu,resource_name=None):
             # 填的是(卡的类型,卡的型号)
             if gpu_type and ',' in gpu_type:
                 gpu_mfrs=gpu_type.split(',')[0].strip().lower()
-                if gpu_mfrs:
+                if gpu_mfrs and gpu_mfrs in conf.get("GPU_RESOURCE", {}):
                     resource_name = conf.get("GPU_RESOURCE", {}).get(gpu_mfrs, resource_name)
-                gpu_type=gpu_type.split(',')[1].strip().upper()
+                    gpu_type=gpu_type.split(',')[1].strip().upper()
+
             # 处理中文括号，和英文括号
             resource_gpu = resource_gpu[0:resource_gpu.index('(')] if '(' in resource_gpu else resource_gpu
             resource_gpu = resource_gpu[0:resource_gpu.index('（')] if '（' in resource_gpu else resource_gpu

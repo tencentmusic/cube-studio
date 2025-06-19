@@ -81,7 +81,6 @@ API_HELP_URL_RIS_KEY = 'help_url'
 API_ACTION_RIS_KEY = 'action'
 API_ROUTE_RIS_KEY = 'route_base'
 
-API_PERMISSIONS_RIS_KEY = "permissions"
 API_USER_PERMISSIONS_RIS_KEY = "user_permissions"
 API_RELATED_RIS_KEY = "related"
 API_COLS_WIDTH_RIS_KEY = 'cols_width'
@@ -90,7 +89,7 @@ API_IMPORT_DATA_RIS_KEY = 'import_data'
 API_DOWNLOAD_DATA_RIS_KEY = 'download_data'
 API_OPS_BUTTON_RIS_KEY = 'ops_link'
 API_ENABLE_FAVORITE_RIS_KEY = 'enable_favorite'
-
+API_FIXED_COLUMNS_RIS_KEY = 'fixed_columns'
 
 def get_error_msg():
     if current_app.config.get("FAB_API_SHOW_STACKTRACE"):
@@ -817,6 +816,15 @@ class MyappFormRestApi(ModelRestApi):
         else:
             response[API_ORDER_COLUMNS_RES_KEY] = self.order_columns
 
+
+    fixed_columns=[]
+    def merge_fixed_columns(self, response, **kwargs):
+        _pruned_select_cols = kwargs.get(API_SELECT_COLUMNS_RIS_KEY, [])
+        if _pruned_select_cols:
+            response[API_FIXED_COLUMNS_RIS_KEY] = [order_col for order_col in self.fixed_columns if order_col in _pruned_select_cols]
+        else:
+            response[API_FIXED_COLUMNS_RIS_KEY] = self.fixed_columns
+
     # @pysnooper.snoop(watch_explode=('aa'))
     def merge_columns_info(self, response, **kwargs):
         columns_info = {}
@@ -929,6 +937,7 @@ class MyappFormRestApi(ModelRestApi):
     @merge_response_func(merge_edit_title, API_EDIT_TITLE_RIS_KEY)
     @merge_response_func(merge_description_columns, API_DESCRIPTION_COLUMNS_RIS_KEY)
     @merge_response_func(merge_order_columns, API_ORDER_COLUMNS_RIS_KEY)
+    @merge_response_func(merge_fixed_columns, API_FIXED_COLUMNS_RIS_KEY)
     @merge_response_func(merge_columns_info, API_COLUMNS_INFO_RIS_KEY)
     @merge_response_func(merge_help_url_info, API_HELP_URL_RIS_KEY)
     @merge_response_func(merge_action_info, API_ACTION_RIS_KEY)

@@ -72,12 +72,13 @@ def download(name,version,partition,save_dir,**kwargs):
     # print(res.content)
     if res.status_code==200:
         donwload_urls = res.json().get("result", {}).get("download_urls", [])
-        print(donwload_urls)
+        print('启动并行下载:',donwload_urls)
         os.makedirs(save_dir, exist_ok=True)
         pool = Pool(len(donwload_urls))  # 开辟包含指定数目线程的线程池
         pool.map(partial(download_file, des_dir=save_dir), donwload_urls)  # 当前worker，只处理分配给当前worker的任务
         pool.close()
         pool.join()
+        print('启动并行完成', save_dir)
 
         # 对目录下的压缩文件进行解压
         files = os.listdir(save_dir)
@@ -85,10 +86,13 @@ def download(name,version,partition,save_dir,**kwargs):
             try:
                 if '.zip' in file:
                     exe_command(f'cd {save_dir} && unzip {file}')
+                    print('解压文件完成',save_dir)
                 elif '.tar.gz' in file:
                     exe_command(f'cd {save_dir} && tar -zxvf {file}')
+                    print('解压文件完成', save_dir)
                 elif '.gz' in file:
                     exe_command(f'cd {save_dir} && gzip -d {file}')
+                    print('解压文件完成', save_dir)
             except Exception as e:
                 print(e)
         exit(0)
@@ -131,7 +135,9 @@ if __name__ == "__main__":
         command = f'huggingface-cli download --repo-type dataset --resume-download {args.name} --revision {args.version} --local-dir {args.save_dir} --local-dir-use-symlinks False'
         exitcode = exe_command(command)
         exit(exitcode)
+    elif args.src_type=='modelscope' or args.src_type=='魔塔':
+        command = f'modelscope download --dataset {args.name} --local_dir {args.save_dir}'
+        exitcode = exe_command(command)
+        exit(exitcode)
 
-    elif args.src_type=='modelscope':
-            pass
 

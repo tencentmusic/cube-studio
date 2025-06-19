@@ -166,6 +166,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
         if ':' in host_port:
             port = host_port.split(':')[-1]
 
+        ip = host_port.split(':')[0]
 
         if self.host:
             from myapp.utils.core import split_url
@@ -176,7 +177,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
         host_port = host + ("" if not port else (":" + port))
         if 'svc.cluster.local' in host:
             return f'''
-<div type=tips addedValue='添加配置 "{host_port.split(':')[0]} {host}" 到hosts文件后再访问域名'>
+<div type=tips addedValue='添加配置 "{ip} {host_port.split(':')[0]}" 到hosts文件后再访问域名'>
     {host_port}
 </div>
 '''
@@ -260,7 +261,6 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def model_name_url(self):
         url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
-
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
     @property
@@ -274,24 +274,19 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def operate_html(self):
-        help_url=''
-        try:
-            help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
-        except Exception as e:
-            print(e)
+
 
         monitoring_url="//"+self.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_SERVICE_PATH','')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
         if self.created_by.id == g.user.id or self.project.user_role(g.user.id)=='creator':
             dom = f'''
-                    <a target=_blank href="/inferenceservice_modelview/api/deploy/debug/{self.id}">{__("调试")}</a> | 
-                    <a href="/inferenceservice_modelview/api/deploy/test/{self.id}">{__("部署测试")}</a> | 
-                    <a href="/inferenceservice_modelview/api/deploy/prod/{self.id}">{__("部署生产")}</a> |
-                    <a target=_blank href="{monitoring_url}">{__("监控")}</a> |
-                    <a href="/inferenceservice_modelview/api/clear/{self.id}">{__("清理")}</a>
-                    '''
+                <a target=_blank href="/inferenceservice_modelview/api/deploy/debug/{self.id}">{__("调试")}</a> | 
+                <a href="/inferenceservice_modelview/api/deploy/prod/{self.id}">{__("部署")}</a> | 
+                <a target=_blank href="{monitoring_url}">{__("监控")}</a> |
+                <a href="/inferenceservice_modelview/api/clear/{self.id}">{__("清理")}</a>
+                '''
         else:
-            dom = f''' {__("调试")} | {__("部署测试")} | {__("部署生产")}</a> | <a target=_blank href="{monitoring_url}">{__("监控")}</a> | {__("清理")} '''
+            dom = f''' {__("调试")}  | {__("部署")}</a> |<a target=_blank href="{monitoring_url}">{__("监控")}</a> | {__("清理")} '''
 
         # if help_url:
         #     dom=f'<a target=_blank href="{help_url}">{__("帮助")}</a> | '+dom
@@ -445,6 +440,8 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         if ':' in host_port:
             port = host_port.split(':')[-1]
 
+        ip = host_port.split(':')[0]
+
         if self.host:
             from myapp.utils.core import split_url
             host_temp, port_temp, path_temp = split_url(self.host)
@@ -466,7 +463,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         host_port = host + ("" if not port else (":" + port))
         if 'svc.cluster.local' in host:
             return f'''
-<div type=tips addedValue='添加配置 "{host_port.split(':')[0]} {host}" 到hosts文件后再访问域名'>
+<div type=tips addedValue='添加配置 "{ip} {host_port.split(':')[0]}" 到hosts文件后再访问域名'>
     {host_port}
 </div>
 '''

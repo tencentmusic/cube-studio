@@ -26,6 +26,8 @@
 
 # 本地调试
 
+参考视频：https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/dev.mp4
+
 ## deploy mysql
 
 ```
@@ -49,16 +51,16 @@ mysql> flush privileges;
 docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.03.01 -f install/docker/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.07.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.03.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.07.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.03.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.03.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.07.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.07.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -123,6 +125,8 @@ docker-compose -f docker-compose.yml  up
 
 前端代码可以在本机上开发调试  也 可以在容器内编译。如果你不是前端开发人员，建议使用容器内编译，这样你的电脑就不需要配置前端环境。
 
+window 电脑前端开发：https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/window-frontend-dev.mp4
+
 #### 前端代码目录
 
 - `myapp/frontend` 主要前端项目文件
@@ -139,6 +143,65 @@ npm: 6.14.8+
 yarn: npm install yarn -g
 
 ```
+
+#### 纯前端开发（本地）
+
+注意：本地前端开发，需要docker-compose先在本地启动cube前后端。
+
+##### 环境准备
+
+- https://nodejs.org/en/download/ 进入nodejs官网，选择下载LTS长期支持版本
+- 然后在官网下载安装好LTS版本之后，输入`npm install -g n`安装node版本管理器（ https://www.npmjs.com/package/n ），最后输入`n 16.15.0`将node版本切换至16.x
+- https://github.com/nodejs/Release 这里可以找到16.x等往期版本
+
+
+### frontend 主体前端
+
+代码目录 `myapp/frontend`
+
+1、 前端配置代理
+
+在前端目录下的`src`里都有一个`setupProxy.js`文件，这个就是用来配置代理转发的，将`target`字段的内容改成已有服务的地址，改完之后重新启动一下前端项目即可生效
+
+2、前端启动
+
+ -  `cd myapp/frontend` 进入目录
+ - `npm run start` 进入调试模式。
+ - - 首次进入  http://localhost:3000/login?username=admin&login_url=http://localhost:3000/frontend/
+ - - 后面可直接进入 前端 http://localhost:3000/frontend/
+
+### vision 任务流编排
+
+代码目录 `myapp/vision`
+
+1、 前端配置代理
+
+在前端目录下的`src`里都有一个`setupProxy.js`文件，这个就是用来配置代理转发的，将`target`字段的内容改成已有服务的地址，改完之后重新启动一下前端项目即可生效
+
+2、前端启动
+ -  `cd myapp/vision` 进入目录
+ - `npm run dev` 进入调试模式。
+ - - vision启动访问地址：http://localhost:3000/   或者某个pipeline的id， http://localhost:3000/?pipeline_id=1#/
+
+### visionPlus 任务流编排
+
+代码目录 `myapp/visionPlus`
+
+1、 前端配置代理
+
+在前端目录下的`src`里都有一个`setupProxy.js`文件，这个就是用来配置代理转发的，将`target`字段的内容改成已有服务的地址，改完之后重新启动一下前端项目即可生效
+
+2、前端启动
+ -  `cd myapp/visionPlus` 进入目录
+ - `npm run dev` 进入调试模式。
+ - - visionPLus启动访问地址：http://localhost:3000/?scenes=etl_pipeline&pipeline_id=1
+
+
+
+
+#### 前端容器内编译
+
+docker-compose启动前后端，进入后端容器。(后端容器包含前端编译所需环境)
 ```sh
 # 初始化安装可能会遇到依赖包的版本选择，直接回车默认即可
 如果本地环境有偏差，可以在容器内进行构建，参考entrypoint.sh中的构建命令
@@ -150,30 +213,7 @@ cd /home/myapp/myapp/vision && npm install && npm run build
 cd /home/myapp/myapp/visionPlus && yarn && npm run build
 ```
 输出路径：`myapp/static/appbuilder`
-#### 纯前端开发（本地）
 
-##### 环境准备
-
-- https://nodejs.org/en/download/ 进入nodejs官网，选择下载LTS长期支持版本
-- 然后在官网下载安装好LTS版本之后，输入`npm install -g n`安装node版本管理器（ https://www.npmjs.com/package/n ），最后输入`n 16.15.0`将node版本切换至16.x
-- https://github.com/nodejs/Release 这里可以找到16.x等往期版本
-
-
-以主要前端项目`myapp/frontend`为例，到这里前端开发环境已经准备好了
-
-1. `cd myapp/frontend` 进入目录
-2. `npm run start` 进入调试模式。需要现在本地启动后端才行
-3. `npm run build` 打包编译静态资源
-#### 前端配置代理
-
-在前端目录下的`src`里都有一个`setupProxy.js`文件，这个就是用来配置代理转发的，将`target`字段的内容改成已有服务的地址，改完之后重新启动一下前端项目即可生效
-#### 前端容器内编译
-
-1) build frontend
-```
-STAGE: 'build'
-docker-compose -f docker-compose.yml  up
-```
 ## 前后端镜像升级
 
 ### 前端镜像升级
@@ -185,7 +225,6 @@ docker build --network=host -t xx.xx.xx/xx/kubeflow-dashboard-frontend:xx -f ins
 然后线上infra命令空间修改kubeflow-dashboard-frontend的deployment的镜像名换为你自己构建的
 
 ![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/c9c8665aba0844f088416b776b10a1d4.png)
-
 
 ### 后端镜像升级
 
@@ -212,7 +251,7 @@ trusted-host=mirrors.aliyun.com
 然后在cube-studio/install/docker/Dockerfile-base中增加:
 
 ```
-COPY install/docker/pip.conf /root/.pip/pip.conf
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
 ```
 
 2） 如果前端安装依赖失败，可以通过新增npm国内镜像来解决

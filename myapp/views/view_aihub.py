@@ -51,7 +51,7 @@ class Aihub_Filter(MyappFilter):
 
 
 class Aihub_base():
-    label_title = _('模型市场')
+    label_title = _('aihub应用')
     datamodel = SQLAInterface(Aihub)
     base_permissions = ['can_show','can_list']
     base_order = ("hot", "desc")
@@ -61,7 +61,13 @@ class Aihub_base():
     page_size = 100
 
     spec_label_columns = {
-        "card": _("信息")
+        "card": _("信息"),
+        "label": _("中文名"),
+        "pic": _("图片地址"),
+        "dataset": _("数据集配置"),
+        "notebook": _("在线开发配置"),
+        "pipeline": _("在线微调配置"),
+        "inference": _("在线部署配置"),
     }
 
     edit_form_extra_fields = {

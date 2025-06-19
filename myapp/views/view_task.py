@@ -192,6 +192,20 @@ class Task_ModelView_Base():
 
     check_delete_permission = check_edit_permission
 
+
+    def pre_add_web(self, task=None):
+
+        # 修改的时候管理员可以在上面添加一些特殊的挂载配置，适应一些特殊情况
+        if g.user.is_admin():
+            if 'volume_mount' not in self.add_columns:
+                self.add_columns = self.add_columns + ['volume_mount']
+        else:
+            if 'volume_mount' in self.add_columns:
+                self.add_columns.remove('volume_mount')
+        self.edit_columns = self.add_columns
+
+    pre_update_web = pre_add_web
+
     # 验证args参数
     # @pysnooper.snoop(watch_explode=('item'))
     def task_args_check(self, item):
@@ -316,11 +330,12 @@ class Task_ModelView_Base():
         self.task_args_check(item)
         item.create_datetime = datetime.datetime.now()
         item.change_datetime = datetime.datetime.now()
-
-        if int(core.get_gpu(item.resource_gpu)[0]):
-            item.node_selector = item.node_selector.replace('cpu=true', 'gpu=true')
-        else:
+        gpu_num, _, _ = core.get_gpu(item.resource_gpu)
+        gpu_num = math.ceil(float(str(gpu_num).split(',')[-1]))
+        if gpu_num==0:
             item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
+        else:
+            item.node_selector = item.node_selector.replace('cpu=true', 'gpu=true')
 
     def pre_update_req(self,req_json=None,src_item=None,*args,**kwargs):
         if src_item and src_item.pipeline and src_item.pipeline.parameter:
@@ -375,11 +390,12 @@ class Task_ModelView_Base():
         self.merge_args(item, 'update')
         self.task_args_check(item)
         item.change_datetime = datetime.datetime.now()
-
-        if int(core.get_gpu(item.resource_gpu)[0]):
-            item.node_selector = item.node_selector.replace('cpu=true', 'gpu=true')
-        else:
+        gpu_num, _, _ = core.get_gpu(item.resource_gpu)
+        gpu_num = math.ceil(float(str(gpu_num).split(',')[-1]))
+        if gpu_num==0:
             item.node_selector = item.node_selector.replace('gpu=true', 'cpu=true')
+        else:
+            item.node_selector = item.node_selector.replace('cpu=true', 'gpu=true')
 
         # 修改了名称，要在pipeline的属性里面一起改了
         src_task_name = self.src_item_json.get('name', item.name)

@@ -10,7 +10,8 @@ docker build --network=host -t $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9-$
 docker push $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-$TARGETARCH
 docker push $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9-$TARGETARCH
 
-# docker manifest create $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9 $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9-amd64 $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9-arm64 && docker manifest push $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9
+# docker manifest rm $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8 && docker manifest create $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8 $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-amd64 $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-arm64 && docker manifest push $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8
+# docker manifest rm $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9 && docker manifest create $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9 $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9-amd64 $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9-arm64 && docker manifest push $hubhost/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9
 
 base_image=nvidia/cuda:12.1.0-cudnn8-devel-ubuntu20.04
 
@@ -19,5 +20,9 @@ docker build --network=host -t $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9-$
 
 docker push $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-$TARGETARCH
 docker push $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9-$TARGETARCH
+
+# docker manifest rm $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8 && docker manifest create $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8 $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-amd64 $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-arm64 && docker manifest push $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8
+# docker manifest rm $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9 && docker manifest create $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9 $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9-amd64 $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9-arm64 && docker manifest push $hubhost/ubuntu-gpu:cuda12.1.0-cudnn8-python3.9
+
 
 

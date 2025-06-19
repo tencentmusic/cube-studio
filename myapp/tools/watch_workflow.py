@@ -110,7 +110,7 @@ def save_workflow(crd, dbsession):
         workflow.change_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         workflow.annotations = json.dumps(crd['annotations'], indent=4, ensure_ascii=False)
         workflow.labels = json.dumps(crd['labels'], indent=4, ensure_ascii=False)
-        workflow.spec = json.dumps(crd['spec'], indent=4, ensure_ascii=False),
+        workflow.spec = json.dumps(crd['spec'], indent=4, ensure_ascii=False)
         workflow.status_more = json.dumps(crd['status_more'], indent=4, ensure_ascii=False)
         workflow.cluster = cluster
         dbsession.commit()

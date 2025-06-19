@@ -153,7 +153,7 @@ def node_traffic():
                 td_html % ("cpu:%s/%s" % (nodes[ip]['used_cpu'], nodes[ip]['cpu'])),
                 td_html % ("mem:%s/%s" % (nodes[ip]['used_memory'], nodes[ip]['memory'])),
                 # td_html % ("gpu:%s/%s" % (round(nodes[ip]['used_gpu'],2) if 'vgpu' in device else int(float(nodes[ip]['used_gpu'])), nodes[ip]['gpu'])),
-                td_html % (f"{gpu_mfrs}:{gpu_used}/{gpu_total}"),
+                td_html % (f"{gpu_mfrs}{gpu_used}/{int(gpu_total)}"),
 
                 # td_html % (','.join(list(set(nodes[ip]['user']))[0:1]))
             )
@@ -165,7 +165,7 @@ def node_traffic():
             global_cluster_load[cluster_name]['gpu_req'] += round(gpu_used, 2)
             global_cluster_load[cluster_name]['gpu_all'] += int(float(gpu_total))
 
-    message = Markup('<table style="margin:20px">%s</table>' % message)
+    message = Markup('<div style="padding:20px"><table>%s</table></div>' % message)
 
     data = {
         'content': message,

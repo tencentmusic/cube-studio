@@ -217,6 +217,12 @@ class Myauthdbview(AuthDBView):
                     # 没有用户的时候自动注册用户
                     user = self.appbuilder.sm.auth_user_remote_org_user(username=username, org_name='', password=password)   # hashed_password=password可以密文存储
                     flash('发现用户%s不存在，已自动注册' % username, "warning")
+                    # # 如果不想让用户自动登录可以使用这里
+                    # user.active = False
+                    # from myapp import db
+                    # db.session.commit()
+                    # flash('发现用户%s不存在，已自动注册，请联系管理员激活' % username, "warning")
+                    # return redirect(self.appbuilder.get_url_for_login)
 
 
             login_user(user, remember=True)

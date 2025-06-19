@@ -4,6 +4,11 @@
 ## ubuntu 在线安装
 
 ```bash
+# 删除所有 NVIDIA 相关的软件源
+sudo rm -f /etc/apt/sources.list.d/nvidia*.list
+# 删除冲突的 GPG 密钥
+sudo rm -f /usr/share/keyrings/nvidia*.gpg
+
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
       && curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
       && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
@@ -98,4 +103,12 @@ vi /etc/containerd/config.toml
 ```bash
 systemctl daemon-reload
 systemctl restart containerd
+```
+
+# 测试docker识别gpu
+
+```bash
+docker run --name test --gpus all -it nvidia/cuda:11.8.0-devel-ubuntu22.04 bash
+
+docker run --name test --gpus all -it ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9  bash
 ```

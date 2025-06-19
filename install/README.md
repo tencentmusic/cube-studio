@@ -1,7 +1,7 @@
 
 # 平台基础架构
 
-![image](https://user-images.githubusercontent.com/20157705/167534673-322f4784-e240-451e-875e-ada57f121418.png)
+![输入图片说明](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/image/infra.png) 
 
 完整的平台包含
  - 1、机器的标准化

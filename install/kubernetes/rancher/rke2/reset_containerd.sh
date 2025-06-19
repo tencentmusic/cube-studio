@@ -41,7 +41,7 @@ pkill -f containerd-shim-runc-v2
 sudo rm -rf /var/lib/rancher/
 sudo rm -rf /etc/rancher/
 sudo rm -rf /run/kubernetes/
-sudo rm -rf /var/lib/kubelet/
+#sudo rm -rf /var/lib/kubelet/
 sudo rm -rf /run/k3s/
 
 rm -f /var/lib/containerd/io.containerd.metadata.v1.bolt/meta.db

@@ -106,8 +106,10 @@ const AppWrapper = (props: IProps) => {
     const controller = new AbortController()
     const url = encodeURIComponent(location.pathname)
     getCustomDialog(url, controller.signal).then(res => {
-      setCustomDialogInfo(res.data)
-      setCustomDialogVisable(res.data.hit)
+      if(res.status!==502) {
+          setCustomDialogInfo(res.data)
+          setCustomDialogVisable(res.data.hit)
+      }
     }).catch(err => {
       console.log(err);
     })

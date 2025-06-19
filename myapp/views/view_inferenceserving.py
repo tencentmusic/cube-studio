@@ -1,6 +1,8 @@
 import math
 import random
-
+import threading
+import uuid
+from flask import Flask, request, Response
 import requests
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask import jsonify, render_template
@@ -60,8 +62,10 @@ INFERNENCE_HOST={
     "triton-server":'/v2/models/$model_name'
 }
 
+INFERNENCE_CONFIGMAP={
+}
 INFERNENCE_COMMAND={
-    "tfserving":"/usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config",
+    "tfserving":"/usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config --rest_api_num_threads=300 --enable_batching=true",
     "torch-server":"torchserve --start --model-store /models/$model_name/ --models $model_name=$model_name.mar --foreground --log-config /config/log4j2.xml",
     "onnxruntime":"onnxruntime_server --model_path /models/",
     "triton-server":'tritonserver --model-repository=/models/ --strict-model-config=true --log-verbose=1'
@@ -103,17 +107,18 @@ class InferenceService_ModelView_base():
     datamodel = SQLAInterface(InferenceService)
 
     # add_columns = ['service_type','project','name', 'label','images','resource_memory','resource_cpu','resource_gpu','min_replicas','max_replicas','ports','host','hpa','metrics','health']
-    add_columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path',
+    columns = ['service_type', 'project', 'label', 'model_name', 'model_version', 'images', 'model_path',
                    'resource_memory', 'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'hpa', 'priority',
-                   'canary', 'shadow', 'host', 'inference_config', 'working_dir', 'command', 'volume_mount', 'env',
+                   'canary', 'shadow', 'host', 'inference_config', 'working_dir', 'command', 'env',
                    'ports', 'metrics', 'health', 'sidecar']
     show_columns = ['service_type', 'project', 'name', 'label', 'model_name', 'model_version', 'images', 'model_path',
                     'images', 'volume_mount', 'sidecar', 'working_dir', 'command', 'env', 'resource_memory',
                     'resource_cpu', 'resource_gpu', 'min_replicas', 'max_replicas', 'ports', 'inference_host_url',
                     'hpa', 'priority', 'canary', 'shadow', 'health', 'model_status', 'expand', 'metrics',
-                    'deploy_history', 'host', 'inference_config']
+                    'deploy_history', 'host', 'inference_config','changed_on','created_on','id']
     enable_echart = False
-    edit_columns = add_columns
+    add_columns = columns + ['volume_mount']
+    edit_columns = columns + ['volume_mount']
 
     add_form_query_rel_fields = {
         "project": [["name", Project_Join_Filter, 'org']]
@@ -122,18 +127,20 @@ class InferenceService_ModelView_base():
 
     list_columns = ['project', 'service_type', 'label', 'model_name_url', 'model_version', 'inference_host_url', 'ip',
                     'status_url', 'resource', 'replicas_html', 'creator', 'modified', 'operate_html']
+    list_select_columns = list_columns+['model_status','changed_on','id']
     cols_width = {
-        "project": {"type": "ellip2", "width": 150},
-        "label": {"type": "ellip2", "width": 300},
-        "service_type": {"type": "ellip2", "width": 200},
+        "project": {"type": "ellip2", "width": 120},
+        "label": {"type": "ellip2", "width": 250},
+        "service_type": {"type": "ellip2", "width": 150},
         "model_name_url": {"type": "ellip2", "width": 250},
-        "model_version": {"type": "ellip2", "width": 200},
-        "inference_host_url": {"type": "ellip1", "width": 500},
-        "ip": {"type": "ellip2", "width": 250},
-        "status_url": {"type": "ellip2", "width": 150},
+        "model_version": {"type": "ellip2", "width": 150},
+        "inference_host_url": {"type": "ellip2", "width": 550},
+        "ip": {"type": "ellip2", "width": 200},
+        "status_url": {"type": "ellip2", "width": 100},
         "modified": {"type": "ellip2", "width": 150},
-        "operate_html": {"type": "ellip2", "width": 350},
-        "resource": {"type": "ellip2", "width": 200},
+        "operate_html": {"type": "ellip2", "width": 170},
+        "test": {"type": "ellip1", "width": 50},
+        "resource": {"type": "ellip2", "width": 280},
     }
     search_columns = ['name', 'created_by', 'project', 'service_type', 'label', 'model_name', 'model_version',
                       'model_path', 'host', 'model_status', 'resource_gpu']
@@ -146,6 +153,7 @@ class InferenceService_ModelView_base():
     label_title = _('推理服务')
     base_order = ('id', 'desc')
     order_columns = ['id']
+    fixed_columns = ['operate_html']
 
     base_filters = [["id", InferenceService_Filter, lambda: []]]
     images = []
@@ -154,7 +162,7 @@ class InferenceService_ModelView_base():
         images += item
     service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（todo）','llm-server（todo）',]
     spec_label_columns = {
-        "inference_host_url": _("域名:需要泛域名支持，测试(test.xx)/调试(debug.xx)"),
+        "inference_host_url": _("域名:需要泛域名支持，调试时域名(debug.xx.xx.xx.xx)"),
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
     host_rule=",<br>".join([cluster+"cluster:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
@@ -162,9 +170,9 @@ class InferenceService_ModelView_base():
 ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件
 tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/
 torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型
-onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx
 triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
-llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推理加速和openai流式接口
+ollama: 使用ollama官方模型，提供openai接口
+vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
 '''.strip()
 
     add_form_extra_fields={
@@ -183,7 +191,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
                                     validators=[DataRequired()]),
         "host": StringField(_('域名'), default=InferenceService.host.default.arg,description= _('访问域名，')+host_rule,widget=BS3TextFieldWidget()),
         "transformer":StringField(_('前后置处理'), default=InferenceService.transformer.default.arg,description= _('前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架'),widget=BS3TextFieldWidget()),
-        'resource_gpu':StringField(_('gpu'), default='0', description= _('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
+        'resource_gpu':StringField(_('gpu'), default='0', description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，<span style="color:red;">虚拟化占用和共享模式占用仅企业版支持</span>'),
                                                         widget=BS3TextFieldWidget(),validators=[DataRequired()]),
 
         'sidecar': MySelectMultipleField(
@@ -270,7 +278,7 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
         'model_path': StringField(
             _('模型地址'),
             default='',
-            description= _('模型文件的容器地址或下载地址，格式参考详情。'),
+            description= _('模型文件的容器地址或下载地址，格式参考详情。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">导入模型</a>'),
             widget=MyBS3TextFieldWidget(tips=_(model_path_describe)),
             validators=[]
         ),
@@ -393,6 +401,16 @@ llm-server: 不同镜像提供不同的推理架构，默认为vllm提供gpu推�
         self.default_filter = {
             "created_by": g.user.id
         }
+
+        # 修改的时候管理员可以在上面添加一些特殊的挂载配置，适应一些特殊情况
+        if g.user.is_admin():
+            self.edit_columns = self.columns+['volume_mount']
+            self.add_columns = self.columns+['volume_mount']  # 添加的时候没有挂载配置，使用项目中的挂载配置
+        else:
+            self.edit_columns = self.columns
+            self.add_columns = self.columns
+
+    pre_update_web=pre_add_web
 
     # @pysnooper.snoop()
     def tfserving_model_config(self, model_name, model_version, model_path):
@@ -600,6 +618,7 @@ output %s
             if not item.host:
                 item.host = f'/v1/models/{item.model_name}/metadata'
             item.health = '80:/v1/models/%s/metadata' % (item.model_name,)
+
         if item.service_type == 'torch-server':
             if not item.working_dir:
                 item.working_dir = '/models'
@@ -609,7 +628,8 @@ output %s
                 tar_command = 'torch-model-archiver --model-name %s --version %s --handler %s --serialized-file %s --export-path /models -f'%(item.model_name,model_version,item.transformer or item.model_type,model_path)
             else:
                 if ('http:' in item.model_path or 'https://' in item.model_path) and item.working_dir == '/models':
-                    print('has download to des_version_path')
+                    pass
+                    # print('has download to des_version_path')
                 else:
                     tar_command = 'cp -rf %s /models/' % (model_path)
             if not item.id or not item.command:
@@ -669,8 +689,8 @@ output %s
             if not item.id or not item.command:
                 item.command = download_command + './onnxruntime_server --log_level info --model_path  %s' % model_path
 
-        if not item.name:
-            item.name = item.model_name + "-" + model_version
+        # if not item.name:
+        item.name = item.model_name + "-" + model_version
 
         if len(item.name)>60:
             item.name = item.name[:60]
@@ -873,8 +893,10 @@ output %s
 
 
         namespace = conf.get('SERVICE_NAMESPACE', 'service')
+
         name = service.name
         command = service.command
+        command = command.replace('$model_path', service.model_path).replace('$model_name', service.model_name).replace("{{creator}}", service.created_by.username)
         deployment_replicas = service.min_replicas
         if env == 'debug':
             name = env + '-' + service.name
@@ -917,7 +939,7 @@ output %s
                     volume_mount = volume_mount.replace('{{' + e.split("=")[0] + '}}', e.split("=")[1])
 
         ports = [int(port) for port in service.ports.split(',')]
-        gpu_num, gpu_type, resource_name = core.get_gpu(service.resource_gpu)
+        gpu_num, _, _ = core.get_gpu(service.resource_gpu)
 
         pod_env = service.env
         pod_env += "\nKUBEFLOW_ENV=" + env
@@ -930,11 +952,13 @@ output %s
         pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
         pod_env += "\nRESOURCE_MIN_REPLICAS=" + str(service.min_replicas)
         pod_env += "\nRESOURCE_MAX_REPLICAS=" + str(service.max_replicas)
-        pod_env += "\nRESOURCE_GPU=" + (str(gpu_num) if ',' not in str(gpu_num) else str(gpu_num).split(',')[1])
+        pod_env += "\nRESOURCE_GPU=" + str(gpu_num).split(',')[-1]
         pod_env += "\nMODEL_PATH=" + service.model_path
         pod_env += "\nMODEL_NAME=" + service.model_name
 
         pod_env = pod_env.strip(',')
+        pod_env = pod_env.replace('$model_path',service.model_path).replace('$model_name',service.model_name).replace("{{creator}}", service.created_by.username)
+
 
         if env == 'test' or env == 'debug':
             try:
@@ -1041,15 +1065,16 @@ output %s
         if host and (env == 'debug' or env == 'test'):
             host = env + '.' + host
         try:
-            # print('deploy istio ingressgateway')
-            k8s_client.create_istio_ingress(
-                namespace=namespace,
-                name=name,
-                host=host,
-                ports=service.ports.split(','),
-                canary=service.canary,
-                shadow=service.shadow
-            )
+            if not core.checkip(host):
+                # print('deploy istio ingressgateway')
+                k8s_client.create_istio_ingress(
+                    namespace=namespace,
+                    name=name,
+                    host=host,
+                    ports=service.ports.split(','),
+                    canary=service.canary,
+                    shadow=service.shadow
+                )
         except Exception as e:
             print(e)
 
@@ -1087,7 +1112,7 @@ output %s
 
         if SERVICE_EXTERNAL_IP:
             # 对于多网卡模式，或者单域名模式，代理需要配置内网ip，界面访问需要公网ip或域名
-            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip() for ip in SERVICE_EXTERNAL_IP]
+            SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip().split(':')[0] for ip in SERVICE_EXTERNAL_IP]
             port_str = conf.get('INFERENCE_PORT', '20000+10*ID').replace('ID', str(service.id))
             meet_ports = core.get_not_black_port(int(eval(port_str)))
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
@@ -1122,7 +1147,7 @@ output %s
             TKE_EXISTED_LBID = conf.get('TKE_EXISTED_LBID', '')
 
         if not SERVICE_EXTERNAL_IP and TKE_EXISTED_LBID:
-            TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')[0]
+            TKE_EXISTED_LBID = TKE_EXISTED_LBID.split('|')[0].strip().split(':')[0]
             port_str = conf.get('INFERENCE_PORT', '20000+10*ID').replace('ID', str(service.id))
             meet_ports = core.get_not_black_port(int(eval(port_str)))
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
@@ -1393,9 +1418,9 @@ output %s
             # 优先显示在线的服务。
             online_id = [x['id'] for x in group if x.get("model_status","offline")=='online']
             # # 按修改时间进行排序，这个需要list接口中返回changed_on
-            # if not online_id:
-            #     exist_services = sorted(group,key=lambda x:x['changed_on'],reverse=True)
-            #     online_id = exist_services[0]
+            if not online_id:
+                exist_services = sorted(group,key=lambda x:x['changed_on'],reverse=True)
+                online_id = [x['id'] for x in exist_services]
             # max_id = online_id
             max_id = max([x['id'] for x in group]) if not online_id else online_id[0]
             all_last_data_id.append(max_id)
@@ -1408,6 +1433,7 @@ output %s
         # 顶层只保留最新的数据
         res['data'] = [all_data[id] for id in all_data if id in all_last_data_id]
         return res
+
 
 # 添加api
 class InferenceService_ModelView_Api(InferenceService_ModelView_base, MyappModelRestApi):
@@ -1428,6 +1454,7 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base, MyappModel
         response_add_columns['images']['values'] = [{"id":x,"value":x} for x in conf.get('INFERNENCE_IMAGES',{}).get(exist_service_type,[])]
         response_add_columns['model_path']['default']=service_model_path.get(exist_service_type,'')
         response_add_columns['command']['default'] = INFERNENCE_COMMAND.get(exist_service_type,'')
+        response_add_columns['inference_config']['default'] = INFERNENCE_CONFIGMAP.get(exist_service_type, '')
         response_add_columns['host']['default'] = INFERNENCE_HOST.get(exist_service_type, '')
         response_add_columns['env']['default'] = '\n'.join(INFERNENCE_ENV.get(exist_service_type,[]))
         response_add_columns['ports']['default'] = INFERNENCE_PORTS.get(exist_service_type,'80')

@@ -1,3 +1,5 @@
+import re
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from myapp.models.model_train_model import Training_Model
 from myapp.models.model_serving import InferenceService
@@ -22,7 +24,7 @@ from flask import (
     Markup,
     make_response,
     redirect,
-    request
+    request, jsonify
 )
 from .base import (
     DeleteMixin,
@@ -57,6 +59,7 @@ class Training_Model_ModelView_Base():
     order_columns = ['id']
     list_columns = ['project_url', 'name', 'version', 'model_metric', 'framework', 'api_type', 'pipeline_url',
                     'creator', 'modified', 'deploy']
+    fixed_columns = ['deploy']
     search_columns = ['created_by', 'project', 'name', 'version', 'framework', 'api_type', 'pipeline_id', 'run_id',
                       'path']
     add_columns = ['project', 'name', 'version', 'describe', 'path', 'framework', 'run_id', 'run_time', 'metrics',
@@ -68,12 +71,12 @@ class Training_Model_ModelView_Base():
     }
     edit_form_query_rel_fields = add_form_query_rel_fields
     cols_width = {
-        "name": {"type": "ellip2", "width": 250},
+        "name": {"type": "ellip2", "width": 200},
         "project_url": {"type": "ellip2", "width": 200},
         "pipeline_url": {"type": "ellip2", "width": 300},
         "version": {"type": "ellip2", "width": 200},
         "modified": {"type": "ellip2", "width": 150},
-        "deploy": {"type": "ellip2", "width": 100},
+        "deploy": {"type": "ellip2", "width": 90},
         "model_metric": {"type": "ellip2", "width": 300},
     }
     spec_label_columns = {
@@ -90,18 +93,18 @@ class Training_Model_ModelView_Base():
 ml-server：支持sklearn和xgb导出的模型，需按文档设置ml推理服务的配置文件
 tfserving：仅支持添加了服务签名的saved_model目录地址，例如：/mnt/xx/../saved_model/
 torch-server：torch-model-archiver编译后的mar模型文件，需保存模型结构和模型参数，例如：/mnt/xx/../xx.mar或torch script保存的模型
-onnxruntime：onnx模型文件的地址，例如：/mnt/xx/../xx.onnx
 triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torchscript模型文件地址model.pt，tf:模型目录地址saved_model，tensorrt:模型文件地址model.plan
-vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速和openai流式接口
+ollama: 使用ollama官方模型，提供openai接口
+vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
 '''.strip()
 
-    service_type_choices = [x.replace('_', '-') for x in ['serving','ml-server','tfserving', 'torch-server', 'onnxruntime', 'triton-server','vllm','aihub']]
+    service_type_choices = [x.replace('_', '-') for x in ['serving','ml-server','tfserving', 'torch-server', 'onnxruntime', 'triton-server']]
 
     add_form_extra_fields = {
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description=_('模型文件的容器地址或下载地址，格式参考详情。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">上传模型</a>'),
+            description=_('模型文件的容器地址或下载地址，格式参考详情。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">导入模型</a>'),
             validators=[DataRequired()],
             widget=MyBS3TextFieldWidget(tips=_(model_path_describe))
         ),
@@ -163,6 +166,7 @@ vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速�
     #             FileAllowed(["zip",'tar.gz'],_("zip/tar.gz Files Only!")),
     #         ]
     #     )
+    import pysnooper
 
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_add(self, item):
@@ -209,7 +213,11 @@ vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速�
     @expose("/deploy/<model_id>", methods=["GET", 'POST'])
     def deploy(self, model_id):
         train_model = db.session.query(Training_Model).filter_by(id=model_id).first()
+        name = train_model.name + "-" + train_model.version.replace('v', '').replace('.', '')
         exist_inference = db.session.query(InferenceService).filter_by(model_name=train_model.name).filter_by(model_version=train_model.version).first()
+        if not exist_inference:
+            exist_inference = db.session.query(InferenceService).filter_by(name=name).first()
+
         from myapp.views.view_inferenceserving import InferenceService_ModelView_base
         inference_class = InferenceService_ModelView_base()
         inference_class.src_item_json = {}
@@ -223,7 +231,7 @@ vllm: 不同镜像提供不同的推理架构，使用vllm提供gpu推理加速�
             exist_inference.model_path = train_model.path
             exist_inference.service_type = train_model.api_type
             exist_inference.images = ''
-            exist_inference.name = '%s-%s-%s' % (exist_inference.service_type, train_model.name, train_model.version.replace('v', '').replace('.', ''))
+            exist_inference.name = name
             inference_class.pre_add(exist_inference)
 
             db.session.add(exist_inference)

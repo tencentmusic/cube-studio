@@ -92,6 +92,10 @@ export default function TabsDetail(props: IProps) {
 
                 return renderMapIframe(content)
 
+            case 'image':
+
+                return renderimage(content)
+
             case 'html':
 
                 return renderHtml(content)
@@ -109,7 +113,14 @@ export default function TabsDetail(props: IProps) {
     }
 
 
-
+    const renderimage = (data: string) => {
+        return (
+            <img
+                src={data}
+                style={{ width: '100%', height: 'auto' }}
+            />
+        );
+    }
 
     const renderHtml = (data: string) => {
 
@@ -167,7 +178,7 @@ export default function TabsDetail(props: IProps) {
 
         return <iframe
 
-            src={data.url}
+            src={data}
 
             allowFullScreen
 
@@ -190,79 +201,132 @@ export default function TabsDetail(props: IProps) {
     };
 
 
-
-
     return (
 
         <>
+            {
+                props.data.length>1?
+                <Tabs className="tabsdetail-tab">
 
-            <Tabs className="tabsdetail-tab">
+                    {
+                         props.data.map((tab, tabIndex) => {
+                            return <Tabs.TabPane tab={tab.tabName} key={`tabsDetailTab${tabIndex}`}>
 
-                {
+                                <div className="d-f fd-c jc-b h100">
 
-                    props.data.map((tab, tabIndex) => {
+                                    <div className="flex1">
 
-                        return <Tabs.TabPane tab={tab.tabName} key={`tabsDetailTab${tabIndex}`}>
+                                        {
 
-                            <div className="d-f fd-c jc-b h100">
+                                            tab.content.map((group, groupIndex) => {
 
-                                <div className="flex1">
+                                                return <div className={tab.bottomButton?"mb32":"mb2"} key={`tabsGroup${groupIndex}`}>
 
-                                    {
+                                                    <div className="fs16 mb16 bor-l b-theme pl4" style={{ borderLeftWidth: 2 }} dangerouslySetInnerHTML={{ __html: group.groupName }}></div>
 
-                                        tab.content.map((group, groupIndex) => {
+                                                    <div>
 
-                                            return <div className="mb32" key={`tabsGroup${groupIndex}`}>
+                                                        {handleGroupContent(group.groupContent.type, group.groupContent.value, tab.tabName, group.groupName)}
 
-                                                <div className="fs16 mb16 bor-l b-theme pl4" style={{ borderLeftWidth: 2 }} dangerouslySetInnerHTML={{ __html: group.groupName }}></div>
-
-                                                <div>
-
-                                                    {handleGroupContent(group.groupContent.type, group.groupContent.value, tab.tabName, group.groupName)}
+                                                    </div>
 
                                                 </div>
 
-                                            </div>
+                                            })
 
-                                        })
+                                        }
 
-                                    }
+                                    </div>
+
+                                    <div className="tabsdetail-tool">
+
+                                        {
+
+                                            tab.bottomButton?.map(button => {
+
+                                                return <Button className="mr12 icon-tool-wrapper" onClick={() => {
+
+                                                    window.open(button.url, 'blank')
+
+                                                }}>
+
+                                                    <span className="icon-tool" dangerouslySetInnerHTML={{ __html: button.icon }}></span>
+
+                                                    <span className="ml6">{button.text}</span>
+
+                                                </Button>
+
+                                            })
+
+                                        }
+
+                                    </div>
 
                                 </div>
 
-                                <div className="tabsdetail-tool">
+                            </Tabs.TabPane>
+
+                        })
+
+                    }
+
+                </Tabs>:
+                <div className="d-f fd-c jc-b h100">
+
+                    <div className="flex1">
+
+                        {
+
+                            props.data[0].content.map((group, groupIndex) => {
+
+                                return <div className={props.data[0].bottomButton?"mb32":"mb2"} key={`tabsGroup${groupIndex}`}>
 
                                     {
-
-                                        tab.bottomButton?.map(button => {
-
-                                            return <Button className="mr12 icon-tool-wrapper" onClick={() => {
-
-                                                window.open(button.url, 'blank')
-
-                                            }}>
-
-                                                <span className="icon-tool" dangerouslySetInnerHTML={{ __html: button.icon }}></span>
-
-                                                <span className="ml6">{button.text}</span>
-
-                                            </Button>
-
-                                        })
-
+                                        group.groupName?<div className="fs16 mb16 bor-l b-theme pl4" style={{ borderLeftWidth: 2 }} dangerouslySetInnerHTML={{ __html: group.groupName }}></div>:null
                                     }
+
+                                    <div>
+
+                                        {handleGroupContent(group.groupContent.type, group.groupContent.value, props.data[0].tabName, group.groupName)}
+
+                                    </div>
 
                                 </div>
 
-                            </div>
+                            })
 
-                        </Tabs.TabPane>
+                        }
 
-                    })
+                    </div>
 
-                }
+                    <div className="tabsdetail-tool">
 
-            </Tabs>
+                        {
+
+                            props.data[0].bottomButton?.map(button => {
+
+                                return <Button className="mr12 icon-tool-wrapper" onClick={() => {
+
+                                    window.open(button.url, 'blank')
+
+                                }}>
+
+                                    <span className="icon-tool" dangerouslySetInnerHTML={{ __html: button.icon }}></span>
+
+                                    <span className="ml6">{button.text}</span>
+
+                                </Button>
+
+                            })
+
+                        }
+
+                    </div>
+
+                </div>
+            }
+
+
 
         </>
 

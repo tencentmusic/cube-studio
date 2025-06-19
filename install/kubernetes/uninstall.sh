@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 read -p "是否继续执行脚本？(yes/no)" answer
@@ -17,16 +16,19 @@ if [[ "$answer" == "yes" ]]; then
     # 高版本k8s部署2.6.1版本
     kubectl delete -f dashboard/v2.6.1-cluster.yaml
     # 部署mysql
-    kubectl delete -f mysql/pv-pvc-hostpath.yaml
+    kubectl delete -f mysql/deploy.yaml
     kubectl delete -f mysql/service.yaml
     kubectl delete -f mysql/configmap-mysql.yaml
-    kubectl delete -f mysql/deploy.yaml
+    kubectl delete -f mysql/pv-pvc-hostpath.yaml
+
     # 部署redis
+    kubectl delete -f redis/master.yaml
+    kubectl delete -f redis/service.yaml
     kubectl delete -f redis/pv-hostpath.yaml
     kubectl delete -f redis/configmap.yaml
-    kubectl delete -f redis/service.yaml
+
     # 如果自己需要使用pv来保存redis队列数据，可以修改master.yaml
-    kubectl delete -f redis/master.yaml
+
 
     # 部署prometheus
     cd prometheus
@@ -48,7 +50,8 @@ if [[ "$answer" == "yes" ]]; then
     kubectl delete -f ./kube-state-metrics/kube-state-metrics-rbac.yml
     kubectl delete -f ./kube-state-metrics/kube-state-metrics-svc.yml
     kubectl delete -f ./kube-state-metrics/kube-state-metrics-dp.yml
-    kubectl delete -f ./grafana/pv-pvc-hostpath.yml
+
+    kubectl delete -f ./grafana/grafana-dp.yml
     kubectl delete -f ./grafana/grafana-sa.yml
     kubectl delete -f ./grafana/grafana-source.yml
     kubectl delete -f ./grafana/grafana-datasources.yml
@@ -57,9 +60,9 @@ if [[ "$answer" == "yes" ]]; then
     kubectl delete configmap grafana-config all-grafana-dashboards --namespace=monitoring
     # kubectl create configmap grafana-config --from-file=./grafana/grafana.ini --namespace=monitoring
     # kubectl create configmap all-grafana-dashboards --from-file=./grafana/dashboard --namespace=monitoring
-    kubectl delete -f ./grafana/grafana-dp.yml
+
+    kubectl delete -f ./grafana/pv-pvc-hostpath.yml
     sleep 5
-    kubectl delete -f ./grafana/grafana-dp.yml
     kubectl delete -f ./service-discovery/kube-controller-manager-svc.yml
     kubectl delete -f ./service-discovery/kube-scheduler-svc.yml
     kubectl delete -f ./prometheus/prometheus-secret.yml
@@ -70,7 +73,6 @@ if [[ "$answer" == "yes" ]]; then
     kubectl delete -f ./prometheus/prometheus-main.yml
     sleep 5
     kubectl delete -f ./prometheus/pv-pvc-hostpath.yaml
-    kubectl delete -f ./prometheus/prometheus-main.yml
     kubectl delete -f ./servicemonitor/alertmanager-sm.yml
     kubectl delete -f ./servicemonitor/coredns-sm.yml
     kubectl delete -f ./servicemonitor/kube-apiserver-sm.yml
@@ -109,9 +111,9 @@ if [[ "$answer" == "yes" ]]; then
     kubectl delete -f virtual.yaml
 
     # 部署argo
-    kubectl delete -f argo/minio-pv-pvc-hostpath.yaml
     kubectl delete -f argo/pipeline-runner-rolebinding.yaml
     kubectl delete -f argo/install-3.4.3-all.yaml
+    kubectl delete -f argo/minio-pv-pvc-hostpath.yaml
 
     # 部署trainjob:tfjob/pytorchjob/mpijob/mxnetjob/xgboostjobs
     kubectl delete -f kubeflow/sa-rbac.yaml
@@ -131,15 +133,15 @@ if [[ "$answer" == "yes" ]]; then
 
     kubectl delete configmap kubernetes-config -n automl
 
+    kubectl delete -k cube/overlays
+    kubectl delete -f sa-rbac.yaml
+
     kubectl delete -f pv-pvc-infra.yaml
     kubectl delete -f pv-pvc-jupyter.yaml
     kubectl delete -f pv-pvc-automl.yaml
     kubectl delete -f pv-pvc-pipeline.yaml
     kubectl delete -f pv-pvc-service.yaml
 
-    kubectl delete -k cube/overlays
-    kubectl delete -f sa-rbac.yaml
-    sh delete_ns_secret.sh
     kubectl label node $node train- cpu- notebook- service- org- istio- kubeflow- kubeflow-dashboard- mysql- redis- monitoring- logging-
     
     read -p "是否删除所有数据？(yes/no)" answer

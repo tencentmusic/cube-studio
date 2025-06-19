@@ -104,51 +104,6 @@ const EditorBody: React.FC = () => {
       dispatch(updateElements(newElementList));
       dispatch(savePipeline());
 
-      // api
-      //   .task_modelview_add(pipelineId, {
-      //     job_template: modelInfo.id,
-      //     pipeline: +pipelineId,
-      //     name: taskName,
-      //     label: `新建 ${modelInfo.name} 任务`,
-      //     volume_mount: 'kubeflow-user-workspace(pvc):/mnt',
-      //     image_pull_policy: 'Always',
-      //     working_dir: '',
-      //     command: '',
-      //     overwrite_entrypoint: 0,
-      //     node_selector: 'cpu=true,train=true',
-      //     resource_memory: '2G',
-      //     resource_cpu: '2',
-      //     resource_gpu: '0',
-      //     timeout: 0,
-      //     retry: 0,
-      //     args: JSON.stringify(defaultArgs),
-      //   })
-      //   .then((res: any) => {
-      //     if (res?.result?.id) {
-      //       const newNode = {
-      //         id: `${res.result.id}`,
-      //         type: 'dataSet',
-      //         position,
-      //         data: {
-      //           name: taskName,
-      //           label: `新建 ${modelInfo.name} 任务`,
-      //         },
-      //       };
-      //       dispatch(updateEditing(true));
-      //       dispatch(updateElements(elements.concat(newNode)));
-      //       setTimeout(() => {
-      //         dispatch(savePipeline());
-      //       }, 2000);
-      //     }
-      //   })
-      //   .catch(err => {
-      //     if (err.response) {
-      //       dispatch(updateErrMsg({ msg: err.response.data.message }));
-      //     }
-      //   })
-      //   .finally(() => {
-      //     dispatch(updateLoading(false));
-      //   });
     }
   };
   // 变更拖拽元素状态

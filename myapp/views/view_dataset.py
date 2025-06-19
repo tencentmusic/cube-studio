@@ -282,7 +282,7 @@ class Dataset_ModelView_base():
 
     # @pysnooper.snoop()
     def pre_add(self, item):
-        if not item.owner:
+        if not item.owner or item.owner == '*':
             item.owner = g.user.username + ",*"
         if item.icon and '</svg>' in item.icon:
             item.icon = re.sub(r'width="\d+(\.\d+)?(px)?"', f'width="50px"', item.icon)

@@ -15,7 +15,10 @@ sudo rm -rf /var/lib/containerd /etc/containerd/
 
 ### 国内使用阿里源
 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -
+# amd64机器
 sudo add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+# arm机器
+sudo add-apt-repository "deb [arch=arm64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
 
 # 更新源
 sudo apt-get update
@@ -39,16 +42,39 @@ systemctl status containerd
 # 2. centos 安装containerd
 
 ```bash
+
 yum update -y
 yum install -y yum-utils device-mapper-persistent-data lvm2
-# 使用阿里源
+
+# amd64安装containerd
+# 使用阿里源,arm64 版本是比较老的版本
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum update -y
 yum -y install containerd.io    # 安装 1.7.20相近版本
 
 systemctl start containerd
 systemctl enable containerd
 systemctl status containerd
 
+
+
+```
+# arm64和amd64离线下载安装
+
+包含nerdctl containerd run 但是没有cni
+
+使用nerdctl full，参考：https://github.com/containerd/nerdctl/releases
+```bash
+arch=arm64
+rm -rf nerdctl-full-1.7.7-linux-${arch}.tar.gz
+wget https://githubfast.com/containerd/nerdctl/releases/download/v1.7.7/nerdctl-full-1.7.7-linux-${arch}.tar.gz
+tar xf nerdctl-full-1.7.7-linux-${arch}.tar.gz -C /usr/local 
+cp /usr/local/lib/systemd/system/*.service /etc/systemd/system/
+# 自启动 buildkit 和 contaienrd 服务
+systemctl enable containerd buildkit  
+systemctl start containerd buildkit  
+# 查看状态
+systemctl status buildkit containerd
 ```
 
 # 3. 配置containerd
@@ -67,7 +93,7 @@ vi /etc/containerd/config.toml
 # 注释上面那行，添加下面这行,注意看一下后面的版本号
 sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.8"
 
-# 2、centos配置这个参数：配置Containerd直接使用systemd去管理cgroupfs,
+# 2、ubuntu centos配置这个参数：配置Containerd直接使用systemd去管理cgroup 而不是直接使用cgroupfs,
 [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
   # 修改下面这行
   SystemdCgroup = true
@@ -120,13 +146,19 @@ systemctl restart containerd
 
 ```
 version=1.7.6
+
+# amd64版本
 wget https://githubfast.com/containerd/nerdctl/releases/download/v${version}/nerdctl-${version}-linux-amd64.tar.gz
+tar zxvf nerdctl-${version}-linux-amd64.tar.gz -C /usr/local/bin
+
+# arm64版本
+wget https://githubfast.com/containerd/nerdctl/releases/download/v${version}/nerdctl-${version}-linux-arm64.tar.gz
+tar zxvf nerdctl-${version}-linux-arm64.tar.gz -C /usr/local/bin
 ```
 
 也可以直接在页面上找到相应版本，直接复制链接。
 
 ```
-tar zxvf nerdctl-${version}-linux-amd64.tar.gz -C /usr/local/bin
 
 # 配置nerdctl
 mkdir -p /etc/nerdctl/
@@ -144,9 +176,14 @@ EOF
 ```
 version=v0.15.1
 
+# amd64版本
 wget https://githubfast.com/moby/buildkit/releases/download/${version}/buildkit-${version}.linux-amd64.tar.gz
-
 tar zxvf buildkit-${version}.linux-amd64.tar.gz -C /usr/local/
+
+# arm64版本
+wget https://githubfast.com/moby/buildkit/releases/download/${version}/buildkit-${version}.linux-arm64.tar.gz
+tar zxvf buildkit-${version}.linux-arm64.tar.gz -C /usr/local/
+
 
 vi /etc/systemd/system/buildkit.service 
 
@@ -167,45 +204,23 @@ WantedBy=multi-user.target
 
 ```
 # 启动
-systemctl enable buildkit --now
+systemctl enable buildkit
 ```
 
 # 6. 安装 cni 网络插件
 ```bash
 # 创建目录
-mkdir -p /opt/cni/bin
+mkdir -p /opt/cni/bin /etc/cni/net.d/
 
 # 下载 CNI 插件 amd，可能网络问题下载失败，记得删除旧文件，重新下载几次
 wget https://githubfast.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
 # wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/containerd/cni-plugins-linux-amd64-v1.1.1.tgz
+tar -C /opt/cni/bin -xzvf cni-plugins-linux-amd64-v1.1.1.tgz
+
 # 下载 CNI 插件 arm
 wget https://githubfast.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-arm64-v1.1.1.tgz
+tar -C /opt/cni/bin -xzvf cni-plugins-linux-arm64-v1.1.1.tgz
 
-# 解压对应版本插件到 /opt/cni/bin
-mkdir -p /opt/cni/bin
-sudo tar -C /opt/cni/bin -xzvf cni-plugins-linux-amd64-v1.1.1.tgz
-
-# 创建一个 CNI 网络配置文件，比如 /etc/cni/net.d/10-bridge.conf，内容如下：
-mkdir -p /etc/cni/net.d/
-vi /etc/cni/net.d/10-bridge.conf
-
-{
-    "cniVersion": "1.0.0",
-    "name": "bridge",
-    "type": "bridge",
-    "bridge": "cni0",
-    "isGateway": true,
-    "ipMasq": true,
-    "ipam": {
-        "type": "host-local",
-        "ranges": [
-            [{"subnet": "10.22.0.0/16"}]
-        ],
-        "routes": [
-            {"dst": "0.0.0.0/0"}
-        ]
-    }
-}
 
 修正containerd 的配置
 vi /etc/containerd/config.toml
@@ -232,4 +247,3 @@ systemctl restart containerd
 nerdctl pull docker.io/library/nginx 
 替换为 
 nerdctl pull docker.anyhub.us.kg/library/nginx   
-
