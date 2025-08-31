@@ -15,8 +15,17 @@ export default function TabsModal(props: IProps) {
     const [data, setData] = useState<ITabsModalData>()
 
     useEffect(() => {
-        fatchData(props.url)
-	}, [props.url]);
+        if(props.visible && props.url) {
+            fatchData(props.url);
+        }
+        // fatchData(props.url)
+	}, [props.url,props.visible]);
+
+    const handleCancel = () => {
+      props.onVisibilityChange(false);
+      setData(undefined);  // 重置数据，确保下次打开会重新获取
+    };
+
     const fatchData = (url: string) => {
         if (!!url) {
             setLoading(true);
@@ -44,7 +53,7 @@ export default function TabsModal(props: IProps) {
             width={680}
             open={props.visible}
             title={data?.title}
-            onCancel={() => props.onVisibilityChange(false)}
+            onCancel={handleCancel}
             onOk={() => props.onVisibilityChange(false)}
             footer={
                 data?.bottomButton?.length ? (

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="10">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Pods List</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid rgba(0,0,0,.12);
+        }
+        .card-title {
+            flex: 1;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-header {
+            background-color: #f5f5f5;
+            text-align: left;
+            font-weight: 500;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(0,0,0,.12);
+        }
+        .table-cell {
+            padding: 12px 16px;
+        }
+        .table-row {
+            border-bottom: none;
+        }
+        .table-row:hover {
+            background-color: rgba(0,0,0,.04);
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-right: 4px;
+            font-size: 12px;
+        }
+        .alert-row {
+            background-color: #ffffff;
+            border-bottom: 1px solid rgba(0,0,0,.12);
+        }
+        .alert-message {
+            color: #ff481b;
+            padding: 8px 16px 8px 60px;
+            font-size: 14px;
+            /*display: block;*/
+            /*unicode-bidi: isolate;*/
+        }
+        .alert-message-container {
+            padding: 0;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 16px;
+        }
+    </style>
+</head>
+<body>
+{% for resources in data %}
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">{{resources.label}}</div>
+        </div>
+
+        <div class="card-content">
+            <table class="table">
+                <thead>
+                    <tr class="table-header">
+                        {% for column in resources.columns %}
+                        <th class="table-cell">{{column}}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resource in resources.data %}
+                        <tr class="table-row">
+                            {% for one_column in resource.one %}
+                                <td class="table-cell">
+                                    {{one_column}}
+                                </td>
+                            {% endfor %}
+
+                        </tr>
+
+                        <tr class="alert-row">
+                            {% if resource.errors %}
+                            <td colspan="11" class="alert-message-container">
+                                <div class="alert-message">
+                                    {% for error in resource.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                             {% endif %}
+                        </tr>
+
+
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                1 - {{ resources.data|length }} of {{ resources.data|length }}
+            </div>
+        </div>
+    </div>
+
+{% endfor %}
+</body>
+</html>

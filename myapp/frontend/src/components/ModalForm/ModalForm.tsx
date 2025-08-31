@@ -51,7 +51,7 @@ const ModalForm = (props: ModalFormProps): JSX.Element => {
 				props.onCancel();
 			}}
 			onOk={() => {
-				console.log(form.getFieldsValue())
+				// console.log(form.getFieldsValue())
 				form.validateFields()
 					.then((values) => {
 						props.onCreate(values, form);

@@ -15,6 +15,7 @@ from flask_appbuilder.security.views import (
     RoleModelView,
     UserModelView
 )
+from markupsafe import Markup
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_appbuilder.security.sqla.models import assoc_user_role
 
@@ -233,12 +234,7 @@ class MyUserRemoteUserModelView_Base():
             _("组织架构"),
             widget=BS3TextFieldWidget(),
             description=_("组织架构，自行填写"),
-        ),
-        "quota": StringField(
-            _("额度限制"),
-            widget=BS3TextFieldWidget(),
-            description=_('资源限额，额度填写方式 $集群名,$资源组名,$命名空间,$资源类型,$限制类型,$限制值，<br>其中$集群名可为all,dev，<br>$资源组名可为all,public，<br>$命名空间包含all,jupyter,pipeline,service,automl,aihub，<br>$资源类型包含cpu,memory,gpu，<br>$限制类型包含single,concurrent')
-        ),
+        )
     }
     edit_form_extra_fields = add_form_extra_fields
 
@@ -289,10 +285,14 @@ class MyUserRemoteUserModelView_Base():
         user.first_name = user.username
         user.last_name = ''
         user.active=True
+        user.password = generate_password_hash(user.password)
 
+    # @pysnooper.snoop()
     def pre_update(self,user):
         user.first_name = user.username
         user.last_name = ''
+        if 'pbkdf2:sha256:' not in user.password:
+            user.password = generate_password_hash(user.password)
 
 class MyUserRemoteUserModelView(MyUserRemoteUserModelView_Base,UserModelView):
     datamodel = SQLAInterface(MyUser)
@@ -315,7 +315,7 @@ class UserInfoEditView(SimpleFormView):
         )
         email = StringField(
             _("邮箱"),
-            validators=[DataRequired(), Regexp(".*@.*.com")],
+            validators=[DataRequired(), Regexp(".*@.*\..*")],
             widget=BS3TextFieldWidget(),
             description=_("填写邮箱地址"),
         )
@@ -343,6 +343,8 @@ class UserInfoEditView(SimpleFormView):
         form = self.form.refresh(request.form)
         item = self.appbuilder.sm.get_user_by_id(g.user.id)
         form.populate_obj(item)
+        if 'pbkdf2:sha256:' not in item.password:
+            item.password = generate_password_hash(item.password)
         self.appbuilder.sm.update_user(item)
         flash(as_unicode(self.message), "info")
 
@@ -386,8 +388,9 @@ class MyappSecurityManager(SecurityManager):
         # if 'token' in request.headers:
         #     token = request.headers['token']
         if authorization_value:
-            # username 免认证
-            if len(authorization_value) < 40:
+            from myapp import conf
+            # username 免认证，设计到多平台调用时打开
+            if len(authorization_value) < 40: # 任务模板请求后端api调用  and conf.get('AUTH_PLATFORM_ACCESS',False):
                 username = authorization_value
                 if username:
                     user = self.find_user(username)
@@ -395,7 +398,6 @@ class MyappSecurityManager(SecurityManager):
                     return user
             else:  # token 认证
                 encoded_jwt = authorization_value.encode('utf-8')
-                from myapp import conf
                 payload = jwt.decode(encoded_jwt, conf.get('JWT_PASSWORD','cube-studio'), algorithms=['HS256'])
                 # if payload['iat'] > time.time():
                 #     return
@@ -901,10 +903,56 @@ class MyappSecurityManager(SecurityManager):
         else:
             return []
 
+    @classmethod
+    def get_all_namespace(self,session):
+        from myapp.models.model_team import Project
+        all_namespaces = []
+        projects = session.query(Project).all()
+        for project in projects:
+            all_namespaces.append(project.notebook_namespace)
+            all_namespaces.append(project.pipeline_namespace)
+            all_namespaces.append(project.service_namespace)
+            all_namespaces.append(project.automl_namespace)
 
+        all_namespaces = list(set(all_namespaces))
+        return all_namespaces
 
+    @classmethod
+    def get_all_notebook_namespace(self,session):
+        from myapp.models.model_team import Project
+        all_namespaces = []
+        projects = session.query(Project).all()
+        for project in projects:
+            all_namespaces.append(project.notebook_namespace)
+        all_namespaces = list(set(all_namespaces))
+        return all_namespaces
 
+    @classmethod
+    def get_all_pipeline_namespace(self,session):
+        from myapp.models.model_team import Project
+        all_namespaces = []
+        projects = session.query(Project).all()
+        for project in projects:
+            all_namespaces.append(project.pipeline_namespace)
+        all_namespaces = list(set(all_namespaces))
+        return all_namespaces
 
+    @classmethod
+    def get_all_service_namespace(self,session):
+        from myapp.models.model_team import Project
+        all_namespaces = []
+        projects = session.query(Project).all()
+        for project in projects:
+            all_namespaces.append(project.service_namespace)
+        all_namespaces = list(set(all_namespaces))
+        return all_namespaces
 
-
-
+    @classmethod
+    def get_all_automl_namespace(self,session):
+        from myapp.models.model_team import Project
+        all_namespaces = []
+        projects = session.query(Project).all()
+        for project in projects:
+            all_namespaces.append(project.automl_namespace)
+        all_namespaces = list(set(all_namespaces))
+        return all_namespaces

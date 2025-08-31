@@ -124,7 +124,7 @@ def save_workflow(crd, dbsession):
             "has_push": ''
         }
         logging.info('new workflow')
-        workflow = Workflow(name=crd['name'], cluster=cluster, namespace=crd['namespace'], create_time=crd['create_time'],
+        workflow = Workflow(name=crd['name'], cluster=cluster, namespace=crd['namespace'], create_time=crd['create_time'],change_time=crd['create_time'],
                             status=crd['status'],
                             annotations=json.dumps(crd['annotations'], indent=4, ensure_ascii=False),
                             labels=json.dumps(crd['labels'], indent=4, ensure_ascii=False),
@@ -405,18 +405,18 @@ def deal_event(event, workflow_info, namespace):
             logging.error(e)
 
 
-# @pysnooper.snoop()
+# @pysnooper.snoop(watch_explode=('event'))
 def listen_workflow():
     workflow_info = conf.get('CRD_INFO')['workflow']
-    namespace = conf.get('PIPELINE_NAMESPACE','pipeline')  # 不仅这一个命名空间
     w = watch.Watch()
     while (True):
         try:
             logging.info('begin listen')
-            for event in w.stream(client.CustomObjectsApi().list_namespaced_custom_object, group=workflow_info['group'],
+            for event in w.stream(client.CustomObjectsApi().list_cluster_custom_object, group=workflow_info['group'],
                                   version=workflow_info["version"],
-                                  namespace=namespace, plural=workflow_info["plural"]):  # label_selector=label,
+                                  plural=workflow_info["plural"]):  # label_selector=label,
                 if event['type'] == 'ADDED' or event['type'] == 'MODIFIED':  # ADDED  MODIFIED DELETED
+                    namespace = event['object']['metadata']['namespace']
                     deal_event(event, workflow_info, namespace)
                 elif event['type'] == 'ERROR':
                     w = watch.Watch()

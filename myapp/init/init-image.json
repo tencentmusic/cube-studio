@@ -5,6 +5,6 @@
     "repository": "hubsecret",
     "gitpath": "",
     "describe": "丰富版本python镜像",
-    "dockerfile":"FROM python:3.9\n\nENV TZ=Asia/Shanghai\nENV DEBIAN_FRONTEND=noninteractive\n\nRUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple\n\nRUN pip install numpy \n\nWORKDIR /app\n\nEXPOSE 80"
+    "dockerfile":"# 设置基础镜像\nFROM python:3.9\n# 配置环境变量\nENV TZ=Asia/Shanghai\nENV DEBIAN_FRONTEND=noninteractive\n# 配置源\nRUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple\n# 安装软件\nRUN pip install numpy \n# 设置工作目录\nWORKDIR /app\n# 拷贝文件，只能是/mnt/$username/下面的\nCOPY /mnt/admin/coco.zip /app/\n# 暴露端口\nEXPOSE 80\n# 设置启动命令\nENTRYPOINT [\"sleep\",\"100000\"]"
   }
 ]

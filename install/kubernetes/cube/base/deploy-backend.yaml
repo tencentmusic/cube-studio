@@ -112,6 +112,14 @@ spec:
             requests:
               cpu: 10m
               memory: 100Mi
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            timeoutSeconds: 10
           livenessProbe:
             failureThreshold: 2
             httpGet:

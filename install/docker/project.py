@@ -188,7 +188,7 @@ class Myauthdbview(AuthDBView):
                 logging.info(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
             # 用户未激活报错
             elif not user.is_active:
-                flash('发现用户%s已存在，但未激活，请联系管理员激活' % form.username.data, "warning")
+                flash('发现用户%s已存在，但未激活，请联系管理员激活' % username, "warning")
                 return redirect(self.appbuilder.get_url_for_login)
             # 校验是否和加密密码对应
             elif check_password_hash(user.password, password):
@@ -226,6 +226,8 @@ class Myauthdbview(AuthDBView):
 
 
             login_user(user, remember=True)
+            from myapp import event_logger
+            event_logger.log(user_id=user.id,action='login',duration_ms=10)
             # 添加到public项目组
             from myapp.security import MyUserRemoteUserModelView_Base
             user_view = MyUserRemoteUserModelView_Base()

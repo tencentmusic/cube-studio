@@ -1,0 +1,15 @@
+{
+  "features": {
+    "id": {
+      "_type": "Value",
+      "dtype": "string"
+    },
+    "image": {
+      "_type": "Image"
+    },
+    "box": {
+      "_type": "Value",
+      "dtype": "string"
+    }
+  }
+}

@@ -110,7 +110,7 @@ echo "127.0.0.1 localhost" >> /etc/hosts
 # 部署rancher server
 export RANCHER_CONTAINER_TAG=v2.8.5
 export PASSWORD=cube-studio
-sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 -e CATTLE_SYSTEM_DEFAULT_REGISTRY=registry.cn-hangzhou.aliyuncs.com -e CATTLE_BOOTSTRAP_PASSWORD=$PASSWORD registry.cn-hangzhou.aliyuncs.com/rancher/rancher:$RANCHER_CONTAINER_TAG
+sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 -e CATTLE_BOOTSTRAP_PASSWORD=$PASSWORD rancher/rancher:$RANCHER_CONTAINER_TAG
 # 打开 https://xx.xx.xx.xx:443/ 等待web界面可以打开。预计要1~10分钟
 # 用户名admin，输入密码cube-studio
 ```
@@ -151,20 +151,20 @@ sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myran
 
 选择“Set a specific password to use”来配置rancher的密码，不选择"Allow collection of anonymous statistics ......"，选择"I agree to the terms and conditions ......"。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/ecda7c7b8861482091848e3b7fe22688.png)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/ecda7c7b8861482091848e3b7fe22688.png)
 
 之后选择添加集群->选择自定义集群->填写集群名称，集群名称英文小写
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/ec25233e26a749d5bcb62a339e222163.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/ec25233e26a749d5bcb62a339e222163.jpeg)
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/8ad63ad0bafb46268401f07ec2433cb6.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/8ad63ad0bafb46268401f07ec2433cb6.jpeg)
 
 然后选择kubernetes的版本（注意：这个版本在第一次打开选择页面时可能刷新不出来，需要等待1~2分钟再刷新才能显示）
 
 注意：选择1.25版本的k8s。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/d60704f5dcf242b883a6dece66e07e93.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/d60704f5dcf242b883a6dece66e07e93.jpeg)
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/d778f141f20842b3ac2442acd75b66b5.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/d778f141f20842b3ac2442acd75b66b5.jpeg)
 
 修改Advanced option，主要是禁用nginx ingress，修改端口范围，使用docker info检查服务器上的docker根目录是否和默认的一致，不一致则需要更改。
 
@@ -194,7 +194,7 @@ sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myran
         - '/data:/data'
         
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/a380de5081d74bd5ac49f0392e6aa341.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/a380de5081d74bd5ac49f0392e6aa341.jpeg)
 
 这个yaml文件中控制着k8s基础组件的启动方式。比如kubelet的启动参数，api-server的启动参数等等。
 
@@ -261,17 +261,17 @@ services部分的示例（注意缩进对齐）
 
 我们可以在部署rancher server的这台机器上，添加etcd/control角色。(如果你准备单机部署或者只是简单尝试，可以把所有角色都选上)
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/e9f72ad20ac74afca6dfbe4980065d4a.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/e9f72ad20ac74afca6dfbe4980065d4a.jpeg)
 
 最后复制页面中显示的命令，接着在rancher server的终端上粘贴命令，注意在粘贴命令后面加上参数 --node-name xx.xx.xx.xx    也就是加上服务器主机的内网ip地址。
 
 粘贴后等待部署完成就行了。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/9c6f2fa9750749edb92a1f92e48824a7.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/9c6f2fa9750749edb92a1f92e48824a7.jpeg)
 
 部署完成后，集群的状态会变为"Active"，之后就可以下载kubeconfig文件，连接k8s集群了。
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/618cfde682044b77b7103fc811d5060b.jpeg)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/618cfde682044b77b7103fc811d5060b.jpeg)
 
 ## 5.1 配置认证过期问题
 
@@ -344,14 +344,47 @@ rancher server修复后，重启每台机器的canal的网络pod
 kubectl delete node node12
 ```
 
-# 12. rancher server 节点迁移
+# 12，重新创建rancher server （参考rancher server迁移）
+
+修改端口，或者修改启动环境变量，等需要重新创建rancher server
+```bash
+export RANCHER_CONTAINER_TAG=v2.8.5
+export RANCHER_CONTAINER_NAME=myrancher
+export PASSWORD=cube-studio
+docker stop $RANCHER_CONTAINER_NAME
+docker create --volumes-from $RANCHER_CONTAINER_NAME --name rancher-data rancher/rancher:$RANCHER_CONTAINER_TAG
+docker run --volumes-from rancher-data -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-$RANCHER_VERSION-$DATE.tar.gz /var/lib/rancher
+docker pull rancher/rancher:$RANCHER_CONTAINER_TAG
+# 重新创建的命令自己按需修改
+docker run -d --privileged --volumes-from rancher-data --restart=unless-stopped -p 443:443 --name=myrancher-new -e CATTLE_TLS_MIN_VERSION=1.2 -e AUDIT_LEVEL=3 -e CATTLE_BOOTSTRAP_PASSWORD=$PASSWORD rancher/rancher:$RANCHER_CONTAINER_TAG
+
+如果修改了启动端口，要在全局设置里面修改server-url，然后关闭docker
+# 停止 Docker 服务
+sudo systemctl stop docker
+sudo systemctl stop docker.socket
+sudo systemctl stop containerd
+
+进去share-mnt容器的主机目录下/var/lib/docker/containers/<container_id>/config.v2.json，将其中的server-url改为新端口号的
+最后再重启 
+sudo systemctl start containerd
+sudo systemctl start docker.socket
+sudo systemctl start docker
+
+然后 docker inspect share-mnt 看看该容器的启动参数变化了没
+
+然后k8s config文件就可以使用了，然后再修改  cattle-system 空间下面的secret cattle-credentials 中的url 和 deployment cattle-cluster-agent 和 daemonset cattle-node-agent，把环境变量中server-url 地址改了
+
+然后docker ps -a |grep agent 查看所有的agent是否正常了。share-mnt容器正常就是会停止，看一下日志是否正常就ok
+```
+
+# 13. rancher server 节点迁移
 我们可以实现将rancher server 节点迁移到另一台机器，以防止机器废弃后无法使用的情况。
 
 首先，先在原机器上把数据压缩，不要关闭源集群rancher server 因为后面还要执行kubectl，这里的.tar.gz的文件名称以实际为准
 
 ```bash
 export RANCHER_CONTAINER_TAG=v2.8.5
-docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:$rancher_version
+docker create --volumes-from myrancher-new --name rancher-data-new rancher/rancher:$RANCHER_CONTAINER_TAG
 docker run --volumes-from rancher-data-new  -v $PWD:/backup alpine tar zcvf /backup/rancher-data-backup-20210101.tar.gz /var/lib/rancher
 
 ```
@@ -384,7 +417,7 @@ curl --insecure -sfL https://100.108.176.29/v3/import/d9jzxfz7tmbsnbhf22jbknzlbj
 至此完成
 
 
-# 13. 总结
+# 14. 总结
 
 rancher使用**全部容器化**的形式来部署k8s集群，能大幅度降低k8s集群扩部署/缩容的门槛。
 你可以使用rancher来扩缩容 etcd，k8s-master，k8s-worker。

@@ -240,13 +240,15 @@ class MyJsonIde(object):
         # return Markup('<pre><code>%s</code></pre>' % (field._value(),))
 
 
-class MySelect2ManyWidget(widgets.Select):
+class MySelect2ManyWidget(Select2ManyWidget):
     extra_classes = None
 
-    def __init__(self, extra_classes=None, style=None, can_input=False):
+    def __init__(self, extra_classes=None, style=None, can_input=False, conten2choices=False, retry_info=False):
         self.extra_classes = extra_classes
         self.style = style or u"width:250px"
         self.can_input = can_input
+        self.conten2choices = conten2choices
+        self.retry_info = retry_info
         return super(MySelect2ManyWidget, self).__init__()
 
 

@@ -73,6 +73,46 @@ class Project(Model,AuditMixinNullable,MyappModelBase):
             return ''
 
     @property
+    def namespace(self):
+        expand = json.loads(self.expand) if self.expand else {}
+        namespaces = expand.get('namespace','')
+        namespaces = namespaces.strip().split(',')
+        namespaces = [x.strip().split(':') for x in namespaces if len(x.strip().split(':'))==2 and x.strip().split(':')[0] in ['NOTEBOOK_NAMESPACE','PIPELINE_NAMESPACE','SERVICE_NAMESPACE','AUTOML_NAMESPACE']]
+        real_namespace={
+            "NOTEBOOK_NAMESPACE":conf.get('NOTEBOOK_NAMESPACE','jupyter'),
+            "PIPELINE_NAMESPACE": conf.get('PIPELINE_NAMESPACE', 'pipeline'),
+            "SERVICE_NAMESPACE": conf.get('SERVICE_NAMESPACE', 'service'),
+            "AUTOML_NAMESPACE": conf.get('AUTOML_NAMESPACE', 'automl'),
+        }
+        real_namespace.update(
+            {
+                x[0]: x[1] for x in namespaces
+            }
+        )
+
+        return real_namespace
+
+    @property
+    def notebook_namespace(self):
+        namespaces = self.namespace
+        return namespaces['NOTEBOOK_NAMESPACE']
+
+    @property
+    def pipeline_namespace(self):
+        namespaces = self.namespace
+        return namespaces['PIPELINE_NAMESPACE']
+
+    @property
+    def service_namespace(self):
+        namespaces = self.namespace
+        return namespaces['SERVICE_NAMESPACE']
+
+    @property
+    def automl_namespace(self):
+        namespaces = self.namespace
+        return namespaces['AUTOML_NAMESPACE']
+
+    @property
     def volume_mount(self):
         try:
             expand = json.loads(self.expand) if self.expand else {}

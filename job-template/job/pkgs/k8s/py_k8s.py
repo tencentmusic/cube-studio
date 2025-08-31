@@ -792,9 +792,18 @@ class K8s():
             if volume_mount_new:
                 volume_mounts_temp = re.split(',|;', volume_mount_new)
                 volume_mounts_temp = [volume_mount_temp.strip() for volume_mount_temp in volume_mounts_temp if volume_mount_temp.strip()]
-
+                all_volumns=[]
+                all_mounts=[]
                 for one_volume_mount in volume_mounts_temp:
                     volume, mount = one_volume_mount.split(":")[0].strip(), one_volume_mount.split(":")[1].strip()
+
+                    # 这里设置下避免重复挂载
+                    if volume.strip() not in all_volumns and mount.strip() not in all_mounts:
+                        all_volumns.append(volume.strip())
+                        all_mounts.append(mount.strip())
+                    else:
+                        continue
+
                     if "(pvc)" in volume:
                         pvc_name = volume.replace('(pvc)', '').replace(' ', '')
                         volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
@@ -809,6 +818,40 @@ class K8s():
                                 "name": volumn_name,
                                 "mountPath": os.path.join(mount, username),
                                 "subPath": username
+                            }
+                        )
+                    if "(pvc-share)" in volume:
+                        pvc_name = volume.replace('(pvc-share)', '').replace(' ', '')
+                        volumn_name = pvc_name.replace('_', '-').lower()[-60:].strip('-')
+                        k8s_volumes.append({
+                            "name": volumn_name,
+                            "persistentVolumeClaim": {
+                                "claimName": pvc_name
+                            }
+                        })
+                        k8s_volume_mounts.append(
+                            {
+                                "name": volumn_name,
+                                "mountPath": mount
+                            }
+                        )
+
+                    if "(nfs)" in volume:
+                        ip_path = volume.replace('(nfs)', '').replace(' ', '')
+                        ip = ip_path.split('/')[0]
+                        path = ip_path.replace(ip,'')
+                        volumn_name = path.replace('_', '-').replace('/', '-').replace('.', '-').lower()[-60:].strip('-')
+                        k8s_volumes.append({
+                            "name": volumn_name,
+                            "nfs": {
+                                "server": ip,
+                                "path": path
+                            }
+                        })
+                        k8s_volume_mounts.append(
+                            {
+                                "name": volumn_name,
+                                "mountPath": mount,
                             }
                         )
 

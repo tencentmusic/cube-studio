@@ -10,6 +10,12 @@ import pysnooper
 from ultralytics import YOLO
 import math
 import datetime
+import pandas as pd
+import yaml
+import faulthandler, torch, cv2
+faulthandler.enable()
+torch.backends.mkldnn.enabled = False
+cv2.ocl.setUseOpenCL(False)
 
 
 base_dir = os.path.split(os.path.realpath(__file__))[0]
@@ -26,7 +32,7 @@ yolo_classes = [ 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 't
          'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
          'hair drier', 'toothbrush' ]
 
-# python train.py --train /mnt/admin/coco_data_sample/train.txt --val /mnt/admin/coco_data_sample/valid.txt --batch_size 1 --epoch 1 --save_model_path /mnt/admin/coco_data_sample/yolov8_best.pt
+# python train.py --train /mnt/admin/coco_data_sample/train.txt --val /mnt/admin/coco_data_sample/valid.txt --batch_size 1 --epoch 1 --save_model_path /mnt/admin/coco_data_sample/yolov8_best.pt --weights yolov8n.pt
 # @pysnooper.snoop()
 def main():
     arg_parser = argparse.ArgumentParser("obj launcher")
@@ -48,6 +54,9 @@ def main():
     # 创建目录
     os.makedirs(os.path.dirname(args.save_model_path),exist_ok=True)
 
+    WORKFLOW_NODE_NAME = os.getenv('WORKFLOW_NODE_NAME', "")
+    first = not WORKFLOW_NODE_NAME.endswith(")") or WORKFLOW_NODE_NAME.endswith("(0)")
+
     # 识别设备
     device = 'cpu'
     resource_gpu = os.getenv('KFJ_TASK_RESOURCE_GPU','')
@@ -61,43 +70,67 @@ def main():
         # resource_gpu = [str(x) for x in resource_gpu]
         # device = ','.join(resource_gpu)
 
-    # 配置训练配置文件
+    if ',' in args.img_size or '，' in args.img_size:
+        img_size = re.split(',|，', args.img_size)
+        img_size = [int(x.strip()) for x in img_size if x.strip()]
+    else:
+        img_size = int(args.img_size.strip())
+
+    # 生成模型训练yaml文件
     logging.info("{} args: {}".format(__file__, args))
     data_config = open('/yolov8/yolov8.yaml').read()
     classes = args.classes.split(',')
     classes = [x.strip() for x in classes if x.strip()]
     if not classes:
-        classes=yolo_classes
-    classes = [f"  {index}: {class1}" for index,class1 in enumerate(classes)]
+        classes = yolo_classes
+    classes = [f"  {index}: {class1}" for index, class1 in enumerate(classes)]
     classes = '\n'.join(classes)
-
     if not args.val:
-        data_config.replace('val: VAL_DATASET','')
-    data_config = data_config.replace('TRAIN_DATATSE',args.train).replace('VAL_DATASET',args.val).replace('CLASSES',str(classes))
-    with open('/yolov8/data.yaml','w') as f_data_cfg:
+        data_config.replace('val: VAL_DATASET', '')
+    data_config = data_config.replace('TRAIN_DATATSE', args.train).replace('VAL_DATASET', args.val).replace('CLASSES',
+                                                                                                            str(classes))
+    with open('/yolov8/data.yaml', 'w') as f_data_cfg:
         f_data_cfg.write(data_config)
 
-    # Load a model
-    model = YOLO(model=args.weights)  # load a pretrained model (recommended for training)
-
-    # Train the model
-    if ',' in args.img_size or '，' in args.img_size:
-        img_size = re.split(',|，',args.img_size)
-        img_size = [int(x.strip()) for x in img_size if x.strip()]
+    # 规定训练文件存放目录
+    train_file_path = os.path.join(os.path.dirname(args.save_model_path), 'tensorboard')
+    if not first:
+        # 继续训练上次的结果
+        last_model_path = None
+        # 得出last.pt文件地址
+        for root, dirs, files in os.walk(train_file_path):
+            for file in files:
+                if file == 'last.pt':
+                    last_model_path = os.path.join(root, file)
+                    print(f"[LOG] 找到上次未完成训练模型地址 {last_model_path}")
+                    break
+        if last_model_path:
+            print("[LOG] 开始继续上次中断训练")
+            model = YOLO(model=last_model_path)
+            model.train(resume=True,
+                        data='/yolov8/data.yaml',
+                        epochs=int(args.epochs),
+                        imgsz=img_size,
+                        batch=int(args.batch_size),
+                        device=device,
+                        project=train_file_path,
+                        patience=int(args.epochs))
     else:
-        img_size = int(args.img_size.strip())
+        # 新的训练,先清空旧文件夹
+        shutil.rmtree(train_file_path, ignore_errors=True)
+        # Load a model
+        model = YOLO(model=args.weights)  # load a pretrained model (recommended for training)
 
-    # 生成一个4位随机数以增加唯一性
-    train_file_path = os.path.join(os.path.dirname(args.save_model_path),'tensorboard')
-    # shutil.rmtree(train_file_path)
-    # os.system(f"tensorboard --logdir {train_file_path} &")
+        # shutil.rmtree(train_file_path)
+        # os.system(f"tensorboard --logdir {train_file_path} &")
 
-    model.train(data='/yolov8/data.yaml',
-                epochs=int(args.epochs),
-                imgsz=img_size,
-                batch=int(args.batch_size),
-                device=device,
-                project=train_file_path)
+        model.train(data='/yolov8/data.yaml',
+                    epochs=int(args.epochs),
+                    imgsz=img_size,
+                    batch=int(args.batch_size),
+                    device=device,
+                    project=train_file_path,
+                    patience=int(args.epochs))
 
     for root, dirs, files in os.walk(train_file_path):
         for file in files:

@@ -1,0 +1,52 @@
+[
+  {
+    "metric_type": "echart-line",
+    "describe": "csv线图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-bar",
+    "describe": "csv柱形图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-pie",
+    "describe": "csv饼图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-scatter",
+    "describe": "csv 散点图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-radar",
+    "describe": "csv 雷达图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-candlestick",
+    "describe": "csv K线可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-heatmap",
+    "describe": "csv 热力图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-parallel",
+    "describe": "csv 并行线可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+  },
+  {
+    "metric_type": "echart-tree",
+    "describe": "json 树图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.json"
+  },
+  {
+    "metric_type": "echart-sunburst",
+    "describe": "json 旭日图可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.json"
+  }
+]

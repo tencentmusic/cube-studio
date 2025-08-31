@@ -1,3 +1,6 @@
+import functools
+import re
+
 from flask_appbuilder import Model
 from sqlalchemy.orm import relationship
 import json
@@ -136,7 +139,6 @@ class Job_Template(Model,AuditMixinNullable,MyappModelBase):
         else:
             return default
 
-
     def clone(self):
         return Job_Template(
             name=self.name,
@@ -189,6 +191,7 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     parameter = Column(Text(65536), default='{}',comment='后端扩展参数')
 
     priority = Column(String(100), default='high', comment='优先级')  # giving priority to meeting high-priority resource needs
+    type = Column(String(100),nullable=True,unique=False,default='',comment='任务流类型')
 
     def __repr__(self):
         return self.name
@@ -251,7 +254,33 @@ class Pipeline(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     # def describe_html(self):
     #     return Markup('<pre><code>' + self.pipeline_file + '</code></pre>')
 
-    # 获取pipeline中的所有task
+    def sort(self,tasks):
+        dag_json = json.loads(self.fix_dag_json())
+        # 获取根节点
+        root_nodes = [key for key in dag_json if not dag_json[key].get('upstream',[])]
+        tasks_dict = {task.name:task for task in tasks}
+
+        # 生成下行链路图
+        for task_name in dag_json:
+            dag_json[task_name]['downstream'] = []
+            for task_name1 in dag_json:
+                if task_name in dag_json[task_name1].get("upstream", []):
+                    dag_json[task_name]['downstream'].append(task_name1)
+
+        sored_tasks = []
+        while root_nodes:
+            new_root_node=[]
+            for root_node in root_nodes:
+                if root_node not in sored_tasks:
+                    sored_tasks.append(root_node)
+                    down_nodes = dag_json[root_node]['downstream']
+                    new_root_node+=down_nodes
+            root_nodes = list(set(new_root_node))
+        tasks = [tasks_dict[task_name] for task_name in sored_tasks]
+        return tasks
+
+    # 获取pipeline中的所有task, 按顺序排好序
+    # @pysnooper.snoop()
     def get_tasks(self,dbsession=db.session):
         return dbsession.query(Task).filter_by(pipeline_id=self.id).all()
 
@@ -483,6 +512,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
     pipeline = relationship(
         "Pipeline", foreign_keys=[pipeline_id]
     )
+    namespace = Column(String(100), default='pipeline', comment='命名空间')
     working_dir = Column(String(1000),default='',comment='启动目录')
     command = Column(String(1000),default='',comment='启动命令')
     overwrite_entrypoint = Column(Boolean,default=False,comment='是否覆盖模板中的入口点')
@@ -566,6 +596,7 @@ class Task(Model,ImportMixin,AuditMixinNullable,MyappModelBase):
             node_selector=self.node_selector,
             resource_memory=self.resource_memory,
             resource_cpu=self.resource_cpu,
+            resource_gpu=self.resource_gpu,
             timeout=self.timeout,
             retry=self.retry,
             expand=self.expand
@@ -830,5 +861,8 @@ class Workflow(Model,Crd,MyappModelBase):
 
     @property
     def stop(self):
-        return Markup(f'<a href="/workflow_modelview/api/stop/{self.id}">{__("停止")}</a>')
+        if self.username == g.user.username or g.user.is_admin() or (self.pipeline and self.pipeline.project.user_role(g.user.id) == 'creator'):
+            return Markup(f'<a href="/workflow_modelview/api/stop/{self.id}">{__("停止")}</a>')
+        else:
+            return __("停止")
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, FormEvent } from 'react';
-import { IconButton, Dropdown, IDropdownOption, TextField } from '@fluentui/react';
+import React, {useState, useEffect, FormEvent, useMemo} from 'react';
+import {IconButton, Dropdown, IDropdownOption, TextField, ITextFieldProps} from '@fluentui/react';
 import { isEdge } from 'react-flow-renderer';
 import api from '@src/api';
 import { useAppDispatch, useAppSelector } from '@src/models/hooks';
@@ -12,6 +12,71 @@ import 'moment/locale/zh-cn';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
+
+
+interface RegexValidatedTextFieldProps extends ITextFieldProps {
+  regex?: RegExp | string;
+}
+
+// 带有正则校验的输入框
+function RegexValidatedTextField({
+  regex,
+  onChange,
+  errorMessage: propErrorMessage,
+  value: externalValue = '', // 默认值设为空字符串
+  ...props
+}: RegexValidatedTextFieldProps) {
+  const [internalValue, setInternalValue] = useState('');
+  const [internalError, setInternalError] = useState('');
+
+  // 同步外部value到内部状态
+  useEffect(() => {
+    setInternalValue(externalValue);
+  }, [externalValue]);
+
+  // 处理正则表达式（支持字符串或RegExp对象）
+  const compiledRegex = useMemo(() => {
+    if (!regex) return null;
+    return typeof regex === 'string' ? new RegExp(regex) : regex;
+  }, [regex]);
+
+  // 校验函数
+  const validate = (value: string): string => {
+    if (compiledRegex && value) {
+      const isValid = compiledRegex.test(value);
+      return isValid ? '' : '输入格式不正确';
+    }
+    return '';
+  };
+
+  // 处理值变化
+  const handleChange = (
+    event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
+    newValue?: string
+  ) => {
+    const value = newValue || '';
+    setInternalValue(value);
+
+    // 实时校验
+    setInternalError(validate(value));
+
+    // 调用外部onChange
+    onChange?.(event, value);
+  };
+
+  // 合并错误信息（优先显示外部传入的错误）
+  const errorMessage = propErrorMessage || internalError;
+
+  return (
+    <TextField
+      {...props}
+      value={internalValue}
+      onChange={handleChange}
+      errorMessage={errorMessage}
+    />
+  );
+}
+
 
 const Setting: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -62,13 +127,11 @@ const Setting: React.FC = () => {
   useEffect(() => {
     api.project_modelview().then((res: any) => {
       const orgProject = res?.result.data.reduce((acc: any, cur: any) => {
-        if (cur.type === 'org') {
-          const item = {
-            key: cur.id,
-            text: cur.name,
-          };
-          acc.push(item);
-        }
+        const item = {
+          key: cur.id,
+          text: cur.name,
+        };
+        acc.push(item);
         return acc;
       }, []);
       setDropItem(orgProject);
@@ -193,8 +256,9 @@ const Setting: React.FC = () => {
             }}
           />
           <div className={style.splitLine}></div>
-          <TextField
+          <RegexValidatedTextField
             label={t('调度周期')}
+            regex={/^(\s*([*0-9,-/]+)\s+){4}([*0-9,-/]+)\s*$/}
             description={t('周期任务的时间设定按照crontab书写格式')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('cron_time', value ? value : '');

@@ -56,12 +56,18 @@ dpkg -l | grep nvidia-docker2
 
 # docker修改配置
 ```bash
-(
-cat << EOF
+
+cat > /etc/docker/daemon.json <<EOF
 {
-    "registry-mirrors": ["https://docker.1panel.live", "https://hub.rat.dev/", "https://docker.chenby.cn", "https://docker.m.daocloud.io"],
-    "data-root": "/data/docker",
+    # 镜像加速器，拉取docker官方镜像时需要
+    "registry-mirrors": ["https://hub.rat.dev/","https://docker.xuanyuan.me", "https://docker.m.daocloud.io","https://dockerproxy.com"],
+    # dns可不配置
+    "dns": ["114.114.114.114","8.8.8.8"],
+    # k8s集群可以同时拉取多个镜像
     "max-concurrent-downloads": 30,
+    # 默认系统根目录下，如果磁盘有限可以改为其他有空间的目录，占用存储会越来越多
+    "data-root": "/data/docker",
+    # 内部如果有http的镜像仓库，可以添加
     "insecure-registries":["docker.oa.com:8080"],
     "default-runtime": "nvidia",
     "runtimes": {
@@ -72,7 +78,6 @@ cat << EOF
     }
 }
 EOF
-)> /etc/docker/daemon.json
 
 systemctl stop docker
 systemctl daemon-reload

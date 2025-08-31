@@ -1,0 +1,363 @@
+{
+    "pipeline": {
+      "name": "ml",
+      "describe": "机器学习建模全流程示例",
+      "project": "public",
+      "parameter": {},
+      "dag_json": {
+        "data-import": {
+          "upstream": []
+        },
+        "hyperparam-search": {
+          "upstream": []
+        },
+        "data-process": {
+          "upstream": [
+            "data-import"
+          ]
+        },
+        "model-train": {
+          "upstream": [
+            "data-process",
+            "hyperparam-search"
+          ]
+        },
+        "model-val": {
+          "upstream": [
+            "model-train"
+          ]
+        },
+        "model-offline-inference": {
+          "upstream": [
+            "model-val"
+          ]
+        },
+        "model-register": {
+          "upstream": [
+            "model-val"
+          ]
+        },
+        "deploy-service": {
+          "upstream": [
+            "model-register"
+          ]
+        }
+      },
+      "global_env": "",
+      "expand": [
+        {
+          "id": "model-train",
+          "type": "dataSet",
+          "position": {
+            "x": 400,
+            "y": 260
+          },
+          "data": {
+            "info": {
+              "describe": "decision-tree算法"
+            },
+            "name": "model-train",
+            "label": "模型训练"
+          }
+        },
+        {
+          "id": "model-val",
+          "type": "dataSet",
+          "position": {
+            "x": 400,
+            "y": 356
+          },
+          "data": {
+            "info": {
+              "describe": "decision-tree算法"
+            },
+            "name": "model-val",
+            "label": "模型评估"
+          }
+        },
+        {
+          "id": "model-offline-inference",
+          "type": "dataSet",
+          "position": {
+            "x": 240,
+            "y": 468
+          },
+          "data": {
+            "info": {
+              "describe": "decision-tree算法"
+            },
+            "name": "model-offline-inference",
+            "label": "模型离线推理"
+          }
+        },
+        {
+          "id": "data-import",
+          "type": "dataSet",
+          "position": {
+            "x": 252,
+            "y": 11
+          },
+          "data": {
+            "info": {
+              "describe": "datax异构数据源同步"
+            },
+            "name": "data-import",
+            "label": "数据导入"
+          }
+        },
+        {
+          "id": "data-process",
+          "type": "dataSet",
+          "position": {
+            "x": 252,
+            "y": 123
+          },
+          "data": {
+            "info": {
+              "describe": "使用用户自定义镜像作为运行镜像"
+            },
+            "name": "data-process",
+            "label": "数据处理"
+          }
+        },
+        {
+          "id": "model-register",
+          "type": "dataSet",
+          "position": {
+            "x": 540,
+            "y": 475
+          },
+          "data": {
+            "info": {
+              "describe": "注册模型"
+            },
+            "name": "model-register",
+            "label": "模型注册"
+          }
+        },
+        {
+          "id": "hyperparam-search",
+          "type": "dataSet",
+          "position": {
+            "x": 572,
+            "y": 123
+          },
+          "data": {
+            "info": {
+              "describe": "超参搜索模板"
+            },
+            "name": "hyperparam-search",
+            "label": "超参搜索"
+          }
+        },
+        {
+          "id": "deploy-service",
+          "type": "dataSet",
+          "position": {
+            "x": 540,
+            "y": 584
+          },
+          "data": {
+            "info": {
+              "describe": "模型部署推理服务"
+            },
+            "name": "deploy-service",
+            "label": "服务部署"
+          }
+        },
+        {
+          "source": "data-import",
+          "arrowHeadType": "arrow",
+          "target": "data-process",
+          "id": "logic__edge-data-importnull-data-processnull"
+        },
+        {
+          "source": "data-process",
+          "arrowHeadType": "arrow",
+          "target": "model-train",
+          "id": "logic__edge-data-processnull-model-trainnull"
+        },
+        {
+          "source": "hyperparam-search",
+          "arrowHeadType": "arrow",
+          "target": "model-train",
+          "id": "logic__edge-hyperparam-searchnull-model-trainnull"
+        },
+        {
+          "source": "model-train",
+          "arrowHeadType": "arrow",
+          "target": "model-val",
+          "id": "logic__edge-model-trainnull-model-valnull"
+        },
+        {
+          "source": "model-val",
+          "arrowHeadType": "arrow",
+          "target": "model-offline-inference",
+          "id": "logic__edge-model-valnull-model-offline-inferencenull"
+        },
+        {
+          "source": "model-val",
+          "arrowHeadType": "arrow",
+          "target": "model-register",
+          "id": "logic__edge-model-valnull-model-registernull"
+        },
+        {
+          "source": "model-register",
+          "arrowHeadType": "arrow",
+          "target": "deploy-service",
+          "id": "logic__edge-model-registernull-deploy-servicenull"
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "job_templete": "decision-tree",
+        "name": "model-train",
+        "label": "模型训练",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--train_dataset": "/mnt/admin/pipeline/data/20230530/cs-training.csv",
+          "--label_columns": "SeriousDlqin2yrs",
+          "--save_model_dir": "/mnt/admin/pipeline/decision_tree1/",
+          "--feature_columns": "RevolvingUtilizationOfUnsecuredLines,age,NumberOfTime30-59DaysPastDueNotWorse,DebtRatio,MonthlyIncome,NumberOfOpenCreditLinesAndLoans,NumberOfTimes90DaysLate,NumberRealEstateLoansOrLines,NumberOfTime60-89DaysPastDueNotWorse,NumberOfDependents",
+          "--model_params": {
+            "max_depth": 5,
+            "min_samples_leaf": 10
+          },
+          "--inference_dataset": "",
+          "--val_dataset": ""
+        }
+      },
+      {
+        "job_templete": "decision-tree",
+        "name": "model-val",
+        "label": "模型评估",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--train_dataset": "",
+          "--label_columns": "SeriousDlqin2yrs",
+          "--save_model_dir": "/mnt/admin/pipeline/decision_tree1/",
+          "--feature_columns": "RevolvingUtilizationOfUnsecuredLines,age,NumberOfTime30-59DaysPastDueNotWorse,DebtRatio,MonthlyIncome,NumberOfOpenCreditLinesAndLoans,NumberOfTimes90DaysLate,NumberRealEstateLoansOrLines,NumberOfTime60-89DaysPastDueNotWorse,NumberOfDependents",
+          "--model_params": "",
+          "--inference_dataset": "",
+          "--val_dataset": "/mnt/admin/pipeline/data/20230530/cs-training.csv"
+        }
+      },
+      {
+        "job_templete": "decision-tree",
+        "name": "model-offline-inference",
+        "label": "模型离线推理",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--train_dataset": "",
+          "--label_columns": "",
+          "--save_model_dir": "/mnt/admin/pipeline/decision_tree1/",
+          "--feature_columns": "RevolvingUtilizationOfUnsecuredLines,age,NumberOfTime30-59DaysPastDueNotWorse,DebtRatio,MonthlyIncome,NumberOfOpenCreditLinesAndLoans,NumberOfTimes90DaysLate,NumberRealEstateLoansOrLines,NumberOfTime60-89DaysPastDueNotWorse,NumberOfDependents",
+          "--model_params": "",
+          "--inference_dataset": "/mnt/admin/pipeline/data/cs-test.csv",
+          "--val_dataset": ""
+        }
+      },
+      {
+        "job_templete": "datax",
+        "name": "data-import",
+        "label": "数据导入",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "-f": "/mnt/admin/pipeline/example/ml/datax.json"
+        }
+      },
+      {
+        "job_templete": "自定义镜像",
+        "name": "data-process",
+        "label": "数据处理",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "images": "ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda11.8.0-cudnn8-python3.9",
+          "workdir": "/mnt/admin/pipeline/example/ml/",
+          "command": "sh fix.sh"
+        }
+      },
+      {
+        "job_templete": "model-register",
+        "name": "model-register",
+        "label": "模型注册",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--project_name": "public",
+          "--model_name": "decision-tree",
+          "--model_version": "{{ datetime.datetime.now().strftime('v%Y.%m.%d.1') }}",
+          "--model_path": "/mnt/admin/pipeline/decision_tree1/",
+          "--model_metric": "",
+          "--describe": "决策树模型",
+          "--framework": "aihub",
+          "--inference_framework": "sklearn"
+        }
+      },
+      {
+        "job_templete": "hyperparam-search",
+        "name": "hyperparam-search",
+        "label": "超参搜索",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--command": "apt-get update -y && apt-get install -y graphviz && pip install IPython pydotplus graphviz && python /mnt/admin/cube-studio/job-template/job/decision_tree/launcher.py --save_model_dir /mnt/admin/pipeline/decision_tree/ --train_dataset /mnt/admin/pipeline/data/data-test.csv --label_columns y --feature_columns age,duration,campaign,pdays,previous,emp_var_rate,cons_price_idx,cons_conf_idx,euribor3m,nr_employed ",
+          "--params": "{\"max_depth\": tune.grid_search([3,4,5]),\"min_samples_split\": tune.grid_search([5,10,20])}",
+          "--outfile": "/mnt/admin/pipeline/decision_tree/val_result.json",
+          "--metric": "['train_auc','test_auc']",
+          "--mode": "max",
+          "--num_samples": "1",
+          "--result_save_path": "/mnt/admin/pipeline/ray_hyperparams/hyperparams_r.csv"
+        }
+      },
+      {
+        "job_templete": "deploy-service",
+        "name": "deploy-service",
+        "label": "服务部署",
+        "volume_mount": "kubeflow-user-workspace(pvc):/mnt",
+        "resource_memory": "2G",
+        "resource_cpu": "2",
+        "resource_gpu": "0",
+        "args": {
+          "--project_name": "public",
+          "--label": "demo推理服务",
+          "--model_name": "",
+          "--model_version": "v2022.10.01.1",
+          "--model_path": "",
+          "--service_type": "serving",
+          "--images": "",
+          "--working_dir": "",
+          "--command": "",
+          "--args": "",
+          "--env": "",
+          "--host": "",
+          "--ports": "80",
+          "--replicas": "1",
+          "--resource_memory": "2G",
+          "--resource_cpu": "2",
+          "--resource_gpu": "0",
+          "--volume_mount": ""
+        }
+      }
+    ]
+  }

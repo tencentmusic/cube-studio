@@ -23,9 +23,9 @@
 
 	# 安装中文
 	RUN apt install -y --force-yes --no-install-recommends locales ttf-wqy-microhei ttf-wqy-zenhei xfonts-wqy && locale-gen zh_CN && locale-gen zh_CN.utf8
-	ENV LANG zh_CN.UTF-8
-	ENV LC_ALL zh_CN.UTF-8
-	ENV LANGUAGE zh_CN.UTF-8
+	ENV LANG=zh_CN.UTF-8
+	ENV LC_ALL=zh_CN.UTF-8
+	ENV LANGUAGE=zh_CN.UTF-8
 
 	# 便捷操作
 	RUN echo "alias ll='ls -alF'" >> ~/.bashrc && \
@@ -147,6 +147,4 @@ python3.7
 	
 python3.6
  - ccr.ccs.tencentyun.com/cube-studio/ubuntu-gpu:cuda9.0-cudnn7-python3.6
-	
-### cuda10.1-cuda10.0-cuda9.0-cudnn7.6
- - ccr.ccs.tencentyun.com/cube-studio/gpu:ubuntu18.04-python3.6-cuda10.1-cuda10.0-cuda9.0-cudnn7.6-base
+

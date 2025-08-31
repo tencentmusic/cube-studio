@@ -140,7 +140,7 @@ cube studio是 开源一站式云原生机器学习平台，目前主要包含
  - 3、基础能力(tf/pytorch/mxnet/valcano/ray等分布式，nni/ray超参搜索)
  - 4、平台web部分(oa/权限/项目组、在线构建镜像、在线开发、pipeline拖拉拽、超参搜索、推理服务管理等)
 
-<img width="1437" alt="image" src="https://user-images.githubusercontent.com/20157705/182564530-2c965f5f-407d-4baa-8772-73cb2645901b.png">
+![输入图片说明](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/image/infra.png) 
 
 
 # 算力/存储/用户管理

@@ -5,6 +5,7 @@ from sqlalchemy import (
     Text,
     Enum,
 )
+from myapp.utils import core
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from myapp.models.base import MyappModelBase
@@ -70,7 +71,7 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
         # 对于有边缘节点，直接使用边缘集群的代理ip
         if SERVICE_EXTERNAL_IP and conf.get('ENABLE_EDGE_K8S',False):
             SERVICE_EXTERNAL_IP = SERVICE_EXTERNAL_IP.split('|')[-1].strip()
-            from myapp.utils import core
+
             port_str = conf.get('NOTEBOOK_PORT', '10000+10*ID').replace('ID', str(self.id))
             meet_ports = core.get_not_black_port(int(eval(port_str)))
             host = "//%s:%s"%(SERVICE_EXTERNAL_IP,str(meet_ports[0]))
@@ -111,38 +112,19 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def resource(self):
-        return self.resource_cpu+"(cpu)"+self.resource_memory+"(memory)"+self.resource_gpu+"(gpu)"
+        return self.resource_cpu+"(cpu)"+self.resource_memory+"(memory)"+self.resource_gpu+("(gpu)" if '(' not in self.resource_gpu else "")
 
     @property
     def status(self):
         try:
             k8s_client = py_k8s.K8s(self.cluster.get('KUBECONFIG',''))
-            namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
-            pods = k8s_client.get_pods(namespace=namespace,pod_name=self.name)
+            # 优化，可以考虑整体查询，然后放cache里面
+            pods = k8s_client.get_pods(namespace=self.namespace,pod_name=self.name)
             if pods and len(pods)>0:
-                message=''
-                status = pods[0]['status']
-                if status.lower()=='pending':
-                    event = k8s_client.get_pod_event(namespace=namespace, pod_name=self.name)
-                    if event:
-                        message=event[-1].get('message','')
-
-
-                if g.user.is_admin():
-                    k8s_dash_url = f'/k8s/web/search/{self.cluster["NAME"]}/jupyter/{self.name}'
-                    if message:
-                        url = Markup(f'<a target=_blank style="color:#008000;" type=tips addedValue="{message}" href="{k8s_dash_url}">{status}</a>')
-                    else:
-                        url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
-                    return url
-
-                if message:
-                    status = f'''
-<div type=tips addedValue='{message}'>
-    {status}
-</div>
-'''
-                return status
+                status = pods[0]['pod_substatus']
+                k8s_dash_url = f'/k8s/web/search/{self.cluster["NAME"]}/{self.namespace}/{self.name}'
+                url = Markup(f'<a target=_blank style="color:#008000;" href="{k8s_dash_url}">{status}</a>')
+                return url
 
         except Exception as e:
             print(e)

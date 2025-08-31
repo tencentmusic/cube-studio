@@ -135,7 +135,7 @@ export default class D3Tool {
 		const innerWidth = this.container.scrollWidth - marginObj.top - marginObj.bottom;
 		const innerHeight = this.container.scrollHeight - marginObj.left - marginObj.right;
 
-		console.log(this.container.scrollWidth, this.container.scrollHeight);
+		// console.log(this.container.scrollWidth, this.container.scrollHeight);
 
 		this.mainView
 			.attr('width', innerWidth)

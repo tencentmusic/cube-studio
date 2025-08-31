@@ -51,7 +51,7 @@ tips:
 | media-download        | multimedia data processing | 	Distributed download of media files                                                         | 
 | video-audio           | multimedia data processing | 	Distributed extraction of audio from video                                                  | 
 | video-img             | multimedia data processing | Distributed extraction of pictures from video                                                | 
-| yolov7                | machine vision | object-detection with yolov7                                                                 |
+| yolov8                | machine vision | object-detection with yolov8                                                                 |
 
 # Deploy
 

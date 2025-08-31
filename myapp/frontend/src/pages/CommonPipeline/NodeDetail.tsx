@@ -38,7 +38,7 @@ export default function NodeDetail(props: IProps) {
                 }
             })
         })
-        console.log('apiList', apiList);
+        // console.log('apiList', apiList);
         Promise.all(apiList).then(res => {
             const result = res.map(item => item.data.result)
             const resMap = result.reduce((pre, next, index) => ({ ...pre, [nameList[index]]: { ...next } }), {})
@@ -50,7 +50,7 @@ export default function NodeDetail(props: IProps) {
         try {
             JSON.parse(`${item.value || []}`)
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
         const dataList = JSON.parse(`${item.value || '[]'}`)
         let columnsConfig = Object.entries(dataList[0] || {}).reduce((pre: any, [key, value]) => [...pre, { title: key, dataIndex: key, key }], [])

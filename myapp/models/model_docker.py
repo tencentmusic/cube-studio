@@ -25,6 +25,7 @@ class Docker(Model,AuditMixinNullable,MyappModelBase):
         "Project", foreign_keys=[project_id]
     )
     describe = Column(String(200),  nullable=True,comment='描述')
+    namespace = Column(String(200), nullable=True, default='jupyter', comment='命名空间')
     base_image = Column(String(200),  nullable=True,comment='基础镜像')
     target_image=Column(String(200), nullable=True,default='',comment='目标镜像')
     last_image = Column(String(200), nullable=True, default='',comment='最后生成镜像')

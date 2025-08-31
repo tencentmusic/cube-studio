@@ -25,9 +25,6 @@ export default function TabsDetail(props: IProps) {
 
     const [markdownMap, setMarkdownMap] = useState<Record<string, Record<string, string>>>({});
 
-
-
-
     useEffect(() => {
 
         const renderMarkdown = async (tab: string, group: string, value: string) => {
@@ -65,11 +62,6 @@ export default function TabsDetail(props: IProps) {
         });
 
     }, [props.data]);
-
-
-
-
-
 
 
     const handleGroupContent = (type: TGroupContentType, content: any, tabName: string, groupName: string) => {
@@ -111,7 +103,6 @@ export default function TabsDetail(props: IProps) {
         }
 
     }
-
 
     const renderimage = (data: string) => {
         return (
@@ -196,10 +187,9 @@ export default function TabsDetail(props: IProps) {
 
         const markdownHtml = markdownMap[tabName]?.[groupName];
 
-        return markdownHtml ? <div dangerouslySetInnerHTML={{ __html: markdownHtml }} /> : null;
+        return markdownHtml ? <div className="markdown-content" dangerouslySetInnerHTML={{ __html: markdownHtml }} /> : null;
 
     };
-
 
     return (
 

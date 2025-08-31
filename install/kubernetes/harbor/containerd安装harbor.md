@@ -1,5 +1,5 @@
-通过nerdctl离线安装Harbor仓库。
-
+# 通过nerdctl离线安装Harbor仓库。
+```
 # 下载离线安装包
 wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/harbor/harbor-offline-installer-v2.3.4.tgz
 
@@ -30,9 +30,9 @@ sed -i 's/docker/nerdctl/g' prepare
 # 执行安装
 1、vi install.sh中去除check_nerdctl check_nerdctlcompose等命令
 2、bash ./install.sh
-
-
+```
 # 卸载
+```
 cd /usr/local/harbor
 nerdctl compose down
 rm -rf `find / -name harbor`
@@ -42,3 +42,4 @@ nerdctl stop `nerdctl ps -q`
 nerdctl rm `nerdctl ps -qa`
 # 将镜像全部删除
 nerdctl rmi `nerdctl images -q`
+```

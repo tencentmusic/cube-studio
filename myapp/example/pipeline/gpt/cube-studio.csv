@@ -1,0 +1,152 @@
+﻿问题,答案
+Dockerfile-base打包出错,基础环境镜像打包失败，可能是因为网络问题，可以配置国内apt源，多构建几次
+"路由增加https反代,login跳转返回http的协议",目前仅支持http协议，代码中做了限制
+服务化->服务上线 部署之后，无法访问服务,内部服务和推理服务部署后，不能访问几个可能的原因，pod没有正常启动，pod端口配置错误，ip端口被网络限制，域名和ip混用，可以按照这个顺序排查
+istio-ingressgateway报错，无法通过健康检查,ingressgate无法通过健康检查，需要看具体的日志才能看到，可能的原因是istiod没有正常启动，导致ingressgateway链接不上istiod，也有可能是因为使用了第三方那个证书导致，或者证书时间过期。可以根据具体的日志信息，到谷歌搜索解决
+登录失败,如果可以打开页面，但是登录失败，可以右上角退出按钮，重新进入登录界面，系统默认自动注册新用户，自带账户密码admin/admin，如果忘记密码可联系管理员修改或进入数据库修改
+有没有支持类似TKE的vCUDA，阿里的cGPU之类的cuda劫持的虚拟gpu计划呢,目前支持vgpu的能力，可以参考github wiki中的“加入gpu机器”这篇文章
+如何去掉登录验证,无法去除登录验证，因为很多界面都是要验证用户后获取，去除登录验证，这些界面将不能正常访问
+单机部署rancher之后进不去web页面,如果是刚部署完后就进入不了web界面，那可能是rancher server还没有启动起来，要稍等片刻，如果是运行一段时间后，突然进去不了，或者因为docker重启，机器重启等原因进入不了，可以参考github wiki中rancher部署k8s部分的文章，配置rancher的单机高可用
+关于将Cube studio嵌入其他云平台的cookie的作用域问题,可以在配置文件config.py中配置COOKIE_DOMAIN参数，这个参数就是你想共享给其他平台的域名后缀
+构建vision和visionPlus失败,前端代码构建失败，可能是由于网络问题，建议添加国内node源以后再构建，可以尝试多构建几次
+core-dns出错，service name无法解析，集群启动，但是pod之间无法通信，是什么原因,应该是机器防火墙的问题，可以使用iptables -P FORWARD ACCEPT；iptables -P INPUT ACCEPT；iptables -P OUTPUT ACCEPT放开防火墙，并且由于各家公司网络可能会自定恢复，所以iptable的放开可以设定为定时任务
+rancher单集群多机 一直卡在Waiting to register with Kubernetes,机器需要先拉取好镜像，再加入到k8s集群，这样加入集群时会快很多
+总有一个镜像拉取有问题是为什么？,可以现在主机上将该镜像拉取好
+"在平台部署notebook直接提示unkown,选择reset会报错",notebook unknow说明notebook没有运行，reset报错，需要提供进一步的消息
+node节点的worker机器上是否需要pull_image_kubeflow.sh里的镜像？,是的，worker节点上需要拉取镜像，并且为机器打上对应的tag
+rancher主机注册的时候一直卡在[remove/etcd-fix-perm] Successfully removed container on host,rancher部署时会自动在机器上部署agent，来完成k8s节点的初始化。rancher部署，需要提前拉取好镜像，准备至少16核的机器设备，如果部署失败，使用reset_docker脚本，重置docker后重启，重新部署
+部署后kubeflow dashboard 报错mysql数据库链接不上，域名无法解析,应该是机器防火墙的问题，可以使用iptables -P FORWARD ACCEPT；iptables -P INPUT ACCEPT；iptables -P OUTPUT ACCEPT放开防火墙，并且由于各家公司网络可能会自定恢复，所以iptable的放开可以设定为定时任务
+似乎没有找到这个镜像，哪里需要这个镜像,镜像找不到，如果是cube-studio的镜像，那可以联系管理员，如果是其他开源项目或者自己的镜像，可以先尝试自己在机器上是否能拉取到，再查看cube-studio平台中拉取不到的问题。有可能是账号密码的问题，也有可能是镜像名错误的问题
+二次开发,二次开发，需要进一步学习源码，或者购买商业版二开咨询服务
+aihub运行中存在的前端bug,aihub中前端bug目前仍在进一步修复中，有什么bug也可以在github中提出
+请问模型训练的结果可视化，类似tensorboard这种的功能打算怎么实现么？,任务结果的可视化，目前是商业版的功能，不过tensorboard在jupyter中进行了集成，可以打开深度学习版本的jupyter，在左侧文件目录结构中，先打开到训练的日志目录，再点击tensorboard图标按钮，就可以查看实时或者离线的训练结果了
+如何进行算子的编排,算子的编排主要分为任务级别和函数级别，任务级别要求前一个结束了才运行下一个，这一类主要在训练菜单中的任务流模块下，拖拉拽算子实现。如果是只做编排，只是用来定义上下游逻辑关系，那可以使用数据ETL中的任务流编排，这是一个通用能力，并不一定使用在数据ETL场景，不过要进行二次开发
+ 如何自定义算子？,部署平台后，参考首页的自定义模板的视频，或者参考cube-studio视频号中的部分视频教程
+stat /data/k8s/kubeflow/pipeline/workspace: no such fire or directory,/data/k8s/目录是分布式存储目录，单机部署时可以是主机目录，首先确保主机该目录存在，并且docker start kubelet后，保证kubelet容器中该目录存在
+构建dockerfile-base时报错,构建基础镜像失败，可能是因为网络问题，可以配置相应的软件源，或者直接基于base镜像再次构建自己的环境镜像
+集群加入gpu后服务报错,可以参考github wiki中“加入gpu机器”中的内容按步骤实施
+商业版和开源版本的主要区别是啥,可以联系社区管理员
+商业版定价多少,可以联系社区管理员
+用户认证系统的问题,现在cube-studi支持AUTH_OID/AUTH_LDAP/AUTH_REMOTE_USER等登录注册方式
+demo演示环境的相关问题，有没有公共体验环境？,社区使用docker-compose部署了开源版本的demo体验环境www.data-master.net，但是因为没有k8s集群，所以公共体验环境中需要与k8s先关的功能无法正常体验，如果想要体验完整开源版本或者商业版本功能，可以联系管理员
+单机部署 myapp/home 无法进入,新版本首页不是myapp/home，直接http+ip进入，会自动跳转到首页。如果无法进去页面，按照github wiki中“单机部署”文章下面的部署后排查来按步骤排查问题
+cube studio社区见面会,目前cube tudio还没有定时的社区见面会，可以随时关注群里的消息，有消息我们会在群里同步
+如何支持更多型号的GPU？,gpu设备的支持，可以参考github wiki中“添加GPU节点”这篇文章，首先机器上要安装gpu驱动，将机器加入k8s集群，并为机器添加对应的标签，主要是gpu=true和gpu-type=V100等机器卡型，然后在k8s中安装对应的驱动插件，最后在业务镜像中安装驱动调用库，比如cuda，这样才能在平台里面使用机器上的gpu
+样例任务流运行完成后，中间过程yolov7的容器没有被清除？,pipeline实例运行结束后，会在三个小时后删除，并不是立刻删除的
+操作中通过更多中的删除无法删除，但通过批量操作中的删除可以进行删除(默认存在的删不了),在“更多”菜单中的删除是单条目删除，和批量操作中的删除应该是一样的。如果删除不了，建议查看是否有其他类型条目的绑定
+单机版本部署rancher后，无法访问web页面，日志出现error syncing 'validating-webhook-configuration': handler need-a-cert,建议提前拉取镜像后，重新部署一下，建议把iptable放开
+80端口被占用，如何修改为其他端口,可以使用nodePort模型，配置istio-system命名空间下的istio-ingressgateway服务的服务类型为nodeport
+服务发布之后ExternalIP为master ip导致集群故障,这种情况主要出现在平台入口使用的是nodeport模式，所以端口相互冲突占用了
+myrancher 运行docker启动后，不断重启,rancher不断重启，有可能是资源不足造成，建议扩大资源至少16核，然后按照github wiki中rancher单机高可用方案部署
+myapp-1 docker 运行启动后，不断重启,myapp1 容器不断重启，有可能是链接不上数据库，可以根据日志信息提供更多内容
+"when frontend run yarn & yarn build, an error happens!",可以联系社区管理员
+vision 前端页面运行不起来。,可以联系社区管理员
+myapp fab create-admin报错,create-admin是初始化阶段创建数据库admin账户，如果之前已经存在过admin会报错，不过可以忽略
+cube-studio是否支持arm64架构，国产芯片，或者华为麒麟服务器,cube-studio是个类似ai中台的角色，架构相对复杂，目前只有商业版本支持arm64的架构
+在notebook到期后，进行reset，会出现404,404可能存在于多域名，或者域名ip混用的场景里面。建议只使用一个，在config文件中配置好域名
+页面有些功能不可点击,部分功能还为补充齐全，或者为商业版功能，所以不可点击。
+K8S高版本的支持,目前支持1.18到1.24的k8s版本。不过高低版本部分组件要微调，可以参考start脚本中的内容
+数据ETL模块不可用,开源版本数据ETL只是提供了算子模板化，拖拉拽编排的能力，使用者需要进行二开，对接上自己公司的调度系统才能正常运行
+start脚本部署不完整，缺钱部分组件。单机部署平台，或许是本地虚拟机资源不足引起的服务部署不全？connection refused,start脚本可以重复多次运行，可以多运行几次，而且在部署前提前把镜像拉取好。
+some namespaces without pods,pipeline，service，jupyter，automl这些命令空间是预留给用户应用的，并非系统应用占用，所以刚部署起来后是没有pod的
+平台部署完成后，ml-pipeline-viewer-crd 起不来，平台的demo跑不起来,新版本已经不再需要ml-pipeline-vierer-crd，建议部署新版本
+所有服务都没问题了，可是输入本机ip还是进入rancher，死活进不去cube的界面，怎么破？,rancher界面是https协议界面，cube-studio的界面是http协议，浏览器会自动记忆之前的网址，所以可以手动在浏览器中输入http协议再加ip来打开cube-studio
+metric-server默认镜像拉取是Always，然后在rancher中修改不动yaml文件是怎么回事？,rancher的metric-server默认镜像拉取策略确实是Always，如果rancher的web界面上修改不成功，那可以直接使用kubectl命令去修改
+"提个小建议,希望作者能更新cuda11的镜像",已经支持cuba11的gou镜像
+请教一下各位大牛，能不能大概说一下master节点打哪些服务的label，worker上又是哪些label是true？,机器通过label进行管理，所有的调度机器由平台控制，不由用户直接控制。开发训练服务机器管理：对于cpu的train/notebook/service会选择cpu=true的机器，对于gpu的train/notebook/service会选择gpu=true的机器，对于vgpu的service会选择vgpu=true的机器，训练任务会选择train=true的机器，notebook会选择notebook=true的机器，服务化会选择service=true的机器，不同项目的任务会选择对应org=xx的机器。默认为org=public，可以通过gpu-type=xx表示gpu的型号，比如gpu-type=V100或gpu-type=T4，在配置gpu算力时也可以同步配置gpu型号。例如2(T4)表示2张T4卡。，控制器机器管理：，mysql=true 部署mysql服务的机器，redis=true 部署mysql服务的机器，kubeflow-dashobard=true 部署cube服务的机器，kubeflow=true 部署kubeflow的机器，isito=true 部署istio的机器，monitoring=true 部署prometheus的机器
+请问，多机器部署的时候，worker需不需要运行start.sh？,worker节点不需要运行start.sh，只需要把worker节点加入到k8s集群即可
+能否提供如何部署triton-server的教程,在github wiki中有triton服务部署的相关资料。
+rancher 创建失败，等了好久还不成功，Cluster health check failed: cluster agent is not ready,rancher部署时会自动在机器上部署agent，来完成k8s节点的初始化。rancher部署，需要提前拉取好镜像，准备至少16核的机器设备，如果部署失败，使用reset_docker脚本，重置docker后重启，重新部署
+没有运行的作业，但是cpu居高不下，如何能够让作业释放资源？,不知道什么任务占用资源，可以先在k8s dashboard进入主机界面，看看主力上有什么pod，或者在prometheus上查看所有pod的cpu，内存，gpu的资源。如果没有发现pod，那可以到机器上查看什么进程占用资源。
+更新了最新版后还是会拉取镜像失败,拉取镜像失败可能的原因包括镜像名写错，镜像在仓库中不存在，镜像没有public，或者没有配置拉取账号密码，或者由于国内网络问题，无法拉取过往镜像。
+怎么支持gpu机器加入集群，能被正常调度,参考github上wiki内容中“gpu机器加入集群”这篇文章
+如何在之前notebook镜像上添加插件，并且重启后生效,需要现在本地机器上使用容器运行notebook，然后浏览器打开后安装插件，再将容器commit成镜像，推送镜像到仓库，这样就可以在线上使用新的notebook镜像了
+如何修改notebook的镜像,需要现在本地机器上使用容器运行notebook，然后浏览器打开后安装插件，再将容器commit成镜像，推送镜像到仓库，这样就可以在线上使用新的notebook镜像了
+机器重启或者机器上的docker 服务 重启后rancher web界面打不开了。,这是rancher中的一个bug，需要参考github中wiki内容，部署rancher文章中的单机高可用方案来解决这个问题。
+部署以后，cert-manager pod 不正常 ，所以istio的pod组件缺少挂载,现在cube-studio使用第一个证书，不需要cert
+rancher部署的时候不成功，等了很久一直失败,rancher部署，需要提前拉取好镜像，准备至少16核的机器设备，如果部署失败，使用reset_docker脚本，重置docker后重启，重新部署
+运行start.sh安装时候报错,运行start脚本，如果报删除对象不存在，可以忽略。如果报api server服务不可达，可以查看自己的config文件是否正常，还有是否可以正常下载kubectl。详细的方法，可以查看start.sh脚本内容。start脚本先拉取镜像和基础软件，然后按步骤安装云原生基础组件，最后配置istio ingressgate代理
+能否隔离部署？也就是说，各个服务的镜像不会自动拉取更新。,内网部署需要先把需要的镜像拉取到内网机器，最好配置内网镜像仓库，方便自己开发更新其他镜像。同时内网部署还需要修改config.py配置文件中的镜像拉取策略，并更新到k8s集群
+"内部服务，添加云原生服务，修改默认端口80为30021,会导致首页打不开",内部服务和推理服务的端口配置是业务代码的监听端口，并不是客户端访问的ip和端口。客户端可以访问的端口是自动生成。会根据端口转发到容器的业务监听端口上。
+notebook模块进入报错,"notebook进入不了可以通过notebook记录后面的reset按钮重启配置notebook
+"
+Grafana模块监控异常,如果打不开grafana页面，可以先排查下monitoring命名空间下的grafana pod是否正常，浏览器是否为http协议。如果可以打开grafana但是页面显示不正常，可以强制刷新浏览器，清空缓存。如果能正常显示页面，但是指标查询异常，可以看看prometheus pod是否正常，可以进入prometheus页面，手动查询指标看看指标是否被正常采集到还是prometheus rule， service discovery， target等是否正常。
+如何部署cube-studio平台，是否有完整详细的部署文档？,github wiki文档有详细的部署文档，需要先部署k8s集群，再部署cube studio平台，再把很多的平台加入到集群中。
+在jupyter lab中加入大数据功能,现在提供了大数据版本的jupyter，可以配置hadoop和spark集群的配置信息，就可以在notebook中查询大数据平台的数据做etl和数据分析，同时在大数据版本的notebook中集成了常用数据分析工具。
+能否有一个一键部署的docker compse,在install/docker中提供了本地一键启动的docker-compose，但是因为cube 平台很多地方需要k8s作为基底，所以本地启动后，部分功能还是需要连接远程k8s才能正常运行
+报价是按项目收费吗？,项目报价收费比较灵活，可以联系社区管理员
+开源版能部署tfserving吗？,开源版本可以部署tfserving、torch-server、triton等推理框架，或者自定义推理镜像
+有没有在线开发里任务ETL的例子？,目前还没有示例，可以
+怎么对接已有的数据中台？,对接数据中台包含计算引擎(sqllab)，调度引擎(数据ETL)，元数据(离线库表/指标/维表)，血缘关系(血缘链路)，存储(任务模板)等各个部分
+任务ETL开源能用吗？,任务ETL开源可以使用，但是需要进行二开对接上自己公司的调度系统才能使用
+Wiki上的公司使用的是开源版还是商业版？,github中公司的示例是部署开源版本的公司示例
+做增量训练怎么使用原来在huggingface上下载的开源模型？,huggingface的模型，在hubggingface对应的介绍页面上一般会介绍如何进行微调，可以在notebook或者pipeline中运行你的微调代码
+有边缘计算部署到车机/手机端的案例吗？,目前还没有边缘计算步数到车载或手机端案例，不过平台支持arm64架构，可以联系管理员一同测试
+全部功能支持私有化部署吗？,目前所有功能均支持私有化部署
+定制化二次开发是腾讯的人吗？能驻场开发吗？,定制化二次开发不是腾讯的人，是由社区开发者人员组成，详细情况可以联系社区管理员栾鹏
+开始部署前需要准备哪些镜像？,主要为rancher的镜像和cube-studio的镜像，可以参考部署文档中的all_image.py文件一次性生成镜像
+哪个版本支持数据血缘？,目前只有商业版本支持血缘链路
+目前支持多租户吗？,支持多租户，多项目组，rbac权限划分
+体验账户和密码在哪里获取？,体验账户密码为admin/admin
+cube studio和KubeSphere什么关系？cube得多租户/资源管理是自己做的一套还是有依赖KubeSphere提供的能力？,cube-studio的账号密码是自己的，kubesphere/rancher是容器编排的产品，有自己独立的账号密码，和cube-studio的账号密码体系没关系
+部署后kubeflow-dashboard一直报错缺啥ab_user_role表,如果是新部署的集群，可以从主机上/data/k8s/infra/mysql删除mysql的存储，然后重新使用start脚本部署cube-studio
+启动jupyter-ubuntu-deeplearning无法调用 cuda？,目前只有gpu版本的jupyter可以调用gpu，其他版本的jupyter均是cpu版本
+cube是基于kubeflow开发的么？,cube-studio和kubeflow生态目前没有太多关系，只是最开始是基于kubeflow开发的，现在只使用了kubeflow的train-operator
+cube项目有用到go吗？,cube项目自己的代码，前端是react后端是python，没有go的代码，但是依赖的相关组件是k8s基础组件，这个外部的开源组件使用了go语言
+argo中的数据是存储到etcd中吗？etcd存储有限制吗？,argo的云原生调度系统，定义workflow等crd，crd的实例是存储在etcd里面的。etcd的存储限制可以参考k8s基础架构，不在cube-studio的技术范围内
+cube的服务化在内网中根据ip和端口访问不到？,内服服务和推理服务的端口是自动生成的。如果部署后无法访问，首选确定pod是否正常启动，
+"kubectl patch svc istio-ingressgateway -n istio-system -p '{""spec"":{""externallPs"":[""""xx.xx.xx.xx""""]}}' 执行这条后创建了一个和物理机冲突的ip，然后集群就崩了，是什么原因？",这个可能的原因是rancher创建的k8s集群网络和主机内网的ip网络重叠了，可以参考github wiki 部署rancher章节里面的 rancher集群配置
+kubernetes1.22.16版本kubeflow-batch部署报错，只部署volcano是否可以？,现在平台不依赖kube-batch，代替方案使用volcano
+sudo sh start.sh x.x.x.x这种安装方式是不是只适用单机通过rancher安装，已有的k8s集群还可以用这种方式么？,已有的k8s集群，也是这种安装方式
+rancher/自定义集群导入/cube-studio启动都完成，没有报错，但访问http://xxxx/mysqpp/home进不去？,首页进不去，可能的原因比较多，参考github wiki中，“单机部署”章节，文章末尾的排查流程按步骤排查
+部署最后的cube组件时，kubernetes-config配置是否必须？报错找不到kubernetes-config,start脚本最开始会创建kubeconfig目录，会将改目录的内容创建为configmap，虽然configmap的内容为空，但是kubeconfig目录是必须存在的
+"metadata-grpc-deployment报错：Non-OK-status: status status: Internal: mysql_real_connect failed: errno: 2005, error: Unknown MySQL server host 'mysql-service.infra' (-3)MetadataStore cannot be created with the given connection config.",新版本已不再使用metadata-grpc服务，建议升级到新版本
+如何配置内网运行时镜像拉取不使用always，而是使用IfNotPresent,平台通过配置文件中的IMAGE_PULL_POLICY参数控制调度任务容器时是否拉取，可以修改配置文件的这个参数，可以参考github wiki中的“自定义配置文件”
+配置文件在哪里，如何修改，并在生产上生效？,配置文件在install/docker/config.py（本地开发）和install/kubernetes/cube/overlays/config/config.py（线上配置），线上也可以直接修改infra命名空间下的kubeflow-dashboard-config这个configmap
+安装cube后访问web端返回301？,301为重定向，一般是因为用户没有登录，所以重定向到登录地址上
+拉去rancher依赖镜像，很多都失败了，需要更换源吗？,不需要，rancher镜像是dockerhub官网的镜像，拉取失败主要是因为docker hub官网做了限频，可以先本地login登录，再多试几次
+镜像太大传不上docker hub怎么办？,可以自己部署内网harbor，或者尝试将镜像的每一层减小一些
+用内外网双网卡安装，外网安装顺利但打不开cube界面，内网很多服务一直pending？,首先要先保证所有pod能正常running，然后再来排查外网ip打开的问题，在部署时要使用内网ip，浏览器打开时使用外网ip，并且云上安全组需要放开权限
+目前的最新版，用哪个rancher和kubernetes的版本好？,rancher 2.6.2， k8s 1.21最好
+默认下载master分支代码就可以吗？,用最新的release版本好一些
+部署人脸检测算法后，开启摄像头报错？cant read properties of undefined (reading 'getUserMedia'),摄像头想要https协议打开域名
+安装完pod都正常但是登录web提示Internal Server Error？,右上角退出后重新登陆试试
+cube-studio用的什么开源协议？,MIT
+搭建单机版出现cluster health check failed cluster agent is not ready？,机器资源问题，提前拉取镜像，reset docker重启后重试。
+cube的VGPU需要授权许可license么？,不需要
+aihub deeplearning的 算法包，有可以直接跑的嘛？,目前aihub的功能只能在商业版中正常使用
+推理服务部署上线，接口入参在哪里配置？,推理服务，有启动命令，可以统一配置在启动命令中
+github和gitee上的文档版本，有什么差异？,看github，维护更好
+体验账号是什么？,admin，admin
+cube的pipeline容器启动时可以加上参数指定端口映射吗？,pipeline中的任务都是离线任务，不是服务，所以不能配置也不需要配置端口映射
+是否考虑把HPC场景加进来？,目前只有商业版支持HPC的任务模板
+cube studio是否提供共享存储功能？包括前端页面的展示在内。,cube studio依赖分布式存储，但是并没有提供分布式的管理能力
+有认证/多用户/用户空间这些功能吗？,有
+报错cannot connect to MySQL server on 'host.docker.internal'(Errno-2] Name or service not known),host.docker.internal是mac/window上docker容器中的本机ip地址的域名表示，可以换成自己的机器的内网ip，但是不要使用127.0.0.1
+juicefs需要其他的文件存储吗？,juicefs就是分布式存储文件，不需要更底层的分布式存储了
+自定义模板报错： failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: exec: images: executable file not found,说明自定义模板中的镜像没有配置启动命令，所以容器运行时找不到可执行文件
+怎么卸载cube-studio？,install/kubernetes/rancher中包含reset_docker.sh脚本，可以快速把k8s集群卸载掉
+创建自定义模板后无法正常调用，修改原有模板后也无法正常使用？,模板修改要配合镜像一起改才能正常使用，自定义镜像的模板不能改。
+怎样启动volcano调度？,使用volcano任务模板，在任务启动时会现场部署一个服务要求的分布式集群，这个集群是有volcano-controller来部署的
+一个主节点三个工作节点，在frontend页面当前负载只显示一台机器？,负载界面显示的机器与机器标签有关系，需要机器按照项目分组和功能分类配置好机器的label标签
+对AIGC大模型训练与推理相关是否有针对性的涉及或支持计划呢？比如SFT训练/Megatron/Deepspeed框架的支持，prompt等？,目前商业版本支持大模型的一键微调，多机多卡训练和服务部署
+工作任务流里面，任务之间的变量传递有什么方式嘛？,目前开源版本不提供任务之间输入输出参数变量在任务之间传递，只有商业版本支持该功能
+服务器的IP地址换了，应该怎么更改？,如果服务器上部署了rancher server，那就需要按照github wiki中的“部署rancher”章节的内容，更换master 服务器
+使用datax时，对应的job.json文件时外部传入，还是本身需要打包进镜像里面？,不需要打进镜像，在notebook里面写就可以，在pipeline里面写上地址就好。
+k8s集群里删不掉PVC？,pvc删除不掉，一般是因为有pod挂载该pvc，需要先找到对应的pod，删除pod后才能删除pvc
+部署完成后，创建notebook后无法进入，界面提示no healthy upstream？,创建notebook无法进入，管理员可以在状态按钮中进入k8s dashboard 查看pod拉取是否正常，运行是否正常等。
+有从数据导入到模型部署整个完整任务流的案例吗？,可以参考cube-studio的视频号，里面有各种各样的教程和示例
+cube-studio支持A10这款显卡吗？,支持
+windows下的ubuntu，基于wsl2，cpu长期打满？,wsl2只能开gpu docker，用不了nvidia k8s plugins，也可以扩内存或用ssd
+部署k8s集群，在其中一个work节点执行了start.sh 本地ip之后，此节点与其他节点ip地址不通了？,部署k8s或者平台后，造成机器本身的ip访问不通，可能的原因是k8s使用的网络ip域与主机本身的网络ip域重复了，可以在rancher中修改节点和服务pod的ip范围，参考github wiki rancher章节
+本地部署，项目配置的expand字段里，公网ip和内网ip指的时哪个集群或机器的内外网ip呢？,配置一个内网ip就行，有公网ip或域名的才配置公网ip
+是否支持CV项目的线上推理可视化？,支持
+怎么支持大数据组件，hive/spark等定时调度任务？pipeline可以直接调吗？,pipeline中包含提交hive spark任务，可以参考hadoop模板，这个模板用于提交大数据生态的相关任务。
+pipeline用的原生的kfp吗？,pipeline目前与kfp没有关系。
+有升级文档吗？,目前每个版本发布，可能涉及到架构的变更，不过统一可是使用将原平台的数据库导出，然后在新数据的基础上部署新版本的平台
+pipeline调度底层用的是什么？,训练pipeline的底层调度是argo，数据etl的pipeline没有定义底层调度，需要用户进行二开对接自己公司的调度系统
+平台有资源审核模块吗？方便管理员对用户申请的资源进行审核。,目前平台限制普通用户最高可配置50核50G，更高的资源配置只有管理员可以设置，但是并没有单独的资源审核模块
+平台支持arm吗？,开源版支持amd64，企业版支持arm64和amd64
+rancher 443拒绝访问？,rancher server是第一个运行的容器，也就是rancher的web界面，部署可能需要等待几秒钟，并且web界面打开跳过https限制
+哪里有详细的教程或者wiki文档地址么？,github上有wiki文档：https://github.com/data-infra/cube-studio/wiki
+502 Bad Gateway nginx报错,目前cube studio只在前面界面上使用nginx/1.23.4如果能打开前面界面的logo，但是1.23.4版本nginx报错，那说明是后端pod启动异常，可以排查后端pod，如果不是该版本，那可以查看是不是自己添加的其他nginx代理导致的

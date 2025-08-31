@@ -14,6 +14,10 @@ from fastapi.responses import RedirectResponse
 from ultralytics import YOLO
 from labelstudio import LabelStudio_ML_Backend
 from PIL import Image
+import faulthandler, torch, cv2
+faulthandler.enable()
+torch.backends.mkldnn.enabled = False
+cv2.ocl.setUseOpenCL(False)
 
 labelstudio = LabelStudio_ML_Backend()
 model_name = os.getenv('KUBEFLOW_MODEL_NAME','yolov8')

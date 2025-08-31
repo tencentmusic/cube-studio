@@ -1,8 +1,11 @@
 import React, { useState, useEffect, FormEvent } from 'react';
+import { useMemo } from 'react';
+import { useRef } from 'react';
 import {
   CommandBar,
   ICommandBarItemProps,
   TextField,
+  ITextFieldProps,
   Dropdown,
   IDropdownOption,
   ActionButton,
@@ -12,7 +15,10 @@ import {
   Label,
   Toggle,
   Slider,
-  SpinButton
+  SpinButton,
+  ComboBox,
+  IComboBox,
+  IComboBoxOption
 } from '@fluentui/react';
 import api from '@src/api';
 import { updateErrMsg } from '@src/models/app';
@@ -25,6 +31,69 @@ import { Switch, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { marked } from 'marked'
 import './editorbody.less';
+
+interface RegexValidatedTextFieldProps extends ITextFieldProps {
+  regex?: RegExp | string;
+}
+
+// 带有正则校验的输入框
+function RegexValidatedTextField({
+  regex,
+  onChange,
+  errorMessage: propErrorMessage,
+  value: externalValue = '', // 默认值设为空字符串
+  ...props
+}: RegexValidatedTextFieldProps) {
+  const [internalValue, setInternalValue] = useState('');
+  const [internalError, setInternalError] = useState('');
+
+  // 同步外部value到内部状态
+  useEffect(() => {
+    setInternalValue(externalValue);
+  }, [externalValue]);
+
+  // 处理正则表达式（支持字符串或RegExp对象）
+  const compiledRegex = useMemo(() => {
+    if (!regex) return null;
+    return typeof regex === 'string' ? new RegExp(regex) : regex;
+  }, [regex]);
+
+  // 校验函数
+  const validate = (value: string): string => {
+    if (compiledRegex && value) {
+      const isValid = compiledRegex.test(value);
+      return isValid ? '' : '输入格式不正确';
+    }
+    return '';
+  };
+
+  // 处理值变化
+  const handleChange = (
+    event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
+    newValue?: string
+  ) => {
+    const value = newValue || '';
+    setInternalValue(value);
+
+    // 实时校验
+    setInternalError(validate(value));
+
+    // 调用外部onChange
+    onChange?.(event, value);
+  };
+
+  // 合并错误信息（优先显示外部传入的错误）
+  const errorMessage = propErrorMessage || internalError;
+
+  return (
+    <TextField
+      {...props}
+      value={internalValue}
+      onChange={handleChange}
+      errorMessage={errorMessage}
+    />
+  );
+}
 
 interface ModelProps {
   model: any;
@@ -196,6 +265,8 @@ const Model: React.FC<ModelProps> = props => {
     }
   }, [jsonEditorValue]);
 
+
+
   return (
     <div
       className={style.modelContainer}
@@ -268,9 +339,10 @@ const Model: React.FC<ModelProps> = props => {
             value={task?.label || ''}
           />
           <div className={style.splitLine}></div>
-          <TextField
+          <RegexValidatedTextField
             label={t('内存申请')}
-            description={t('内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管理员')}
+            regex={/^[0-9]*G$/}
+            description={t('内存的资源使用配置，示例1G，10G， 最大100G，如需更多联系管理员')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_memory', value ? value : '');
             }}
@@ -278,9 +350,10 @@ const Model: React.FC<ModelProps> = props => {
             required
           />
           <div className={style.splitLine}></div>
-          <TextField
+          <RegexValidatedTextField
             label={t('CPU申请')}
-            description={t('CPU的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管理员')}
+            regex={/^[0-9]*$/}
+            description={t('CPU的资源使用配置(单位核)，示例 0.4，10，最大50核，如需更多联系管理员')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_cpu', value ? value : '');
             }}
@@ -288,18 +361,20 @@ const Model: React.FC<ModelProps> = props => {
             required
           />
           <div className={style.splitLine}></div>
-          <TextField
+          <RegexValidatedTextField
             label={t('GPU申请')}
-            description={t('gpu的资源使用限制(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)')}
+            regex={/^[\-\.0-9,a-zA-Z\(\)]*$/}
+            description={t('gpu的资源使用配置(单位卡)，示例:1，2，训练任务每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_gpu', value ? value : '');
             }}
             value={task?.resource_gpu || ''}
           />
           <div className={style.splitLine}></div>
-          <TextField
+          <RegexValidatedTextField
             label={t('RDMA申请')}
-            description={t('RDMA的资源使用限制，示例 0，1，10，填写方式咨询管理员')}
+            regex={/^[0-9]*$/}
+            description={t('RDMA的资源使用配置，示例 0，1，10，填写方式咨询管理员')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('resource_rdma', value ? value : '');
             }}
@@ -307,8 +382,9 @@ const Model: React.FC<ModelProps> = props => {
             required
           />
           <div className={style.splitLine}></div>
-          <TextField
+          <RegexValidatedTextField
             label={t('超时中断')}
+            regex={/^[0-9]*$/}
             description={t('task运行时长限制，为0表示不限制(单位s)')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('timeout', value ? value : '');
@@ -316,8 +392,9 @@ const Model: React.FC<ModelProps> = props => {
             value={task?.timeout || 0}
           />
           <div className={style.splitLine}></div>
-          <TextField
+          <RegexValidatedTextField
             label={t('重试次数')}
+            regex={/^[0-9]*$/}
             description={t('task重试次数')}
             onChange={(event: FormEvent, value?: string) => {
               handleOnChange('retry', value ? value : '');
@@ -503,28 +580,93 @@ const Model: React.FC<ModelProps> = props => {
                   </React.Fragment>
                 )
               }
+              // 后面都是针对字符串类型来的
+              // 可选可填，这个有点问题
+
+              if (options.length > 0 && args.item_type === 'select-input'){
+                return (
+                  <React.Fragment key={key}>
+                    {
+                       <>
+                          <ComboBox
+                            label={`${key}`}
+                            onChange={(event: React.FormEvent<IComboBox>, option?: IComboBoxOption, index?: number, value?: string) => {
+                                // 如果用户选择已有选项，`option` 会有值
+                                const newValue = value !== undefined ? value : (option ? option.text : '');
+                                if (newValue !== undefined) {
+                                  handleOnChange(key, newValue, args.type);
+                                }
+                            }}
+                            // 失焦的时候保留值
+                            onBlur={(event: React.FormEvent<IComboBox>) => {
+                              const inputValue = (event.target as HTMLInputElement).value;
+                              if (inputValue !== undefined) {
+                                handleOnChange(key, inputValue, args.type);
+                              }
+                            }}
+                            selectedKey={keyValue || args.default}
+                            text={keyValue || args.default}
+                            options={options}
+                            allowFreeform={true}  // 允许自由输入
+                            autoComplete="on"     // 可选：启用自动补全
+                            openOnKeyboardFocus={true}
+                            required={args.require === 1}
+                            disabled={args.editable !== 1}
+                            styles={{
+                              root: {
+                                width: '100%', // 确保ComboBox本身宽度正确
+                              },
+                              callout: {
+                                width: '300px', // 使弹出层宽度与输入框一致
+                                minWidth: 'unset', // 移除默认最小宽度
+                              },
+                              optionsContainer: {
+                                width: '100%', // 选项容器宽度
+                              }
+                            }}
+                            />
+                            <div className={style.argsDescription}>
+                              <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
+                              {args.tip ? tip_tooltip : null}
+                            </div>
+                       </>
+                    }
+
+                  </React.Fragment>
+                )
+              }
+
+              if (options.length > 0){
+                return (
+                  <React.Fragment key={key}>
+                    {
+                      <>
+                        <Dropdown
+                          label={`${key}`}
+                          onChange={(event: FormEvent, option?: IDropdownOption) => {
+                            handleOnChange(key, `${option?.key}` || '', args.type);
+                          }}
+                          defaultSelectedKey={keyValue || args.default}
+                          options={options}
+                          required={args.require === 1}
+                          disabled={args.editable !== 1}
+                        />
+                        <div className={style.argsDescription}>
+                          <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
+                          {args.tip ? tip_tooltip : null}
+                        </div>
+                      </>
+                    }
+
+                  </React.Fragment>
+                )
+              }
 
               return (
                 <React.Fragment key={key}>
-                  {options.length > 0 ? (
-                    <>
-                      <Dropdown
-                        label={`${key}`}
-                        onChange={(event: FormEvent, option?: IDropdownOption) => {
-                          handleOnChange(key, `${option?.key}` || '', args.type);
-                        }}
-                        defaultSelectedKey={keyValue || args.default}
-                        options={options}
-                        required={args.require === 1}
-                        disabled={args.editable !== 1}
-                      />
-                      <div className={style.argsDescription}>
-                        <span dangerouslySetInnerHTML={{ __html: args.describe }}></span>
-                        {args.tip ? tip_tooltip : null}
-                      </div>
-                    </>
-                  ) : (
-                      <TextField
+                   {
+                      <>
+                      <RegexValidatedTextField
                         onRenderLabel={() => {
                           return (
                             <div className={style.textLabelStyle}>
@@ -576,9 +718,11 @@ const Model: React.FC<ModelProps> = props => {
                         }}
                         value={keyValue}
                         required={args.require === 1}
+                        regex={args.regex}
                         disabled={args.editable !== 1 || args.type === 'json'}
                       />
-                    )}
+                    </>
+                    }
                 </React.Fragment>
               );
             });

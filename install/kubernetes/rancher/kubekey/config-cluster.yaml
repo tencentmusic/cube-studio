@@ -19,7 +19,6 @@ spec:
   controlPlaneEndpoint:
     ## Internal loadbalancer for apiservers
     # internalLoadbalancer: haproxy
-
     domain: lb.kubesphere.local
     address: ""
     port: 6443
@@ -28,7 +27,7 @@ spec:
     proxyMode: iptables
     clusterName: cluster.local
     autoRenewCerts: true
-    containerManager: containerd
+    containerManager: docker
     maxPods: 100
     apiserverArgs:
       - service-node-port-range=1-65535

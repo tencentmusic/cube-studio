@@ -1,0 +1,8 @@
+sex,family,education
+1,FALSE,"{""a"":1}"
+2,TRUE,"{""a"":2}"
+1,FALSE,"{""a"":3}"
+2,TRUE,"{""a"":4}"
+1,FALSE,"{""a"":5}"
+2,TRUE,"{""a"":6}"
+1,FALSE,"{""a"":7}"

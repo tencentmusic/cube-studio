@@ -7,7 +7,7 @@ from kubernetes import client
 from kubernetes import watch
 from myapp.utils.py.py_k8s import K8s
 from myapp.project import push_message
-from myapp import app
+from myapp import app, cache
 from myapp.utils.celery import session_scope
 conf = app.config
 
@@ -30,12 +30,11 @@ from datetime import datetime, timezone, timedelta
 
 # @pysnooper.snoop()
 def listen_service():
-    namespace = conf.get('SERVICE_NAMESPACE','service')
     w = watch.Watch()
     while (True):
         try:
             logging.info('begin listen')
-            for event in w.stream(client.CoreV1Api().list_namespaced_pod, namespace=namespace,timeout_seconds=60):  # label_selector=label,
+            for event in w.stream(client.CoreV1Api().list_pod_for_all_namespaces,timeout_seconds=60):  # label_selector=label,
                 with session_scope(nullpool=True) as dbsession:
                     try:
                         if event['object'].status and event['object'].status.container_statuses and event["type"]=='MODIFIED':  # 容器重启会触发MODIFIED
@@ -50,10 +49,17 @@ def listen_service():
                                 # print(event['object'].status)
                                 if terminated and terminated.finished_at:  # 任务终止
                                     finished_at = int(terminated.finished_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间
+                                    # 只推送刚发生的事情，不然太久远的没意义
                                     if (datetime.now().timestamp() - finished_at) < 5:
-                                        message = "cluster: %s, pod: %s, user: %s, status: %s" % (cluster,event['object'].metadata.name,inferenceserving.created_by.username, 'terminated')
+                                        pod_name = event['object'].metadata.name
+                                        message = "cluster: %s, pod: %s, user: %s, status: %s" % (cluster,pod_name,inferenceserving.created_by.username, 'terminated')
                                         logging.info(message)
-                                        push_message([inferenceserving.created_by.username], message)
+                                        last = cache.get(pod_name)
+                                        # 不频繁推送，推送一次是的用户关注就可以了
+                                        if not last:
+                                            cache.set(pod_name, 1,timeout=60*60)
+                                            # 手动删除本身就会有terminated 这个消息记录太多了，而且反复重启也会有大量的消息
+                                            push_message([inferenceserving.created_by.username], message)
                                 # if running and running.started_at:  # 任务重启运行
                                 #     start_time = int(running.started_at.astimezone(timezone(timedelta(hours=8))).timestamp())  # 要找事件发生的时间
                                 #     if (datetime.now().timestamp() - start_time) < 5:

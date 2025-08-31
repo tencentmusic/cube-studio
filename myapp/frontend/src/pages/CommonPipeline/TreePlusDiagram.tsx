@@ -196,13 +196,13 @@ export default class RelationDiagram extends D3Tool {
 		this.nodesInCollectionMap = new Map()
 		this.dataNodes = []
 
-		console.log('data', data);
+		// console.log('data', data);
 
 		// 这一步之后已经构建了完整的链路关系
 		const preHandlePreData: IPreHandleNode[] = this.preHandleNodes(data, 'parent');
 		const preHandleNextData: IPreHandleNode[] = this.preHandleNodes(data, 'children');
 
-		console.log('preHandleNextData', preHandleNextData);
+		// console.log('preHandleNextData', preHandleNextData);
 
 		// if (this.isCollection) {
 		// 	this.handleCollectionNodes(preHandlePreData, 'parent')
@@ -236,7 +236,7 @@ export default class RelationDiagram extends D3Tool {
 
 		const preRenderData = this.preRenderDataReady(preHandleData)
 
-		console.log('preRenderData', preRenderData);
+		// console.log('preRenderData', preRenderData);
 
 		this.renderNode(preRenderData).then(() => {
 			// if (rootNode) {
@@ -366,7 +366,7 @@ export default class RelationDiagram extends D3Tool {
 				d3.selectAll(`#${key} text[fill="#000000"]`).attr('type', `mainText`);
 
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 			}
 
 			// 调试位置坐标
@@ -456,7 +456,7 @@ export default class RelationDiagram extends D3Tool {
 		const _selfThis = this
 		const boxs = d3.selectAll('.node polygon').data()
 
-		console.log('boxs', boxs);
+		// console.log('boxs', boxs);
 
 		boxs.forEach((item: any) => {
 			const box = item.bbox
@@ -705,7 +705,7 @@ export default class RelationDiagram extends D3Tool {
 						})
 						.renderDot(dotSrc);
 				} catch (error) {
-					console.log(error);
+					console.error(error);
 				}
 
 				// 后处理
@@ -731,7 +731,7 @@ export default class RelationDiagram extends D3Tool {
 		const nodeParentList = this.tree2List(cutTreeNodeParent, 'parent')
 		const nodeChildrenList = this.tree2List(cutTreeNodeChildren, 'children')
 
-		console.log('nodeParentList', nodeParentList);
+		// console.log('nodeParentList', nodeParentList);
 
 		for (let i = 0; i < nodeParentList.length; i++) {
 			const item = nodeParentList[i];
@@ -785,7 +785,7 @@ export default class RelationDiagram extends D3Tool {
 	}
 
 	public refresh() {
-		console.log('refresh');
+		// console.log('refresh');
 		// todo 图的改造
 
 		// const nodeParentList = this.tree2List([this.rootNode], 'parent')

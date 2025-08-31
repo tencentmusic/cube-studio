@@ -58,7 +58,8 @@ export interface IDynamicFormConfigItem {
     description?: any
     multiple?: boolean,
     list?: IDynamicFormConfigItem[]
-    data: Record<string, any>
+    data: Record<string, any>,
+    rows: number
 }
 
 export type TDynamicFormType = 'input' | 'textArea' | 'select' | 'datePicker' | 'rangePicker' | 'radio' | 'checkout' | 'match-input' | 'input-select' | 'fileUpload' | 'cascader' | 'json'
@@ -203,13 +204,13 @@ export default function DynamicForm(props: IProps) {
         // ].filter(item => !!item) as Rule[]
 
         let extraContent: any = null
-
+        // console.log('111'+config.name+"2222"+config.defaultValue+'333')
         return <Form.Item
             key={`dynamicForm_${config.name}`}
             label={config.label}
             name={config.name}
             rules={config.rules}
-            initialValue={config.defaultValue}
+            initialValue={config.defaultValue || ""}
             extra={<>
                 {config.data.tips ? <Tooltip
                     className="mr8"
@@ -292,7 +293,7 @@ export default function DynamicForm(props: IProps) {
             label={config.label}
             name={config.name}
             rules={config.rules}
-            initialValue={config.defaultValue}
+            initialValue={config.defaultValue || ""}
             extra={<>
                 {config.data.tips ? <Tooltip
                     className="mr8"
@@ -325,7 +326,7 @@ export default function DynamicForm(props: IProps) {
             label={config.label}
             name={config.name}
             rules={config.rules}
-            initialValue={config.defaultValue}
+            initialValue={config.defaultValue || ""}
             extra={<>
                 {config.data.tips ? <Tooltip
                     className="mr8"
@@ -350,7 +351,7 @@ export default function DynamicForm(props: IProps) {
             label={config.label}
             name={config.name}
             rules={config.rules}
-            initialValue={config.defaultValue}
+            initialValue={config.defaultValue || ""}
             extra={<>
                 {config.data.tips ? <Tooltip
                     className="mr8"
@@ -366,7 +367,7 @@ export default function DynamicForm(props: IProps) {
             </>}
             {...itemProps}
         >
-            <JsonEditor readOnly={config.disable} placeholder={config.placeHolder || `${t('请选择')}${config.label}`} />
+            <JsonEditor rows={config.rows} readOnly={config.disable} placeholder={config.placeHolder || `${t('请选择')}${config.label}`} />
         </Form.Item>
     }
     const renderSelect = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
@@ -379,7 +380,7 @@ export default function DynamicForm(props: IProps) {
             label={config.label}
             name={config.name}
             rules={config.rules}
-            initialValue={config.defaultValue}
+            initialValue={config.defaultValue || ""}
             extra={<>
                 {config.data.tips ? <Tooltip
                     className="mr8"
@@ -450,6 +451,7 @@ export default function DynamicForm(props: IProps) {
             key={`dynamicForm_${config.name}`}
             label={config.label}
             name={config.name}
+            initialValue={config.defaultValue ? moment(config.defaultValue) : undefined}
             rules={[{ required: true, message: t('请选择时间') }]}
             extra={<>
                 {config.data.tips ? <Tooltip
@@ -466,9 +468,7 @@ export default function DynamicForm(props: IProps) {
             </>}
             {...itemProps}
         >
-            <DatePicker style={{ width: '100%' }} locale={locale} showTime={!!config.data.showTime} disabledDate={(current) => {
-                return current && current > moment().endOf('day');
-            }} />
+            <DatePicker style={{ width: '100%' }} locale={locale} showTime={!!config.data.showTime} />
         </Form.Item>
     }
     const renderRangePicker = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
@@ -500,7 +500,7 @@ export default function DynamicForm(props: IProps) {
     // 多级选择器
     const renderCascader = (config: IDynamicFormConfigItem, itemProps: Record<string, any>) => {
         const options = config.options || []
-        console.log(options)
+        // console.log(options)
         return <Form.Item
             key={`dynamicForm_${config.name}`}
             label={config.label}

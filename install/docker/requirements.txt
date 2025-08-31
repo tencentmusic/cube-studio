@@ -60,4 +60,4 @@ openai==1.34.0              # openai接口协议
 ldap3==2.9.1                # ldap单点登录
 gmssl==3.2.2                # sm4加解密，单点登录
 gevent==25.5.1              # gevent并发后端
-
+tiktoken==0.9.0             # openai token计算

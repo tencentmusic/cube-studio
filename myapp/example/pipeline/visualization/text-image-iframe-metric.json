@@ -1,0 +1,17 @@
+[
+  {
+    "metric_type": "image",
+    "describe": "图片可视化结果",
+    "image": "/static/assets/images/pipeline/tree.jpg"
+  },
+  {
+    "metric_type": "text",
+    "describe": "文字可视化结果",
+    "text": "auc:0.7,耗时12h"
+  },
+  {
+    "metric_type": "iframe",
+    "describe": "ifram嵌入可视化结果",
+    "url": "/grafana/d/pod-info/pod-info?orgId=1&refresh=5s&from=now-15m&to=now"
+  }
+]

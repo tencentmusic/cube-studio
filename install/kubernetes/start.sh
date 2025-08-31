@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ $# -eq 0 ]; then
+  echo "错误：请提供 内网ip地址 作为参数"
+  exit 1
+fi
 bash init_node.sh
 mkdir -p ~/.kube && rm -rf ~/.kube/config && cp config ~/.kube/config
 mkdir -p kubeconfig && echo "" > kubeconfig/dev-kubeconfig
@@ -84,10 +88,6 @@ kubectl apply -f ./servicemonitor/kubestate-metrics-sm.yml
 kubectl apply -f ./servicemonitor/node-exporter-sm.yml
 kubectl apply -f ./servicemonitor/prometheus-operator-sm.yml
 kubectl apply -f ./servicemonitor/prometheus-sm.yml
-
-# 部署prometheus_adapter
-kubectl apply -f ./prometheus_adapter/metric_rule.yaml
-kubectl apply -f ./prometheus_adapter/prometheus_adapter.yaml
 cd ../
 
 
@@ -138,6 +138,9 @@ kubectl create -f pv-pvc-jupyter.yaml
 kubectl create -f pv-pvc-automl.yaml
 kubectl create -f pv-pvc-pipeline.yaml
 kubectl create -f pv-pvc-service.yaml
+
+# 替换配置文件config.py中的内网ip地址
+sed -i "s/SERVICE_EXTERNAL_IP=\\[\\]/SERVICE_EXTERNAL_IP=\[\"$1\"\]/g" cube/overlays/config/config.py
 
 kubectl delete -k cube/overlays
 kubectl apply -k cube/overlays

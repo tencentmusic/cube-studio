@@ -79,10 +79,9 @@ LOGO_TARGET_PATH = None
 # 认证相关的配置
 # ----------------------------------------------------
 # 认证类型
-# AUTH_OID : OpenID认证
 # AUTH_DB : 数据库账号密码配置
 # AUTH_LDAP : LDAP认证
-# AUTH_REMOTE_USER : 远程用户认证
+# AUTH_REMOTE_USER : 远程用户认证，或者OpenID认证，或者公司内部自定义的接口获取用户信息方法
 AUTH_TYPE = AUTH_DB
 
 # AUTH_TYPE = AUTH_REMOTE_USER
@@ -94,7 +93,8 @@ AUTH_TYPE = AUTH_DB
 
 # 是否允许用户注册
 AUTH_USER_REGISTRATION = False
-
+# 是否允许其他平台的接入，允许后，其他平台可设置cookie在本平台登录，并可跳过登录api调用
+AUTH_PLATFORM_ACCESS = False
 # 注册用户的默认角色
 AUTH_USER_REGISTRATION_ROLE = "Gamma"
 
@@ -302,13 +302,6 @@ ENABLE_FLASK_COMPRESS = True
 # 任务的最小执行间隔min
 PIPELINE_TASK_CRON_RESOLUTION = 10
 
-# 右上角导航
-# NAVBAR_RIGHT=[
-#     {
-#         "icon": '<svg t="1699698387046" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11066" width="200" height="200"><path d="M512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667s-191.018667 426.666667-426.666667 426.666667S85.333333 747.648 85.333333 512 276.352 85.333333 512 85.333333z m0 85.333334a341.333333 341.333333 0 1 0 0 682.666666 341.333333 341.333333 0 0 0 0-682.666666z m-40.405333 156.586666l121.856 369.706667h-83.968l-27.050667-89.685333H361.898667l-27.648 89.685333H256L378.453333 327.253333h93.141334z m256.213333 0v369.706667h-78.549333V327.253333h78.506666z m-303.36 75.562667H420.693333l-43.306666 144.64h89.898666L424.448 402.773333z" fill="#333333" p-id="11067"></path></svg>',
-#         "link": "/frontend/ai_hub/model_market/model_visual"
-#     }
-# ]
 
 
 EMAIL_REPORTS_USER = "admin"
@@ -386,6 +379,7 @@ def get_env_variable(var_name, default=None):
 # 当前控制器所在的集群
 ENVIRONMENT=get_env_variable('ENVIRONMENT','DEV').lower()
 
+# 数据库链接相关配置
 SQLALCHEMY_POOL_SIZE = 300
 SQLALCHEMY_POOL_RECYCLE = 300  # 超时重连， 必须小于数据库的超时终端时间
 SQLALCHEMY_MAX_OVERFLOW = 800
@@ -404,6 +398,7 @@ SQLALCHEMY_DATABASE_URI = os.getenv('MYSQL_SERVICE','')
 SQLALCHEMY_BINDS = {}
 from celery.schedules import crontab
 
+# 缓存配置
 CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24  # cache默认超时是24小时，一天才过期
 
 CACHE_CONFIG = {
@@ -412,7 +407,7 @@ CACHE_CONFIG = {
     'CACHE_REDIS_PORT': int(REDIS_PORT), # 配置端口号
     'CACHE_REDIS_URL':'redis://:%s@%s:%s/1'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/1'%(REDIS_HOST,str(REDIS_PORT))   # 0，1为数据库编号（redis有0-16个数据库）
 }
-
+# 异步任务和定时任务配置
 class CeleryConfig(object):
     # 任务队列
     broker_url = 'redis://:%s@%s:%s/0'%(REDIS_PASSWORD,REDIS_HOST,str(REDIS_PORT)) if REDIS_PASSWORD else 'redis://%s:%s/0'%(REDIS_HOST,str(REDIS_PORT))
@@ -491,6 +486,14 @@ class CeleryConfig(object):
             'rate_limit': '1/s',
             'soft_time_limit': 3600,
             "expires": 3600,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
+        },
+        # 异步查询k8s资源
+        'task.get_k8s_resource': {
+            'rate_limit': '1/s',
+            'soft_time_limit': 300,
+            "expires": 300,
             'max_retries': 0,
             "reject_on_worker_lost": False
         },
@@ -783,7 +786,7 @@ STORE_CONFIG = {
     "download_host":"https://xx.cos.ap-nanjing.myqcloud.com/"
 }
 
-K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
+K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/user1/'  #
 BLACK_PORT = [10250]   # 黑名单端口，cube-studio将不会占用这些端口，10250是kubelet的端口。
 
 K8S_NETWORK_MODE = 'iptables'   # iptables ipvs
@@ -804,7 +807,7 @@ ALL_LINKS=[
     {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
-        "url": K8S_DASHBOARD_CLUSTER+"#/pod?namespace=infra"
+        "url": "/k8s/dashboard/cluster/#/pod?namespace=infra"
     },
     {
         "label":"Grafana",
@@ -850,7 +853,6 @@ MODEL_URLS = {
     "data_blood":"/frontend/data/metadata/data_blood",
     "metadata_metric":"/frontend/data/metadata/metadata_metric",
     "dimension": "/frontend/data/metadata/metadata_dimension",
-    "feast":"/frontend/data/feast/feast",
     "dataset":"/frontend/data/media_data/dataset",
     "label_platform":"/frontend/data/media_data/label_platform",
 
@@ -880,8 +882,11 @@ MODEL_URLS = {
  # 可以跨域分享cookie的子域名，例如.svc.local.com
 COOKIE_DOMAIN = ''
 SERVICE_DOMAIN='service.svc.cluster.local'
-CHATGPT_TOKEN = [""]
-CHATGPT_CHAT_URL = ['']
+CHATGPT_TOKEN = []
+CHATGPT_CHAT_URL = []
+CHATGPT_ARGS = {
+    "model": 'gpt-5-chat'
+}
 
 
 # 所有训练集群的信息
@@ -890,7 +895,7 @@ CLUSTERS={
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        # "SERVICE_DOMAIN": 'service.local.com',
+        "SERVICE_DOMAIN": 'service.local.com',
     }
 }
 

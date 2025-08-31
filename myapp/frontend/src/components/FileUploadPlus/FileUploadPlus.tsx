@@ -55,7 +55,7 @@ export default function FileUploadPlus(props: Iprops) {
     }
 
     const handleChange = (info: UploadChangeParam) => {
-        console.log(info);
+        // console.log(info);
 
         if (info.file.status === 'uploading') {
             setFileLoading(true);
@@ -74,7 +74,7 @@ export default function FileUploadPlus(props: Iprops) {
     };
 
     const file2Bin = (file?: RcFile) => {
-        console.log('file2Bin', file);
+        // console.log('file2Bin', file);
         return new Promise((resolve, reject) => {
             if (file) {
                 let name = file.name.replace(/.+\./, '');
@@ -154,13 +154,13 @@ export default function FileUploadPlus(props: Iprops) {
                 fileList={fileList}
                 showUploadList={false}
                 customRequest={(options) => {
-                    console.log("options.file",options.file);
+                    // console.log("options.file",options.file);
                     const tarList = [...fileList, options.file as RcFile]
-                    console.log("tarList",tarList);
+                    // console.log("tarList",tarList);
                     setFileList(tarList)
 
                     Promise.all(tarList.map((item: any) => file2Bin(item))).then(res => {
-                        console.log(res)
+                        // console.log(res)
                         props.onChange && props.onChange(res)
                     })
 

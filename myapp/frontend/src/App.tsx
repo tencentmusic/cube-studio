@@ -111,7 +111,7 @@ const AppWrapper = (props: IProps) => {
           setCustomDialogVisable(res.data.hit)
       }
     }).catch(err => {
-      console.log(err);
+      console.error(err);
     })
     return () => {
       controller.abort()

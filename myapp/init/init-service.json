@@ -48,18 +48,6 @@
       "help_url": "/docs/example/service.md"
     }
   },
-  "jaeger": {
-    "project_name": "public",
-    "service_name": "jaeger",
-    "service_describe": "jaeger链路追踪",
-    "image_name": "jaegertracing/all-in-one:1.29",
-    "command": "",
-    "env": "",
-    "ports": "16686,5775",
-    "expand": {
-      "help_url": "/docs/example/service.md"
-    }
-  },
   "postgresql-ui": {
     "project_name": "public",
     "service_name": "postgresql-ui",
@@ -84,24 +72,12 @@
       "help_url": "https://github.com/tencentmusic/cube-studio/wiki"
     }
   },
-  "chrome": {
-    "project_name": "public",
-    "service_name": "chrome",
-    "service_describe": "无头浏览器",
-    "image_name": "selenium/standalone-chrome",
-    "command": "",
-    "env": "shm-size=2g\nSE_NODE_OVERRIDE_MAX_SESSIONS=true\nSE_NODE_MAX_SESSIONS=20",
-    "ports": "4444",
-    "expand": {
-      "help_url": "https://github.com/tencentmusic/cube-studio/wiki"
-    }
-  },
 
   "sd-webui": {
     "project_name": "public",
     "service_name": "sd-webui",
     "service_describe": "sd的webui",
-    "image_name": "ccr.ccs.tencentyun.com/cube-studio/aihub:sd-webui",
+    "image_name": "ccr.ccs.tencentyun.com/cube-studio/sd-webui:20250301",
     "command": "python /app/stable-diffusion-webui/webui.py --port 80 --listen --no-half",
     "env": "",
     "ports": "80",
@@ -117,7 +93,7 @@
     "project_name": "public",
     "service_name": "xinference",
     "service_describe": "xinference大模型推理",
-    "image_name": "xprobe/xinference:v1.0.1",
+    "image_name": "xprobe/xinference:latest",
     "command": "xinference-local -H 0.0.0.0",
     "env": "XINFERENCE_HOME=/mnt/{{creator}}/pipeline/example/xinference\nHF_HUB_ENABLE_HF_TRANSFER=1\nHF_ENDPOINT=https://hf-mirror.com\nXINFERENCE_MODEL_SRC=modelscope",
     "ports": "9997",
@@ -126,22 +102,6 @@
     "resource_memory": "20G",
     "expand": {
       "help_url": "https://github.com/xorbitsai/inference"
-    }
-  },
-  "ollama": {
-    "project_name": "public",
-    "service_name": "ollama",
-    "service_describe": "ollama大模型推理",
-    "image_name": "ghcr.nju.edu.cn/open-webui/open-webui:ollama",
-    "command": "",
-    "env": "",
-    "ports": "8080",
-    "resource_gpu": "1",
-    "resource_cpu": "20",
-    "resource_memory": "20G",
-    "volume_mount":"kubeflow-user-workspace(pvc):/mnt,/data/k8s/kubeflow/pipeline/workspace/{{creator}}/pipeline/example/ollama/model(hostpath):/root/.ollama",
-    "expand": {
-      "help_url": "https://github.com/ollama/ollama"
     }
   }
 }

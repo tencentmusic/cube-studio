@@ -3,7 +3,7 @@ import os
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from flask_appbuilder import Model
-
+import re
 from sqlalchemy import Text
 
 from myapp import app

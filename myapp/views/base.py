@@ -520,7 +520,7 @@ class MyappModelView(ModelView):
                 except Exception as e:
                     flash(str(e), "error")
                 else:
-                    print(item.to_json())
+                    # print(item.to_json())
                     if self.datamodel.add(item):
                         self.post_add(item)
                     flash(*self.datamodel.message)

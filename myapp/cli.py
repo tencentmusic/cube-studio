@@ -43,6 +43,7 @@ def replace_git(content):
 def init():
     try:
         """Inits the Myapp application"""
+        # 添加所有接口的权限示例记录
         appbuilder.add_permissions(update_perms=True)  # update_perms为true才会检测新权限
         security_manager.sync_role_definitions()
     except Exception as e:
@@ -82,11 +83,11 @@ def init():
 
         # 添加一些默认的记录
         add_project('org', 'public', __('公共项目组'),expand={'cluster':'dev','org':'public'})
-        add_project('org', __('推荐中心'), __('推荐项目组'),expand={'cluster':'dev','org':'public'})
-        add_project('org', __('搜索中心'), __('搜索项目组'),expand={'cluster':'dev','org':'public'})
-        add_project('org', __('广告中心'), __('广告项目组'),expand={'cluster':'dev','org':'public'})
-        add_project('org', __('安全中心'), __('安全项目组'),expand={'cluster':'dev','org':'public'})
-        add_project('org', __('多媒体中心'), __('多媒体项目组'),expand={'cluster':'dev','org':'public'})
+        # add_project('org', __('推荐中心'), __('推荐项目组'),expand={'cluster':'dev','org':'public'})
+        # add_project('org', __('搜索中心'), __('搜索项目组'),expand={'cluster':'dev','org':'public'})
+        # add_project('org', __('广告中心'), __('广告项目组'),expand={'cluster':'dev','org':'public'})
+        # add_project('org', __('安全中心'), __('安全项目组'),expand={'cluster':'dev','org':'public'})
+        # add_project('org', __('多媒体中心'), __('多媒体项目组'),expand={'cluster':'dev','org':'public'})
 
         add_project('job-template', __('基础命令'), __('python/bash等直接在服务器命令行中执行命令的模板'), {"index": 1})
         add_project('job-template', __('数据导入导出'), __('集群与用户机器或其他集群之间的数据迁移'), {"index": 2})
@@ -149,7 +150,8 @@ def init():
             for old_name in job_template_old_names:
                 job_template = db.session.query(Job_Template).filter_by(name=old_name).first()
                 if job_template:
-                    break
+                    job_template.name=job_template_name
+                    db.session.commit()
 
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='job-template').first()
         if project and images.id:
@@ -164,8 +166,6 @@ def init():
                     job_template.volume_mount = job_template_volume
                     job_template.accounts = job_template_account
                     job_template_expand['source'] = "github"
-                    if 'help_url' in job_template_expand:
-                        job_template_expand['help_url']=job_template_expand['help_url'] if re.match(r'^http',job_template_expand['help_url']) else (conf.get('GIT_URL', '').strip('/') + job_template_expand['help_url'])
                     job_template.expand = json.dumps(job_template_expand, indent=4, ensure_ascii=False) if job_template_expand else '{}'
                     job_template.created_by_fk = 1
                     job_template.changed_by_fk = 1
@@ -213,8 +213,8 @@ def init():
                 repository = Repository()
                 repository.name = 'hubsecret'
                 repository.server=conf.get('REPOSITORY_ORG','ccr.ccs.tencentyun.com/cube-studio/')
-                repository.user = ''
-                repository.password = ''
+                repository.user = 'yourname'
+                repository.password = 'yourpassword'
                 repository.hubsecret = 'hubsecret'
                 repository.created_by_fk = 1
                 repository.changed_by_fk = 1
@@ -304,6 +304,7 @@ def init():
                     task_model.resource_rdma = task.get('resource_rdma', '0')
                     task_model.created_by_fk = 1
                     task_model.changed_by_fk = 1
+                    task_model.retry = int(task.get('retry', '0'))
                     task_model.pipeline_id = pipeline_model.id
                     task_model.job_template_id = job_template.id
                     db.session.add(task_model)
@@ -571,13 +572,13 @@ def init():
                          expand={}):
         model_version = model_version if model_version else datetime.now().strftime('v%Y.%m.%d.1')
         model_version = model_version.replace('v', '').replace('.', '').replace(':', '')
-        service_name = model_name + "-" + model_version
+        service_name = model_name.replace('/', '-').replace(':', '-').replace('.', '-').strip('-') + "-" + model_version
         service = db.session.query(InferenceService).filter_by(name=service_name).first()
         project = db.session.query(Project).filter_by(name=project_name).filter_by(type='org').first()
         if service is None and project:
             try:
                 service = InferenceService()
-                service.name = service_name
+                service.name = service_name.replace('_', '-')
                 service.label = service_describe
                 service.service_type = service_type
                 service.model_name = model_name
@@ -601,9 +602,6 @@ def init():
                 service.volume_mount = volume_mount
                 service.metrics = metrics
                 service.health = health
-                if "help_url" in expand:
-                    help_url = expand['help_url']
-                    expand["help_url"] = help_url if bool(re.match(r'^http', help_url)) else (conf.get('GIT_URL', '').strip('/') + help_url)
                 service.expand = json.dumps(expand, indent=4, ensure_ascii=False)
 
                 from myapp.views.view_inferenceserving import InferenceService_ModelView_base

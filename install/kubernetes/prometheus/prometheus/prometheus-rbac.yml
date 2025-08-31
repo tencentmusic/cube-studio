@@ -13,6 +13,8 @@ rules:
   - ""
   resources:
   - nodes/metrics
+  - nodes/proxy
+  - nodes/stats
   - nodes
   - services
   - endpoints

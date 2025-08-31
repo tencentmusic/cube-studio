@@ -5,7 +5,7 @@ metadata:
   name: kubeflow-clusterrole
 rules:
 - apiGroups: ["*"]
-  resources: ["pods","pods/exec","pods/log","services","endpoints","events","configmaps","nodes","deployments","mpijobs","tfjobs","pytorchjobs","jobs","sparkapplications","mxjobs","paddlejobs","xgboostjobs"]
+  resources: ["pods","pods/exec","pods/log","services","endpoints","events","configmaps","deployments","mpijobs","tfjobs","pytorchjobs","jobs","sparkapplications","mxjobs","paddlejobs","xgboostjobs"]
   verbs: ["create", "delete", "deletecollection", "patch", "update", "get", "list", "watch"]
 ---
 apiVersion: v1

@@ -199,7 +199,8 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 defaultValue: item.default === '' ? undefined : item.default,
                 multiple: item['ui-type'] && item['ui-type'] === 'select2',
                 options: (item.values || []).map((item: any) => ({ label: item.value, value: item.id, children: item.children })),
-                data: { ...item }
+                data: { ...item },
+                rows: Number(item.rows || 5)
             }
             return res
         })
@@ -272,8 +273,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             const typeValue = topElement?.getAttribute('type');
                             const addedValue = topElement?.getAttribute('addedValue');
 
-                            console.log('type:', typeValue);
-                            console.log('addedValue:', addedValue);
                             if (typeValue && addedValue){
                                 if (typeValue === 'tips'){
                                     return <Tooltip title={<span className="tips-content" dangerouslySetInnerHTML={{ __html: addedValue}}></span>} placement="topLeft">
@@ -333,8 +332,6 @@ export default function TaskListManager(props?: IAppMenuItem) {
                             const typeValue = topElement?.getAttribute('type');
                             const addedValue = topElement?.getAttribute('addedValue');
 
-                            console.log('type:', typeValue);
-                            console.log('addedValue:', addedValue);
                             if (typeValue && addedValue){
                                 if (typeValue === 'tips'){
                                     return <Tooltip title={<span className="tips-content" dangerouslySetInnerHTML={{ __html: addedValue}}></span>} placement="topLeft">
@@ -632,7 +629,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                 config: createDyFormConfig(currentData, label_columns, description_columns)
                             }
                         })
-                        const formReset = add_columns.filter((item) => item.default !== '').map(column => ({ [column.name]: column.default })).reduce((pre, next) => ({ ...pre, ...next }), {})
+                        const formReset = add_columns.map(column => ({ [column.name]: column.default })).reduce((pre, next) => ({ ...pre, ...next }), {})
 
                         setDynamicFormDataAdd(formReset)
                         setDynamicFormConfigAdd(formConfigAdd)
@@ -757,7 +754,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
             });
 
         }).catch(err => {
-            console.log(err);
+            console.error(err);
         }).finally(() => {
             setLoading(false)
             setLoadingAdd(false)
@@ -834,7 +831,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                 setSorterParam(sorter)
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error);
             })
             .finally(() => setLoading(false));
     };
@@ -1008,8 +1005,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                     config: createDyFormConfig(currentData, label_columns, description_columns)
                                 }
                             })
-                            const formReset = add_columns.filter((item) => item.default !== '').map(column => ({ [column.name]: column.default })).reduce((pre, next) => ({ ...pre, ...next }), {})
-
+                            const formReset = add_columns.map(column => ({ [column.name]: column.default })).reduce((pre, next) => ({ ...pre, ...next }), {})
                             form.setFieldsValue(formReset)
                             setDynamicFormConfigAdd(formConfigAdd)
                             setDynamicFormGroupConfigAdd(formGroupConfigAdd)
@@ -1048,7 +1044,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                 }
                             )
                         } else {
-                            processedValue = (next.value || '').split(',');
+                            processedValue = next.value ? next.value.split(',') : [];
                           }
                         return { ...pre, [next.key]: processedValue }
                     }

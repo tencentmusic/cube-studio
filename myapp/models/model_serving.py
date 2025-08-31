@@ -22,11 +22,9 @@ import pysnooper
 class service_common():
     @property
     def monitoring_url(self):
-        url="//"+self.project.cluster.get('HOST',request.host).split('|')[-1]+conf.get('GRAFANA_SERVICE_PATH','')+self.name
+        url="//"+self.project.cluster.get('HOST',request.host).split('|')[-1]+conf.get('GRAFANA_SERVICE_PATH','').replace('var-namespace=service',f'var-namespace={self.namespace}')+self.name
         return Markup(f'<a href="{url}">{__("监控")}</a>')
         # https://www.angularjswiki.com/fontawesome/fa-flask/    <i class="fa-solid fa-monitor-waveform"></i>
-
-
 
     def get_node_selector(self):
         return self.get_default_node_selector(self.project.node_selector,self.resource_gpu,'service')
@@ -43,6 +41,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     name = Column(String(100), nullable=False,unique=True,comment='英文名')   # Used to generate pod service and vs
     label = Column(String(100), nullable=False,comment='中文名')
+    namespace = Column(String(200), nullable=True, default='service', comment='命名空间')
     images = Column(String(200), nullable=False,comment='镜像')
     working_dir = Column(String(100),default='',comment='启动目录')
     command = Column(String(1000),default='',comment='启动命令')
@@ -61,17 +60,9 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     @property
     def deploy(self):
-        monitoring_url = "//"+self.project.cluster.get('HOST', request.host).split('|')[-1] + conf.get('GRAFANA_SERVICE_PATH','') + self.name
-        help_url=''
-        try:
-            help_url = json.loads(self.expand).get('help_url','') if self.expand else ''
-        except Exception as e:
-            print(e)
+        monitoring_url = "//"+self.project.cluster.get('HOST', request.host).split('|')[-1] + conf.get('GRAFANA_SERVICE_PATH','').replace('var-namespace=service',f'var-namespace={self.namespace}') + self.name
 
-        if help_url:
-            return Markup(f'<a href="/service_modelview/api/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
-        else:
-            return Markup(f'<a href="/service_modelview/api/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
+        return Markup(f'<a href="/service_modelview/api/deploy/{self.id}">{__("部署")}</a> | <a href="{monitoring_url}">{__("监控")}</a> | <a href="/service_modelview/api/clear/{self.id}">{__("清理")}</a>')
 
 
     @property
@@ -83,7 +74,7 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     def name_url(self):
         # user_roles = [role.name.lower() for role in list(g.user.roles)]
         # if "admin" in user_roles:
-        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{self.namespace}/{self.name.replace("_", "-")}'
 
         return Markup(f'<a target=_blank href="{url}">{self.label}</a>')
 
@@ -193,9 +184,11 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
             try:
                 # 查看k8s的pod是否read了
                 k8s_client = K8s(self.project.cluster.get('KUBECONFIG', ''))
-                read_pod = k8s_client.get_pod_ip(namespace=conf.get('SERVICE_NAMESPACE','service'),service_name=self.name)
-                if read_pod:
-                    return True
+                all_endpoints = k8s_client.v1.read_namespaced_endpoints(namespace=self.namespace, name=self.name,_request_timeout=5)  # 先查询入口点，
+                if all_endpoints.subsets:
+                    addresses = [subset.addresses for subset in all_endpoints.subsets if subset.addresses]
+                    if len(addresses)>0:
+                        return True
             except Exception as e:
                 print(e)
 
@@ -214,7 +207,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     name = Column(String(100), nullable=True,unique=True,comment='英文名')
     label = Column(String(100), nullable=False,comment='中文名')
-
+    namespace = Column(String(200), nullable=True, default='service', comment='命名空间')
     service_type= Column(String(100),nullable=True,default='serving',comment='服务类型')
     model_name = Column(String(200),default='',comment='模型名')
     model_version = Column(String(200),default='',comment='模型版本')
@@ -258,9 +251,11 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
 
     priority = Column(Integer,default=1,comment='优先级')   # giving priority to meeting high-priority resource needs
 
+
     @property
     def model_name_url(self):
-        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{self.namespace}/{self.name.replace("_", "-")}'
+
         return Markup(f'<a target=_blank href="{url}">{self.model_name}</a>')
 
     @property
@@ -275,8 +270,7 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     @property
     def operate_html(self):
 
-
-        monitoring_url="//"+self.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_SERVICE_PATH','')+self.name
+        monitoring_url="//"+self.project.cluster.get('HOST', request.host).split('|')[-1]+conf.get('GRAFANA_SERVICE_PATH','').replace('var-namespace=service',f'var-namespace={self.namespace}')+self.name
         # if self.created_by.username==g.user.username or g.user.is_admin():
         if self.created_by.id == g.user.id or self.project.user_role(g.user.id)=='creator':
             dom = f'''
@@ -316,20 +310,15 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
         if self.model_status=='online':
             try:
                 # 查看k8s的pod是否read了
-                k8s_client = K8s(self.project.cluster.get('KUBECONFIG', ''))
-                read_pod = k8s_client.get_pod_ip(namespace=conf.get('SERVICE_NAMESPACE','service'),service_name=self.name)
-                if read_pod:
-                    pass
-                    # return self.model_status+"(ready)"
-                else:
-                    url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
+                if not self.ready:
+                    url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{self.namespace}/{self.name.replace("_", "-")}'
                     return Markup(f'<a target=_blank href="{url}">deploying</a>')
                     # return "deploying"
                     # return self.model_status + "(not ready)"
             except Exception as e:
                 print(e)
 
-        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("SERVICE_NAMESPACE","service")}/{self.name.replace("_", "-")}'
+        url = f'/k8s/web/search/{self.project.cluster["NAME"]}/{self.namespace}/{self.name.replace("_", "-")}'
         return Markup(f'<a target=_blank href="{url}">{self.model_status}</a>')
 
         # return self.model_status
@@ -341,11 +330,12 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
             try:
                 # 查看k8s的pod是否read了
                 k8s_client = K8s(self.project.cluster.get('KUBECONFIG', ''))
-                read_pod = k8s_client.get_pod_ip(namespace=conf.get('SERVICE_NAMESPACE','service'),service_name=self.name)
-                if read_pod:
-                    return True
-                else:
-                    return False
+                all_endpoints = k8s_client.v1.read_namespaced_endpoints(namespace=self.namespace,name=self.name,_request_timeout=5)  # 先查询入口点，
+                if all_endpoints.subsets:
+                    addresses = [subset.addresses for subset in all_endpoints.subsets if subset.addresses]
+                    if len(addresses) > 0:
+                        return True
+                return False
             except Exception as e:
                 print(e)
 

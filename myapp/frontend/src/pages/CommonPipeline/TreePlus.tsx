@@ -44,7 +44,7 @@ export default function TreePlus(props: IProps) {
 		if (resizeIframe.contentWindow) {
 			resizeIframe.contentWindow.onresize = () => {
 				setTimeout(() => {
-					console.log(relationDiagramRef.current);
+					// console.log(relationDiagramRef.current);
 					relationDiagramRef.current?.reSize();
 				}, 1000);
 			};
@@ -60,15 +60,15 @@ export default function TreePlus(props: IProps) {
 	}, [relationDiagram]);
 
 	const handleClickNode = (node: any) => {
-		console.log(node)
+		// console.log(node)
 		const currentNode = relationDiagram && relationDiagram.dataMap && relationDiagram.dataMap.get(node.key)
-		console.log('currentNode', currentNode);
+		// console.log('currentNode', currentNode);
 
 		setNodeDetail([])
 		setLoadingDetail(true)
 		setVisableDrawer(true)
 		getNodeInfoCommon(currentNode?.detail_url || '').then(res => {
-			console.log(res.data.result.detail);
+			// console.log(res.data.result.detail);
 			const detail = res.data.result.detail
 			setNodeDetail(detail)
 			setLoadingDetail(false)
@@ -103,7 +103,7 @@ export default function TreePlus(props: IProps) {
 						setLayoutConfig(layout)
 					})
 					.catch((err) => {
-						console.log(err);
+						// console.log(err);
 						setIsNoData(true)
 					})
 					.finally(() => {

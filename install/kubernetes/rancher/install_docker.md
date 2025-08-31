@@ -137,12 +137,13 @@ systemctl enable docker
 # 5. 配置docker
 
 ```bash
-vi /etc/docker/daemon.json
 
+mkdir -p /etc/docker/
 # 添加如下配置
+cat > /etc/docker/daemon.json <<EOF
 {
     # 镜像加速器，拉取docker官方镜像时需要
-    "registry-mirrors": ["https://docker.1panel.live", "https://hub.rat.dev/", "https://docker.chenby.cn", "https://docker.m.daocloud.io"],
+    "registry-mirrors": ["https://hub.rat.dev/","https://docker.xuanyuan.me", "https://docker.m.daocloud.io","https://dockerproxy.com"],
     # dns可不配置
     "dns": ["114.114.114.114","8.8.8.8"],
     # k8s集群可以同时拉取多个镜像
@@ -152,6 +153,7 @@ vi /etc/docker/daemon.json
     # 内部如果有http的镜像仓库，可以添加
     "insecure-registries":["docker.oa.com:8080"]
 }
+EOF
 
 systemctl stop docker
 systemctl daemon-reload

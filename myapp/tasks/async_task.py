@@ -30,7 +30,7 @@ def check_docker_commit(task,docker_id):  # 在页面中测试时会自定接收
         try:
             docker = dbsession.query(Docker).filter_by(id=int(docker_id)).first()
             pod_name = "docker-commit-%s-%s" % (docker.created_by.username, str(docker.id))
-            namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
+            namespace = docker.project.notebook_namespace
             k8s_client = K8s(conf.get('CLUSTERS').get(conf.get('ENVIRONMENT')).get('KUBECONFIG',''))
             begin_time=datetime.datetime.now()
             now_time=datetime.datetime.now()
@@ -82,6 +82,8 @@ def check_notebook_commit(task,notebook_id,target_image):  # 在页面中测试�
                         break
                 else:
                     break
+
+                now_time = datetime.datetime.now()
 
         except Exception as e:
             logging.error(e)
@@ -225,12 +227,12 @@ def upgrade_service(task,service_id,name,namespace):
                 except Exception as e:
                     logging.error(e)
 
-                if time.time() - begin_time > 600:
-                    message = __('%s 新版本运行状态检查超时，请手动检查和清理旧版本%s %s') % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), service.model_name, service.model_version)
+                if time.time() - begin_time > 60*10:
+                    message = __('%s 新版本推理服务运行状态检查超时，请手动检查和清理旧版本%s %s') % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), service.model_name, service.model_version)
                     # push_admin(message)
                     push_message([service.created_by.username], message)
                     return
-                time.sleep(60)
+                time.sleep(60*3)
 
 
             # 切换还完，做旧服务的清理。 同域名的只能保留一个，这样能让客户端使用同一个域名总是请求到最新的一个服务。但是要避免service.host配置的不是域名的情况
@@ -264,7 +266,7 @@ def upgrade_service(task,service_id,name,namespace):
                         # push_admin(message)
                         push_message([service.created_by.username],message)
             else:
-                message = __('%s %s 没有历史在线版本，%s版本升级完成') % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), service.model_name, service.model_version)
+                message = __('%s %s 推理服务没有历史在线版本，%s版本升级完成') % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), service.model_name, service.model_version)
                 # push_admin(message)
                 push_message([service.created_by.username], message)
 
@@ -323,5 +325,33 @@ def update_dataset(task,dataset_id):
             push_admin(f'数据集备份失败，id:{dataset_id}')
 
 
+
+@celery_app.task(name="task.get_k8s_resource", bind=True)  # , soft_time_limit=15
+def get_k8s_resource(task,kubeconfig='',namespace='',ops_type='pods',label=None,**kwargs):
+    try:
+        from myapp.utils.py.py_k8s import K8s
+        from myapp import cache
+        k8s_client = K8s(kubeconfig)
+        if ops_type=='pods':
+            if namespace:
+                if not cache.get(f'all_pods_{namespace}_checking'):
+                    cache.set(f'all_pods_{namespace}_checking', 1)
+                    pods = k8s_client.v1.list_namespaced_pod(namespace=namespace,watch=False).items or []
+                    cache.set(f'all_pods_{namespace}', pods)
+                    cache.set(f'all_pods_{namespace}_checking', 0)
+            else:
+                if not cache.get(f'all_pods_checking'):
+                    cache.set(f'all_pods_checking', 1)
+                    pods = k8s_client.v1.list_pod_for_all_namespaces(watch=False).items or []
+                    cache.set('all_pods', pods)
+                    cache.set(f'all_pods_checking', 0)
+        if ops_type=='nodes':
+            if not cache.get(f'all_nodes_checking'):
+                cache.set(f'all_nodes_checking', 1)
+                all_node = k8s_client.v1.list_node(label_selector=label).items or []
+                cache.set('all_nodes', all_node)
+                cache.set(f'all_nodes_checking', 0)
+    except Exception as e:
+        pass
 if __name__ =='__main__':
     upgrade_service(task=None,service_id=21,namespace='service',name='serving-nginx-202303141')

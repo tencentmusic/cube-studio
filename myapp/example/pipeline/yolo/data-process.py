@@ -123,7 +123,7 @@ for task_id in all_annotations:
             x2,y2=x1+width,y1+height
             x_center = (x1+x2)/2
             y_center = (y1+y2)/2
-            save_label = [class_type_index,round(x_center,6),round(y_center,6),round(width,6),round(height,6)]
+            save_label = [class_type_index,round(float(x_center),6),round(float(y_center),6),round(float(width),6),round(float(height),6)]
             save_label = [str(x) for x in save_label]
             save_label = ' '.join(save_label)
             save_labels.append(save_label)

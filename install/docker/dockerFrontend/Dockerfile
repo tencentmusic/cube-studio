@@ -1,5 +1,5 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.07.01 -f install/docker/dockerFrontend/Dockerfile .
-# docker buildx build --platform linux/amd64,linux/arm64 -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.07.01 -f install/docker/dockerFrontend/Dockerfile . --push
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.09.01 -f install/docker/dockerFrontend/Dockerfile .
+# docker buildx build --platform linux/amd64,linux/arm64 -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.09.01 -f install/docker/dockerFrontend/Dockerfile . --push
 
 FROM nginx
 
@@ -27,7 +27,14 @@ RUN mkdir ./frontend ./static
 
 # 拷贝dist包文件
 COPY ./myapp/static/appbuilder/frontend ./frontend
+#COPY ./myapp/chatgpt-web/distChat ./frontend/distChat
 COPY ./myapp/static ./static
+# 安全风险去除
+RUN rm -rf frontend/manifest.json frontend/robots.txt
+
+RUN find frontend -name ".DS_Store" -type f -delete
+RUN find static -name ".DS_Store" -type f -delete
+
 RUN chmod -R 777 frontend
 RUN chmod -R 777 static
 # 拷贝nginx配置文件

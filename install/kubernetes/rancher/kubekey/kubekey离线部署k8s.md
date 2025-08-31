@@ -23,8 +23,9 @@ registry.cn-beijing.aliyuncs.com/kubesphereio/k8s-dns-node-cache:1.22.20
 如果不成功，可以多试几次
 ```bash
 export KKZONE=cn
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.1.8 sh -
+curl -sfL https://get-kk.kubesphere.io | VERSION=v3.1.10 sh -
 chmod +x kk
+cp kk /usr/bin/
 ```
 ### 配置离线包内容
 

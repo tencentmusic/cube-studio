@@ -51,16 +51,16 @@ mysql> flush privileges;
 docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9 -f install/docker/Dockerfile-base .
 
 使用基础镜像构建生产镜像
-docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.07.01 -f install/docker/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.09.01 -f install/docker/Dockerfile .
 
 构建frontend镜像
-docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.07.01 -f install/docker/dockerFrontend/Dockerfile .
+docker build --network=host -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.09.01 -f install/docker/dockerFrontend/Dockerfile .
 ```
 
 ## 镜像拉取(如果你不参与开发可以直接使用线上镜像)
 ```
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.07.01
-docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.07.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.09.01
+docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.09.01
 ```
 
 ## deploy myapp (docker-compose)
@@ -219,22 +219,22 @@ cd /home/myapp/myapp/visionPlus && yarn && npm run build
 ### 前端镜像升级
 
 在项目根目录下执行下面命令：其中xx.xx.xx/xx/是你的镜像仓库地址
-
+```
 docker build --network=host -t xx.xx.xx/xx/kubeflow-dashboard-frontend:xx -f install/docker/dockerFrontend/Dockerfile .
-
+```
 然后线上infra命令空间修改kubeflow-dashboard-frontend的deployment的镜像名换为你自己构建的
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/c9c8665aba0844f088416b776b10a1d4.png)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/c9c8665aba0844f088416b776b10a1d4.png)
 
 ### 后端镜像升级
 
 在项目根目录下执行下面命令：其中xx.xx.xx/xx/是你的镜像仓库地址
-
+```
 docker build --network=host -t xx.xx.xx/xx/kubeflow-dashboard:xx -f install/docker/Dockerfile .
-
+```
 然后线上infra命令空间修改kubeflow-dashboard的deployment的镜像名换为你自己构建的
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/3bbabe70cf954bb78b91331e113bf103.png)
+![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/csdn_image/3bbabe70cf954bb78b91331e113bf103.png)
 
 ## Q&A
 1） 如果构建镜像过程中因为网络问题失败，可以通过新增pip国内镜像地址来解决。

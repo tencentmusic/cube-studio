@@ -1,0 +1,5 @@
+{
+    "metric_type": "table",
+    "describe": "结果数据可视化",
+    "file_path": "/mnt/admin/pipeline/example/visualization/data.csv"
+}

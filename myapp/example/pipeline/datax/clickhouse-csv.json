@@ -1,0 +1,58 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+            //设置传输速度 byte/s 尽量逼近这个速度但是不高于它.
+            // channel 表示通道数量，byte表示通道速度，如果单通道速度1MB，配置byte为1048576表示一个channel
+                 "channel":2
+            },
+            //出错限制
+                "errorLimit": {
+                //先选择record
+                "record": 0,
+                //百分比  1表示100%
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "clickhousereader",
+                    "parameter": {
+                        // 数据库连接用户名
+                        "username": "clickhouse",
+                        // 数据库连接密码
+                        "password": "c1ickh0use0perator",
+                        "column": [
+                            "week","star"
+                        ],
+                        "connection": [
+                            {
+                                "table": [
+                                    "star"
+                                ],
+                                "jdbcUrl": [
+     "jdbc:clickhouse://192.168.3.100:30665/cdl"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "writer": {
+                    "name": "txtfilewriter",
+                    "parameter": {
+                        "path": "/mnt/admin/pipeline/example/ml/",
+                        "fileName": "data-clickhouse.csv",
+                        "writeMode": "truncate",
+                        "fileFormat":"csv",
+                        "header": [
+                            "week",
+                            "star"
+                        ],
+                        "dateFormat": "yyyy-MM-dd"
+                    }
+                }
+            }
+        ]
+    }
+}

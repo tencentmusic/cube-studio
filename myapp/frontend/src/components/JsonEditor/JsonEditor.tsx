@@ -1,58 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { EditorView } from '@codemirror/view';
 import { useTranslation } from 'react-i18next';
+import { Button } from 'antd';
 
 interface IProps extends ReactCodeMirrorProps {
   onChange?: (value: string) => void;
+  value?: string;
+  rows?: number
 }
 
 export default function JsonEditor(props: IProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [isValidJson, setIsValidJson] = useState(true);
+  const [rawValue, setRawValue] = useState(props.value || '{}');
+  const [editorHeight, setEditorHeight] = useState('auto');
+  const editorRef = useRef<HTMLDivElement>(null);
+  const isUserEditing = useRef(false);
+  const prevPropsValue = useRef(props.value);
 
-  // 格式化 JSON 内容
-  const formatJson = (code: string) => {
+
+  // 格式化函数
+  const formatJsonString = (jsonString: string) => {
     try {
-      const parsed = JSON.parse(code);
-      const formattedJson =  JSON.stringify(parsed, null, 2);
-      return formattedJson;
+      const parsed = JSON.parse(jsonString);
+      return JSON.stringify(parsed, null, 2);
     } catch (e) {
-      return code;
+      return jsonString;
     }
   };
-  const handleEditorChange = (value: string) => {
-    try {
-      const parsed = JSON.parse(value);
-      const formattedJson =  JSON.stringify(parsed, null, 2);
-      if (props.onChange) {
-        props.onChange(formattedJson);
-      }
+
+  // 处理外部value变化
+  useEffect(() => {
+    if (props.value !== prevPropsValue.current && !isUserEditing.current) {
+      const formatted = formatJsonString(props.value || '{}');
+      setRawValue(formatted);
       setIsValidJson(true);
+      prevPropsValue.current = props.value;
+    }
+  }, [props.value]);
+
+  // 计算编辑器高度
+  const calculateHeight = () => {
+    if (!editorRef.current) return;
+
+    const editor = editorRef.current.querySelector('.cm-editor');
+    if (!editor) return;
+
+    // 获取内容高度
+    const contentHeight = editor.scrollHeight;
+    // 设置最大高度为300px
+    const height = Math.min(contentHeight, 300);
+    setEditorHeight(`${height}px`);
+  };
+
+  // 内容变化时重新计算高度
+  useEffect(() => {
+    calculateHeight();
+  }, [rawValue]);
+
+
+  // 处理编辑器变化
+  const handleEditorChange = (value: string) => {
+    isUserEditing.current = true;
+    setRawValue(value);
+
+    try {
+      JSON.parse(value);
+      setIsValidJson(true);
+      props.onChange?.(value);
     } catch (e) {
       setIsValidJson(false);
-      if (props.onChange) {
-        props.onChange(value);
-      }
+      props.onChange?.(value);
     }
+  };
+
+  // 手动格式化
+  const handleFormatClick = () => {
+    const formatted = formatJsonString(rawValue);
+    setRawValue(formatted);
+    setIsValidJson(true);
+    props.onChange?.(formatted);
+    isUserEditing.current = false;
   };
 
   return (
-    <div>
+    <div style={{
+      position: 'relative'
+    }}>
       <CodeMirror
-        value={formatJson(props.value || '{}')}
-        onChange={(value) => handleEditorChange(value)}  // 处理内容变化
-        readOnly={props.readOnly}  // 控制只读模式
-        maxHeight="300px"
+        value={rawValue}
+        onChange={handleEditorChange}
+        readOnly={props.readOnly}
+        height={editorHeight}
         extensions={[
-          json(),               // 启用 JSON 语法高亮
-          EditorView.lineWrapping, // 启用自动换行
+            json(),
+            EditorView.lineWrapping,
+            EditorView.theme({
+            "&": {
+              maxHeight: "300px",
+            },
+            ".cm-scroller": {
+              overflow: "auto",
+            },
+          }),
         ]}
-        placeholder={props.placeholder}  // 设置占位符
-        basicSetup={{ lineNumbers: false }}  // 启用行号
+        placeholder={props.placeholder}
+        basicSetup={{ lineNumbers: false }}
       />
-      {/* 显示无效 JSON 提示 */}
+      <div style={{
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 100,
+      }}>
+        <Button
+          size="small"
+          type="primary"
+          onClick={handleFormatClick}
+          disabled={!isValidJson}
+        >
+          {t("格式化")}
+        </Button>
+      </div>
       {!isValidJson && (
         <div style={{ color: 'red', marginTop: '10px' }}>
           {t("json格式错误")}

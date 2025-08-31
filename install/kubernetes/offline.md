@@ -15,8 +15,12 @@
 mkdir offline
 cd offline
 # 下载kubectl 和harbor的离线安装包
+# amd64版本
 wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/kubectl
 wget https://githubfast.com/goharbor/harbor/releases/download/v2.11.1/harbor-offline-installer-v2.11.1.tgz
+# arm64版本
+wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/kubectl-arm64 && mv kubectl-arm64 kubectl
+wget https://githubfast.com/wise2c-devops/build-harbor-aarch64/releases/download/v2.13.0/harbor-offline-installer-aarch64-v2.13.0.tgz
 
 # 下载模型
 wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/inference/resnet50.onnx
@@ -79,46 +83,6 @@ cp -r offline /data/k8s/kubeflow/pipeline/workspace/admin/
 
 不能联网机器上运行，每台机器运行 pull_harbor.sh 从内网仓库中拉取镜像 或 image_load.sh 从压缩文件中导入镜像
 
-## 构建内网版本cube-studio
-
-联网机器上，重新打前后端镜像，并更新到内网仓库
-
-在install/kubernetes目录下执行 替换成内网镜像
-
-```python3
-cube_repo='<内网镜像仓库ip>:<内网镜像仓库端口>/cube-studio/'
-import os
-def fix_file(file_path):
-    if os.path.isdir(file_path):
-        file_paths = [os.path.join(file_path, one) for one in os.listdir(file_path)]
-    else:
-        file_paths = [file_path]
-        
-    for file_path in file_paths:
-        content = ''.join(open(file_path, mode='r').readlines())
-        content = content.replace('ccr.ccs.tencentyun.com/cube-studio/', cube_repo)  # 替换自产镜像
-        content = content.replace('docker:23.0.4', cube_repo + 'docker:23.0.4')  # 替换docker
-        # content = content.replace('python:', cube_repo + 'python:')  # 替换docker
-        file = open(file_path, mode='w')
-        file.write(content)
-        file.close()
-
-fix_file('cube/overlays/config/config.py')
-fix_file('../../myapp/init')
-fix_file('../../myapp/init-en')
-```
-
-项目根路径下
-```bash
-cube_repo='<内网镜像仓库ip>:<内网镜像仓库端口>/cube-studio/'
-构建前端
-docker build --network=host -t ${cube_repo}kubeflow-dashboard-frontend:offline -f install/docker/dockerFrontend/Dockerfile .
-docker push ${cube_repo}kubeflow-dashboard-frontend:offline
-构建后端
-docker build --network=host -t ${cube_repo}kubeflow-dashboard:offline --build-arg TARGETARCH=amd64 -f install/docker/Dockerfile .
-docker push ${cube_repo}kubeflow-dashboard:offline
-```
-
 ## 内网部署cube-studio
 
 1、修改init_node.sh中pull_images.sh 修改为pull_harbor.sh，表示从内网拉取镜像，每台机器都要执行。
@@ -139,7 +103,20 @@ vi install/kubernetes/cube/overlays/kustomization.yml
 修改最底部的newName和newTag
 ```
 
-3、复制k8s的config文件，部署cube-studio，部署方式通外网，参考：部署/单机部署
+4、修改cube-studio的配置文件
+
+```bash
+vi install/kubernetes/cube/overlays/config/config.py
+
+下面的值改为内网仓库地址
+REPOSITORY_ORG PUSH_REPOSITORY_ORG USER_IMAGE NOTEBOOK_IMAGES DOCKER_IMAGES NERDCTL_IMAGES NNI_IMAGES WAIT_POD_IMAGES OPEN_WEBUI_IMAGE INFERNENCE_IMAGES
+
+其他修改：
+SERVICE_EXTERNAL_IP 添加内网ip
+DEFAULT_GPU_RESOURCE_NAME 修改为默认的k8s资源名
+```
+
+6、复制k8s的config文件，部署cube-studio，部署方式通外网，参考：部署/单机部署
 
 ## web界面的部分内网修正
 

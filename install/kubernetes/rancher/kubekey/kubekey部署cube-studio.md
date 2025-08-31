@@ -65,8 +65,13 @@ free -m
 
 如果下载不成功，可以多执行几次
 ```shell
+# arm64版本
+# wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/kubekey-v3.1.10-linux-arm64 -O /usr/bin/kk
+# amd64版本
+# wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/install/kubekey-v3.1.10-linux-amd64 -O /usr/bin/kk
+
 export KKZONE=cn
-curl -sfL https://get-kk.kubesphere.io | VERSION=v3.1.8 sh -
+curl -sfL https://get-kk.kubesphere.io | VERSION=v3.1.10 sh -
 chmod +x kk
 cp kk /usr/bin/
 ```
@@ -170,4 +175,31 @@ PROMETHEUS 修改为 prometheus-k8s.kubesphere-monitoring-system:9090
 
 ```bash
 ./kk delete cluster -f config-cluster.yaml
+```
+
+# 彻底清理
+关闭kubelet,etcd和docker
+```bash
+systemctl stop kubelet
+systemctl stop etcd
+```
+删除k8s相关目录
+```bash
+sudo rm -rvf ~/.kube
+sudo rm -rvf ~/.kube/
+sudo rm -rvf /etc/kubernetes/
+sudo rm -rvf /etc/systemd/system/kubelet.service.d
+sudo rm -rvf /etc/systemd/system/kubelet.service
+sudo rm -rvf /usr/bin/kube*
+sudo rm -rvf /etc/cni
+sudo rm -rvf /opt/cni
+sudo rm -rvf /var/lib/etcd
+sudo rm -rvf /var/etcd
+```
+清除Docker所有相关资源
+```bash
+docker rm -f $(docker ps -aq)
+docker rmi -f $(docker images -aq)
+docker volume prune
+docker network prune
 ```

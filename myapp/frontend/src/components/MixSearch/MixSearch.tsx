@@ -79,7 +79,7 @@ const MixSearch = (props: IProps) => {
 
 	/**利用表单获取查询字段 */
 	const handleFinishForm = async (values: any): Promise<void> => {
-		console.log(values);
+		// console.log(values);
 		const preVal = values['group'].filter(((item: any) => !!item.key))
 		const tarVal = preVal.map((item: any) => ({ key: item.key, value: item.value }))
 		props.onChange(tarVal);

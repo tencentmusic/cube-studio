@@ -494,6 +494,14 @@ class CeleryConfig(object):
             'max_retries': 0,
             "reject_on_worker_lost": False
         },
+        # 异步查询k8s资源
+        'task.get_k8s_resource': {
+            'rate_limit': '1/s',
+            'soft_time_limit': 300,
+            "expires": 300,
+            'max_retries': 0,
+            "reject_on_worker_lost": False
+        },
         # 上传workflow信息
         'task.upload_workflow': {
             'rate_limit': '10/s',
@@ -783,7 +791,7 @@ STORE_CONFIG = {
     "download_host":"https://xx.cos.ap-nanjing.myqcloud.com/"
 }
 
-K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/cluster/'  #
+K8S_DASHBOARD_CLUSTER = '/k8s/dashboard/user1/'  #
 BLACK_PORT = [10250]   # 黑名单端口，cube-studio将不会占用这些端口，10250是kubelet的端口。
 
 K8S_NETWORK_MODE = 'iptables'   # iptables ipvs
@@ -804,7 +812,7 @@ ALL_LINKS=[
     {
         "label": "K8s Dashboard",
         "name": "kubernetes_dashboard",
-        "url": K8S_DASHBOARD_CLUSTER+"#/pod?namespace=infra"
+        "url": "/k8s/dashboard/user1/#/pod?namespace=infra"
     },
     {
         "label":"Grafana",
@@ -880,8 +888,11 @@ MODEL_URLS = {
  # 可以跨域分享cookie的子域名，例如.svc.local.com
 COOKIE_DOMAIN = ''
 SERVICE_DOMAIN='service.svc.cluster.local'
-CHATGPT_TOKEN = [""]
-CHATGPT_CHAT_URL = ['']
+CHATGPT_TOKEN = []
+CHATGPT_CHAT_URL = []
+CHATGPT_ARGS = {
+    "model": 'gpt-5-chat'
+}
 
 
 # 所有训练集群的信息
@@ -890,7 +901,7 @@ CLUSTERS={
     "dev":{
         "NAME":"dev",
         "KUBECONFIG":'/home/myapp/kubeconfig/dev-kubeconfig',
-        # "SERVICE_DOMAIN": 'service.local.com',
+        "SERVICE_DOMAIN": 'service.local.com',
     }
 }
 

@@ -1,7 +1,7 @@
 # yolov8
 描述：基于yolov8框架实现的目标识别模板
 
-镜像：ccr.ccs.tencentyun.com/cube-studio/yolov8:2024.07
+镜像：ccr.ccs.tencentyun.com/cube-studio/yolov8:20250801
 
 启动参数：  
 ```bash
@@ -74,7 +74,7 @@
             "require": 1,
             "choice": [],
             "range": "",
-            "default": "/yolov7/weights/yolov7_training.pt",
+            "default": "/yolov8/weights/yolov8_training.pt",
             "placeholder": "",
             "describe": "权重文件",
             "editable": 1
@@ -86,7 +86,7 @@
             "require": 1,
             "choice": [],
             "range": "",
-            "default": "/mnt/{{creator}}/coco_data_sample/yolov7_best.pt",
+            "default": "/mnt/{{creator}}/coco_data_sample/yolov8_best.pt",
             "placeholder": "",
             "describe": "模型保存地址",
             "editable": 1

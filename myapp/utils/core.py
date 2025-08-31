@@ -34,7 +34,7 @@ import markdown as md
 import numpy
 import parsedatetime
 from jinja2 import Environment, BaseLoader, DebugUndefined
-
+import pysnooper
 try:
     from pydruid.utils.having import Having
 except ImportError:
@@ -1331,7 +1331,6 @@ def get_stacktrace():
     if current_app.config.get("SHOW_STACKTRACE"):
         return traceback.format_exc()
 
-import pysnooper
 # @pysnooper.snoop()
 def pic2html(output_arr,max_num=4,output_type="image"):
     # 要定格写，不然markdown不识别
@@ -1395,7 +1394,7 @@ def pic2html(output_arr,max_num=4,output_type="image"):
             html = html % one_img_html
         return html
 
-import pysnooper
+
 
 # @pysnooper.snoop()
 def check_resource_memory(resource_memory, src_resource_memory=None):
@@ -1516,7 +1515,7 @@ def check_resource_cpu(resource_cpu, src_resource_cpu=None):
             resource = str(min) + "~" + str(max)
         return resource
 
-
+# @pysnooper.snoop()
 def check_resource_gpu(resource_gpu, src_resource_gpu=None):
     from myapp import conf
 
@@ -1562,7 +1561,7 @@ def check_resource(resource_memory,resource_cpu,resource_gpu,src_resource_memory
     new_resource_cpu = str(math.ceil(float(check_resource_cpu(resource_cpu,src_resource_cpu))))
     new_resource_gpu = str(check_resource_gpu(resource_gpu, src_resource_gpu))
 
-    if str(new_resource_memory).replace('G', '') != str(resource_memory).replace('G', '') or str(new_resource_cpu) != str(resource_cpu) or str(new_resource_gpu) != str(resource_gpu):
+    if str(new_resource_memory).replace('G', '') != str(resource_memory).replace('G', '') or str(new_resource_cpu) != str(resource_cpu) or str(new_resource_gpu.split('(')[0]) != str(resource_gpu.split('(')[0]):
         message = _('占用算力超过管理员设定的最大值，系统已自动调整算力为:') + f"cpu({new_resource_cpu}),memory({new_resource_memory}),gpu({new_resource_gpu})"
         flash(message=message,category='warning')
 
@@ -1580,11 +1579,10 @@ def checkip(ip):
     else:
         return False
 
-import pysnooper
 
-# @pysnooper.snoop()
 def get_gpu(resource_gpu,resource_name=None):
-    from myapp import conf
+    from myapp import conf,db
+
     gpu_num = 0
     if not resource_name:
         resource_name=conf.get('DEFAULT_GPU_RESOURCE_NAME','')
@@ -1631,6 +1629,44 @@ def get_gpu(resource_gpu,resource_name=None):
 
     # gpu_num 可以是小数，可以是整数，也可以是1G,0.1这种写了显存的字符串结构
     return gpu_num, gpu_type, resource_name
+
+# @pysnooper.snoop()
+def get_rdma(resource_rdma,resource_name=None):
+    from myapp import conf
+    rdma_num = 0
+    if not resource_name:
+        resource_name = conf.get('RDMA_RESOURCE_NAME', '')
+    rdma_type = None
+    try:
+        if resource_rdma:
+            # 英文括号
+            if '(' in resource_rdma:
+                rdma_type = re.findall(r"\((.+?)\)", resource_rdma)
+                rdma_type = rdma_type[0] if rdma_type else None
+            # 中文括号
+            if '（' in resource_rdma:
+                rdma_type = re.findall(r"（(.+?)）", resource_rdma)
+                rdma_type = rdma_type[0] if rdma_type else None
+
+            # 括号里面填的可能是roce，这种词汇，不是资源名，而是类型
+            if rdma_type and rdma_type.lower() in list(conf.get('RDMA_RESOURCE', {}).keys()):
+                rdma_mfrs = rdma_type.lower()
+                rdma_type = None
+                resource_name = conf.get("RDMA_RESOURCE", {}).get(rdma_mfrs, resource_name)
+
+            # 处理中文括号，和英文括号
+            resource_rdma = resource_rdma[0:resource_rdma.index('(')] if '(' in resource_rdma else resource_rdma
+            resource_rdma = resource_rdma[0:resource_rdma.index('（')] if '（' in resource_rdma else resource_rdma
+
+            rdma_num = int(resource_rdma)
+
+    except Exception as e:
+        print(e)
+    rdma_type = rdma_type.upper() if rdma_type else None
+
+    return rdma_num, rdma_type, resource_name
+
+
 
 # 按expand字段中index字段进行排序
 def sort_expand_index(items):
@@ -1874,7 +1910,7 @@ def split_url(url):
 # @pysnooper.snoop()
 def get_all_resource(cluster='all',namespace='all',exclude_pod=[]):
     from myapp.utils.py.py_k8s import K8s
-    from myapp import conf
+    from myapp import conf,security_manager,db
     if cluster=='all':
         clusters=conf.get('CLUSTERS')
     else:
@@ -1882,27 +1918,57 @@ def get_all_resource(cluster='all',namespace='all',exclude_pod=[]):
             cluster:conf.get('CLUSTERS').get(cluster,{})
         }
     if namespace=='all':
-        namespaces=conf.get('HUBSECRET_NAMESPACE',[])
+        namespaces=security_manager.get_all_namespace(db.session)
     else:
         namespaces=[namespace]
 
     all_resource = []
+    # 一种方式是从数据库里面查询当前正在运行的。
+    # from myapp.models.model_pod import Pod
+    # pods = db.session.query(Pod).filter(Pod.cluster.in_(clusters)).filter(Pod.namespace.in_(namespaces)).filter(Pod.status=='Running').all()
+    #
+    # for pod in pods:
+    #     # 集群，资源组，空间，项目组，用户，resource，值
+    #     all_resource.append([pod.cluster,pod.org, pod.namespace, pod.project.name if pod.project else '', pod.user.username if pod.user else '', pod.name,json.loads(pod.labels), 'cpu', float(json.loads(pod.resource).get('cpu',0))])
+    #     all_resource.append([pod.cluster, pod.org, pod.namespace, pod.project.name if pod.project else '',pod.user.username if pod.user else '', pod.name, json.loads(pod.labels), 'memory',float(json.loads(pod.resource).get('memory', 0))])
+    #     gpu_value = sum([float(v) for k,v in json.loads(pod.resource).items() if k in conf.get('GPU_RESOURCE', {})])
+    #     all_resource.append([pod.cluster, pod.org, pod.namespace, pod.project.name if pod.project else '',pod.user.username if pod.user else '', pod.name, json.loads(pod.labels), 'gpu',gpu_value])
+
+    # 一种方式是现场查询正在运行的，有些pod没在running中，但是已经占了资源
     for cluser_name in clusters:
         cluster = clusters[cluser_name]
         k8s_client = K8s(cluster.get('KUBECONFIG', ''))
-        for namespace in namespaces:
-            pods = k8s_client.get_pods(namespace=namespace)
-            for pod in pods:
-                # 只计算running中的资源
-                if pod['status'].lower()=='running':
-                    # 集群，资源组，空间，项目组，用户，resource，值
-                    user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('run-username','admin'))))
-                    project = pod['annotations'].get('project', 'public')
-                    all_resource.append([cluser_name,pod['node_selector'].get('org','public'),namespace,project,user,pod['name'],pod['labels'],'cpu',float(pod['cpu'])])
-                    all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], 'memory',float(pod['memory'])])
-                    gpu_resource = conf.get('GPU_RESOURCE', {})
-                    for ai_device in gpu_resource:
-                        all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user,pod['name'],pod['labels'], ai_device,float(pod.get(ai_device,''))])
+        import concurrent.futures
+        # 使用线程池并行查询
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # 为每个namespace提交任务
+            future_to_namespace = {
+                executor.submit(lambda kwargs: k8s_client.get_pods(**kwargs), {"namespace": namespace, "cache": True}): namespace for namespace in namespaces
+            }
+            # 等待所有任务完成并收集结果
+            for future in concurrent.futures.as_completed(future_to_namespace):
+                namespace = future_to_namespace[future]
+                try:
+                    pods = future.result()
+                    for pod in pods:
+                        # 要计算是否占上资源的
+                        if k8s_client.exist_hold_resource(pod):
+                            # 集群，资源组，空间，项目组，用户，resource，值
+                            user = pod['labels'].get('user', pod['labels'].get('username', pod['labels'].get('run-rtx',pod['labels'].get('run-username','admin'))))
+                            project = pod['annotations'].get('project', 'public')
+                            all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user, pod['name'], pod['labels'], 'cpu', float(pod['cpu'])])
+                            all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user, pod['name'], pod['labels'], 'memory', float(pod['memory'])])
+                            gpu_resource = conf.get('GPU_RESOURCE', {})
+                            for ai_device in gpu_resource:
+                                gpu_value = float(pod.get(ai_device, '0'))
+                                if gpu_value > 0:
+                                    all_resource.append([cluser_name, pod['node_selector'].get('org', 'public'), namespace, project, user, pod['name'], pod['labels'], 'gpu', gpu_value])
+
+                except Exception as e:
+                    print(f"Error getting pods for namespace {namespace}: {e}")
+
+
+
 
     columns = ['cluster', 'org', 'namespace', 'project', 'user', 'name','labels','resource', 'value']
     all_resource =[dict(zip(columns,resource)) for resource in all_resource]
@@ -1947,7 +2013,7 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
     #     return True,''
 
     # resource为{"cpu":1,"memory":1,"gpu":1}格式
-    # quota 书写格式，cluster_name，org,namespace，resource，single_total,value
+    # quota 书写格式，cluster_name，org,namespace，resource，single_concurrent,value
     # exclude_pod数组格式表示忽略的名称数组，字典格式表述忽略的pod标签，字符串表示原始的pod名
 
     # 添加对gpu型号的处理
@@ -1998,6 +2064,8 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
                             exist_pod = all_resources
                             # 过滤个人名下的pod
                             exist_pod = [pod for pod in exist_pod if pod['user'] == req_user.username]
+                            # 过滤当前资源类型
+                            exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
 
                             if quota['cluser']!='all':
                                 exist_pod = [pod for pod in exist_pod if pod['cluster']==quota['cluser']]
@@ -2053,12 +2121,13 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
                     exist_pod = all_resources
                     # 过滤该项目组下的pod
                     exist_pod = [pod for pod in exist_pod if pod['project'] == req_project.name]
+                    # 过滤当前资源类型
+                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
 
                     # print(exist_pod)
                     if quota['namespace'] != 'all':
                         exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
 
-                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
                     # print(exist_pod)
                     # print(quota['resource'])
                     exist_resource = sum([float(str(pod.get('value', '0')).replace('G', '')) for pod in exist_pod])
@@ -2109,10 +2178,11 @@ def meet_quota(req_user,req_project,req_cluster_name,req_org,req_namespace,exclu
                     exist_pod = all_resources
                     # 过滤该项目组下的pod
                     exist_pod = [pod for pod in exist_pod if pod['project'] == req_project.name and pod['user']==req_user.username]
+                    # 过滤当前资源类型
+                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
+
                     if quota['namespace'] != 'all':
                         exist_pod = [pod for pod in exist_pod if pod['namespace'] == quota['namespace']]
-
-                    exist_pod = [pod for pod in exist_pod if pod['resource'] == quota['resource']]
 
                     # print(exist_pod)
                     # print(quota['resource'])
@@ -2411,3 +2481,86 @@ def pipeline_immutable(pipeline):
     data['label']=immutable_config.get('label',data['label'])
     return data
 
+
+# 多个volume_mount 合并在一起的写法，不能有相同mount的点
+def merge_volume_mount(*args):
+    volume_mount_arr = []
+    all_mount = []
+    for volume_mount in args:
+        if volume_mount.strip():
+            volume_mount = re.split(',|;', volume_mount.strip())
+            for volume in volume_mount:
+                if ':' in volume:
+                    mount = volume.split(':')[-1].strip('/')
+                    if mount not in all_mount:
+                        all_mount.append(mount)
+                        volume_mount_arr.append(volume)
+                    else:
+                        pass
+    return ','.join(volume_mount_arr).strip(',')
+
+
+
+def get_k8s_env():
+    return [
+        {
+            "name": "K8S_NODE_NAME",
+            "valueFrom": {
+                "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "spec.nodeName"
+                }
+            }
+        },
+        {
+            "name": "K8S_POD_NAMESPACE",
+            "valueFrom": {
+                "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.namespace"
+                }
+            }
+        },
+        {
+            "name": "K8S_POD_IP",
+            "valueFrom": {
+                "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                }
+            }
+        },
+        {
+            "name": "K8S_HOST_IP",
+            "valueFrom": {
+                "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.hostIP"
+                }
+            }
+        },
+        {
+            "name": "K8S_POD_NAME",
+            "valueFrom": {
+                "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.name"
+                }
+            }
+        },
+        {
+            "name": "K8S_POD_NAMESPACE",
+            "valueFrom": {
+                "fieldRef": {
+                    "fieldPath": "metadata.namespace"
+                }
+            }
+        }
+    ]
+
+# 根据某个字段的值打开jupyter
+def open_jupyter(label,dom_name=None):
+    if dom_name:
+        return f'''<a href="#" onclick="const path = document.getElementById('form_in_modal_{dom_name}')?.value || '/mnt/{{{{creator}}}}'; window.open(`/notebook_modelview/api/entry/jupyter?file_path=${{encodeURIComponent(path)}}`, '_blank'); return false;"> {label}</a>'''
+    else:
+        return f'<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{{{creator}}}}/">{label}</a>'

@@ -10,7 +10,7 @@ from sqlalchemy import (
 from myapp.models.base import MyappModelBase
 from myapp.models.model_team import Project
 from myapp.models.helpers import AuditMixinNullable
-from flask import request
+from flask import request, g
 from myapp import app
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
@@ -68,7 +68,11 @@ class NNI(Model,AuditMixinNullable,MyappModelBase):
 
     @property
     def run(self):
-        ops_html = f'<a target=_blank href="/nni_modelview/api/run/{self.id}">{__("运行")}</a> | <a target=_blank href="/k8s/web/search/{self.project.cluster["NAME"]}/{conf.get("AUTOML_NAMESPACE","automl")}/{self.name}">{__("容器")}</a>  | <a href="/nni_modelview/api/stop/{self.id}">{__("清理")}</a> '
+        # 只有管理员和创建者可以这样
+        if self.created_by.id == g.user.id or self.project.user_role(g.user.id) == 'creator':
+            ops_html = f'<a target=_blank href="/nni_modelview/api/run/{self.id}">{__("运行")}</a> | <a target=_blank href="/k8s/web/search/{self.project.cluster["NAME"]}/{self.namespace}/{self.name}">{__("容器")}</a>  | <a href="/nni_modelview/api/stop/{self.id}">{__("清理")}</a> '
+        else:
+            ops_html = f'{__("运行")} | {__("容器")} | {__("清理")}'
         return Markup(ops_html)
 
     # @property
