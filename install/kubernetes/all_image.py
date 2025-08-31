@@ -51,8 +51,8 @@ pipeline = [
 ]
 cube_studio = [
     # 前后端
-    'ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.07.01',
-    'ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.07.01',
+    'ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.09.01',
+    'ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.09.01',
     # notebook基础镜像
     'ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-cpu-base',
     'ccr.ccs.tencentyun.com/cube-studio/notebook:vscode-ubuntu-gpu-base',
