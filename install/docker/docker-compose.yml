@@ -8,23 +8,23 @@ services:
     ports:
       - "6379:6379"
 
-#  mysql:
-#    image: mysql:8.0.32
-#    restart: unless-stopped
-#    environment:
-#      MYSQL_ROOT_PASSWORD: admin
-#      MYSQL_DATABASE: kubeflow
-#      TZ: Asia/Shanghai
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - ./data/mysql:/var/lib/mysql
-#      - ./docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
-#    healthcheck:
-#      test: "/usr/bin/mysql --user=root --password=admin --execute \"SHOW DATABASES;\""
-#      timeout: 45s
-#      interval: 10s
-#      retries: 10
+  mysql:
+    image: mysql:8.0.32
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: kubeflow
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=admin --execute \"SHOW DATABASES;\""
+      timeout: 45s
+      interval: 10s
+      retries: 10
 
   frontend:
     image: ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.09.01
@@ -47,7 +47,7 @@ services:
       REDIS_HOST: 'redis'
       REDIS_PORT: '6379'
       REDIS_PASSWORD: admin
-      MYSQL_SERVICE: 'mysql+pymysql://root:admin@host.docker.internal:3306/kubeflow?charset=utf8'
+      MYSQL_SERVICE: 'mysql+pymysql://root:admin@mysql:3306/kubeflow?charset=utf8'
       ENVIRONMENT: DEV
     depends_on:
       - redis
