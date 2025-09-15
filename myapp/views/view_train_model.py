@@ -1,5 +1,7 @@
 import re
 
+from flask_appbuilder.baseviews import expose_api
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from myapp.models.model_train_model import Training_Model
 from myapp.models.model_serving import InferenceService
@@ -44,8 +46,7 @@ conf = app.config
 class Training_Model_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
-        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
-        if "admin" in user_roles:
+        if g.user.is_admin():
             return query
         join_projects_id = security_manager.get_join_projects_id(db.session)
         return query.filter(self.model.project_id.in_(join_projects_id))
@@ -57,7 +58,7 @@ class Training_Model_ModelView_Base():
     base_permissions = ['can_add', 'can_edit', 'can_delete', 'can_list', 'can_show']
     base_order = ('changed_on', 'desc')
     order_columns = ['id']
-    list_columns = ['project_url', 'name', 'version', 'model_metric', 'framework', 'api_type', 'pipeline_url',
+    list_columns = ['project', 'name', 'version', 'model_metric', 'framework', 'api_type', 'pipeline_url',
                     'creator', 'modified', 'deploy']
     fixed_columns = ['deploy']
     search_columns = ['created_by', 'project', 'name', 'version', 'framework', 'api_type', 'pipeline_id', 'run_id',
@@ -72,6 +73,7 @@ class Training_Model_ModelView_Base():
     edit_form_query_rel_fields = add_form_query_rel_fields
     cols_width = {
         "name": {"type": "ellip2", "width": 200},
+        "project": {"type": "ellip2", "width": 120},
         "project_url": {"type": "ellip2", "width": 200},
         "pipeline_url": {"type": "ellip2", "width": 300},
         "version": {"type": "ellip2", "width": 200},
@@ -104,7 +106,7 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
         "path": StringField(
             _('模型文件地址'),
             default='/mnt/admin/xx/saved_model/',
-            description=_('模型文件的容器地址或下载地址，格式参考详情。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">导入模型</a>'),
+            description=_('模型文件的容器地址或下载地址，格式参考详情。')+core.open_jupyter(_('导入模型'),'path'),
             validators=[DataRequired()],
             widget=MyBS3TextFieldWidget(tips=_(model_path_describe))
         ),
@@ -123,7 +125,7 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             widget=MyBS3TextFieldWidget(),
             description= _('模型版本'),
             default=datetime.datetime.now().strftime('v%Y.%m.%d.1'),
-            validators=[DataRequired()]
+            validators=[DataRequired(),Regexp("[a-z0-9_\-\.]*")]
         ),
         "run_id": StringField(
             _('run id'),
@@ -168,12 +170,23 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
     #     )
     import pysnooper
 
+    def pre_add_web(self, item=None):
+        self.default_filter = {
+            "created_by": g.user.id
+        }
+
     # @pysnooper.snoop(watch_explode=('item'))
     def pre_add(self, item):
         if not item.run_id:
             item.run_id = 'random_run_id_' + uuid.uuid4().hex[:32]
         if not item.pipeline_id:
             item.pipeline_id = 0
+        try:
+            if item.metrics:
+                metric = json.loads(item.metrics)
+                item.metrics = json.dumps(metric,indent=4,ensure_ascii=False)
+        except:
+            pass
 
     def pre_update(self, item):
         if not item.path:
@@ -193,7 +206,7 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
     check_delete_permission = check_edit_permission
 
     import pysnooper
-    @expose("/download/<model_id>", methods=["GET", 'POST'])
+    @expose_api(description="下载模型",url="/download/<model_id>", methods=["GET", 'POST'])
     # @pysnooper.snoop()
     def download_model(self, model_id):
         train_model = db.session.query(Training_Model).filter_by(id=model_id).first()
@@ -210,7 +223,7 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
         return redirect(conf.get('MODEL_URLS',{}).get('train_model','/frontend/'))
 
 
-    @expose("/deploy/<model_id>", methods=["GET", 'POST'])
+    @expose_api(description="部署模型",url="/deploy/<model_id>", methods=["GET", 'POST'])
     def deploy(self, model_id):
         train_model = db.session.query(Training_Model).filter_by(id=model_id).first()
         name = train_model.name + "-" + train_model.version.replace('v', '').replace('.', '')

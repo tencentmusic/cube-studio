@@ -1,4 +1,7 @@
 import os
+import re
+
+from flask_appbuilder.baseviews import expose_api
 
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask_babel import gettext as __
@@ -22,7 +25,7 @@ from .base import (
     MyappFilter,
     MyappModelView,
 )
-
+from myapp import security_manager
 conf = app.config
 
 
@@ -61,19 +64,22 @@ class Repository_ModelView_Base():
             default='harbor.oa.com/cube-studio/',
             choices=[['harbor.oa.com/cube-studio/','harbor.oa.com/cube-studio/'],['ccr.ccs.tencentyun.com/cube-studio/','ccr.ccs.tencentyun.com/cube-studio/'],['registry.docker-cn.com','registry.docker-cn.com']],
             # description= _("镜像仓库地址")
-            description= _("镜像仓库地址，示例：")+conf.get('REPOSITORY_ORG','')
+            description= _("镜像仓库地址，示例：")+conf.get('REPOSITORY_ORG',''),
+            validators=[DataRequired(),Regexp('^[a-zA-Z0-9\-._:@\/]*$')]
         ),
         "user": StringField(
             _('用户名'),
             default='',
             widget=BS3TextFieldWidget(),
-            description= _("镜像仓库的用户名")
+            description= _("镜像仓库的用户名"),
+            validators=[DataRequired()]
         ),
         "password": StringField(
             _('密码'),
             default='',
             widget=BS3TextFieldWidget(),
-            description= _("镜像仓库的链接密码")
+            description= _("镜像仓库的链接密码"),
+            validators=[DataRequired()]
         )
     }
 
@@ -85,14 +91,15 @@ class Repository_ModelView_Base():
             _('名称'),
             default=g.user.username + "-",
             widget=BS3TextFieldWidget(),
-            description= _("仓库名称")
+            description= _("仓库名称"),
+            validators=[DataRequired()]
         )
 
         self.add_form_extra_fields['hubsecret'] = StringField(
             "hubsecret",
             default=g.user.username + "-hubsecret",
             widget=BS3TextFieldWidget(),
-            description= _("在k8s中创建的hub secret"),
+            description= _("在k8s中创建的hub secret，英文名(小写字母、数字、-组成)，最长50个字符"),
             validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54), DataRequired()]
         )
 
@@ -114,8 +121,7 @@ class Repository_ModelView_Base():
         for kubeconfig in all_kubeconfig:
             try:
                 k8s = K8s(kubeconfig)
-                namespaces = conf.get('HUBSECRET_NAMESPACE',[])
-                for namespace in namespaces:
+                for namespace in security_manager.get_all_namespace(db.session):
                     try:
                         server = repo.server[:repo.server.index('/')] if '/' in repo.server else repo.server
                         # print(server)
@@ -148,6 +154,7 @@ appbuilder.add_api(Repository_ModelView_Api)
 
 class Images_ModelView_Base():
     label_title = _('镜像')
+    route_base = '/images_modelview/api'
     datamodel = SQLAInterface(Images)
 
     list_columns = ['project','images_url', 'creator', 'modified']
@@ -180,12 +187,14 @@ class Images_ModelView_Base():
             description= _('镜像名称全称，例如ubuntu:20.04'),
             default='',
             widget=BS3TextFieldWidget(),
+            validators=[DataRequired(),Regexp('^[a-zA-Z0-9\-._:@\/]*$')]
         ),
         "entrypoint": StringField(
             _('启动命令'),
             description= _('镜像的入口命令，直接写成单行字符串，例如python xx.py，无需添加[]'),
             default='',
             widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[\x00-\x7F]*$')]
         )
     }
 
@@ -203,7 +212,7 @@ class Images_ModelView_Base():
 
 class Images_ModelView_Api(Images_ModelView_Base, MyappModelRestApi):
     datamodel = SQLAInterface(Images)
-    route_base = '/images_modelview/api'
+
 
 
 appbuilder.add_api(Images_ModelView_Api)

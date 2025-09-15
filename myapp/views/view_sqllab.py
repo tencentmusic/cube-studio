@@ -1,5 +1,8 @@
 import copy
 import traceback
+
+from flask_appbuilder.baseviews import expose_api
+
 # 将model添加成视图，并控制在前端的显示
 from myapp import app, appbuilder, db, event_logger, cache
 from flask import jsonify, g, request
@@ -96,7 +99,7 @@ def check_process_res(res_keys, res):
 class Sqllab_Query_View(BaseMyappView):
     route_base = '/idex'
 
-    @expose('/config', methods=(["GET", "POST"]))
+    @expose_api(description="sqllab的引擎参数配置",url='/config', methods=(["GET", "POST"]))
     def sqllab_config(self):
         all_uri = copy.deepcopy(db_uri_demo)
         try:
@@ -151,7 +154,7 @@ class Sqllab_Query_View(BaseMyappView):
         return jsonify(config)
 
     # 提交异步查询（必须）
-    @expose('/submit_task', methods=(["POST"]))
+    @expose_api(description="提交sql查询任务",url='/submit_task', methods=(["POST"]))
     def submit_task(self, args_in=None):
         if args_in:
             req_data = args_in
@@ -166,7 +169,7 @@ class Sqllab_Query_View(BaseMyappView):
         return check_process_res(res_keys, res)
 
     # 获取任务状态（必须）
-    @expose('/look/<task_id>', methods=(["GET"]))
+    @expose_api(description="获取sqllab任务状态",url='/look/<task_id>', methods=(["GET"]))
     def check_task(self, task_id):
         task_id = int(task_id)
         qid, engine_impl = check_task_engine(task_id)
@@ -175,7 +178,7 @@ class Sqllab_Query_View(BaseMyappView):
         return check_process_res(res_keys, res)
 
     # 获取结果（必须）
-    @expose('/result/<task_id>', methods=(["GET"]))
+    @expose_api(description="获取sqllab结果",url='/result/<task_id>', methods=(["GET"]))
     def get_result(self, task_id):
         qid, engine_impl = check_task_engine(task_id)
         res = engine_impl.get_result(qid)
@@ -183,7 +186,7 @@ class Sqllab_Query_View(BaseMyappView):
         return check_process_res(res_keys, res)
 
     # 下载结果（必须）
-    @expose('/download_url/<task_id>', methods=(["GET"]))
+    @expose_api(description="下载sqllab结果",url='/download_url/<task_id>', methods=(["GET"]))
     def download_url(self, task_id):
         qid, engine_impl = check_task_engine(task_id)
         res = engine_impl.download_url(qid)
@@ -191,7 +194,7 @@ class Sqllab_Query_View(BaseMyappView):
         return check_process_res(res_keys, res)
 
     # 终止任务（必须）
-    @expose('/stop/<task_id>', methods=(["GET"]))
+    @expose_api(description="终止sqllab任务",url='/stop/<task_id>', methods=(["GET"]))
     def stop(self, task_id):
         qid, engine_impl = check_task_engine(task_id)
         res = engine_impl.stop(qid)

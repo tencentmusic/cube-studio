@@ -1,0 +1,8 @@
+**/node_modules/
+myapp/chatgpt-web/src
+myapp/frontend
+myapp/vision
+myapp/visionPlus
+myapp/search
+myapp/test
+myapp/project-*

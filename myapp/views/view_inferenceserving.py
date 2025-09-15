@@ -4,6 +4,8 @@ import threading
 import uuid
 from flask import Flask, request, Response
 import requests
+from flask_appbuilder.baseviews import expose_api
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask import jsonify, render_template
 from jinja2 import Environment, BaseLoader, DebugUndefined
@@ -48,9 +50,13 @@ import datetime, time, json
 
 conf = app.config
 
-global_all_service_load = {
-    "data": None,
-    "check_time": None
+# 推理服务的各种配置
+
+INFERNENCE_MODEL_PATH = {
+    "ml-server": "/mnt/.../$model_name.pkl",
+    "tfserving": "/mnt/.../saved_model",
+    "torch-server": "/mnt/.../$model_name.mar",
+    "triton-server": "onnx:/mnt/.../model.onnx(model.plan,model.bin,model.savedmodel/,model.pt,model.dali)"
 }
 
 
@@ -58,7 +64,6 @@ global_all_service_load = {
 INFERNENCE_HOST={
     "tfserving":"/v1/models/$model_name/metadata",
     "torch-server":":8081/models",
-    "onnxruntime":"",
     "triton-server":'/v2/models/$model_name'
 }
 
@@ -67,7 +72,6 @@ INFERNENCE_CONFIGMAP={
 INFERNENCE_COMMAND={
     "tfserving":"/usr/bin/tf_serving_entrypoint.sh --model_config_file=/config/models.config --monitoring_config_file=/config/monitoring.config --platform_config_file=/config/platform.config --rest_api_num_threads=300 --enable_batching=true",
     "torch-server":"torchserve --start --model-store /models/$model_name/ --models $model_name=$model_name.mar --foreground --log-config /config/log4j2.xml",
-    "onnxruntime":"onnxruntime_server --model_path /models/",
     "triton-server":'tritonserver --model-repository=/models/ --strict-model-config=true --log-verbose=1'
 }
 INFERNENCE_ENV={
@@ -77,7 +81,6 @@ INFERNENCE_ENV={
 INFERNENCE_PORTS={
     "tfserving":'8501',
     "torch-server":"8080,8081",
-    "onnxruntime":"8001",
     "triton-server":"8000,8002"
 }
 INFERNENCE_METRICS={
@@ -92,6 +95,21 @@ INFERNENCE_HEALTH={
 }
 
 
+sidecars={
+    "istio":"流量监控",
+    "rate_limit":'限速(todo)',
+    "jwt": 'token认证(todo)',
+    'monitor':'token统计(todo)',
+    'whitelist':'黑白名单(todo)',
+    'quotalimit':'额度限制(todo)',
+    'security':'内容安全(todo)',
+    'search':'联网查询(todo)',
+    "retry":'失败重试(todo)',
+    'desensitization':'数据脱敏(todo)',
+    'prompt':'提示词模板(todo)',
+    'value_map':'参数值映射(todo)',
+    "value_fixed":'参数值固定(todo)'
+}
 
 class InferenceService_Filter(MyappFilter):
     # @pysnooper.snoop()
@@ -156,13 +174,10 @@ class InferenceService_ModelView_base():
     fixed_columns = ['operate_html']
 
     base_filters = [["id", InferenceService_Filter, lambda: []]]
-    images = []
-    INFERNENCE_IMAGES = list(conf.get('INFERNENCE_IMAGES', {}).values())
-    for item in INFERNENCE_IMAGES:
-        images += item
-    service_type_choices = ['serving', 'tfserving', 'torch-server', 'onnxruntime', 'triton-server', 'ml-server（todo）','llm-server（todo）',]
+
+    service_type_choices = ['serving', 'tfserving', 'torch-server', 'triton-server','ml-server(todo)',  'vllm(todo)', 'vllm-distributed(todo)', 'ollama(todo)', 'mindie(todo)', 'mindie-distributed(todo)']
     spec_label_columns = {
-        "inference_host_url": _("域名:需要泛域名支持，调试时域名(debug.xx.xx.xx.xx)"),
+        "inference_host_url": _("域名:需要泛域名支持，调试时域名(debug.xx.xx.xx.xx)")
     }
     service_type_choices = [x.replace('_','-') for x in service_type_choices]
     host_rule=",<br>".join([cluster+"cluster:*."+conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN','')) for cluster in conf.get('CLUSTERS') if conf.get('CLUSTERS')[cluster].get("SERVICE_DOMAIN",conf.get('SERVICE_DOMAIN',''))])
@@ -175,6 +190,7 @@ ollama: 使用ollama官方模型，提供openai接口
 vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
 '''.strip()
 
+
     add_form_extra_fields={
         "project": QuerySelectField(
             _('项目组'),
@@ -183,15 +199,17 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             widget=Select2Widget(),
             validators=[DataRequired()]
         ),
-        "resource_memory":StringField('memory',default='5G',description= _('内存的资源使用限制，示例1G，10G， 最大100G，如需更多联系管路员'),widget=BS3TextFieldWidget(),validators=[DataRequired(), Regexp("^.*G$")]),
-        "resource_cpu":StringField('cpu', default='5',description= _('cpu的资源使用限制(单位核)，示例 0.4，10，最大50核，如需更多联系管路员'),widget=BS3TextFieldWidget(), validators=[DataRequired()]),
-        "min_replicas": StringField(_('最小副本数'), default=InferenceService.min_replicas.default.arg,description= _('最小副本数，用来配置高可用，流量变动自动伸缩'),widget=BS3TextFieldWidget(), validators=[DataRequired()]),
+        "resource_memory":StringField('memory',default='5G',description= _('内存的资源使用配置，示例1G，10G， 最大100G，如需更多联系管路员'),widget=BS3TextFieldWidget(),validators=[DataRequired(), Regexp("^[0-9]*G$")]),
+        "resource_cpu":StringField('cpu', default='5',description= _('cpu的资源使用配置(单位核)，示例 0.4，10，最大50核，如需更多联系管路员'),widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[0-9]*$")]),
+        "min_replicas": StringField(_('最小副本数'), default=InferenceService.min_replicas.default.arg,description= _('最小副本数，用来配置高可用，流量变动自动伸缩'),widget=BS3TextFieldWidget(), validators=[DataRequired(),Regexp("^[0-9]+$")]),
         "max_replicas": StringField(_('最大副本数'), default=InferenceService.max_replicas.default.arg,
                                     description= _('最大副本数，用来配置高可用，流量变动自动伸缩'), widget=BS3TextFieldWidget(),
-                                    validators=[DataRequired()]),
-        "host": StringField(_('域名'), default=InferenceService.host.default.arg,description= _('访问域名，')+host_rule,widget=BS3TextFieldWidget()),
+                                    validators=[DataRequired(),Regexp("^[0-9]+$")]),
+        "host": StringField(_('域名'), default=InferenceService.host.default.arg,description= _('访问域名，')+host_rule,widget=BS3TextFieldWidget(),validators=[Regexp('^[\x00-\x7F]*$')]),
         "transformer":StringField(_('前后置处理'), default=InferenceService.transformer.default.arg,description= _('前后置处理逻辑，用于原生开源框架的请求预处理和响应预处理，目前仅支持kfserving下框架'),widget=BS3TextFieldWidget()),
-        'resource_gpu':StringField(_('gpu'), default='0', description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'), widget=BS3TextFieldWidget(),validators=[DataRequired()]),
+        'resource_gpu':StringField(_('gpu'), default='0', description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)，<span style="color:red;">虚拟化占用和共享模式占用仅企业版支持</span>'),
+                                                        widget=BS3TextFieldWidget(),validators=[DataRequired(),Regexp('^[\-\.0-9,a-zA-Z\(\)]*$')]),
+        "working_dir": StringField(_('工作目录'), description=_('工作目录，容器进程启动目录，不填默认使用Dockerfile内定义的工作目录。')+core.open_jupyter(_('打开目录'),'working_dir'),widget=BS3TextFieldWidget()),
 
         'sidecar': MySelectMultipleField(
             _('sidecar'),
@@ -199,7 +217,7 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             description = _('容器的agent代理,istio用于服务网格，jwt用于统一认证(需要客户端在请求头中添加开发者生成的token)'),
             widget=Select2ManyWidget(),
             validators=[],
-            choices=[['istio', 'istio'],['jwt','jwt']]
+            choices=[[x,sidecars[x]] for x in sidecars]
         ),
         "priority": SelectField(
             _('服务优先级'),
@@ -214,14 +232,14 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             default='',
             description= _('英文名(小写字母、数字、- 组成)，最长50个字符'),
             widget=MyBS3TextFieldWidget(),
-            validators=[DataRequired(), Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(1, 54)]
+            validators=[DataRequired(), Regexp("^[a-z][a-z0-9\.\/:\-]*[a-z0-9]$"), Length(1, 54)]  #
         ),
         'model_version': StringField(
             _('模型版本号'),
             default=datetime.datetime.now().strftime('v%Y.%m.%d.1'),
             description= _('版本号，时间格式'),
             widget=MyBS3TextFieldWidget(),
-            validators=[DataRequired(), Length(1, 54)]
+            validators=[DataRequired(),Regexp("[a-z0-9_\-\.]*"), Length(1, 54)]
         ),
 
         'service_type': SelectField(
@@ -243,7 +261,15 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             _('弹性伸缩'),
             default='',
             description= _('弹性伸缩容的触发条件：可以使用cpu/mem/gpu/qps等信息，可以使用其中一个指标或者多个指标，示例：cpu:50%,mem:50%,gpu:50%'),
-            widget=BS3TextFieldWidget()
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^(cpu:|mem:|gpu:|%|,|[0-9])*$')]
+        ),
+        "cronhpa": StringField(
+            _('定时伸缩'),
+            default='',
+            description=_('根据时间定时伸缩容，定时伸缩时，弹性伸缩容失效。24小时制，示例：9~21:1,21~9:0，表示9点到21点使用一个副本。21点到第二天9点为0个副本'),
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[0-9~:,]$')]
         ),
 
         'expand': StringField(
@@ -259,25 +285,28 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             _('流量分流'),
             default='',
             description= _('流量分流，将该服务的所有请求，按比例分流到目标服务上。格式 service1:20%,service2:30%，表示分流20%流量到service1，30%到service2'),
-            widget=BS3TextFieldWidget()
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[0-9a-z:,%]*$')]
         ),
 
         'shadow': StringField(
             _('流量复制'),
             default='',
             description= _('流量复制，将该服务的所有请求，按比例复制到目标服务上，格式 service1:20%,service2:30%，表示复制20%流量到service1，30%到service2'),
-            widget=BS3TextFieldWidget()
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[0-9a-z:,%]*$')]
         ),
         'volume_mount': StringField(
             _('挂载'),
             default='',
             description= _('外部挂载，格式:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),
-            widget=BS3TextFieldWidget()
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[\x00-\x7F]*$')]
         ),
         'model_path': StringField(
             _('模型地址'),
             default='',
-            description= _('模型文件的容器地址或下载地址，格式参考详情。<a target="_blank" href="/notebook_modelview/api/entry/jupyter?file_path=/mnt/{{creator}}/">导入模型</a>'),
+            description= _('模型文件的容器地址或下载地址，格式参考详情。')+core.open_jupyter(_('导入模型'),'model_path'),
             widget=MyBS3TextFieldWidget(tips=_(model_path_describe)),
             validators=[]
         ),
@@ -286,7 +315,8 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             default='',
             description= _("推理服务镜像"),
             widget=MySelect2Widget(can_input=True),
-            choices=[[x, x] for x in images]
+            choices=[],
+            validators=[Regexp('^[\x00-\x7F]*$')]
         ),
         'command': StringField(
             _('启动命令'),
@@ -305,19 +335,21 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
             default='',
             description= _('监听端口号，逗号分隔'),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired()]
+            validators=[DataRequired(),Regexp('^[0-9,:]*$')]
         ),
         'metrics': StringField(
             _('指标地址'),
             default='',
             description= _('请求指标采集，配置端口+url，示例：8080:/metrics'),
-            widget=BS3TextFieldWidget()
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[0-9]+:/[\x00-\x7F]*$')]
         ),
         'health': StringField(
             _('健康检查'),
             default='',
-            description= _('健康检查接口，使用http接口或者shell命令，示例：8080:/health或者 shell:python health.py'),
-            widget=BS3TextFieldWidget()
+            description= _('健康检查接口，使用http接口，示例：8080:/health'),
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[0-9]+:/[\x00-\x7F]*$')]
         ),
 
         'inference_config': StringField(
@@ -400,14 +432,13 @@ vllm: 使用vllm官方支持的hugggingface模型，提供openai接口
         self.default_filter = {
             "created_by": g.user.id
         }
-
         # 修改的时候管理员可以在上面添加一些特殊的挂载配置，适应一些特殊情况
-        if g.user.is_admin():
-            self.edit_columns = self.columns+['volume_mount']
-            self.add_columns = self.columns+['volume_mount']  # 添加的时候没有挂载配置，使用项目中的挂载配置
-        else:
+        if not conf.get('ENABLE_USER_VOLUME',False) and not g.user.is_admin():
             self.edit_columns = self.columns
             self.add_columns = self.columns
+        else:
+            self.add_columns = self.columns + ['volume_mount']
+            self.edit_columns = self.columns + ['volume_mount']
 
     pre_update_web=pre_add_web
 
@@ -684,12 +715,8 @@ output %s
                     config_str,
                 )
 
-        if item.service_type == 'onnxruntime':
-            if not item.id or not item.command:
-                item.command = download_command + './onnxruntime_server --log_level info --model_path  %s' % model_path
-
         # if not item.name:
-        item.name = item.model_name + "-" + model_version
+        item.name = item.model_name.replace('/','-').replace(':','-').replace('.','-').strip('-') + "-" + model_version
 
         if len(item.name)>60:
             item.name = item.name[:60]
@@ -697,6 +724,9 @@ output %s
 
     # @pysnooper.snoop()
     def pre_add(self, item):
+        if not item.namespace:
+            item.namespace = item.project.service_namespace
+
         if not item.expand:
             item.expand= '{}'
         if item.sidecar:
@@ -707,6 +737,23 @@ output %s
             item.model_path = ''
         if not item.volume_mount:
             item.volume_mount = item.project.volume_mount
+        else:
+            if conf.get('ENABLE_USER_VOLUME',False) and not g.user.is_admin():
+                volume_mounts_temp = re.split(',|;', item.volume_mount)
+                volume_mount_arr=[]
+                for volume_mount in volume_mounts_temp:
+                    match = re.search(r'\((.*?)\)', volume_mount)
+                    if match:
+                        volume_type = match.group(1)
+                        re_str = conf.get('ENABLE_USER_VOLUME_CONFIG', {}).get(volume_type, '')
+                        if re_str:
+                            if re.match(re_str, volume_mount):
+                                volume_mount_arr.append(volume_mount)
+
+                item.volume_mount = ','.join(volume_mount_arr).strip(',')
+            # 合并项目组的挂载
+            item.volume_mount = core.merge_volume_mount(item.project.volume_mount,item.volume_mount)
+
 
         self.use_expand(item)
         item.resource_gpu = item.resource_gpu.upper() if item.resource_gpu else '0'
@@ -723,13 +770,11 @@ output %s
         except Exception as e:
             pass
 
-
-    def delete_old_service(self, service_name, cluster):
+    def delete_old_service(self, service_name, cluster, namespaces):
         try:
             from myapp.utils.py.py_k8s import K8s
             k8s_client = K8s(cluster.get('KUBECONFIG', ''))
-            service_namespace = conf.get('SERVICE_NAMESPACE','service')
-            for namespace in [service_namespace, ]:
+            for namespace in [namespaces, ]:
                 for name in [service_name, 'debug-' + service_name, 'test-' + service_name]:
                     service_external_name = (name + "-external").lower()[:60].strip('-')
                     k8s_client.delete_deployment(namespace=namespace, name=name)
@@ -749,39 +794,41 @@ output %s
 
         self.pre_add(item)
 
-        # 如果模型版本和模型名称变了，需要把之前的服务删除掉
-        if self.src_item_json.get('name','') and item.name!=self.src_item_json.get('name',''):
-            self.delete_old_service(self.src_item_json.get('name',''), item.project.cluster)
-            flash(__("发现模型服务变更，启动清理服务")+'%s:%s'%(self.src_item_json.get('model_name',''),self.src_item_json.get('model_version','')),'success')
-
-
-        src_project_id = self.src_item_json.get('project_id', 0)
-        if src_project_id and src_project_id != item.project.id:
-            try:
+       
+        if self.src_item_json:
+            # 如果项目组变了，就删除之前的
+            if str(self.src_item_json.get('project_id', '0')) != str(item.project.id):
                 from myapp.models.model_team import Project
-                src_project = db.session.query(Project).filter_by(id=int(src_project_id)).first()
-                if src_project and src_project.cluster['NAME'] != item.project.cluster['NAME']:
-                    # 如果集群变了，原有集群的已经部署的服务要clear掉
-                    service_name = self.src_item_json.get('name', '')
-                    if service_name:
-                        self.delete_old_service(service_name,src_project.cluster)
+                old_project = db.session.query(Project).filter_by(id=int(self.src_item_json.get('project_id', '0'))).first()
+                if old_project and old_project.cluster['NAME'] != item.project.cluster['NAME']:
+                    cluster = conf.get('CLUSTERS').get(old_project.cluster['NAME'])
+                    self.delete_old_service(service_name=self.src_item_json.get('name', ''), cluster=cluster, namespaces=item.namespace)
+                    flash(__('发现集群更换，启动清理服务'), 'success')
 
                 # 域名后缀如果不一样也要变了
-                if src_project and src_project.cluster['SERVICE_DOMAIN'] != item.project.cluster['SERVICE_DOMAIN']:
-                    item.host=item.host.replace(src_project.cluster['SERVICE_DOMAIN'],item.project.cluster['SERVICE_DOMAIN'])
-            except Exception as e:
-                print(e)
+                if old_project and old_project.cluster['SERVICE_DOMAIN'] != item.project.cluster['SERVICE_DOMAIN']:
+                    item.host = item.host.replace(old_project.cluster['SERVICE_DOMAIN'], item.project.cluster['SERVICE_DOMAIN'])
+
+            # 如果模型版本和模型名称变了，需要把之前的服务删除掉
+            elif self.src_item_json.get('name', '') and item.name != self.src_item_json.get('name', ''):
+                self.delete_old_service(service_name=self.src_item_json.get('name', ''), cluster=item.project.cluster, namespaces=item.namespace)
+                flash(__("发现模型服务变更，启动清理服务") + '%s:%s' % (self.src_item_json.get('model_name', ''), self.src_item_json.get('model_version', '')), 'success')
+
+        # 如果命名空间变了也要清理掉
+        if item.namespace and item.namespace != item.project.service_namespace:
+            flash('切换项目组命名空间改变，注意部署前先清理推理服务', 'info')
 
     # 事后无法读取到project属性
     def pre_delete(self, item):
-        self.delete_old_service(item.name, item.project.cluster)
+        self.delete_old_service(service_name=item.name, cluster=item.project.cluster,namespaces=item.namespace)
+
         flash(__('服务清理完成'), category='success')
 
-    @expose('/clear/<service_id>', methods=['POST', "GET"])
+    @expose_api(description="清理推理服务",url='/clear/<service_id>', methods=['POST', "GET"])
     def clear(self, service_id):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
         if service:
-            self.delete_old_service(service.name, service.project.cluster)
+            self.delete_old_service(service_name=service.name, cluster=service.project.cluster, namespaces=service.namespace)
             service.model_status = 'offline'
             if not service.deploy_history:
                 service.deploy_history=''
@@ -790,26 +837,26 @@ output %s
             flash(__('服务清理完成'), category='success')
         return redirect(conf.get('MODEL_URLS', {}).get('inferenceservice', ''))
 
-    @expose('/deploy/debug/<service_id>', methods=['POST', "GET"])
+    @expose_api(description="部署推理服务调试环境",url='/deploy/debug/<service_id>', methods=['POST', "GET"])
     # @pysnooper.snoop()
     def deploy_debug(self, service_id):
-        return self.deploy(service_id, env='debug')
+        return self.deploy(service_id, stag='debug')
 
-    @expose('/deploy/test/<service_id>', methods=['POST', "GET"])
+    @expose_api(description="部署推理服务测试环境",url='/deploy/test/<service_id>', methods=['POST', "GET"])
     # @pysnooper.snoop()
     def deploy_test(self, service_id):
-        return self.deploy(service_id, env='test')
+        return self.deploy(service_id, stag='test')
 
-    @expose('/deploy/prod/<service_id>', methods=['POST', "GET"])
+    @expose_api(description="部署推理服务生产环境",url='/deploy/prod/<service_id>', methods=['POST', "GET"])
     # @pysnooper.snoop()
     def deploy_prod(self, service_id):
-        return self.deploy(service_id, env='prod')
+        return self.deploy(service_id, stag='prod')
 
-    @expose('/deploy/update/', methods=['POST', 'GET'])
+    @expose_api(description="推理服务升级",url='/deploy/update/', methods=['POST', 'GET'])
     # @pysnooper.snoop(watch_explode=('deploy'))
     def update_service(self):
         args = request.get_json(silent=True) if request.get_json(silent=True) else {}
-        namespace = conf.get('SERVICE_NAMESPACE', 'service')
+
         args.update(request.args)
         service_id = int(args.get('service_id', 0))
         service_name = args.get('service_name', '')
@@ -835,6 +882,7 @@ output %s
                     .order_by(InferenceService.id.desc()).first()
 
         if service:
+            namespace = service.project.service_namespace
             status = 0
             message = 'success'
             if request.method == 'POST':
@@ -881,30 +929,33 @@ output %s
             })
 
     # @pysnooper.snoop()
-    def deploy(self, service_id, env='prod'):
+    def deploy(self, service_id, stag='prod'):
         service = db.session.query(InferenceService).filter_by(id=service_id).first()
-        if service.model_status!='offline' and service.model_status!=env:
-            if env=='prod' and service.model_status=='online':
+        if service.model_status != 'offline' and service.model_status != 'debug' and 'distributed' in service.service_type:
+            flash(f'分布式推理部署前需前清理服务', category='warning')
+            return redirect(conf.get('MODEL_URLS', {}).get('inferenceservice','/frontend/service/inferenceservice/inferenceservice_manager'))
+
+        if service.model_status!='offline' and service.model_status!=stag:
+            if stag=='prod' and service.model_status=='online':
                 pass
             else:
                 flash(f'检测到推理服务状态{service.model_status}，请先清理再部署',category='warning')
                 return redirect(conf.get('MODEL_URLS',{}).get('inferenceservice','/frontend/service/inferenceservice/inferenceservice_manager'))
 
 
-        namespace = conf.get('SERVICE_NAMESPACE', 'service')
+        namespace = service.project.service_namespace
 
         name = service.name
         command = service.command
         command = command.replace('$model_path', service.model_path).replace('$model_name', service.model_name).replace("{{creator}}", service.created_by.username)
         deployment_replicas = service.min_replicas
-        if env == 'debug':
-            name = env + '-' + service.name
+        if stag == 'debug':
+            name = stag + '-' + service.name
             command = 'sleep 43200'
             deployment_replicas = 1
-            # namespace=pre_namespace
 
-        if env == 'test':
-            name = env + '-' + service.name
+        if stag == 'test':
+            name = stag + '-' + service.name
             # namespace=pre_namespace
 
 
@@ -937,33 +988,38 @@ output %s
                 if '=' in e:
                     volume_mount = volume_mount.replace('{{' + e.split("=")[0] + '}}', e.split("=")[1])
 
-        ports = [int(port) for port in service.ports.split(',')]
+        ports = [int(port) for port in service.ports.replace('，',',').split(',')]
         gpu_num, _, _ = core.get_gpu(service.resource_gpu)
 
-        pod_env = service.env
-        pod_env += "\nKUBEFLOW_ENV=" + env
+        pod_env = service.env.strip()
+        pod_env += "\nKUBEFLOW_ENV=" + stag
         pod_env += '\nKUBEFLOW_MODEL_PATH=' + (service.model_path if service.model_path else '')
         pod_env += '\nKUBEFLOW_MODEL_VERSION=' + service.model_version
         pod_env += '\nKUBEFLOW_MODEL_IMAGES=' + service.images
         pod_env += '\nKUBEFLOW_MODEL_NAME=' + service.model_name
-        pod_env += '\nKUBEFLOW_AREA=' + json.loads(service.project.expand).get('area', 'guangzhou')
+        pod_env += '\nKUBEFLOW_INFERENCE_ID=' + str(service.id)
+        pod_env += '\nKUBEFLOW_RUN_ID=' + str(uuid.uuid4().hex[:4])
         pod_env += "\nRESOURCE_CPU=" + service.resource_cpu
         pod_env += "\nRESOURCE_MEMORY=" + service.resource_memory
         pod_env += "\nRESOURCE_MIN_REPLICAS=" + str(service.min_replicas)
         pod_env += "\nRESOURCE_MAX_REPLICAS=" + str(service.max_replicas)
-        pod_env += "\nRESOURCE_GPU=" + str(gpu_num).split(',')[-1]
-        pod_env += "\nMODEL_PATH=" + service.model_path
+        pod_env += "\nRESOURCE_GPU=" + str(gpu_num).replace('，',',').split(',')[-1]
+        pod_env += "\nMODEL_PATH=" + service.model_path.rstrip('/')
         pod_env += "\nMODEL_NAME=" + service.model_name
+        pod_env += "\nINFERENCE_NAME=" + name
+        # pod_env += "\nSECRET=" + service.created_by.secret
 
         pod_env = pod_env.strip(',')
         pod_env = pod_env.replace('$model_path',service.model_path).replace('$model_name',service.model_name).replace("{{creator}}", service.created_by.username)
 
 
-        if env == 'test' or env == 'debug':
+        sidecar_contaners = []
+
+        if stag == 'test' or stag == 'debug':
             try:
                 # print('delete deployment')
-                k8s_client.delete_deployment(namespace=namespace, name=name)
-                k8s_client.delete_statefulset(namespace=namespace, name=name)
+                k8s_client.delete_deployment(namespace=service.namespace, name=name)
+                k8s_client.delete_statefulset(namespace=service.namespace, name=name)
             except Exception as e:
                 print(e)
         # 因为所有的服务流量通过ingress实现，所以没有isito的envoy代理
@@ -995,6 +1051,10 @@ output %s
             pod_annotations = {
                 'project': service.project.name
             }
+            service.namespace=namespace
+            db.session.commit()
+            service.namespace=namespace
+            db.session.commit()
             k8s_client.create_deployment(
                 namespace=namespace,
                 name=name,
@@ -1004,7 +1064,7 @@ output %s
                 command=['bash', '-c', command] if command else None,
                 args=None,
                 volume_mount=volume_mount,
-                working_dir=service.working_dir,
+                working_dir=service.working_dir.replace('{{creator}}',service.created_by.username),
                 node_selector=service.get_node_selector(),
                 resource_memory=service.resource_memory,
                 resource_cpu=service.resource_cpu,
@@ -1018,7 +1078,7 @@ output %s
                 accounts=None,
                 username=service.created_by.username,
                 ports=pod_ports,
-                health=service.health if ':' in service.health and env != 'debug' else None
+                health=service.health if ':' in service.health and stag != 'debug' else None
             )
         except Exception as e:
             flash('deploymnet:' + str(e), 'warning')
@@ -1061,8 +1121,8 @@ output %s
             if config_host:
                 host=config_host
         # 前缀来区分不同的环境服务
-        if host and (env == 'debug' or env == 'test'):
-            host = env + '.' + host
+        if host and (stag == 'debug' or stag == 'test'):
+            host = stag + '.' + host
         try:
             if not core.checkip(host):
                 # print('deploy istio ingressgateway')
@@ -1070,7 +1130,7 @@ output %s
                     namespace=namespace,
                     name=name,
                     host=host,
-                    ports=service.ports.split(','),
+                    ports=service.ports.replace('，',',').split(','),
                     canary=service.canary,
                     shadow=service.shadow
                 )
@@ -1122,19 +1182,20 @@ output %s
                 "service.kubernetes.io/local-svc-only-bind-node-with-pod": "true",
                 "service.cloud.tencent.com/local-svc-weighted-balance": "true"
             }
-
-            k8s_client.create_service(
-                namespace=namespace,
-                name=service_external_name,
-                username=service.created_by.username,
-                annotations=annotations,
-                ports=service_ports,
-                selector=labels,
-                service_type='ClusterIP' if conf.get('K8S_NETWORK_MODE', 'iptables') != 'ipvs' else 'NodePort',
-                external_ip=SERVICE_EXTERNAL_IP if conf.get('K8S_NETWORK_MODE', 'iptables') != 'ipvs' else None
-                # external_traffic_policy='Local'
-            )
-
+            if meet_ports[0]<30000:
+                k8s_client.create_service(
+                    namespace=namespace,
+                    name=service_external_name,
+                    username=service.created_by.username,
+                    annotations=annotations,
+                    ports=service_ports,
+                    selector=labels,
+                    service_type='ClusterIP' if conf.get('K8S_NETWORK_MODE', 'iptables') != 'ipvs' else 'NodePort',
+                    external_ip=SERVICE_EXTERNAL_IP if conf.get('K8S_NETWORK_MODE', 'iptables') != 'ipvs' else None
+                    # external_traffic_policy='Local'
+                )
+            else:
+                flash(__('端口已耗尽，后续请使用泛域名访问服务'), 'warning')
         # # 以ip形式访问的话，使用的代理ip。不然不好处理机器服务化机器扩容和缩容时ip变化
         # ip和端口形式只定向到生产，因为不能像泛化域名一样随意添加
         TKE_EXISTED_LBID = ''
@@ -1151,19 +1212,22 @@ output %s
             meet_ports = core.get_not_black_port(int(eval(port_str)))
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (service.name + "-external").lower()[:60].strip('-')
-            k8s_client.create_service(
-                namespace=namespace,
-                name=service_external_name,
-                username=service.created_by.username,
-                ports=service_ports,
-                selector=labels,
-                service_type='LoadBalancer',
-                annotations={
-                    "service.kubernetes.io/tke-existed-lbid": TKE_EXISTED_LBID,
-                }
-            )
+            if meet_ports[0] < 30000:
+                k8s_client.create_service(
+                    namespace=namespace,
+                    name=service_external_name,
+                    username=service.created_by.username,
+                    ports=service_ports,
+                    selector=labels,
+                    service_type='LoadBalancer',
+                    annotations={
+                        "service.kubernetes.io/tke-existed-lbid": TKE_EXISTED_LBID,
+                    }
+                )
+            else:
+                flash(__('端口已耗尽，后续请使用泛域名访问服务'), 'warning')
 
-        if env == 'prod':
+        if stag == 'prod':
             hpas = re.split(',|;', service.hpa)
             regex = re.compile(r"\(.*\)")
             if float(regex.sub('', service.resource_gpu)) < 1:
@@ -1175,7 +1239,7 @@ output %s
             if int(service.max_replicas) > int(service.min_replicas) and service.hpa:
                 try:
                     # 创建+绑定deployment
-                    print('create hpa')
+                    # print('create hpa')
                     k8s_client.create_hpa(
                         namespace=namespace,
                         name=name,
@@ -1194,18 +1258,19 @@ output %s
         #     pass
 
         # 不记录部署测试的情况
-        if env == 'debug' and service.model_status == 'offline':
+        if stag == 'debug' and service.model_status == 'offline':
             service.model_status = 'debug'
-        if env == 'test' and service.model_status == 'offline':
+        if stag == 'test' and service.model_status == 'offline':
             service.model_status = 'test'
 
-        if env == 'prod':
+        if stag == 'prod':
             service.model_status = 'online'
-        service.deploy_history=service.deploy_history+"\n"+"deploy %s: %s %s"%(env,g.user.username,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        service.deploy_history=service.deploy_history+"\n"+"deploy %s: %s %s"%(stag,g.user.username,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         service.deploy_history = '\n'.join(service.deploy_history.split("\n")[-10:])
         db.session.commit()
-        if env == "debug":
+        if stag == "debug":
             time.sleep(2)
+            # 可能是之前debug了，现在可以直接打开
             pods = k8s_client.get_pods(namespace=namespace, labels={"app": name})
             if pods:
                 pod = pods[0]
@@ -1213,7 +1278,7 @@ output %s
                 return redirect("/k8s/web/debug/%s/%s/%s/%s" % (service.project.cluster['NAME'], namespace, pod['name'],name))
 
         # 生产环境才有域名代理灰度的问题
-        if env == 'prod':
+        if stag == 'prod':
             from myapp.tasks.async_task import upgrade_service
             kwargs = {
                 "service_id": service.id,
@@ -1244,7 +1309,7 @@ output %s
                         break
 
                 new_services.model_version=model_version
-                new_services.name = new_services.model_name+"-"+new_services.model_version.replace('v','').replace('.','')
+                new_services.name = (new_services.model_name.replace('/','-').replace(':','-').replace('.','-').strip('-')+"-"+new_services.model_version.replace('v','').replace('.',''))[:60]
                 new_services.created_on = datetime.datetime.now()
                 new_services.changed_on = datetime.datetime.now()
                 db.session.add(new_services)
@@ -1254,154 +1319,6 @@ output %s
         except Exception as e:
             raise e
         return redirect(request.referrer)
-
-    # @pysnooper.snoop()
-    def echart_option(self, filters=None):
-        # print(filters)
-        global global_all_service_load
-        if not global_all_service_load:
-            global_all_service_load['check_time'] = None
-
-        option=global_all_service_load['data']
-        if not global_all_service_load['check_time'] or (datetime.datetime.now() - global_all_service_load['check_time']).total_seconds()>3600:
-            all_services = db.session.query(InferenceService).filter_by(model_status='online').all()
-
-            from myapp.utils.py.py_prometheus import Prometheus
-            prometheus = Prometheus(conf.get('PROMETHEUS', ''))
-            # prometheus = Prometheus('10.101.142.16:8081')
-            all_services_load = prometheus.get_istio_service_metric(namespace='service')
-            services_metrics = []
-            legend=['qps','cpu','memory','gpu']
-            today_time = int(datetime.datetime.strptime(datetime.datetime.now().strftime("%Y-%m-%d"),"%Y-%m-%d").timestamp())
-            time_during = 5 * 60
-            end_point = min(int(datetime.datetime.now().timestamp() - today_time)//time_during, 60*60*24//time_during)
-            start_point = max(end_point - 60, 0)
-
-            # @pysnooper.snoop()
-            def add_metric_data(metric, metric_name, service_name):
-                if metric_name == 'qps':
-                    metric = [[date_value[0], int(float(date_value[1]))] for date_value in metric if datetime.datetime.now().timestamp() > date_value[0] > today_time]
-                if metric_name == 'memory':
-                    metric = [[date_value[0], round(float(date_value[1]) / 1024 / 1024 / 1024, 2)] for date_value in metric if datetime.datetime.now().timestamp() > date_value[0] > today_time]
-                if metric_name == 'cpu' or metric_name == 'gpu':
-                    metric = [[date_value[0], round(float(date_value[1]), 2)] for date_value in metric if datetime.datetime.now().timestamp() > date_value[0] > today_time]
-
-                if metric:
-                    # 将时间戳转化为时间段分箱，按分钟分箱
-
-                    metric_binning = [[0] for x in range(60 * 60 * 24 // time_during)]  # 每5分钟一个分箱
-                    for date_value in metric:
-                        timestamp, value = date_value[0], date_value[1]
-                        metric_binning[(timestamp - today_time) // time_during].append(value)
-                    metric_binning = [int(sum(x) / len(x)) for x in metric_binning]
-
-                    # metric_binning = [[datetime.datetime.fromtimestamp(today_time+time_during*i+time_during).strftime('%Y-%m-%dT%H:%M:%S.000Z'),metric_binning[i]] for i in range(len(metric_binning)) if i<=end_point]
-                    metric_binning = [[(today_time+time_during*i+time_during)*1000,metric_binning[i]] for i in range(len(metric_binning)) if i<=end_point]
-
-                    services_metrics.append(
-                        {
-                            "name": service_name,
-                            "type": 'line',
-                            "smooth": True,
-                            "showSymbol": False,
-                            "data": metric_binning
-                        }
-                    )
-
-            for service in all_services:
-                # qps_metric = all_services_load['qps'].get(service.name,[])
-                # add_metric_data(qps_metric, 'qps',service.name)
-                #
-                # servie_pod_metrics = []
-                # for pod_name in all_services_load['memory']:
-                #     if service.name in pod_name:
-                #         pod_metric = all_services_load['memory'][pod_name]
-                #         servie_pod_metrics = servie_pod_metrics + pod_metric
-                # add_metric_data(servie_pod_metrics, 'memory', service.name)
-                #
-                # servie_pod_metrics = []
-                # for pod_name in all_services_load['cpu']:
-                #     if service.name in pod_name:
-                #         pod_metric = all_services_load['cpu'][pod_name]
-                #         servie_pod_metrics = servie_pod_metrics + pod_metric
-                # add_metric_data(servie_pod_metrics, 'cpu',service.name)
-
-                servie_pod_metrics = []
-                for pod_name in all_services_load['gpu']:
-                    if service.name in pod_name:
-                        pod_metric = all_services_load['gpu'][pod_name]
-                        servie_pod_metrics = servie_pod_metrics + pod_metric
-                add_metric_data(servie_pod_metrics, 'gpu', service.created_by.username + ":" + service.label)
-
-            # dataZoom: [
-            #     {
-            #         start: {{start_point}},
-            #         end: {{end_point}}
-            #     }
-            # ],
-            option = '''
-            {
-              "title": {
-                "text": 'GPU monitor'
-              },
-              "tooltip": {
-                "trigger": 'axis',
-                 "position": [10, 10]
-              },
-        
-              "legend": {
-                "data": {{ legend }}
-              },
-               
-              "grid": {
-                "left": '3%',
-                "right": '4%',
-                "bottom": '3%',
-                "containLabel": true
-              },
-              "xAxis": {
-                "type": "time",
-                "min": new Date('{{today}}'),
-                "max": new Date('{{tomorrow}}'),
-                "boundaryGap": false,
-                "timezone" : 'Asia/Shanghai', 
-              },
-              "yAxis": {
-                "type": "value",
-                "boundaryGap": false,
-                "axisLine":{       //y轴
-                  "show":false
-                },
-                "axisTick":{       //y轴刻度线
-                  "show":true
-                },
-                "splitLine": {     //网格线
-                  "show": true,
-                  "color": '#f1f2f6'
-                }
-              },
-              "series": {{services_metric}}
-            }
-    
-            '''
-            # print(services_metrics)
-            rtemplate = Environment(loader=BaseLoader, undefined=DebugUndefined).from_string(option)
-            option = rtemplate.render(
-                legend=legend,
-                services_metric=json.dumps(services_metrics, ensure_ascii=False, indent=4),
-                start_point=start_point,
-                end_point=end_point,
-                today=datetime.datetime.now().strftime('%Y/%m/%d'),
-                tomorrow=(datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y/%m/%d'),
-            )
-            # global_all_service_load['check_time']=datetime.datetime.now()
-
-        global_all_service_load['data'] = option
-        # print(option)
-        # file = open('myapp/test.txt',mode='w')
-        # file.write(option)
-        # file.close()
-        return option
 
     # 划分数据历史版本
     # @pysnooper.snoop()
@@ -1443,15 +1360,10 @@ class InferenceService_ModelView_Api(InferenceService_ModelView_base, MyappModel
     # @pysnooper.snoop()
     def set_columns_related(self, exist_add_args, response_add_columns):
         exist_service_type = exist_add_args.get('service_type', '')
-        service_model_path = {
-            "ml-server": "/mnt/.../$model_name.pkl",
-            "tfserving": "/mnt/.../saved_model",
-            "torch-server": "/mnt/.../$model_name.mar",
-            "onnxruntime": "/mnt/.../$model_name.onnx",
-            "triton-server": "onnx:/mnt/.../model.onnx(model.plan,model.bin,model.savedmodel/,model.pt,model.dali)"
-        }
+
         response_add_columns['images']['values'] = [{"id":x,"value":x} for x in conf.get('INFERNENCE_IMAGES',{}).get(exist_service_type,[])]
-        response_add_columns['model_path']['default']=service_model_path.get(exist_service_type,'')
+        response_add_columns['images']['default'] = ''
+        response_add_columns['model_path']['default']=INFERNENCE_MODEL_PATH.get(exist_service_type,'')
         response_add_columns['command']['default'] = INFERNENCE_COMMAND.get(exist_service_type,'')
         response_add_columns['inference_config']['default'] = INFERNENCE_CONFIGMAP.get(exist_service_type, '')
         response_add_columns['host']['default'] = INFERNENCE_HOST.get(exist_service_type, '')

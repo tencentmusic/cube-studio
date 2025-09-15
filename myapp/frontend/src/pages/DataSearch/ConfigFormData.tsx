@@ -133,9 +133,6 @@ const ConfigFormData = React.forwardRef((props: IProps, ref) => {
         <div className="configformdata-container d-f ac">
             <Form form={form} component={false}>
                 {
-                    console.log('props.option', props.option)
-                }
-                {
                     props.option.map((component) => {
                         return dispatchRenderFormItem(component)
                     })

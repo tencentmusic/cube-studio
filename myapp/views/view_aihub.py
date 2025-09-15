@@ -2,6 +2,7 @@ import re
 import shutil
 import time
 
+from flask_appbuilder.baseviews import expose_api
 from wtforms.validators import Regexp, Length, DataRequired
 
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
@@ -82,6 +83,7 @@ class Aihub_base():
 
 
     def post_list(self,items):
+        flash('AIHub内容使用，请使用<a target="_blank" href="https://github.com/data-infra/cube-studio/blob/main/README.md">企业版</a>',category='success')
         return items
 
 

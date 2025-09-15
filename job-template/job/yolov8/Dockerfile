@@ -20,19 +20,9 @@ ENV PYTHONPATH=/src/:/github/
 ENV NODE_PATH=$NODE_HOME/lib/node_modules:${PATH:-}
 ENV PATH=$NODE_HOME/bin:${PATH:-}
 
-RUN bash /yolov8/install-cube-studio.sh
 RUN rm -rf /usr/bin/python3 && ln -s /usr/bin/python /usr/bin/python3
 
 ENTRYPOINT ["python","train.py"]
-
-# 测试预训练模型推理
-# python detect.py --weights weights/yolov7.pt --source inference/images
-
-# 测试微调
-# python train.py --weights weights/yolov7_training.pt --cfg /mnt/admin/coco/yolov7.yaml --data /mnt/admin/coco/coco.yaml --device cpu --batch-size 64 --epoch 1
-
-# 微调后推理
-#python detect.py --weights runs/train/exp2/weights/best.pt --source inference/images
 
 
 

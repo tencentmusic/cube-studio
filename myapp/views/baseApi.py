@@ -1328,7 +1328,7 @@ class MyappModelRestApi(ModelRestApi):
             for col in self.add_columns:
                 field = self.add_model_schema.fields[col]
                 if isinstance(field, RelatedList) and field.name in json_data:
-                    json_data[field.name] = [{"id": int(id)} for id in json_data[field.name].replace('，',',').split(',')]
+                    json_data[field.name] = [{"id": int(str(id).strip())} for id in json_data[field.name].replace('，',',').split(',') if str(id).strip()]
             item = self.add_model_schema.load(json_data)
             # item = self.add_model_schema.load(data)
         except Exception as err:
@@ -1391,7 +1391,7 @@ class MyappModelRestApi(ModelRestApi):
             for col in self.edit_columns:
                 field = self.edit_model_schema.fields[col]
                 if isinstance(field, RelatedList) and field.name in json_data:
-                    json_data[field.name] = [{"id": int(id)} for id in json_data[field.name].replace('，',',').split(',')]
+                    json_data[field.name] = [{"id": int(str(id).strip())} for id in json_data[field.name].replace('，',',').split(',') if str(id).strip()]
             if self.pre_update_req:
                 new_json_data = self.pre_update_req(req_json=json_data, src_item = item)
                 if new_json_data:
@@ -2162,9 +2162,6 @@ class MyappModelRestApi(ModelRestApi):
                 field, filter_rel_field, page=page, page_size=page_size
             )
             ret["validators"].append(validators.DataRequired())
-
-        # 如果是外键，都加必填
-        # if
 
         # 对于非数据库中字段使用字段信息描述类型
         ret["type"] = field.__class__.__name__ if 'type' not in ret else ret["type"]

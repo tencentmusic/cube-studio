@@ -35,6 +35,7 @@ kubectl delete -f ./servicemonitor/prometheus-operator-sm.yml
 kubectl delete -f ./servicemonitor/prometheus-sm.yml
 # 删除prometheus 实例
 kubectl delete -f ./prometheus/prometheus-main.yml
+kubectl delete pvc -n monitoring prometheus-k8s-db-prometheus-k8s-0
 kubectl delete -f ./prometheus/pv-pvc-hostpath.yaml
 # 删除prometheus 配置
 kubectl delete -f ./service-discovery/kube-controller-manager-svc.yml

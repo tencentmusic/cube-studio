@@ -46,8 +46,7 @@ conf = app.config
 class Job_Tempalte_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
-        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
-        if "admin" in user_roles:
+        if g.user.is_admin():
             return query.order_by(self.model.id.desc())
 
         # join_projects_id = security_manager.get_join_projects_id(db.session)
@@ -109,18 +108,20 @@ class Job_Template_ModelView_Base():
             default='',
             description= _('使用该模板的task，会在添加时，自动添加该挂载。格式示例:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            validators=[Regexp('^[\x00-\x7F]*$')]
         ),
         "workdir": StringField(
             _('工作目录'),
             description= _('工作目录，不填写将直接使用镜像默认的工作目录'),
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            validators=[Regexp('^[\x00-\x7F]*$')]
         ),
         "entrypoint": StringField(
             _('启动命令'),
             description= _('镜像的入口命令，直接写成单行字符串，例如python xx.py，无需添加[]'),
             default='',
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
-            validators=[DataRequired()]
+            validators=[DataRequired(),Regexp('^[\x00-\x7F]*$')]
         ),
         "job_args_definition": StringField(
             _('参数定义'),
@@ -138,6 +139,7 @@ class Job_Template_ModelView_Base():
             default='',
             description= _('添加到容器内的host映射。<br>书写格式:每行一个dns解析记录，ip host1 host2，<br>示例：1.1.1.1 example1.oa.com example2.oa.com'),
             widget=MyBS3TextAreaFieldWidget(rows=3),  # 传给widget函数的是外层的field对象，以及widget函数的参数
+            validators=[Regexp('^[\x00-\x7F]*$')]
         ),
         "demo": StringField(
             _('demo'),
@@ -149,7 +151,7 @@ class Job_Template_ModelView_Base():
             default='',
             description= _('k8s的ServiceAccount，在此类任务运行时会自动挂载此账号，多用于任务操作k8s pod时使用'),
             widget=BS3TextFieldWidget(),  # 传给widget函数的是外层的field对象，以及widget函数的参数
-            validators=[]
+            validators=[Regexp("^[a-z][a-z0-9\-]*[a-z0-9]$"), Length(0, 54)]
         ),
         "privileged": BooleanField(
             _('超级权限'),
@@ -287,7 +289,6 @@ class Job_Template_ModelView_Base():
         return sort_expand_index(items)
 
 
-
     @action("copy", "复制", confirmation= '复制所选记录?', icon="fa-copy",multiple=True, single=False)
     def copy(self, job_templates):
         if not isinstance(job_templates, list):
@@ -306,6 +307,16 @@ class Job_Template_ModelView_Base():
             raise e
         return redirect(request.referrer)
 
+    # 帮助地址可以随时根据配置文件变更
+    def pre_list_res(self,_response):
+        for item in _response.get('data',[]):
+            expand = json.loads(item.get('expand','{}')) if item.get('expand','') else {}
+            help_url = expand.get('help_url','')
+            if 'http' not in help_url:
+                help_url = conf.get('GIT_URL', '').strip('/') + help_url
+                expand['help_url'] = help_url
+                item['expand'] = json.dumps(expand)
+        return _response
 
     # 配置只有管理员可以添加和删除
     def add_more_info(self,response, **kwargs):

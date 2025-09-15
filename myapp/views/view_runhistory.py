@@ -4,7 +4,7 @@ import json
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 import pysnooper
 import urllib.parse
-from flask import request
+from flask import request, g
 from flask_appbuilder.actions import action
 from myapp.models.model_job import RunHistory, Pipeline
 import calendar
@@ -32,8 +32,7 @@ conf = app.config
 class RunHistory_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
-        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
-        if "admin" in user_roles:
+        if g.user.is_admin():
             return query
 
         pipeline_ids = security_manager.get_create_pipeline_ids(db.session)

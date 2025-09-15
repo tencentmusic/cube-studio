@@ -25,4 +25,7 @@ myapp/test
 .ipynb_checkpoints
 /job-template/job/*/.ipynb_checkpoints/
 /install/docker/kubeconfig/
-/aihub/__MACOSX/
+/aihub/deep-learning/chat-embedding/docs/
+/myapp/chatgpt-web/.pnpm-store/
+/myapp/flask_appbuilder/
+/myapp/chatgpt-web/distChat

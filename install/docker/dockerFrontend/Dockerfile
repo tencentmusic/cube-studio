@@ -27,7 +27,7 @@ RUN mkdir ./frontend ./static
 
 # 拷贝dist包文件
 COPY ./myapp/static/appbuilder/frontend ./frontend
-#COPY ./myapp/chatgpt-web/distChat ./frontend/distChat
+COPY ./myapp/chatgpt-web/distChat ./frontend/distChat
 COPY ./myapp/static ./static
 # 安全风险去除
 RUN rm -rf frontend/manifest.json frontend/robots.txt

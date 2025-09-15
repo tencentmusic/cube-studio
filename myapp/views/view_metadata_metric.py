@@ -3,7 +3,7 @@ from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 from sqlalchemy import or_
 from flask_appbuilder.actions import action
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Regexp
 from myapp import app, appbuilder
 from wtforms import StringField, SelectField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
@@ -101,7 +101,7 @@ class Metadata_metric_ModelView_base():
             label= _('名称'),
             description= _('指标英文名'),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired()]
+            validators=[DataRequired(),Regexp('^[\x00-\x7F]*$')]
         ),
         "label": StringField(
             label= _('标签'),

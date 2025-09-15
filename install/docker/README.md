@@ -28,22 +28,6 @@
 
 参考视频：https://cube-studio.oss-cn-hangzhou.aliyuncs.com/video/dev.mp4
 
-## deploy mysql
-
-```
-docker run -p 3306:3306 --restart always --name mysql -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v $PWD/docker-add-file/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf -d mysql:8.0.32
-```
-
-进入mysql，创建kubeflow数据库
-```
-mysql> CREATE DATABASE IF NOT EXISTS kubeflow DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
-
-# 然后给admin用户授权，以便其他容器能访问。
-mysql> use mysql;
-mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; 
-mysql> flush privileges;
-```
-
 ## 镜像构建（可忽略）
 
 ```
@@ -68,6 +52,7 @@ docker pull ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard-frontend:2025.
 注意：前后端代码生产环境均在容器中运行。
 
 后端开发调试：代码通过挂载，在本机ide中修改，在docker-compose中运行调试，debug模式自动热更新。
+
 前端调试：大部分功能在本机ide开发调试即可，支持热更新。完整的平台前端调试需要本地ide开发完成后打包编译为静态文件，也可以在docker中编译成静态文件，在docker-compose中运行验证，不同于后端，这种docker中调试的话前端不支持热更新。
 
 #### 本地后端python代码开发
@@ -97,6 +82,7 @@ docker-compose.yaml文件在install/docker目录下，这里提供了mac和linux
 1) debug backend
 ```
 STAGE: 'dev'
+cd install/docker/
 docker-compose -f docker-compose.yml  up
 ```
 

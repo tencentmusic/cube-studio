@@ -1,7 +1,7 @@
-# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:kubeflow-dashboard:2025.09.01 -f install/docker/Dockerfile .
+# docker build -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.09.01 -f install/docker/Dockerfile .
 # docker buildx build --platform linux/amd64,linux/arm64 -t ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:2025.09.01 -f install/docker/Dockerfile . --push
 
-FROM ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9-20250601
+FROM ccr.ccs.tencentyun.com/cube-studio/kubeflow-dashboard:base-python3.9-20250701
 
 RUN wget https://cube-studio.oss-cn-hangzhou.aliyuncs.com/aihub/deeplearning/aihub.zip && mkdir -p /cube-studio/aihub && unzip aihub.zip -d /cube-studio/aihub/ && rm aihub.zip
 

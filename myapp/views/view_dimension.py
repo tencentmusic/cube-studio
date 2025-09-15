@@ -2,6 +2,8 @@ import random
 import time
 import logging
 import pandas
+from flask_appbuilder.baseviews import expose_api
+
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
@@ -55,7 +57,7 @@ Metadata_column_fields = {
         description= _('列名(小写字母、数字、_ 组成)，最长50个字符'),
         default='',
         widget=BS3TextFieldWidget(),
-        validators=[Regexp("^[a-z][a-z0-9_]*[a-z0-9]$"), Length(1, 54), DataRequired()]
+        validators=[Regexp("^[a-z][a-z0-9\-_]*[a-z0-9]$"), Length(1, 54), DataRequired()]
     ),
     "describe": StringField(
         label= _('列描述'),
@@ -94,7 +96,7 @@ Metadata_column_fields = {
         label= _('可选择项'),
         description= _('enum类型时，逗号分割多个可选择项，为空则为数据库记录已存在可选择项'),
         default='',
-        widget=BS3TextFieldWidget(),
+        widget=BS3TextFieldWidget()
     )
 }
 
@@ -198,10 +200,10 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         ),
         "table_name": StringField(
             label= _('表名'),
-            description= _('远程数据库的表名'),
+            description= _('远程数据库的表名(小写字母、数字、_ 组成)，最长50个字符'),
             widget=BS3TextFieldWidget(),
             default='',
-            validators=[DataRequired(), Regexp("^[a-z][a-z0-9_\-]*[a-z0-9]$")]
+            validators=[DataRequired(), Regexp("^[a-z][a-z0-9\-_]*[a-z0-9]$")]
         ),
         "label": StringField(
             label= _('标签'),
@@ -339,13 +341,13 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         results = pandas.read_sql_query(sql, sql_engine)
         return results.to_dict()
 
-    @expose("/external/<dim_id>", methods=["GET"])
+    @expose_api(description="创建hive外表",url="/external/<dim_id>", methods=["GET"])
     def external(self, dim_id):
         ddl_sql = ddl_hive_external_table(dim_id)
         print(ddl_sql)
         return Markup(ddl_sql.replace('\n', '<br>'))
 
-    # @expose("/clear/<dim_id>", methods=["GET"])
+    # @expose_api(description="清空",url="/clear/<dim_id>", methods=["GET"])
     @action("clear", "清空", "清空选中维表的所有远程数据?", "fa-trash", single=True, multiple=False)
     def delete_all(self, items):
         if not items:
@@ -368,7 +370,7 @@ class Dimension_table_ModelView_Api(MyappModelRestApi):
         url_path = conf.get('MODEL_URLS', {}).get("dimension") + f'?targetId={dim_id}'
         return redirect(url_path)
 
-    @expose("/create_external_table/<dim_id>", methods=["GET"])
+    @expose_api(description="创建hive外表",url="/create_external_table/<dim_id>", methods=["GET"])
     # @pysnooper.snoop()
     def create_external_table(self, dim_id):
         item = db.session.query(Dimension_table).filter_by(id=int(dim_id)).first()
@@ -630,7 +632,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         default='',
                         description='',
                         widget=MySelect2Widget(can_input=True,conten2choices=False if columns[column_name].get('choices','') else True),
-                        choices=[[x,x] for x in columns[column_name].get('choices','').split(',')]
+                        choices=[[x,x] for x in columns[column_name].get('choices','').replace('，',',').split(',')]
                     )
                 else:
                     add_form_extra_fields[column_name] = StringField(
@@ -771,7 +773,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                         return name
                 return ''
 
-            @expose("/upload/", methods=["POST"])
+            @expose_api(description="批量上传维表数据",url="/upload/", methods=["POST"])
             # @pysnooper.snoop(watch_explode=('attr'))
             def upload(self):
                 csv_file = request.files.get('csv_file')  # FileStorage
@@ -973,17 +975,17 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
 
         return all_dimension["dimension_%s" % dim_id]
 
-    @expose("/<dim_id>/api/_info", methods=["GET"])
+    @expose_api(description="",url="/<dim_id>/api/_info", methods=["GET"])
     def dim_api_info(self, dim_id, **kwargs):
         view_instance = self.set_model(dim_id)
         return view_instance.api_info(**kwargs)
 
-    @expose("/<dim_id>/api/<int:pk>", methods=["GET"])
+    @expose_api(description="",url="/<dim_id>/api/<int:pk>", methods=["GET"])
     def dim_api_show(self, dim_id, pk, **kwargs):
         view_instance = self.set_model(dim_id)
         return view_instance.api_show(pk, **kwargs)
 
-    @expose("/<dim_id>/api/", methods=["GET"])
+    @expose_api(description="",url="/<dim_id>/api/", methods=["GET"])
     def dim_api_list(self, dim_id, **kwargs):
 
         view_instance = self.set_model(dim_id)
@@ -1003,7 +1005,7 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                 "result": ""
             })
 
-    @expose("/<dim_id>/api/", methods=["POST"])
+    @expose_api(description="",url="/<dim_id>/api/", methods=["POST"])
     def dim_api_add(self, dim_id):
         view_instance = self.set_model(dim_id)
 
@@ -1018,37 +1020,37 @@ class Dimension_remote_table_ModelView_Api(MyappModelRestApi):
                 "result": ""
             })
 
-    @expose("/<dim_id>/api/<pk>", methods=["PUT"])
+    @expose_api(description="",url="/<dim_id>/api/<pk>", methods=["PUT"])
     # @pysnooper.snoop(watch_explode=('item','data'))
     def dim_api_edit(self, dim_id, pk):
         view_instance = self.set_model(dim_id)
         return view_instance.api_edit(pk)
 
-    @expose("/<dim_id>/api/<pk>", methods=["DELETE"])
+    @expose_api(description="",url="/<dim_id>/api/<pk>", methods=["DELETE"])
     def dim_api_delete(self, dim_id, pk):
         view_instance = self.set_model(dim_id)
         return view_instance.api_delete(pk)
 
-    @expose("/<dim_id>/api/upload/", methods=["POST"])
+    @expose_api(description="维表批量上传",url="/<dim_id>/api/upload/", methods=["POST"])
     # @pysnooper.snoop()
     def dim_api_upload(self, dim_id):
         view_instance = self.set_model(dim_id)
         return view_instance.upload()
 
-    @expose("/<dim_id>/api/download_template", methods=["GET"])
-    @expose("/<dim_id>/api/download_template/", methods=["GET"])
+    @expose_api(description="下载维表批量上传模板",url="/<dim_id>/api/download_template", methods=["GET"])
+    @expose_api(description="下载维表批量上传模板",url="/<dim_id>/api/download_template/", methods=["GET"])
     # @pysnooper.snoop()
     def dim_api_download_template(self, dim_id):
         view_instance = self.set_model(dim_id)
         return view_instance.download_template()
 
-    @expose("/<dim_id>/api/download/", methods=["GET"])
+    @expose_api(description="维表批量下载",url="/<dim_id>/api/download/", methods=["GET"])
     # @pysnooper.snoop()
     def dim_api_download(self, dim_id):
         view_instance = self.set_model(dim_id)
         return view_instance.download()
 
-    @expose("/<dim_id>/api/multi_action/<string:name>", methods=["POST"])
+    @expose_api(description="维表批量操作",url="/<dim_id>/api/multi_action/<string:name>", methods=["POST"])
     def multi_action(self, dim_id, name):
         view_instance = self.set_model(dim_id)
         return view_instance.multi_action(name)

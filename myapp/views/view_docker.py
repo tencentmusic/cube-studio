@@ -1,3 +1,4 @@
+from flask_appbuilder.baseviews import expose_api
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
@@ -38,8 +39,7 @@ from myapp.models.model_docker import Docker
 class Docker_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
-        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
-        if "admin" in user_roles:
+        if g.user.is_admin():
             return query
 
         return query.filter(self.model.created_by_fk == g.user.id)
@@ -60,6 +60,7 @@ class Docker_ModelView_Base():
     edit_columns = add_columns
     search_columns = ['created_by', 'project']
     list_columns = ['project', 'describe', 'consecutive_build', 'image_history', 'debug']
+    fixed_columns = ['debug']
     cols_width = {
         "project": {"type": "ellip2", "width": 150},
         "describe": {"type": "ellip2", "width": 200},
@@ -81,30 +82,30 @@ class Docker_ModelView_Base():
             # 'volume_mount': StringField(
             #     label= _('挂载'),
             #     default='kubeflow-user-workspace(pvc):/mnt/',
-            #     description= _('构建镜像时添加的挂载'),
+            #     description= _('外部挂载，格式:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录'),
             #     widget=BS3TextFieldWidget(),
-            #     validators=[]
+            #     validators=[Regexp('^[\x00-\x7F]*$')]
             # ),
             'resource_memory': StringField(
                 label= _('内存'),
                 default='8G',
-                description= _('内存的资源使用限制，示例：1G，20G'),
+                description= _('内存的资源使用配置，示例：1G，20G'),
                 widget=BS3TextFieldWidget(),
-                validators=[DataRequired(), Regexp("^.*G$")]
+                validators=[DataRequired(), Regexp("^[0-9]*G$")]
             ),
             'resource_cpu': StringField(
                 label= _('cpu'),
                 default='4',
-                description= _('cpu的资源使用限制(单位：核)，示例：2'),
+                description= _('cpu的资源使用配置(单位：核)，示例：2'),
                 widget=BS3TextFieldWidget(),
-                validators=[DataRequired()]
+                validators=[DataRequired(),Regexp("^[0-9]*$")]
             ),
             'resource_gpu': StringField(
                 label= _('gpu'),
                 default='0',
                 description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。-1为共享占用方式，小数(0.1)为vgpu方式，申请具体的卡型号，可以类似 1(V100)'),
                 widget=BS3TextFieldWidget(),
-                validators=[DataRequired()]
+                validators=[DataRequired(),Regexp('^[\-\.0-9,a-zA-Z\(\)]*$')]
             )
         }
     }
@@ -141,14 +142,14 @@ class Docker_ModelView_Base():
             default=conf.get('PUSH_REPOSITORY_ORG','ccr.ccs.tencentyun.com/cube-studio/')+g.user.username+":"+datetime.datetime.now().strftime('%Y.%m.%d'+".1"),
             description= _("目标镜像名，将直接推送到目标仓库，需在镜像仓库中配置了相应仓库的账号密码"),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), ]
+            validators=[DataRequired(),Regexp('^[a-zA-Z0-9\-._:@\/]*$')]
         )
         self.add_form_extra_fields['base_image'] = StringField(
             _('基础镜像'),
             default=conf.get('USER_IMAGE',''),
             description=f'{__("基础镜像和构建方法可参考：")}<a target="_blank" href="%s">{__("点击打开")}</a>' % (conf.get('HELP_URL',{}).get('docker', '')),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), ]
+            validators=[DataRequired(), Regexp('^[a-zA-Z0-9\-._:@\/]*$')]
         )
         # # if g.user.is_admin():
         # self.edit_columns=['describe','base_image','target_image','need_gpu','consecutive_build']
@@ -157,6 +158,7 @@ class Docker_ModelView_Base():
         self.default_filter = {
             "created_by": g.user.id
         }
+
 
     pre_update_web = pre_add_web
 
@@ -173,6 +175,8 @@ class Docker_ModelView_Base():
         # if image_org not in item.target_image or item.target_image==image_org:
         #     flash('目标镜像名称不符合规范','warning')
 
+        if not item.namespace:
+            item.namespace = item.project.notebook_namespace
         if item.expand:
             expand = json.loads(item.expand)
             expand['namespace'] = json.loads(item.project.expand).get('NOTEBOOK_NAMESPACE', conf.get('NOTEBOOK_NAMESPACE','jupyter'))
@@ -194,13 +198,14 @@ class Docker_ModelView_Base():
                 flash(__('发现基础镜像更换，已帮你删除之前启动的debug容器'), 'success')
 
     # @event_logger.log_this
-    @expose("/debug/<docker_id>", methods=["GET", "POST"])
+    @expose_api(description="容器debug",url="/debug/<docker_id>", methods=["GET", "POST"])
     # @pysnooper.snoop()
     def debug(self, docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
+
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(docker.project.cluster.get('KUBECONFIG', ''))
-        namespace = json.loads(docker.expand).get("namespace", conf.get('NOTEBOOK_NAMESPACE','jupyter'))
+        namespace = docker.project.notebook_namespace
         pod_name = "docker-%s-%s" % (docker.created_by.username, str(docker.id))
         pod = k8s_client.get_pods(namespace=namespace, pod_name=pod_name)
         if pod:
@@ -222,7 +227,8 @@ class Docker_ModelView_Base():
             image_pull_secrets = conf.get('HUBSECRET', [])
             user_repositorys = db.session.query(Repository).filter(Repository.created_by_fk == g.user.id).all()
             image_pull_secrets = list(set(image_pull_secrets + [rep.hubsecret for rep in user_repositorys]))
-
+            docker.namespace = namespace
+            db.session.commit()
             k8s_client.create_debug_pod(namespace,
                                         name=pod_name,
                                         command=command,
@@ -258,7 +264,7 @@ class Docker_ModelView_Base():
             try_num = try_num - 1
             time.sleep(2)
         if try_num == 0:
-            pod_url = conf.get('K8S_DASHBOARD_CLUSTER','') + '#/search?namespace=%s&q=%s' % (namespace, pod_name)
+            pod_url = f'/web/search/{docker.project.cluster["NAME"]}/{namespace}/{pod_name}'
             # event = k8s_client.get_pod_event(namespace=namespace,pod_name=pod_name)
 
             message = __('拉取镜像时间过长，一分钟后刷新此页面，或者打开链接：')+'<a href="%s">' % pod_url+__('查看pod信息')+'</a>'
@@ -269,10 +275,10 @@ class Docker_ModelView_Base():
             # return redirect(conf.get('MODEL_URLS',{}).get('docker',''))
 
         flash(__('镜像调试只安装环境，请不要运行业务代码。当晚前请注意保存镜像'), 'warning')
-        return redirect(f'/k8s/web/debug/{conf.get("ENVIRONMENT")}/{namespace}/{pod_name}/{pod_name}')
+        return redirect(f'/k8s/web/debug/{docker.project.cluster["NAME"]}/{namespace}/{pod_name}/{pod_name}')
 
     # @event_logger.log_this
-    @expose("/delete_pod/<docker_id>", methods=["GET", "POST"])
+    @expose_api(description="清理在线调试镜像",url="/delete_pod/<docker_id>", methods=["GET", "POST"])
     # @pysnooper.snoop()
     def delete_pod(self, docker_id,cluster=None):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
@@ -280,7 +286,7 @@ class Docker_ModelView_Base():
         if not cluster:
             cluster = docker.project.cluster['NAME']
         k8s_client = K8s(conf.get('CLUSTERS').get(cluster).get('KUBECONFIG', ''))
-        namespace = json.loads(docker.expand).get("namespace", conf.get('NOTEBOOK_NAMESPACE','jupyter'))
+        namespace = docker.namespace
         pod_name = "docker-%s-%s" % (docker.created_by.username, str(docker.id))
         k8s_client.delete_pods(namespace=namespace, pod_name=pod_name)
         pod_name = "docker-commit-%s-%s" % (docker.created_by.username, str(docker.id))
@@ -292,13 +298,13 @@ class Docker_ModelView_Base():
         self.delete_pod(docker_id=item.id)
 
     # @event_logger.log_this
-    @expose("/save/<docker_id>", methods=["GET", "POST"])
+    @expose_api(description="保存在线调试镜像",url="/save/<docker_id>", methods=["GET", "POST"])
     # @pysnooper.snoop(watch_explode='status')
     def save(self, docker_id):
         docker = db.session.query(Docker).filter_by(id=docker_id).first()
         from myapp.utils.py.py_k8s import K8s
         k8s_client = K8s(docker.project.cluster.get('KUBECONFIG', ''))
-        namespace = json.loads(docker.expand).get("namespace", conf.get('NOTEBOOK_NAMESPACE','jupyter'))
+        namespace = docker.namespace
         pod_name = "docker-%s-%s" % (docker.created_by.username, str(docker.id))
         pod = None
         try:
@@ -386,7 +392,7 @@ class Docker_ModelView_Base():
         return redirect("/k8s/web/log/%s/%s/%s" % (docker.project.cluster.get('NAME', ''), namespace, pod_name))
 
 
-    @expose('/entry/docker', methods=['GET', 'DELETE'])
+    @expose_api(description="创建在线调试镜像",url='/entry/docker', methods=['GET', 'DELETE'])
     def entry_docker(self):
         return redirect('/frontend/dev/images/docker?isVisableAdd=true')
 

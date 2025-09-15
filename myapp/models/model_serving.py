@@ -172,9 +172,11 @@ class Service(Model,AuditMixinNullable,MyappModelBase,service_common):
     {host_port}
 </div>
 '''
-        else:
+        elif self.ready:
             url = "http://" + host_port
             return Markup(f'<a target=_blank href="{url}">{host_port}</a>')
+        else:
+            return host_port
 
     @property
     def ready(self):
@@ -457,9 +459,11 @@ class InferenceService(Model,AuditMixinNullable,MyappModelBase,service_common):
     {host_port}
 </div>
 '''
-        else:
-            url = "http://" + host_port+path
+        elif self.ready:
+            url = "http://" + host_port + path
             return Markup(f'<a target=_blank href="{url}">{host_port}</a>')
+        else:
+            return host_port
 
 
     def clone(self):

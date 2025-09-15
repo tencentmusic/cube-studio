@@ -36,8 +36,7 @@ conf = app.config
 class Dataset_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
-        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
-        if "admin" in user_roles:
+        if g.user.is_admin():
             return query
 
         return query.filter(
@@ -117,7 +116,7 @@ class Dataset_ModelView_base():
         "ops_html": {"type": "ellip1", "width": 100},
     }
     features_demo = '''
-填写规则：
+rules：
 {
   "column1": {
     # feature type
@@ -128,7 +127,8 @@ class Dataset_ModelView_base():
 
   }
 }
-示例：
+
+example：
 {
     "id": {
         "_type": "Value",
@@ -146,17 +146,17 @@ class Dataset_ModelView_base():
     add_form_extra_fields = {
         "name": StringField(
             label= _('名称'),
-            description= _('数据集英文名，小写'),
+            description= _('数据集英文名，(小写字母、数字、- 组成)，最长50个字符'),
             default='',
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), Regexp("^[a-z][a-z0-9_]*[a-z0-9]$"), ]
+            validators=[DataRequired(), Regexp("^[a-z][a-z0-9_]*[a-z0-9]$")]
         ),
         "version": StringField(
             label= _('版本'),
             description= _('数据集版本'),
             default='latest',
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired(), Regexp("[a-z0-9_\-]*"), ]
+            validators=[DataRequired(), Regexp("[a-z0-9_\-\.]*")]
         ),
         "subdataset": StringField(
             label= _('子数据集'),
@@ -301,7 +301,7 @@ class Dataset_ModelView_base():
                 if os.path.exists(local_path):
                     new_paths.append(path)
                 else:
-                    flash(path+"，文件不存在，保存时以去除", "error")
+                    flash(path+"，文件不存在，保存时已去除", "error")
             item.path = '\n'.join(new_paths)
 
 
@@ -329,85 +329,6 @@ class Dataset_ModelView_base():
         update_dataset.apply_async(kwargs=kwargs)
         # update_dataset(task=None,dataset_id=item.id)
 
-    @expose("/upload/<dataset_id>", methods=["POST"])
-    # @pysnooper.snoop()
-    def upload_dataset(self, dataset_id):
-        dataset = db.session.query(Dataset).filter_by(id=int(dataset_id)).first()
-        filename = request.form['filename']
-        partition = request.form.get('partition', '')
-
-        print(request.form)
-        print(request.files)
-        file = request.files['file']
-        file_data = file.stream.read()
-        data_dir = f'/data/k8s/kubeflow/dataset/{dataset.name}/{dataset.version}'
-        os.makedirs(data_dir, exist_ok=True)
-        save_path = os.path.join(data_dir, secure_filename(filename))
-        current_chunk = int(request.form['current_chunk'])
-
-        if os.path.exists(save_path) and current_chunk == 0:
-            os.remove(save_path)
-        try:
-            with open(save_path, 'ab') as f:
-                f.seek(int(request.form['current_offset']))
-                f.write(file_data)
-        except OSError:
-            # log.exception will include the traceback so we can see what's wrong
-            print('Could not write to file')
-            return make_response(("Not sure why,"" but we couldn't write the file to disk", 500))
-
-        total_chunks = int(request.form['total_chunk'])
-
-        if current_chunk + 1 == total_chunks:
-            # This was the last chunk, the file should be complete and the size we expect
-            if os.path.getsize(save_path) != int(request.form['total_size']):
-                print(f"File {filename} was completed, but has a size mismatch.Was {os.path.getsize(save_path)} but we expected {request.form['total_size']} ")
-                return make_response(('Size mismatch', 500))
-            else:
-                print(f'File {filename} has been uploaded successfully')
-                # save_type = request.form['save_type']  # 替换，还是追加数据集
-                dataset.path = (dataset.path or '') + "\n" + save_path
-                dataset.path = '\n'.join(list(set([x.strip() for x in dataset.path.split('\n') if x.strip()])))
-                if partition:
-                    segment = json.loads(dataset.segment) if dataset.segment else {}
-                    if partition not in segment:
-                        segment[partition] = [save_path]
-                    else:
-                        segment[partition].append(save_path)
-                        segment[partition] = list(set(segment[partition]))
-                    dataset.segment = json.dumps(segment, indent=4, ensure_ascii=False)
-                db.session.commit()
-        else:
-            print(f'Chunk {current_chunk + 1} of {total_chunks} for file {filename} complete')
-
-        return make_response(("Chunk upload successful", 200))
-
-    # # 将外部存储保存到本地存储中心
-    # @expose("/download/<dataset_name>", methods=["GET","POST"])
-    # @expose("/download/<dataset_name>/<dataset_version>", methods=["GET",'POST'])
-    # def download(self, dataset_name,dataset_version=None):
-    #     try:
-    #         store_type = conf.get('STORE_TYPE', 'minio')
-    #         params = importlib.import_module(f'myapp.utils.store.{store_type}')
-    #         store_client = getattr(params, store_type.upper() + '_client')(**conf.get('STORE_CONFIG', {}))
-    #         remote_file_path = f'/dataset/{dataset_name}/{dataset_version if dataset_version else "latest"}'
-    #         urls = store_client.get_download_url(remote_file_path)
-    #
-    #         return jsonify({
-    #             "status":0,
-    #             "result":{
-    #                 "store_type": conf.get('STORE_TYPE', 'minio'),
-    #                 "download_urls":urls
-    #             },
-    #             "message":"success"
-    #         })
-    #     except Exception as e:
-    #         print(e)
-    #         return jsonify({
-    #             "status": 1,
-    #             "result": '',
-    #             "message": str(e)
-    #         })
 
     # 将外部存储保存到本地存储中心
     @expose("/download/<dataset_id>", methods=["GET", "POST"])

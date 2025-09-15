@@ -1,4 +1,7 @@
 import os
+import re
+
+from flask_appbuilder.baseviews import expose_api
 
 from myapp.views.baseSQLA import MyappSQLAInterface as SQLAInterface
 from flask_babel import gettext as __
@@ -45,8 +48,7 @@ conf = app.config
 class Notebook_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
-        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
-        if "admin" in user_roles:
+        if g.user.is_admin():
             return query
 
         return query.filter(self.model.created_by_fk == g.user.id)
@@ -63,19 +65,17 @@ class Notebook_ModelView_Base():
     order_columns = ['id']
     search_columns = ['created_by', 'name']
 
-
-
     add_columns = ['project', 'name', 'describe', 'images', 'working_dir', 'volume_mount', 'resource_memory','resource_cpu', 'resource_gpu']
     list_columns = ['project', 'ide_type_html', 'name_url', 'status', 'describe','reset', 'resource', 'renew', 'save']
     show_columns = ['project', 'name', 'namespace', 'describe', 'images', 'working_dir', 'env', 'volume_mount','resource_memory', 'resource_cpu', 'resource_gpu', 'expand']
     cols_width = {
-        "project": {"type": "ellip2", "width": 150},
+        "project": {"type": "ellip2", "width": 120},
         "ide_type_html": {"type": "ellip2", "width": 200},
-        "name_url": {"type": "ellip2", "width": 200},
-        "describe": {"type": "ellip2", "width": 250},
-        "resource": {"type": "ellip2", "width": 300},
-        "status": {"type": "ellip2", "width": 100},
-        "renew": {"type": "ellip2", "width": 200},
+        "name_url": {"type": "ellip2", "width": 150},
+        "describe": {"type": "ellip2", "width": 180},
+        "resource": {"type": "ellip2", "width": 270},
+        "status": {"type": "ellip2", "width": 140},
+        "renew": {"type": "ellip2", "width": 150},
         "save": {"type": "ellip2", "width": 200},
         "ops_html": {"type": "ellip2", "width": 130}
     }
@@ -138,8 +138,9 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['volume_mount'] = StringField(
             _('挂载'),
             default=notebook.project.volume_mount if notebook else '',
-            description= _('外部挂载，格式:$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2,4G(memory):/dev/shm,注意pvc会自动挂载对应目录下的个人username子目录'),
-            widget=BS3TextFieldWidget()
+            description= _('外部挂载，格式:<br>$pvc_name1(pvc):/$container_path1,$hostpath1(hostpath):/$container_path2<br>注意pvc会自动挂载对应目录下的个人username子目录') if g.user.is_admin() else _('外部挂载，格式: $ip/$path(nfs):/nfs，逗号分隔多个挂载'),
+            widget=BS3TextFieldWidget(),
+            validators=[Regexp('^[\x00-\x7F]*$')]
         )
         self.add_form_extra_fields['working_dir'] = StringField(
             _('工作目录'),
@@ -150,23 +151,23 @@ class Notebook_ModelView_Base():
         self.add_form_extra_fields['resource_memory'] = StringField(
             _('内存'),
             default=Notebook.resource_memory.default.arg,
-            description= _('内存的资源使用限制，示例：1G，20G'),
+            description= _('内存的资源使用配置，示例：1G，20G'),
             widget=BS3TextFieldWidget(),
             validators=[DataRequired(), Regexp("^.*G$")]
         )
         self.add_form_extra_fields['resource_cpu'] = StringField(
             _('cpu'),
             default=Notebook.resource_cpu.default.arg,
-            description= _('cpu的资源使用限制(单位：核)，示例：2'), widget=BS3TextFieldWidget(),
-            validators=[DataRequired()]
+            description= _('cpu的资源使用配置(单位：核)，示例：2'), widget=BS3TextFieldWidget(),
+            validators=[DataRequired(),Regexp("^[0-9]*$")]
         )
 
         self.add_form_extra_fields['resource_gpu'] = StringField(
             _('gpu'),
             default='0',
-            description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。申请具体的卡型号，可以类似 1(V100)'),
+            description= _('申请的gpu卡数目，示例:2，每个容器独占整卡。-1为共享占用方式，小数(0.1)为vgpu方式，申请具体的卡型号，可以类似 1(V100)'),
             widget=BS3TextFieldWidget(),
-            validators=[DataRequired()]
+            validators=[DataRequired(),Regexp('^[\-\.0-9,a-zA-Z\(\)]*$')]
         )
 
         columns = ['name', 'describe', 'images', 'resource_memory', 'resource_cpu', 'resource_gpu']
@@ -174,14 +175,17 @@ class Notebook_ModelView_Base():
         self.add_columns = ['project'] + columns  # 添加的时候没有挂载配置，使用项目中的挂载配置
 
         # 修改的时候管理员可以在上面添加一些特殊的挂载配置，适应一些特殊情况
-        if g.user.is_admin():
-            columns.append('volume_mount')
-        self.edit_columns = ['project'] + columns
+        if not conf.get('ENABLE_USER_VOLUME',False) and not g.user.is_admin():
+            self.add_columns = ['project'] + columns
+            self.edit_columns = ['project'] + columns
+        else:
+            self.add_columns = ['project'] + columns
+            self.edit_columns = ['project'] + columns + ['volume_mount']
+
         self.edit_form_extra_fields = self.add_form_extra_fields
         self.default_filter = {
             "created_by": g.user.id
         }
-
 
     def pre_add(self, item):
         item.name = item.name.replace("_", "-")[0:54].lower()
@@ -196,6 +200,8 @@ class Notebook_ModelView_Base():
         item.resource_memory=core.check_resource_memory(item.resource_memory,self.src_item_json.get('resource_memory',None))
         item.resource_cpu = core.check_resource_cpu(item.resource_cpu,self.src_item_json.get('resource_cpu',None))
         item.namespace = json.loads(item.project.expand).get('NOTEBOOK_NAMESPACE', conf.get('NOTEBOOK_NAMESPACE'))
+        if not item.namespace:
+            item.namespace = item.project.notebook_namespace
 
         if 'theia' in item.images or 'vscode' in item.images:
             item.ide_type = 'theia'
@@ -208,6 +214,24 @@ class Notebook_ModelView_Base():
 
         if not item.id:
             item.volume_mount = item.project.volume_mount
+        else:
+            if conf.get('ENABLE_USER_VOLUME',False) and not g.user.is_admin():
+                volume_mounts_temp = re.split(',|;', item.volume_mount)
+                volume_mount_arr=[]
+                for volume_mount in volume_mounts_temp:
+                    match = re.search(r'\((.*?)\)', volume_mount)
+                    if match:
+                        volume_type = match.group(1)
+                        re_str = conf.get('ENABLE_USER_VOLUME_CONFIG', {}).get(volume_type, '')
+                        if re_str:
+                            if re.match(re_str, volume_mount):
+                                volume_mount_arr.append(volume_mount)
+
+                item.volume_mount = ','.join(volume_mount_arr).strip(',')
+            # 合并项目组的挂载
+            item.volume_mount = core.merge_volume_mount(item.project.volume_mount,item.volume_mount)
+
+
 
         all_images={x[1]:x[0] for x in conf.get('NOTEBOOK_IMAGES', []) }
         if item.images in all_images:
@@ -224,6 +248,9 @@ class Notebook_ModelView_Base():
 
         self.pre_add(item)
 
+
+
+
         # 如果修改了基础镜像，就把debug中的任务删除掉
         if self.src_item_json:
             # k8s集群更换了，要删除原来的
@@ -239,7 +266,7 @@ class Notebook_ModelView_Base():
             self.reset_notebook(item)
         except Exception as e:
             print(e)
-            flash(__('start fail, please manually reset: ')+str(e), 'warning')
+            flash(__('start fail, please reset notebook: ')+str(e), 'warning')
             return
 
         flash(__('自动reset 一分钟后生效'), 'info')
@@ -271,8 +298,7 @@ class Notebook_ModelView_Base():
     pre_update_web = set_column
     pre_add_web = set_column
 
-    @expose('/entry/jupyter', methods=['GET', 'DELETE'])
-    # @pysnooper.snoop()
+    @expose_api(description="创建打开jupyter",url='/entry/jupyter', methods=['GET', 'DELETE'])
     def entry_jupyter(self):
         data=request.args
         project_name=data.get('project_name','public')
@@ -282,6 +308,8 @@ class Notebook_ModelView_Base():
         resource_cpu = data.get('resource_cpu',"10")
         volume_mount = data.get('volume_mount','kubeflow-user-workspace(pvc):/mnt')
         file_path = data.get('file_path', '')   # 一定要是文件在 notebook的容器目录
+        if 'http://' in file_path or 'https://' in file_path:
+            file_path = '/mnt/{{creator}}'
 
         def template_str(src_str):
             from jinja2 import Environment, BaseLoader, DebugUndefined
@@ -296,6 +324,12 @@ class Notebook_ModelView_Base():
         file_path = template_str(file_path)
         if f'/mnt/{g.user.username}' in file_path:
             file_path = file_path.replace(f'/mnt/{g.user.username}','')
+        # 如果是打不开的文本文件，就自动变为目录
+        file_name = file_path.split('/')[-1]
+        text_file_extensions = {'ipynb', 'py', 'R', 'txt', 'csv', 'json', 'xml', 'py', 'html', 'css', 'js', 'md', 'yaml', 'yml', 'html', 'jpg', 'jpeg', 'png', 'sh'}
+        if '.' in file_name:
+            if file_name.split('.')[-1] not in text_file_extensions:
+                file_path = file_path.replace(file_name,'')
 
         images = data.get('images',f'{conf.get("REPOSITORY_ORG","ccr.ccs.tencentyun.com/cube-studio/")}notebook:jupyter-ubuntu22.04')
         project = db.session.query(Project).filter(Project.name==project_name).filter(Project.type=='org').first()
@@ -332,22 +366,23 @@ class Notebook_ModelView_Base():
 
         notebook_id = notebook.id
         k8s_client = K8s(notebook.cluster.get('KUBECONFIG', ''))
-        namespace = conf.get('NOTEBOOK_NAMESPACE','jupyter')
+        namespace = notebook.project.notebook_namespace
+        del_namespace = notebook.namespace
         crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
 
         # 删除
         if request.method=='DELETE':
             try:
-                k8s_client.delete_pods(namespace=namespace,pod_name=name)
+                k8s_client.delete_pods(namespace=del_namespace,pod_name=name)
             except Exception as e:
                 print(e)
             try:
-                k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'], namespace=namespace, name=name)
+                k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'],plural=crd_info['plural'], namespace=del_namespace, name=name)
             except Exception as e:
                 print(e)
 
             try:
-                k8s_client.delete_service(namespace=namespace,name=name)
+                k8s_client.delete_service(namespace=del_namespace,name=name)
             except Exception as e:
                 print(e)
 
@@ -373,7 +408,7 @@ class Notebook_ModelView_Base():
                 namespace=namespace,
                 name=name,
                 username=notebook.created_by.username,
-                ports=[port, ],
+                ports=[port],
                 selector=labels
             )
         try:
@@ -407,7 +442,7 @@ class Notebook_ModelView_Base():
                             "match": [
                                 {
                                     "uri": {
-                                        "prefix": "/notebook/%s/%s/" % (namespace, notebook.name)
+                                        "prefix": f"/notebook/jupyter/{notebook.name}/"
                                     },
                                     "headers": {
                                         "cookie": {
@@ -487,6 +522,8 @@ class Notebook_ModelView_Base():
             # print(pod)
             try:
                 pod = k8s_client.v1.create_namespaced_pod(namespace, pod)
+                notebook.namespace=namespace
+                db.session.commit()
                 time.sleep(1)
             except Exception as e:
                 print(e)
@@ -510,7 +547,7 @@ class Notebook_ModelView_Base():
                             time.sleep(2)
                             return redirect(file_path)
 
-                    return redirect('http://%s%s'%(host,rewrite_url))
+                    return redirect('%s%s'%(request.host_url.strip('/'),rewrite_url))
             left_retry=left_retry-1
             time.sleep(2)
         res = make_response(__("notebook未就绪，刷新此页面。<br> notebook状态：<br><br>")+Markup(status))
@@ -532,8 +569,9 @@ class Notebook_ModelView_Base():
             self.pre_delete(notebook)
         except:
             pass
-        k8s_client = K8s(notebook.cluster.get('KUBECONFIG', ''))
-        namespace = notebook.namespace
+        k8s_client = K8s(notebook.project.cluster.get('KUBECONFIG', ''))
+        new_namespace = notebook.project.notebook_namespace
+        old_namespace = notebook.namespace
         SERVICE_EXTERNAL_IP = []
 
         # 先使用项目组的
@@ -559,6 +597,7 @@ class Notebook_ModelView_Base():
 
         command = None
         workingDir = None
+        health=None
         volume_mount = notebook.volume_mount
         # 端口+0是jupyterlab  +1是sshd   +2 +3 是预留的用户自己启动应用占用的端口
         port_str = conf.get('NOTEBOOK_PORT','10000+10*ID').replace('ID', str(notebook.id))
@@ -619,8 +658,11 @@ class Notebook_ModelView_Base():
         annotations={
             'project': notebook.project.name
         }
+        notebook.namespace = new_namespace
+        db.session.commit()
+
         k8s_client.create_debug_pod(
-            namespace=namespace,
+            namespace=new_namespace,
             name=notebook.name,
             labels=labels,
             annotations=annotations,
@@ -642,7 +684,7 @@ class Notebook_ModelView_Base():
             username=notebook.created_by.username
         )
         k8s_client.create_service(
-            namespace=namespace,
+            namespace=new_namespace,
             name=notebook.name,
             username=notebook.created_by.username,
             ports=[port, ],
@@ -650,10 +692,11 @@ class Notebook_ModelView_Base():
         )
 
         crd_info = conf.get('CRD_INFO', {}).get('virtualservice', {})
-        crd_name = "notebook-jupyter-%s"%notebook.name.replace('_', '-') #  notebook.name.replace('_', '-')
-        vs_obj = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
+        old_crd_name = f"notebook-{old_namespace}-{notebook.name.replace('_', '-')}" #  notebook.name.replace('_', '-')
+        new_crd_name = f"notebook-{new_namespace}-{notebook.name.replace('_', '-')}"  # notebook.name.replace('_', '-')
+        vs_obj = k8s_client.get_one_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=old_namespace, name=old_crd_name)
         if vs_obj:
-            k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, name=crd_name)
+            k8s_client.delete_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=old_namespace, name=old_crd_name)
             time.sleep(1)
         host=None
         # 优先使用项目组配置的
@@ -669,8 +712,8 @@ class Notebook_ModelView_Base():
             "apiVersion": "networking.istio.io/v1alpha3",
             "kind": "VirtualService",
             "metadata": {
-                "name": crd_name,
-                "namespace": namespace
+                "name": new_crd_name,
+                "namespace": new_namespace
             },
             "spec": {
                 "gateways": [
@@ -684,7 +727,7 @@ class Notebook_ModelView_Base():
                         "match": [
                             {
                                 "uri": {
-                                    "prefix": "/notebook/%s/%s/" % (namespace, notebook.name)
+                                    "prefix": f"/notebook/jupyter/{notebook.name}/"
                                 },
                                 "headers": {
                                     "cookie":{
@@ -699,7 +742,7 @@ class Notebook_ModelView_Base():
                         "route": [
                             {
                                 "destination": {
-                                    "host": "%s.%s.svc.cluster.local" % (notebook.name, namespace),
+                                    "host": "%s.%s.svc.cluster.local" % (notebook.name, new_namespace),
                                     "port": {
                                         "number": port
                                     }
@@ -714,23 +757,26 @@ class Notebook_ModelView_Base():
 
         # print(crd_json)
         try:
-            crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=namespace, body=crd_json)
+            crd = k8s_client.create_crd(group=crd_info['group'], version=crd_info['version'], plural=crd_info['plural'],namespace=new_namespace, body=crd_json)
         except:
             pass
         # 边缘模式时，需要根据项目组中的配置设置代理ip
+        if meet_ports[0]>20000:
+            flash(__('端口已耗尽，ssh连接notebook请通过跳板机跳转连接'), 'warning')
 
-        if SERVICE_EXTERNAL_IP and SERVICE_EXTERNAL_IP[0]!='127.0.0.1':
+        if SERVICE_EXTERNAL_IP and SERVICE_EXTERNAL_IP[0]!='127.0.0.1' and meet_ports[0]<20000:
             SERVICE_EXTERNAL_IP = [ip.split('|')[0].strip().split(':')[0] for ip in SERVICE_EXTERNAL_IP]
             ports = [port]
-            # if notebook.ide_type=='bigdata':
-            for index in range(1, 4):
-                ports.append(meet_ports[index])
+            ports.append(meet_ports[1])   # 给每个notebook多开一个端口，ssh的端口
+
+            # for index in range(1, 4):
+            #     ports.append(meet_ports[index])
 
             # ports = list(set(ports))  # 这里会乱序
             service_ports = [[meet_ports[index], port] for index, port in enumerate(ports)]
             service_external_name = (notebook.name + "-external").lower()[:60].strip('-')
             k8s_client.create_service(
-                namespace=namespace,
+                namespace=new_namespace,
                 name=service_external_name,
                 username=notebook.created_by.username,
                 ports=service_ports,
@@ -740,7 +786,7 @@ class Notebook_ModelView_Base():
             )
 
     # @event_logger.log_this
-    @expose('/reset/<notebook_id>', methods=['GET', 'POST'])
+    @expose_api(description="重置在线ide",url='/reset/<notebook_id>', methods=['GET', 'POST'])
     def reset(self, notebook_id):
 
         notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
@@ -756,7 +802,7 @@ class Notebook_ModelView_Base():
         return redirect(conf.get('MODEL_URLS', {}).get('notebook', ''))
 
     # @event_logger.log_this
-    @expose('/renew/<notebook_id>', methods=['GET', 'POST'])
+    @expose_api(description="在线ide续期",url='/renew/<notebook_id>', methods=['GET', 'POST'])
     def renew(self, notebook_id):
         notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
         notebook.changed_on = datetime.datetime.now()
@@ -789,7 +835,7 @@ class Notebook_ModelView_Base():
     def pre_delete(self, item):
         self.base_muldelete([item])
 
-    @expose("/list/")
+    @expose_api(description="在线ide的列表查询",url="/list/")
     @has_access
     def list(self):
         args = request.args.to_dict()
@@ -805,7 +851,7 @@ class Notebook_ModelView_Base():
         return res
 
     # @event_logger.log_this
-    # @expose("/delete/<pk>")
+    # @expose_api(description="",url="/delete/<pk>")
     # @has_access
     # def delete(self, pk):
     #     pk = self._deserialize_pk_if_composite(pk)
@@ -819,6 +865,12 @@ class Notebook_ModelView_Base():
         self.update_redirect()
         return redirect(self.get_redirect())
 
+    @expose_api(description="停止在线ide",url='/stop/<notebook_id>', methods=['GET', 'POST'])
+    def stop(self, notebook_id):
+        notebook = db.session.query(Notebook).filter_by(id=notebook_id).first()
+        self.base_muldelete([notebook])
+        flash(_('清理完成'),'info')
+        return redirect(conf.get('MODEL_URLS', {}).get('notebook', ''))
     @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
     def muldelete(self, items):
         return self._muldelete(items)

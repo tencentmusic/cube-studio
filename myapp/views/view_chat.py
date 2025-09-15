@@ -4,6 +4,9 @@ import random
 import re
 import shutil
 import logging
+
+from flask_appbuilder.baseviews import expose_api
+
 from myapp.models.model_chat import Chat, ChatLog
 import requests
 import time
@@ -50,8 +53,7 @@ max_len=2000
 class Chat_Filter(MyappFilter):
     # @pysnooper.snoop()
     def apply(self, query, func):
-        user_roles = [role.name.lower() for role in list(self.get_user_roles())]
-        if "admin" in user_roles:
+        if g.user.is_admin():
             return query
         return query.filter(
             or_(
@@ -316,6 +318,13 @@ aihub接口类型
             description= _('提示词模板，包含{{knowledge}}知识库召回内容，{{history}}为多轮对话，{{query}}为用户的问题'),
             widget=MyBS3TextAreaFieldWidget(rows=5),
             validators=[]
+        ),
+        "session_num": StringField(
+            label=_('上下文条数'),
+            default='0',
+            description=_('最大保留的上下文对话条数，同时受限于最大token数'),
+            widget=BS3TextFieldWidget(),
+            validators=[DataRequired(), Regexp("^[0-9]+$")]
         ),
         "tips": StringField(
             label= _('输入示例'),
@@ -595,9 +604,9 @@ AI:
         return redirect(request.referrer)
 
 
-    @expose('/clear/<session_id>', methods=['DELETE', 'GET'])
+    @expose_api(description="清除对话缓存",url='/clear/<session_id>', methods=['DELETE', 'GET'])
     def clear_session(self, session_id=None):
-        cache.set('chat_' + session_id,[])  # 所有需要的上下文
+        cache.set('chat_' + session_id,[],timeout=60)  # 所有需要的上下文
         return jsonify({
             "status": 0,
             "message": 'success',
@@ -606,7 +615,7 @@ AI:
             }
         })
 
-    @expose('/chat/<chat_name>', methods=['POST', 'GET'])
+    @expose_api(description="对话智能体",url='/chat/<chat_name>', methods=['POST', 'GET'])
     # @pysnooper.snoop()
     def chat(self, chat_name, args=None):
         if chat_name == 'chatbi':
@@ -1241,7 +1250,7 @@ AI:
         }
         return json.dumps(back)
 
-    @expose('/chat/chatgpt/<chat_name>', methods=['POST', 'GET'])
+    @expose_api(description="chatgpt接口对话",url='/chat/chatgpt/<chat_name>', methods=['POST', 'GET'])
     # @pysnooper.snoop()
     def chatgpt_api(self, chat_name):
         """
@@ -1295,14 +1304,14 @@ AI:
             before = service_config.get('before',[])
             after = service_config.get('after', [])
             data = {
-                'model': service_config.get('model',conf.get('CHATGPT_ARGS',{}).get('model','gpt-4-turbo-2024-04-09')),
+                'model': service_config.get('model',conf.get('CHATGPT_ARGS',{}).get('model','gpt-5-mini')),
                 'messages': message,
                 'temperature': service_config.get("temperature",1),  # 问答发散度 0-2 越高越发散 较高的值（如0.8）将使输出更随机，较低的值（如0.2）将使其更集中和确定性
                 'top_p': service_config.get("top_p",0.5),  # 同temperature，如果设置 0.1 意味着只考虑构成前 10% 概率质量的 tokens
                 'n': 1,  # top n可选值
                 'stream': stream,
                 'stop': service_config.get('stop','elit proident sint'),  #
-                'max_tokens': service_config.get("max_tokens",2500),  # 最大返回数
+                'max_tokens': service_config.get("max_tokens",8192),  # 最大返回数
                 'presence_penalty': service_config.get("presence_penalty",1),  # [控制主题的重复度]，-2.0（抓住一个主题使劲谈论） ~ 2.0（最大程度避免谈论重复的主题） 之间的数字，正值会根据到目前为止是否出现在文本中来惩罚新 tokens，从而增加模型谈论新主题的可能性
                 'frequency_penalty': service_config.get('frequency_penalty',0), # [重复度惩罚因子], -2.0(可以尽情出现相同的词汇) ~ 2.0 (尽量不要出现相同的词汇)
                 'user': 'user',
@@ -1345,18 +1354,18 @@ AI:
                             if message == '[DONE]':
                                 finish = True
                                 back_message = back_message+g.after_message
-                                if chatlog_id:
+                                # if chatlog_id:
                                     # chatlog = db.session.query(ChatLog).filter_by(id=int(chatlog_id)).first()
                                     # chatlog.answer_status = '成功'
                                     # # chatlog.answer = back_message  # 内容太多了
                                     # db.session.commit()
-                                    if history != None:
-                                        history.append((search_text, back_message))
-                                        history = history[0 - int(chat.session_num):]
-                                        try:
-                                            cache.set('chat_' + session_id, history, timeout=300)  # 人连续对话的时间跨度
-                                        except Exception as e:
-                                            print(e)
+                                if history != None:
+                                    history.append((search_text, back_message))
+                                    history = history[0 - int(chat.session_num):]
+                                    try:
+                                        cache.set('chat_' + session_id, history, timeout=300)  # 人连续对话的时间跨度
+                                    except Exception as e:
+                                        print(e)
                             else:
                                 back_message = back_message + message
 
@@ -1429,7 +1438,14 @@ AI:
                     for ops in after:
                         if len(ops)==3 and ops[0]=='replace':
                             mes = mes.replace(ops[1],ops[2])
-
+                    # 记录上下文
+                    if history != None:
+                        history.append((search_text, mes))
+                        history = history[0 - int(chat.session_num):]
+                        try:
+                            cache.set('chat_' + session_id, history, timeout=300)  # 人连续对话的时间跨度
+                        except Exception as e:
+                            print(e)
                     return 0, mes
                 else:
                     service_config = json.loads(chat.service_config)

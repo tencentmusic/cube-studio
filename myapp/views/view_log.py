@@ -1,3 +1,5 @@
+from flask_appbuilder import action
+
 from myapp.views.baseSQLA import MyappSQLAInterface
 from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
@@ -21,6 +23,10 @@ class LOG_ModelView_Api(MyappModelRestApi):
         "duration_ms": _("响应延迟"),
         "referrer": _("相关人"),
     }
+
+    @action("muldelete", "删除", "确定删除所选记录?", "fa-trash", single=False)
+    def muldelete(self, items):
+        return self._muldelete(items)
 
 appbuilder.add_api(LOG_ModelView_Api)
 
