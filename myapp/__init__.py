@@ -1,3 +1,7 @@
+# 关键：替换标准库的阻塞调用为非阻塞版本, 必须在所有其他导入前执行，确保覆盖标准库
+from gevent import monkey
+monkey.patch_all()
+
 import datetime
 import time, random
 from copy import deepcopy
