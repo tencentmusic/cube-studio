@@ -9,4 +9,4 @@ sed -i "s|bfloat16|float16|g"  Qwen3-8B/config.json
 #./hfd.sh Qwen/QwQ-32B --tool aria2c -x 8
 #sed -i "s|bfloat16|float16|g"  QwQ-32B/config.json
 
-#./hfd.sh  Qwen/Qwen2.5-VL-7B-Instruct --tool aria2c -x 8
+#./hfd.sh  Qwen/Qwen3-VL-8B-Instruct --tool aria2c -x 8

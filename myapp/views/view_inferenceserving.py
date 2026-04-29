@@ -234,7 +234,7 @@ triton-server：框架:地址。onnx:模型文件地址model.onnx，pytorch:torc
             default=datetime.datetime.now().strftime('v%Y.%m.%d.1'),
             description= _('版本号，时间格式'),
             widget=MyBS3TextFieldWidget(),
-            validators=[DataRequired(),Regexp("[a-z0-9_\-\.]*"), Length(1, 54)]
+            validators=[DataRequired(),Regexp("^[a-z0-9_\-\.]*$"), Length(1, 54)]
         ),
 
         'service_type': SelectField(

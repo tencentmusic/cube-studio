@@ -267,7 +267,7 @@ def upgrade_service(task,service_id,name,namespace):
                 for old_service in old_services:
                     if old_service.name != service.name:
                         inference_model_view = InferenceService_ModelView_base()
-                        inference_model_view.delete_old_service(old_service.name, old_service.project.cluster)
+                        inference_model_view.delete_old_service(service_name=old_service.name, cluster=old_service.project.cluster,namespaces=old_service.namespace)
                         old_service.model_status = 'offline'
                         old_service.deploy_history = service.deploy_history + "\n" + "clear: %s %s" % ('admin', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                         dbsession.commit()
