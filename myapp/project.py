@@ -96,13 +96,6 @@ class MyCustomRemoteUserView(AuthRemoteUserView):
 
     @expose('/login/')
     def _login(self):
-        if 'username' in request.args:
-            if request.args.get('username'):
-                username = request.args.get('username')
-                user = self.appbuilder.sm.find_user(username)
-                if user:
-                    login_user(user, remember=True)
-                    return redirect(self.appbuilder.get_url_for_index)
 
         return redirect(portal_url)
 
@@ -153,15 +146,6 @@ class Myauthdbview(AuthDBView):
         request_data = request.args.to_dict()
         comed_url = request_data.get('login_url', '')
 
-        if 'username' in request_data:
-            if request_data.get('username'):
-                username = request_data.get('username')
-                user = self.appbuilder.sm.find_user(username)
-                if user:
-                    login_user(user, remember=True)
-                    if comed_url:
-                        return redirect(comed_url)
-                    return redirect(self.appbuilder.get_url_for_index)
 
         if g.user is not None and g.user.is_authenticated:
             return redirect(self.appbuilder.get_url_for_index)
