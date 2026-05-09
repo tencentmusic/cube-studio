@@ -146,7 +146,7 @@ pipeline用的原生的kfp吗？,pipeline目前与kfp没有关系。
 有升级文档吗？,目前每个版本发布，可能涉及到架构的变更，不过统一可是使用将原平台的数据库导出，然后在新数据的基础上部署新版本的平台
 pipeline调度底层用的是什么？,训练pipeline的底层调度是argo，数据etl的pipeline没有定义底层调度，需要用户进行二开对接自己公司的调度系统
 平台有资源审核模块吗？方便管理员对用户申请的资源进行审核。,目前平台限制普通用户最高可配置50核50G，更高的资源配置只有管理员可以设置，但是并没有单独的资源审核模块
-平台支持arm吗？,开源版支持amd64，企业版支持arm64和amd64
+平台支持arm吗？,开源版支持amd64，todo支持arm64和amd64
 rancher 443拒绝访问？,rancher server是第一个运行的容器，也就是rancher的web界面，部署可能需要等待几秒钟，并且web界面打开跳过https限制
 哪里有详细的教程或者wiki文档地址么？,github上有wiki文档：https://github.com/data-infra/cube-studio/wiki
 502 Bad Gateway nginx报错,目前cube studio只在前面界面上使用nginx/1.23.4如果能打开前面界面的logo，但是1.23.4版本nginx报错，那说明是后端pod启动异常，可以排查后端pod，如果不是该版本，那可以查看是不是自己添加的其他nginx代理导致的

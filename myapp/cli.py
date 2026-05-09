@@ -32,7 +32,7 @@ def make_shell_context():
 
 def replace_git(content):
     content = json.dumps(content)
-    content = content.replace('https://github.com/tencentmusic/cube-studio/tree/master', conf.get('GIT_URL', '').strip('/'))
+    content = content.replace('https://github.com/data-infra/cube-studio/tree/main', conf.get('GIT_URL', '').strip('/'))
     content = content.replace('ccr.ccs.tencentyun.com/cube-studio', conf.get('REPOSITORY_ORG', '').strip('/'))
     return json.loads(content)
 

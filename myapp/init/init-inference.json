@@ -87,7 +87,7 @@
     "resource_cpu": "5",
     "inference_config": "---config.pbtxt\n\nname: \"resnet50\"\nplatform: \"onnxruntime_onnx\"\nbackend: \"onnxruntime\"\nmax_batch_size : 0\n\ninput [\n  {\n    name: \"input_name\"\n    data_type: TYPE_FP32\n    format: FORMAT_NCHW\n    dims: [ 3, 224, 224 ]\n    reshape { shape: [ 1, 3, 224, 224 ] }\n  }\n]\noutput [\n  {\n    name: \"output_name\"\n    data_type: TYPE_FP32\n    dims: [ 1000 ]\n    reshape { shape: [ 1, 1000 ] }\n  }\n]\n\nparameters { key: \"intra_op_thread_count\" value: { string_value: \"10\" } }\nparameters { key: \"execution_mode\" value: { string_value: \"1\" } }\nparameters { key: \"inter_op_thread_count\" value: { string_value: \"10\" } }\n",
     "expand": {
-      "help_url": "https://github.com/tencentmusic/cube-studio/tree/master/images/serving/triton-server/example"
+      "help_url": "https://github.com/data-infra/cube-studio/tree/main/images/serving/triton-server/example"
     }
   }
 }

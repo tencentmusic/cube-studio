@@ -111,9 +111,6 @@ echo "127.0.0.1 localhost" >> /etc/hosts
 # 部署rancher server
 export RANCHER_CONTAINER_TAG=v2.10.3
 export PASSWORD=cube-studio
-# 有网的环境直接拉取阿里云的
-sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 -e CATTLE_SYSTEM_DEFAULT_REGISTRY=registry.cn-hangzhou.aliyuncs.com -e CATTLE_BOOTSTRAP_PASSWORD=$PASSWORD registry.cn-hangzhou.aliyuncs.com/rancher/rancher:$RANCHER_CONTAINER_TAG
-# 没有网的环境可以使用原始名称
 sudo docker run -d --privileged --restart=unless-stopped -p 443:443 --name=myrancher -e AUDIT_LEVEL=3 -e CATTLE_BOOTSTRAP_PASSWORD=$PASSWORD rancher/rancher:$RANCHER_CONTAINER_TAG
 # 打开 https://xx.xx.xx.xx:443/ 等待web界面可以打开。预计要1~10分钟
 # 用户名admin，输入密码cube-studio

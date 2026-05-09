@@ -89,7 +89,7 @@
           "hide": true,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{destination_service_name}}",
+          "legendFormat": "{{destination_workload}}",
           "range": true,
           "refId": "B"
         },
@@ -1312,14 +1312,14 @@
           "type": "prometheus",
           "uid": "P1809F7CD0C75ACF3"
         },
-        "definition": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_service_name)",
+        "definition": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_workload)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "service",
         "options": [],
         "query": {
-          "query": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_service_name)",
+          "query": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\"}, destination_workload)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

@@ -69,7 +69,7 @@
     "env": "discovery.type=single-node\ncluster.name=es-docker-cluster\nTAKE_FILE_OWNERSHIP=111",
     "ports": "8080,9200",
     "expand": {
-      "help_url": "https://github.com/tencentmusic/cube-studio/wiki"
+      "help_url": "https://github.com/data-infra/cube-studio/wiki"
     }
   },
 
