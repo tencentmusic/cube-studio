@@ -1,1 +1,0 @@
-nginx -g 'daemon off;'
