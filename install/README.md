@@ -64,11 +64,7 @@
 
 ![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/image/danjibushuxiaoguo.png)
 
-# 本地开发
+# 部署
 
-管理平台web端可连接多个k8s集群用来在k8s集群上调度发起任务实例。同时管理多个k8s集群时，或本地调试时，可以将k8s集群的config文件存储在kubeconfig目录中，按照$ENVIRONMENT-kubeconfig 的规范命名
-
-./docker 目录包含本地开发方案，涉及镜像构建，docker-compose启动，前端构建，后端编码等过程
-
-参考install/docker/README.md
+参考 [帮助文档](https://github.com/data-infra/cube-studio/wiki)
 
