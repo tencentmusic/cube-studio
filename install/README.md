@@ -1,4 +1,8 @@
 
+# 帮助文档
+
+[帮助文档](https://github.com/data-infra/cube-studio/wiki)
+
 # 平台基础架构
 
 ![输入图片说明](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/image/infra.png) 
@@ -63,8 +67,3 @@
 平台完成部署之后如下:
 
 ![在这里插入图片描述](https://cube-studio.oss-cn-hangzhou.aliyuncs.com/docs/image/danjibushuxiaoguo.png)
-
-# 部署
-
-参考 [帮助文档](https://github.com/data-infra/cube-studio/wiki)
-

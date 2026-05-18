@@ -1,3 +1,7 @@
+# 帮助文档
+
+[帮助文档](https://github.com/data-infra/cube-studio/wiki)
+
 # 视频教程
 
 [job模板制作教程](https://www.bilibili.com/video/BV15B4y197nm)
