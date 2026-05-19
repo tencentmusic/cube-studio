@@ -1,3 +1,13 @@
+# 仓库已归档
+
+本仓库已于 2026-05-18 归档，不再维护。 
+
+如有需要请移至[新仓库地址](https://github.com/data-infra/cube-studio)
+
+# 帮助文档
+
+参考 [帮助文档](https://github.com/data-infra/cube-studio/wiki)
+
 # Cube Studio
 
 [English](README_EN.md) | 简体中文
@@ -5,10 +15,6 @@
 ### 整体架构
 
 ![image](https://github.com/tencentmusic/cube-studio/assets/20157705/a07b1742-3413-4957-bd15-0f2b3c30f66f)
-
-# 帮助文档
-
-参考 [帮助文档](https://github.com/data-infra/cube-studio/wiki)
 
 # 公司
 
