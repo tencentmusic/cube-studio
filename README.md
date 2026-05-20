@@ -2,8 +2,6 @@
 
 本仓库已于 2026-05-18 归档，不再维护。 
 
-如有需要请移至[新仓库地址](https://github.com/data-infra/cube-studio)
-
 # 帮助文档
 
 参考 [帮助文档](https://github.com/data-infra/cube-studio/wiki)
